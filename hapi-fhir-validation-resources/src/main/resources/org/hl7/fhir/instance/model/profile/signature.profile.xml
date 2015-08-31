@@ -1,0 +1,265 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="Signature"/>
+ <url value="http://hl7.org/fhir/StructureDefinition/Signature"/>
+ <name value="Signature"/>
+ <publisher value="HL7 FHIR Standard"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for Signature Type"/>
+ <requirements value="There are a number of places where content must be signed in healthcare."/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
+ <snapshot>
+  <element>
+   <path value="Signature"/>
+   <short value="A digital Signature - XML DigSig, JWT, Graphical image of signature, etc"/>
+   <definition value="A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities."/>
+   <comments value="The elements of the Signature Resource are for ease of access of these elements. Foro digital signatures (Xml DigSig, JWT), the non-repudiation proof comes from the Signature  validation, which includes validation of the referenced objects (e.g., Resources) (a.k.a., Content) in the XML-Signature Detached form."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Element"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Signature.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Signature.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Signature.type"/>
+   <short value="Indication of the reason the entity signed the object(s)"/>
+   <definition value="An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document."/>
+   <comments value="Examples include attesting to: authorship, correct transcription, and witness of specific event. Also known as a “Commitment Type Indication”."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="An indication of the reason that an entity signed the object"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/signature-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Signature.when"/>
+   <short value="When the signature was created"/>
+   <definition value="When the digital signature was signed."/>
+   <comments value="This should agree with the information in the signature."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="instant"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Signature.who[x]"/>
+   <short value="Who signed the signature"/>
+   <definition value="A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key)."/>
+   <comments value="This should agree with the information in the signature."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Signature.contentType"/>
+   <short value="The technical format of the signature"/>
+   <definition value="A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The mime type of an attachment. Any valid mime type is allowed"/>
+    <valueSetUri value="http://www.rfc-editor.org/bcp/bcp13.txt"/>
+   </binding>
+  </element>
+  <element>
+   <path value="Signature.blob"/>
+   <short value="The actual signature content (XML DigSig. JWT, picture, etc)"/>
+   <definition value="The base64 encoding of the Signature content."/>
+   <comments value="Where the signature type is an XML DigSig, the signed content is a FHIR Resource(s), the signature is of the XML form of the Resource(s) using  XML-Signature (XMLDIG) &quot;Detached Signature&quot; form."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="base64Binary"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="Signature"/>
+   <short value="A digital Signature - XML DigSig, JWT, Graphical image of signature, etc"/>
+   <definition value="A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities."/>
+   <comments value="The elements of the Signature Resource are for ease of access of these elements. Foro digital signatures (Xml DigSig, JWT), the non-repudiation proof comes from the Signature  validation, which includes validation of the referenced objects (e.g., Resources) (a.k.a., Content) in the XML-Signature Detached form."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Element"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Signature.type"/>
+   <short value="Indication of the reason the entity signed the object(s)"/>
+   <definition value="An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document."/>
+   <comments value="Examples include attesting to: authorship, correct transcription, and witness of specific event. Also known as a “Commitment Type Indication”."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="An indication of the reason that an entity signed the object"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/signature-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Signature.when"/>
+   <short value="When the signature was created"/>
+   <definition value="When the digital signature was signed."/>
+   <comments value="This should agree with the information in the signature."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="instant"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Signature.who[x]"/>
+   <short value="Who signed the signature"/>
+   <definition value="A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key)."/>
+   <comments value="This should agree with the information in the signature."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Signature.contentType"/>
+   <short value="The technical format of the signature"/>
+   <definition value="A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The mime type of an attachment. Any valid mime type is allowed"/>
+    <valueSetUri value="http://www.rfc-editor.org/bcp/bcp13.txt"/>
+   </binding>
+  </element>
+  <element>
+   <path value="Signature.blob"/>
+   <short value="The actual signature content (XML DigSig. JWT, picture, etc)"/>
+   <definition value="The base64 encoding of the Signature content."/>
+   <comments value="Where the signature type is an XML DigSig, the signed content is a FHIR Resource(s), the signature is of the XML form of the Resource(s) using  XML-Signature (XMLDIG) &quot;Detached Signature&quot; form."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="base64Binary"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+ </differential>
+</StructureDefinition>

@@ -1,0 +1,1298 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="ConceptMap"/>
+ <meta>
+  <lastUpdated value="2015-08-27T19:45:13.172-04:00"/>
+ </meta>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+  <valueInteger value="2"/>
+ </extension>
+ <url value="http://hl7.org/fhir/StructureDefinition/ConceptMap"/>
+ <name value="ConceptMap"/>
+ <publisher value="Health Level Seven International (Vocabulary)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org/Special/committees/Vocab/index.cfm"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for ConceptMap Resource"/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <mapping>
+  <identity value="w5"/>
+  <uri value="http://hl7.org/fhir/w5"/>
+  <name value="W5 Mapping"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
+ <snapshot>
+  <element>
+   <path value="ConceptMap"/>
+   <short value="A map from one set of concepts to one or more other concepts"/>
+   <definition value="A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="infrastructure"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ConceptMap.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ConceptMap.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ConceptMap.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="ConceptMap.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.url"/>
+   <short value="Globally unique logical id for concept map"/>
+   <definition value="An absolute URL that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.identifier"/>
+   <short value="Additional identifier for the concept map"/>
+   <definition value="Formal identifier that is used to identify this concept map when it is represented in other formats, or referenced in a specification, model, design or an instance."/>
+   <comments value="Typically, this is used for values that can go in a v3 II data type."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.version"/>
+   <short value="Logical id for this version of the concept map"/>
+   <definition value="The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp."/>
+   <comments value="There may be multiple resource versions of the concept map that have this same identifier."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id.version"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.name"/>
+   <short value="Informal name for this concept map"/>
+   <definition value="A free text natural language name describing the concept map."/>
+   <comments value="Not expected to be unique."/>
+   <requirements value="Support human navigation."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.status"/>
+   <short value="draft | active | retired"/>
+   <definition value="The status of the concept map."/>
+   <comments value="Allows filtering of ConceptMaps that are appropriate for use."/>
+   <requirements value="Identify when/if the concept map should be used."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The lifecycle status of a Value Set or Concept Map"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/conformance-resource-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.experimental"/>
+   <short value="If for testing purposes, not real usage"/>
+   <definition value="This ConceptMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
+   <comments value="Allows filtering of ConceptMaps that are appropriate for use."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.publisher"/>
+   <short value="Name of the publisher (Organization or individual)"/>
+   <definition value="The name of the individual or organization that published the concept map."/>
+   <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
+   <requirements value="Helps establish the &quot;authority/credibility&quot; of the concept map.  May also allow for contact."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.contact"/>
+   <short value="Contact details of the publisher"/>
+   <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
+   <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ConceptMap.contact.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.contact.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.contact.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.contact.name"/>
+   <short value="Name of a individual to contact"/>
+   <definition value="The name of an individual to contact regarding the concept map."/>
+   <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ConceptMap.contact.telecom"/>
+   <short value="Contact details for individual or publisher"/>
+   <definition value="Contact details for individual (if a name was provided) or the publisher."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ConceptMap.date"/>
+   <short value="Date for given status"/>
+   <definition value="The date that this version of the concept map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the concept map changes."/>
+   <comments value="Note that this is not the same as the resource last-modified-date, since the resource may be a secondary representation of the concept map. Additional specific dates may be added as extensions."/>
+   <requirements value="Need to know when a concept map was first legal for use or became withdrawn or replaced."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.description"/>
+   <short value="Human language description of the concept map"/>
+   <definition value="A free text natural language description of the use of the concept map - reason for definition, conditions of use, etc."/>
+   <comments value="The description is not intended to describe the semantics of the concept map. The description should capture its intended use, which is needed for ensuring integrity for its use in models across future changes."/>
+   <requirements value="Human understandability."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.useContext"/>
+   <short value="Content intends to support these contexts"/>
+   <definition value="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of concept maps."/>
+   <requirements value="Assist in searching for appropriate concept maps."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Indicates the countries, regions, disciplines and other aspects of use this artifact is targeted for use within"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/use-context"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.requirements"/>
+   <short value="Why is this needed?"/>
+   <definition value="Explains why this concept map is needed and why it's been constrained as it has."/>
+   <comments value="This element does not describe the usage of the concept map (that's done in comments), rather it's for traceability of *why* the element is either needed or why the constraints exist as they do.  This may be used to point to source materials or specifications that drove the structure of this data element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.copyright"/>
+   <short value="Use and/or Publishing restrictions"/>
+   <definition value="A copyright statement relating to the concept map and/or its contents."/>
+   <comments value="Frequently, the copyright differs between the concept map, and codes that are included. The copyright statement should clearly differentiate between these when required."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.source[x]"/>
+   <short value="Identifies the source of the concepts which are being mapped"/>
+   <definition value="The source value set that specifies the concepts that are being mapped."/>
+   <comments value="Should be a version specific reference. URIs SHOULD be absolute."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/ValueSet"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/StructureDefinition"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ConceptMap.target[x]"/>
+   <short value="Provides context to the mappings"/>
+   <definition value="The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made."/>
+   <comments value="Should be a version specific reference. URIs SHOULD be absolute."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/ValueSet"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/StructureDefinition"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="SourceElement"/>
+   </extension>
+   <path value="ConceptMap.element"/>
+   <short value="Mappings for a concept from the source set"/>
+   <definition value="Mappings for an individual concept in the source to one or more concepts in the target."/>
+   <comments value="Generally, the ideal is that there would only be one mapping for each concept in the source value set, but a given concept may be mapped mutliple times with different comments or dependencies."/>
+   <alias value="code"/>
+   <alias value="concept"/>
+   <alias value="item"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.element.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.element.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.element.codeSystem"/>
+   <short value="Code System (if value set crosses code systems)"/>
+   <definition value="An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.code"/>
+   <short value="Identifies element being mapped"/>
+   <definition value="Identity (code or path) or the element/item being mapped."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="TargetElement"/>
+   </extension>
+   <path value="ConceptMap.element.target"/>
+   <short value="Concept in target system for element"/>
+   <definition value="A concept from the target value set that this concept maps to."/>
+   <comments value="Ideally there would only be one map, with equal or equivalent mapping. But multiple maps are allowed for several narrower options, or to assert that other concepts are unmatched."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <constraint>
+    <key value="cmd-1"/>
+    <severity value="error"/>
+    <human value="If the map is narrower or inexact, there SHALL be some comments"/>
+    <xpath value="exists(f:comments) or ((f:equivalence/@value != 'narrower') and (f:equivalence/@value != 'inexact'))"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.codeSystem"/>
+   <short value="System of the target (if necessary)"/>
+   <definition value="An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems)."/>
+   <comments value="Should be a version specific reference."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.code"/>
+   <short value="Code that identifies the target element"/>
+   <definition value="Identity (code or path) or the element/item that the map refers to."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.equivalence"/>
+   <short value="equivalent | equal | wider | subsumes | narrower | specializes | inexact | unmatched | disjoint"/>
+   <definition value="The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The degree of equivalence between concepts"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/concept-map-equivalence"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.comments"/>
+   <short value="Description of status/issues in mapping"/>
+   <definition value="A description of status/issues in mapping that conveys additional information not represented in  the structured data."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="cmd-1"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="OtherElement"/>
+   </extension>
+   <path value="ConceptMap.element.target.dependsOn"/>
+   <name value="dependsOn"/>
+   <short value="Other elements required for this mapping (from context)"/>
+   <definition value="A set of additional dependencies for this mapping to hold. This mapping is only applicable if the specified element can be resolved, and it has the specified value."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.dependsOn.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.dependsOn.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.dependsOn.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.dependsOn.element"/>
+   <short value="Reference to element/field/valueset mapping depends on"/>
+   <definition value="A reference to a specific concept that holds a coded value. This can be an element in a FHIR resource, or a specific reference to a data element in a different specification (e.g. v2) or a general reference to a kind of data field, or a reference to a value set with an appropriately narrow definition."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.dependsOn.codeSystem"/>
+   <short value="Code System (if necessary)"/>
+   <definition value="An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.dependsOn.code"/>
+   <short value="Value of the referenced element"/>
+   <definition value="Identity (code or path) or the element/item that the map depends on / refers to."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.product"/>
+   <short value="Other concepts that this mapping also produces"/>
+   <definition value="A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on."/>
+   <min value="0"/>
+   <max value="*"/>
+   <nameReference value="dependsOn"/>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="ConceptMap"/>
+   <short value="A map from one set of concepts to one or more other concepts"/>
+   <definition value="A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="infrastructure"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.url"/>
+   <short value="Globally unique logical id for concept map"/>
+   <definition value="An absolute URL that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.identifier"/>
+   <short value="Additional identifier for the concept map"/>
+   <definition value="Formal identifier that is used to identify this concept map when it is represented in other formats, or referenced in a specification, model, design or an instance."/>
+   <comments value="Typically, this is used for values that can go in a v3 II data type."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.version"/>
+   <short value="Logical id for this version of the concept map"/>
+   <definition value="The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp."/>
+   <comments value="There may be multiple resource versions of the concept map that have this same identifier."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id.version"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.name"/>
+   <short value="Informal name for this concept map"/>
+   <definition value="A free text natural language name describing the concept map."/>
+   <comments value="Not expected to be unique."/>
+   <requirements value="Support human navigation."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.status"/>
+   <short value="draft | active | retired"/>
+   <definition value="The status of the concept map."/>
+   <comments value="Allows filtering of ConceptMaps that are appropriate for use."/>
+   <requirements value="Identify when/if the concept map should be used."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The lifecycle status of a Value Set or Concept Map"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/conformance-resource-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.experimental"/>
+   <short value="If for testing purposes, not real usage"/>
+   <definition value="This ConceptMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
+   <comments value="Allows filtering of ConceptMaps that are appropriate for use."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.publisher"/>
+   <short value="Name of the publisher (Organization or individual)"/>
+   <definition value="The name of the individual or organization that published the concept map."/>
+   <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
+   <requirements value="Helps establish the &quot;authority/credibility&quot; of the concept map.  May also allow for contact."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.contact"/>
+   <short value="Contact details of the publisher"/>
+   <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
+   <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ConceptMap.contact.name"/>
+   <short value="Name of a individual to contact"/>
+   <definition value="The name of an individual to contact regarding the concept map."/>
+   <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ConceptMap.contact.telecom"/>
+   <short value="Contact details for individual or publisher"/>
+   <definition value="Contact details for individual (if a name was provided) or the publisher."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ConceptMap.date"/>
+   <short value="Date for given status"/>
+   <definition value="The date that this version of the concept map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the concept map changes."/>
+   <comments value="Note that this is not the same as the resource last-modified-date, since the resource may be a secondary representation of the concept map. Additional specific dates may be added as extensions."/>
+   <requirements value="Need to know when a concept map was first legal for use or became withdrawn or replaced."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.description"/>
+   <short value="Human language description of the concept map"/>
+   <definition value="A free text natural language description of the use of the concept map - reason for definition, conditions of use, etc."/>
+   <comments value="The description is not intended to describe the semantics of the concept map. The description should capture its intended use, which is needed for ensuring integrity for its use in models across future changes."/>
+   <requirements value="Human understandability."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.useContext"/>
+   <short value="Content intends to support these contexts"/>
+   <definition value="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of concept maps."/>
+   <requirements value="Assist in searching for appropriate concept maps."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Indicates the countries, regions, disciplines and other aspects of use this artifact is targeted for use within"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/use-context"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ConceptMap.requirements"/>
+   <short value="Why is this needed?"/>
+   <definition value="Explains why this concept map is needed and why it's been constrained as it has."/>
+   <comments value="This element does not describe the usage of the concept map (that's done in comments), rather it's for traceability of *why* the element is either needed or why the constraints exist as they do.  This may be used to point to source materials or specifications that drove the structure of this data element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.copyright"/>
+   <short value="Use and/or Publishing restrictions"/>
+   <definition value="A copyright statement relating to the concept map and/or its contents."/>
+   <comments value="Frequently, the copyright differs between the concept map, and codes that are included. The copyright statement should clearly differentiate between these when required."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.source[x]"/>
+   <short value="Identifies the source of the concepts which are being mapped"/>
+   <definition value="The source value set that specifies the concepts that are being mapped."/>
+   <comments value="Should be a version specific reference. URIs SHOULD be absolute."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/ValueSet"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/StructureDefinition"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ConceptMap.target[x]"/>
+   <short value="Provides context to the mappings"/>
+   <definition value="The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made."/>
+   <comments value="Should be a version specific reference. URIs SHOULD be absolute."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/ValueSet"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/StructureDefinition"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="SourceElement"/>
+   </extension>
+   <path value="ConceptMap.element"/>
+   <short value="Mappings for a concept from the source set"/>
+   <definition value="Mappings for an individual concept in the source to one or more concepts in the target."/>
+   <comments value="Generally, the ideal is that there would only be one mapping for each concept in the source value set, but a given concept may be mapped mutliple times with different comments or dependencies."/>
+   <alias value="code"/>
+   <alias value="concept"/>
+   <alias value="item"/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="ConceptMap.element.codeSystem"/>
+   <short value="Code System (if value set crosses code systems)"/>
+   <definition value="An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.code"/>
+   <short value="Identifies element being mapped"/>
+   <definition value="Identity (code or path) or the element/item being mapped."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="TargetElement"/>
+   </extension>
+   <path value="ConceptMap.element.target"/>
+   <short value="Concept in target system for element"/>
+   <definition value="A concept from the target value set that this concept maps to."/>
+   <comments value="Ideally there would only be one map, with equal or equivalent mapping. But multiple maps are allowed for several narrower options, or to assert that other concepts are unmatched."/>
+   <min value="0"/>
+   <max value="*"/>
+   <constraint>
+    <key value="cmd-1"/>
+    <severity value="error"/>
+    <human value="If the map is narrower or inexact, there SHALL be some comments"/>
+    <xpath value="exists(f:comments) or ((f:equivalence/@value != 'narrower') and (f:equivalence/@value != 'inexact'))"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.codeSystem"/>
+   <short value="System of the target (if necessary)"/>
+   <definition value="An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems)."/>
+   <comments value="Should be a version specific reference."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.code"/>
+   <short value="Code that identifies the target element"/>
+   <definition value="Identity (code or path) or the element/item that the map refers to."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.equivalence"/>
+   <short value="equivalent | equal | wider | subsumes | narrower | specializes | inexact | unmatched | disjoint"/>
+   <definition value="The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The degree of equivalence between concepts"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/concept-map-equivalence"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.comments"/>
+   <short value="Description of status/issues in mapping"/>
+   <definition value="A description of status/issues in mapping that conveys additional information not represented in  the structured data."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="cmd-1"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="OtherElement"/>
+   </extension>
+   <path value="ConceptMap.element.target.dependsOn"/>
+   <name value="dependsOn"/>
+   <short value="Other elements required for this mapping (from context)"/>
+   <definition value="A set of additional dependencies for this mapping to hold. This mapping is only applicable if the specified element can be resolved, and it has the specified value."/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.dependsOn.element"/>
+   <short value="Reference to element/field/valueset mapping depends on"/>
+   <definition value="A reference to a specific concept that holds a coded value. This can be an element in a FHIR resource, or a specific reference to a data element in a different specification (e.g. v2) or a general reference to a kind of data field, or a reference to a value set with an appropriately narrow definition."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.dependsOn.codeSystem"/>
+   <short value="Code System (if necessary)"/>
+   <definition value="An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.dependsOn.code"/>
+   <short value="Value of the referenced element"/>
+   <definition value="Identity (code or path) or the element/item that the map depends on / refers to."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ConceptMap.element.target.product"/>
+   <short value="Other concepts that this mapping also produces"/>
+   <definition value="A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on."/>
+   <min value="0"/>
+   <max value="*"/>
+   <nameReference value="dependsOn"/>
+  </element>
+ </differential>
+</StructureDefinition>

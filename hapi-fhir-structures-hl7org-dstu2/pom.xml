@@ -20,7 +20,12 @@
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>1.2-SNAPSHOT</version>
 		</dependency>
-
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources</artifactId>
+			<version>1.2-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -153,15 +158,8 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>${guava_version}</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency> <groupId>org.springframework.security</groupId> <artifactId>spring-security-web</artifactId> 
-			<version>${spring_security_version}</version> <scope>test</scope> </dependency> 
-			<dependency> <groupId>org.springframework.security</groupId> <artifactId>spring-security-config</artifactId> 
-			<version>${spring_security_version}</version> <scope>test</scope> </dependency> 
-			<dependency> <groupId>org.springframework.security</groupId> <artifactId>spring-security-jwt</artifactId> 
-			<version>1.0.2.RELEASE</version> <scope>test</scope> </dependency> -->
 
 	</dependencies>
 

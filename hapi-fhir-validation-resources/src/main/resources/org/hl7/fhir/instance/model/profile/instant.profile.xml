@@ -1,0 +1,83 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="instant"/>
+ <url value="http://hl7.org/fhir/StructureDefinition/instant"/>
+ <name value="instant"/>
+ <publisher value="HL7 FHIR Standard"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for instant Type: An instant in time - known at least to the second"/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
+ <snapshot>
+  <element>
+   <path value="instant"/>
+   <short value="Primitive Type instant"/>
+   <definition value="An instant in time - known at least to the second"/>
+   <comments value="Note: This is intended for precisely observed times, typically system logs etc, and not human-reported times - for them, see date and dateTime below. Time zone is always required"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Element"/>
+   </type>
+  </element>
+  <element>
+   <path value="instant.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="instant.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+  </element>
+  <element>
+   <path value="instant.value"/>
+   <representation value="xmlAttr"/>
+   <short value="Primitive value for instant"/>
+   <definition value="The actual value"/>
+   <min value="0"/>
+   <max value="1"/>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="instant"/>
+   <short value="Primitive Type instant"/>
+   <definition value="An instant in time - known at least to the second"/>
+   <comments value="Note: This is intended for precisely observed times, typically system logs etc, and not human-reported times - for them, see date and dateTime below. Time zone is always required"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Element"/>
+   </type>
+  </element>
+  <element>
+   <path value="instant.value"/>
+   <representation value="xmlAttr"/>
+   <short value="Primitive value for instant"/>
+   <definition value="Primitive value for instant"/>
+   <min value="0"/>
+   <max value="1"/>
+  </element>
+ </differential>
+</StructureDefinition>

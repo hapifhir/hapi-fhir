@@ -16,11 +16,11 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>13275</WindowHeight>
-  <WindowWidth>28800</WindowWidth>
+  <WindowHeight>16575</WindowHeight>
+  <WindowWidth>-27136</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>4</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -3354,7 +3354,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4254,7 +4253,7 @@
     <Cell ss:StyleID="s114"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">Validate a resource</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s128"><Data ss:Type="String">The validate interaction checks whether the attached content would be acceptable either generally, or as a create, or an update or delete to an existing resource.  The action the server takes depends on the mode parameter:  * [missing]: The server checks the content of the resource against any schema, constraint rules, and other general terminology rules * create: The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not validate any uniqueness constraints) * update: The server checks the content, and then checks that it would accept it as an update against the nominated specific resource (e.g. that there are no changes to immutable fields the server does not allow to change, and checking version integrity if appropriate) * delete: The server ignores the content, and checks that the nominated resource is allowed to be deleted (e.g. checking referential integrity rules)  Modes update and delete can only be used when the operation is invoked at the resource level.   The return from this operation is an OperationOutcome   </Data><NamedCell
+    <Cell ss:StyleID="s128"><Data ss:Type="String">The validate interaction checks whether the attached content would be acceptable either generally, or as a create, or an update or delete to an existing resource.  The action the server takes depends on the mode parameter:  &#10;&#10;* [mode not provided]: The server checks the content of the resource against any schema, constraint rules, and other general terminology rules &#10;* create: The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not violate any uniqueness constraints) &#10;* update: The server checks the content, and then checks that it would accept it as an update against the nominated specific resource (e.g. that there are no changes to immutable fields the server does not allow to change, and checking version integrity if appropriate) &#10;* delete: The server ignores the content, and checks that the nominated resource is allowed to be deleted (e.g. checking referential integrity rules)  &#10;&#10;Modes update and delete can only be used when the operation is invoked at the resource instance level.   The return from this operation is an OperationOutcome   </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s129"><Data ss:Type="String">This operation may be used during design and development to validate application design. It can also be used at run-time. One possible use might be that a client asks the server whether a proposed update is valid as the user is editing a dialog, and displays an updated error to the user. The operation can be used as part of a light-weight two phase commit protocol but there is no expectation that the server will hold the content of the resource after this operation is used, or that the server guarantees to succesfully perform an actual create, update or delete after the validation operation completes.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -4318,7 +4317,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Access a list of profiles, tags, and security labels</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">This operation retrieves a summary of the profiles, tags, and security labels for the given scope. E.g. for each scope:  * system-wide: a list of all profiles, tags and security labels in use by the system * resource-type level: A list of all profiles, tags, and security labels for the resource type * individual resource level: A list of all profiles, tags, and security labels for the current version of the resource.  Also, as a special case, this operation (and other meta operations) can be performed on a historical version of a resource)</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">This operation retrieves a summary of the profiles, tags, and security labels for the given scope. E.g. for each scope:  &#10;&#10;* system-wide: a list of all profiles, tags and security labels in use by the system &#10;* resource-type level: A list of all profiles, tags, and security labels for the resource type &#10;* individual resource level: A list of all profiles, tags, and security labels for the current version of the resource.  Also, as a special case, this operation (and other meta operations) can be performed on a historical version of a resource)</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="String">At the system and type levels, the $meta operation is used to get a summary of all the labels that are in use across the system. The principle use for this operation is to support search e.g. what tags can be searched for. At these levels, the meta will not contain versionId, lastUpdated etc. Systems are not obligated to implement the operation at this level (and should return a 4xx error if they don't)  At the resource and historical entry level, the $meta operation returns the same meta as would be returned by accessing the resource directly. This can be used to allow a system to get access to the meta-information for the resource without accessing the resource itself, e.g. for security reasons</Data></Cell>
     <Cell><Data ss:Type="String">$meta-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$meta-response.txt</Data></Cell>
@@ -4804,10 +4803,11 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>4</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -4820,12 +4820,11 @@
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>12</ActiveRow>
-     <ActiveCol>11</ActiveCol>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>8</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -6473,7 +6472,7 @@
     <Cell ss:StyleID="s114"/>
     <Cell ss:StyleID="s149"/>
     <Cell ss:StyleID="s149"><Data ss:Type="String">Validate for Create</Data></Cell>
-    <Cell ss:StyleID="s149"><Data ss:Type="String">The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not validate any uniqueness constraints)</Data></Cell>
+    <Cell ss:StyleID="s149"><Data ss:Type="String">The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not violate any uniqueness constraints)</Data></Cell>
     <Cell ss:StyleID="s127"/>
     <Cell ss:StyleID="s127"/>
     <Cell ss:StyleID="s140"/>

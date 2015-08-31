@@ -34,6 +34,7 @@ public class Include {
 
 	private boolean myRecurse;
 	private String myValue;
+	private boolean myImmutable;
 
 	/**
 	 * Constructor for <b>non-recursive</b> include
@@ -125,9 +126,18 @@ public class Include {
 	}
 
 	public void setValue(String theValue) {
+		if (myImmutable) {
+			throw new IllegalStateException("Can not change the value of this include");
+		}
 		myValue = theValue;
 	}
 
+	public Include toLocked() {
+		Include retVal = new Include(myValue, myRecurse);
+		retVal.myImmutable = true;
+		return retVal;
+	}
+	
 	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this);

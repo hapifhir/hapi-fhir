@@ -28,26 +28,36 @@ import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
 /**
- *  @param <T> The bundle type
+ * @param <T>
+ *           The bundle type
  */
 public interface IFhirSystemDao<T> extends IDao {
 
-	T transaction(T theResources);
-
-	IBundleProvider history(Date theDate);
+	/**
+	 * Use with caution! This deletes everything!!
+	 */
+	void deleteAllTagsOnServer();
 
 	TagList getAllTags();
 
 	Map<String, Long> getResourceCounts();
+
+	IBundleProvider history(Date theDate);
+
+	int performReindexingPass(Integer theCount);
+
+	/**
+	 * Marks all indexes as needing fresh indexing
+	 * 
+	 * @return Returns the number of affected rows
+	 */
+	int markAllResourcesForReindexing();
 
 	/**
 	 * Not supported for DSTU1
 	 */
 	MetaDt metaGetOperation();
 
-	/**
-	 * Use with caution! This deletes everything!!
-	 */
-	void deleteAllTagsOnServer();
+	T transaction(T theResources);
 
 }

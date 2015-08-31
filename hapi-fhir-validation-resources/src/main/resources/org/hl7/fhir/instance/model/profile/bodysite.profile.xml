@@ -1,0 +1,398 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="BodySite"/>
+ <meta>
+  <lastUpdated value="2015-08-27T19:45:13.172-04:00"/>
+ </meta>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+  <valueInteger value="0"/>
+ </extension>
+ <url value="http://hl7.org/fhir/StructureDefinition/BodySite"/>
+ <name value="BodySite"/>
+ <publisher value="Health Level Seven International (Orders and Observations)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org/Special/committees/orders/index.cfm"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for BodySite Resource"/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="openehr"/>
+  <uri value="http://openehr.org"/>
+  <name value="Open EHR"/>
+ </mapping>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
+ <snapshot>
+  <element>
+   <path value="BodySite"/>
+   <short value="Specific and identified anatomical location"/>
+   <definition value="Record details about the anatomical location of a specimen or body part.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case."/>
+   <alias value="anatomical location"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <mapping>
+    <identity value="openehr"/>
+    <map value="Archetype ID   openEHR-EHR-CLUSTER.anatomical_location.v1      Concept name   Anatomical Location      Concept description   Record details about an anatomical location.      Keywords   location, site, anatomical      Copyright   © openEHR Foundation      Purpose   To record details about anatomical location.      Misuse   Not for specifiying unilateral/bilateral occurence - this is related to an evaluation which perhaps includes multiple locations.      Author   Author name: Heather Leslie Organisation: Ocean Informatics Email: heather.leslie@oceaninformatics.com Date of Origination: 2008-11-10       Translator   Norwegian Bokmål: Lars Bitsch-Larsen, Haukeland University Hospital of Bergen, Norway, MD, DEAA, MBA, spec in anesthesia, spec in tropical medicine. Arabic (Syria): Mona Saleh       Other contributors   Heather Leslie, Ocean Informatics, Australia (Editor) Ian McNicoll, freshEHR Clinical Informatics, United Kingdom (Editor) Dunmail Hodkinson, Black Pear Software Ltd, UK      References   Use cases: - 5LICS, midclavicular line - L forearm, 2cm anterior to the cubital fossa - Right iliac fossa - 5 cm below L tibial tuberosity - 2 cm medial to R nipple - 4 cm below R costal margin in midclavicular line - R femur - midline nose - medial aspect of R great toe nail."/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="BodySite.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="BodySite.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="BodySite.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="BodySite.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.patient"/>
+   <short value="Patient"/>
+   <definition value="The person to which the body site belongs."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="BodySite.identifier"/>
+   <short value="Bodysite identifier"/>
+   <definition value="Identifier for this instance of the anatomical location."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="openehr"/>
+    <map value="Specific location  Cluster Optional (0..1) Cardinality: Mandatory, repeating, unordered (1..*)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.code"/>
+   <short value="Named anatomical location"/>
+   <definition value="Named anatomical location - ideally would be coded where possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Codes describing anatomical locations. May include laterality"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/body-site"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="openehr"/>
+    <map value="Name of location"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.modifier"/>
+   <short value="Modification to location code"/>
+   <definition value="Modifier to refine the anatomical location.  These include modifiers for laterality, relative location, directionality, number, and plane."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Concepts modifying the anatomic location"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/bodysite-relative-location"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="openehr"/>
+    <map value="Combines Side, Numerical identifier, Anatomical plane,and Aspect"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.description"/>
+   <short value="The Description of anatomical location"/>
+   <definition value="Description of anatomical location."/>
+   <comments value="This Description  could include any visual markings used to orientate the viewer e.g external reference points, special sutures, ink markings."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="openehr"/>
+    <map value="Description of anatomical location/Visual markings/orientation"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.image"/>
+   <short value="Attached images"/>
+   <definition value="Image or images used to identify a location."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <mapping>
+    <identity value="openehr"/>
+    <map value="Image"/>
+   </mapping>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="BodySite"/>
+   <short value="Specific and identified anatomical location"/>
+   <definition value="Record details about the anatomical location of a specimen or body part.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case."/>
+   <alias value="anatomical location"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <mapping>
+    <identity value="openehr"/>
+    <map value="Archetype ID   openEHR-EHR-CLUSTER.anatomical_location.v1      Concept name   Anatomical Location      Concept description   Record details about an anatomical location.      Keywords   location, site, anatomical      Copyright   © openEHR Foundation      Purpose   To record details about anatomical location.      Misuse   Not for specifiying unilateral/bilateral occurence - this is related to an evaluation which perhaps includes multiple locations.      Author   Author name: Heather Leslie Organisation: Ocean Informatics Email: heather.leslie@oceaninformatics.com Date of Origination: 2008-11-10       Translator   Norwegian Bokmål: Lars Bitsch-Larsen, Haukeland University Hospital of Bergen, Norway, MD, DEAA, MBA, spec in anesthesia, spec in tropical medicine. Arabic (Syria): Mona Saleh       Other contributors   Heather Leslie, Ocean Informatics, Australia (Editor) Ian McNicoll, freshEHR Clinical Informatics, United Kingdom (Editor) Dunmail Hodkinson, Black Pear Software Ltd, UK      References   Use cases: - 5LICS, midclavicular line - L forearm, 2cm anterior to the cubital fossa - Right iliac fossa - 5 cm below L tibial tuberosity - 2 cm medial to R nipple - 4 cm below R costal margin in midclavicular line - R femur - midline nose - medial aspect of R great toe nail."/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.patient"/>
+   <short value="Patient"/>
+   <definition value="The person to which the body site belongs."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="BodySite.identifier"/>
+   <short value="Bodysite identifier"/>
+   <definition value="Identifier for this instance of the anatomical location."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="openehr"/>
+    <map value="Specific location  Cluster Optional (0..1) Cardinality: Mandatory, repeating, unordered (1..*)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.code"/>
+   <short value="Named anatomical location"/>
+   <definition value="Named anatomical location - ideally would be coded where possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Codes describing anatomical locations. May include laterality"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/body-site"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="openehr"/>
+    <map value="Name of location"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.modifier"/>
+   <short value="Modification to location code"/>
+   <definition value="Modifier to refine the anatomical location.  These include modifiers for laterality, relative location, directionality, number, and plane."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Concepts modifying the anatomic location"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/bodysite-relative-location"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="openehr"/>
+    <map value="Combines Side, Numerical identifier, Anatomical plane,and Aspect"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.description"/>
+   <short value="The Description of anatomical location"/>
+   <definition value="Description of anatomical location."/>
+   <comments value="This Description  could include any visual markings used to orientate the viewer e.g external reference points, special sutures, ink markings."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="openehr"/>
+    <map value="Description of anatomical location/Visual markings/orientation"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="BodySite.image"/>
+   <short value="Attached images"/>
+   <definition value="Image or images used to identify a location."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <mapping>
+    <identity value="openehr"/>
+    <map value="Image"/>
+   </mapping>
+  </element>
+ </differential>
+</StructureDefinition>

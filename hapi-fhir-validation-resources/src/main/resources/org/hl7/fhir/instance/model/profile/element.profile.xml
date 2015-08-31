@@ -1,0 +1,125 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="Element"/>
+ <url value="http://hl7.org/fhir/StructureDefinition/Element"/>
+ <name value="Element"/>
+ <publisher value="HL7 FHIR Standard"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for Element Type"/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <abstract value="true"/>
+ <snapshot>
+  <element>
+   <path value="Element"/>
+   <short value="Base for all elements"/>
+   <definition value="Base definition for all elements in a resource."/>
+   <min value="0"/>
+   <max value="*"/>
+   <condition value="ele-1"/>
+   <constraint>
+    <key value="ele-1"/>
+    <severity value="error"/>
+    <human value="All FHIR elements must have a @value or children"/>
+    <xpath value="@value|f:*|h:div"/>
+   </constraint>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Element.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Element.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="Element"/>
+   <short value="Base for all elements"/>
+   <definition value="Base definition for all elements in a resource."/>
+   <min value="0"/>
+   <max value="*"/>
+   <condition value="ele-1"/>
+   <constraint>
+    <key value="ele-1"/>
+    <severity value="error"/>
+    <human value="All FHIR elements must have a @value or children"/>
+    <xpath value="@value|f:*|h:div"/>
+   </constraint>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Element.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Element.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+ </differential>
+</StructureDefinition>

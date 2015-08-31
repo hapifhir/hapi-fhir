@@ -1,0 +1,1565 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="StructureDefinition"/>
+ <meta>
+  <lastUpdated value="2015-08-27T19:45:13.172-04:00"/>
+ </meta>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+  <valueInteger value="3"/>
+ </extension>
+ <url value="http://hl7.org/fhir/StructureDefinition/StructureDefinition"/>
+ <name value="StructureDefinition"/>
+ <publisher value="Health Level Seven International (FHIR Infrastructure)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for StructureDefinition Resource"/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <mapping>
+  <identity value="w5"/>
+  <uri value="http://hl7.org/fhir/w5"/>
+  <name value="W5 Mapping"/>
+ </mapping>
+ <mapping>
+  <identity value="iso11179"/>
+  <uri value="http://metadata-standards.org/11179/"/>
+  <name value="ISO 11179"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
+ <snapshot>
+  <element>
+   <path value="StructureDefinition"/>
+   <short value="Structural Definition"/>
+   <definition value="A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions, and constraints on resources and data types."/>
+   <alias value="Template"/>
+   <alias value="Profile"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <constraint>
+    <key value="sdf-9"/>
+    <severity value="error"/>
+    <human value="In any snapshot or differential, no label, code or requirements on the an element without a &quot;.&quot; in the path (e.g. the first element)"/>
+    <xpath value="not(exists(f:snapshot/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)])) and not(exists(f:differential/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)]))"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-8"/>
+    <severity value="error"/>
+    <human value="In any snapshot or differential, all the elements except the first have to have a path that starts with the path of the first + &quot;.&quot;"/>
+    <xpath value="string-join(for $elementName in f:*[self::f:snapshot or self::f:differential]/f:element[position()>1]/f:path/@value return if (starts-with($elementName, concat($elementName/ancestor::f:element/parent::f:*/f:element[1]/f:path/@value, '.'))) then '' else $elementName,'')=''"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-12"/>
+    <severity value="error"/>
+    <human value="element.base cannot appear if theres's no base on the structure definition"/>
+    <xpath value="f:base or not(exists(f:snapshot/f:element/f:base) or exists(f:differential/f:element/f:base))"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-11"/>
+    <severity value="error"/>
+    <human value="If there's a constrained type, its content must match the path name in the first element of a snapshot"/>
+    <xpath value="not(exists(f:constrainedType)) or not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value)"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-13"/>
+    <severity value="error"/>
+    <human value="element.base must appear if theres's a base on the structure definition"/>
+    <xpath value="not(f:constrainedType) or not(f:snapshot/f:element[not(f:base)])"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-10"/>
+    <severity value="error"/>
+    <human value="If the structure is not abstract, or there's a constrained type, then there SHALL be a base"/>
+    <xpath value="(f:abstract/@value='true') or not(exists(f:constrainedType)) or exists(f:base)"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-7"/>
+    <severity value="error"/>
+    <human value="If the structure describes a base Resource or Type, the url has to start with &quot;http://hl7.org/fhir/StructureDefinition/&quot; and the tail must match the name"/>
+    <xpath value="not(exists(constrainedType)) or f:url/@value=concat('http://hl7.org/fhir/StructureDefinition/', f:name/@value)"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-6"/>
+    <severity value="error"/>
+    <human value="A structure must have either a differential, or a snapshot (or both)"/>
+    <xpath value="exists(f:snapshot) or exists(f:differential)"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-5"/>
+    <severity value="error"/>
+    <human value="If the structure defines an extension then the structure must have context information"/>
+    <xpath value="not(f:constrainedType/@value = 'extension') or (exists(f:context) and exists(f:contextType))"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-4"/>
+    <severity value="error"/>
+    <human value="A structure must have a base unless abstract = true"/>
+    <xpath value="(f:abstract/@value = 'true') or exists(f:base)"/>
+   </constraint>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="infrastructure"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="StructureDefinition.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.url"/>
+   <short value="Literal URL used to reference this StructureDefinition"/>
+   <definition value="An absolute URL that is used to identify this structure definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure definition is (or will be) published."/>
+   <requirements value="So you can say, in a StructureDefinition, what the full extension URLs should be. This is required to allow hosting StructureDefinitions on multiple different servers, and to allow for the editorial process."/>
+   <alias value="url"/>
+   <alias value="authoritative-url"/>
+   <alias value="destination"/>
+   <alias value="identity"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.identifier"/>
+   <short value="Other identifiers for the StructureDefinition"/>
+   <definition value="Formal identifier that is used to identify this StructureDefinition when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI)."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Identifier part"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.version"/>
+   <short value="Logical id for this version of the StructureDefinition"/>
+   <definition value="The identifier that is used to identify this version of the StructureDefinition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureDefinition author manually."/>
+   <requirements value="There may be multiple resource versions of the StructureDefinition that have this same identifier. The resource version id will change for technical reasons, whereas the stated version number needs to be under the author's control."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Version"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id.version"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.name"/>
+   <short value="Informal name for this StructureDefinition"/>
+   <definition value="A free text natural language name identifying the StructureDefinition."/>
+   <comments value="Not expected to be globally unique."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.display"/>
+   <short value="Use this name when displaying the value"/>
+   <definition value="Defined so that applications can use this name when displaying the value of the extension to the user."/>
+   <comments value="Applications don't have to use this name, but can always fall back to it. In the absence of a value for this element, use the name."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.status"/>
+   <short value="draft | active | retired"/>
+   <definition value="The status of the StructureDefinition."/>
+   <requirements value="Allows filtering of StructureDefinitions that are appropriate for use vs. not."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The lifecycle status of a Value Set or Concept Map"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/conformance-resource-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Registration status"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.experimental"/>
+   <short value="If for testing purposes, not real usage"/>
+   <definition value="This StructureDefinition was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
+   <requirements value="Allows filtering of StructureDefinitions that are appropriate for use vs. not."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Registration status"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.publisher"/>
+   <short value="Name of the publisher (Organization or individual)"/>
+   <definition value="The name of the individual or organization that published the structure definition."/>
+   <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
+   <requirements value="Helps establish the &quot;authority/credibility&quot; of the structure definition.  May also allow for contact."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Registration Authority"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.contact"/>
+   <short value="Contact details of the publisher"/>
+   <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
+   <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.contact.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.contact.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.contact.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.contact.name"/>
+   <short value="Name of a individual to contact"/>
+   <definition value="The name of an individual to contact regarding the structure definition."/>
+   <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.contact.telecom"/>
+   <short value="Contact details for individual or publisher"/>
+   <definition value="Contact details for individual (if a name was provided) or the publisher."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.date"/>
+   <short value="Date for this version of the StructureDefinition"/>
+   <definition value="The date that this version of the StructureDefinition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the structure definition changes."/>
+   <comments value="Additional specific dates may be added as extensions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.description"/>
+   <short value="Natural language description of the StructureDefinition"/>
+   <definition value="A free text natural language description of the StructureDefinition and its use."/>
+   <comments value="This field can be used for things such as why the StructureDefinition was written, comments about misuse, instructions for clinical use and interpretation, literature references, examples from the paper world, etc.  It is *not* a rendering of the StructureDefinition as conveyed in StructureDefinition.text. This item SHOULD be populated unless the information is available from context."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.useContext"/>
+   <short value="Content intends to support these contexts"/>
+   <definition value="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of structure definitions."/>
+   <requirements value="Assist in searching for appropriate content."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Indicates the countries, regions, disciplines and other aspects of use this artifact is targeted for use within"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/use-context"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="COMPONENT, PROPERTY, TIME_ASPCT, SYSTEM, SCALE_TYP, METHOD_TYP, CLASS, CLASSTYPE, ORDER_OBS, DOCUMENT_SECTION, HL7_ATTACHMENT_STRUCTURE"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.requirements"/>
+   <short value="Scope and Usage this structure definition is for"/>
+   <definition value="Explains why this structure definition is needed and why it's been constrained as it has."/>
+   <comments value="This element does not describe the usage of the structure definition (that's done in comments), rather it's for traceability of *why* the element is either needed or why the constraints exist as they do.  This may be used to point to source materials or specifications that drove the structure of this data element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="w5"/>
+    <map value="why"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.copyright"/>
+   <short value="Use and/or Publishing restrictions"/>
+   <definition value="A copyright statement relating to the structure definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings."/>
+   <alias value="License"/>
+   <alias value="Restrictions"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="StructureDefinition.code"/>
+   <short value="Assist with indexing and finding"/>
+   <definition value="A set of terms from external terminologies that may be used to assist with indexing and searching of templates."/>
+   <requirements value="Assist in searching for appropriate StructureDefinitions."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Codes for the meaning of the defined structure (SNOMED CT and LOINC codes, as an example)"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/profile-code"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="keywords"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.fhirVersion"/>
+   <short value="FHIR Version this StructureDefinition targets"/>
+   <definition value="The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version."/>
+   <comments value="A StructureDefinition does not need to specify the target it applies to,as StructureDefinitions will often be valid across multiple versions of FHIR. FHIR tooling can determine whether a StructureDefinition is consistent with a particular StructureDefinition if desired."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.mapping"/>
+   <short value="External specification that the content is mapped to"/>
+   <definition value="An external specification that the content is mapped to."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <constraint>
+    <key value="sdf-2"/>
+    <severity value="error"/>
+    <human value="Must have at a name or a uri (or both)"/>
+    <xpath value="exists(f:uri) or exists(f:name)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="StructureDefinition.mapping.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.mapping.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.mapping.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.mapping.identity"/>
+   <short value="Internal id when this mapping is used"/>
+   <definition value="An Internal id that is used to identify this mapping set when specific mappings are made."/>
+   <comments value="The specification is described once, with general comments, and then specific mappings are made that reference this declaration."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="StructureDefinition.mapping.uri"/>
+   <short value="Identifies what this mapping refers to"/>
+   <definition value="An absolute URI that identifies the specification that this mapping is expressed to."/>
+   <comments value="A formal identity for the specification being mapped to helps with identifying maps consistently."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <condition value="sdf-2"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.mapping.name"/>
+   <short value="Names what this mapping refers to"/>
+   <definition value="A name for the specification that is being mapped to."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="sdf-2"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.mapping.comments"/>
+   <short value="Versions, Issues, Scope limitations etc"/>
+   <definition value="Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="StructureDefinition.kind"/>
+   <short value="datatype | resource | logical"/>
+   <definition value="Defines the kind of structure that this definition is describing."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Defines the type of structure that a definition is describing"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/structure-definition-kind"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="StructureDefinition.constrainedType"/>
+   <short value="Any datatype or resource, including abstract ones"/>
+   <definition value="The type of type that is being constrained - a data type, an extension, a resource, including abstract ones. If this field is present, it indicates that the structure definition is a constraint. If it is not present, then the structure definition is the definition of a base structure."/>
+   <comments value="if a constrained type is present, then there SHALL be a base resource as well. Note that the constrained type could be determined by chasing through the base references until the base definition is reached, or by looking at the path of the first element in the snapshot - if present - but providing the constrainedType directly makes for simpler tooling and indexing."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <condition value="sdf-10"/>
+   <condition value="sdf-11"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Either a resource or a data type"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/defined-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="StructureDefinition.abstract"/>
+   <short value="Whether the structure is abstract"/>
+   <definition value="Whether structure this definition describes is abstract or not  - that is, whether an actual exchanged item can ever be of this type."/>
+   <comments value="Abstract Resources cannot be instantiated - a concrete sub-type must be used. Abstract datatypes and extensions cannot be used in an instance. Flagging a constraint structure as abstract conveys design intent but makes no difference to how the structure definition is handled. Note that inline declared elements that are given the type &quot;Element&quot; in the profile, but have children described, are anonymous concrete types that specialise Element. Abstract is not relevant for logical models."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.contextType"/>
+   <short value="resource | datatype | mapping | extension"/>
+   <definition value="If this is an extension, Identifies the context within FHIR resources where the extension can be used."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <condition value="sdf-5"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="How an extension context is interpreted"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/extension-context"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="StructureDefinition.context"/>
+   <short value="Where the extension can be used in instances"/>
+   <definition value="Identifies the types of resource or data type elements to which the extension can be applied."/>
+   <comments value="If the context is an element that can have multiple types, then use (e.g.) value[x] if the extension works on all choice types, or otherwise an enumeration of explicitly named elements if not. Note that a context of &quot;string&quot; doesn't mean that the extension can be used with one of the string patterns such as &quot;id&quot; etc."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="sdf-5"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.base"/>
+   <short value="Structure that this set of constraints applies to"/>
+   <definition value="An absolute URI that is the base structure from which this set of constraints is derived."/>
+   <comments value="If differential constraints are specified in this structure, they are applied to the base in a &quot;differential&quot; fashion. If there is no base, then the differential constraints cannot be provided (snapshot only). Differential structures are useful for the editing perspective, and snapshot structures are suitable for operational use. The FHIR Project provides a number of tools/services to populate snaphots from differential constraints. Logical Models have a base of &quot;Element&quot; or another logical model."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <condition value="sdf-4"/>
+   <condition value="sdf-10"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.snapshot"/>
+   <short value="Snapshot view of the structure"/>
+   <definition value="A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <condition value="sdf-6"/>
+   <constraint>
+    <key value="sdf-3"/>
+    <severity value="error"/>
+    <human value="If a structure is a snapshot, then each element definition must have a formal definition, and cardinalities"/>
+    <xpath value="exists(f:base) or (count(f:element) = count(f:element[exists(f:definition) and exists(f:min) and exists(f:max)]))"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-1"/>
+    <severity value="error"/>
+    <human value="Element paths must be unique - or not (LM)"/>
+    <xpath value="count(f:element) >= count(distinct-values(f:element/f:path/@value))"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="StructureDefinition.snapshot.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.snapshot.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.snapshot.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.snapshot.element"/>
+   <short value="Definition of elements in the resource (if no StructureDefinition)"/>
+   <definition value="Captures constraints on each element within the resource."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="ElementDefinition"/>
+   </type>
+   <condition value="sdf-3"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="--"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.differential"/>
+   <short value="Differential view of the structure"/>
+   <definition value="A differential view is expressed relative to the base StructureDefinition - a statement of differences that it applies."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <condition value="sdf-6"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.differential.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.differential.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.differential.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.differential.element"/>
+   <short value="Definition of elements in the resource (if no StructureDefinition)"/>
+   <definition value="Captures constraints on each element within the resource."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="ElementDefinition"/>
+   </type>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="--"/>
+   </mapping>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="StructureDefinition"/>
+   <short value="Structural Definition"/>
+   <definition value="A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions, and constraints on resources and data types."/>
+   <alias value="Template"/>
+   <alias value="Profile"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <constraint>
+    <key value="sdf-9"/>
+    <severity value="error"/>
+    <human value="In any snapshot or differential, no label, code or requirements on the an element without a &quot;.&quot; in the path (e.g. the first element)"/>
+    <xpath value="not(exists(f:snapshot/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)])) and not(exists(f:differential/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)]))"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-8"/>
+    <severity value="error"/>
+    <human value="In any snapshot or differential, all the elements except the first have to have a path that starts with the path of the first + &quot;.&quot;"/>
+    <xpath value="string-join(for $elementName in f:*[self::f:snapshot or self::f:differential]/f:element[position()>1]/f:path/@value return if (starts-with($elementName, concat($elementName/ancestor::f:element/parent::f:*/f:element[1]/f:path/@value, '.'))) then '' else $elementName,'')=''"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-12"/>
+    <severity value="error"/>
+    <human value="element.base cannot appear if theres's no base on the structure definition"/>
+    <xpath value="f:base or not(exists(f:snapshot/f:element/f:base) or exists(f:differential/f:element/f:base))"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-11"/>
+    <severity value="error"/>
+    <human value="If there's a constrained type, its content must match the path name in the first element of a snapshot"/>
+    <xpath value="not(exists(f:constrainedType)) or not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value)"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-13"/>
+    <severity value="error"/>
+    <human value="element.base must appear if theres's a base on the structure definition"/>
+    <xpath value="not(f:constrainedType) or not(f:snapshot/f:element[not(f:base)])"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-10"/>
+    <severity value="error"/>
+    <human value="If the structure is not abstract, or there's a constrained type, then there SHALL be a base"/>
+    <xpath value="(f:abstract/@value='true') or not(exists(f:constrainedType)) or exists(f:base)"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-7"/>
+    <severity value="error"/>
+    <human value="If the structure describes a base Resource or Type, the url has to start with &quot;http://hl7.org/fhir/StructureDefinition/&quot; and the tail must match the name"/>
+    <xpath value="not(exists(constrainedType)) or f:url/@value=concat('http://hl7.org/fhir/StructureDefinition/', f:name/@value)"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-6"/>
+    <severity value="error"/>
+    <human value="A structure must have either a differential, or a snapshot (or both)"/>
+    <xpath value="exists(f:snapshot) or exists(f:differential)"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-5"/>
+    <severity value="error"/>
+    <human value="If the structure defines an extension then the structure must have context information"/>
+    <xpath value="not(f:constrainedType/@value = 'extension') or (exists(f:context) and exists(f:contextType))"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-4"/>
+    <severity value="error"/>
+    <human value="A structure must have a base unless abstract = true"/>
+    <xpath value="(f:abstract/@value = 'true') or exists(f:base)"/>
+   </constraint>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="infrastructure"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.url"/>
+   <short value="Literal URL used to reference this StructureDefinition"/>
+   <definition value="An absolute URL that is used to identify this structure definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this structure definition is (or will be) published."/>
+   <requirements value="So you can say, in a StructureDefinition, what the full extension URLs should be. This is required to allow hosting StructureDefinitions on multiple different servers, and to allow for the editorial process."/>
+   <alias value="url"/>
+   <alias value="authoritative-url"/>
+   <alias value="destination"/>
+   <alias value="identity"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.identifier"/>
+   <short value="Other identifiers for the StructureDefinition"/>
+   <definition value="Formal identifier that is used to identify this StructureDefinition when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI)."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Identifier part"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.version"/>
+   <short value="Logical id for this version of the StructureDefinition"/>
+   <definition value="The identifier that is used to identify this version of the StructureDefinition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureDefinition author manually."/>
+   <requirements value="There may be multiple resource versions of the StructureDefinition that have this same identifier. The resource version id will change for technical reasons, whereas the stated version number needs to be under the author's control."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Version"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id.version"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.name"/>
+   <short value="Informal name for this StructureDefinition"/>
+   <definition value="A free text natural language name identifying the StructureDefinition."/>
+   <comments value="Not expected to be globally unique."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.display"/>
+   <short value="Use this name when displaying the value"/>
+   <definition value="Defined so that applications can use this name when displaying the value of the extension to the user."/>
+   <comments value="Applications don't have to use this name, but can always fall back to it. In the absence of a value for this element, use the name."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.status"/>
+   <short value="draft | active | retired"/>
+   <definition value="The status of the StructureDefinition."/>
+   <requirements value="Allows filtering of StructureDefinitions that are appropriate for use vs. not."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The lifecycle status of a Value Set or Concept Map"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/conformance-resource-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Registration status"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.experimental"/>
+   <short value="If for testing purposes, not real usage"/>
+   <definition value="This StructureDefinition was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
+   <requirements value="Allows filtering of StructureDefinitions that are appropriate for use vs. not."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Registration status"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.publisher"/>
+   <short value="Name of the publisher (Organization or individual)"/>
+   <definition value="The name of the individual or organization that published the structure definition."/>
+   <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
+   <requirements value="Helps establish the &quot;authority/credibility&quot; of the structure definition.  May also allow for contact."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Registration Authority"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.contact"/>
+   <short value="Contact details of the publisher"/>
+   <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
+   <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.contact.name"/>
+   <short value="Name of a individual to contact"/>
+   <definition value="The name of an individual to contact regarding the structure definition."/>
+   <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.contact.telecom"/>
+   <short value="Contact details for individual or publisher"/>
+   <definition value="Contact details for individual (if a name was provided) or the publisher."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.date"/>
+   <short value="Date for this version of the StructureDefinition"/>
+   <definition value="The date that this version of the StructureDefinition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the structure definition changes."/>
+   <comments value="Additional specific dates may be added as extensions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.description"/>
+   <short value="Natural language description of the StructureDefinition"/>
+   <definition value="A free text natural language description of the StructureDefinition and its use."/>
+   <comments value="This field can be used for things such as why the StructureDefinition was written, comments about misuse, instructions for clinical use and interpretation, literature references, examples from the paper world, etc.  It is *not* a rendering of the StructureDefinition as conveyed in StructureDefinition.text. This item SHOULD be populated unless the information is available from context."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.useContext"/>
+   <short value="Content intends to support these contexts"/>
+   <definition value="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of structure definitions."/>
+   <requirements value="Assist in searching for appropriate content."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Indicates the countries, regions, disciplines and other aspects of use this artifact is targeted for use within"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/use-context"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="COMPONENT, PROPERTY, TIME_ASPCT, SYSTEM, SCALE_TYP, METHOD_TYP, CLASS, CLASSTYPE, ORDER_OBS, DOCUMENT_SECTION, HL7_ATTACHMENT_STRUCTURE"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.requirements"/>
+   <short value="Scope and Usage this structure definition is for"/>
+   <definition value="Explains why this structure definition is needed and why it's been constrained as it has."/>
+   <comments value="This element does not describe the usage of the structure definition (that's done in comments), rather it's for traceability of *why* the element is either needed or why the constraints exist as they do.  This may be used to point to source materials or specifications that drove the structure of this data element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="w5"/>
+    <map value="why"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.copyright"/>
+   <short value="Use and/or Publishing restrictions"/>
+   <definition value="A copyright statement relating to the structure definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings."/>
+   <alias value="License"/>
+   <alias value="Restrictions"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="StructureDefinition.code"/>
+   <short value="Assist with indexing and finding"/>
+   <definition value="A set of terms from external terminologies that may be used to assist with indexing and searching of templates."/>
+   <requirements value="Assist in searching for appropriate StructureDefinitions."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Codes for the meaning of the defined structure (SNOMED CT and LOINC codes, as an example)"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/profile-code"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="keywords"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.fhirVersion"/>
+   <short value="FHIR Version this StructureDefinition targets"/>
+   <definition value="The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version."/>
+   <comments value="A StructureDefinition does not need to specify the target it applies to,as StructureDefinitions will often be valid across multiple versions of FHIR. FHIR tooling can determine whether a StructureDefinition is consistent with a particular StructureDefinition if desired."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.mapping"/>
+   <short value="External specification that the content is mapped to"/>
+   <definition value="An external specification that the content is mapped to."/>
+   <min value="0"/>
+   <max value="*"/>
+   <constraint>
+    <key value="sdf-2"/>
+    <severity value="error"/>
+    <human value="Must have at a name or a uri (or both)"/>
+    <xpath value="exists(f:uri) or exists(f:name)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="StructureDefinition.mapping.identity"/>
+   <short value="Internal id when this mapping is used"/>
+   <definition value="An Internal id that is used to identify this mapping set when specific mappings are made."/>
+   <comments value="The specification is described once, with general comments, and then specific mappings are made that reference this declaration."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="StructureDefinition.mapping.uri"/>
+   <short value="Identifies what this mapping refers to"/>
+   <definition value="An absolute URI that identifies the specification that this mapping is expressed to."/>
+   <comments value="A formal identity for the specification being mapped to helps with identifying maps consistently."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <condition value="sdf-2"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.mapping.name"/>
+   <short value="Names what this mapping refers to"/>
+   <definition value="A name for the specification that is being mapped to."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="sdf-2"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.mapping.comments"/>
+   <short value="Versions, Issues, Scope limitations etc"/>
+   <definition value="Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="StructureDefinition.kind"/>
+   <short value="datatype | resource | logical"/>
+   <definition value="Defines the kind of structure that this definition is describing."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Defines the type of structure that a definition is describing"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/structure-definition-kind"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="StructureDefinition.constrainedType"/>
+   <short value="Any datatype or resource, including abstract ones"/>
+   <definition value="The type of type that is being constrained - a data type, an extension, a resource, including abstract ones. If this field is present, it indicates that the structure definition is a constraint. If it is not present, then the structure definition is the definition of a base structure."/>
+   <comments value="if a constrained type is present, then there SHALL be a base resource as well. Note that the constrained type could be determined by chasing through the base references until the base definition is reached, or by looking at the path of the first element in the snapshot - if present - but providing the constrainedType directly makes for simpler tooling and indexing."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <condition value="sdf-10"/>
+   <condition value="sdf-11"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Either a resource or a data type"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/defined-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="StructureDefinition.abstract"/>
+   <short value="Whether the structure is abstract"/>
+   <definition value="Whether structure this definition describes is abstract or not  - that is, whether an actual exchanged item can ever be of this type."/>
+   <comments value="Abstract Resources cannot be instantiated - a concrete sub-type must be used. Abstract datatypes and extensions cannot be used in an instance. Flagging a constraint structure as abstract conveys design intent but makes no difference to how the structure definition is handled. Note that inline declared elements that are given the type &quot;Element&quot; in the profile, but have children described, are anonymous concrete types that specialise Element. Abstract is not relevant for logical models."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.contextType"/>
+   <short value="resource | datatype | mapping | extension"/>
+   <definition value="If this is an extension, Identifies the context within FHIR resources where the extension can be used."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <condition value="sdf-5"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="How an extension context is interpreted"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/extension-context"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="StructureDefinition.context"/>
+   <short value="Where the extension can be used in instances"/>
+   <definition value="Identifies the types of resource or data type elements to which the extension can be applied."/>
+   <comments value="If the context is an element that can have multiple types, then use (e.g.) value[x] if the extension works on all choice types, or otherwise an enumeration of explicitly named elements if not. Note that a context of &quot;string&quot; doesn't mean that the extension can be used with one of the string patterns such as &quot;id&quot; etc."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="sdf-5"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.base"/>
+   <short value="Structure that this set of constraints applies to"/>
+   <definition value="An absolute URI that is the base structure from which this set of constraints is derived."/>
+   <comments value="If differential constraints are specified in this structure, they are applied to the base in a &quot;differential&quot; fashion. If there is no base, then the differential constraints cannot be provided (snapshot only). Differential structures are useful for the editing perspective, and snapshot structures are suitable for operational use. The FHIR Project provides a number of tools/services to populate snaphots from differential constraints. Logical Models have a base of &quot;Element&quot; or another logical model."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <condition value="sdf-4"/>
+   <condition value="sdf-10"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.snapshot"/>
+   <short value="Snapshot view of the structure"/>
+   <definition value="A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition."/>
+   <min value="0"/>
+   <max value="1"/>
+   <condition value="sdf-6"/>
+   <constraint>
+    <key value="sdf-3"/>
+    <severity value="error"/>
+    <human value="If a structure is a snapshot, then each element definition must have a formal definition, and cardinalities"/>
+    <xpath value="exists(f:base) or (count(f:element) = count(f:element[exists(f:definition) and exists(f:min) and exists(f:max)]))"/>
+   </constraint>
+   <constraint>
+    <key value="sdf-1"/>
+    <severity value="error"/>
+    <human value="Element paths must be unique - or not (LM)"/>
+    <xpath value="count(f:element) >= count(distinct-values(f:element/f:path/@value))"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="StructureDefinition.snapshot.element"/>
+   <short value="Definition of elements in the resource (if no StructureDefinition)"/>
+   <definition value="Captures constraints on each element within the resource."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="ElementDefinition"/>
+   </type>
+   <condition value="sdf-3"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="--"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="StructureDefinition.differential"/>
+   <short value="Differential view of the structure"/>
+   <definition value="A differential view is expressed relative to the base StructureDefinition - a statement of differences that it applies."/>
+   <min value="0"/>
+   <max value="1"/>
+   <condition value="sdf-6"/>
+  </element>
+  <element>
+   <path value="StructureDefinition.differential.element"/>
+   <short value="Definition of elements in the resource (if no StructureDefinition)"/>
+   <definition value="Captures constraints on each element within the resource."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="ElementDefinition"/>
+   </type>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="--"/>
+   </mapping>
+  </element>
+ </differential>
+</StructureDefinition>

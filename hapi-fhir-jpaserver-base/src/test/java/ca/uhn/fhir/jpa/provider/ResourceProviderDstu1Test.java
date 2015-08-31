@@ -6,8 +6,14 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -21,6 +27,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
@@ -63,6 +70,8 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	// private static IFhirResourceDao<Patient> ourPatientDao;
 	// private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
 	private static Server ourServer;
+	private static String ourServerBase;
+	private static CloseableHttpClient ourHttpClient;
 
 	// private static JpaConformanceProvider ourConfProvider;
 
@@ -165,7 +174,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 			.forResource(Encounter.class)
 			.where(Encounter.IDENTIFIER.exactly().systemAndCode("urn:foo", "testDeepChainingE1"))
 			.include(Encounter.INCLUDE_LOCATION_LOCATION)
-			.include(Location.INCLUDE_PARTOF)
+			.include(Location.INCLUDE_PARTOF.asRecursive())
 			.execute();
 		//@formatter:on
 
@@ -482,6 +491,22 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
 
 	}
+	
+	@Test
+	public void testMetadata() throws Exception {
+		HttpGet get = new HttpGet(ourServerBase + "/metadata");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(resp, stringContainsInOrder("THIS IS THE DESC"));
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+	}
+
 
 	@AfterClass
 	public static void afterClass() throws Exception {
@@ -496,7 +521,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		RestfulServer restServer = new RestfulServer(ourCtx);
 		
-		String serverBase = "http://localhost:" + port + "/fhir/context";
+		ourServerBase = "http://localhost:" + port + "/fhir/context";
 
 		ourAppCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu1.xml", "fhir-jpabase-spring-test-config.xml");
 
@@ -514,6 +539,11 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 
+		IFhirSystemDao<List<IResource>> systemDao = ourAppCtx.getBean(IFhirSystemDao.class);
+		JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(restServer, systemDao);
+		confProvider.setImplementationDescription("THIS IS THE DESC");
+		restServer.setServerConformanceProvider(confProvider);
+
 		ourServer = new Server(port);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
@@ -526,8 +556,13 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 
-		ourClient = ourCtx.newRestfulGenericClient(serverBase);
+		ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourHttpClient = builder.build();
 
 	}
 

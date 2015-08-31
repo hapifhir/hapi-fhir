@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -476,7 +476,7 @@ public class Timing extends Type implements ICompositeType {
          * If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.
          */
         @Child(name = "frequencyMax", type = {IntegerType.class}, order=7, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Event occurs frequency times per period", formalDefinition="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range." )
+        @Description(shortDefinition="Event occurs up to frequencyMax times per period", formalDefinition="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range." )
         protected IntegerType frequencyMax;
 
         /**

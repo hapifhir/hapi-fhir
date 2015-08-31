@@ -10,17 +10,18 @@
   <LastAuthor>Lloyd</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2015-07-21T19:41:05Z</LastSaved>
-  <Version>12.00</Version>
+  <Version>15.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>12975</WindowHeight>
-  <WindowWidth>28800</WindowWidth>
+  <WindowHeight>16575</WindowHeight>
+  <WindowWidth>-27136</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>7</ActiveSheet>
+  <ActiveSheet>4</ActiveSheet>
+  <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -4043,9 +4044,9 @@
     <Cell ss:StyleID="s92"><Data ss:Type="String">RequiredRootGroup</Data></Cell>
     <Cell ss:StyleID="s91"/>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Questionnaire</Data></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">If root group must be &quot;required&quot;</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">If root, group must be 'required'</Data></Cell>
     <Cell ss:StyleID="s91"/>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">f:group/f:required/@value='true'</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">not(exists(lloyd-fix-me)) or (f:group/f:required/@value='true')</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s107"><NamedCell ss:Name="Invariantids"/></Cell>
@@ -4494,8 +4495,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>4</ActiveRow>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>6</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4885,7 +4886,7 @@
     <Cell ss:StyleID="s119"><Data ss:Type="String">in</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="Number">0</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="String">*</Data></Cell>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">Any</Data></Cell>
+    <Cell ss:StyleID="s119"><Data ss:Type="String">Reference(Any)</Data></Cell>
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s133"><Data ss:Type="String">Resources containing information to be used to help populate the [[[QuestionnaireResponse]]].  These may be FHIR resources or may be Binaries containing FHIR documents, CDA documents or other source materials.  Servers may not support all possible source materials and may ignore materials they do not recognize.  (They MAY provide warnings if ignoring submitted resources.)</Data></Cell>
@@ -5384,6 +5385,7 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -5404,7 +5406,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>5</ActiveRow>
+     <ActiveRow>6</ActiveRow>
      <ActiveCol>4</ActiveCol>
     </Pane>
    </Panes>
@@ -6404,7 +6406,6 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -7823,7 +7824,7 @@
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s152"><Data ss:Type="String">Answer is a combination of a numeric value and unit</Data></Cell>
+    <Cell ss:StyleID="s152"><Data ss:Type="String">Answer is a combination of a numeric value and unit, potentially with a comparator (&lt;, &gt;, etc)</Data></Cell>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s143"/>
@@ -8241,8 +8242,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>8</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

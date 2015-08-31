@@ -53,16 +53,17 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 	indexes = { 
 		@Index(name = "IDX_RES_DATE", columnNames = { "RES_UPDATED" }), 
 		@Index(name = "IDX_RES_LANG", columnNames = { "RES_TYPE", "RES_LANGUAGE" }), 
-		@Index(name = "IDX_RES_PROFILE", columnNames = { "RES_PROFILE" }) 
+		@Index(name = "IDX_RES_PROFILE", columnNames = { "RES_PROFILE" }),
+		@Index(name = "IDX_INDEXSTATUS", columnNames = { "SP_INDEX_STATUS" }) 
 	})
 //@formatter:on
 public class ResourceTable extends BaseHasResource implements Serializable {
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final int MAX_PROFILE_LENGTH = 200;
 
-	private static final long serialVersionUID = 1L;
-
 	static final int RESTYPE_LEN = 30;
+
+	private static final long serialVersionUID = 1L;
 
 	@Column(name = "SP_HAS_LINKS")
 	private boolean myHasLinks;
@@ -74,6 +75,12 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceLink> myIncomingResourceLinks;
+	
+	@Column(name = "SP_INDEX_STATUS", nullable=true)
+	private Long myIndexStatus;
+
+	@Column(name = "RES_LANGUAGE", length=MAX_LANGUAGE_LENGTH, nullable=true)
+	private String myLanguage;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
@@ -105,6 +112,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Column(name = "SP_TOKEN_PRESENT")
 	private boolean myParamsTokenPopulated;
 
+	@Column(name = "RES_PROFILE", length=MAX_PROFILE_LENGTH,nullable=true)
+	private String myProfile;
+
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceLink> myResourceLinks;
 
@@ -117,34 +127,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Column(name = "RES_VER")
 	private long myVersion;
 
-	@Column(name = "RES_LANGUAGE", length=MAX_LANGUAGE_LENGTH, nullable=true)
-	private String myLanguage;
-
-	@Column(name = "RES_PROFILE", length=MAX_PROFILE_LENGTH,nullable=true)
-	private String myProfile;
-	
-	public String getLanguage() {
-		return myLanguage;
-	}
-
-	public void setLanguage(String theLanguage) {
-		if (defaultString(theLanguage).length()> MAX_LANGUAGE_LENGTH) {
-			throw new UnprocessableEntityException("Language exceeds maximum length of " + MAX_LANGUAGE_LENGTH + " chars: " + theLanguage);
-		}
-		myLanguage = theLanguage;
-	}
-
-	public String getProfile() {
-		return myProfile;
-	}
-
-	public void setProfile(String theProfile) {
-		if (defaultString(theProfile).length()> MAX_PROFILE_LENGTH) {
-			throw new UnprocessableEntityException("Profile name exceeds maximum length of " + MAX_PROFILE_LENGTH + " chars: " + theProfile);
-		}
-		myProfile = theProfile;
-	}
-
 	public ResourceTag addTag(TagDefinition theTag) {
 		ResourceTag tag = new ResourceTag(this, theTag);
 		tag.setResourceType(getResourceType());
@@ -155,10 +137,18 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	public Long getId() {
 		return myId;
 	}
-
+	
 	public IdDt getIdDt() {
 		Object id = getForcedId() == null ? myId : getForcedId().getForcedId();
 		return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
+	}
+
+	public Long getIndexStatus() {
+		return myIndexStatus;
+	}
+
+	public String getLanguage() {
+		return myLanguage;
 	}
 
 	public Collection<ResourceIndexedSearchParamDate> getParamsDate() {
@@ -174,7 +164,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		}
 		return myParamsNumber;
 	}
-
 
 	public Collection<ResourceIndexedSearchParamQuantity> getParamsQuantity() {
 		if(myParamsQuantity==null) {
@@ -196,6 +185,11 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		}
 		return myParamsToken;
 	}
+
+	public String getProfile() {
+		return myProfile;
+	}
+
 
 	public Collection<ResourceLink> getResourceLinks() {
 		if (myResourceLinks == null) {
@@ -260,6 +254,17 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myId = theId;
 	}
 
+	public void setIndexStatus(Long theIndexStatus) {
+		myIndexStatus = theIndexStatus;
+	}
+
+	public void setLanguage(String theLanguage) {
+		if (defaultString(theLanguage).length()> MAX_LANGUAGE_LENGTH) {
+			throw new UnprocessableEntityException("Language exceeds maximum length of " + MAX_LANGUAGE_LENGTH + " chars: " + theLanguage);
+		}
+		myLanguage = theLanguage;
+	}
+
 	public void setParamsDate(Collection<ResourceIndexedSearchParamDate> theParamsDate) {
 		if (!isParamsDatePopulated() && theParamsDate.isEmpty()) {
 			return;
@@ -318,6 +323,13 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public void setParamsTokenPopulated(boolean theParamsTokenPopulated) {
 		myParamsTokenPopulated = theParamsTokenPopulated;
+	}
+
+	public void setProfile(String theProfile) {
+		if (defaultString(theProfile).length()> MAX_PROFILE_LENGTH) {
+			throw new UnprocessableEntityException("Profile name exceeds maximum length of " + MAX_PROFILE_LENGTH + " chars: " + theProfile);
+		}
+		myProfile = theProfile;
 	}
 
 	public void setResourceLinks(List<ResourceLink> theLinks) {

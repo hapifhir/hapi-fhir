@@ -1,0 +1,1567 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="ImplementationGuide"/>
+ <meta>
+  <lastUpdated value="2015-08-27T19:45:13.172-04:00"/>
+ </meta>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+  <valueInteger value="0"/>
+ </extension>
+ <url value="http://hl7.org/fhir/StructureDefinition/ImplementationGuide"/>
+ <name value="ImplementationGuide"/>
+ <publisher value="Health Level Seven International (FHIR Infrastructure)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for ImplementationGuide Resource"/>
+ <requirements value="An implementation guide is able to define default profiles that must apply to any use of a resource, so validation services may need to take one or more implementation guide resources when validating."/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <mapping>
+  <identity value="w5"/>
+  <uri value="http://hl7.org/fhir/w5"/>
+  <name value="W5 Mapping"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
+ <snapshot>
+  <element>
+   <path value="ImplementationGuide"/>
+   <short value="A set of rules about how FHIR is used"/>
+   <definition value="A set of rules or how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole, and to publish a computable definition of all the parts."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="infrastructure"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.url"/>
+   <short value="Literal URL used to reference this Implementation Guide"/>
+   <definition value="An absolute URL that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this implementation guide is (or will be) published."/>
+   <requirements value="This is required to allow hosting Implementation Guides on multiple different servers, and to allow for the editorial process."/>
+   <alias value="url"/>
+   <alias value="authoritative-url"/>
+   <alias value="destination"/>
+   <alias value="identity"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.version"/>
+   <short value="Logical id for this version of the Implementation Guide"/>
+   <definition value="The identifier that is used to identify this version of the Implementation Guide when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the Implementation Guide author manually."/>
+   <requirements value="There may be multiple resource versions of the Implementation Guide that have this same identifier. The resource version id will change for technical reasons, whereas the stated version number needs to be under the author's control."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id.version"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.name"/>
+   <short value="Informal name for this Implementation Guide"/>
+   <definition value="A free text natural language name identifying the Implementation Guide."/>
+   <comments value="Not expected to be globally unique."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.status"/>
+   <short value="draft | active | retired"/>
+   <definition value="The status of the Implementation Guide."/>
+   <requirements value="Allows filtering of Implementation Guides that are appropriate for use vs. not."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The lifecycle status of a Value Set or Concept Map"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/conformance-resource-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.experimental"/>
+   <short value="If for testing purposes, not real usage"/>
+   <definition value="This Implementation Guide was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
+   <requirements value="Allows filtering of Implementation Guides that are appropriate for use vs. not."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.publisher"/>
+   <short value="Name of the publisher (Organization or individual)"/>
+   <definition value="The name of the individual or organization that published the implementation guide."/>
+   <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
+   <requirements value="Helps establish the &quot;authority/credibility&quot; of the implementation guide.  May also allow for contact."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.contact"/>
+   <short value="Contact details of the publisher"/>
+   <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
+   <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.contact.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.contact.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.contact.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.contact.name"/>
+   <short value="Name of a individual to contact"/>
+   <definition value="The name of an individual to contact regarding the implementation guide."/>
+   <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.contact.telecom"/>
+   <short value="Contact details for individual or publisher"/>
+   <definition value="Contact details for individual (if a name was provided) or the publisher."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.date"/>
+   <short value="Date for this version of the Implementation Guide"/>
+   <definition value="The date that this version of the Implementation Guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes."/>
+   <comments value="Additional specific dates may be added as extensions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.description"/>
+   <short value="Natural language description of the Implementation Guide"/>
+   <definition value="A free text natural language description of the Implementation Guide and its use."/>
+   <comments value="This field can be used for things such as why the Implementation Guide was written, comments about misuse, instructions for clinical use and interpretation, literature references, examples from the paper world, etc.  It is *not* a rendering of the Implementation Guide as conveyed in Implementation Guide.text. This item SHOULD be populated unless the information is available from context."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.useContext"/>
+   <short value="The implementation guide is intended to support these contexts"/>
+   <definition value="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdication for which this implementation guide was defined."/>
+   <requirements value="Assist in searching for appropriate implementation guide."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Indicates the countries, regions, disciplines and other aspects of use this artifact is targeted for use within"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/use-context"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.copyright"/>
+   <short value="Use and/or Publishing restrictions"/>
+   <definition value="A copyright statement relating to the implementation guide and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings."/>
+   <alias value="License"/>
+   <alias value="Restrictions"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.fhirVersion"/>
+   <short value="FHIR Version this Implementation Guide targets"/>
+   <definition value="The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version."/>
+   <comments value="A Implementation Guide should specify the target it applies to, as ImplementationGuides are rarely valid across multiple versions of FHIR."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.dependency"/>
+   <short value="Another Implementation guide this depends on"/>
+   <definition value="Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc defined in other implementation guides."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.dependency.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.dependency.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.dependency.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.dependency.type"/>
+   <short value="reference | inclusion"/>
+   <definition value="How the dependency is represented when the guide is published."/>
+   <comments value="For information about processing included guides, see [Including Guides]{implementationguide.html#include}."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="How a dependency is represented when the guide is published"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/guide-dependency-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.dependency.uri"/>
+   <short value="Where to find dependency"/>
+   <definition value="Where the dependncy is located."/>
+   <comments value="When a guide is published, and the type is 'include', this will be a relative reference within the guide."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package"/>
+   <short value="Group of resources as used in .page.package"/>
+   <definition value="A logial group of resources. Logical groups can be used when building pages."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.name"/>
+   <short value="Name used .page.package"/>
+   <definition value="The name for the group, as used in page.package."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.description"/>
+   <short value="Human readable text describing the package"/>
+   <definition value="Human readable text describing the package."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource"/>
+   <short value="Resource in the implementation guide"/>
+   <definition value="A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc) are obvious candidates for inclusion, but any kind of resource can be included as an example resource."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.purpose"/>
+   <short value="example | terminology | profile | extension | dictionary | logical"/>
+   <definition value="Why the resource is included in the guide."/>
+   <comments value="The purpose alters the way that a resource is handled when a guide is built. At present, only value set and concept map resources are allowed for terminology resources, and only StructureDefinition, SearchPerameter, and OperationDefinition for profile. Dictionaries must be bundles of DataElement or Medication at this time."/>
+   <requirements value="This element is provided so that implementation guide tooling does not have to guess the purpose of including a resource in the implementation guide based on the type or context."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Why a resource is included in the guide"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/guide-resource-purpose"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.name"/>
+   <short value="Human Name for the resource"/>
+   <definition value="A human assigned name for the resource. All resources SHOULD have a name, but the name may be extracted from the resource (e.g. ValueSet.name)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.description"/>
+   <short value="Reason why included in guide"/>
+   <definition value="A description of the reason that a resource has been included in the implementation guide."/>
+   <comments value="This is mostly used with examples to explain why it is present (though they can have extensive comments in the examples)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.acronym"/>
+   <short value="Short code to identify the resource"/>
+   <definition value="A short code that may be used to identify the resource throughout the implementation guide."/>
+   <comments value="This is used when generating schematrons from profiles, for example, but has other uses. Publishing tooling may autogenerate this value, but a human assigned value is more useful. This value must be unique within an implementation guide (across included guides as well)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.source[x]"/>
+   <short value="Location of the resource"/>
+   <definition value="Where this resource is found."/>
+   <comments value="Usually this is a relative URL that locates the resource within the implementation guide. If you authoring an implementation guide, and will publish it using the FHIR publication tooling, use a URI that may point to a resource, or to one of various alternative representations (e.g. spreadsheet). The tooling will convert this when it publishes it."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.exampleFor"/>
+   <short value="Resource this is an example of (if applicable)"/>
+   <definition value="Another resource that this resource is an example for. This is mostly used for resources that are included as examples of StructureDefinitions."/>
+   <comments value="Examples: * StructureDefinition -> Any * ValueSet -> expansion * OperationDefinition -> Parameters * Questionnaire -> QuestionnaireResponse."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/StructureDefinition"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.global"/>
+   <short value="Profiles that apply globally"/>
+   <definition value="A set of profiles that all resources covered by this implementation guide must conform to."/>
+   <comments value="See (reference) for a discussion of which resources are 'covered' by an implementation guide."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.global.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.global.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.global.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.global.type"/>
+   <short value="Type this profiles applies to"/>
+   <definition value="The type of resource that all instances must conform to."/>
+   <comments value="The type must match that of the profile that is referred to, but is made explicit here as a denormalization so that a system processing the implementation guide resource knows which resources the profile applies to even if the profile itself is not available."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="One of the resource types defined as part of FHIR"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/resource-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.global.profile"/>
+   <short value="Profile that all resources must conform to"/>
+   <definition value="A reference to the profile that all instances must conform to."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/StructureDefinition"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.binary"/>
+   <short value="Image, css, script, etc"/>
+   <definition value="A binary file that is included in the  implementation guide when it is published."/>
+   <comments value="This is principally included for the FHIR publishing tool, but may be useful when extracting and reusing content from the implementation guide."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page"/>
+   <name value="page"/>
+   <short value="Page/Section in the Guide"/>
+   <definition value="A page / section in the implementation guide. The root page is the implementation guide home page."/>
+   <comments value="Pages automatically become sections if they have sub-pages. By convention, the home page is called index.html."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.source"/>
+   <short value="Where to find that page"/>
+   <definition value="The source address for the page."/>
+   <comments value="The publishing tool will auto-generate source for list (source = n/a), and inject included implementations for include (source = uri of guide to include)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.name"/>
+   <short value="Short name shown for navigational assistance"/>
+   <definition value="A short name used to represent this page in navigational sturctures such as table of contents, bread crumbs, etc."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.kind"/>
+   <short value="page | example | list | include | directory | dictionary | toc | resource"/>
+   <definition value="The kind of page that this is. Some pages are autogenerated (list, example), and othe kinds are of interest so that tools can navigate the user to the page of interest."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The kind of an included page"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/guide-page-kind"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.type"/>
+   <short value="Kind of resource to include in the list"/>
+   <definition value="For constructed pages, what kind of resources to include in the list."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="One of the resource types defined as part of FHIR"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/resource-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.package"/>
+   <short value="Name of package to include"/>
+   <definition value="For constructed pages, a list of packages to include in the page (or else empty for everything)."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.format"/>
+   <short value="Format of the page (e.g. html, markdown etc)"/>
+   <definition value="The format of the page."/>
+   <comments value="This is primarily for the pubishing tool, that will convert all pages to html format. HTML pages are pre-processed, see xxxx."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="The mime type of an attachment. Any valid mime type is allowed"/>
+    <valueSetUri value="http://www.rfc-editor.org/bcp/bcp13.txt"/>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.page"/>
+   <short value="Nested Pages / Sections"/>
+   <definition value="Nested Pages/Sections under this page."/>
+   <comments value="The implementation guide breadcrumbs are generated from this structure."/>
+   <min value="0"/>
+   <max value="*"/>
+   <nameReference value="page"/>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="ImplementationGuide"/>
+   <short value="A set of rules about how FHIR is used"/>
+   <definition value="A set of rules or how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole, and to publish a computable definition of all the parts."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="infrastructure"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.url"/>
+   <short value="Literal URL used to reference this Implementation Guide"/>
+   <definition value="An absolute URL that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this implementation guide is (or will be) published."/>
+   <requirements value="This is required to allow hosting Implementation Guides on multiple different servers, and to allow for the editorial process."/>
+   <alias value="url"/>
+   <alias value="authoritative-url"/>
+   <alias value="destination"/>
+   <alias value="identity"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.version"/>
+   <short value="Logical id for this version of the Implementation Guide"/>
+   <definition value="The identifier that is used to identify this version of the Implementation Guide when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the Implementation Guide author manually."/>
+   <requirements value="There may be multiple resource versions of the Implementation Guide that have this same identifier. The resource version id will change for technical reasons, whereas the stated version number needs to be under the author's control."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id.version"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.name"/>
+   <short value="Informal name for this Implementation Guide"/>
+   <definition value="A free text natural language name identifying the Implementation Guide."/>
+   <comments value="Not expected to be globally unique."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.status"/>
+   <short value="draft | active | retired"/>
+   <definition value="The status of the Implementation Guide."/>
+   <requirements value="Allows filtering of Implementation Guides that are appropriate for use vs. not."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The lifecycle status of a Value Set or Concept Map"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/conformance-resource-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.experimental"/>
+   <short value="If for testing purposes, not real usage"/>
+   <definition value="This Implementation Guide was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
+   <requirements value="Allows filtering of Implementation Guides that are appropriate for use vs. not."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.publisher"/>
+   <short value="Name of the publisher (Organization or individual)"/>
+   <definition value="The name of the individual or organization that published the implementation guide."/>
+   <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
+   <requirements value="Helps establish the &quot;authority/credibility&quot; of the implementation guide.  May also allow for contact."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.contact"/>
+   <short value="Contact details of the publisher"/>
+   <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
+   <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.contact.name"/>
+   <short value="Name of a individual to contact"/>
+   <definition value="The name of an individual to contact regarding the implementation guide."/>
+   <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.contact.telecom"/>
+   <short value="Contact details for individual or publisher"/>
+   <definition value="Contact details for individual (if a name was provided) or the publisher."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.date"/>
+   <short value="Date for this version of the Implementation Guide"/>
+   <definition value="The date that this version of the Implementation Guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes."/>
+   <comments value="Additional specific dates may be added as extensions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImplementationGuide.description"/>
+   <short value="Natural language description of the Implementation Guide"/>
+   <definition value="A free text natural language description of the Implementation Guide and its use."/>
+   <comments value="This field can be used for things such as why the Implementation Guide was written, comments about misuse, instructions for clinical use and interpretation, literature references, examples from the paper world, etc.  It is *not* a rendering of the Implementation Guide as conveyed in Implementation Guide.text. This item SHOULD be populated unless the information is available from context."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.useContext"/>
+   <short value="The implementation guide is intended to support these contexts"/>
+   <definition value="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdication for which this implementation guide was defined."/>
+   <requirements value="Assist in searching for appropriate implementation guide."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Indicates the countries, regions, disciplines and other aspects of use this artifact is targeted for use within"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/use-context"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.copyright"/>
+   <short value="Use and/or Publishing restrictions"/>
+   <definition value="A copyright statement relating to the implementation guide and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings."/>
+   <alias value="License"/>
+   <alias value="Restrictions"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.fhirVersion"/>
+   <short value="FHIR Version this Implementation Guide targets"/>
+   <definition value="The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version."/>
+   <comments value="A Implementation Guide should specify the target it applies to, as ImplementationGuides are rarely valid across multiple versions of FHIR."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.dependency"/>
+   <short value="Another Implementation guide this depends on"/>
+   <definition value="Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc defined in other implementation guides."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.dependency.type"/>
+   <short value="reference | inclusion"/>
+   <definition value="How the dependency is represented when the guide is published."/>
+   <comments value="For information about processing included guides, see [Including Guides]{implementationguide.html#include}."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="How a dependency is represented when the guide is published"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/guide-dependency-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.dependency.uri"/>
+   <short value="Where to find dependency"/>
+   <definition value="Where the dependncy is located."/>
+   <comments value="When a guide is published, and the type is 'include', this will be a relative reference within the guide."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package"/>
+   <short value="Group of resources as used in .page.package"/>
+   <definition value="A logial group of resources. Logical groups can be used when building pages."/>
+   <min value="1"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.name"/>
+   <short value="Name used .page.package"/>
+   <definition value="The name for the group, as used in page.package."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.description"/>
+   <short value="Human readable text describing the package"/>
+   <definition value="Human readable text describing the package."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource"/>
+   <short value="Resource in the implementation guide"/>
+   <definition value="A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc) are obvious candidates for inclusion, but any kind of resource can be included as an example resource."/>
+   <min value="1"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.purpose"/>
+   <short value="example | terminology | profile | extension | dictionary | logical"/>
+   <definition value="Why the resource is included in the guide."/>
+   <comments value="The purpose alters the way that a resource is handled when a guide is built. At present, only value set and concept map resources are allowed for terminology resources, and only StructureDefinition, SearchPerameter, and OperationDefinition for profile. Dictionaries must be bundles of DataElement or Medication at this time."/>
+   <requirements value="This element is provided so that implementation guide tooling does not have to guess the purpose of including a resource in the implementation guide based on the type or context."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Why a resource is included in the guide"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/guide-resource-purpose"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.name"/>
+   <short value="Human Name for the resource"/>
+   <definition value="A human assigned name for the resource. All resources SHOULD have a name, but the name may be extracted from the resource (e.g. ValueSet.name)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.description"/>
+   <short value="Reason why included in guide"/>
+   <definition value="A description of the reason that a resource has been included in the implementation guide."/>
+   <comments value="This is mostly used with examples to explain why it is present (though they can have extensive comments in the examples)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.acronym"/>
+   <short value="Short code to identify the resource"/>
+   <definition value="A short code that may be used to identify the resource throughout the implementation guide."/>
+   <comments value="This is used when generating schematrons from profiles, for example, but has other uses. Publishing tooling may autogenerate this value, but a human assigned value is more useful. This value must be unique within an implementation guide (across included guides as well)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.source[x]"/>
+   <short value="Location of the resource"/>
+   <definition value="Where this resource is found."/>
+   <comments value="Usually this is a relative URL that locates the resource within the implementation guide. If you authoring an implementation guide, and will publish it using the FHIR publication tooling, use a URI that may point to a resource, or to one of various alternative representations (e.g. spreadsheet). The tooling will convert this when it publishes it."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.package.resource.exampleFor"/>
+   <short value="Resource this is an example of (if applicable)"/>
+   <definition value="Another resource that this resource is an example for. This is mostly used for resources that are included as examples of StructureDefinitions."/>
+   <comments value="Examples: * StructureDefinition -> Any * ValueSet -> expansion * OperationDefinition -> Parameters * Questionnaire -> QuestionnaireResponse."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/StructureDefinition"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.global"/>
+   <short value="Profiles that apply globally"/>
+   <definition value="A set of profiles that all resources covered by this implementation guide must conform to."/>
+   <comments value="See (reference) for a discussion of which resources are 'covered' by an implementation guide."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.global.type"/>
+   <short value="Type this profiles applies to"/>
+   <definition value="The type of resource that all instances must conform to."/>
+   <comments value="The type must match that of the profile that is referred to, but is made explicit here as a denormalization so that a system processing the implementation guide resource knows which resources the profile applies to even if the profile itself is not available."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="One of the resource types defined as part of FHIR"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/resource-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.global.profile"/>
+   <short value="Profile that all resources must conform to"/>
+   <definition value="A reference to the profile that all instances must conform to."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/StructureDefinition"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.binary"/>
+   <short value="Image, css, script, etc"/>
+   <definition value="A binary file that is included in the  implementation guide when it is published."/>
+   <comments value="This is principally included for the FHIR publishing tool, but may be useful when extracting and reusing content from the implementation guide."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page"/>
+   <name value="page"/>
+   <short value="Page/Section in the Guide"/>
+   <definition value="A page / section in the implementation guide. The root page is the implementation guide home page."/>
+   <comments value="Pages automatically become sections if they have sub-pages. By convention, the home page is called index.html."/>
+   <min value="1"/>
+   <max value="1"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.source"/>
+   <short value="Where to find that page"/>
+   <definition value="The source address for the page."/>
+   <comments value="The publishing tool will auto-generate source for list (source = n/a), and inject included implementations for include (source = uri of guide to include)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.name"/>
+   <short value="Short name shown for navigational assistance"/>
+   <definition value="A short name used to represent this page in navigational sturctures such as table of contents, bread crumbs, etc."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.kind"/>
+   <short value="page | example | list | include | directory | dictionary | toc | resource"/>
+   <definition value="The kind of page that this is. Some pages are autogenerated (list, example), and othe kinds are of interest so that tools can navigate the user to the page of interest."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The kind of an included page"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/guide-page-kind"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.type"/>
+   <short value="Kind of resource to include in the list"/>
+   <definition value="For constructed pages, what kind of resources to include in the list."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="One of the resource types defined as part of FHIR"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/resource-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.package"/>
+   <short value="Name of package to include"/>
+   <definition value="For constructed pages, a list of packages to include in the page (or else empty for everything)."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.format"/>
+   <short value="Format of the page (e.g. html, markdown etc)"/>
+   <definition value="The format of the page."/>
+   <comments value="This is primarily for the pubishing tool, that will convert all pages to html format. HTML pages are pre-processed, see xxxx."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="The mime type of an attachment. Any valid mime type is allowed"/>
+    <valueSetUri value="http://www.rfc-editor.org/bcp/bcp13.txt"/>
+   </binding>
+  </element>
+  <element>
+   <path value="ImplementationGuide.page.page"/>
+   <short value="Nested Pages / Sections"/>
+   <definition value="Nested Pages/Sections under this page."/>
+   <comments value="The implementation guide breadcrumbs are generated from this structure."/>
+   <min value="0"/>
+   <max value="*"/>
+   <nameReference value="page"/>
+  </element>
+ </differential>
+</StructureDefinition>

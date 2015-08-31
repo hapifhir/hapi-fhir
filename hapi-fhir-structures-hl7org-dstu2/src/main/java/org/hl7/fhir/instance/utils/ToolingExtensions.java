@@ -27,7 +27,7 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -76,7 +76,7 @@ public class ToolingExtensions {
   public static final String EXT_REPLACED_BY = "http://hl7.org/fhir/StructureDefinition/valueset-replacedby";
 
   // unregistered?
-  
+
   public static final String EXT_FLYOVER = "http://hl7.org/fhir/Profile/questionnaire-extensions#flyover";
   private static final String EXT_QTYPE = "http://www.healthintersections.com.au/fhir/Profile/metadata#type";
   private static final String EXT_QREF = "http://www.healthintersections.com.au/fhir/Profile/metadata#reference";
@@ -89,9 +89,9 @@ public class ToolingExtensions {
   public static final String EXT_FMM_LEVEL = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm";
   public static final String EXT_FMM_LEVEL_NO_WARN = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm-no-warnings";
 
-  
+
   // specific extension helpers
-  
+
   public static Extension makeIssueSource(Source source) {
     Extension ex = new Extension();
     // todo: write this up and get it published with the pack (and handle the redirect?)
@@ -105,11 +105,11 @@ public class ToolingExtensions {
   public static boolean hasExtension(DomainResource de, String url) {
     return getExtension(de, url) != null;
   }
-  
+
   public static boolean hasExtension(Element e, String url) {
     return getExtension(e, url) != null;
   }
-  
+
   public static void addStringExtension(DomainResource dr, String url, String content) throws Exception {
     if (!Utilities.noString(content)) {
       Extension ex = getExtension(dr, url);
@@ -253,7 +253,7 @@ public class ToolingExtensions {
   public static void addFlyOver(GroupComponent group, String text) throws Exception {
     if (!Utilities.noString(text))
       group.getExtension().add(Factory.newExtension(EXT_FLYOVER, Factory.newString_(text), true));   
-    
+
   }
 
   public static void setQuestionType(GroupComponent group, String text) throws Exception {
@@ -281,11 +281,11 @@ public class ToolingExtensions {
   public static void addReference(QuestionComponent group, String value) throws Exception {
     group.getExtension().add(Factory.newExtension(EXT_REFERENCE, Factory.newString_(value), true));       
   }
-  
+
   public static void addIdentifier(Element element, Identifier value) throws Exception {
     element.getExtension().add(Factory.newExtension(EXT_IDENTIFIER, value, true));       
   }
-  
+
   /**
    * @param name the identity of the extension of interest
    * @return The extension, if on this element, else null
@@ -301,7 +301,7 @@ public class ToolingExtensions {
     }
     return null;
   }
-  
+
   public static Extension getExtension(Element el, String name) {
     if (name == null)
       return null;
@@ -313,7 +313,7 @@ public class ToolingExtensions {
     }
     return null;
   }
-  
+
   public static void setStringExtension(DomainResource resource, String uri, String value) {
     Extension ext = getExtension(resource, uri);
     if (ext != null)
@@ -353,7 +353,7 @@ public class ToolingExtensions {
     for (Extension e : element.getExtension()) {
       if (e.getUrl().equals(EXT_TRANSLATION)) {
         Extension e1 = ExtensionHelper.getExtension(e, "lang");
-        
+
         if (e1 != null && e1.getValue() instanceof CodeType && ((CodeType) e.getValue()).getValue().equals(lang)) {
           e1 = ExtensionHelper.getExtension(e, "content");
           return ((StringType) e.getValue()).getValue();
@@ -386,20 +386,20 @@ public class ToolingExtensions {
     eld.getExtension().add(new Extension().setUrl(EXT_ALLOWABLE_UNITS).setValue(cc));
   }
 
-	public static List<Extension> getExtensions(Element element, String url) {
-	  List<Extension> results = new ArrayList<Extension>();
-	  for (Extension ex : element.getExtension())
-	  	if (ex.getUrl().equals(url))
-	  		results.add(ex);
-	  return results;
+  public static List<Extension> getExtensions(Element element, String url) {
+    List<Extension> results = new ArrayList<Extension>();
+    for (Extension ex : element.getExtension())
+      if (ex.getUrl().equals(url))
+        results.add(ex);
+    return results;
   }
 
-	public static List<Extension> getExtensions(DomainResource resource, String url) {
-	  List<Extension> results = new ArrayList<Extension>();
-	  for (Extension ex : resource.getExtension())
-	  	if (ex.getUrl().equals(url))
-	  		results.add(ex);
-	  return results;
+  public static List<Extension> getExtensions(DomainResource resource, String url) {
+    List<Extension> results = new ArrayList<Extension>();
+    for (Extension ex : resource.getExtension())
+      if (ex.getUrl().equals(url))
+        results.add(ex);
+    return results;
   }
 
   public static void addDEReference(DataElement de, String value) {

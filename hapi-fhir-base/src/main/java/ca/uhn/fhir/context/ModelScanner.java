@@ -52,7 +52,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
-import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -626,12 +625,6 @@ class ModelScanner {
 					} else if (IBaseEnumeration.class.isAssignableFrom(nextElementType)) {
 						Class<?> binderType = ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(next);
 						def = new RuntimeChildPrimitiveEnumerationDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binderType);
-					} else if (childAnnotation.enumFactory().getSimpleName().equals("NoEnumFactory") == false) {
-						Class<? extends IBaseEnumFactory<?>> enumFactory = childAnnotation.enumFactory();
-						def = new RuntimeChildEnumerationDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, enumFactory);
-						// } else if ("id".equals(elementName) && IIdType.class.isAssignableFrom(nextDatatype)) {
-						// def = new RuntimeChildIdDatatypeDefinition(next, elementName, descriptionAnnotation,
-						// childAnnotation, nextDatatype);
 					} else {
 						def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
 					}

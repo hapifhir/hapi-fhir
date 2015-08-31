@@ -1,0 +1,794 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="SearchParameter"/>
+ <meta>
+  <lastUpdated value="2015-08-27T19:45:13.172-04:00"/>
+ </meta>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+  <valueInteger value="0"/>
+ </extension>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm-no-warnings">
+  <valueInteger value="2"/>
+ </extension>
+ <url value="http://hl7.org/fhir/StructureDefinition/SearchParameter"/>
+ <name value="SearchParameter"/>
+ <publisher value="Health Level Seven International (FHIR Infrastructure)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for SearchParameter Resource"/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="v2"/>
+  <uri value="http://hl7.org/v2"/>
+  <name value="HL7 v2"/>
+ </mapping>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <mapping>
+  <identity value="w5"/>
+  <uri value="http://hl7.org/fhir/w5"/>
+  <name value="W5 Mapping"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
+ <snapshot>
+  <element>
+   <path value="SearchParameter"/>
+   <short value="Search Parameter for a resource"/>
+   <definition value="A Search Parameter that defines a named search item that can be used to search/filter on a resource."/>
+   <comments value="In FHIR, search is not performed directly on a resource (by XML or JSON path), but on a named parameter that maps into the resource content."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <constraint>
+    <key value="spd-1"/>
+    <severity value="error"/>
+    <human value="If an xpath is present, there SHALL be be an xpathUsage"/>
+    <xpath value="not(exists(f:xpath)) or exists(f:xpathUsage)"/>
+   </constraint>
+   <mapping>
+    <identity value="v2"/>
+    <map value="n/a"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="infrastructure"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="SearchParameter.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.url"/>
+   <short value="Literal URL used to reference this search parameter"/>
+   <definition value="An absolute URL that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published."/>
+   <requirements value="To allow referencing and reusing search parameter definitions under other names on operational systems (in case of name clash)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.name"/>
+   <short value="Informal name for this search parameter"/>
+   <definition value="A free text natural language name identifying the search parameter."/>
+   <comments value="This is often the same as the code for the parameter, but does not need to be."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.status"/>
+   <short value="draft | active | retired"/>
+   <definition value="The status of this search parameter definition."/>
+   <comments value="This is not intended for use with actual conformance statements, but where conformance statements are used to describe possible or desired systems."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The lifecycle status of a Value Set or Concept Map"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/conformance-resource-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.experimental"/>
+   <short value="If for testing purposes, not real usage"/>
+   <definition value="A flag to indicate that this search parameter definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
+   <comments value="Allows filtering of search parameter definitions that are appropriate for use vs. not."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.publisher"/>
+   <short value="Name of the publisher (Organization or individual)"/>
+   <definition value="The name of the individual or organization that published the search parameter."/>
+   <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
+   <requirements value="Helps establish the &quot;authority/credibility&quot; of the search parameter.  May also allow for contact."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.contact"/>
+   <short value="Contact details of the publisher"/>
+   <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
+   <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.contact.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.contact.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.contact.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.contact.name"/>
+   <short value="Name of a individual to contact"/>
+   <definition value="The name of an individual to contact regarding the search parameter."/>
+   <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.contact.telecom"/>
+   <short value="Contact details for individual or publisher"/>
+   <definition value="Contact details for individual (if a name was provided) or the publisher."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.date"/>
+   <short value="Publication Date(/time)"/>
+   <definition value="The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the search parameter changes."/>
+   <comments value="Additional specific dates may be added as extensions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.requirements"/>
+   <short value="Why this search parameter is defined"/>
+   <definition value="The Scope and Usage that this search parameter was created to meet."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="w5"/>
+    <map value="why"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.code"/>
+   <short value="Code used in URL"/>
+   <definition value="The code used in the URL or the parameter name in a parameters resource for this search parameter."/>
+   <comments value="For maximum compatibility, use only lowercase ASCII characters."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.base"/>
+   <short value="The resource type this search parameter applies to"/>
+   <definition value="The base resource type that this search parameter refers to."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="One of the resource types defined as part of FHIR"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/resource-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="SearchParameter.type"/>
+   <short value="number | date | string | token | reference | composite | quantity | uri"/>
+   <definition value="The type of value a search parameter refers to, and how the content is interpreted."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Data types allowed to be used for search parameters"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/search-param-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="SearchParameter.description"/>
+   <short value="Documentation for  search parameter"/>
+   <definition value="A description of the search parameters and how it used."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.xpath"/>
+   <short value="XPath that extracts the values"/>
+   <definition value="An XPath expression that returns a set of elements for the search parameter."/>
+   <comments value="Note that the elements returned by the XPath are sometimes complex elements where logic is required to determine quite how to handle them. E.g. CodeableConcepts may contain text and/or multiple codings, where the codings themselves contain a code and a system."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="spd-1"/>
+  </element>
+  <element>
+   <path value="SearchParameter.xpathUsage"/>
+   <short value="normal | phonetic | nearby | distance | other"/>
+   <definition value="How the search parameter relates to the set of elements returned by evaluating the xpath query."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <condition value="spd-1"/>
+   <binding>
+    <strength value="required"/>
+    <description value="How a search parameter relates to the set of elements returned by evaluating the its xpath query"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/search-xpath-usage"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="SearchParameter.target"/>
+   <short value="Types of resource (if a resource reference)"/>
+   <definition value="Types of resource (if a resource is referenced)."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="One of the resource types defined as part of FHIR"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/resource-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="SearchParameter"/>
+   <short value="Search Parameter for a resource"/>
+   <definition value="A Search Parameter that defines a named search item that can be used to search/filter on a resource."/>
+   <comments value="In FHIR, search is not performed directly on a resource (by XML or JSON path), but on a named parameter that maps into the resource content."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <constraint>
+    <key value="spd-1"/>
+    <severity value="error"/>
+    <human value="If an xpath is present, there SHALL be be an xpathUsage"/>
+    <xpath value="not(exists(f:xpath)) or exists(f:xpathUsage)"/>
+   </constraint>
+   <mapping>
+    <identity value="v2"/>
+    <map value="n/a"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="infrastructure"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.url"/>
+   <short value="Literal URL used to reference this search parameter"/>
+   <definition value="An absolute URL that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published."/>
+   <requirements value="To allow referencing and reusing search parameter definitions under other names on operational systems (in case of name clash)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.name"/>
+   <short value="Informal name for this search parameter"/>
+   <definition value="A free text natural language name identifying the search parameter."/>
+   <comments value="This is often the same as the code for the parameter, but does not need to be."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.status"/>
+   <short value="draft | active | retired"/>
+   <definition value="The status of this search parameter definition."/>
+   <comments value="This is not intended for use with actual conformance statements, but where conformance statements are used to describe possible or desired systems."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The lifecycle status of a Value Set or Concept Map"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/conformance-resource-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.experimental"/>
+   <short value="If for testing purposes, not real usage"/>
+   <definition value="A flag to indicate that this search parameter definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
+   <comments value="Allows filtering of search parameter definitions that are appropriate for use vs. not."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.publisher"/>
+   <short value="Name of the publisher (Organization or individual)"/>
+   <definition value="The name of the individual or organization that published the search parameter."/>
+   <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
+   <requirements value="Helps establish the &quot;authority/credibility&quot; of the search parameter.  May also allow for contact."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.contact"/>
+   <short value="Contact details of the publisher"/>
+   <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
+   <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.contact.name"/>
+   <short value="Name of a individual to contact"/>
+   <definition value="The name of an individual to contact regarding the search parameter."/>
+   <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.contact.telecom"/>
+   <short value="Contact details for individual or publisher"/>
+   <definition value="Contact details for individual (if a name was provided) or the publisher."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.date"/>
+   <short value="Publication Date(/time)"/>
+   <definition value="The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the search parameter changes."/>
+   <comments value="Additional specific dates may be added as extensions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.requirements"/>
+   <short value="Why this search parameter is defined"/>
+   <definition value="The Scope and Usage that this search parameter was created to meet."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="w5"/>
+    <map value="why"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="SearchParameter.code"/>
+   <short value="Code used in URL"/>
+   <definition value="The code used in the URL or the parameter name in a parameters resource for this search parameter."/>
+   <comments value="For maximum compatibility, use only lowercase ASCII characters."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.base"/>
+   <short value="The resource type this search parameter applies to"/>
+   <definition value="The base resource type that this search parameter refers to."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="One of the resource types defined as part of FHIR"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/resource-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="SearchParameter.type"/>
+   <short value="number | date | string | token | reference | composite | quantity | uri"/>
+   <definition value="The type of value a search parameter refers to, and how the content is interpreted."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Data types allowed to be used for search parameters"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/search-param-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="SearchParameter.description"/>
+   <short value="Documentation for  search parameter"/>
+   <definition value="A description of the search parameters and how it used."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="SearchParameter.xpath"/>
+   <short value="XPath that extracts the values"/>
+   <definition value="An XPath expression that returns a set of elements for the search parameter."/>
+   <comments value="Note that the elements returned by the XPath are sometimes complex elements where logic is required to determine quite how to handle them. E.g. CodeableConcepts may contain text and/or multiple codings, where the codings themselves contain a code and a system."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="spd-1"/>
+  </element>
+  <element>
+   <path value="SearchParameter.xpathUsage"/>
+   <short value="normal | phonetic | nearby | distance | other"/>
+   <definition value="How the search parameter relates to the set of elements returned by evaluating the xpath query."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <condition value="spd-1"/>
+   <binding>
+    <strength value="required"/>
+    <description value="How a search parameter relates to the set of elements returned by evaluating the its xpath query"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/search-xpath-usage"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="SearchParameter.target"/>
+   <short value="Types of resource (if a resource reference)"/>
+   <definition value="Types of resource (if a resource is referenced)."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="One of the resource types defined as part of FHIR"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/resource-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+ </differential>
+</StructureDefinition>

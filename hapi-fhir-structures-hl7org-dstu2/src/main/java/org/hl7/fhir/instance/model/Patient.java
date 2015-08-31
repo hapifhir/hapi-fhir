@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1076,7 +1076,7 @@ public class Patient extends DomainResource {
      * Patient's nominated care provider.
      */
     @Child(name = "careProvider", type = {Organization.class, Practitioner.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Patient's nominated care provider", formalDefinition="Patient's nominated care provider." )
+    @Description(shortDefinition="Patient's nominated primary care provider", formalDefinition="Patient's nominated care provider." )
     protected List<Reference> careProvider;
     /**
      * The actual objects that are the target of the reference (Patient's nominated care provider.)
@@ -1947,7 +1947,7 @@ public class Patient extends DomainResource {
   public static final String SP_LINK = "link";
   @SearchParamDefinition(name="language", path="Patient.communication.language", description="Language code (irrespective of use value)", type="token" )
   public static final String SP_LANGUAGE = "language";
-  @SearchParamDefinition(name="deathdate", path="Patient.deceased[x]", description="The date of death has been provided and satisfies this search value", type="date" )
+  @SearchParamDefinition(name="deathdate", path="Patient.deceasedDateTime", description="The date of death has been provided and satisfies this search value", type="date" )
   public static final String SP_DEATHDATE = "deathdate";
   @SearchParamDefinition(name="animal-breed", path="Patient.animal.breed", description="The breed for animal patients", type="token" )
   public static final String SP_ANIMALBREED = "animal-breed";

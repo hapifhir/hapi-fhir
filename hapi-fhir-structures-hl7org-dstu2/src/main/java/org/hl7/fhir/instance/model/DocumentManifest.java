@@ -29,18 +29,20 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
-
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.Enumerations.*;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
+import org.hl7.fhir.instance.model.Enumerations.DocumentReferenceStatus;
+import org.hl7.fhir.instance.model.Enumerations.DocumentReferenceStatusEnumFactory;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.annotations.ResourceDef;
+import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.utilities.Utilities;
 /**
  * A manifest that defines a set of documents.
  */

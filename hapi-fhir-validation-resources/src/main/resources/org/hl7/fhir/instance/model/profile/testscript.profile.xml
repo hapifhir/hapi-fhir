@@ -1,0 +1,3188 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="TestScript"/>
+ <meta>
+  <lastUpdated value="2015-08-27T19:45:13.172-04:00"/>
+ </meta>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+  <valueInteger value="0"/>
+ </extension>
+ <url value="http://hl7.org/fhir/StructureDefinition/TestScript"/>
+ <name value="TestScript"/>
+ <publisher value="Health Level Seven International (FHIR Infrastructure)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for TestScript Resource"/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="w5"/>
+  <uri value="http://hl7.org/fhir/w5"/>
+  <name value="W5 Mapping"/>
+ </mapping>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
+ <snapshot>
+  <element>
+   <path value="TestScript"/>
+   <short value="Describes a set of tests"/>
+   <definition value="TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <constraint>
+    <key value="inv-16"/>
+    <severity value="error"/>
+    <human value="Assertions SHALL be present in TestScript.setup.action and TestScript.test.action only."/>
+    <xpath value="not(f:assert)"/>
+   </constraint>
+   <constraint>
+    <key value="inv-15"/>
+    <severity value="error"/>
+    <human value="Operations SHALL be present in TestScript.setup.action, TestScript.test.action and TestScript.teardown.action only."/>
+    <xpath value="not(f:operation)"/>
+   </constraint>
+   <mapping>
+    <identity value="w5"/>
+    <map value="infrastructure"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.url"/>
+   <short value="Literal URL used to reference this TestScript"/>
+   <definition value="An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published."/>
+   <alias value="url"/>
+   <alias value="authoritative-url"/>
+   <alias value="destination"/>
+   <alias value="identity"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.version"/>
+   <short value="Logical id for this version of the TestScript"/>
+   <definition value="The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually."/>
+   <requirements value="There may be multiple resource versions of the TestScript that have this same identifier. The resource version id will change for technical reasons, whereas the stated version number needs to be under the author's control."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id.version"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.name"/>
+   <short value="Informal name for this TestScript"/>
+   <definition value="A free text natural language name identifying the TestScript."/>
+   <comments value="Not expected to be globally unique."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.status"/>
+   <short value="draft | active | retired"/>
+   <definition value="The status of the TestScript."/>
+   <requirements value="Allows filtering of TestScripts that are appropriate for use vs. not."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The lifecycle status of a Value Set or Concept Map"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/conformance-resource-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.experimental"/>
+   <short value="If for testing purposes, not real usage"/>
+   <definition value="This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
+   <requirements value="Allows filtering of TestScripts that are appropriate for use vs. not."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.publisher"/>
+   <short value="Name of the publisher (Organization or individual)"/>
+   <definition value="The name of the individual or organization that published the Test Script."/>
+   <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
+   <requirements value="Helps establish the &quot;authority/credibility&quot; of the Test Script.  May also allow for contact."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-display-hint">
+    <valueString value="left"/>
+   </extension>
+   <path value="TestScript.contact"/>
+   <short value="Contact details of the publisher"/>
+   <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
+   <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.contact.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.contact.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.contact.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.contact.name"/>
+   <short value="Name of a individual to contact"/>
+   <definition value="The name of an individual to contact regarding the Test Script."/>
+   <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.contact.telecom"/>
+   <short value="Contact details for individual or publisher"/>
+   <definition value="Contact details for individual (if a name was provided) or the publisher."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.date"/>
+   <short value="Date for this version of the TestScript"/>
+   <definition value="The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change."/>
+   <comments value="Additional specific dates may be added as extensions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.description"/>
+   <short value="Natural language description of the TestScript"/>
+   <definition value="A free text natural language description of the TestScript and its use."/>
+   <comments value="This field can be used for things such as why the TestScript was written, comments about misuse, instructions for clinical use and interpretation, literature references, examples from the paper world, etc.  It is *not* a rendering of the TestScript as conveyed in TestScript.text. This item SHOULD be populated unless the information is available from context."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.useContext"/>
+   <short value="Content intends to support these contexts"/>
+   <definition value="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts."/>
+   <requirements value="Assist in searching for appropriate content."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Indicates the countries, regions, disciplines and other aspects of use this artifact is targeted for use within"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/use-context"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.requirements"/>
+   <short value="Scope and Usage this Test Script is for"/>
+   <definition value="Explains why this Test Script is needed and why it's been constrained as it has."/>
+   <comments value="This element does not describe the usage of the Test Script (that's done in comments), rather it's for traceability of *why* the element is either needed or why the constraints exist as they do.  This may be used to point to source materials or specifications that drove the structure of this data element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="w5"/>
+    <map value="why"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.copyright"/>
+   <short value="Use and/or Publishing restrictions"/>
+   <definition value="A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings."/>
+   <alias value="License"/>
+   <alias value="Restrictions"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata"/>
+   <name value="metadata"/>
+   <short value="Required capability that is assumed to function correctly on the FHIR server being tested"/>
+   <definition value="The required capability must exist and is assumed to function correctly on the FHIR server being tested."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <constraint>
+    <key value="inv-5"/>
+    <severity value="error"/>
+    <human value="TestScript metadata capabilities SHALL contain required or validated or both."/>
+    <xpath value="f:capabilities/f:required or f:capabilities/f:validated or (f:capabilities/f:required and f:capabilities/f:validated)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.metadata.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.metadata.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.metadata.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.metadata.link"/>
+   <short value="Links to the FHIR specification"/>
+   <definition value="A link to the FHIR specification that this test is covering."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata.link.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.metadata.link.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.metadata.link.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.metadata.link.url"/>
+   <short value="URL to the specification"/>
+   <definition value="URL to a particular requirement or feature within the FHIR specification."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata.link.description"/>
+   <short value="Short description"/>
+   <definition value="Short description of the link."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities"/>
+   <short value="Capabiltities that are assumed to function correctly on the FHIR server being tested"/>
+   <definition value="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested."/>
+   <comments value="When the metadata capabiltiies section is defined at TestScript.metadata or at TestScript.setup.metadata, and the server's conformance statement does not contain the elements defined in the minimal conformance statement, then all the tests in the TestScript are skipped.  When the metadata capabiltiies section is defined at TestScript.test.metadata and the server's conformance statement does not contain the elements defined in the minimal conformance statement, then only that test is skipped.  The &quot;metadata.capabilities.required&quot; and &quot;metadata.capabilities.validated&quot; elements only indicate whether the capabilities are the primary focus of the test script or not.  The do not impact the skipping logic.  Capabilities whose &quot;metadata.capabilities.validated&quot; flag is true are the primary focus of the test script."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.required"/>
+   <short value="Required capabilities"/>
+   <definition value="The capabilities required of the server in order for this test script to execute."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.validated"/>
+   <short value="Validated capabilities"/>
+   <definition value="Whether or not the capabilities are primarily getting validated by this test script."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.description"/>
+   <short value="The description of the capabilities"/>
+   <definition value="Description of the capabilities that this test script is requiring the server to support."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.destination"/>
+   <short value="Which server these requirements apply to"/>
+   <definition value="Which server these requirements apply to."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="integer"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.link"/>
+   <short value="Links to the FHIR specification"/>
+   <definition value="Links to the FHIR specification that describes this interaction and the resources involved in more detail."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.conformance"/>
+   <short value="Required Conformance"/>
+   <definition value="Minimum conformance required of server for test script to execute successfully.   If server does not meet at a minimum the reference conformance definition, then all tests in this script are skipped."/>
+   <comments value="The conformance statement of the server has to contain at a mininum the contents of the reference pointed to by this element."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Conformance"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.multiserver"/>
+   <short value="Whether or not the tests apply to more than one FHIR server"/>
+   <definition value="If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <meaningWhenMissing value="False"/>
+  </element>
+  <element>
+   <path value="TestScript.fixture"/>
+   <short value="Fixture in the test script - by reference (uri)"/>
+   <definition value="Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.fixture.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.fixture.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.fixture.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.fixture.autocreate"/>
+   <short value="Whether or not to implicitly create the fixture during setup"/>
+   <definition value="Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <meaningWhenMissing value="False"/>
+  </element>
+  <element>
+   <path value="TestScript.fixture.autodelete"/>
+   <short value="Whether or not to implicitly delete the fixture during teardown"/>
+   <definition value="Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <meaningWhenMissing value="False"/>
+  </element>
+  <element>
+   <path value="TestScript.fixture.resource"/>
+   <short value="Reference of the resource"/>
+   <definition value="Reference to the resource (containing the contents of the resource needed for operations)."/>
+   <comments value="See http://hl7-fhir.github.io/resourcelist.html for complete list of resource types."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.profile"/>
+   <short value="Reference of the validation profile"/>
+   <definition value="Reference to the profile to be used for validation."/>
+   <comments value="See http://hl7-fhir.github.io/resourcelist.html for complete list of resource types."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.variable"/>
+   <short value="Variable"/>
+   <definition value="Variable is set based either on element value in response body or on header field value in the response headers."/>
+   <comments value="Variables would be set based either on XPath/JsonPath expressions against fixtures (static and response), or headerField evaluations against response headers. If variable evaluates to nodelist or anything other than a primitive value, then test engine would report error.  Variables would be used to perform clean replacements in &quot;operation.params&quot;, &quot;operation.requestHeader.value&quot;, and &quot;operation.url&quot; element values during operation calls and in &quot;assert.value&quot; during assertion evaluations. This limits the places that test engines would need to look for placeholders &quot;${}&quot;.  Variables are scoped to the whole script. They are NOT evaluated at declaration. They are evaluated by test engine when used for substitutions in &quot;operation.params&quot;, &quot;operation.requestHeader.value&quot;, and &quot;operation.url&quot; element values during operation calls and in &quot;assert.value&quot; during assertion evaluations.  See example testscript-search.xml."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <constraint>
+    <key value="inv-4"/>
+    <severity value="error"/>
+    <human value="Variable cannot contain both headerField and path."/>
+    <xpath value="not(f:headerField and f:path)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.variable.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.variable.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.variable.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.variable.name"/>
+   <short value="Variable name"/>
+   <definition value="Variable name."/>
+   <comments value="Placeholders would contain the variable name wrapped in ${} in &quot;operation.params&quot;, &quot;operation.requestHeader.value&quot;, and &quot;operation.url&quot; elements.  These placeholders would need to be replaced by the variable value before the operation is executed."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.variable.headerField"/>
+   <short value="Header field name"/>
+   <definition value="Will be used to grab the header field value from the headers that sourceId is pointing to."/>
+   <comments value="If headerField is defined, then the variable will be evaluated against the headers that sourceId is pointing to.  If path is defined, then the variable will be evaluated against the fixture body that sourceId is pointing to.  It is an error to define both headerField and path."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.variable.path"/>
+   <short value="XPath or JSONPath against the fixture body"/>
+   <definition value="XPath or JSONPath against the fixture body.  When variables are defined, either headerField must be specified or path, but not both."/>
+   <comments value="If headerField is defined, then the variable will be evaluated against the headers that sourceId is pointing to.  If path is defined, then the variable will be evaluated against the fixture body that sourceId is pointing to.  It is an error to define both headerField and path."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.variable.sourceId"/>
+   <short value="Fixture Id"/>
+   <definition value="Fixture to evaluate the XPath/JSONPath expression or the headerField  against."/>
+   <comments value="This can be a statically defined fixture (at the top of the testscript) or a dynamically set fixture created by responseId of the action.operation element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup"/>
+   <short value="A series of required setup operations before tests are executed"/>
+   <definition value="A series of required setup operations before tests are executed."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.metadata"/>
+   <short value="Capabiltities that are assumed to function correctly on the FHIR server being tested"/>
+   <definition value="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested."/>
+   <min value="0"/>
+   <max value="1"/>
+   <nameReference value="metadata"/>
+   <constraint>
+    <key value="inv-6"/>
+    <severity value="error"/>
+    <human value="Setup metadata capabilities SHALL contain required or validated or both."/>
+    <xpath value="f:capabilities/f:required or f:capabilities/f:validated or (f:capabilities/f:required and f:capabilities/f:validated)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.setup.action"/>
+   <short value="Action"/>
+   <definition value="Action would contain either an operation or an assertion."/>
+   <comments value="An action should contain either an operation or an assertion but not both.  It can contain any number of variables."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <constraint>
+    <key value="inv-1"/>
+    <severity value="error"/>
+    <human value="Setup action SHALL contain either an operation or assert but not both."/>
+    <xpath value="(f:operation or f:assert) and not(f:operation and f:assert)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation"/>
+   <name value="operation"/>
+   <short value="An operation"/>
+   <definition value="An operation."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <constraint>
+    <key value="inv-10"/>
+    <severity value="error"/>
+    <human value="Setup operation SHALL contain either sourceId or targetId or params or url."/>
+    <xpath value="f:sourceId or ((f:targetId or f:url or f:params) and (count(f:targetId) + count(f:url) + count(f:params) =1)) or (f:type/f:code/@value='conformance' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.type"/>
+   <short value="The operation type that will be executed"/>
+   <definition value="Server interaction or operation type."/>
+   <comments value="See http://hl7-fhir.github.io/http.html for list of server interactions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <binding>
+    <strength value="extensible"/>
+    <description value="The allowable operation types."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/testscript-operation-codes"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.resource"/>
+   <short value="Resource type"/>
+   <definition value="The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html."/>
+   <comments value="If &quot;url&quot; element is specified, then &quot;targetId&quot;, &quot;params&quot;, and &quot;resource&quot; elements will be ignored as &quot;url&quot; element will have everything needed for constructing the request url.  If &quot;params&quot; element is specified, then &quot;targetId&quot; element is ignored. For FHIR operations that require a resource (e.g. &quot;read&quot; and &quot;vread&quot; operations), the &quot;resource&quot; element must be specified when &quot;params&quot; element is specified.  If &quot;url&quot; and &quot;params&quot; elements are absent, then the request url will be constructed from &quot;targetId&quot; fixture if present. For &quot;read&quot; operation, the resource and id values will be extracted from &quot;targetId&quot; fixture and used to construct the url. For &quot;vread&quot; and &quot;history&quot; operations, the versionId value will also be used."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="Either a resource or a data type"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/defined-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.label"/>
+   <short value="Operation label"/>
+   <definition value="The label would be used for tracking/logging purposes by test engines."/>
+   <comments value="This has no impact on the verification itself."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.description"/>
+   <short value="Operation description"/>
+   <definition value="The description would be used by test engines for tracking and reporting purposes."/>
+   <comments value="This has no impact on the verification itself."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.accept"/>
+   <short value="xml | json"/>
+   <definition value="The content-type or mime-type to use for RESTful operation in the 'Accept' header."/>
+   <comments value="If this is specified, then test engine shall set the 'Accept' header to the corresponding value.    If 'xml' is specified, then 'Accept' header of 'application/xml+fhir' will be set.  If 'json' is specified, then 'application/json+fhir' will be used.    If you'd like to explicitly set the 'Accept' to some other value then use the 'requestHeader' element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <meaningWhenMissing value="xml"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The content or mime type."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/content-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.contentType"/>
+   <short value="xml | json"/>
+   <definition value="The content-type or mime-type to use for RESTful operation in the 'Content-Type' header."/>
+   <comments value="If this is specified, then test engine shall set the 'Content-Type' header to the corresponding value.    If 'xml' is specified, then 'Content-Type' header of 'application/xml+fhir' will be set.    If 'json' is specified, then 'application/json+fhir' will be used.    If you'd like to explicitly set the 'Content-Type' to some other value then use the 'requestHeader' element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <meaningWhenMissing value="xml"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The content or mime type."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/content-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.destination"/>
+   <short value="Which server to perform the operation on"/>
+   <definition value="Which server to perform the operation on."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="integer"/>
+   </type>
+   <defaultValueInteger value="0"/>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.encodeRequestUrl"/>
+   <short value="Whether or not to send the request url in encoded format"/>
+   <definition value="Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.params"/>
+   <short value="Params"/>
+   <definition value="Path plus parameters after [type].  Used to set parts of the request URL explicitly."/>
+   <comments value="If &quot;url&quot; element is specified, then &quot;targetId&quot;, &quot;params&quot;, and &quot;resource&quot; elements will be ignored as &quot;url&quot; element will have everything needed for constructing the request url.  If &quot;params&quot; element is specified, then &quot;targetId&quot; element is ignored.  For FHIR operations that require a resource (e.g. &quot;read&quot; and &quot;vread&quot; operations), the &quot;resource&quot; element must be specified when &quot;params&quot; element is specified.  If &quot;url&quot; and &quot;params&quot; elements are absent, then the request url will be constructed from &quot;targetId&quot; fixture if present.  For &quot;read&quot; operation, the resource and id values will be extracted from &quot;targetId&quot; fixture and used to construct the url.  For &quot;vread&quot; and &quot;history&quot; operations, the versionId value will also be used.   Test engines would append whatever is specified for &quot;params&quot; to the URL after the resource type without tampering with the string (beyond encoding the URL for HTTP).  The &quot;params&quot; element does not correspond exactly to &quot;search parameters&quot;.  Nor is it the &quot;path&quot;.  It corresponds to the part of the URL that comes after the [type] (when &quot;resource&quot; element is specified). e.g. It corresponds to &quot;/[id]/_history/[vid] {?_format=[mime-type]}&quot; in the following operation: GET [base]/[type]/[id]/_history/[vid] {?_format=[mime-type]}  Test engines do have to look for placeholders (${}) and replace the variable placeholders with the variable values at runtime before sending the request."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.requestHeader"/>
+   <short value="Each operation can have one ore more header elements"/>
+   <definition value="Header elements would be used to set HTTP headers."/>
+   <comments value="This gives control to test-script writers to set headers explicitly based on test requirements.  It will allow for testing using:  - &quot;If-Modified-Since&quot; and &quot;If-None-Match&quot; headers.  See http://hl7-fhir.github.io/http.html#2.1.0.5.1 - &quot;If-Match&quot; header.  See http://hl7-fhir.github.io/http.html#2.1.0.11 - Conditional Create using &quot;If-None-Exist&quot;.  See http://hl7-fhir.github.io/http.html#2.1.0.13.1 - Invalid &quot;Content-Type&quot; header for negative testing. - etc."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.requestHeader.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.requestHeader.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.requestHeader.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.requestHeader.field"/>
+   <short value="Header field name"/>
+   <definition value="The HTTP header field e.g. &quot;Accept&quot;."/>
+   <comments value="If header element is specified, then field is required."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.requestHeader.value"/>
+   <short value="Header value"/>
+   <definition value="The value of the header e.g. &quot;application/xml&quot;."/>
+   <comments value="If header element is specified, then value is required.  No conversions will be done by Test Engine e.g. &quot;xml&quot; to &quot;application/xml+fhir&quot;.  The values will be set in HTTP headers &quot;as-is&quot;.  Test engines do have to look for placeholders (${}) and replace the variable placeholders with the variable values at runtime before sending the request."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.responseId"/>
+   <short value="Response Id"/>
+   <definition value="The fixture id (maybe new) to map to the response."/>
+   <comments value="If a responseId is supplied, and the server responds, then the resulting response (both headers and body) is mapped to the fixture ID (which may be entirely new and previously undeclared) designated by &quot;responseId&quot;.  If responseId is not specified, it is the Test Engine's responsibility to store the response and use it as sourceId in subsequent assertions when assertion path and/or headerField is specified and sourceId is not specified."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.sourceId"/>
+   <short value="Fixture Id of body for PUT and POST requests"/>
+   <definition value="The id of the fixture used as the body of a PUT or POST request."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.targetId"/>
+   <short value="Id of fixture used for extracting the [id],  [type], and [vid] for GET requests"/>
+   <definition value="Id of fixture used for extracting the [id],  [type], and [vid] for GET requests."/>
+   <comments value="If &quot;url&quot; element is specified, then &quot;targetId&quot;, &quot;params&quot;, and &quot;resource&quot; elements will be ignored as &quot;url&quot; element will have everything needed for constructing the request url.  If &quot;params&quot; element is specified, then &quot;targetId&quot; element is ignored.  For FHIR operations that require a resource (e.g. &quot;read&quot; and &quot;vread&quot; operations), the &quot;resource&quot; element must be specified when &quot;params&quot; element is specified.  If &quot;url&quot; and &quot;params&quot; elements are absent, then the request url will be constructed from &quot;targetId&quot; fixture if present.  For &quot;read&quot; operation, the resource and id values will be extracted from &quot;targetId&quot; fixture and used to construct the url.  For &quot;vread&quot; and &quot;history&quot; operations, the versionId value will also be used."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.url"/>
+   <short value="Request URL"/>
+   <definition value="Complete request URL."/>
+   <comments value="Used to set the request URL explicitly.  If &quot;url&quot; element is defined, then &quot;targetId&quot;, &quot;resource&quot;, and &quot;params&quot; elements will be ignored.  Test engines would use whatever is specified in &quot;url&quot; without tampering with the string (beyond encoding the URL for HTTP).  Test engines do have to look for placeholders (${}) and replace the variable placeholders with the variable values at runtime before sending the request."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert"/>
+   <name value="assert"/>
+   <short value="Assertion"/>
+   <definition value="Evaluates the results of previous operations to determine if the server under test behaves appropriately."/>
+   <comments value="In order to evaluate an assertion the request, response, and results of the most recently executed operation must always be maintained by the test engine."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <constraint>
+    <key value="inv-8"/>
+    <severity value="error"/>
+    <human value="Only a single assertion SHALL be present within setup action assert element."/>
+    <xpath value="count(f:contentType) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:validateProfileId)  &lt;=1"/>
+   </constraint>
+   <constraint>
+    <key value="inv-13"/>
+    <severity value="error"/>
+    <human value="Setup action assert shall contain both compareToSourceId and compareToSourcePath or neither."/>
+    <xpath value="(f:compareToSourceId and f:compareToSourcePath) or not(f:compareToSourceId or f:compareToSourcePath)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.label"/>
+   <short value="Assertion label"/>
+   <definition value="The label would be used for tracking/logging purposes by test engines."/>
+   <comments value="This has no impact on the verification itself."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.description"/>
+   <short value="Assertion description"/>
+   <definition value="The description would be used by test engines for tracking and reporting purposes."/>
+   <comments value="This has no impact on the verification itself."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.direction"/>
+   <short value="response | request"/>
+   <definition value="The direction to use for the assertion."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="The type of direction to use for assertion."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/assert-direction-codes"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.compareToSourceId"/>
+   <short value="Id of fixture used to compare the &quot;sourceId/path&quot; evaluations to"/>
+   <definition value="Id of fixture used to compare the &quot;sourceId/path&quot; evaluations to."/>
+   <comments value="The id of the fixture used to make comparisons to."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.compareToSourcePath"/>
+   <short value="XPath or JSONPath expression against fixture used to compare the &quot;sourceId/path&quot; evaluations to"/>
+   <definition value="XPath or JSONPath expression against fixture used to compare the &quot;sourceId/path&quot; evaluations to."/>
+   <comments value="The XPath or JSONPath expression to be evaluated against the expected fixture to compare to. Ignored if &quot;assert.value&quot; is used. The evaluation will be done before the assertion is evaluated."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.contentType"/>
+   <short value="xml | json"/>
+   <definition value="The content-type or mime-type to use for RESTful operation in the 'Content-Type' header."/>
+   <comments value="If this is specified, then test engine shall confirm that the content-type of the last operation's headers is set to this value.  If &quot;assert.sourceId&quot; element is specified, then the evaluation will be done against the headers mapped to that sourceId (and not the last operation's headers).    If 'xml' is specified, then 'Content-Type' header of 'application/xml+fhir' will be confirmed. If 'json' is specified, then 'application/json+fhir' will be used. If you'd like to have more control over the string, then use 'assert.headerField' instead."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <meaningWhenMissing value="xml"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The content or mime type."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/content-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.headerField"/>
+   <short value="The header field"/>
+   <definition value="The header field e.g. 'Location'."/>
+   <comments value="If &quot;headerField&quot; is specified then &quot;value&quot; must be specified.  If &quot;sourceId&quot; is not specified, then &quot;headerField&quot; will be evaluated against the last operation's response headers.  Test engines are to keep track of the last operation's response body and response headers."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.minimumId"/>
+   <short value="MinimumId"/>
+   <definition value="The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId."/>
+   <comments value="Asserts that the response contains all the element/content in another fixture pointed to by minimumId.  This can be a statically defined fixture or one that is dynamically set via responseId."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.navigationLinks"/>
+   <short value="Navigation Links"/>
+   <definition value="Navigation Links."/>
+   <comments value="Asserts that the Bundle contains first, last, and next links."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.operator"/>
+   <short value="equals | notEquals | in | notIn | greaterThan | lessThan | empty | notEmpty | contains | notContains"/>
+   <definition value="The operator type."/>
+   <comments value="Operators come handy especially for negative testing.  If operator is not specified, then the &quot;equals&quot; operator is assumed.  e.g. &lt;code>   &lt;assert>  &lt;operator value=&quot;in&quot; />  &lt;responseCode value=&quot;200,201,204&quot; />    &lt;/assert>    &lt;assert>  &lt;operator value=&quot;notEquals&quot; />  &lt;response value=&quot;okay&quot;/>   &lt;/assert>    &lt;assert>  &lt;operator value=&quot;greaterThan&quot; />    &lt;responseHeader>     &lt;field value=&quot;Content-Length&quot; />     &lt;value value=&quot;0&quot; />    &lt;responseHeader>   &lt;/assert> &lt;/code>."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="The type of operator to use for assertion."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/assert-operator-codes"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.path"/>
+   <short value="XPath or JSONPath expression"/>
+   <definition value="The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server."/>
+   <comments value="If both &quot;path&quot; and &quot;fixtureId&quot; are specified, then the path will be evaluated against the responseBody mapped to the fixtureId.  If &quot;path&quot; is specified and &quot;fixtureId&quot; is not, then the path will be evaluated against the responseBody of the last operation.  Test engines are to store the response body and headers of the last operation at all times for subsequent assertions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.resource"/>
+   <short value="Resource type"/>
+   <definition value="The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html."/>
+   <comments value="This will be expected resource type in response body e.g. in read, vread, search, etc.  See http://hl7-fhir.github.io/resourcelist.html for complete list of resource types.  e.g. &lt;assert > &lt;resourceType value=&quot;Patient&quot; &lt;/assert>."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="Either a resource or a data type"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/defined-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.response"/>
+   <short value="okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable"/>
+   <definition value="okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable."/>
+   <comments value="This is a shorter way of achieving similar verifications via &quot;assert.responseCode&quot;.  If you need more control, then use &quot;assert.responseCode&quot;  e.g. &lt;assert>  &lt;contentType value=&quot;json&quot; />  &lt;response value=&quot;okay&quot;/> &lt;/assert>."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="The type of response code to use for assertion."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/assert-response-code-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.responseCode"/>
+   <short value="Response Code"/>
+   <definition value="HTTP Response Code."/>
+   <comments value="To be used with &quot;operator&quot; attribute value. Asserts that the response code equals this value if &quot;operator&quot; is not specified.   If the operator is &quot;in&quot; or &quot;notIn&quot; then the responseCode would be a comma-separated list of values e.g. &quot;200,201&quot;. Otherwise, it's expected to be a numeric value.   If &quot;fixture&quot; is not specified, then the &quot;responseBodyId&quot; value of the last operation is assumed."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.sourceId"/>
+   <short value="Fixture Id"/>
+   <definition value="Fixture to evaluate the XPath/JSONPath expression or the headerField  against."/>
+   <comments value="This can be a statically defined fixture (at the top of the testscript) or a dynamically set fixture created by responseId of the action.operation element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.validateProfileId"/>
+   <short value="Validate Profile Id"/>
+   <definition value="The ID of the Profile to validate against."/>
+   <comments value="The ID of a Profile fixture. Asserts that the response is valid according to the Profile specified by validateProfileId."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.value"/>
+   <short value="The value to compare to"/>
+   <definition value="The value to compare to."/>
+   <comments value="The string-representation of a number, string, or boolean that is expected.  Test engines do have to look for placeholders (${}) and replace the variable placeholders with the variable values at runtime before comparing this value to the actual value."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.warningOnly"/>
+   <short value="Warning Only"/>
+   <definition value="Warning Only."/>
+   <comments value="If this element is specified and it is true, then assertion failures can be logged by test engine but should not stop the test script execution from proceeding.  There are likely cases where the spec is not clear on what should happen. If the spec says something is optional (maybe a response header for example), but a server doesn’t do it, we could choose to issue a warning."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+  </element>
+  <element>
+   <path value="TestScript.test"/>
+   <short value="A test in this script"/>
+   <definition value="A test in this script."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.test.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.test.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.test.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.test.name"/>
+   <short value="The name of this test"/>
+   <definition value="The name of this test."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.test.description"/>
+   <short value="Short description of the test"/>
+   <definition value="A short description of the test."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.test.metadata"/>
+   <short value="Capabiltities that are assumed to function correctly on the FHIR server being tested"/>
+   <definition value="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested."/>
+   <min value="0"/>
+   <max value="1"/>
+   <nameReference value="metadata"/>
+   <constraint>
+    <key value="inv-7"/>
+    <severity value="error"/>
+    <human value="Test metadata capabilities SHALL contain required or validated or both."/>
+    <xpath value="f:capabilities/f:required or f:capabilities/f:validated or (f:capabilities/f:required and f:capabilities/f:validated)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.test.action"/>
+   <short value="Action"/>
+   <definition value="Action would contain either an operation or an assertion."/>
+   <comments value="An action should contain either an operation or an assertion but not both.  It can contain any number of variables."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <constraint>
+    <key value="inv-2"/>
+    <severity value="error"/>
+    <human value="Test action SHALL contain either an operation or assert but not both."/>
+    <xpath value="(f:operation or f:assert) and not(f:operation and f:assert)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.test.action.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.test.action.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.test.action.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.test.action.operation"/>
+   <short value="Operation"/>
+   <definition value="An operation would involve a REST request to a server."/>
+   <min value="0"/>
+   <max value="1"/>
+   <nameReference value="operation"/>
+   <constraint>
+    <key value="inv-11"/>
+    <severity value="error"/>
+    <human value="Test operation SHALL contain either sourceId or targetId or params or url."/>
+    <xpath value="f:sourceId or (f:targetId or f:url or f:params) and (count(f:targetId) + count(f:url) + count(f:params) =1) or (f:type/f:code/@value='conformance' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.test.action.assert"/>
+   <short value="Assertion"/>
+   <definition value="Evaluates the results of previous operations to determine if the server under test behaves appropriately."/>
+   <comments value="In order to evaluate an assertion the request, response, and results of the most recently executed operation must always be maintained by the test engine."/>
+   <min value="0"/>
+   <max value="1"/>
+   <nameReference value="assert"/>
+   <constraint>
+    <key value="inv-9"/>
+    <severity value="error"/>
+    <human value="Only a single assertion SHALL be present within test action assert element."/>
+    <xpath value="count(f:contentType) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:validateProfileId)  &lt;=1"/>
+   </constraint>
+   <constraint>
+    <key value="inv-14"/>
+    <severity value="error"/>
+    <human value="Test action assert shall contain both compareToSourceId and compareToSourcePath or neither."/>
+    <xpath value="(f:compareToSourceId and f:compareToSourcePath) or not(f:compareToSourceId or f:compareToSourcePath)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.teardown"/>
+   <short value="A series of required clean up steps"/>
+   <definition value="A series of operations required to clean up after the all the tests are executed (successfully or otherwise)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.teardown.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.teardown.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.teardown.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.teardown.action"/>
+   <short value="Action"/>
+   <definition value="Action would contain either an operation or an assertion."/>
+   <comments value="An action should contain either an operation or an assertion but not both.  It can contain any number of variables."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <constraint>
+    <key value="inv-3"/>
+    <severity value="error"/>
+    <human value="Teardown action SHALL contain an operation."/>
+    <xpath value="f:operation"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.teardown.action.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.teardown.action.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.teardown.action.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.teardown.action.operation"/>
+   <short value="Operation"/>
+   <definition value="An operation would involve a REST request to a server."/>
+   <min value="0"/>
+   <max value="1"/>
+   <nameReference value="operation"/>
+   <constraint>
+    <key value="inv-12"/>
+    <severity value="error"/>
+    <human value="Teardown operation SHALL contain either sourceId or targetId or params or url."/>
+    <xpath value="f:sourceId or (f:targetId or f:url or (f:params and f:resource)) and (count(f:targetId) + count(f:url) + count(f:params) =1) or (f:type/f:code/@value='conformance' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')"/>
+   </constraint>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="TestScript"/>
+   <short value="Describes a set of tests"/>
+   <definition value="TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <constraint>
+    <key value="inv-16"/>
+    <severity value="error"/>
+    <human value="Assertions SHALL be present in TestScript.setup.action and TestScript.test.action only."/>
+    <xpath value="not(f:assert)"/>
+   </constraint>
+   <constraint>
+    <key value="inv-15"/>
+    <severity value="error"/>
+    <human value="Operations SHALL be present in TestScript.setup.action, TestScript.test.action and TestScript.teardown.action only."/>
+    <xpath value="not(f:operation)"/>
+   </constraint>
+   <mapping>
+    <identity value="w5"/>
+    <map value="infrastructure"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.url"/>
+   <short value="Literal URL used to reference this TestScript"/>
+   <definition value="An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published."/>
+   <alias value="url"/>
+   <alias value="authoritative-url"/>
+   <alias value="destination"/>
+   <alias value="identity"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.version"/>
+   <short value="Logical id for this version of the TestScript"/>
+   <definition value="The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually."/>
+   <requirements value="There may be multiple resource versions of the TestScript that have this same identifier. The resource version id will change for technical reasons, whereas the stated version number needs to be under the author's control."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id.version"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.name"/>
+   <short value="Informal name for this TestScript"/>
+   <definition value="A free text natural language name identifying the TestScript."/>
+   <comments value="Not expected to be globally unique."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.status"/>
+   <short value="draft | active | retired"/>
+   <definition value="The status of the TestScript."/>
+   <requirements value="Allows filtering of TestScripts that are appropriate for use vs. not."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The lifecycle status of a Value Set or Concept Map"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/conformance-resource-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.experimental"/>
+   <short value="If for testing purposes, not real usage"/>
+   <definition value="This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
+   <requirements value="Allows filtering of TestScripts that are appropriate for use vs. not."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.publisher"/>
+   <short value="Name of the publisher (Organization or individual)"/>
+   <definition value="The name of the individual or organization that published the Test Script."/>
+   <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
+   <requirements value="Helps establish the &quot;authority/credibility&quot; of the Test Script.  May also allow for contact."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-display-hint">
+    <valueString value="left"/>
+   </extension>
+   <path value="TestScript.contact"/>
+   <short value="Contact details of the publisher"/>
+   <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
+   <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.contact.name"/>
+   <short value="Name of a individual to contact"/>
+   <definition value="The name of an individual to contact regarding the Test Script."/>
+   <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.contact.telecom"/>
+   <short value="Contact details for individual or publisher"/>
+   <definition value="Contact details for individual (if a name was provided) or the publisher."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.date"/>
+   <short value="Date for this version of the TestScript"/>
+   <definition value="The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change."/>
+   <comments value="Additional specific dates may be added as extensions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.description"/>
+   <short value="Natural language description of the TestScript"/>
+   <definition value="A free text natural language description of the TestScript and its use."/>
+   <comments value="This field can be used for things such as why the TestScript was written, comments about misuse, instructions for clinical use and interpretation, literature references, examples from the paper world, etc.  It is *not* a rendering of the TestScript as conveyed in TestScript.text. This item SHOULD be populated unless the information is available from context."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.useContext"/>
+   <short value="Content intends to support these contexts"/>
+   <definition value="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts."/>
+   <requirements value="Assist in searching for appropriate content."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Indicates the countries, regions, disciplines and other aspects of use this artifact is targeted for use within"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/use-context"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.requirements"/>
+   <short value="Scope and Usage this Test Script is for"/>
+   <definition value="Explains why this Test Script is needed and why it's been constrained as it has."/>
+   <comments value="This element does not describe the usage of the Test Script (that's done in comments), rather it's for traceability of *why* the element is either needed or why the constraints exist as they do.  This may be used to point to source materials or specifications that drove the structure of this data element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="w5"/>
+    <map value="why"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="TestScript.copyright"/>
+   <short value="Use and/or Publishing restrictions"/>
+   <definition value="A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings."/>
+   <alias value="License"/>
+   <alias value="Restrictions"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata"/>
+   <name value="metadata"/>
+   <short value="Required capability that is assumed to function correctly on the FHIR server being tested"/>
+   <definition value="The required capability must exist and is assumed to function correctly on the FHIR server being tested."/>
+   <min value="0"/>
+   <max value="1"/>
+   <constraint>
+    <key value="inv-5"/>
+    <severity value="error"/>
+    <human value="TestScript metadata capabilities SHALL contain required or validated or both."/>
+    <xpath value="f:capabilities/f:required or f:capabilities/f:validated or (f:capabilities/f:required and f:capabilities/f:validated)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.metadata.link"/>
+   <short value="Links to the FHIR specification"/>
+   <definition value="A link to the FHIR specification that this test is covering."/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="TestScript.metadata.link.url"/>
+   <short value="URL to the specification"/>
+   <definition value="URL to a particular requirement or feature within the FHIR specification."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata.link.description"/>
+   <short value="Short description"/>
+   <definition value="Short description of the link."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities"/>
+   <short value="Capabiltities that are assumed to function correctly on the FHIR server being tested"/>
+   <definition value="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested."/>
+   <comments value="When the metadata capabiltiies section is defined at TestScript.metadata or at TestScript.setup.metadata, and the server's conformance statement does not contain the elements defined in the minimal conformance statement, then all the tests in the TestScript are skipped.  When the metadata capabiltiies section is defined at TestScript.test.metadata and the server's conformance statement does not contain the elements defined in the minimal conformance statement, then only that test is skipped.  The &quot;metadata.capabilities.required&quot; and &quot;metadata.capabilities.validated&quot; elements only indicate whether the capabilities are the primary focus of the test script or not.  The do not impact the skipping logic.  Capabilities whose &quot;metadata.capabilities.validated&quot; flag is true are the primary focus of the test script."/>
+   <min value="1"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.required"/>
+   <short value="Required capabilities"/>
+   <definition value="The capabilities required of the server in order for this test script to execute."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.validated"/>
+   <short value="Validated capabilities"/>
+   <definition value="Whether or not the capabilities are primarily getting validated by this test script."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.description"/>
+   <short value="The description of the capabilities"/>
+   <definition value="Description of the capabilities that this test script is requiring the server to support."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.destination"/>
+   <short value="Which server these requirements apply to"/>
+   <definition value="Which server these requirements apply to."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="integer"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.link"/>
+   <short value="Links to the FHIR specification"/>
+   <definition value="Links to the FHIR specification that describes this interaction and the resources involved in more detail."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.metadata.capabilities.conformance"/>
+   <short value="Required Conformance"/>
+   <definition value="Minimum conformance required of server for test script to execute successfully.   If server does not meet at a minimum the reference conformance definition, then all tests in this script are skipped."/>
+   <comments value="The conformance statement of the server has to contain at a mininum the contents of the reference pointed to by this element."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Conformance"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.multiserver"/>
+   <short value="Whether or not the tests apply to more than one FHIR server"/>
+   <definition value="If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <meaningWhenMissing value="False"/>
+  </element>
+  <element>
+   <path value="TestScript.fixture"/>
+   <short value="Fixture in the test script - by reference (uri)"/>
+   <definition value="Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute."/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="TestScript.fixture.autocreate"/>
+   <short value="Whether or not to implicitly create the fixture during setup"/>
+   <definition value="Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <meaningWhenMissing value="False"/>
+  </element>
+  <element>
+   <path value="TestScript.fixture.autodelete"/>
+   <short value="Whether or not to implicitly delete the fixture during teardown"/>
+   <definition value="Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <meaningWhenMissing value="False"/>
+  </element>
+  <element>
+   <path value="TestScript.fixture.resource"/>
+   <short value="Reference of the resource"/>
+   <definition value="Reference to the resource (containing the contents of the resource needed for operations)."/>
+   <comments value="See http://hl7-fhir.github.io/resourcelist.html for complete list of resource types."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.profile"/>
+   <short value="Reference of the validation profile"/>
+   <definition value="Reference to the profile to be used for validation."/>
+   <comments value="See http://hl7-fhir.github.io/resourcelist.html for complete list of resource types."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.variable"/>
+   <short value="Variable"/>
+   <definition value="Variable is set based either on element value in response body or on header field value in the response headers."/>
+   <comments value="Variables would be set based either on XPath/JsonPath expressions against fixtures (static and response), or headerField evaluations against response headers. If variable evaluates to nodelist or anything other than a primitive value, then test engine would report error.  Variables would be used to perform clean replacements in &quot;operation.params&quot;, &quot;operation.requestHeader.value&quot;, and &quot;operation.url&quot; element values during operation calls and in &quot;assert.value&quot; during assertion evaluations. This limits the places that test engines would need to look for placeholders &quot;${}&quot;.  Variables are scoped to the whole script. They are NOT evaluated at declaration. They are evaluated by test engine when used for substitutions in &quot;operation.params&quot;, &quot;operation.requestHeader.value&quot;, and &quot;operation.url&quot; element values during operation calls and in &quot;assert.value&quot; during assertion evaluations.  See example testscript-search.xml."/>
+   <min value="0"/>
+   <max value="*"/>
+   <constraint>
+    <key value="inv-4"/>
+    <severity value="error"/>
+    <human value="Variable cannot contain both headerField and path."/>
+    <xpath value="not(f:headerField and f:path)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.variable.name"/>
+   <short value="Variable name"/>
+   <definition value="Variable name."/>
+   <comments value="Placeholders would contain the variable name wrapped in ${} in &quot;operation.params&quot;, &quot;operation.requestHeader.value&quot;, and &quot;operation.url&quot; elements.  These placeholders would need to be replaced by the variable value before the operation is executed."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.variable.headerField"/>
+   <short value="Header field name"/>
+   <definition value="Will be used to grab the header field value from the headers that sourceId is pointing to."/>
+   <comments value="If headerField is defined, then the variable will be evaluated against the headers that sourceId is pointing to.  If path is defined, then the variable will be evaluated against the fixture body that sourceId is pointing to.  It is an error to define both headerField and path."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.variable.path"/>
+   <short value="XPath or JSONPath against the fixture body"/>
+   <definition value="XPath or JSONPath against the fixture body.  When variables are defined, either headerField must be specified or path, but not both."/>
+   <comments value="If headerField is defined, then the variable will be evaluated against the headers that sourceId is pointing to.  If path is defined, then the variable will be evaluated against the fixture body that sourceId is pointing to.  It is an error to define both headerField and path."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.variable.sourceId"/>
+   <short value="Fixture Id"/>
+   <definition value="Fixture to evaluate the XPath/JSONPath expression or the headerField  against."/>
+   <comments value="This can be a statically defined fixture (at the top of the testscript) or a dynamically set fixture created by responseId of the action.operation element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup"/>
+   <short value="A series of required setup operations before tests are executed"/>
+   <definition value="A series of required setup operations before tests are executed."/>
+   <min value="0"/>
+   <max value="1"/>
+  </element>
+  <element>
+   <path value="TestScript.setup.metadata"/>
+   <short value="Capabiltities that are assumed to function correctly on the FHIR server being tested"/>
+   <definition value="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested."/>
+   <min value="0"/>
+   <max value="1"/>
+   <nameReference value="metadata"/>
+   <constraint>
+    <key value="inv-6"/>
+    <severity value="error"/>
+    <human value="Setup metadata capabilities SHALL contain required or validated or both."/>
+    <xpath value="f:capabilities/f:required or f:capabilities/f:validated or (f:capabilities/f:required and f:capabilities/f:validated)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.setup.action"/>
+   <short value="Action"/>
+   <definition value="Action would contain either an operation or an assertion."/>
+   <comments value="An action should contain either an operation or an assertion but not both.  It can contain any number of variables."/>
+   <min value="1"/>
+   <max value="*"/>
+   <constraint>
+    <key value="inv-1"/>
+    <severity value="error"/>
+    <human value="Setup action SHALL contain either an operation or assert but not both."/>
+    <xpath value="(f:operation or f:assert) and not(f:operation and f:assert)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation"/>
+   <name value="operation"/>
+   <short value="An operation"/>
+   <definition value="An operation."/>
+   <min value="0"/>
+   <max value="1"/>
+   <constraint>
+    <key value="inv-10"/>
+    <severity value="error"/>
+    <human value="Setup operation SHALL contain either sourceId or targetId or params or url."/>
+    <xpath value="f:sourceId or ((f:targetId or f:url or f:params) and (count(f:targetId) + count(f:url) + count(f:params) =1)) or (f:type/f:code/@value='conformance' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.type"/>
+   <short value="The operation type that will be executed"/>
+   <definition value="Server interaction or operation type."/>
+   <comments value="See http://hl7-fhir.github.io/http.html for list of server interactions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <binding>
+    <strength value="extensible"/>
+    <description value="The allowable operation types."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/testscript-operation-codes"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.resource"/>
+   <short value="Resource type"/>
+   <definition value="The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html."/>
+   <comments value="If &quot;url&quot; element is specified, then &quot;targetId&quot;, &quot;params&quot;, and &quot;resource&quot; elements will be ignored as &quot;url&quot; element will have everything needed for constructing the request url.  If &quot;params&quot; element is specified, then &quot;targetId&quot; element is ignored. For FHIR operations that require a resource (e.g. &quot;read&quot; and &quot;vread&quot; operations), the &quot;resource&quot; element must be specified when &quot;params&quot; element is specified.  If &quot;url&quot; and &quot;params&quot; elements are absent, then the request url will be constructed from &quot;targetId&quot; fixture if present. For &quot;read&quot; operation, the resource and id values will be extracted from &quot;targetId&quot; fixture and used to construct the url. For &quot;vread&quot; and &quot;history&quot; operations, the versionId value will also be used."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="Either a resource or a data type"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/defined-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.label"/>
+   <short value="Operation label"/>
+   <definition value="The label would be used for tracking/logging purposes by test engines."/>
+   <comments value="This has no impact on the verification itself."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.description"/>
+   <short value="Operation description"/>
+   <definition value="The description would be used by test engines for tracking and reporting purposes."/>
+   <comments value="This has no impact on the verification itself."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.accept"/>
+   <short value="xml | json"/>
+   <definition value="The content-type or mime-type to use for RESTful operation in the 'Accept' header."/>
+   <comments value="If this is specified, then test engine shall set the 'Accept' header to the corresponding value.    If 'xml' is specified, then 'Accept' header of 'application/xml+fhir' will be set.  If 'json' is specified, then 'application/json+fhir' will be used.    If you'd like to explicitly set the 'Accept' to some other value then use the 'requestHeader' element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <meaningWhenMissing value="xml"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The content or mime type."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/content-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.contentType"/>
+   <short value="xml | json"/>
+   <definition value="The content-type or mime-type to use for RESTful operation in the 'Content-Type' header."/>
+   <comments value="If this is specified, then test engine shall set the 'Content-Type' header to the corresponding value.    If 'xml' is specified, then 'Content-Type' header of 'application/xml+fhir' will be set.    If 'json' is specified, then 'application/json+fhir' will be used.    If you'd like to explicitly set the 'Content-Type' to some other value then use the 'requestHeader' element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <meaningWhenMissing value="xml"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The content or mime type."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/content-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.destination"/>
+   <short value="Which server to perform the operation on"/>
+   <definition value="Which server to perform the operation on."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="integer"/>
+   </type>
+   <defaultValueInteger value="0"/>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.encodeRequestUrl"/>
+   <short value="Whether or not to send the request url in encoded format"/>
+   <definition value="Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="true"/>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.params"/>
+   <short value="Params"/>
+   <definition value="Path plus parameters after [type].  Used to set parts of the request URL explicitly."/>
+   <comments value="If &quot;url&quot; element is specified, then &quot;targetId&quot;, &quot;params&quot;, and &quot;resource&quot; elements will be ignored as &quot;url&quot; element will have everything needed for constructing the request url.  If &quot;params&quot; element is specified, then &quot;targetId&quot; element is ignored.  For FHIR operations that require a resource (e.g. &quot;read&quot; and &quot;vread&quot; operations), the &quot;resource&quot; element must be specified when &quot;params&quot; element is specified.  If &quot;url&quot; and &quot;params&quot; elements are absent, then the request url will be constructed from &quot;targetId&quot; fixture if present.  For &quot;read&quot; operation, the resource and id values will be extracted from &quot;targetId&quot; fixture and used to construct the url.  For &quot;vread&quot; and &quot;history&quot; operations, the versionId value will also be used.   Test engines would append whatever is specified for &quot;params&quot; to the URL after the resource type without tampering with the string (beyond encoding the URL for HTTP).  The &quot;params&quot; element does not correspond exactly to &quot;search parameters&quot;.  Nor is it the &quot;path&quot;.  It corresponds to the part of the URL that comes after the [type] (when &quot;resource&quot; element is specified). e.g. It corresponds to &quot;/[id]/_history/[vid] {?_format=[mime-type]}&quot; in the following operation: GET [base]/[type]/[id]/_history/[vid] {?_format=[mime-type]}  Test engines do have to look for placeholders (${}) and replace the variable placeholders with the variable values at runtime before sending the request."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.requestHeader"/>
+   <short value="Each operation can have one ore more header elements"/>
+   <definition value="Header elements would be used to set HTTP headers."/>
+   <comments value="This gives control to test-script writers to set headers explicitly based on test requirements.  It will allow for testing using:  - &quot;If-Modified-Since&quot; and &quot;If-None-Match&quot; headers.  See http://hl7-fhir.github.io/http.html#2.1.0.5.1 - &quot;If-Match&quot; header.  See http://hl7-fhir.github.io/http.html#2.1.0.11 - Conditional Create using &quot;If-None-Exist&quot;.  See http://hl7-fhir.github.io/http.html#2.1.0.13.1 - Invalid &quot;Content-Type&quot; header for negative testing. - etc."/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.requestHeader.field"/>
+   <short value="Header field name"/>
+   <definition value="The HTTP header field e.g. &quot;Accept&quot;."/>
+   <comments value="If header element is specified, then field is required."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.requestHeader.value"/>
+   <short value="Header value"/>
+   <definition value="The value of the header e.g. &quot;application/xml&quot;."/>
+   <comments value="If header element is specified, then value is required.  No conversions will be done by Test Engine e.g. &quot;xml&quot; to &quot;application/xml+fhir&quot;.  The values will be set in HTTP headers &quot;as-is&quot;.  Test engines do have to look for placeholders (${}) and replace the variable placeholders with the variable values at runtime before sending the request."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.responseId"/>
+   <short value="Response Id"/>
+   <definition value="The fixture id (maybe new) to map to the response."/>
+   <comments value="If a responseId is supplied, and the server responds, then the resulting response (both headers and body) is mapped to the fixture ID (which may be entirely new and previously undeclared) designated by &quot;responseId&quot;.  If responseId is not specified, it is the Test Engine's responsibility to store the response and use it as sourceId in subsequent assertions when assertion path and/or headerField is specified and sourceId is not specified."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.sourceId"/>
+   <short value="Fixture Id of body for PUT and POST requests"/>
+   <definition value="The id of the fixture used as the body of a PUT or POST request."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.targetId"/>
+   <short value="Id of fixture used for extracting the [id],  [type], and [vid] for GET requests"/>
+   <definition value="Id of fixture used for extracting the [id],  [type], and [vid] for GET requests."/>
+   <comments value="If &quot;url&quot; element is specified, then &quot;targetId&quot;, &quot;params&quot;, and &quot;resource&quot; elements will be ignored as &quot;url&quot; element will have everything needed for constructing the request url.  If &quot;params&quot; element is specified, then &quot;targetId&quot; element is ignored.  For FHIR operations that require a resource (e.g. &quot;read&quot; and &quot;vread&quot; operations), the &quot;resource&quot; element must be specified when &quot;params&quot; element is specified.  If &quot;url&quot; and &quot;params&quot; elements are absent, then the request url will be constructed from &quot;targetId&quot; fixture if present.  For &quot;read&quot; operation, the resource and id values will be extracted from &quot;targetId&quot; fixture and used to construct the url.  For &quot;vread&quot; and &quot;history&quot; operations, the versionId value will also be used."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.operation.url"/>
+   <short value="Request URL"/>
+   <definition value="Complete request URL."/>
+   <comments value="Used to set the request URL explicitly.  If &quot;url&quot; element is defined, then &quot;targetId&quot;, &quot;resource&quot;, and &quot;params&quot; elements will be ignored.  Test engines would use whatever is specified in &quot;url&quot; without tampering with the string (beyond encoding the URL for HTTP).  Test engines do have to look for placeholders (${}) and replace the variable placeholders with the variable values at runtime before sending the request."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert"/>
+   <name value="assert"/>
+   <short value="Assertion"/>
+   <definition value="Evaluates the results of previous operations to determine if the server under test behaves appropriately."/>
+   <comments value="In order to evaluate an assertion the request, response, and results of the most recently executed operation must always be maintained by the test engine."/>
+   <min value="0"/>
+   <max value="1"/>
+   <constraint>
+    <key value="inv-8"/>
+    <severity value="error"/>
+    <human value="Only a single assertion SHALL be present within setup action assert element."/>
+    <xpath value="count(f:contentType) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:validateProfileId)  &lt;=1"/>
+   </constraint>
+   <constraint>
+    <key value="inv-13"/>
+    <severity value="error"/>
+    <human value="Setup action assert shall contain both compareToSourceId and compareToSourcePath or neither."/>
+    <xpath value="(f:compareToSourceId and f:compareToSourcePath) or not(f:compareToSourceId or f:compareToSourcePath)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.label"/>
+   <short value="Assertion label"/>
+   <definition value="The label would be used for tracking/logging purposes by test engines."/>
+   <comments value="This has no impact on the verification itself."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.description"/>
+   <short value="Assertion description"/>
+   <definition value="The description would be used by test engines for tracking and reporting purposes."/>
+   <comments value="This has no impact on the verification itself."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.direction"/>
+   <short value="response | request"/>
+   <definition value="The direction to use for the assertion."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="The type of direction to use for assertion."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/assert-direction-codes"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.compareToSourceId"/>
+   <short value="Id of fixture used to compare the &quot;sourceId/path&quot; evaluations to"/>
+   <definition value="Id of fixture used to compare the &quot;sourceId/path&quot; evaluations to."/>
+   <comments value="The id of the fixture used to make comparisons to."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.compareToSourcePath"/>
+   <short value="XPath or JSONPath expression against fixture used to compare the &quot;sourceId/path&quot; evaluations to"/>
+   <definition value="XPath or JSONPath expression against fixture used to compare the &quot;sourceId/path&quot; evaluations to."/>
+   <comments value="The XPath or JSONPath expression to be evaluated against the expected fixture to compare to. Ignored if &quot;assert.value&quot; is used. The evaluation will be done before the assertion is evaluated."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.contentType"/>
+   <short value="xml | json"/>
+   <definition value="The content-type or mime-type to use for RESTful operation in the 'Content-Type' header."/>
+   <comments value="If this is specified, then test engine shall confirm that the content-type of the last operation's headers is set to this value.  If &quot;assert.sourceId&quot; element is specified, then the evaluation will be done against the headers mapped to that sourceId (and not the last operation's headers).    If 'xml' is specified, then 'Content-Type' header of 'application/xml+fhir' will be confirmed. If 'json' is specified, then 'application/json+fhir' will be used. If you'd like to have more control over the string, then use 'assert.headerField' instead."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <meaningWhenMissing value="xml"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The content or mime type."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/content-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.headerField"/>
+   <short value="The header field"/>
+   <definition value="The header field e.g. 'Location'."/>
+   <comments value="If &quot;headerField&quot; is specified then &quot;value&quot; must be specified.  If &quot;sourceId&quot; is not specified, then &quot;headerField&quot; will be evaluated against the last operation's response headers.  Test engines are to keep track of the last operation's response body and response headers."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.minimumId"/>
+   <short value="MinimumId"/>
+   <definition value="The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId."/>
+   <comments value="Asserts that the response contains all the element/content in another fixture pointed to by minimumId.  This can be a statically defined fixture or one that is dynamically set via responseId."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.navigationLinks"/>
+   <short value="Navigation Links"/>
+   <definition value="Navigation Links."/>
+   <comments value="Asserts that the Bundle contains first, last, and next links."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.operator"/>
+   <short value="equals | notEquals | in | notIn | greaterThan | lessThan | empty | notEmpty | contains | notContains"/>
+   <definition value="The operator type."/>
+   <comments value="Operators come handy especially for negative testing.  If operator is not specified, then the &quot;equals&quot; operator is assumed.  e.g. &lt;code>   &lt;assert>  &lt;operator value=&quot;in&quot; />  &lt;responseCode value=&quot;200,201,204&quot; />    &lt;/assert>    &lt;assert>  &lt;operator value=&quot;notEquals&quot; />  &lt;response value=&quot;okay&quot;/>   &lt;/assert>    &lt;assert>  &lt;operator value=&quot;greaterThan&quot; />    &lt;responseHeader>     &lt;field value=&quot;Content-Length&quot; />     &lt;value value=&quot;0&quot; />    &lt;responseHeader>   &lt;/assert> &lt;/code>."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="The type of operator to use for assertion."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/assert-operator-codes"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.path"/>
+   <short value="XPath or JSONPath expression"/>
+   <definition value="The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server."/>
+   <comments value="If both &quot;path&quot; and &quot;fixtureId&quot; are specified, then the path will be evaluated against the responseBody mapped to the fixtureId.  If &quot;path&quot; is specified and &quot;fixtureId&quot; is not, then the path will be evaluated against the responseBody of the last operation.  Test engines are to store the response body and headers of the last operation at all times for subsequent assertions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.resource"/>
+   <short value="Resource type"/>
+   <definition value="The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html."/>
+   <comments value="This will be expected resource type in response body e.g. in read, vread, search, etc.  See http://hl7-fhir.github.io/resourcelist.html for complete list of resource types.  e.g. &lt;assert > &lt;resourceType value=&quot;Patient&quot; &lt;/assert>."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="Either a resource or a data type"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/defined-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.response"/>
+   <short value="okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable"/>
+   <definition value="okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable."/>
+   <comments value="This is a shorter way of achieving similar verifications via &quot;assert.responseCode&quot;.  If you need more control, then use &quot;assert.responseCode&quot;  e.g. &lt;assert>  &lt;contentType value=&quot;json&quot; />  &lt;response value=&quot;okay&quot;/> &lt;/assert>."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="The type of response code to use for assertion."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/assert-response-code-types"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.responseCode"/>
+   <short value="Response Code"/>
+   <definition value="HTTP Response Code."/>
+   <comments value="To be used with &quot;operator&quot; attribute value. Asserts that the response code equals this value if &quot;operator&quot; is not specified.   If the operator is &quot;in&quot; or &quot;notIn&quot; then the responseCode would be a comma-separated list of values e.g. &quot;200,201&quot;. Otherwise, it's expected to be a numeric value.   If &quot;fixture&quot; is not specified, then the &quot;responseBodyId&quot; value of the last operation is assumed."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.sourceId"/>
+   <short value="Fixture Id"/>
+   <definition value="Fixture to evaluate the XPath/JSONPath expression or the headerField  against."/>
+   <comments value="This can be a statically defined fixture (at the top of the testscript) or a dynamically set fixture created by responseId of the action.operation element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.validateProfileId"/>
+   <short value="Validate Profile Id"/>
+   <definition value="The ID of the Profile to validate against."/>
+   <comments value="The ID of a Profile fixture. Asserts that the response is valid according to the Profile specified by validateProfileId."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.value"/>
+   <short value="The value to compare to"/>
+   <definition value="The value to compare to."/>
+   <comments value="The string-representation of a number, string, or boolean that is expected.  Test engines do have to look for placeholders (${}) and replace the variable placeholders with the variable values at runtime before comparing this value to the actual value."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.setup.action.assert.warningOnly"/>
+   <short value="Warning Only"/>
+   <definition value="Warning Only."/>
+   <comments value="If this element is specified and it is true, then assertion failures can be logged by test engine but should not stop the test script execution from proceeding.  There are likely cases where the spec is not clear on what should happen. If the spec says something is optional (maybe a response header for example), but a server doesn’t do it, we could choose to issue a warning."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+  </element>
+  <element>
+   <path value="TestScript.test"/>
+   <short value="A test in this script"/>
+   <definition value="A test in this script."/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="TestScript.test.name"/>
+   <short value="The name of this test"/>
+   <definition value="The name of this test."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.test.description"/>
+   <short value="Short description of the test"/>
+   <definition value="A short description of the test."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="TestScript.test.metadata"/>
+   <short value="Capabiltities that are assumed to function correctly on the FHIR server being tested"/>
+   <definition value="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested."/>
+   <min value="0"/>
+   <max value="1"/>
+   <nameReference value="metadata"/>
+   <constraint>
+    <key value="inv-7"/>
+    <severity value="error"/>
+    <human value="Test metadata capabilities SHALL contain required or validated or both."/>
+    <xpath value="f:capabilities/f:required or f:capabilities/f:validated or (f:capabilities/f:required and f:capabilities/f:validated)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.test.action"/>
+   <short value="Action"/>
+   <definition value="Action would contain either an operation or an assertion."/>
+   <comments value="An action should contain either an operation or an assertion but not both.  It can contain any number of variables."/>
+   <min value="1"/>
+   <max value="*"/>
+   <constraint>
+    <key value="inv-2"/>
+    <severity value="error"/>
+    <human value="Test action SHALL contain either an operation or assert but not both."/>
+    <xpath value="(f:operation or f:assert) and not(f:operation and f:assert)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.test.action.operation"/>
+   <short value="Operation"/>
+   <definition value="An operation would involve a REST request to a server."/>
+   <min value="0"/>
+   <max value="1"/>
+   <nameReference value="operation"/>
+   <constraint>
+    <key value="inv-11"/>
+    <severity value="error"/>
+    <human value="Test operation SHALL contain either sourceId or targetId or params or url."/>
+    <xpath value="f:sourceId or (f:targetId or f:url or f:params) and (count(f:targetId) + count(f:url) + count(f:params) =1) or (f:type/f:code/@value='conformance' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.test.action.assert"/>
+   <short value="Assertion"/>
+   <definition value="Evaluates the results of previous operations to determine if the server under test behaves appropriately."/>
+   <comments value="In order to evaluate an assertion the request, response, and results of the most recently executed operation must always be maintained by the test engine."/>
+   <min value="0"/>
+   <max value="1"/>
+   <nameReference value="assert"/>
+   <constraint>
+    <key value="inv-9"/>
+    <severity value="error"/>
+    <human value="Only a single assertion SHALL be present within test action assert element."/>
+    <xpath value="count(f:contentType) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:validateProfileId)  &lt;=1"/>
+   </constraint>
+   <constraint>
+    <key value="inv-14"/>
+    <severity value="error"/>
+    <human value="Test action assert shall contain both compareToSourceId and compareToSourcePath or neither."/>
+    <xpath value="(f:compareToSourceId and f:compareToSourcePath) or not(f:compareToSourceId or f:compareToSourcePath)"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.teardown"/>
+   <short value="A series of required clean up steps"/>
+   <definition value="A series of operations required to clean up after the all the tests are executed (successfully or otherwise)."/>
+   <min value="0"/>
+   <max value="1"/>
+  </element>
+  <element>
+   <path value="TestScript.teardown.action"/>
+   <short value="Action"/>
+   <definition value="Action would contain either an operation or an assertion."/>
+   <comments value="An action should contain either an operation or an assertion but not both.  It can contain any number of variables."/>
+   <min value="1"/>
+   <max value="*"/>
+   <constraint>
+    <key value="inv-3"/>
+    <severity value="error"/>
+    <human value="Teardown action SHALL contain an operation."/>
+    <xpath value="f:operation"/>
+   </constraint>
+  </element>
+  <element>
+   <path value="TestScript.teardown.action.operation"/>
+   <short value="Operation"/>
+   <definition value="An operation would involve a REST request to a server."/>
+   <min value="0"/>
+   <max value="1"/>
+   <nameReference value="operation"/>
+   <constraint>
+    <key value="inv-12"/>
+    <severity value="error"/>
+    <human value="Teardown operation SHALL contain either sourceId or targetId or params or url."/>
+    <xpath value="f:sourceId or (f:targetId or f:url or (f:params and f:resource)) and (count(f:targetId) + count(f:url) + count(f:params) =1) or (f:type/f:code/@value='conformance' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')"/>
+   </constraint>
+  </element>
+ </differential>
+</StructureDefinition>

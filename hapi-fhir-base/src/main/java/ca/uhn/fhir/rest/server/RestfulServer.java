@@ -288,7 +288,7 @@ public class RestfulServer extends HttpServlet {
 
 	/**
 	 * Returns the default encoding to return (XML/JSON) if an incoming request does not specify a preference (either with the <code>_format</code> URL parameter, or with an <code>Accept</code> header
-	 * in the request. The default is {@link EncodingEnum#XML}.
+	 * in the request. The default is {@link EncodingEnum#XML}. Will not return null.
 	 */
 	public EncodingEnum getDefaultResponseEncoding() {
 		return myDefaultResponseEncoding;

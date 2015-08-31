@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -152,7 +152,7 @@ public class Provenance extends DomainResource {
          * The function of the agent with respect to the activity.
          */
         @Child(name = "role", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Agents Role", formalDefinition="The function of the agent with respect to the activity." )
+        @Description(shortDefinition="What the agents involvement was", formalDefinition="The function of the agent with respect to the activity." )
         protected Coding role;
 
         /**
@@ -174,7 +174,14 @@ public class Provenance extends DomainResource {
         @Description(shortDefinition="Authorization-system identifier for the agent", formalDefinition="The identify of the agent as known by the authorization system." )
         protected Identifier userId;
 
-        private static final long serialVersionUID = -1847456681L;
+        /**
+         * A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest.
+         */
+        @Child(name = "relatedAgent", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Track delegation between agents", formalDefinition="A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest." )
+        protected List<ProvenanceAgentRelatedAgentComponent> relatedAgent;
+
+        private static final long serialVersionUID = 1792758952L;
 
     /*
      * Constructor
@@ -278,11 +285,52 @@ public class Provenance extends DomainResource {
           return this;
         }
 
+        /**
+         * @return {@link #relatedAgent} (A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest.)
+         */
+        public List<ProvenanceAgentRelatedAgentComponent> getRelatedAgent() { 
+          if (this.relatedAgent == null)
+            this.relatedAgent = new ArrayList<ProvenanceAgentRelatedAgentComponent>();
+          return this.relatedAgent;
+        }
+
+        public boolean hasRelatedAgent() { 
+          if (this.relatedAgent == null)
+            return false;
+          for (ProvenanceAgentRelatedAgentComponent item : this.relatedAgent)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #relatedAgent} (A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest.)
+         */
+    // syntactic sugar
+        public ProvenanceAgentRelatedAgentComponent addRelatedAgent() { //3
+          ProvenanceAgentRelatedAgentComponent t = new ProvenanceAgentRelatedAgentComponent();
+          if (this.relatedAgent == null)
+            this.relatedAgent = new ArrayList<ProvenanceAgentRelatedAgentComponent>();
+          this.relatedAgent.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public ProvenanceAgentComponent addRelatedAgent(ProvenanceAgentRelatedAgentComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.relatedAgent == null)
+            this.relatedAgent = new ArrayList<ProvenanceAgentRelatedAgentComponent>();
+          this.relatedAgent.add(t);
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("role", "Coding", "The function of the agent with respect to the activity.", 0, java.lang.Integer.MAX_VALUE, role));
           childrenList.add(new Property("actor", "Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, java.lang.Integer.MAX_VALUE, actor));
           childrenList.add(new Property("userId", "Identifier", "The identify of the agent as known by the authorization system.", 0, java.lang.Integer.MAX_VALUE, userId));
+          childrenList.add(new Property("relatedAgent", "", "A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest.", 0, java.lang.Integer.MAX_VALUE, relatedAgent));
         }
 
       public ProvenanceAgentComponent copy() {
@@ -291,6 +339,11 @@ public class Provenance extends DomainResource {
         dst.role = role == null ? null : role.copy();
         dst.actor = actor == null ? null : actor.copy();
         dst.userId = userId == null ? null : userId.copy();
+        if (relatedAgent != null) {
+          dst.relatedAgent = new ArrayList<ProvenanceAgentRelatedAgentComponent>();
+          for (ProvenanceAgentRelatedAgentComponent i : relatedAgent)
+            dst.relatedAgent.add(i.copy());
+        };
         return dst;
       }
 
@@ -302,7 +355,7 @@ public class Provenance extends DomainResource {
           return false;
         ProvenanceAgentComponent o = (ProvenanceAgentComponent) other;
         return compareDeep(role, o.role, true) && compareDeep(actor, o.actor, true) && compareDeep(userId, o.userId, true)
-          ;
+           && compareDeep(relatedAgent, o.relatedAgent, true);
       }
 
       @Override
@@ -317,7 +370,152 @@ public class Provenance extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (role == null || role.isEmpty()) && (actor == null || actor.isEmpty())
-           && (userId == null || userId.isEmpty());
+           && (userId == null || userId.isEmpty()) && (relatedAgent == null || relatedAgent.isEmpty())
+          ;
+      }
+
+  }
+
+    @Block()
+    public static class ProvenanceAgentRelatedAgentComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The type of relationship between agents.
+         */
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Type of relationship between agents", formalDefinition="The type of relationship between agents." )
+        protected CodeableConcept type;
+
+        /**
+         * An internal reference to another agent listed in this provenance by it's id.
+         */
+        @Child(name = "target", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Reference to other agent in this resource by id", formalDefinition="An internal reference to another agent listed in this provenance by it's id." )
+        protected UriType target;
+
+        private static final long serialVersionUID = 794181198L;
+
+    /*
+     * Constructor
+     */
+      public ProvenanceAgentRelatedAgentComponent() {
+        super();
+      }
+
+    /*
+     * Constructor
+     */
+      public ProvenanceAgentRelatedAgentComponent(CodeableConcept type, UriType target) {
+        super();
+        this.type = type;
+        this.target = target;
+      }
+
+        /**
+         * @return {@link #type} (The type of relationship between agents.)
+         */
+        public CodeableConcept getType() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProvenanceAgentRelatedAgentComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new CodeableConcept(); // cc
+          return this.type;
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (The type of relationship between agents.)
+         */
+        public ProvenanceAgentRelatedAgentComponent setType(CodeableConcept value) { 
+          this.type = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #target} (An internal reference to another agent listed in this provenance by it's id.). This is the underlying object with id, value and extensions. The accessor "getTarget" gives direct access to the value
+         */
+        public UriType getTargetElement() { 
+          if (this.target == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProvenanceAgentRelatedAgentComponent.target");
+            else if (Configuration.doAutoCreate())
+              this.target = new UriType(); // bb
+          return this.target;
+        }
+
+        public boolean hasTargetElement() { 
+          return this.target != null && !this.target.isEmpty();
+        }
+
+        public boolean hasTarget() { 
+          return this.target != null && !this.target.isEmpty();
+        }
+
+        /**
+         * @param value {@link #target} (An internal reference to another agent listed in this provenance by it's id.). This is the underlying object with id, value and extensions. The accessor "getTarget" gives direct access to the value
+         */
+        public ProvenanceAgentRelatedAgentComponent setTargetElement(UriType value) { 
+          this.target = value;
+          return this;
+        }
+
+        /**
+         * @return An internal reference to another agent listed in this provenance by it's id.
+         */
+        public String getTarget() { 
+          return this.target == null ? null : this.target.getValue();
+        }
+
+        /**
+         * @param value An internal reference to another agent listed in this provenance by it's id.
+         */
+        public ProvenanceAgentRelatedAgentComponent setTarget(String value) { 
+            if (this.target == null)
+              this.target = new UriType();
+            this.target.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("type", "CodeableConcept", "The type of relationship between agents.", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("target", "uri", "An internal reference to another agent listed in this provenance by it's id.", 0, java.lang.Integer.MAX_VALUE, target));
+        }
+
+      public ProvenanceAgentRelatedAgentComponent copy() {
+        ProvenanceAgentRelatedAgentComponent dst = new ProvenanceAgentRelatedAgentComponent();
+        copyValues(dst);
+        dst.type = type == null ? null : type.copy();
+        dst.target = target == null ? null : target.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof ProvenanceAgentRelatedAgentComponent))
+          return false;
+        ProvenanceAgentRelatedAgentComponent o = (ProvenanceAgentRelatedAgentComponent) other;
+        return compareDeep(type, o.type, true) && compareDeep(target, o.target, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof ProvenanceAgentRelatedAgentComponent))
+          return false;
+        ProvenanceAgentRelatedAgentComponent o = (ProvenanceAgentRelatedAgentComponent) other;
+        return compareValues(target, o.target, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && (type == null || type.isEmpty()) && (target == null || target.isEmpty())
+          ;
       }
 
   }
@@ -335,7 +533,7 @@ public class Provenance extends DomainResource {
          * The type of the entity. If the entity is a resource, then this is a resource type.
          */
         @Child(name = "type", type = {Coding.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Entity Type", formalDefinition="The type of the entity. If the entity is a resource, then this is a resource type." )
+        @Description(shortDefinition="The type of resource in this entity", formalDefinition="The type of the entity. If the entity is a resource, then this is a resource type." )
         protected Coding type;
 
         /**
@@ -1209,7 +1407,7 @@ public class Provenance extends DomainResource {
   public static final String SP_SIGTYPE = "sigtype";
   @SearchParamDefinition(name="agent", path="Provenance.agent.actor", description="Individual, device or organization playing role", type="reference" )
   public static final String SP_AGENT = "agent";
-  @SearchParamDefinition(name="entitytype", path="Provenance.entity.type", description="Entity Type", type="token" )
+  @SearchParamDefinition(name="entitytype", path="Provenance.entity.type", description="The type of resource in this entity", type="token" )
   public static final String SP_ENTITYTYPE = "entitytype";
   @SearchParamDefinition(name="patient", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference" )
   public static final String SP_PATIENT = "patient";

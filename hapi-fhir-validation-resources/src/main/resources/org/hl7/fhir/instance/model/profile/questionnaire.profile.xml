@@ -1,0 +1,1220 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="Questionnaire"/>
+ <meta>
+  <lastUpdated value="2015-08-27T19:45:13.172-04:00"/>
+ </meta>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+  <valueInteger value="0"/>
+ </extension>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm-no-warnings">
+  <valueInteger value="3"/>
+ </extension>
+ <url value="http://hl7.org/fhir/StructureDefinition/Questionnaire"/>
+ <name value="Questionnaire"/>
+ <publisher value="Health Level Seven International (Patient Care)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for Questionnaire Resource"/>
+ <requirements value="To support structured, hierarchical registration of data gathered using digital forms and other questionnaires."/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <mapping>
+  <identity value="w5"/>
+  <uri value="http://hl7.org/fhir/w5"/>
+  <name value="W5 Mapping"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
+ <snapshot>
+  <element>
+   <path value="Questionnaire"/>
+   <short value="A structured set of questions"/>
+   <definition value="A structured set of questions intended to guide the collection of answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions."/>
+   <alias value="Form"/>
+   <alias value="CRF"/>
+   <alias value="Survey"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <constraint>
+    <key value="que-3"/>
+    <severity value="error"/>
+    <human value="If root, group must be 'required'"/>
+    <xpath value="not(exists(lloyd-fix-me)) or (f:group/f:required/@value='true')"/>
+   </constraint>
+   <constraint>
+    <key value="que-2"/>
+    <severity value="error"/>
+    <human value="The link ids for groups and questions must be unique within the questionnaire"/>
+    <xpath value="count(descendant::f:linkId/@value)=count(distinct-values(descendant::f:linkId/@value))"/>
+   </constraint>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Observation[moodCode=DEF]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="clinical"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Questionnaire.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Questionnaire.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Questionnaire.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="Questionnaire.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.identifier"/>
+   <short value="External Ids for this questionnaire"/>
+   <definition value="This records identifiers associated with this question set that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
+   <requirements value="Need to allow connection to a wider workflow."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id[use=BUS]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.version"/>
+   <short value="Logical id for this version of Questionnaire"/>
+   <definition value="The version number assigned by the publisher for business reasons.  It may remain the same when the resource is updated."/>
+   <requirements value="In some cases, separate resource instances might be created for each version (if an older version can be maintained once a new version exists)."/>
+   <alias value="N/A - MIF rather than RIM level"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id[use=VER]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id.version"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.status"/>
+   <short value="draft | published | retired"/>
+   <definition value="The lifecycle status of the questionnaire as a whole."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Lifecycle status of the questionnaire"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/questionnaire-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".statusCode (also whether there's a revisionControlAct - and possibly mood to distinguish &quot;in-progress&quot; from &quot;published)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.date"/>
+   <short value="Date this version was authored"/>
+   <definition value="The date that this questionnaire was last changed."/>
+   <alias value="Date Created"/>
+   <alias value="Date published"/>
+   <alias value="Date Issued"/>
+   <alias value="Date updated"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=AUT].time"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.publisher"/>
+   <short value="Organization/individual who designed the questionnaire"/>
+   <definition value="Organization or person responsible for developing and maintaining the questionnaire."/>
+   <requirements value="Conveys responsibility for the questions and their organization and also helps evaluate the questionnaire's &quot;authority&quot;."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=AUT].role"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.telecom"/>
+   <short value="Contact information of the publisher"/>
+   <definition value="Contact details to assist a user in finding and communicating with the publisher."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=AUT].role.telecom"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.subjectType"/>
+   <short value="Resource that can be subject of QuestionnaireResponse"/>
+   <definition value="Identifies the types of subjects that can be the subject of the questionnaire."/>
+   <comments value="If none are specified, then the subject is unlimited."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="One of the resource types defined as part of FHIR"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/resource-types"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=META].target[classCode=OBS, moodCode=DEFN, isCriterion=true].participation.role.classCode"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Group"/>
+   </extension>
+   <path value="Questionnaire.group"/>
+   <name value="group"/>
+   <short value="Grouped questions"/>
+   <definition value="A collection of related questions (or further groupings of questions)."/>
+   <comments value="The Questionnaire itself has one &quot;root&quot; group with the actual contents of the Questionnaire.  Information on this root group applies to the questionnaire as a whole."/>
+   <requirements value="Need to be able to logically group answers to grouped questions."/>
+   <alias value="Section"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <condition value="que-3"/>
+   <constraint>
+    <key value="que-1"/>
+    <severity value="error"/>
+    <human value="Groups may either contain questions or groups but not both"/>
+    <xpath value="not(exists(f:group) and exists(f:question))"/>
+   </constraint>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=DOCSECT, moodCode=EVN]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.linkId"/>
+   <short value="To link questionnaire with questionnaire response"/>
+   <definition value="An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource."/>
+   <comments value="May be omitted if there is no expectation to link answers back to a questionnaire.  This *can* be a meaningful id (e.g. a LOINC code) but is not intended to have any meaning.  GUIDs or sequential numbers are appropriate here."/>
+   <requirements value="[[[QuestionnaireResponse]]] does not require omitted groups to be included and may have some groups that repeat, so linkage based on position alone is not sufficient."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.title"/>
+   <short value="Name to be displayed for group"/>
+   <definition value="The human-readable name for this section of the questionnaire."/>
+   <comments value="The title of the &quot;root&quot; group is the title for the questionnaire."/>
+   <requirements value="When including text for the questionnaire with the answers, sections may have a section header."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".title"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.concept"/>
+   <short value="Concept that represents this section on a questionnaire"/>
+   <definition value="Identifies a how this group of questions is known in a particular terminology such as LOINC."/>
+   <comments value="The code(s) for the &quot;root&quot; group apply to the questionnaire as a whole."/>
+   <requirements value="Allows linking of groups of questions (and complete questionnaires) to formal terminologies."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="Codes for questionnaires and groupings of questionnaire questions"/>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.text"/>
+   <short value="Additional text for the group"/>
+   <definition value="Additional text for the group, used for display purposes."/>
+   <comments value="Common extensions are defined for more specialized types of display text."/>
+   <requirements value="When including text for the questionnaire, each section may contain additional explanations are background text."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".text"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.required"/>
+   <short value="Must group be included in data results?"/>
+   <definition value="If true, indicates that the group must be present and have required questions within it answered.  If false, the group may be skipped when answering the questionnaire."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Not supported - MIF/templating layer"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.repeats"/>
+   <short value="Whether the group may repeat"/>
+   <definition value="Whether the group may occur multiple times in the instance, containing multiple sets of answers."/>
+   <requirements value="Groups may be used to create set of (related) questions that can be repeated to give multiple answers to such a set."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Not supported - MIF/templating layer"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.group"/>
+   <short value="Nested questionnaire group"/>
+   <definition value="A sub-group within a group. The ordering of groups within this group is relevant."/>
+   <requirements value="Reports can consist of complex nested groups."/>
+   <min value="0"/>
+   <max value="*"/>
+   <nameReference value="group"/>
+   <condition value="que-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=DOCSECT, moodCode=EVN]"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Question"/>
+   </extension>
+   <path value="Questionnaire.group.question"/>
+   <short value="Questions in this group"/>
+   <definition value="Set of questions within this group. The order of questions within the group is relevant."/>
+   <requirements value="Must register answers to questions."/>
+   <alias value="Responses"/>
+   <alias value="Contents"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <condition value="que-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=OBS, moodCode=EVN or DEF]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.linkId"/>
+   <short value="To link questionnaire with questionnaire response"/>
+   <definition value="An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a [[[QuestionnaireResponse]]] resource."/>
+   <comments value="May be omitted if there is no expectation to link answers back to a questionnaire.  This *can* be a meaningful id (e.g. a LOINC code) but is not intended to have any meaning.  GUIDs or sequential numbers are appropriate here."/>
+   <requirements value="[[[QuestionnaireResponse]]] does not require omitted groups to be included and may have some groups that repeat, so linkage based on position alone is not sufficient."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.concept"/>
+   <short value="Concept that represents this question on a questionnaire"/>
+   <definition value="Identifies a how this question is known in a particular terminology such as LOINC."/>
+   <requirements value="Allows linking of questions (and their answers) to formal terminologies."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.text"/>
+   <short value="Text of the question as it is shown to the user"/>
+   <definition value="The actual question as shown to the user to prompt them for an answer."/>
+   <comments value="Common extensions are defined for more specialized types of display text."/>
+   <requirements value="When including text for the questionnaire, each question may contain its actual question display text."/>
+   <alias value="Question"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code.display"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.type"/>
+   <short value="boolean | decimal | integer | date | dateTime +"/>
+   <definition value="The expected format of the answer, e.g. the type of input (string, integer) or whether a (multiple) choice is expected."/>
+   <comments value="Additional constraints on the type of answer can be conveyed by extensions."/>
+   <requirements value="Defines the format in which the user is to be prompted for the answer."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="The expected format of an answer"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/answer-format"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A - MIF rather than RIM level"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.required"/>
+   <short value="Must question be answered in data results?"/>
+   <definition value="If true, indicates that the question must be answered and have required groups within it also present.  If false, the question and any contained groups may be skipped when answering the questionnaire."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Not supported - MIF/templating layer"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.repeats"/>
+   <short value="Can question  have multiple answers?"/>
+   <definition value="If true, the question may have more than one answer."/>
+   <comments value="Whether the question itself will be displayed for each answer is a rendering choice typically based on whether there are nested groups."/>
+   <requirements value="Used for &quot;check all that apply&quot; types of questions or &quot;list your top 3&quot;, etc."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Not supported - MIF/templating layer"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.options"/>
+   <short value="Valueset containing permitted answers"/>
+   <definition value="Reference to a valueset containing the a list of codes representing permitted answers for the question."/>
+   <comments value="LOINC defines many useful value sets for questionnaire response. See [LOINC Answer Lists](loinc.html#alist)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/ValueSet"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Not supported - MIF/templating layer to capture value set"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.group"/>
+   <short value="Nested questionnaire group"/>
+   <definition value="Nested group, containing nested question for this question. The order of groups within the question is relevant."/>
+   <requirements value="It is useful to have &quot;sub-questions&quot;, questions which normally appear when certain answers are given and which collect additional details."/>
+   <min value="0"/>
+   <max value="*"/>
+   <nameReference value="group"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=DOCSECT, moodCode=EVN]"/>
+   </mapping>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="Questionnaire"/>
+   <short value="A structured set of questions"/>
+   <definition value="A structured set of questions intended to guide the collection of answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions."/>
+   <alias value="Form"/>
+   <alias value="CRF"/>
+   <alias value="Survey"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <constraint>
+    <key value="que-3"/>
+    <severity value="error"/>
+    <human value="If root, group must be 'required'"/>
+    <xpath value="not(exists(lloyd-fix-me)) or (f:group/f:required/@value='true')"/>
+   </constraint>
+   <constraint>
+    <key value="que-2"/>
+    <severity value="error"/>
+    <human value="The link ids for groups and questions must be unique within the questionnaire"/>
+    <xpath value="count(descendant::f:linkId/@value)=count(distinct-values(descendant::f:linkId/@value))"/>
+   </constraint>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Observation[moodCode=DEF]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="clinical"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.identifier"/>
+   <short value="External Ids for this questionnaire"/>
+   <definition value="This records identifiers associated with this question set that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
+   <requirements value="Need to allow connection to a wider workflow."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id[use=BUS]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.version"/>
+   <short value="Logical id for this version of Questionnaire"/>
+   <definition value="The version number assigned by the publisher for business reasons.  It may remain the same when the resource is updated."/>
+   <requirements value="In some cases, separate resource instances might be created for each version (if an older version can be maintained once a new version exists)."/>
+   <alias value="N/A - MIF rather than RIM level"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id[use=VER]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id.version"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.status"/>
+   <short value="draft | published | retired"/>
+   <definition value="The lifecycle status of the questionnaire as a whole."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Lifecycle status of the questionnaire"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/questionnaire-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".statusCode (also whether there's a revisionControlAct - and possibly mood to distinguish &quot;in-progress&quot; from &quot;published)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.date"/>
+   <short value="Date this version was authored"/>
+   <definition value="The date that this questionnaire was last changed."/>
+   <alias value="Date Created"/>
+   <alias value="Date published"/>
+   <alias value="Date Issued"/>
+   <alias value="Date updated"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=AUT].time"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.publisher"/>
+   <short value="Organization/individual who designed the questionnaire"/>
+   <definition value="Organization or person responsible for developing and maintaining the questionnaire."/>
+   <requirements value="Conveys responsibility for the questions and their organization and also helps evaluate the questionnaire's &quot;authority&quot;."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=AUT].role"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.telecom"/>
+   <short value="Contact information of the publisher"/>
+   <definition value="Contact details to assist a user in finding and communicating with the publisher."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=AUT].role.telecom"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.subjectType"/>
+   <short value="Resource that can be subject of QuestionnaireResponse"/>
+   <definition value="Identifies the types of subjects that can be the subject of the questionnaire."/>
+   <comments value="If none are specified, then the subject is unlimited."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="One of the resource types defined as part of FHIR"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/resource-types"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=META].target[classCode=OBS, moodCode=DEFN, isCriterion=true].participation.role.classCode"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Group"/>
+   </extension>
+   <path value="Questionnaire.group"/>
+   <name value="group"/>
+   <short value="Grouped questions"/>
+   <definition value="A collection of related questions (or further groupings of questions)."/>
+   <comments value="The Questionnaire itself has one &quot;root&quot; group with the actual contents of the Questionnaire.  Information on this root group applies to the questionnaire as a whole."/>
+   <requirements value="Need to be able to logically group answers to grouped questions."/>
+   <alias value="Section"/>
+   <min value="1"/>
+   <max value="1"/>
+   <condition value="que-3"/>
+   <constraint>
+    <key value="que-1"/>
+    <severity value="error"/>
+    <human value="Groups may either contain questions or groups but not both"/>
+    <xpath value="not(exists(f:group) and exists(f:question))"/>
+   </constraint>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=DOCSECT, moodCode=EVN]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.linkId"/>
+   <short value="To link questionnaire with questionnaire response"/>
+   <definition value="An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource."/>
+   <comments value="May be omitted if there is no expectation to link answers back to a questionnaire.  This *can* be a meaningful id (e.g. a LOINC code) but is not intended to have any meaning.  GUIDs or sequential numbers are appropriate here."/>
+   <requirements value="[[[QuestionnaireResponse]]] does not require omitted groups to be included and may have some groups that repeat, so linkage based on position alone is not sufficient."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.title"/>
+   <short value="Name to be displayed for group"/>
+   <definition value="The human-readable name for this section of the questionnaire."/>
+   <comments value="The title of the &quot;root&quot; group is the title for the questionnaire."/>
+   <requirements value="When including text for the questionnaire with the answers, sections may have a section header."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".title"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.concept"/>
+   <short value="Concept that represents this section on a questionnaire"/>
+   <definition value="Identifies a how this group of questions is known in a particular terminology such as LOINC."/>
+   <comments value="The code(s) for the &quot;root&quot; group apply to the questionnaire as a whole."/>
+   <requirements value="Allows linking of groups of questions (and complete questionnaires) to formal terminologies."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="Codes for questionnaires and groupings of questionnaire questions"/>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.text"/>
+   <short value="Additional text for the group"/>
+   <definition value="Additional text for the group, used for display purposes."/>
+   <comments value="Common extensions are defined for more specialized types of display text."/>
+   <requirements value="When including text for the questionnaire, each section may contain additional explanations are background text."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".text"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.required"/>
+   <short value="Must group be included in data results?"/>
+   <definition value="If true, indicates that the group must be present and have required questions within it answered.  If false, the group may be skipped when answering the questionnaire."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Not supported - MIF/templating layer"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.repeats"/>
+   <short value="Whether the group may repeat"/>
+   <definition value="Whether the group may occur multiple times in the instance, containing multiple sets of answers."/>
+   <requirements value="Groups may be used to create set of (related) questions that can be repeated to give multiple answers to such a set."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Not supported - MIF/templating layer"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.group"/>
+   <short value="Nested questionnaire group"/>
+   <definition value="A sub-group within a group. The ordering of groups within this group is relevant."/>
+   <requirements value="Reports can consist of complex nested groups."/>
+   <min value="0"/>
+   <max value="*"/>
+   <nameReference value="group"/>
+   <condition value="que-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=DOCSECT, moodCode=EVN]"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Question"/>
+   </extension>
+   <path value="Questionnaire.group.question"/>
+   <short value="Questions in this group"/>
+   <definition value="Set of questions within this group. The order of questions within the group is relevant."/>
+   <requirements value="Must register answers to questions."/>
+   <alias value="Responses"/>
+   <alias value="Contents"/>
+   <min value="0"/>
+   <max value="*"/>
+   <condition value="que-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=OBS, moodCode=EVN or DEF]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.linkId"/>
+   <short value="To link questionnaire with questionnaire response"/>
+   <definition value="An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a [[[QuestionnaireResponse]]] resource."/>
+   <comments value="May be omitted if there is no expectation to link answers back to a questionnaire.  This *can* be a meaningful id (e.g. a LOINC code) but is not intended to have any meaning.  GUIDs or sequential numbers are appropriate here."/>
+   <requirements value="[[[QuestionnaireResponse]]] does not require omitted groups to be included and may have some groups that repeat, so linkage based on position alone is not sufficient."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.concept"/>
+   <short value="Concept that represents this question on a questionnaire"/>
+   <definition value="Identifies a how this question is known in a particular terminology such as LOINC."/>
+   <requirements value="Allows linking of questions (and their answers) to formal terminologies."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.text"/>
+   <short value="Text of the question as it is shown to the user"/>
+   <definition value="The actual question as shown to the user to prompt them for an answer."/>
+   <comments value="Common extensions are defined for more specialized types of display text."/>
+   <requirements value="When including text for the questionnaire, each question may contain its actual question display text."/>
+   <alias value="Question"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code.display"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.type"/>
+   <short value="boolean | decimal | integer | date | dateTime +"/>
+   <definition value="The expected format of the answer, e.g. the type of input (string, integer) or whether a (multiple) choice is expected."/>
+   <comments value="Additional constraints on the type of answer can be conveyed by extensions."/>
+   <requirements value="Defines the format in which the user is to be prompted for the answer."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="The expected format of an answer"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/answer-format"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A - MIF rather than RIM level"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.required"/>
+   <short value="Must question be answered in data results?"/>
+   <definition value="If true, indicates that the question must be answered and have required groups within it also present.  If false, the question and any contained groups may be skipped when answering the questionnaire."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Not supported - MIF/templating layer"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.repeats"/>
+   <short value="Can question  have multiple answers?"/>
+   <definition value="If true, the question may have more than one answer."/>
+   <comments value="Whether the question itself will be displayed for each answer is a rendering choice typically based on whether there are nested groups."/>
+   <requirements value="Used for &quot;check all that apply&quot; types of questions or &quot;list your top 3&quot;, etc."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Not supported - MIF/templating layer"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.options"/>
+   <short value="Valueset containing permitted answers"/>
+   <definition value="Reference to a valueset containing the a list of codes representing permitted answers for the question."/>
+   <comments value="LOINC defines many useful value sets for questionnaire response. See [LOINC Answer Lists](loinc.html#alist)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/ValueSet"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Not supported - MIF/templating layer to capture value set"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Questionnaire.group.question.group"/>
+   <short value="Nested questionnaire group"/>
+   <definition value="Nested group, containing nested question for this question. The order of groups within the question is relevant."/>
+   <requirements value="It is useful to have &quot;sub-questions&quot;, questions which normally appear when certain answers are given and which collect additional details."/>
+   <min value="0"/>
+   <max value="*"/>
+   <nameReference value="group"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=DOCSECT, moodCode=EVN]"/>
+   </mapping>
+  </element>
+ </differential>
+</StructureDefinition>

@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.provider;
 import java.util.Collections;
 
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -48,8 +48,8 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 				paramMap.setCount(theCount.getValue());
 			}
 
-			paramMap.setRevIncludes(Collections.singleton(new Include("*")));
-			paramMap.setIncludes(Collections.singleton(new Include("*")));
+			paramMap.setRevIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
+			paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
 			return retVal;

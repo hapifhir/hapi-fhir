@@ -22,6 +22,8 @@
 				<a href="https://coveralls.io/r/jamesagnew/hapi-fhir?branch=master"><img src="https://coveralls.io/repos/jamesagnew/hapi-fhir/badge.svg?branch=master" alt="Coverage Status"/></a>
 				<br/>
 				<a href="https://maven-badges.herokuapp.com/maven-central/ca.uhn.hapi.fhir/hapi-fhir-base/badge.svg"><img src="https://maven-badges.herokuapp.com/maven-central/ca.uhn.hapi.fhir/hapi-fhir-base/badge.svg" alt="Maven Central"/></a>
+				<br/>
+				<a href="https://www.versioneye.com/user/projects/55e1d0d9c6d8f2001c00043e"><img src="https://www.versioneye.com/user/projects/55e1d0d9c6d8f2001c00043e/badge.svg?style=flat" alt="VersionEye"/></a>
 			</p>
 			
 			<p>

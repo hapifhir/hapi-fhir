@@ -16,11 +16,11 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>16875</WindowHeight>
-  <WindowWidth>-27136</WindowWidth>
+  <WindowHeight>12975</WindowHeight>
+  <WindowWidth>24000</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>7</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -1097,7 +1097,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Error or warning code</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide it's own code for the error in the details element</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Expresses the issue in a human and computer-friendly way, allowing the requesting system to behave differently based on the type of issue</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -3744,7 +3744,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -5873,7 +5872,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">exception</Data></Cell>
     <Cell ss:StyleID="s78"><Data ss:Type="String">operationoutcome-example-exception.xml</Data></Cell>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s141"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s140"><Data ss:Type="String">All OK</Data></Cell>
@@ -5882,7 +5881,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">allok</Data></Cell>
     <Cell ss:StyleID="s78"><Data ss:Type="String">operationoutcome-example-allok.xml</Data></Cell>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s141"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s140"><Data ss:Type="String">Validation Failed</Data></Cell>
@@ -5891,7 +5890,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">validationfail</Data></Cell>
     <Cell ss:StyleID="s78"><Data ss:Type="String">operationoutcome-example-validationfail.xml</Data></Cell>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s141"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s140"><Data ss:Type="String">Search Error</Data></Cell>
@@ -5900,16 +5899,16 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">searchfail</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">operationoutcome-example-searchfail.xml</Data></Cell>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s141"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s140"/>
+    <Cell ss:StyleID="s140"><Data ss:Type="String">Break-The-Glass Hint</Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">A note that additional information might be available if Break-The-Glass is used</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">break-the-glass</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">operationoutcome-example-break-the-glass.xml</Data></Cell>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s141"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s140"/>
@@ -6217,6 +6216,7 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6236,8 +6236,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>7</ActiveRow>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>3</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

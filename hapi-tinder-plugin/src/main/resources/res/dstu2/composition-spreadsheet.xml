@@ -16,8 +16,8 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>16875</WindowHeight>
-  <WindowWidth>-27136</WindowWidth>
+  <WindowHeight>11400</WindowHeight>
+  <WindowWidth>22575</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>622</TabRatio>
@@ -993,7 +993,7 @@
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s78"><Data ss:Type="String">A set of resources composed into a single coherent clinical statement with clinical attestation</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s80"><Data ss:Type="String">A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement.  </Data><NamedCell
+    <Cell ss:StyleID="s80"><Data ss:Type="String">A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s81"><Data ss:Type="String">To support documents, and also to capture the EN13606 notion of an attested commit to the patient EHR, and to allow a set of disparate resources at the information/engineering level to be gathered into a clinical statement</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1147,7 +1147,8 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Key metadata element describing the composition, used in searching/filtering.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">For Composition type, LOINC is ubiquitious and strongly endorsed by the HL7. Most implementation guides will require a specific LOINC code, or use LOINC as an extensible binding</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">./code</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1185,7 +1186,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Helps humans to assess whether the composition is of interest when viewing an index of compositions or documents</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">This is a metadata field from [XDS/MHD](http://wiki.ihe.net/index.php?title=Mobile_access_to_Health_Documents_(MHD)) </Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">This is a metadata field from [XDS/MHD](http://wiki.ihe.net/index.php?title=Mobile_access_to_Health_Documents_(MHD))</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.outboundRelationship[typeCode=&quot;COMP].target[classCode=&quot;LIST&quot;, moodCode=&quot;EVN&quot;].code</Data><NamedCell
@@ -1202,7 +1203,7 @@
     <Cell ss:StyleID="s86"><Data ss:Type="String">Composition.title</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">1..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">string</Data><NamedCell
@@ -1221,7 +1222,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">Official human-readable label for the composition</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">If compositions do not have a title, the text or a display name of Composition.type (e.g. a &quot;consultation&quot; or &quot;progress note&quot;) can be used in its place</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">For many compositions, the title is the same as the text or a display name of Composition.type (e.g. a &quot;consultation&quot; or &quot;progress note&quot;). Note that CDA does not make title mandatory, but there are no known cases where it is useful for title to be omitted, so it is mandatory here. Feedback on this requirement is welcome during the trial use period</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">./title</Data><NamedCell
@@ -1255,13 +1256,13 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">preliminary | final | appended | amended | entered-in-error</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">preliminary | final | amended | entered-in-error</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">The workflow/clinical status of this composition. The status is a marker for the clinical standing of the document</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Need to be able to mark interim, amended, or withdrawn compositions or documents</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">If a composition is marked as withdrawn, the compositions/documents in the series, or data from the composition or document series, should never be displayed to a user without being clearly marked as untrustworthy. The flag &quot;withdrawn&quot; is why this element is labeled as a modifier of other elements</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">If a composition is marked as withdrawn, the compositions/documents in the series, or data from the composition or document series, should never be displayed to a user without being clearly marked as untrustworthy. The flag &quot;withdrawn&quot; is why this element is labeled as a modifier of other elements. &#10;&#10;Some reporting work flows require that the original narrative of a final document never be altered; instead, only new narrative can be added. The composition resource has no explicit status for explicitly reporting this business rule hass been . This would be handled by an extension if required</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">interim: .completionCode=&quot;IN&quot; &amp; ./statusCode[isNormalDatatype()]=&quot;active&quot;;  final: .completionCode=&quot;AU&quot; &amp;&amp;  ./statusCode[isNormalDatatype()]=&quot;complete&quot; and not(./inboundRelationship[typeCode=&quot;SUBJ&quot; and isNormalActRelationship()]/source[subsumesCode(&quot;ActClass#CACT&quot;) and moodCode=&quot;EVN&quot; and domainMember(&quot;ReviseComposition&quot;, code) and isNormalAct()]);  amended: .completionCode=&quot;AU&quot; &amp;&amp;  ./statusCode[isNormalDatatype()]=&quot;complete&quot; and ./inboundRelationship[typeCode=&quot;SUBJ&quot; and isNormalActRelationship()]/source[subsumesCode(&quot;ActClass#CACT&quot;) and moodCode=&quot;EVN&quot; and domainMember(&quot;ReviseComposition&quot;, code) and isNormalAct() and statusCode=&quot;completed&quot;];  withdrawn : .completionCode=NI &amp;&amp;  ./statusCode[isNormalDatatype()]=&quot;obsolete&quot;  </Data><NamedCell
@@ -1736,9 +1737,9 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Full details for the event(s) the composition consents</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">The event(s) being documented</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Full details for the event(s) the composition/documentation consents</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1849,7 +1850,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Section headings are often standardized for different types of documents.  They give guidance to humans on how the document is organized</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The title identifies the section for a human reader. The title must be consistent with the narrative of the resource that is the target of the section.content reference</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The title identifies the section for a human reader. The title must be consistent with the narrative of the resource that is the target of the section.content reference. Generally, sections SHOULD have titles, but in some documents it is unnecessary or inappropriate. Typically, this is where a section has subsections that have their own adequately distinguishing title,  or documents that only have a single section. Most Implementation Guides will make section title to be a required element</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">./title</Data><NamedCell
@@ -3657,7 +3658,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>28</TopRowBottomPane>
+   <TopRowBottomPane>4</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -3674,7 +3675,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>31</ActiveRow>
+     <ActiveRow>6</ActiveRow>
      <ActiveCol>16</ActiveCol>
     </Pane>
    </Panes>
@@ -4530,7 +4531,7 @@
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Operations!R1C1:R2C9"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="11" ss:ExpandedRowCount="51" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="11" ss:ExpandedRowCount="49" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s113" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="130.5"/>
    <Column ss:StyleID="s113" ss:AutoFitWidth="0" ss:Width="124.5"/>
@@ -4593,7 +4594,8 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="String">A client can ask a server to generate a fully bundled document from a composition resource. The server takes the composition resource, locates all the referenced resources and other additional resources as configured or requested and either returns a full document bundle, or returns an error. Note that since this is a search operation, the document bundle is  wrapped inside the search bundle.  If some of the resources are located on other servers, it is at the discretion of the  server whether to retrieve them or return an error. If the correct version of the document  that would be generated already exists, then the server can return the existing one.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s131"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">Note: this operation definition does not resolve the question how document signatures are created. This is an open issue during the period of trail use, and feedback is requested regarding this question</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">$document-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$document-response.txt</Data></Cell>
    </Row>
@@ -4606,28 +4608,6 @@
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s119"><Data ss:Type="String">Whether to store the document once it is generated</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">Whether to store the document at the binary end-point (/Binary) or not once it is generated. Value = true or false (default is for the server to decide)</Data></Cell>
-    <Cell ss:StyleID="s134"/>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s118"><Data ss:Type="String">document.cert</Data></Cell>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">string</Data></Cell>
-    <Cell ss:StyleID="s119"/>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">Certificate URL to use to sign the document with</Data></Cell>
-    <Cell ss:StyleID="s133"><Data ss:Type="String">Certificate URL to use to sign the document with. The certificate should be associated with one of the attestors</Data></Cell>
-    <Cell ss:StyleID="s134"/>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="75">
-    <Cell ss:StyleID="s118"><Data ss:Type="String">document.pword</Data></Cell>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">string</Data></Cell>
-    <Cell ss:StyleID="s119"/>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">Password for private key if certificate requires one</Data></Cell>
-    <Cell ss:StyleID="s133"><Data ss:Type="String">Password for private key if certificate requires one and the server doesn't know it by some other means. Putting the password in the URL has obvious security implications to consider. An alternative is for the client to sign the document</Data></Cell>
     <Cell ss:StyleID="s134"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -7415,7 +7395,7 @@
    <NamedRange ss:Name="_FilterDatabase"
     ss:RefersTo="='composition-status'!R1C1:R1C9" ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="50" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s138" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s138" ss:Width="80.25"/>
    <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="34.5"/>
@@ -7484,24 +7464,13 @@
     <Cell ss:StyleID="s132"><Data ss:Type="String">&lt;ActStatus.completed</Data></Cell>
     <Cell ss:StyleID="s143"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="90">
-    <Cell ss:StyleID="s142"><Data ss:Type="String">appended</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="Number">3</Data></Cell>
-    <Cell ss:StyleID="s119"/>
-    <Cell ss:StyleID="s152"/>
-    <Cell ss:StyleID="s152"><Data ss:Type="String">Appended ap Appended</Data></Cell>
-    <Cell ss:StyleID="s152"><Data ss:Type="String">The composition or document has been modified subsequent to being released as &quot;final&quot;, and is complete and verified by an authorized person. The modifications added new information to the composition or document, but did not revise existing content</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">&lt;ActStatus.completed</Data></Cell>
-    <Cell ss:StyleID="s143"><Data ss:Type="String">If systems are not able to be sure whether existing information has changed or not, they should use the status &quot;amended&quot;</Data></Cell>
-   </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
     <Cell ss:StyleID="s142"><Data ss:Type="String">amended</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="Number">4</Data></Cell>
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s152"><Data ss:Type="String">Amended</Data></Cell>
-    <Cell ss:StyleID="s152"><Data ss:Type="String">The composition or document has been modified subsequent to being released as &quot;final&quot;, and is complete and verified by an authorized person</Data></Cell>
+    <Cell ss:StyleID="s152"><Data ss:Type="String">The composition content or the referenced resources have been modified (edited or added to) subsequent to being released as &quot;final&quot; and the composition is complete and verified by an authorized person</Data></Cell>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s132"><Data ss:Type="String">&lt;ActStatus.completed</Data></Cell>
     <Cell ss:StyleID="s143"/>
@@ -8029,7 +7998,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>6</ActiveRow>
+     <ActiveRow>3</ActiveRow>
      <ActiveCol>4</ActiveCol>
     </Pane>
    </Panes>

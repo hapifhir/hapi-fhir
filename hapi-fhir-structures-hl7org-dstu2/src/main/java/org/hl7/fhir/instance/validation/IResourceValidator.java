@@ -86,7 +86,7 @@ public interface IResourceValidator {
   List<ValidationMessage> validate(Element element) throws Exception;
 
   /**
-   * Given a DOM element, return a list of errors in the resource 
+   * Given a DOM element, return a list of errors in the resource
    * 
    * @param errors
    * @param elem

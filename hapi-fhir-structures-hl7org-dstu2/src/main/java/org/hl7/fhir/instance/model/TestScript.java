@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -3264,10 +3264,10 @@ public class TestScript extends DomainResource {
         protected Enumeration<ContentType> contentType;
 
         /**
-         * The header field e.g. 'Content-Location'.
+         * The header field e.g. 'Location'.
          */
         @Child(name = "headerField", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The header field", formalDefinition="The header field e.g. 'Content-Location'." )
+        @Description(shortDefinition="The header field", formalDefinition="The header field e.g. 'Location'." )
         protected StringType headerField;
 
         /**
@@ -3651,7 +3651,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #headerField} (The header field e.g. 'Content-Location'.). This is the underlying object with id, value and extensions. The accessor "getHeaderField" gives direct access to the value
+         * @return {@link #headerField} (The header field e.g. 'Location'.). This is the underlying object with id, value and extensions. The accessor "getHeaderField" gives direct access to the value
          */
         public StringType getHeaderFieldElement() { 
           if (this.headerField == null)
@@ -3671,7 +3671,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #headerField} (The header field e.g. 'Content-Location'.). This is the underlying object with id, value and extensions. The accessor "getHeaderField" gives direct access to the value
+         * @param value {@link #headerField} (The header field e.g. 'Location'.). This is the underlying object with id, value and extensions. The accessor "getHeaderField" gives direct access to the value
          */
         public TestScriptSetupActionAssertComponent setHeaderFieldElement(StringType value) { 
           this.headerField = value;
@@ -3679,14 +3679,14 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The header field e.g. 'Content-Location'.
+         * @return The header field e.g. 'Location'.
          */
         public String getHeaderField() { 
           return this.headerField == null ? null : this.headerField.getValue();
         }
 
         /**
-         * @param value The header field e.g. 'Content-Location'.
+         * @param value The header field e.g. 'Location'.
          */
         public TestScriptSetupActionAssertComponent setHeaderField(String value) { 
           if (Utilities.noString(value))
@@ -4238,7 +4238,7 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("compareToSourceId", "string", "Id of fixture used to compare the \"sourceId/path\" evaluations to.", 0, java.lang.Integer.MAX_VALUE, compareToSourceId));
           childrenList.add(new Property("compareToSourcePath", "string", "XPath or JSONPath expression against fixture used to compare the \"sourceId/path\" evaluations to.", 0, java.lang.Integer.MAX_VALUE, compareToSourcePath));
           childrenList.add(new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, java.lang.Integer.MAX_VALUE, contentType));
-          childrenList.add(new Property("headerField", "string", "The header field e.g. 'Content-Location'.", 0, java.lang.Integer.MAX_VALUE, headerField));
+          childrenList.add(new Property("headerField", "string", "The header field e.g. 'Location'.", 0, java.lang.Integer.MAX_VALUE, headerField));
           childrenList.add(new Property("minimumId", "string", "The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.", 0, java.lang.Integer.MAX_VALUE, minimumId));
           childrenList.add(new Property("navigationLinks", "boolean", "Navigation Links.", 0, java.lang.Integer.MAX_VALUE, navigationLinks));
           childrenList.add(new Property("operator", "code", "The operator type.", 0, java.lang.Integer.MAX_VALUE, operator));

@@ -10,14 +10,14 @@
   <LastAuthor>Grahame Grieve</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2015-07-29T02:22:47Z</LastSaved>
-  <Version>15.00</Version>
+  <Version>14.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>11400</WindowHeight>
-  <WindowWidth>22575</WindowWidth>
+  <WindowHeight>12975</WindowHeight>
+  <WindowWidth>24000</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>673</TabRatio>
@@ -1962,7 +1962,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Reference</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Reference(Any)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1994,7 +1994,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Reference</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Reference(Any)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3058,7 +3058,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">The header field</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">The header field e.g. 'Content-Location'</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">The header field e.g. 'Location'</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">If &quot;headerField&quot; is specified then &quot;value&quot; must be specified.  If &quot;sourceId&quot; is not specified, then &quot;headerField&quot; will be evaluated against the last operation's response headers.  Test engines are to keep track of the last operation's response body and response headers.</Data><NamedCell
@@ -3158,7 +3158,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">The operator type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Operators come handy especially for negative testing.  If operator is not specified, then the &quot;equals&quot; operator is assumed.  e.g. &lt;code&gt;   &lt;assert&gt;  &lt;operator value=&quot;in&quot; /&gt;  &lt;responseCode value=&quot;200,201,204&quot; /&gt;    &lt;/assert&gt;    &lt;assert&gt;  &lt;operator value=&quot;notEmpty&quot; /&gt;  &lt;responseHeader&gt;     &lt;field value=&quot;Content-Location&quot; /&gt;   &lt;responseHeader&gt;   &lt;/assert&gt;    &lt;assert&gt;  &lt;operator value=&quot;notEquals&quot; /&gt;  &lt;response value=&quot;okay&quot;/&gt;   &lt;/assert&gt;    &lt;assert&gt;  &lt;operator value=&quot;greaterThan&quot; /&gt;    &lt;responseHeader&gt;     &lt;field value=&quot;Content-Length&quot; /&gt;     &lt;value value=&quot;0&quot; /&gt;    &lt;responseHeader&gt;   &lt;/assert&gt; &lt;/code&gt; </Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Operators come handy especially for negative testing.  If operator is not specified, then the &quot;equals&quot; operator is assumed.  e.g. &lt;code&gt;   &lt;assert&gt;  &lt;operator value=&quot;in&quot; /&gt;  &lt;responseCode value=&quot;200,201,204&quot; /&gt;    &lt;/assert&gt;    &lt;assert&gt;  &lt;operator value=&quot;notEquals&quot; /&gt;  &lt;response value=&quot;okay&quot;/&gt;   &lt;/assert&gt;    &lt;assert&gt;  &lt;operator value=&quot;greaterThan&quot; /&gt;    &lt;responseHeader&gt;     &lt;field value=&quot;Content-Length&quot; /&gt;     &lt;value value=&quot;0&quot; /&gt;    &lt;responseHeader&gt;   &lt;/assert&gt; &lt;/code&gt; </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -5546,9 +5546,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>11</TopRowBottomPane>
+   <TopRowBottomPane>48</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>13</LeftColumnRightPane>
+   <LeftColumnRightPane>8</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -5564,7 +5564,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>12</ActiveRow>
+     <ActiveRow>65</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

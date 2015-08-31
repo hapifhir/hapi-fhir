@@ -1,0 +1,1530 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="xdsdocumentreference"/>
+ <url value="http://hl7.org/fhir/StructureDefinition/xdsdocumentreference"/>
+ <name value="XDS profile for Document Reference"/>
+ <publisher value="HL7"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org"/>
+  </telecom>
+ </contact>
+ <description value="XDSDocumentEntry"/>
+ <status value="draft"/>
+ <date value="2012-06-24"/>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+ <snapshot>
+  <element>
+   <path value="DocumentReference"/>
+   <name value="XDSDocumentReference"/>
+   <short value="XDSDocumentEntry"/>
+   <definition value="A reference to a document."/>
+   <comments value="Usually, this is used for documents other than those defined by FHIR."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DocumentReference"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Document[classCode=&quot;DOC&quot; and moodCode=&quot;EVN&quot;]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="infrastructure"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="DocumentReference.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="DocumentReference.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="DocumentReference.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="DocumentReference.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.masterIdentifier"/>
+   <short value="XDSDocumentEntry.uniqueId"/>
+   <definition value="Globally unique identifier assigned to the document by the creating entity. A DocumentEntry representing a single document is identified by the uniqueId attribute; the linkage between DocumentEntry and the Document it represents is made with the uniqueId attribute. This unique identifier may be used in other documents to reference this document."/>
+   <comments value="CDA Document Id extension and root."/>
+   <requirements value="The structure and format of this Id shall be consistent with the specification corresponding to the formatCode attribute. (e.g., for a DICOM standard document a 64 character numeric UID, for an HL7 CDA format a serialization of the CDA Document Id extension and root in the form oid^extension, where OID is a 64 digits max, and the Id is a 16 UTF-8 char max. If the OID is coded without the extension then the '^' character shall not be included.)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="TXA-12-Unique Document Number"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.uniqueId"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.identifier"/>
+   <short value="XDSDocumentEntry.referenceIdList"/>
+   <definition value="Other identifiers for the document."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="TXA-16-Unique Document File Name?"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id / .setId"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.entryUUID"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.subject"/>
+   <short value="XDSDocumentEntry.patientId + sourcePatientId/sourcePatientInfo"/>
+   <definition value="The patientId represents the subject of care of the document.  The value of the patientId shall be the same for all new documents of a SubmissionSet. Patient information typically includes: the patient first and last name, sex, and birth date."/>
+   <comments value="In the context of XDS, the patientId shall be the one with use = official. The Clinical XDS Affinity Domain policies may require more or less specific information and format. This patient information is not intended to be updated once the Document is registered (just as the Document content and metadata itself will not be updated without replacing the previous document). As sourcePatientInfo may have been updated by the source actor, it may no longer be in use within the Document Source (EHR-CR). It is only intended as an audit/checking mechanism and has occasional use for Document Consumer actors."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PID-3-Patient ID List (No standard way to define a Practitioner or Group subject in V2 MDM message)"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=&quot;SBJ&quot;].role[typeCode=&quot;PAT&quot;]"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.patientId"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.focus"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.type"/>
+   <short value="XDSDocumentEntry.typeCode"/>
+   <definition value="The code specifying the particular kind of document (e.g., Prescription, Discharge Summary, Report). It is suggested that the XDS Affinity Domain draws these values from a coding scheme providing a coarse level of granularity (about 10 to 100 entries). Shall have a single value."/>
+   <comments value="Key metadata element describing the document, used in searching/filtering."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="Precice type of clinical document"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/c80-doc-typecodes"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="TXA-2-Document Type"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./code"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.type"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.class"/>
+   <short value="XDSDocumentEntry.classCode"/>
+   <definition value="A categorization for the type of the document. This may be implied by or derived from the code specified in the Document Type."/>
+   <comments value="XDSDocumentEntry.typeCode."/>
+   <requirements value="Helps humans to assess whether the document is of interest when viewing an list of documents."/>
+   <alias value="kind"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="High-level kind of a clinical document at a macro level"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/c80-doc-classcodes"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value=".outboundRelationship[typeCode=&quot;COMP].target[classCode=&quot;LIST&quot;, moodCode=&quot;EVN&quot;].code"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=&quot;COMP].target[classCode=&quot;LIST&quot;, moodCode=&quot;EVN&quot;].code"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.class"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.format"/>
+   <short value="XDSDocumentEntry.formatCode"/>
+   <definition value="Code globally uniquely specifying the format of the document. Along with the typeCode, it should provide sufficient information to allow any potential XDS Document Consumer to know if it will be able to process the document. The formatCode shall be sufficiently specific to ensure processing/display by identifying a document encoding, structure and template (e.g., for a CDA Document, the fact that it complies with a CDA schema, possibly a template and the choice of a content-specific style sheet)."/>
+   <comments value="Format codes may be specified by multiple organizations. Format codes defined by ITI shall have names with the prefix urn:ihe:iti:. Format codes defined by other IHE domains shall have names with the prefix urn:ihe:???domain initials???: Format codes defined by the Affinity Domain shall have names with the prefix urn:ad:???name of affinity domain???: Affinity Domains shall be unique. The prefixes described here are not assumed to be exhaustive."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="Document Format Codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/formatcodes"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.formatCode"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.author"/>
+   <short value="XDSDocumentEntry.author"/>
+   <definition value="Represents the humans and/or machines that authored the document."/>
+   <comments value="Not necessarily who did the actual data entry (i.e. typist) it in or who was the source (informant)."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="TXA-9-Originator Code/Name (No standard way to indicate a Device in V2 MDM message)"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=&quot;AUT&quot;].role[classCode=&quot;ASSIGNED&quot;]"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.author"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.author"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.custodian"/>
+   <short value="n/a"/>
+   <definition value="Org which maintains the document."/>
+   <comments value="Identifies the logical organization to go to find the current version, where to report issues, etc. This is different from the physical location of the document, which is the technical location of the document, which host may be delegated to the management of some other organization."/>
+   <min value="0"/>
+   <max value="0"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=&quot;RCV&quot;].role[classCode=&quot;CUST&quot;].scoper[classCode=&quot;ORG&quot; and determinerCode=&quot;INST&quot;]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.authenticator"/>
+   <short value="??"/>
+   <definition value="Represents a participant who has legally authenticated or attested the document within the authorInstitution. Legal authentication implies that a document has been signed manually or electronically by the legalAuthenticator."/>
+   <comments value="Represents a participant within the author institution who has legally authenticated or attested the document. Legal authentication implies that a document has been signed manually or electronically by the legal Authenticator."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="TXA-10-Assigned Document Authenticator"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=&quot;AUTHEN&quot;].role[classCode=&quot;ASSIGNED&quot;]"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.legalAuthenticator"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.created"/>
+   <short value="XDSDocumentEntry.creationTime"/>
+   <definition value="Represents the time the author created the document in the Document Source."/>
+   <comments value="Creation time is used for tracking, organizing versions and searching. This is the creation time of the document, not the source material on which it is based."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="TXA-6-Origination Date/Time"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".effectiveTime[type=&quot;TS&quot;]"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.submissionTime"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.done"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.indexed"/>
+   <short value="XDS submission time or XDSDocumentEntry.creationTime  if unknown"/>
+   <definition value="When this document reference created."/>
+   <comments value="Referencing/indexing time is used for tracking, organizing versions and searching."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="instant"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".availabilityTime[type=&quot;TS&quot;]"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.submissionTime"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.status"/>
+   <short value="implied by XDS workflow"/>
+   <definition value="This attribute is always set to Approved as part of the submission of new XDS Documents. It may be changed to Deprecated under the primary responsibility of the Document Source with possible patient supervision. Although XDS supports the ability to delete documents, there is no such state as ???the Document Entry is removed??? (only an audit trail is kept if such a deletion is allowed)."/>
+   <comments value="This is the status of the DocumentReference object, which might be independent from the docStatus."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The status of the document reference"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/document-reference-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="TXA-19-Document Availability Status"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="interim: .completionCode=&quot;IN&quot; &amp; ./statusCode[isNormalDatatype()]=&quot;active&quot;;  final: .completionCode=&quot;AU&quot; &amp;&amp;  ./statusCode[isNormalDatatype()]=&quot;complete&quot; and not(./inboundRelationship[typeCode=&quot;SUBJ&quot; and isNormalActRelationship()]/source[subsumesCode(&quot;ActClass#CACT&quot;) and moodCode=&quot;EVN&quot; and domainMember(&quot;ReviseDocument&quot;, code) and isNormalAct()]);  amended: .completionCode=&quot;AU&quot; &amp;&amp;  ./statusCode[isNormalDatatype()]=&quot;complete&quot; and ./inboundRelationship[typeCode=&quot;SUBJ&quot; and isNormalActRelationship()]/source[subsumesCode(&quot;ActClass#CACT&quot;) and moodCode=&quot;EVN&quot; and domainMember(&quot;ReviseDocument&quot;, code) and isNormalAct() and statusCode=&quot;completed&quot;];  withdrawn : .completionCode=NI &amp;&amp;  ./statusCode[isNormalDatatype()]=&quot;obsolete&quot;"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry status"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.docStatus"/>
+   <short value="preliminary | final | appended | amended | entered-in-error"/>
+   <definition value="Status of the underlying document."/>
+   <comments value="The document that is pointed to might be in various lifecycle states."/>
+   <min value="0"/>
+   <max value="0"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Status of the underlying document"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/composition-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="TXA-17-Document Completion Status"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".statusCode"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.relatesTo"/>
+   <short value="Relationships that this document has with other document references that already exist"/>
+   <definition value="Relationships to other documents."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.relatesTo.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.relatesTo.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.relatesTo.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.relatesTo.code"/>
+   <short value="The type of relationship that this document has with anther document"/>
+   <definition value="supersedes | transforms | signs | appends."/>
+   <comments value="If this document appends another document, then the document cannot be fully understood without also accessing the referenced document."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The type of relationship between documents"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/document-relationship-type"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship.typeCode"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry Associations type"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.relatesTo.target"/>
+   <short value="The target document of this relationship"/>
+   <definition value="Target of the relationship."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".target[classCode=&quot;DOC&quot;, moodCode=&quot;EVN&quot;].id"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry Associations reference"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.description"/>
+   <short value="XDSDocumentEntry.title"/>
+   <definition value="Represents the title of the document."/>
+   <comments value="What the document is about, rather than a terse summary of the document. It is commonly the case that records do not have a title and are collectively referred to by the display name of Record code (e.g. a &quot;consultation&quot; or &quot;progress note&quot;)."/>
+   <requirements value="Helps humans to assess whether the document is of interest."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="TXA-25-Document Title"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=&quot;SUBJ&quot;].target.text"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.description"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.securityLabel"/>
+   <short value="XDSDocumentEntry.confidentialityCode"/>
+   <definition value="The code specifying the level of confidentiality of the XDS Document. These codes are specific to an XDS Affinity Domain."/>
+   <comments value="Enforcement and issues related to highly sensitive documents are beyond the scope of XDS (see security section). confidentialityCode is part of a codification scheme and value set enforced by the Document Registry."/>
+   <requirements value="Use of the Health Care Privacy/Security Classification (HCS) system of security-tag use is recommended."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Security Labels from the Healthcare Privacy and Security Classification System"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/security-labels"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="TXA-18-Document Confidentiality Status"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".confidentialityCode"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.confidentialityCode"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.content"/>
+   <short value="Where to access the document"/>
+   <definition value="The document or url to the document along with critical metadata to prove content has integrity."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.mimeType DocumentEntry.languageCode DocumentEntry.URI DocumentEntry.size DocumentEntry.hash DocumentEntry.title"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.content.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.content.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.content.contentType"/>
+   <short value="XDSDocumentEntry.mimeType"/>
+   <definition value="MIME type of the document in the Repository."/>
+   <requirements value="Processors of the data need to be able to know how to interpret the data."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <exampleCode value="text/plain; charset=UTF-8, image/png"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The mime type of an attachment. Any valid mime type is allowed"/>
+    <valueSetUri value="http://www.rfc-editor.org/bcp/bcp13.txt"/>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="ED.2+ED.3/RP.2+RP.3. Note conversion may be needed if old style values are being used"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./mediaType, ./charset"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.content.language"/>
+   <short value="XDSDocumentEntry.languageCode"/>
+   <definition value="Specifies the human language of character data in the document. The values of the attribute are language identifiers as described by the IETF (Internet Engineering Task Force) RFC 3066."/>
+   <comments value="This value may further be restricted by the registry according to XDS Affinity Domain specific policy."/>
+   <requirements value="Users need to be able to choose between the languages in a set of attachments."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <exampleCode value="en-AU"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./language"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.content.data"/>
+   <short value="Data inline, base64ed"/>
+   <definition value="The actual data of the attachment - a sequence of bytes. In XML, represented using base64."/>
+   <comments value="The base64-encoded data SHALL be expressed in the same character set as the base resource XML or JSON."/>
+   <requirements value="The data needs to able to be transmitted inline."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="base64Binary"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="ED.5"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./data"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.content.url"/>
+   <short value="repository location (by implication &amp; configuration)"/>
+   <definition value="Where to access the document."/>
+   <comments value="If both data and url are provided, the url SHALL point to the same content as the data contains. Urls may be relative references or may reference transient locations such as a wrapping envelope using cid: though this has ramifications for using signatures. Relative URLs are interpreted relative to the service url, like a resource reference, rather than relative to the resource itself. If a URL is provided, it SHALL resolve to actual data."/>
+   <requirements value="The data needs to be transmitted by reference."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <exampleUri value="http://www.acme.com/logo-small.png"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="RP.1+RP.2 - if they refer to a URL (see v2.6)"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./reference/literal"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.content.size"/>
+   <short value="XDSDocumentEntry.size"/>
+   <definition value="Size in bytes of the byte stream that was provided in the Register and Provide Transaction and stored by the XDS Document Repository. This value is computed by the Document Repository and included in the Register Documents Set Transaction."/>
+   <comments value="The number of bytes is redundant if the data is provided as a base64binary, but is useful if the data is provided as a url reference."/>
+   <requirements value="Representing the size allows applications to determine whether they should fetch the content automatically in advance, or refuse to fetch it at all."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (needs data type R3 proposal)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.content.hash"/>
+   <short value="XDSDocumentEntry.hash"/>
+   <definition value="Hash key of the XDS Document itself."/>
+   <comments value="This value is computed by the Document Repository and used by the Document Registry for detecting the improper resubmission of XDS Documents. If present, shall have a single value. If this attribute is received in a Provide &amp; Register Document Set-b [ITI-41] transaction, it shall be verified by the repository with the actual hash value of the submitted document; an XDSRepositoryMetadataError shall be returned on mismatch."/>
+   <requirements value="Included so that applications can verify that the contents of a location have not changed and so that a signature of the content can implicitly sign the content of an image without having to include the data in the instance or reference the url in the signature."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="base64Binary"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".integrityCheck[parent::ED/integrityCheckAlgorithm=&quot;SHA-1&quot;]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.content.title"/>
+   <short value="Label to display in place of the data"/>
+   <definition value="A label or set of text to display in place of the data."/>
+   <requirements value="Applications need a label to display to a human user in place of the actual data if the data cannot be rendered or perceived by the viewer."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <exampleString value="&quot;Official Corporate Logo&quot;"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./title/data"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.content.creation"/>
+   <short value="Date attachment was first created"/>
+   <definition value="The date that the attachment was first created."/>
+   <requirements value="This is often tracked as an integrity issue for use of the attachment."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (needs data type R3 proposal)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context"/>
+   <short value="event codes, service Start &amp; Stop time, and facility type"/>
+   <definition value="Clinical context of document - eventCodeList, serviceStart &amp; Stop time, and facility type."/>
+   <comments value="These values are primarily added to help with searching for interesting/relevant documents."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="outboundRelationship[typeCode=&quot;SUBJ&quot;].target[classCode&lt;'ACT']"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.encounter"/>
+   <short value="Context of the document  content"/>
+   <definition value="Describes the clinical encounter or type of care that the document content is associated with."/>
+   <min value="0"/>
+   <max value="0"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Encounter"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="w5"/>
+    <map value="context"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.event"/>
+   <short value="XDSDocumentEntry.eventCodeList"/>
+   <definition value="This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a &quot;History and Physical Report&quot; in which the procedure being documented is necessarily a &quot;History and Physical&quot; act."/>
+   <comments value="An event can further specialize the act inherent in the typeCode, such as where it is simply &quot;Procedure Report&quot; and the procedure was a &quot;colonoscopy&quot;. If one or more eventCodes are included, they shall not conflict with the values inherent in the classCode, practiceSettingCode or typeCode, as such a conflict would create an ambiguous situation. This short list of codes is provided to be used as ???key words??? for certain types of queries."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.eventCodeList"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.period"/>
+   <short value="XDSDocumentEntry.serviceStartTime &amp; XDSDocumentEntry.serviceStopTime"/>
+   <definition value="The start and stop time of the service being documented took place."/>
+   <comments value="At least a start date SHALL be provided."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Period"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".effectiveTime"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.serviceStartTime DocumentEntry.serviceStopTime"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.facilityType"/>
+   <short value="XDSDocumentEntry.healthCareFacilityTypeCode"/>
+   <definition value="This code represents the type of organizational setting of the clinical encounter during which the documented act occurred."/>
+   <comments value="In some cases, the setting of the encounter is inherent in the typeCode, such as &quot;Diabetes Clinic Progress Note&quot;. healthcareFacilityTypeCode shall be equivalent to or further specialize the value inherent in the typeCode; for example, where the typeCode is simply &quot;Clinic Progress Note&quot; and the value of healthcareFacilityTypeCode is &quot;private clinic&quot;. The value shall not conflict with the value inherent in the typeCode, as such a conflict would create an ambiguous situation."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="XDS Facility Type"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/c80-facilitycodes"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=&quot;LOC&quot;].role[classCode=&quot;DSDLOC&quot;].code"/>
+   </mapping>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.healthcareFacilityTypeCode"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.practiceSetting"/>
+   <short value="XDSDocumentEntry.practiceSettingCode"/>
+   <definition value="XDSDocumentEntry.practiceSettingCode."/>
+   <comments value="The value set for this content has an example binding because it is a value set decided by community policy. Other examples exist for consideration: * HITSP created the table HITSP/C80 Table 2-148 Clinical Specialty Value Set (a value set based upon SNOMED-CT which is referenced by Direct (XDR and XDM for Direct Messaging Specification, Version 1), as well as Nationwide Health Information Network (NHIN).  Query for Documents, Web Service Interface Specification, V 3.0, 07/27/2011 * ELGA (Austria) (ELGA CDA Implementie-rungsleitfäden Registrierung von CDA Dokumenten für ELGA mit IHE Cross-Enterprise Document Sharing: XDS Metadaten (XDSDocumentEntry), [1.2.40.0.34.7.6.3] * XDS Connect-a-thon practiceSettingCode."/>
+   <requirements value="This is an important piece of metadata that providers often rely upon to quickly sort and/or filter out to find specific content."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Additional details about where the content was created (e.g. clinical specialty)"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/c80-practice-codes"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.practiceSettingCode"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.sourcePatientInfo"/>
+   <short value="Source patient info"/>
+   <definition value="The Patient Information as known when the document was published. May be a reference to a version specific, or contained."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.sourcePatientInfo DocumentEntry.sourcePatientId"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.related"/>
+   <short value="Related identifiers or resources"/>
+   <definition value="Related identifiers or resources associated with the DocumentReference."/>
+   <comments value="May be identifiers or resources that caused the DocumentReference or referenced Document to be created."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="DocumentReference.context.related.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.related.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.related.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.related.identifier"/>
+   <short value="Related Identifier"/>
+   <definition value="Related identifier to this DocumentReference. If both id and ref are present they shall refer to the same thing."/>
+   <comments value="Order numbers, accession numbers, XDW workflow numbers."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="xds"/>
+    <map value="DocumentEntry.referenceIdList"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="DocumentReference.context.related.ref"/>
+   <short value="Related Resource"/>
+   <definition value="Related Resource to this DocumentReference. If both id and ref are present they shall refer to the same thing."/>
+   <comments value="Order, DiagnosticOrder,  Procedure, EligibilityRequest, etc."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="DocumentReference"/>
+   <name value="XDSDocumentReference"/>
+   <short value="XDSDocumentEntry"/>
+   <definition value="A reference to a document."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DocumentReference"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.policyManager"/>
+   <short value="XDSDocumentEntry.homeCommunityId"/>
+   <definition value="A globally unique identifier for a community with which this document is associated."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.masterIdentifier"/>
+   <short value="XDSDocumentEntry.uniqueId"/>
+   <definition value="Globally unique identifier assigned to the document by the creating entity. A DocumentEntry representing a single document is identified by the uniqueId attribute; the linkage between DocumentEntry and the Document it represents is made with the uniqueId attribute. This unique identifier may be used in other documents to reference this document."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.identifier"/>
+   <short value="XDSDocumentEntry.referenceIdList"/>
+   <definition value="Other identifiers for the document."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.subject"/>
+   <short value="XDSDocumentEntry.patientId + sourcePatientId/sourcePatientInfo"/>
+   <definition value="The patientId represents the subject of care of the document.  The value of the patientId shall be the same for all new documents of a SubmissionSet. Patient information typically includes: the patient first and last name, sex, and birth date."/>
+   <comments value="In the context of XDS, the patientId shall be the one with use = official. The Clinical XDS Affinity Domain policies may require more or less specific information and format. This patient information is not intended to be updated once the Document is registered (just as the Document content and metadata itself will not be updated without replacing the previous document). As sourcePatientInfo may have been updated by the source actor, it may no longer be in use within the Document Source (EHR-CR). It is only intended as an audit/checking mechanism and has occasional use for Document Consumer actors."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.type"/>
+   <short value="XDSDocumentEntry.typeCode"/>
+   <definition value="The code specifying the particular kind of document (e.g., Prescription, Discharge Summary, Report). It is suggested that the XDS Affinity Domain draws these values from a coding scheme providing a coarse level of granularity (about 10 to 100 entries). Shall have a single value."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.class"/>
+   <short value="XDSDocumentEntry.classCode"/>
+   <definition value="A categorization for the type of the document. This may be implied by or derived from the code specified in the Document Type."/>
+   <comments value="XDSDocumentEntry.typeCode."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.format"/>
+   <short value="XDSDocumentEntry.formatCode"/>
+   <definition value="Code globally uniquely specifying the format of the document. Along with the typeCode, it should provide sufficient information to allow any potential XDS Document Consumer to know if it will be able to process the document. The formatCode shall be sufficiently specific to ensure processing/display by identifying a document encoding, structure and template (e.g., for a CDA Document, the fact that it complies with a CDA schema, possibly a template and the choice of a content-specific style sheet)."/>
+   <comments value="Format codes may be specified by multiple organizations. Format codes defined by ITI shall have names with the prefix urn:ihe:iti:. Format codes defined by other IHE domains shall have names with the prefix urn:ihe:???domain initials???: Format codes defined by the Affinity Domain shall have names with the prefix urn:ad:???name of affinity domain???: Affinity Domains shall be unique. The prefixes described here are not assumed to be exhaustive."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.author"/>
+   <short value="XDSDocumentEntry.author"/>
+   <definition value="Represents the humans and/or machines that authored the document."/>
+   <min value="1"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.custodian"/>
+   <short value="n/a"/>
+   <definition value="Org which maintains the document."/>
+   <min value="0"/>
+   <max value="0"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.authenticator"/>
+   <short value="??"/>
+   <definition value="Represents a participant who has legally authenticated or attested the document within the authorInstitution. Legal authentication implies that a document has been signed manually or electronically by the legalAuthenticator."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.created"/>
+   <short value="XDSDocumentEntry.creationTime"/>
+   <definition value="Represents the time the author created the document in the Document Source."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.indexed"/>
+   <short value="XDS submission time or XDSDocumentEntry.creationTime  if unknown"/>
+   <definition value="When this document reference created."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="instant"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.status"/>
+   <short value="implied by XDS workflow"/>
+   <definition value="This attribute is always set to Approved as part of the submission of new XDS Documents. It may be changed to Deprecated under the primary responsibility of the Document Source with possible patient supervision. Although XDS supports the ability to delete documents, there is no such state as ???the Document Entry is removed??? (only an audit trail is kept if such a deletion is allowed)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.docStatus"/>
+   <definition value="Status of the underlying document."/>
+   <min value="0"/>
+   <max value="0"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.relatesTo"/>
+   <short value="Relationships that this document has with other document references that already exist"/>
+   <definition value="Relationships to other documents."/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="DocumentReference.relatesTo.code"/>
+   <short value="The type of relationship that this document has with anther document"/>
+   <definition value="supersedes | transforms | signs | appends."/>
+   <comments value="If this document appends another document, then the document cannot be fully understood without also accessing the referenced document."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.relatesTo.target"/>
+   <short value="The target document of this relationship"/>
+   <definition value="Target of the relationship."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.description"/>
+   <short value="XDSDocumentEntry.title"/>
+   <definition value="Represents the title of the document."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.securityLabel"/>
+   <short value="XDSDocumentEntry.confidentialityCode"/>
+   <definition value="The code specifying the level of confidentiality of the XDS Document. These codes are specific to an XDS Affinity Domain."/>
+   <comments value="Enforcement and issues related to highly sensitive documents are beyond the scope of XDS (see security section). confidentialityCode is part of a codification scheme and value set enforced by the Document Registry."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.content"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.content.contentType"/>
+   <short value="XDSDocumentEntry.mimeType"/>
+   <definition value="MIME type of the document in the Repository."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.content.language"/>
+   <short value="XDSDocumentEntry.languageCode"/>
+   <definition value="Specifies the human language of character data in the document. The values of the attribute are language identifiers as described by the IETF (Internet Engineering Task Force) RFC 3066."/>
+   <comments value="This value may further be restricted by the registry according to XDS Affinity Domain specific policy."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.content.url"/>
+   <short value="repository location (by implication &amp; configuration)"/>
+   <definition value="Where to access the document."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.content.size"/>
+   <short value="XDSDocumentEntry.size"/>
+   <definition value="Size in bytes of the byte stream that was provided in the Register and Provide Transaction and stored by the XDS Document Repository. This value is computed by the Document Repository and included in the Register Documents Set Transaction."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.content.hash"/>
+   <short value="XDSDocumentEntry.hash"/>
+   <definition value="Hash key of the XDS Document itself."/>
+   <comments value="This value is computed by the Document Repository and used by the Document Registry for detecting the improper resubmission of XDS Documents. If present, shall have a single value. If this attribute is received in a Provide &amp; Register Document Set-b [ITI-41] transaction, it shall be verified by the repository with the actual hash value of the submitted document; an XDSRepositoryMetadataError shall be returned on mismatch."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="base64Binary"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.context"/>
+   <short value="event codes, service Start &amp; Stop time, and facility type"/>
+   <definition value="Clinical context of document - eventCodeList, serviceStart &amp; Stop time, and facility type."/>
+   <min value="0"/>
+   <max value="1"/>
+  </element>
+  <element>
+   <path value="DocumentReference.context.encounter"/>
+   <min value="0"/>
+   <max value="0"/>
+  </element>
+  <element>
+   <path value="DocumentReference.context.event"/>
+   <short value="XDSDocumentEntry.eventCodeList"/>
+   <definition value="This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a &quot;History and Physical Report&quot; in which the procedure being documented is necessarily a &quot;History and Physical&quot; act."/>
+   <comments value="An event can further specialize the act inherent in the typeCode, such as where it is simply &quot;Procedure Report&quot; and the procedure was a &quot;colonoscopy&quot;. If one or more eventCodes are included, they shall not conflict with the values inherent in the classCode, practiceSettingCode or typeCode, as such a conflict would create an ambiguous situation. This short list of codes is provided to be used as ???key words??? for certain types of queries."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.context.period"/>
+   <short value="XDSDocumentEntry.serviceStartTime &amp; XDSDocumentEntry.serviceStopTime"/>
+   <definition value="The start and stop time of the service being documented took place."/>
+   <comments value="At least a start date SHALL be provided."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Period"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.context.facilityType"/>
+   <short value="XDSDocumentEntry.healthCareFacilityTypeCode"/>
+   <definition value="This code represents the type of organizational setting of the clinical encounter during which the documented act occurred."/>
+   <comments value="In some cases, the setting of the encounter is inherent in the typeCode, such as &quot;Diabetes Clinic Progress Note&quot;. healthcareFacilityTypeCode shall be equivalent to or further specialize the value inherent in the typeCode; for example, where the typeCode is simply &quot;Clinic Progress Note&quot; and the value of healthcareFacilityTypeCode is &quot;private clinic&quot;. The value shall not conflict with the value inherent in the typeCode, as such a conflict would create an ambiguous situation."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+  </element>
+  <element>
+   <path value="DocumentReference.context.practiceSetting"/>
+   <short value="XDSDocumentEntry.practiceSettingCode"/>
+   <definition value="XDSDocumentEntry.practiceSettingCode."/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+  </element>
+ </differential>
+</StructureDefinition>

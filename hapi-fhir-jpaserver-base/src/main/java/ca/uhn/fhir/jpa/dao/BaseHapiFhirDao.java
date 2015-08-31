@@ -117,6 +117,8 @@ import ca.uhn.fhir.util.FhirTerser;
 
 public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
+	public static final long INDEX_STATUS_INDEXED = Long.valueOf(1L);
+	public static final long INDEX_STATUS_INDEXING_FAILED = Long.valueOf(2L);
 	public static final String NS_JPA_PROFILE = "https://github.com/jamesagnew/hapi-fhir/ns/jpa/profile";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirDao.class);
 
@@ -1127,12 +1129,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				entity.setParamsDatePopulated(dateParams.isEmpty() == false);
 				entity.setResourceLinks(links);
 				entity.setHasLinks(links.isEmpty() == false);
+				entity.setIndexStatus(INDEX_STATUS_INDEXED);
 
 			} else {
 
 				populateResourceIntoEntity(theResource, entity);
 				entity.setUpdated(new Date());
 				entity.setLanguage(theResource.getLanguage().getValue());
+				entity.setIndexStatus(null);
 
 			}
 

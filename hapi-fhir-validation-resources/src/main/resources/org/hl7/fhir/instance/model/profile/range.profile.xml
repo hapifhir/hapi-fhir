@@ -1,0 +1,204 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="Range"/>
+ <url value="http://hl7.org/fhir/StructureDefinition/Range"/>
+ <name value="Range"/>
+ <publisher value="HL7 FHIR Standard"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for Range Type"/>
+ <requirements value="Need to be able to specify ranges of values."/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="v2"/>
+  <uri value="http://hl7.org/v2"/>
+  <name value="HL7 v2"/>
+ </mapping>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
+ <snapshot>
+  <element>
+   <path value="Range"/>
+   <short value="Set of values bounded by low and high"/>
+   <definition value="A set of ordered Quantities defined by a low and high limit."/>
+   <comments value="The stated low and high value are assumed to have arbitrarily high precision when it comes to determining which values are in the range. I.e. 1.99 is not in the range 2 -> 3."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Element"/>
+   </type>
+   <constraint>
+    <key value="rng-2"/>
+    <severity value="error"/>
+    <human value="If present, low SHALL have a lower value than high"/>
+    <xpath value="not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) &lt;= number(f:high/f:value/@value))"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="NR and also possibly SN (but see also quantity)"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="IVL&lt;QTY[not(type=&quot;TS&quot;)]> [lowClosed=&quot;true&quot; and highClosed=&quot;true&quot;]or URG&lt;QTY[not(type=&quot;TS&quot;)]>"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Range.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Range.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Range.low"/>
+   <short value="Low limit"/>
+   <definition value="The low limit. The boundary is inclusive."/>
+   <comments value="If the low element is missing, the low boundary is not known."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
+   </type>
+   <condition value="rng-2"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="NR.1"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./low"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Range.high"/>
+   <short value="High limit"/>
+   <definition value="The high limit. The boundary is inclusive."/>
+   <comments value="If the high element is missing, the high boundary is not known."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
+   </type>
+   <condition value="rng-2"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="NR.2"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./high"/>
+   </mapping>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="Range"/>
+   <short value="Set of values bounded by low and high"/>
+   <definition value="A set of ordered Quantities defined by a low and high limit."/>
+   <comments value="The stated low and high value are assumed to have arbitrarily high precision when it comes to determining which values are in the range. I.e. 1.99 is not in the range 2 -> 3."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Element"/>
+   </type>
+   <constraint>
+    <key value="rng-2"/>
+    <severity value="error"/>
+    <human value="If present, low SHALL have a lower value than high"/>
+    <xpath value="not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) &lt;= number(f:high/f:value/@value))"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="NR and also possibly SN (but see also quantity)"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="IVL&lt;QTY[not(type=&quot;TS&quot;)]> [lowClosed=&quot;true&quot; and highClosed=&quot;true&quot;]or URG&lt;QTY[not(type=&quot;TS&quot;)]>"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Range.low"/>
+   <short value="Low limit"/>
+   <definition value="The low limit. The boundary is inclusive."/>
+   <comments value="If the low element is missing, the low boundary is not known."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
+   </type>
+   <condition value="rng-2"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="NR.1"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./low"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Range.high"/>
+   <short value="High limit"/>
+   <definition value="The high limit. The boundary is inclusive."/>
+   <comments value="If the high element is missing, the high boundary is not known."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
+   </type>
+   <condition value="rng-2"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="NR.2"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./high"/>
+   </mapping>
+  </element>
+ </differential>
+</StructureDefinition>

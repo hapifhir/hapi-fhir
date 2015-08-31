@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
 
 
 public enum OrganizationType {
@@ -59,9 +59,25 @@ public enum OrganizationType {
          */
         EDU, 
         /**
-         * An organization that identified as a part of a religeous institution
+         * An organization that is identified as a part of a religeous institution
          */
         RELI, 
+        /**
+         * An organization that is identified as a Pharmaceutical/Clinical Research Sponsor
+         */
+        CRS, 
+        /**
+         * An un-incorporated community group
+         */
+        CG, 
+        /**
+         * An organization that is a registered business or corporation but not identified by other types
+         */
+        BUS, 
+        /**
+         * Other type of organization not already specified
+         */
+        OTHER, 
         /**
          * added to help the parsers
          */
@@ -83,6 +99,14 @@ public enum OrganizationType {
           return EDU;
         if ("reli".equals(codeString))
           return RELI;
+        if ("crs".equals(codeString))
+          return CRS;
+        if ("cg".equals(codeString))
+          return CG;
+        if ("bus".equals(codeString))
+          return BUS;
+        if ("other".equals(codeString))
+          return OTHER;
         throw new Exception("Unknown OrganizationType code '"+codeString+"'");
         }
         public String toCode() {
@@ -94,6 +118,10 @@ public enum OrganizationType {
             case INS: return "ins";
             case EDU: return "edu";
             case RELI: return "reli";
+            case CRS: return "crs";
+            case CG: return "cg";
+            case BUS: return "bus";
+            case OTHER: return "other";
             default: return "?";
           }
         }
@@ -108,7 +136,11 @@ public enum OrganizationType {
             case GOVT: return "A political body, often used when including organization records for government bodies such as a Federal Government, State or Local Government";
             case INS: return "A company that provides insurance to its subscribers that may include healthcare related policies";
             case EDU: return "An educational institution that provides education or research facilitites";
-            case RELI: return "An organization that identified as a part of a religeous institution";
+            case RELI: return "An organization that is identified as a part of a religeous institution";
+            case CRS: return "An organization that is identified as a Pharmaceutical/Clinical Research Sponsor";
+            case CG: return "An un-incorporated community group";
+            case BUS: return "An organization that is a registered business or corporation but not identified by other types";
+            case OTHER: return "Other type of organization not already specified";
             default: return "?";
           }
         }
@@ -121,6 +153,10 @@ public enum OrganizationType {
             case INS: return "Insurance Company";
             case EDU: return "Educational Institute";
             case RELI: return "Religious Institution";
+            case CRS: return "Clinical Research Sponsor";
+            case CG: return "Community Group";
+            case BUS: return "Non-Healthcare Business or Corporation";
+            case OTHER: return "Other";
             default: return "?";
           }
     }

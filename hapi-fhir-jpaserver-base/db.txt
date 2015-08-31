@@ -1,0 +1,13 @@
+update hfj_resource set forced_id_pid = null where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_history_tag where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_ver where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_forced_id where resource_pid in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_date where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_number where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_quantity where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_string where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_spidx_token where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_link where src_resource_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_tag where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_resource where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+

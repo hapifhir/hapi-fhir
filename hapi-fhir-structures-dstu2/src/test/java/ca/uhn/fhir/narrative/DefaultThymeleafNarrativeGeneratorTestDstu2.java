@@ -17,16 +17,17 @@ import ca.uhn.fhir.model.dstu2.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.composite.SimpleQuantityDt;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
-import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.DiagnosticReportStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu2.valueset.MedicationPrescriptionStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.MedicationOrderStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -156,7 +157,7 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("1938HB").setDisplay("Hemoglobin");
 			obs.setValue(new QuantityDt(null, 2.223, "mg/L"));
-			obs.addReferenceRange().setLow(new QuantityDt(2.20)).setHigh(new QuantityDt(2.99));
+			obs.addReferenceRange().setLow(new SimpleQuantityDt(2.20)).setHigh(new SimpleQuantityDt(2.99));
 			obs.setStatus(ObservationStatusEnum.FINAL);
 			obs.setComments("This is a result comment");
 
@@ -195,13 +196,13 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 	
 	@Test
 	public void testGenerateMedicationPrescription(){
-		MedicationPrescription mp = new MedicationPrescription();
+		MedicationOrder mp = new MedicationOrder();
 		mp.setId("12345");
 		Medication med = new Medication();
-		med.setName("ciprofloaxin");
+		med.getCode().setText("ciproflaxin");
 		ResourceReferenceDt medRef = new ResourceReferenceDt(med);
 		mp.setMedication(medRef );
-		mp.setStatus(MedicationPrescriptionStatusEnum.ACTIVE);
+		mp.setStatus(MedicationOrderStatusEnum.ACTIVE);
 		mp.setDateWritten(new DateTimeDt("2014-09-01"));
 		
 		NarrativeDt narrative = new NarrativeDt();

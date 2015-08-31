@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -17,6 +18,19 @@ public class IdDtTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IdDtTest.class);
 
+	@Test
+	public void testDetectIsIdPartValid() {
+		assertTrue(new IdDt("0").isIdPartValid());
+		assertTrue(new IdDt("0a").isIdPartValid());
+		assertTrue(new IdDt("0abgZZ").isIdPartValid());
+		assertTrue(new IdDt("---").isIdPartValid());
+		assertTrue(new IdDt("1.2.3.4").isIdPartValid());
+		
+		assertFalse(new IdDt(" 1").isIdPartValid());
+		assertFalse(new IdDt("1:1").isIdPartValid());
+		assertFalse(new IdDt(StringUtils.leftPad("", 65, '0')).isIdPartValid());
+	}
+	
 	@Test
 	public void testDetectLocal() {
 		IdDt id;

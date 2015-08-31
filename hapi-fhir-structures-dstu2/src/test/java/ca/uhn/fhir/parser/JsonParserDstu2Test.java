@@ -30,7 +30,7 @@ import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
-import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
@@ -485,15 +485,15 @@ public class JsonParserDstu2Test {
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
 		assertEquals("searchset", parsed.getType().getValue());
 		assertEquals(3, parsed.getTotalResults().getValue().intValue());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLinkNext().getValue());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLinkSelf().getValue());
+		assertEquals("https://example.com/base/MedicationOrder?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLinkNext().getValue());
+		assertEquals("https://example.com/base/MedicationOrder?patient=347&_include=MedicationOrder.medication", parsed.getLinkSelf().getValue());
 
 		assertEquals(2, parsed.getEntries().size());
 
-		MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
+		MedicationOrder p = (MedicationOrder) parsed.getEntries().get(0).getResource();
 		assertEquals("Patient/347", p.getPatient().getReference().getValue());
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
-		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
+		assertEquals("http://example.com/base/MedicationOrder/3123/_history/1", p.getId().getValue());
 
 		Medication m = (Medication) parsed.getEntries().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
@@ -526,7 +526,7 @@ public class JsonParserDstu2Test {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
 
-		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
+		MedicationOrder p = (MedicationOrder) parsed.getEntry().get(0).getResource();
 		assertEquals("#med", ((ResourceReferenceDt) p.getMedication()).getReference().getValue());
 
 		Medication m = (Medication) ((ResourceReferenceDt) p.getMedication()).getResource();
@@ -555,15 +555,15 @@ public class JsonParserDstu2Test {
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
 		assertEquals("searchset", parsed.getType());
 		assertEquals(3, parsed.getTotal().intValue());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink().get(0).getUrlElement().getValueAsString());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
+		assertEquals("https://example.com/base/MedicationOrder?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink().get(0).getUrlElement().getValueAsString());
+		assertEquals("https://example.com/base/MedicationOrder?patient=347&_include=MedicationOrder.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
 
 		assertEquals(2, parsed.getEntry().size());
 
-		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
+		MedicationOrder p = (MedicationOrder) parsed.getEntry().get(0).getResource();
 		assertEquals("Patient/347", p.getPatient().getReference().getValue());
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
-		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
+		assertEquals("http://example.com/base/MedicationOrder/3123/_history/1", p.getId().getValue());
 
 		Medication m = (Medication) parsed.getEntry().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
@@ -600,10 +600,10 @@ public class JsonParserDstu2Test {
 
 		assertEquals(2, parsed.getEntries().size());
 
-		MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
+		MedicationOrder p = (MedicationOrder) parsed.getEntries().get(0).getResource();
 		assertEquals("Patient/347", p.getPatient().getReference().getValue());
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
-		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
+		assertEquals("http://example.com/base/MedicationOrder/3123/_history/1", p.getId().getValue());
 
 		Medication m = (Medication) parsed.getEntries().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -172,9 +172,9 @@ public class MedicationAdministration extends DomainResource {
         /**
          * A coded specification of the anatomic site where the medication first entered the body.  E.g. "left arm".
          */
-        @Child(name = "site", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "site", type = {CodeableConcept.class, BodySite.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Body site administered to", formalDefinition="A coded specification of the anatomic site where the medication first entered the body.  E.g. \"left arm\"." )
-        protected CodeableConcept site;
+        protected Type site;
 
         /**
          * A code specifying the route or physiological path of administration of a therapeutic agent into or onto the patient.   E.g. topical, intravenous, etc.
@@ -204,7 +204,7 @@ public class MedicationAdministration extends DomainResource {
         @Description(shortDefinition="Dose quantity per unit of time", formalDefinition="Identifies the speed with which the medication was introduced into the patient. Typically the rate for an infusion e.g. 200ml in 2 hours.  May also be expressed as a rate per unit of time such as 100ml per hour - the duration is then not specified, or is specified in the quantity." )
         protected Type rate;
 
-        private static final long serialVersionUID = -1465497586L;
+        private static final long serialVersionUID = -1772198879L;
 
     /*
      * Constructor
@@ -265,13 +265,34 @@ public class MedicationAdministration extends DomainResource {
         /**
          * @return {@link #site} (A coded specification of the anatomic site where the medication first entered the body.  E.g. "left arm".)
          */
-        public CodeableConcept getSite() { 
-          if (this.site == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationAdministrationDosageComponent.site");
-            else if (Configuration.doAutoCreate())
-              this.site = new CodeableConcept(); // cc
+        public Type getSite() { 
           return this.site;
+        }
+
+        /**
+         * @return {@link #site} (A coded specification of the anatomic site where the medication first entered the body.  E.g. "left arm".)
+         */
+        public CodeableConcept getSiteCodeableConcept() throws Exception { 
+          if (!(this.site instanceof CodeableConcept))
+            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.site.getClass().getName()+" was encountered");
+          return (CodeableConcept) this.site;
+        }
+
+        public boolean hasSiteCodeableConcept() throws Exception { 
+          return this.site instanceof CodeableConcept;
+        }
+
+        /**
+         * @return {@link #site} (A coded specification of the anatomic site where the medication first entered the body.  E.g. "left arm".)
+         */
+        public Reference getSiteReference() throws Exception { 
+          if (!(this.site instanceof Reference))
+            throw new Exception("Type mismatch: the type Reference was expected, but "+this.site.getClass().getName()+" was encountered");
+          return (Reference) this.site;
+        }
+
+        public boolean hasSiteReference() throws Exception { 
+          return this.site instanceof Reference;
         }
 
         public boolean hasSite() { 
@@ -281,7 +302,7 @@ public class MedicationAdministration extends DomainResource {
         /**
          * @param value {@link #site} (A coded specification of the anatomic site where the medication first entered the body.  E.g. "left arm".)
          */
-        public MedicationAdministrationDosageComponent setSite(CodeableConcept value) { 
+        public MedicationAdministrationDosageComponent setSite(Type value) { 
           this.site = value;
           return this;
         }
@@ -406,7 +427,7 @@ public class MedicationAdministration extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("text", "string", "Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication.", 0, java.lang.Integer.MAX_VALUE, text));
-          childrenList.add(new Property("site", "CodeableConcept", "A coded specification of the anatomic site where the medication first entered the body.  E.g. \"left arm\".", 0, java.lang.Integer.MAX_VALUE, site));
+          childrenList.add(new Property("site[x]", "CodeableConcept|Reference(BodySite)", "A coded specification of the anatomic site where the medication first entered the body.  E.g. \"left arm\".", 0, java.lang.Integer.MAX_VALUE, site));
           childrenList.add(new Property("route", "CodeableConcept", "A code specifying the route or physiological path of administration of a therapeutic agent into or onto the patient.   E.g. topical, intravenous, etc.", 0, java.lang.Integer.MAX_VALUE, route));
           childrenList.add(new Property("method", "CodeableConcept", "A coded value indicating the method by which the medication was introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.  Terminologies used often pre-coordinate this term with the route and or form of administration.", 0, java.lang.Integer.MAX_VALUE, method));
           childrenList.add(new Property("quantity", "SimpleQuantity", "The amount of the medication given at one administration event.   Use this value when the administration is essentially an instantaneous event such as a swallowing a tablet or giving an injection.", 0, java.lang.Integer.MAX_VALUE, quantity));
@@ -484,14 +505,14 @@ public class MedicationAdministration extends DomainResource {
     /**
      * The individual who was responsible for giving the medication to the patient.
      */
-    @Child(name = "practitioner", type = {Practitioner.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "practitioner", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who administered substance?", formalDefinition="The individual who was responsible for giving the medication to the patient." )
     protected Reference practitioner;
 
     /**
      * The actual object that is the target of the reference (The individual who was responsible for giving the medication to the patient.)
      */
-    protected Practitioner practitionerTarget;
+    protected Resource practitionerTarget;
 
     /**
      * The visit or admission the or other contact between patient and health care provider the medication administration was performed as part of.
@@ -539,10 +560,10 @@ public class MedicationAdministration extends DomainResource {
     protected List<CodeableConcept> reasonGiven;
 
     /**
-     * An interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true).  For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.
+     * A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.
      */
     @Child(name = "effectiveTime", type = {DateTimeType.class, Period.class}, order=9, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Start and end time of administration", formalDefinition="An interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true).  For many administrations, such as swallowing a tablet the use of dateTime is more appropriate." )
+    @Description(shortDefinition="Start and end time of administration", formalDefinition="A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate." )
     protected Type effectiveTime;
 
     /**
@@ -572,13 +593,13 @@ public class MedicationAdministration extends DomainResource {
     protected StringType note;
 
     /**
-     * Indicates how the medication is/was used by the patient.
+     * Describes the medication dosage information details e.g. dose, rate, site, route, etc.
      */
     @Child(name = "dosage", type = {}, order=13, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Details of how medication was taken", formalDefinition="Indicates how the medication is/was used by the patient." )
+    @Description(shortDefinition="Details of how medication was taken", formalDefinition="Describes the medication dosage information details e.g. dose, rate, site, route, etc." )
     protected MedicationAdministrationDosageComponent dosage;
 
-    private static final long serialVersionUID = -320745165L;
+    private static final long serialVersionUID = -669616345L;
 
   /*
    * Constructor
@@ -754,19 +775,14 @@ public class MedicationAdministration extends DomainResource {
     /**
      * @return {@link #practitioner} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The individual who was responsible for giving the medication to the patient.)
      */
-    public Practitioner getPractitionerTarget() { 
-      if (this.practitionerTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationAdministration.practitioner");
-        else if (Configuration.doAutoCreate())
-          this.practitionerTarget = new Practitioner(); // aa
+    public Resource getPractitionerTarget() { 
       return this.practitionerTarget;
     }
 
     /**
      * @param value {@link #practitioner} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The individual who was responsible for giving the medication to the patient.)
      */
-    public MedicationAdministration setPractitionerTarget(Practitioner value) { 
+    public MedicationAdministration setPractitionerTarget(Resource value) { 
       this.practitionerTarget = value;
       return this;
     }
@@ -985,14 +1001,14 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @return {@link #effectiveTime} (An interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true).  For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
+     * @return {@link #effectiveTime} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
      */
     public Type getEffectiveTime() { 
       return this.effectiveTime;
     }
 
     /**
-     * @return {@link #effectiveTime} (An interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true).  For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
+     * @return {@link #effectiveTime} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
      */
     public DateTimeType getEffectiveTimeDateTimeType() throws Exception { 
       if (!(this.effectiveTime instanceof DateTimeType))
@@ -1005,7 +1021,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @return {@link #effectiveTime} (An interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true).  For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
+     * @return {@link #effectiveTime} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
      */
     public Period getEffectiveTimePeriod() throws Exception { 
       if (!(this.effectiveTime instanceof Period))
@@ -1022,7 +1038,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @param value {@link #effectiveTime} (An interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true).  For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
+     * @param value {@link #effectiveTime} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
      */
     public MedicationAdministration setEffectiveTime(Type value) { 
       this.effectiveTime = value;
@@ -1185,7 +1201,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @return {@link #dosage} (Indicates how the medication is/was used by the patient.)
+     * @return {@link #dosage} (Describes the medication dosage information details e.g. dose, rate, site, route, etc.)
      */
     public MedicationAdministrationDosageComponent getDosage() { 
       if (this.dosage == null)
@@ -1201,7 +1217,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @param value {@link #dosage} (Indicates how the medication is/was used by the patient.)
+     * @param value {@link #dosage} (Describes the medication dosage information details e.g. dose, rate, site, route, etc.)
      */
     public MedicationAdministration setDosage(MedicationAdministrationDosageComponent value) { 
       this.dosage = value;
@@ -1213,17 +1229,17 @@ public class MedicationAdministration extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "External identifier - FHIR will generate its own internal IDs (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event.  Particularly important if these records have to be updated.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("patient", "Reference(Patient)", "The person or animal to whom the medication was given.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("practitioner", "Reference(Practitioner)", "The individual who was responsible for giving the medication to the patient.", 0, java.lang.Integer.MAX_VALUE, practitioner));
+        childrenList.add(new Property("practitioner", "Reference(Practitioner|Patient|RelatedPerson)", "The individual who was responsible for giving the medication to the patient.", 0, java.lang.Integer.MAX_VALUE, practitioner));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "The visit or admission the or other contact between patient and health care provider the medication administration was performed as part of.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("prescription", "Reference(MedicationOrder)", "The original request, instruction or authority to perform the administration.", 0, java.lang.Integer.MAX_VALUE, prescription));
         childrenList.add(new Property("wasNotGiven", "boolean", "Set this to true if the record is saying that the medication was NOT administered.", 0, java.lang.Integer.MAX_VALUE, wasNotGiven));
         childrenList.add(new Property("reasonNotGiven", "CodeableConcept", "A code indicating why the administration was not performed.", 0, java.lang.Integer.MAX_VALUE, reasonNotGiven));
         childrenList.add(new Property("reasonGiven", "CodeableConcept", "A code indicating why the medication was given.", 0, java.lang.Integer.MAX_VALUE, reasonGiven));
-        childrenList.add(new Property("effectiveTime[x]", "dateTime|Period", "An interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true).  For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.", 0, java.lang.Integer.MAX_VALUE, effectiveTime));
+        childrenList.add(new Property("effectiveTime[x]", "dateTime|Period", "A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.", 0, java.lang.Integer.MAX_VALUE, effectiveTime));
         childrenList.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, java.lang.Integer.MAX_VALUE, medication));
         childrenList.add(new Property("device", "Reference(Device)", "The device used in administering the medication to the patient.  E.g. a particular infusion pump.", 0, java.lang.Integer.MAX_VALUE, device));
         childrenList.add(new Property("note", "string", "Extra information about the medication administration that is not conveyed by the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
-        childrenList.add(new Property("dosage", "", "Indicates how the medication is/was used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosage));
+        childrenList.add(new Property("dosage", "", "Describes the medication dosage information details e.g. dose, rate, site, route, etc.", 0, java.lang.Integer.MAX_VALUE, dosage));
       }
 
       public MedicationAdministration copy() {

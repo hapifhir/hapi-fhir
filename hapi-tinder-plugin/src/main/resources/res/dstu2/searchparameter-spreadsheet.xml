@@ -6446,7 +6446,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s88"><Data ss:Type="String">XPathUsageType</Data></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">How a search parameter relates to the set of elements returned by evaluating the it's xpath query</Data></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">How a search parameter relates to the set of elements returned by evaluating the its xpath query</Data></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">#search-xpath-usage</Data></Cell>

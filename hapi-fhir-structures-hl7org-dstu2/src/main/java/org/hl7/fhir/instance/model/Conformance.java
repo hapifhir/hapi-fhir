@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1861,20 +1861,13 @@ public class Conformance extends DomainResource implements IBaseConformance {
         protected List<ConformanceRestOperationComponent> operation;
 
         /**
-         * A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier "http://hl7.org/fhir/documents/mailbox". Other specifications can declare their own identifier for this purpose.
-         */
-        @Child(name = "documentMailbox", type = {UriType.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="How documents are accepted in /Mailbox", formalDefinition="A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose." )
-        protected List<UriType> documentMailbox;
-
-        /**
          * An absolute URI which is a reference to the definition of a compartment hosted by the system.
          */
-        @Child(name = "compartment", type = {UriType.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "compartment", type = {UriType.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Compartments served/used by system", formalDefinition="An absolute URI which is a reference to the definition of a compartment hosted by the system." )
         protected List<UriType> compartment;
 
-        private static final long serialVersionUID = -881838536L;
+        private static final long serialVersionUID = 931983837L;
 
     /*
      * Constructor
@@ -2219,60 +2212,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
-         * @return {@link #documentMailbox} (A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier "http://hl7.org/fhir/documents/mailbox". Other specifications can declare their own identifier for this purpose.)
-         */
-        public List<UriType> getDocumentMailbox() { 
-          if (this.documentMailbox == null)
-            this.documentMailbox = new ArrayList<UriType>();
-          return this.documentMailbox;
-        }
-
-        public boolean hasDocumentMailbox() { 
-          if (this.documentMailbox == null)
-            return false;
-          for (UriType item : this.documentMailbox)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        /**
-         * @return {@link #documentMailbox} (A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier "http://hl7.org/fhir/documents/mailbox". Other specifications can declare their own identifier for this purpose.)
-         */
-    // syntactic sugar
-        public UriType addDocumentMailboxElement() {//2 
-          UriType t = new UriType();
-          if (this.documentMailbox == null)
-            this.documentMailbox = new ArrayList<UriType>();
-          this.documentMailbox.add(t);
-          return t;
-        }
-
-        /**
-         * @param value {@link #documentMailbox} (A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier "http://hl7.org/fhir/documents/mailbox". Other specifications can declare their own identifier for this purpose.)
-         */
-        public ConformanceRestComponent addDocumentMailbox(String value) { //1
-          UriType t = new UriType();
-          t.setValue(value);
-          if (this.documentMailbox == null)
-            this.documentMailbox = new ArrayList<UriType>();
-          this.documentMailbox.add(t);
-          return this;
-        }
-
-        /**
-         * @param value {@link #documentMailbox} (A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier "http://hl7.org/fhir/documents/mailbox". Other specifications can declare their own identifier for this purpose.)
-         */
-        public boolean hasDocumentMailbox(String value) { 
-          if (this.documentMailbox == null)
-            return false;
-          for (UriType v : this.documentMailbox)
-            if (v.equals(value)) // uri
-              return true;
-          return false;
-        }
-
-        /**
          * @return {@link #compartment} (An absolute URI which is a reference to the definition of a compartment hosted by the system.)
          */
         public List<UriType> getCompartment() { 
@@ -2336,7 +2275,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
           childrenList.add(new Property("transactionMode", "code", "A code that indicates how transactions are supported.", 0, java.lang.Integer.MAX_VALUE, transactionMode));
           childrenList.add(new Property("searchParam", "@Conformance.rest.resource.searchParam", "Search parameters that are supported for searching all resources for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation.", 0, java.lang.Integer.MAX_VALUE, searchParam));
           childrenList.add(new Property("operation", "", "Definition of an operation or a named query and with its parameters and their meaning and type.", 0, java.lang.Integer.MAX_VALUE, operation));
-          childrenList.add(new Property("documentMailbox", "uri", "A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose.", 0, java.lang.Integer.MAX_VALUE, documentMailbox));
           childrenList.add(new Property("compartment", "uri", "An absolute URI which is a reference to the definition of a compartment hosted by the system.", 0, java.lang.Integer.MAX_VALUE, compartment));
         }
 
@@ -2367,11 +2305,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
           for (ConformanceRestOperationComponent i : operation)
             dst.operation.add(i.copy());
         };
-        if (documentMailbox != null) {
-          dst.documentMailbox = new ArrayList<UriType>();
-          for (UriType i : documentMailbox)
-            dst.documentMailbox.add(i.copy());
-        };
         if (compartment != null) {
           dst.compartment = new ArrayList<UriType>();
           for (UriType i : compartment)
@@ -2389,8 +2322,8 @@ public class Conformance extends DomainResource implements IBaseConformance {
         ConformanceRestComponent o = (ConformanceRestComponent) other;
         return compareDeep(mode, o.mode, true) && compareDeep(documentation, o.documentation, true) && compareDeep(security, o.security, true)
            && compareDeep(resource, o.resource, true) && compareDeep(interaction, o.interaction, true) && compareDeep(transactionMode, o.transactionMode, true)
-           && compareDeep(searchParam, o.searchParam, true) && compareDeep(operation, o.operation, true) && compareDeep(documentMailbox, o.documentMailbox, true)
-           && compareDeep(compartment, o.compartment, true);
+           && compareDeep(searchParam, o.searchParam, true) && compareDeep(operation, o.operation, true) && compareDeep(compartment, o.compartment, true)
+          ;
       }
 
       @Override
@@ -2401,16 +2334,15 @@ public class Conformance extends DomainResource implements IBaseConformance {
           return false;
         ConformanceRestComponent o = (ConformanceRestComponent) other;
         return compareValues(mode, o.mode, true) && compareValues(documentation, o.documentation, true) && compareValues(transactionMode, o.transactionMode, true)
-           && compareValues(documentMailbox, o.documentMailbox, true) && compareValues(compartment, o.compartment, true)
-          ;
+           && compareValues(compartment, o.compartment, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (mode == null || mode.isEmpty()) && (documentation == null || documentation.isEmpty())
            && (security == null || security.isEmpty()) && (resource == null || resource.isEmpty()) && (interaction == null || interaction.isEmpty())
            && (transactionMode == null || transactionMode.isEmpty()) && (searchParam == null || searchParam.isEmpty())
-           && (operation == null || operation.isEmpty()) && (documentMailbox == null || documentMailbox.isEmpty())
-           && (compartment == null || compartment.isEmpty());
+           && (operation == null || operation.isEmpty()) && (compartment == null || compartment.isEmpty())
+          ;
       }
 
   }
@@ -2876,10 +2808,10 @@ public class Conformance extends DomainResource implements IBaseConformance {
         protected List<ResourceInteractionComponent> interaction;
 
         /**
-         * This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources.
+         * This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources. If the value is 'versioned-update', then the server supports all the versioning features, including using e-tags for version integrity in the API.
          */
         @Child(name = "versioning", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="no-version | versioned | versioned-update", formalDefinition="This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources." )
+        @Description(shortDefinition="no-version | versioned | versioned-update", formalDefinition="This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources. If the value is 'versioned-update', then the server supports all the versioning features, including using e-tags for version integrity in the API." )
         protected Enumeration<ResourceVersionPolicy> versioning;
 
         /**
@@ -3085,7 +3017,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
-         * @return {@link #versioning} (This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
+         * @return {@link #versioning} (This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources. If the value is 'versioned-update', then the server supports all the versioning features, including using e-tags for version integrity in the API.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
          */
         public Enumeration<ResourceVersionPolicy> getVersioningElement() { 
           if (this.versioning == null)
@@ -3105,7 +3037,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
-         * @param value {@link #versioning} (This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
+         * @param value {@link #versioning} (This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources. If the value is 'versioned-update', then the server supports all the versioning features, including using e-tags for version integrity in the API.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
          */
         public ConformanceRestResourceComponent setVersioningElement(Enumeration<ResourceVersionPolicy> value) { 
           this.versioning = value;
@@ -3113,14 +3045,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
-         * @return This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources.
+         * @return This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources. If the value is 'versioned-update', then the server supports all the versioning features, including using e-tags for version integrity in the API.
          */
         public ResourceVersionPolicy getVersioning() { 
           return this.versioning == null ? null : this.versioning.getValue();
         }
 
         /**
-         * @param value This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources.
+         * @param value This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources. If the value is 'versioned-update', then the server supports all the versioning features, including using e-tags for version integrity in the API.
          */
         public ConformanceRestResourceComponent setVersioning(ResourceVersionPolicy value) { 
           if (value == null)
@@ -3515,7 +3447,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
           childrenList.add(new Property("type", "code", "A type of resource exposed via the restful interface.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("profile", "Reference(StructureDefinition)", "A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses}.", 0, java.lang.Integer.MAX_VALUE, profile));
           childrenList.add(new Property("interaction", "", "Identifies a restful operation supported by the solution.", 0, java.lang.Integer.MAX_VALUE, interaction));
-          childrenList.add(new Property("versioning", "code", "This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources.", 0, java.lang.Integer.MAX_VALUE, versioning));
+          childrenList.add(new Property("versioning", "code", "This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources. If the value is 'versioned-update', then the server supports all the versioning features, including using e-tags for version integrity in the API.", 0, java.lang.Integer.MAX_VALUE, versioning));
           childrenList.add(new Property("readHistory", "boolean", "A flag for whether the server is able to return past versions as part of the vRead operation.", 0, java.lang.Integer.MAX_VALUE, readHistory));
           childrenList.add(new Property("updateCreate", "boolean", "A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.", 0, java.lang.Integer.MAX_VALUE, updateCreate));
           childrenList.add(new Property("conditionalCreate", "boolean", "A flag that indicates that the server supports conditional create.", 0, java.lang.Integer.MAX_VALUE, conditionalCreate));

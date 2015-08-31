@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
 
 
 public enum ProvenanceAgentRole {
@@ -67,6 +67,14 @@ public enum ProvenanceAgentRole {
          */
         CUSTODIAN, 
         /**
+         * A device that operates independently of an author on custodian's algorithms for data extraction of existing information for purpose of generating a new artifact.
+         */
+        ASSEMBLER, 
+        /**
+         * A device used by an author to record new information, which may also be used by the author to select existing information for aggregation with newly recorded information for the purpose of generating a new artifact.
+         */
+        COMPOSER, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -89,6 +97,10 @@ public enum ProvenanceAgentRole {
           return INFORMANT;
         if ("custodian".equals(codeString))
           return CUSTODIAN;
+        if ("assembler".equals(codeString))
+          return ASSEMBLER;
+        if ("composer".equals(codeString))
+          return COMPOSER;
         throw new Exception("Unknown ProvenanceAgentRole code '"+codeString+"'");
         }
         public String toCode() {
@@ -101,6 +113,8 @@ public enum ProvenanceAgentRole {
             case ATTESTER: return "attester";
             case INFORMANT: return "informant";
             case CUSTODIAN: return "custodian";
+            case ASSEMBLER: return "assembler";
+            case COMPOSER: return "composer";
             default: return "?";
           }
         }
@@ -117,6 +131,8 @@ public enum ProvenanceAgentRole {
             case ATTESTER: return "A verifier who attests to the accuracy of the resource";
             case INFORMANT: return "A person who reported information that contributed to the resource";
             case CUSTODIAN: return "The entity that is accountable for maintaining a true an accurate copy of the original record";
+            case ASSEMBLER: return "A device that operates independently of an author on custodian's algorithms for data extraction of existing information for purpose of generating a new artifact.";
+            case COMPOSER: return "A device used by an author to record new information, which may also be used by the author to select existing information for aggregation with newly recorded information for the purpose of generating a new artifact.";
             default: return "?";
           }
         }
@@ -130,6 +146,8 @@ public enum ProvenanceAgentRole {
             case ATTESTER: return "Attester";
             case INFORMANT: return "Informant";
             case CUSTODIAN: return "Custodian";
+            case ASSEMBLER: return "Assembler";
+            case COMPOSER: return "Composer";
             default: return "?";
           }
     }

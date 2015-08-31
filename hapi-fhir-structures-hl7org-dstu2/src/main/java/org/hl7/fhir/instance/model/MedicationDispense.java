@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -193,9 +193,9 @@ public class MedicationDispense extends DomainResource {
         /**
          * A coded specification of the anatomic site where the medication first enters the body.
          */
-        @Child(name = "site", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "site", type = {CodeableConcept.class, BodySite.class}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Body site to administer to", formalDefinition="A coded specification of the anatomic site where the medication first enters the body." )
-        protected CodeableConcept site;
+        protected Type site;
 
         /**
          * A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject.
@@ -232,7 +232,7 @@ public class MedicationDispense extends DomainResource {
         @Description(shortDefinition="Upper limit on medication per unit of time", formalDefinition="The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time,  e.g. 1000mg in 24 hours." )
         protected Ratio maxDosePerPeriod;
 
-        private static final long serialVersionUID = -422348215L;
+        private static final long serialVersionUID = -1470136646L;
 
     /*
      * Constructor
@@ -386,13 +386,34 @@ public class MedicationDispense extends DomainResource {
         /**
          * @return {@link #site} (A coded specification of the anatomic site where the medication first enters the body.)
          */
-        public CodeableConcept getSite() { 
-          if (this.site == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationDispenseDosageInstructionComponent.site");
-            else if (Configuration.doAutoCreate())
-              this.site = new CodeableConcept(); // cc
+        public Type getSite() { 
           return this.site;
+        }
+
+        /**
+         * @return {@link #site} (A coded specification of the anatomic site where the medication first enters the body.)
+         */
+        public CodeableConcept getSiteCodeableConcept() throws Exception { 
+          if (!(this.site instanceof CodeableConcept))
+            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.site.getClass().getName()+" was encountered");
+          return (CodeableConcept) this.site;
+        }
+
+        public boolean hasSiteCodeableConcept() throws Exception { 
+          return this.site instanceof CodeableConcept;
+        }
+
+        /**
+         * @return {@link #site} (A coded specification of the anatomic site where the medication first enters the body.)
+         */
+        public Reference getSiteReference() throws Exception { 
+          if (!(this.site instanceof Reference))
+            throw new Exception("Type mismatch: the type Reference was expected, but "+this.site.getClass().getName()+" was encountered");
+          return (Reference) this.site;
+        }
+
+        public boolean hasSiteReference() throws Exception { 
+          return this.site instanceof Reference;
         }
 
         public boolean hasSite() { 
@@ -402,7 +423,7 @@ public class MedicationDispense extends DomainResource {
         /**
          * @param value {@link #site} (A coded specification of the anatomic site where the medication first enters the body.)
          */
-        public MedicationDispenseDosageInstructionComponent setSite(CodeableConcept value) { 
+        public MedicationDispenseDosageInstructionComponent setSite(Type value) { 
           this.site = value;
           return this;
         }
@@ -575,7 +596,7 @@ public class MedicationDispense extends DomainResource {
           childrenList.add(new Property("additionalInstructions", "CodeableConcept", "Additional instructions such as \"Swallow with plenty of water\" which may or may not be coded.", 0, java.lang.Integer.MAX_VALUE, additionalInstructions));
           childrenList.add(new Property("timing", "Timing", "The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \"Every  8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\";  \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\".", 0, java.lang.Integer.MAX_VALUE, timing));
           childrenList.add(new Property("asNeeded[x]", "boolean|CodeableConcept", "If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication.", 0, java.lang.Integer.MAX_VALUE, asNeeded));
-          childrenList.add(new Property("site", "CodeableConcept", "A coded specification of the anatomic site where the medication first enters the body.", 0, java.lang.Integer.MAX_VALUE, site));
+          childrenList.add(new Property("site[x]", "CodeableConcept|Reference(BodySite)", "A coded specification of the anatomic site where the medication first enters the body.", 0, java.lang.Integer.MAX_VALUE, site));
           childrenList.add(new Property("route", "CodeableConcept", "A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject.", 0, java.lang.Integer.MAX_VALUE, route));
           childrenList.add(new Property("method", "CodeableConcept", "A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.  Terminologies used often pre-coordinate this term with the route and or form of administration.", 0, java.lang.Integer.MAX_VALUE, method));
           childrenList.add(new Property("dose[x]", "Range|SimpleQuantity", "The amount of therapeutic or other substance given at one administration event.", 0, java.lang.Integer.MAX_VALUE, dose));

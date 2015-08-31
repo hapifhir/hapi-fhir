@@ -1,0 +1,2451 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="Contract"/>
+ <meta>
+  <lastUpdated value="2015-08-27T19:45:13.172-04:00"/>
+ </meta>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+  <valueInteger value="0"/>
+ </extension>
+ <url value="http://hl7.org/fhir/StructureDefinition/Contract"/>
+ <name value="Contract"/>
+ <publisher value="Health Level Seven International (Financial Management)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org/Special/committees/fm/index.cfm"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for Contract Resource"/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
+ <snapshot>
+  <element>
+   <path value="Contract"/>
+   <short value="Contract"/>
+   <definition value="A formal agreement between parties regarding the conduct of business, exchange of information or other matters."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="FinancialContract"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Contract.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Contract.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Contract.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="Contract.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.identifier"/>
+   <short value="Contract identifier"/>
+   <definition value="Unique identifier for this Contract."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="FinancialContract id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.issued"/>
+   <short value="When this Contract was issued"/>
+   <definition value="When this  Contract was issued."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="FinancialContract effectiveTime"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.applies"/>
+   <short value="Effective time"/>
+   <definition value="Relevant time or time-period when this Contract is applicable."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Period"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="FinancialContract activityTime"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.subject"/>
+   <short value="Subject of this Contract"/>
+   <definition value="Who and/or what this Contract is about: typically a Patient, Organization, or valued items such as goods and services."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Role"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.authority"/>
+   <short value="Authority under which this Contract has standing"/>
+   <definition value="A formally or informally recognized grouping of people, principals, organizations, or jurisdictions formed for the purpose of achieving some form of collective action such as the promulgation, administration and enforcement of contracts and policies."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Role Scoper"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.domain"/>
+   <short value="Domain in which this Contract applies"/>
+   <definition value="Recognized governance framework or system operating with a circumscribed scope in accordance with specified principles, policies, processes or procedures for managing rights, actions, or behaviors of parties or principals relative to resources."/>
+   <alias value="scope of governance jurisdication"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.type"/>
+   <short value="Contract Tyoe"/>
+   <definition value="Type of Contract such as an insurance policy, real estate contract, a will, power of attorny, Privacy or Security policy , trust framework agreement, etc."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="List of overall contract codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-type"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="CNTRCT"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.subType"/>
+   <short value="Contract Subtype"/>
+   <definition value="More specific type or specialization of an overarching or more general contract such as auto insurance, home owner  insurance, prenupial agreement, Advanced-Directive, or privacy consent."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes within the above"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-subtype"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="e.g., RECOV"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.action"/>
+   <short value="Contract Action"/>
+   <definition value="Action stipulated by this Contract."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the contract action"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-action"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="e.g., JURISPOL"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.actionReason"/>
+   <short value="Contract Action Reason"/>
+   <definition value="Reason for action stipulated by this Contract."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the contract action reason"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="e.g., QUALIMP"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Actor"/>
+   </extension>
+   <path value="Contract.actor"/>
+   <short value="Contract Actor"/>
+   <definition value="List of Contract actors."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.actor.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.actor.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.actor.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.actor.entity"/>
+   <short value="Contract Actor Type"/>
+   <definition value="Who or what actors are assigned roles in this Contract."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Contract"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Group"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Substance"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.actor.role"/>
+   <short value="Contract  Actor Role"/>
+   <definition value="Role type of actors assigned roles in this Contract."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the contract actor role"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-actorrole"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="ValuedItem"/>
+   </extension>
+   <path value="Contract.valuedItem"/>
+   <short value="Contract Valued Item"/>
+   <definition value="Contract Valued Item List."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem classCode INVE"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.entity[x]"/>
+   <short value="Contract Valued Item Type"/>
+   <definition value="Specific type of Contract Valued Item that may be priced."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem code"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.identifier"/>
+   <short value="Contract Valued Item Identifier"/>
+   <definition value="Identifies a Contract Valued Item instance."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.effectiveTime"/>
+   <short value="Contract Valued Item Effective Tiem"/>
+   <definition value="Indicates the time during which this Contract ValuedItem information is effective."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem                effectiveTime"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.quantity"/>
+   <short value="Count of Contract Valued Items"/>
+   <definition value="Specifies the units by which the Contract Valued Item is measured or counted, and quantifies the countable or measurable Contract Valued Item instances."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem unitQuantity"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.unitPrice"/>
+   <short value="Contract Valued Item fee, charge, or cost"/>
+   <definition value="A Contract Valued Item unit valuation measure."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem unitPriceAmt"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.factor"/>
+   <short value="Contract Valued Item Price Scaling Factor"/>
+   <definition value="A real number that represents a multiplier used in determining the overall value of the Contract Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem factorNumber"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.points"/>
+   <short value="Contract Valued Item Difficulty Scaling Factor"/>
+   <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Valued Item delivered. The concept of Points allows for assignment of point values for a Contract Valued Item, such that a monetary amount can be assigned to each point."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem pointNumber"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.net"/>
+   <short value="Total Contract Valued Item Value"/>
+   <definition value="Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem netAmt"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Signatory"/>
+   </extension>
+   <path value="Contract.signer"/>
+   <short value="Contract Signer"/>
+   <definition value="Party signing this Contract."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.signer.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.signer.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.signer.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.signer.type"/>
+   <short value="Contract Signer Type"/>
+   <definition value="Role of this Contract signer, e.g., notary, grantee."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <binding>
+    <strength value="preferred"/>
+    <description value="List of parties who may be signing"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-signer-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Contract.signer.party"/>
+   <short value="Contract Signatory Party"/>
+   <definition value="Party which is a signator to this Contract."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.signer.signature"/>
+   <short value="Contract Documentation Signature"/>
+   <definition value="Legally binding Contract DSIG signature contents in Base64."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Term"/>
+   </extension>
+   <path value="Contract.term"/>
+   <name value="term"/>
+   <short value="Contract Term List"/>
+   <definition value="One or more Contract Provisions, which may be related and conveyed as a group, and may contain nested groups."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.term.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.identifier"/>
+   <short value="Contract Term identifier"/>
+   <definition value="Unique identifier for this particular Contract Provision."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Contract.term.issued"/>
+   <short value="Contract Term Issue Date Time"/>
+   <definition value="When this Contract Provision was issued."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Contract.term.applies"/>
+   <short value="Contract Term Effective Time"/>
+   <definition value="Relevant time or time-period when this Contract Provision is applicable."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Period"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Contract.term.type"/>
+   <short value="Contract Term Type"/>
+   <definition value="Type of Contract Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g., life time maximum benefit."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the types of contract provisions"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-term-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Contract.term.subType"/>
+   <short value="Contract Term Subtype"/>
+   <definition value="Subtype of this Contract Provision, e.g., life time maximum payment for a contract term for specific valued item, e.g., disability payment."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the subtypes of contract provisions"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-term-subtype"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Contract.term.subject"/>
+   <short value="Subject of this Contract Term"/>
+   <definition value="Who or what this Contract Provision is about."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.term.action"/>
+   <short value="Contract Term Action"/>
+   <definition value="Action stipulated by this Contract Provision."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the contract action"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-action"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Contract.term.actionReason"/>
+   <short value="Contract Term Action Reason"/>
+   <definition value="Reason or purpose for the action stipulated by this Contract Provision."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the contract action reason"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="TermActor"/>
+   </extension>
+   <path value="Contract.term.actor"/>
+   <short value="Contract Term Actor List"/>
+   <definition value="List of actors participating in this Contract Provision."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.term.actor.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.actor.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.actor.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.actor.entity"/>
+   <short value="Contract Term Actor"/>
+   <definition value="The actor assigned a role in this Contract Provision."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Contract"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Group"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Substance"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.term.actor.role"/>
+   <short value="Contract Term Actor Role"/>
+   <definition value="Role played by the actor assigned this role in this Contract Provision."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the contract actor role"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-actorrole"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Contract.term.text"/>
+   <short value="Human readable Contract term text"/>
+   <definition value="Human readable form of this Contract Provision."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="TermValuedItem"/>
+   </extension>
+   <path value="Contract.term.valuedItem"/>
+   <short value="Contract Term Valued Item"/>
+   <definition value="Contract Provision Valued Item List."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem classCode INVE"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.entity[x]"/>
+   <short value="Contract Term Valued Item Type"/>
+   <definition value="Specific type of Contract Provision Valued Item that may be priced."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem code"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.identifier"/>
+   <short value="Contract Term Valued Item Identifier"/>
+   <definition value="Identifies a Contract Provision Valued Item instance."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.effectiveTime"/>
+   <short value="Contract Term Valued Item Effective Tiem"/>
+   <definition value="Indicates the time during which this Contract Term ValuedItem information is effective."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem effectiveTime"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.quantity"/>
+   <short value="Contract Term Valued Item Count"/>
+   <definition value="Specifies the units by which the Contract Provision Valued Item is measured or counted, and quantifies the countable or measurable Contract Term Valued Item instances."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem unitQuantity"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.unitPrice"/>
+   <short value="Contract Term Valued Item fee, charge, or cost"/>
+   <definition value="A Contract Provision Valued Item unit valuation measure."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem unitPriceAmt"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.factor"/>
+   <short value="Contract Term Valued Item Price Scaling Factor"/>
+   <definition value="A real number that represents a multiplier used in determining the overall value of the Contract Provision Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem factorNumber"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.points"/>
+   <short value="Contract Term Valued Item Difficulty Scaling Factor"/>
+   <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Provision Valued Item delivered. The concept of Points allows for assignment of point values for a Contract ProvisionValued Item, such that a monetary amount can be assigned to each point."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem pointNumber"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.net"/>
+   <short value="Total Contract Term Valued Item Value"/>
+   <definition value="Expresses the product of the Contract Provision Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.term.group"/>
+   <short value="Nested Contract Term Group"/>
+   <definition value="Nested group of Contract Provisions."/>
+   <min value="0"/>
+   <max value="*"/>
+   <nameReference value="term"/>
+  </element>
+  <element>
+   <path value="Contract.binding[x]"/>
+   <short value="Binding Contract"/>
+   <definition value="Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the &quot;source of truth&quot; and which would be the basis for legal action related to enforcement of this Contract."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Composition"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"/>
+   </type>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="FriendlyLanguage"/>
+   </extension>
+   <path value="Contract.friendly"/>
+   <short value="Contract Friendly Language"/>
+   <definition value="The &quot;patient friendly language&quot; versionof the Contract in whole or in parts. &quot;Patient friendly language&quot; means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.friendly.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.friendly.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.friendly.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.friendly.content[x]"/>
+   <short value="Easily comprehended representation of this Contract"/>
+   <definition value="Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Composition"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"/>
+   </type>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="LegalLanguage"/>
+   </extension>
+   <path value="Contract.legal"/>
+   <short value="Contract Legal Language"/>
+   <definition value="List of Legal expressions or representations of this Contract."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.legal.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.legal.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.legal.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.legal.content[x]"/>
+   <short value="Contract Legal Text"/>
+   <definition value="Contract legal text in human renderable form."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Composition"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"/>
+   </type>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="ComputableLanguage"/>
+   </extension>
+   <path value="Contract.rule"/>
+   <short value="Computable Contract Language"/>
+   <definition value="List of Computable Policy Rule Language Representations of this Contract."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.rule.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.rule.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.rule.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.rule.content[x]"/>
+   <short value="Computable Contract Rules"/>
+   <definition value="Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+   </type>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="Contract"/>
+   <short value="Contract"/>
+   <definition value="A formal agreement between parties regarding the conduct of business, exchange of information or other matters."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="FinancialContract"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.identifier"/>
+   <short value="Contract identifier"/>
+   <definition value="Unique identifier for this Contract."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="FinancialContract id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.issued"/>
+   <short value="When this Contract was issued"/>
+   <definition value="When this  Contract was issued."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="FinancialContract effectiveTime"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.applies"/>
+   <short value="Effective time"/>
+   <definition value="Relevant time or time-period when this Contract is applicable."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Period"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="FinancialContract activityTime"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.subject"/>
+   <short value="Subject of this Contract"/>
+   <definition value="Who and/or what this Contract is about: typically a Patient, Organization, or valued items such as goods and services."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Role"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.authority"/>
+   <short value="Authority under which this Contract has standing"/>
+   <definition value="A formally or informally recognized grouping of people, principals, organizations, or jurisdictions formed for the purpose of achieving some form of collective action such as the promulgation, administration and enforcement of contracts and policies."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Role Scoper"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.domain"/>
+   <short value="Domain in which this Contract applies"/>
+   <definition value="Recognized governance framework or system operating with a circumscribed scope in accordance with specified principles, policies, processes or procedures for managing rights, actions, or behaviors of parties or principals relative to resources."/>
+   <alias value="scope of governance jurisdication"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.type"/>
+   <short value="Contract Tyoe"/>
+   <definition value="Type of Contract such as an insurance policy, real estate contract, a will, power of attorny, Privacy or Security policy , trust framework agreement, etc."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="List of overall contract codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-type"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="CNTRCT"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.subType"/>
+   <short value="Contract Subtype"/>
+   <definition value="More specific type or specialization of an overarching or more general contract such as auto insurance, home owner  insurance, prenupial agreement, Advanced-Directive, or privacy consent."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes within the above"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-subtype"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="e.g., RECOV"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.action"/>
+   <short value="Contract Action"/>
+   <definition value="Action stipulated by this Contract."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the contract action"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-action"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="e.g., JURISPOL"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.actionReason"/>
+   <short value="Contract Action Reason"/>
+   <definition value="Reason for action stipulated by this Contract."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the contract action reason"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="e.g., QUALIMP"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Actor"/>
+   </extension>
+   <path value="Contract.actor"/>
+   <short value="Contract Actor"/>
+   <definition value="List of Contract actors."/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="Contract.actor.entity"/>
+   <short value="Contract Actor Type"/>
+   <definition value="Who or what actors are assigned roles in this Contract."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Contract"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Group"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Substance"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.actor.role"/>
+   <short value="Contract  Actor Role"/>
+   <definition value="Role type of actors assigned roles in this Contract."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the contract actor role"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-actorrole"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="ValuedItem"/>
+   </extension>
+   <path value="Contract.valuedItem"/>
+   <short value="Contract Valued Item"/>
+   <definition value="Contract Valued Item List."/>
+   <min value="0"/>
+   <max value="*"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem classCode INVE"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.entity[x]"/>
+   <short value="Contract Valued Item Type"/>
+   <definition value="Specific type of Contract Valued Item that may be priced."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem code"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.identifier"/>
+   <short value="Contract Valued Item Identifier"/>
+   <definition value="Identifies a Contract Valued Item instance."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.effectiveTime"/>
+   <short value="Contract Valued Item Effective Tiem"/>
+   <definition value="Indicates the time during which this Contract ValuedItem information is effective."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem                effectiveTime"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.quantity"/>
+   <short value="Count of Contract Valued Items"/>
+   <definition value="Specifies the units by which the Contract Valued Item is measured or counted, and quantifies the countable or measurable Contract Valued Item instances."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem unitQuantity"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.unitPrice"/>
+   <short value="Contract Valued Item fee, charge, or cost"/>
+   <definition value="A Contract Valued Item unit valuation measure."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem unitPriceAmt"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.factor"/>
+   <short value="Contract Valued Item Price Scaling Factor"/>
+   <definition value="A real number that represents a multiplier used in determining the overall value of the Contract Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem factorNumber"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.points"/>
+   <short value="Contract Valued Item Difficulty Scaling Factor"/>
+   <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Valued Item delivered. The concept of Points allows for assignment of point values for a Contract Valued Item, such that a monetary amount can be assigned to each point."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem pointNumber"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.valuedItem.net"/>
+   <short value="Total Contract Valued Item Value"/>
+   <definition value="Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedItem netAmt"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Signatory"/>
+   </extension>
+   <path value="Contract.signer"/>
+   <short value="Contract Signer"/>
+   <definition value="Party signing this Contract."/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="Contract.signer.type"/>
+   <short value="Contract Signer Type"/>
+   <definition value="Role of this Contract signer, e.g., notary, grantee."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <binding>
+    <strength value="preferred"/>
+    <description value="List of parties who may be signing"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-signer-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Contract.signer.party"/>
+   <short value="Contract Signatory Party"/>
+   <definition value="Party which is a signator to this Contract."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.signer.signature"/>
+   <short value="Contract Documentation Signature"/>
+   <definition value="Legally binding Contract DSIG signature contents in Base64."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Term"/>
+   </extension>
+   <path value="Contract.term"/>
+   <name value="term"/>
+   <short value="Contract Term List"/>
+   <definition value="One or more Contract Provisions, which may be related and conveyed as a group, and may contain nested groups."/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="Contract.term.identifier"/>
+   <short value="Contract Term identifier"/>
+   <definition value="Unique identifier for this particular Contract Provision."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Contract.term.issued"/>
+   <short value="Contract Term Issue Date Time"/>
+   <definition value="When this Contract Provision was issued."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Contract.term.applies"/>
+   <short value="Contract Term Effective Time"/>
+   <definition value="Relevant time or time-period when this Contract Provision is applicable."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Period"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Contract.term.type"/>
+   <short value="Contract Term Type"/>
+   <definition value="Type of Contract Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g., life time maximum benefit."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the types of contract provisions"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-term-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Contract.term.subType"/>
+   <short value="Contract Term Subtype"/>
+   <definition value="Subtype of this Contract Provision, e.g., life time maximum payment for a contract term for specific valued item, e.g., disability payment."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the subtypes of contract provisions"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-term-subtype"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Contract.term.subject"/>
+   <short value="Subject of this Contract Term"/>
+   <definition value="Who or what this Contract Provision is about."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.term.action"/>
+   <short value="Contract Term Action"/>
+   <definition value="Action stipulated by this Contract Provision."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the contract action"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-action"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Contract.term.actionReason"/>
+   <short value="Contract Term Action Reason"/>
+   <definition value="Reason or purpose for the action stipulated by this Contract Provision."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the contract action reason"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="TermActor"/>
+   </extension>
+   <path value="Contract.term.actor"/>
+   <short value="Contract Term Actor List"/>
+   <definition value="List of actors participating in this Contract Provision."/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="Contract.term.actor.entity"/>
+   <short value="Contract Term Actor"/>
+   <definition value="The actor assigned a role in this Contract Provision."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Contract"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Group"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Substance"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.term.actor.role"/>
+   <short value="Contract Term Actor Role"/>
+   <definition value="Role played by the actor assigned this role in this Contract Provision."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Detailed codes for the contract actor role"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/contract-actorrole"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Contract.term.text"/>
+   <short value="Human readable Contract term text"/>
+   <definition value="Human readable form of this Contract Provision."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="TermValuedItem"/>
+   </extension>
+   <path value="Contract.term.valuedItem"/>
+   <short value="Contract Term Valued Item"/>
+   <definition value="Contract Provision Valued Item List."/>
+   <min value="0"/>
+   <max value="*"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem classCode INVE"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.entity[x]"/>
+   <short value="Contract Term Valued Item Type"/>
+   <definition value="Specific type of Contract Provision Valued Item that may be priced."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem code"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.identifier"/>
+   <short value="Contract Term Valued Item Identifier"/>
+   <definition value="Identifies a Contract Provision Valued Item instance."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.effectiveTime"/>
+   <short value="Contract Term Valued Item Effective Tiem"/>
+   <definition value="Indicates the time during which this Contract Term ValuedItem information is effective."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem effectiveTime"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.quantity"/>
+   <short value="Contract Term Valued Item Count"/>
+   <definition value="Specifies the units by which the Contract Provision Valued Item is measured or counted, and quantifies the countable or measurable Contract Term Valued Item instances."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem unitQuantity"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.unitPrice"/>
+   <short value="Contract Term Valued Item fee, charge, or cost"/>
+   <definition value="A Contract Provision Valued Item unit valuation measure."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem unitPriceAmt"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.factor"/>
+   <short value="Contract Term Valued Item Price Scaling Factor"/>
+   <definition value="A real number that represents a multiplier used in determining the overall value of the Contract Provision Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem factorNumber"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.points"/>
+   <short value="Contract Term Valued Item Difficulty Scaling Factor"/>
+   <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Provision Valued Item delivered. The concept of Points allows for assignment of point values for a Contract ProvisionValued Item, such that a monetary amount can be assigned to each point."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="COCT_RM440000UV09 ValuedUnitItem pointNumber"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Contract.term.valuedItem.net"/>
+   <short value="Total Contract Term Valued Item Value"/>
+   <definition value="Expresses the product of the Contract Provision Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+  </element>
+  <element>
+   <path value="Contract.term.group"/>
+   <short value="Nested Contract Term Group"/>
+   <definition value="Nested group of Contract Provisions."/>
+   <min value="0"/>
+   <max value="*"/>
+   <nameReference value="term"/>
+  </element>
+  <element>
+   <path value="Contract.binding[x]"/>
+   <short value="Binding Contract"/>
+   <definition value="Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the &quot;source of truth&quot; and which would be the basis for legal action related to enforcement of this Contract."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Composition"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"/>
+   </type>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="FriendlyLanguage"/>
+   </extension>
+   <path value="Contract.friendly"/>
+   <short value="Contract Friendly Language"/>
+   <definition value="The &quot;patient friendly language&quot; versionof the Contract in whole or in parts. &quot;Patient friendly language&quot; means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement."/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="Contract.friendly.content[x]"/>
+   <short value="Easily comprehended representation of this Contract"/>
+   <definition value="Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Composition"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"/>
+   </type>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="LegalLanguage"/>
+   </extension>
+   <path value="Contract.legal"/>
+   <short value="Contract Legal Language"/>
+   <definition value="List of Legal expressions or representations of this Contract."/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="Contract.legal.content[x]"/>
+   <short value="Contract Legal Text"/>
+   <definition value="Contract legal text in human renderable form."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Composition"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"/>
+   </type>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="ComputableLanguage"/>
+   </extension>
+   <path value="Contract.rule"/>
+   <short value="Computable Contract Language"/>
+   <definition value="List of Computable Policy Rule Language Representations of this Contract."/>
+   <min value="0"/>
+   <max value="*"/>
+  </element>
+  <element>
+   <path value="Contract.rule.content[x]"/>
+   <short value="Computable Contract Rules"/>
+   <definition value="Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+   </type>
+  </element>
+ </differential>
+</StructureDefinition>

@@ -16,12 +16,12 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>11400</WindowHeight>
-  <WindowWidth>22575</WindowWidth>
+  <WindowHeight>10695</WindowHeight>
+  <WindowWidth>24645</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>808</TabRatio>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>3</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -2167,12 +2167,12 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Patient's nominated care provider</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Patient's nominated primary care provider</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Patient's nominated care provider</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">This may be the primary care provider (in a GP context), or it may be a patient nominated care manager in a community/disablity setting, or even organization that will provide people to perform the care provider roles.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">This may be the primary care provider (in a GP context), or it may be a patient nominated care manager in a community/disablity setting, or even organization that will provide people to perform the care provider roles.&#10;&#10;This is not to be used to record Care Teams, these should be recorded on either the CarePlan or EpisodeOfCare resources.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Need to rationalize this with circleOfCare from CarePlan</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -4074,13 +4074,12 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>7</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>14</LeftColumnRightPane>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -4088,14 +4087,15 @@
     </Pane>
     <Pane>
      <Number>1</Number>
-     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
+     <ActiveRow>9</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4871,7 +4871,7 @@
     <Cell ss:StyleID="s117"><Data ss:Type="String">deathdate</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">date</Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s118"><Data ss:Type="String">Patient.deceased[x]</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">Patient.deceasedDateTime</Data></Cell>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s119"><Data ss:Type="String">The date of death has been provided and satisfies this search value</Data></Cell>
    </Row>
@@ -4977,6 +4977,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4996,8 +4997,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>8</ActiveRow>
-     <ActiveCol>3</ActiveCol>
+     <ActiveRow>26</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -5076,9 +5077,9 @@
     <Cell ss:StyleID="s115"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">Fetch Patient Record</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s129"><Data ss:Type="String">This operation is used to return all the information related to patient described in the resource on which this operation is invoked. The response is a bundle of type &quot;searchset&quot;. At a minimum, the patient resource itself is returned, along with any other resources that the server has available for the given user. The server also returns whatever resources are needed to support the records - e.g. linked practitioners, locations, organizations etc. The principle intended use for rhis operation is to provide a patient with access to their records (e.g. &quot;Blue Button&quot;).  The server SHOULD return all resources that it has that are in the patient compartment for the identified patient, and any resource referenced from those, including binaries and attachments. In the US Realm, at a mimimum, the resources returned SHALL include all the data covered by the meaningful use common data elements (ref to be provided). Other applicable implementation guides may make additional rules about the information that is returned. Note: the expectations here will be refined after experience with this at connectathon.</Data><NamedCell
+    <Cell ss:StyleID="s129"><Data ss:Type="String">This operation is used to return all the information related to the patient described in the resource on which this operation is invoked. The response is a bundle of type &quot;searchset&quot;. At a minimum, the patient resource itself is returned, along with any other resources that the server has that are related to the patient, and that are available for the given user. The server also returns whatever resources are needed to support the records - e.g. linked practitioners, medications, locations, organizations etc. The principle intended use for rhis operation is to provide a patient with access to their entire record (e.g. &quot;Blue Button&quot;).  The server SHOULD return at least all resources that it has that are in the patient compartment for the identified patient, and any resource referenced from those, including binaries and attachments. In the US Realm, at a mimimum, the resources returned SHALL include all the data covered by the meaningful use common data elements as defined in [DAF]{daf/daf.html}. Other applicable implementation guides may make additional rules about how much information that is returned</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="String">The key differences between this operation and simply searching the patient compartment are:  * unless the client requests otherwise, the server returns the entire result set in a single bundle (rather than using paging) * the server is responsible for determining what resources to return as included resources (rather than the client specifying which ones)  It is assumed that the server has identified and secured the context appropriately, and can either associate the authorization context with a single patient, or determine whether the context has the rights to the nominated patient, if there is one. If there is no nominated patient (e.g. the operation is invoked at the system level) and the context is not associated with a single patient record, then the server should return an error. Speciying the relationship between the context, a user and patient records is outside the scope of this specification.</Data><NamedCell
+    <Cell ss:StyleID="s130"><Data ss:Type="String">The key differences between this operation and simply searching the patient compartment are:  &#10;&#10;* unless the client requests otherwise, the server returns the entire result set in a single bundle (rather than using paging) &#10;* the server is responsible for determining what resources to return as included resources (rather than the client specifying which ones). This frees the client from needing to determine what it could or should ask for&#10;&#10;It is assumed that the server has identified and secured the context appropriately, and can either associate the authorization context with a single patient, or determine whether the context has the rights to the nominated patient, if there is one. If there is no nominated patient (e.g. the operation is invoked at the system level) and the context is not associated with a single patient record, then the server should return an error. Speciying the relationship between the context, a user and patient records is outside the scope of this specification.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">$everything-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$everything-response.txt</Data></Cell>
@@ -5623,7 +5624,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>7</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -5636,10 +5637,12 @@
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>9</ActiveCol>
+     <ActiveRow>1</ActiveRow>
+     <ActiveCol>7</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

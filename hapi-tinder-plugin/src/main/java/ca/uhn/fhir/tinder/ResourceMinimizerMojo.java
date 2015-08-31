@@ -3,8 +3,10 @@ package ca.uhn.fhir.tinder;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URL;
 import java.util.Collection;
 
@@ -120,9 +122,11 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 			if (!inputString.equals(outputString)) {
 				ourLog.info("Trimming contents of resource: {} - From {} to {}", nextFile, FileUtils.byteCountToDisplaySize(inputString.length()), FileUtils.byteCountToDisplaySize(outputString.length()));
 				try {
-					BufferedWriter writer = new BufferedWriter(new FileWriter(nextFile.getAbsolutePath(), false));
-					writer.append(outputString);
-					writer.close();
+					String f = nextFile.getAbsolutePath();
+					Writer w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
+					w = new BufferedWriter(w);
+					w.append(outputString);
+					w.close();
 				} catch (IOException e) {
 					throw new MojoFailureException("Failed to write " + nextFile, e);
 				}
@@ -140,12 +144,17 @@ public class ResourceMinimizerMojo extends AbstractMojo {
       ourLog.info("Logback used '{}' as the configuration file.", mainURL);
 		
 		ResourceMinimizerMojo m = new ResourceMinimizerMojo();
-		m.targetDirectory = new File("/Users/t3903uhn/git/hapi-fhir/hapi-tinder-plugin/src/main/resources/vs/dstu2");
+		m.targetDirectory = new File("../hapi-tinder-plugin/src/main/resources/vs/dstu2");
 		m.fhirVersion = "DSTU2";
 		m.execute();
 		
 		m = new ResourceMinimizerMojo();
-		m.targetDirectory = new File("/Users/t3903uhn/git/hapi-fhir/hapi-fhir-structures-hl7org-dstu2/src/main/resources/org/hl7/fhir/instance/model/profile");
+		m.targetDirectory = new File("../hapi-fhir-validation-resources/src/main/resources/org/hl7/fhir/instance/model/valueset/");
+		m.fhirVersion = "DSTU2";
+		m.execute();
+		
+		m = new ResourceMinimizerMojo();
+		m.targetDirectory = new File("../hapi-fhir-validation-resources/src/main/resources/org/hl7/fhir/instance/model/profile");
 		m.fhirVersion = "DSTU2";
 		m.execute();
 

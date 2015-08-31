@@ -314,7 +314,7 @@
             ],
             "deleted": true,
             "item": {
-              "reference": "MedicationPrescription/1",
+              "reference": "MedicationOrder/1",
               "display": "use of Ventolin Inhaler was discontinued"
             }
           }
@@ -324,7 +324,7 @@
     {
       "base": "urn:uuid:",
       "resource": {
-        "resourceType": "MedicationPrescription",
+        "resourceType": "MedicationOrder",
         "id": "124a6916-5d84-4b8c-b250-10cefb8e6e86",
         "meta": {
           "lastUpdated": "2013-05-05T16:13:03Z"

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -53,6 +53,14 @@ public class OrganizationTypeEnumFactory implements EnumFactory<OrganizationType
       return OrganizationType.EDU;
     if ("reli".equals(codeString))
       return OrganizationType.RELI;
+    if ("crs".equals(codeString))
+      return OrganizationType.CRS;
+    if ("cg".equals(codeString))
+      return OrganizationType.CG;
+    if ("bus".equals(codeString))
+      return OrganizationType.BUS;
+    if ("other".equals(codeString))
+      return OrganizationType.OTHER;
     throw new IllegalArgumentException("Unknown OrganizationType code '"+codeString+"'");
   }
 
@@ -71,6 +79,14 @@ public class OrganizationTypeEnumFactory implements EnumFactory<OrganizationType
       return "edu";
     if (code == OrganizationType.RELI)
       return "reli";
+    if (code == OrganizationType.CRS)
+      return "crs";
+    if (code == OrganizationType.CG)
+      return "cg";
+    if (code == OrganizationType.BUS)
+      return "bus";
+    if (code == OrganizationType.OTHER)
+      return "other";
     return "?";
   }
 

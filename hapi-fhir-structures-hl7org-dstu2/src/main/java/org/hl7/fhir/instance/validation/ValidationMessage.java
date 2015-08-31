@@ -63,7 +63,7 @@ public class ValidationMessage
   private IssueSeverity level;
   private String html;
 
-
+  
   /**
    * Constructor
    */

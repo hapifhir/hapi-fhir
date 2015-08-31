@@ -2621,7 +2621,7 @@ Per WGM MonQ3 - you need a schedule for each order component oralDiet.schedule, 
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
-					<Data ss:Type="String">Quantity</Data>
+					<Data ss:Type="String">SimpleQuantity</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
@@ -3478,7 +3478,7 @@ Per WGM MonQ3 - you need a schedule for each order component oralDiet.schedule, 
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
-					<Data ss:Type="String">Quantity</Data>
+					<Data ss:Type="String">SimpleQuantity</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
@@ -4077,7 +4077,7 @@ Per WGM MonQ3 - you need a schedule for each order component oralDiet.schedule, 
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
-					<Data ss:Type="String">Quantity</Data>
+					<Data ss:Type="String">SimpleQuantity</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
@@ -4419,7 +4419,7 @@ Per WGM MonQ3 - you need a schedule for each order component oralDiet.schedule, 
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
-					<Data ss:Type="String">Quantity</Data>
+					<Data ss:Type="String">SimpleQuantity</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
@@ -4504,7 +4504,7 @@ Per WGM MonQ3 - you need a schedule for each order component oralDiet.schedule, 
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
-					<Data ss:Type="String">Quantity|Ratio</Data>
+					<Data ss:Type="String">SimpleQuantity|Ratio</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
@@ -4675,7 +4675,7 @@ Per WGM MonQ3 - you need a schedule for each order component oralDiet.schedule, 
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
-					<Data ss:Type="String">Quantity</Data>
+					<Data ss:Type="String">SimpleQuantity</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">

@@ -1,0 +1,729 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="Timing"/>
+ <url value="http://hl7.org/fhir/StructureDefinition/Timing"/>
+ <name value="Timing"/>
+ <publisher value="HL7 FHIR Standard"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for Timing Type"/>
+ <requirements value="Need to able to track proposed timing schedules. There are several different ways to do this: one or more specified times, a simple rules like three times a day, or  before/after meals."/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="v2"/>
+  <uri value="http://hl7.org/v2"/>
+  <name value="HL7 v2"/>
+ </mapping>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
+ <snapshot>
+  <element>
+   <path value="Timing"/>
+   <short value="A timing schedule that specifies an event that may occur multiple times"/>
+   <definition value="Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds."/>
+   <comments value="A timing schedule can be either a list of events - intervals on which the event occurs, or a single event with repeating criteria or just repeating criteria with no actual event.  When both event and a repeating specification are provided, the list of events should be understood as an interpretation of the information in the repeat structure."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Element"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="QSET&lt;TS> (GTS)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.event"/>
+   <short value="When the event occurs"/>
+   <definition value="Identifies specific times when the event occurs."/>
+   <requirements value="In an MAR, for instance, you need to take a general specification, and turn it into a precise specification."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="QLIST&lt;TS>"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat"/>
+   <short value="When the event is to occur"/>
+   <definition value="A set of rules that describe when the event should occur."/>
+   <requirements value="Many timing schedules are determined by regular repetitions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Element"/>
+   </type>
+   <constraint>
+    <key value="tim-6"/>
+    <severity value="error"/>
+    <human value="If there's a periodMax, there must be a period"/>
+    <xpath value="not(exists(f:periodMax)) or exists(period)"/>
+   </constraint>
+   <constraint>
+    <key value="tim-7"/>
+    <severity value="error"/>
+    <human value="If there's a durationMax, there must be a duration"/>
+    <xpath value="not(exists(f:durationMax)) or exists(duration)"/>
+   </constraint>
+   <constraint>
+    <key value="tim-1"/>
+    <severity value="error"/>
+    <human value="if there's a duration, there needs to be duration units"/>
+    <xpath value="not(exists(f:duration)) or exists(f:durationUnits)"/>
+   </constraint>
+   <constraint>
+    <key value="tim-2"/>
+    <severity value="error"/>
+    <human value="if there's a period, there needs to be duration units"/>
+    <xpath value="not(exists(f:period)) or exists(f:periodUnits)"/>
+   </constraint>
+   <constraint>
+    <key value="tim-3"/>
+    <severity value="error"/>
+    <human value="Either frequency or when can exist, not both"/>
+    <xpath value="not(exists(f:frequency)) or not(exists(f:when))"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Implies PIVL or EIVL"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.bounds[x]"/>
+   <short value="Length/Range of lengths, or (Start and/or end) limits"/>
+   <definition value="Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Duration"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="Period"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="IVL(TS) used in a QSI"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.count"/>
+   <short value="Number of times to repeat"/>
+   <definition value="A total count of the desired number of repetitions."/>
+   <comments value="If you have both bounds and count, then this should be understand as within the bounds period, until count times happens."/>
+   <requirements value="Repetitions may be limited by end time or total occurrences."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="integer"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.count"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.duration"/>
+   <short value="How long when it happens"/>
+   <definition value="How long this thing happens for when it happens."/>
+   <comments value="For some events the duration is part of the definition of the event (e.g. IV infusions, where the duration is implicit in the specified quantity and rate). For others, it's part of the timing specification (e.g. exercise)."/>
+   <requirements value="Some activities are not instantaneous and need to be maintained for a period of time."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <constraint>
+    <key value="tim-4"/>
+    <severity value="error"/>
+    <human value="duration SHALL be a non-negative value"/>
+    <xpath value="@value >= 0 or not(@value)"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase / EIVL.offset"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.durationMax"/>
+   <short value="How long when it happens (Max)"/>
+   <definition value="The upper limit of how long this thing happens for when it happens."/>
+   <comments value="For some events the duration is part of the definition of the event (e.g. IV infusions, where the duration is implicit in the specified quantity and rate). For others, it's part of the timing specification (e.g. exercise)."/>
+   <requirements value="Some activities are not instantaneous and need to be maintained for a period of time."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase / EIVL.offset"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.durationUnits"/>
+   <short value="s | min | h | d | wk | mo | a - unit of time (UCUM)"/>
+   <definition value="The units of time for the duration, in UCUM units."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="A unit of time (units from UCUM)"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/units-of-time"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase.unit"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.frequency"/>
+   <short value="Event occurs frequency times per period"/>
+   <definition value="The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="integer"/>
+   </type>
+   <defaultValueInteger value="1"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase / EIVL.offset"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.frequencyMax"/>
+   <short value="Event occurs up to frequencyMax times per period"/>
+   <definition value="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="integer"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.period"/>
+   <short value="Event occurs frequency times per period"/>
+   <definition value="Indicates the duration of time over which repetitions are to occur.  E.g. to express &quot;3 times per day&quot;, 3 would be the frequency and &quot;1 day&quot; would be the period."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <constraint>
+    <key value="tim-5"/>
+    <severity value="error"/>
+    <human value="period SHALL be a non-negative value"/>
+    <xpath value="@value >= 0 or not(@value)"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.periodMax"/>
+   <short value="Upper limit of period (3-4 hours)"/>
+   <definition value="If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as &quot;do this once every 3-5 days."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.periodUnits"/>
+   <short value="s | min | h | d | wk | mo | a - unit of time (UCUM)"/>
+   <definition value="The units of time for the period in UCUM units."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="A unit of time (units from UCUM)"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/units-of-time"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase.unit"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.when"/>
+   <short value="Regular life events the event is tied to"/>
+   <definition value="A real world event that the occurrence of the event should be tied to."/>
+   <requirements value="Timings are frequently determined by occurrences such as waking, eating and sleep."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Real world event that the schedule relates to"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/event-timing"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="EIVL.event"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.code"/>
+   <short value="QD | QOD | Q4H | Q6H | BID | TID | QID | AM | PM +"/>
+   <definition value="A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes."/>
+   <comments value="A repeat should always be defined except for the common codes BID, TID, QID, AM and PM, which all systems are required to understand."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="Code for a known / defined timing pattern"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/timing-abbreviation"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="QSC.code"/>
+   </mapping>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="Timing"/>
+   <short value="A timing schedule that specifies an event that may occur multiple times"/>
+   <definition value="Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds."/>
+   <comments value="A timing schedule can be either a list of events - intervals on which the event occurs, or a single event with repeating criteria or just repeating criteria with no actual event.  When both event and a repeating specification are provided, the list of events should be understood as an interpretation of the information in the repeat structure."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Element"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="QSET&lt;TS> (GTS)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.event"/>
+   <short value="When the event occurs"/>
+   <definition value="Identifies specific times when the event occurs."/>
+   <requirements value="In an MAR, for instance, you need to take a general specification, and turn it into a precise specification."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="QLIST&lt;TS>"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat"/>
+   <short value="When the event is to occur"/>
+   <definition value="A set of rules that describe when the event should occur."/>
+   <requirements value="Many timing schedules are determined by regular repetitions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <constraint>
+    <key value="tim-6"/>
+    <severity value="error"/>
+    <human value="If there's a periodMax, there must be a period"/>
+    <xpath value="not(exists(f:periodMax)) or exists(period)"/>
+   </constraint>
+   <constraint>
+    <key value="tim-7"/>
+    <severity value="error"/>
+    <human value="If there's a durationMax, there must be a duration"/>
+    <xpath value="not(exists(f:durationMax)) or exists(duration)"/>
+   </constraint>
+   <constraint>
+    <key value="tim-1"/>
+    <severity value="error"/>
+    <human value="if there's a duration, there needs to be duration units"/>
+    <xpath value="not(exists(f:duration)) or exists(f:durationUnits)"/>
+   </constraint>
+   <constraint>
+    <key value="tim-2"/>
+    <severity value="error"/>
+    <human value="if there's a period, there needs to be duration units"/>
+    <xpath value="not(exists(f:period)) or exists(f:periodUnits)"/>
+   </constraint>
+   <constraint>
+    <key value="tim-3"/>
+    <severity value="error"/>
+    <human value="Either frequency or when can exist, not both"/>
+    <xpath value="not(exists(f:frequency)) or not(exists(f:when))"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Implies PIVL or EIVL"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.bounds[x]"/>
+   <short value="Length/Range of lengths, or (Start and/or end) limits"/>
+   <definition value="Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Duration"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="Period"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="IVL(TS) used in a QSI"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.count"/>
+   <short value="Number of times to repeat"/>
+   <definition value="A total count of the desired number of repetitions."/>
+   <comments value="If you have both bounds and count, then this should be understand as within the bounds period, until count times happens."/>
+   <requirements value="Repetitions may be limited by end time or total occurrences."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="integer"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.count"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.duration"/>
+   <short value="How long when it happens"/>
+   <definition value="How long this thing happens for when it happens."/>
+   <comments value="For some events the duration is part of the definition of the event (e.g. IV infusions, where the duration is implicit in the specified quantity and rate). For others, it's part of the timing specification (e.g. exercise)."/>
+   <requirements value="Some activities are not instantaneous and need to be maintained for a period of time."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <constraint>
+    <key value="tim-4"/>
+    <severity value="error"/>
+    <human value="duration SHALL be a non-negative value"/>
+    <xpath value="@value >= 0 or not(@value)"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase / EIVL.offset"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.durationMax"/>
+   <short value="How long when it happens (Max)"/>
+   <definition value="The upper limit of how long this thing happens for when it happens."/>
+   <comments value="For some events the duration is part of the definition of the event (e.g. IV infusions, where the duration is implicit in the specified quantity and rate). For others, it's part of the timing specification (e.g. exercise)."/>
+   <requirements value="Some activities are not instantaneous and need to be maintained for a period of time."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase / EIVL.offset"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.durationUnits"/>
+   <short value="s | min | h | d | wk | mo | a - unit of time (UCUM)"/>
+   <definition value="The units of time for the duration, in UCUM units."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="A unit of time (units from UCUM)"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/units-of-time"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase.unit"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.frequency"/>
+   <short value="Event occurs frequency times per period"/>
+   <definition value="The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="integer"/>
+   </type>
+   <defaultValueInteger value="1"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase / EIVL.offset"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.frequencyMax"/>
+   <short value="Event occurs up to frequencyMax times per period"/>
+   <definition value="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="integer"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.period"/>
+   <short value="Event occurs frequency times per period"/>
+   <definition value="Indicates the duration of time over which repetitions are to occur.  E.g. to express &quot;3 times per day&quot;, 3 would be the frequency and &quot;1 day&quot; would be the period."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <constraint>
+    <key value="tim-5"/>
+    <severity value="error"/>
+    <human value="period SHALL be a non-negative value"/>
+    <xpath value="@value >= 0 or not(@value)"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.periodMax"/>
+   <short value="Upper limit of period (3-4 hours)"/>
+   <definition value="If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as &quot;do this once every 3-5 days."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.periodUnits"/>
+   <short value="s | min | h | d | wk | mo | a - unit of time (UCUM)"/>
+   <definition value="The units of time for the period in UCUM units."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="A unit of time (units from UCUM)"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/units-of-time"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="PIVL.phase.unit"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.repeat.when"/>
+   <short value="Regular life events the event is tied to"/>
+   <definition value="A real world event that the occurrence of the event should be tied to."/>
+   <requirements value="Timings are frequently determined by occurrences such as waking, eating and sleep."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Real world event that the schedule relates to"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/event-timing"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="EIVL.event"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Timing.code"/>
+   <short value="QD | QOD | Q4H | Q6H | BID | TID | QID | AM | PM +"/>
+   <definition value="A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes."/>
+   <comments value="A repeat should always be defined except for the common codes BID, TID, QID, AM and PM, which all systems are required to understand."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="Code for a known / defined timing pattern"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/timing-abbreviation"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="QSC.code"/>
+   </mapping>
+  </element>
+ </differential>
+</StructureDefinition>

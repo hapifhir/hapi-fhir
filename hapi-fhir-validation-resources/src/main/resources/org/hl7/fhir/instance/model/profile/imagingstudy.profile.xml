@@ -1,0 +1,1767 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="ImagingStudy"/>
+ <meta>
+  <lastUpdated value="2015-08-27T19:45:13.172-04:00"/>
+ </meta>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+  <valueInteger value="0"/>
+ </extension>
+ <url value="http://hl7.org/fhir/StructureDefinition/ImagingStudy"/>
+ <name value="ImagingStudy"/>
+ <publisher value="Health Level Seven International (Imaging Integration)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org/Special/committees/imagemgt/index.cfm"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for ImagingStudy Resource"/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <mapping>
+  <identity value="dicom"/>
+  <uri value="http://nema.org/dicom"/>
+  <name value="DICOM"/>
+ </mapping>
+ <mapping>
+  <identity value="w5"/>
+  <uri value="http://hl7.org/fhir/w5"/>
+  <name value="W5 Mapping"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
+ <snapshot>
+  <element>
+   <path value="ImagingStudy"/>
+   <short value="A set of images produced in single study (one or more series of references images)"/>
+   <definition value="Representation of the content produced in a DICOM imaging study. A study comprises a set of Series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A Series is of only one modality (e.g., X-ray, CT, MR, ultrasound), but a Study may have multiple Series of different modalities."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act[classCode=COMPOSITION, moodCode=EVN]"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="Reference IHE radiology TF vol 2 table 4.14-1"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="clinical"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImagingStudy.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImagingStudy.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ImagingStudy.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="ImagingStudy.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-display-hint">
+    <valueString value="dicom=http://dicom.nema.org/medical/dicom/current/output/chtml/part03/sect_C.7.2.html#sect_C.7.2.1"/>
+   </extension>
+   <path value="ImagingStudy.started"/>
+   <short value="When the study was started"/>
+   <definition value="Date and Time the study started. Timezone Offset From UTC."/>
+   <alias value="StudyDate"/>
+   <alias value="StudyTime"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <exampleDateTime value="2011-01-01T11:01:20+03:00"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".effectiveTime"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0020)+(0008,0030)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.init"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-display-hint">
+    <valueString value="dicom=http://dicom.nema.org/medical/dicom/current/output/chtml/part03/sect_C.2.2.html"/>
+   </extension>
+   <path value="ImagingStudy.patient"/>
+   <short value="Who the images are of"/>
+   <definition value="The patient imaged in the study."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=SBJ].role"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0010/*)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.focus"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-display-hint">
+    <valueString value="dicom="/>
+   </extension>
+   <path value="ImagingStudy.uid"/>
+   <short value="Formal identifier for the study"/>
+   <definition value="Formal identifier for the study."/>
+   <alias value="StudyInstanceUID"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="oid"/>
+   </type>
+   <exampleUri value="urn:oid:2.16.124.113543.6003.1154777499.30246.19789.3503430045"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,000D)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.accession"/>
+   <short value="Related workflow identifier (&quot;Accession Number&quot;)"/>
+   <definition value="Accession Number is an identifier related to some aspect of imaging workflow and data management, and usage may vary across different institutions.  See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_TF_Rev13.0_Vol1_FT_2014-07-30.pdf)."/>
+   <alias value="AccessionNumber"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[typeCode=COMP].source[classCode=ACSN, moodCode=EVN].id"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0050)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.identifier"/>
+   <short value="Other identifiers for the study"/>
+   <definition value="Other identifiers for the study."/>
+   <alias value="StudyID"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id (no means to distinguish from uid)"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,0010)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.order"/>
+   <short value="Order(s) that caused this study to be performed"/>
+   <definition value="A list of the diagnostic orders that resulted in this imaging study being performed."/>
+   <requirements value="To support grouped procedures (one imaging study supporting multiple ordered procedures, e.g., chest/abdomen/pelvis CT)."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DiagnosticOrder"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=FLFS].target[classCode=DGIMG, moodCode=RQO]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.modalityList"/>
+   <short value="All series.modality if actual acquisition modalities"/>
+   <definition value="A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19)."/>
+   <alias value="ModalitiesInStudy"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Type of acquired data in the instance"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/dicom-cid29"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0061)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.referrer"/>
+   <short value="Referring physician (0008,0090)"/>
+   <definition value="The requesting/referring physician."/>
+   <alias value="ReferringPhysiciansName"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=FLFS].target[classCode=DGIMG, moodCode=RQO].participation[typeCode=AUT].role"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0090)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.cause"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.availability"/>
+   <short value="ONLINE | OFFLINE | NEARLINE | UNAVAILABLE (0008,0056)"/>
+   <definition value="Availability of study (online, offline or nearline)."/>
+   <alias value="InstanceAvailability"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Availability of the resource"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/instance-availability"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Not supported"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0056)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.url"/>
+   <short value="Retrieve URI"/>
+   <definition value="WADO-RS resource where Study is available."/>
+   <alias value="RetrieveURI"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".text.reference"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,1190)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.numberOfSeries"/>
+   <short value="Number of Study Related Series"/>
+   <definition value="Number of Series in Study."/>
+   <alias value="NumberOfStudyRelatedSeries"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP, subsetCode=SUMM].target[classCode=OBSSER, moodCode=EVN].repeatNumber"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,1206)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.numberOfInstances"/>
+   <short value="Number of Study Related Instances"/>
+   <definition value="Number of SOP Instances in Study."/>
+   <alias value="NumberOfStudyRelatedInstances"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP, subsetCode=SUMM].target[classCode=DGIMG, moodCode=EVN].repeatNumber"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,1208)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.procedure"/>
+   <short value="Type of procedure performed"/>
+   <definition value="Type of procedure performed."/>
+   <comments value="For the Procedure.code, LOINC radiology orderables would be a good value set to use."/>
+   <alias value="ProcedureCodeSequence"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Procedure"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=PROC, moodCode=EVN]"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,1032)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.interpreter"/>
+   <short value="Who interpreted images"/>
+   <definition value="Who read the study and interpreted the images or other content."/>
+   <alias value="Name of Physician(s) Reading Study"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=PRF].role"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,1060)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.description"/>
+   <short value="Institution-generated description"/>
+   <definition value="Institution-generated description or classification of the Study performed."/>
+   <alias value="StudyDescription"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".text"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,1030)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series"/>
+   <short value="Each study has one or more series of instances"/>
+   <definition value="Each study has one or more series of images or other content."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=OBSSER, moodCode=EVN]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.number"/>
+   <short value="Numeric identifier of this series"/>
+   <definition value="The Numeric identifier of this series in the study."/>
+   <alias value="SeriesNumber"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <exampleInteger value="3"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[type=COMP, source[classCode=COMPOSITION, moodCode=EVN]].sequenceNumber"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,0011)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.modality"/>
+   <short value="The modality of the instances in the series"/>
+   <definition value="The modality of this series sequence."/>
+   <alias value="Modality"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Type of acquired data in the instance"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/dicom-cid29"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0060)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.uid"/>
+   <short value="Formal identifier for this series"/>
+   <definition value="Formal identifier for this series."/>
+   <alias value="SeriesInstanceUID"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="oid"/>
+   </type>
+   <exampleUri value="urn:oid:2.16.124.113543.6003.2588828330.45298.17418.2723805630"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,000E)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.description"/>
+   <short value="A description of the series"/>
+   <definition value="A description of the series."/>
+   <alias value="SeriesDescription"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <exampleString value="CT Surview 180"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".text"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,103E)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.numberOfInstances"/>
+   <short value="Number of Series Related Instances"/>
+   <definition value="Number of SOP Instances in Series."/>
+   <alias value="NumberOfSeriesRelatedInstances"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP, subsetCode=SUMM].target[classCode=DGIMG, moodCode=EVN].repeatNumber"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,1209)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.availability"/>
+   <short value="ONLINE | OFFLINE | NEARLINE | UNAVAILABLE"/>
+   <definition value="Availability of series (online, offline or nearline)."/>
+   <alias value="InstanceAvailability"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Availability of the resource"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/instance-availability"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[typeCode=COMP]. source[classCode=OBS, moodCode=EVN, code=&quot;availability&quot;].value"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0056)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.url"/>
+   <short value="Location of the referenced instance(s)"/>
+   <definition value="URI/URL specifying the location of the referenced series using WADO-RS."/>
+   <alias value="RetrieveURI"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".text.reference"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,1115) > (0008,1190)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.bodySite"/>
+   <short value="Body part examined"/>
+   <definition value="Body part examined. See  DICOM Part 16 Annex L for the mapping from DICOM to Snomed."/>
+   <alias value="BodyPartExamined"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Codes describing anatomical locations. May include laterality"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/body-site"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".targetSiteCode"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0018,0015)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.laterality"/>
+   <short value="Body part laterality"/>
+   <definition value="Laterality if bodySite is paired anatomic structure and laterality is not pre-coordinated in bodySite code."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,0060)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.started"/>
+   <short value="When the series started"/>
+   <definition value="The date and time when the series was started."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".effectiveTime"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance"/>
+   <short value="A single SOP instance from the series"/>
+   <definition value="A single SOP Instance within the series, e.g., an image, or presentation state."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=DGIMG, moodCode=EVN]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.number"/>
+   <short value="The number of this instance in the series"/>
+   <definition value="The number of instance in the series."/>
+   <alias value="InstanceNumber"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <exampleInteger value="1"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[typeCode=COMP, source[classCode=OBSSER, moodCode=EVN]].sequenceNumber"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,0013)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.uid"/>
+   <short value="Formal identifier for this instance"/>
+   <definition value="Formal identifier for this image or other content."/>
+   <alias value="SOPInstanceUID"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="oid"/>
+   </type>
+   <exampleUri value="urn:oid:2.16.124.113543.6003.189642796.63084.16748.2599092903"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0018)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.sopClass"/>
+   <short value="DICOM class type"/>
+   <definition value="DICOM instance  type."/>
+   <alias value="SOPClassUID"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="oid"/>
+   </type>
+   <exampleUri value="urn:oid:1.2.840.10008.5.1.4.1.1.2"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[typeCode=COMP]. source[classCode=OBS, moodCode=EVN, code=&quot;sop class&quot;].value"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0016)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.type"/>
+   <short value="Type of instance (image etc)"/>
+   <definition value="A human-friendly SOP Class name."/>
+   <comments value="E.g., 'CT image', 'MR multi-frame', 'blending presentation'."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0004,1430)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.title"/>
+   <short value="Description of instance"/>
+   <definition value="The description of the instance."/>
+   <comments value="Particularly for post-acquisition analytic objects, such as SR, presentation states, value mapping, etc."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".title"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0070,0080) | (0040,A043) > (0008,0104) | (0042,0010) | (0008,0008)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.content"/>
+   <short value="Content of the instance"/>
+   <definition value="Content of the instance or a rendering thereof (e.g., a JPEG of an image, or an XML of a structured report). May be represented for example by inline encoding; by a URL reference to a WADO-RS service that makes the instance available; or to a FHIR Resource (e.g., Media, Document, etc.). Multiple content attachments may be used for alternate representations of the instance."/>
+   <comments value="Use of Attachment.data is discouraged."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".text.binary"/>
+   </mapping>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="ImagingStudy"/>
+   <short value="A set of images produced in single study (one or more series of references images)"/>
+   <definition value="Representation of the content produced in a DICOM imaging study. A study comprises a set of Series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A Series is of only one modality (e.g., X-ray, CT, MR, ultrasound), but a Study may have multiple Series of different modalities."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act[classCode=COMPOSITION, moodCode=EVN]"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="Reference IHE radiology TF vol 2 table 4.14-1"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="clinical"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-display-hint">
+    <valueString value="dicom=http://dicom.nema.org/medical/dicom/current/output/chtml/part03/sect_C.7.2.html#sect_C.7.2.1"/>
+   </extension>
+   <path value="ImagingStudy.started"/>
+   <short value="When the study was started"/>
+   <definition value="Date and Time the study started. Timezone Offset From UTC."/>
+   <alias value="StudyDate"/>
+   <alias value="StudyTime"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <exampleDateTime value="2011-01-01T11:01:20+03:00"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".effectiveTime"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0020)+(0008,0030)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.init"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-display-hint">
+    <valueString value="dicom=http://dicom.nema.org/medical/dicom/current/output/chtml/part03/sect_C.2.2.html"/>
+   </extension>
+   <path value="ImagingStudy.patient"/>
+   <short value="Who the images are of"/>
+   <definition value="The patient imaged in the study."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=SBJ].role"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0010/*)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.focus"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-display-hint">
+    <valueString value="dicom="/>
+   </extension>
+   <path value="ImagingStudy.uid"/>
+   <short value="Formal identifier for the study"/>
+   <definition value="Formal identifier for the study."/>
+   <alias value="StudyInstanceUID"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="oid"/>
+   </type>
+   <exampleUri value="urn:oid:2.16.124.113543.6003.1154777499.30246.19789.3503430045"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,000D)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.accession"/>
+   <short value="Related workflow identifier (&quot;Accession Number&quot;)"/>
+   <definition value="Accession Number is an identifier related to some aspect of imaging workflow and data management, and usage may vary across different institutions.  See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_TF_Rev13.0_Vol1_FT_2014-07-30.pdf)."/>
+   <alias value="AccessionNumber"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[typeCode=COMP].source[classCode=ACSN, moodCode=EVN].id"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0050)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.identifier"/>
+   <short value="Other identifiers for the study"/>
+   <definition value="Other identifiers for the study."/>
+   <alias value="StudyID"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id (no means to distinguish from uid)"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,0010)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.order"/>
+   <short value="Order(s) that caused this study to be performed"/>
+   <definition value="A list of the diagnostic orders that resulted in this imaging study being performed."/>
+   <requirements value="To support grouped procedures (one imaging study supporting multiple ordered procedures, e.g., chest/abdomen/pelvis CT)."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DiagnosticOrder"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=FLFS].target[classCode=DGIMG, moodCode=RQO]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.modalityList"/>
+   <short value="All series.modality if actual acquisition modalities"/>
+   <definition value="A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19)."/>
+   <alias value="ModalitiesInStudy"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Type of acquired data in the instance"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/dicom-cid29"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0061)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.referrer"/>
+   <short value="Referring physician (0008,0090)"/>
+   <definition value="The requesting/referring physician."/>
+   <alias value="ReferringPhysiciansName"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=FLFS].target[classCode=DGIMG, moodCode=RQO].participation[typeCode=AUT].role"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0090)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.cause"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.availability"/>
+   <short value="ONLINE | OFFLINE | NEARLINE | UNAVAILABLE (0008,0056)"/>
+   <definition value="Availability of study (online, offline or nearline)."/>
+   <alias value="InstanceAvailability"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Availability of the resource"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/instance-availability"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Not supported"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0056)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.url"/>
+   <short value="Retrieve URI"/>
+   <definition value="WADO-RS resource where Study is available."/>
+   <alias value="RetrieveURI"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".text.reference"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,1190)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.numberOfSeries"/>
+   <short value="Number of Study Related Series"/>
+   <definition value="Number of Series in Study."/>
+   <alias value="NumberOfStudyRelatedSeries"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP, subsetCode=SUMM].target[classCode=OBSSER, moodCode=EVN].repeatNumber"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,1206)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.numberOfInstances"/>
+   <short value="Number of Study Related Instances"/>
+   <definition value="Number of SOP Instances in Study."/>
+   <alias value="NumberOfStudyRelatedInstances"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP, subsetCode=SUMM].target[classCode=DGIMG, moodCode=EVN].repeatNumber"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,1208)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.procedure"/>
+   <short value="Type of procedure performed"/>
+   <definition value="Type of procedure performed."/>
+   <comments value="For the Procedure.code, LOINC radiology orderables would be a good value set to use."/>
+   <alias value="ProcedureCodeSequence"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Procedure"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=PROC, moodCode=EVN]"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,1032)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.interpreter"/>
+   <short value="Who interpreted images"/>
+   <definition value="Who read the study and interpreted the images or other content."/>
+   <alias value="Name of Physician(s) Reading Study"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=PRF].role"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,1060)"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.witness"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.description"/>
+   <short value="Institution-generated description"/>
+   <definition value="Institution-generated description or classification of the Study performed."/>
+   <alias value="StudyDescription"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".text"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,1030)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series"/>
+   <short value="Each study has one or more series of instances"/>
+   <definition value="Each study has one or more series of images or other content."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=OBSSER, moodCode=EVN]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.number"/>
+   <short value="Numeric identifier of this series"/>
+   <definition value="The Numeric identifier of this series in the study."/>
+   <alias value="SeriesNumber"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <exampleInteger value="3"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[type=COMP, source[classCode=COMPOSITION, moodCode=EVN]].sequenceNumber"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,0011)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.modality"/>
+   <short value="The modality of the instances in the series"/>
+   <definition value="The modality of this series sequence."/>
+   <alias value="Modality"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Type of acquired data in the instance"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/dicom-cid29"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0060)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.uid"/>
+   <short value="Formal identifier for this series"/>
+   <definition value="Formal identifier for this series."/>
+   <alias value="SeriesInstanceUID"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="oid"/>
+   </type>
+   <exampleUri value="urn:oid:2.16.124.113543.6003.2588828330.45298.17418.2723805630"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,000E)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.description"/>
+   <short value="A description of the series"/>
+   <definition value="A description of the series."/>
+   <alias value="SeriesDescription"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <exampleString value="CT Surview 180"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".text"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,103E)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.numberOfInstances"/>
+   <short value="Number of Series Related Instances"/>
+   <definition value="Number of SOP Instances in Series."/>
+   <alias value="NumberOfSeriesRelatedInstances"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP, subsetCode=SUMM].target[classCode=DGIMG, moodCode=EVN].repeatNumber"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,1209)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.availability"/>
+   <short value="ONLINE | OFFLINE | NEARLINE | UNAVAILABLE"/>
+   <definition value="Availability of series (online, offline or nearline)."/>
+   <alias value="InstanceAvailability"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Availability of the resource"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/instance-availability"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[typeCode=COMP]. source[classCode=OBS, moodCode=EVN, code=&quot;availability&quot;].value"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0056)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.url"/>
+   <short value="Location of the referenced instance(s)"/>
+   <definition value="URI/URL specifying the location of the referenced series using WADO-RS."/>
+   <alias value="RetrieveURI"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".text.reference"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,1115) > (0008,1190)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.bodySite"/>
+   <short value="Body part examined"/>
+   <definition value="Body part examined. See  DICOM Part 16 Annex L for the mapping from DICOM to Snomed."/>
+   <alias value="BodyPartExamined"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Codes describing anatomical locations. May include laterality"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/body-site"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".targetSiteCode"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0018,0015)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.laterality"/>
+   <short value="Body part laterality"/>
+   <definition value="Laterality if bodySite is paired anatomic structure and laterality is not pre-coordinated in bodySite code."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,0060)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.started"/>
+   <short value="When the series started"/>
+   <definition value="The date and time when the series was started."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".effectiveTime"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance"/>
+   <short value="A single SOP instance from the series"/>
+   <definition value="A single SOP Instance within the series, e.g., an image, or presentation state."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=COMP].target[classCode=DGIMG, moodCode=EVN]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.number"/>
+   <short value="The number of this instance in the series"/>
+   <definition value="The number of instance in the series."/>
+   <alias value="InstanceNumber"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <exampleInteger value="1"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[typeCode=COMP, source[classCode=OBSSER, moodCode=EVN]].sequenceNumber"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0020,0013)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.uid"/>
+   <short value="Formal identifier for this instance"/>
+   <definition value="Formal identifier for this image or other content."/>
+   <alias value="SOPInstanceUID"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="oid"/>
+   </type>
+   <exampleUri value="urn:oid:2.16.124.113543.6003.189642796.63084.16748.2599092903"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0018)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.sopClass"/>
+   <short value="DICOM class type"/>
+   <definition value="DICOM instance  type."/>
+   <alias value="SOPClassUID"/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="oid"/>
+   </type>
+   <exampleUri value="urn:oid:1.2.840.10008.5.1.4.1.1.2"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[typeCode=COMP]. source[classCode=OBS, moodCode=EVN, code=&quot;sop class&quot;].value"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0008,0016)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.type"/>
+   <short value="Type of instance (image etc)"/>
+   <definition value="A human-friendly SOP Class name."/>
+   <comments value="E.g., 'CT image', 'MR multi-frame', 'blending presentation'."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0004,1430)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.title"/>
+   <short value="Description of instance"/>
+   <definition value="The description of the instance."/>
+   <comments value="Particularly for post-acquisition analytic objects, such as SR, presentation states, value mapping, etc."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".title"/>
+   </mapping>
+   <mapping>
+    <identity value="dicom"/>
+    <map value="(0070,0080) | (0040,A043) > (0008,0104) | (0042,0010) | (0008,0008)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ImagingStudy.series.instance.content"/>
+   <short value="Content of the instance"/>
+   <definition value="Content of the instance or a rendering thereof (e.g., a JPEG of an image, or an XML of a structured report). May be represented for example by inline encoding; by a URL reference to a WADO-RS service that makes the instance available; or to a FHIR Resource (e.g., Media, Document, etc.). Multiple content attachments may be used for alternate representations of the instance."/>
+   <comments value="Use of Attachment.data is discouraged."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".text.binary"/>
+   </mapping>
+  </element>
+ </differential>
+</StructureDefinition>

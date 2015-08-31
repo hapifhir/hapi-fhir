@@ -1,0 +1,1335 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="Condition"/>
+ <meta>
+  <lastUpdated value="2015-08-27T19:45:13.172-04:00"/>
+ </meta>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+  <valueInteger value="0"/>
+ </extension>
+ <url value="http://hl7.org/fhir/StructureDefinition/Condition"/>
+ <name value="Condition"/>
+ <publisher value="Health Level Seven International (Patient Care)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for Condition Resource"/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="v2"/>
+  <uri value="http://hl7.org/v2"/>
+  <name value="HL7 v2"/>
+ </mapping>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <mapping>
+  <identity value="w5"/>
+  <uri value="http://hl7.org/fhir/w5"/>
+  <name value="W5 Mapping"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
+ <snapshot>
+  <element>
+   <path value="Condition"/>
+   <short value="Detailed information about conditions, problems or diagnoses"/>
+   <definition value="Use to record detailed information about conditions, problems or diagnoses recognized by a clinician. There are many uses including: recording a Diagnosis during an Encounter; populating a problem List or a Summary Statement, such as a Discharge Summary."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PPR message"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Observation[classCode=OBS, moodCode=EVN, code=ASSERTION, value&lt;Diagnosis]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="clinical"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Condition.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Condition.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Condition.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="Condition.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.identifier"/>
+   <short value="External Ids for this condition"/>
+   <definition value="This records identifiers associated with this condition that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
+   <requirements value="Need to allow connection to a wider workflow."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.patient"/>
+   <short value="Who has the condition?"/>
+   <definition value="Indicates the patient who the condition record is associated with."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PID-3"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=SBJ].role[classCode=PAT]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.focus"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.encounter"/>
+   <short value="Encounter when condition first asserted"/>
+   <definition value="Encounter during which the condition was first asserted."/>
+   <comments value="This record indicates the encounter this particular record is associated with.  In the case of a &quot;new&quot; diagnosis reflecting ongoing/revised information about the condition, this might be distinct from the first encounter in which the underlying condition was first &quot;known&quot;."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Encounter"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PV1-19 (+PV1-54)"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[typeCode=COMP].source[classCode=ENC, moodCode=EVN]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="context"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.asserter"/>
+   <short value="Person who asserts this condition"/>
+   <definition value="Individual who is making the condition statement."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="REL-7.1 identifier + REL-7.12 type code"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=AUT].role"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.author"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.dateRecorded"/>
+   <short value="When first entered"/>
+   <definition value="A date, when  the Condition statement was documented."/>
+   <comments value="The Date Recorded represents the date when this particular Condition record was created in the EHR, not the date of the most recent update in terms of when severity, abatement, etc. were specified.  The date of the last record modification can be retrieved from the resource metadata."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="date"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="REL-11"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=AUT].time"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.code"/>
+   <short value="Identification of the condition, problem or diagnosis"/>
+   <definition value="Identification of the condition, problem or diagnosis."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Identification of the Condition or diagnosis."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/condition-code"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PRB-3"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".value"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="what"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.category"/>
+   <short value="complaint | symptom | finding | diagnosis"/>
+   <definition value="A category assigned to the condition."/>
+   <comments value="The categorization is often highly contextual and may appear poorly differentiated or not very useful in other contexts."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="A category assigned to the condition."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/condition-category"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="'problem' if from PRB-3. 'diagnosis' if from DG1 segment in PV1 message"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.clinicalStatus"/>
+   <short value="active | relapse | remission | resolved"/>
+   <definition value="The clinical status of the condition."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="The clinical status of the Condition or diagnosis"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/condition-clinical"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PRB-14 / DG1-6"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.verificationStatus"/>
+   <short value="provisional | differential | confirmed | refuted | entered-in-error | unknown"/>
+   <definition value="The verification status to support the clinical status of the condition."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The verification status to support or decline the clinical status of the Condition or diagnosis."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/condition-ver-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PRB-13"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code (pre or post-coordinated in)  Can use valueNegationInd for refuted"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.severity"/>
+   <short value="Subjective severity of condition"/>
+   <definition value="A subjective assessment of the severity of the condition as evaluated by the clinician."/>
+   <comments value="Coding of the severity with a terminology is preferred, where possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="A subjective assessment of the severity of the condition as evaluated by the clinician."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/condition-severity"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PRB-26 / ABS-3"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Can be pre/post-coordinated into value.  Or ./inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=&quot;severity&quot;].value"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="grade"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.onset[x]"/>
+   <short value="Estimated or actual date,  date-time, or age"/>
+   <definition value="Estimated or actual date or date-time  the condition began, in the opinion of the clinician."/>
+   <comments value="Age is generally used when the patient reports an age at which the Condition began to occur."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Age"/>
+   </type>
+   <type>
+    <code value="Period"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PRB-16"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".effectiveTime.low or .inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=&quot;age at onset&quot;].value"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.init"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.abatement[x]"/>
+   <short value="If/when in resolution/remission"/>
+   <definition value="The date or estimated date that the condition resolved or went into remission. This is called &quot;abatement&quot; because of the many overloaded connotations associated with &quot;remission&quot; or &quot;resolution&quot; - Conditions are never really resolved, but they can abate."/>
+   <comments value="There is no explicit distinction between resolution and remission because in many cases the distinction is not clear. Age is generally used when the patient reports an age at which the Condition abated.  If there is no abatement element, it is unknown whether the condition has resolved or entered remission; applications and users should generally assume that the condition is still valid."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Age"/>
+   </type>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <type>
+    <code value="Period"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".effectiveTime.high or .inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=&quot;age at remission&quot;].value or .inboundRelationship[typeCode=SUBJ]source[classCode=CONC, moodCode=EVN].status=completed"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.done"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.stage"/>
+   <short value="Stage/grade, usually assessed formally"/>
+   <definition value="Clinical stage or grade of a condition. May include formal severity assessments."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <constraint>
+    <key value="con-1"/>
+    <severity value="error"/>
+    <human value="Stage SHALL have summary or assessment"/>
+    <xpath value="exists(f:summary) or exists(f:assessment)"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=&quot;stage/grade&quot;]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.stage.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.stage.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.stage.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.stage.summary"/>
+   <short value="Simple summary (disease specific)"/>
+   <definition value="A simple summary of the stage such as &quot;Stage 3&quot;. The determination of the stage is disease-specific."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <condition value="con-1"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".value"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.stage.assessment"/>
+   <short value="Formal record of assessment"/>
+   <definition value="Reference to a formal record of the evidence on which the staging assessment is based."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/ClinicalImpression"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DiagnosticReport"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Observation"/>
+   </type>
+   <condition value="con-1"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".self"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.evidence"/>
+   <short value="Supporting evidence"/>
+   <definition value="Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed."/>
+   <comments value="The evidence may be a simple list of coded symptoms/manifestations, or references to observations or formal assessments, or both."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <constraint>
+    <key value="con-2"/>
+    <severity value="error"/>
+    <human value="evidence SHALL have code or details"/>
+    <xpath value="exists(f:code) or exists(f:detail)"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=SPRT].target[classCode=OBS, moodCode=EVN]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.evidence.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.evidence.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.evidence.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.evidence.code"/>
+   <short value="Manifestation/symptom"/>
+   <definition value="A manifestation or symptom that led to the recording of this condition."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <condition value="con-2"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Codes that describe the manifestation or symptoms of a condition."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/manifestation-or-symptom"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="[code=&quot;diagnosis&quot;].value"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.evidence.detail"/>
+   <short value="Supporting information found elsewhere"/>
+   <definition value="Links to other relevant information, including pathology reports."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+   <condition value="con-2"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".self"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.bodySite"/>
+   <short value="Anatomical location, if relevant"/>
+   <definition value="The anatomical location where this condition manifests itself."/>
+   <comments value="May be a summary code, or a reference to a very precise definition of the location, or both."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Codes describing anatomical locations. May include laterality"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/body-site"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".targetBodySiteCode"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.notes"/>
+   <short value="Additional information about the Condition"/>
+   <definition value="Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="NTE child of PRB"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=&quot;annotation&quot;].value"/>
+   </mapping>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="Condition"/>
+   <short value="Detailed information about conditions, problems or diagnoses"/>
+   <definition value="Use to record detailed information about conditions, problems or diagnoses recognized by a clinician. There are many uses including: recording a Diagnosis during an Encounter; populating a problem List or a Summary Statement, such as a Discharge Summary."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PPR message"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Observation[classCode=OBS, moodCode=EVN, code=ASSERTION, value&lt;Diagnosis]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="clinical"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.identifier"/>
+   <short value="External Ids for this condition"/>
+   <definition value="This records identifiers associated with this condition that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
+   <requirements value="Need to allow connection to a wider workflow."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".id"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.patient"/>
+   <short value="Who has the condition?"/>
+   <definition value="Indicates the patient who the condition record is associated with."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PID-3"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=SBJ].role[classCode=PAT]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.focus"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.encounter"/>
+   <short value="Encounter when condition first asserted"/>
+   <definition value="Encounter during which the condition was first asserted."/>
+   <comments value="This record indicates the encounter this particular record is associated with.  In the case of a &quot;new&quot; diagnosis reflecting ongoing/revised information about the condition, this might be distinct from the first encounter in which the underlying condition was first &quot;known&quot;."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Encounter"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PV1-19 (+PV1-54)"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[typeCode=COMP].source[classCode=ENC, moodCode=EVN]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="context"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.asserter"/>
+   <short value="Person who asserts this condition"/>
+   <definition value="Individual who is making the condition statement."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="REL-7.1 identifier + REL-7.12 type code"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=AUT].role"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.author"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.dateRecorded"/>
+   <short value="When first entered"/>
+   <definition value="A date, when  the Condition statement was documented."/>
+   <comments value="The Date Recorded represents the date when this particular Condition record was created in the EHR, not the date of the most recent update in terms of when severity, abatement, etc. were specified.  The date of the last record modification can be retrieved from the resource metadata."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="date"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="REL-11"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".participation[typeCode=AUT].time"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.code"/>
+   <short value="Identification of the condition, problem or diagnosis"/>
+   <definition value="Identification of the condition, problem or diagnosis."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Identification of the Condition or diagnosis."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/condition-code"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PRB-3"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".value"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="what"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.category"/>
+   <short value="complaint | symptom | finding | diagnosis"/>
+   <definition value="A category assigned to the condition."/>
+   <comments value="The categorization is often highly contextual and may appear poorly differentiated or not very useful in other contexts."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="A category assigned to the condition."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/condition-category"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="'problem' if from PRB-3. 'diagnosis' if from DG1 segment in PV1 message"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="class"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.clinicalStatus"/>
+   <short value="active | relapse | remission | resolved"/>
+   <definition value="The clinical status of the condition."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="The clinical status of the Condition or diagnosis"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/condition-clinical"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PRB-14 / DG1-6"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.verificationStatus"/>
+   <short value="provisional | differential | confirmed | refuted | entered-in-error | unknown"/>
+   <definition value="The verification status to support the clinical status of the condition."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The verification status to support or decline the clinical status of the Condition or diagnosis."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/condition-ver-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PRB-13"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".code (pre or post-coordinated in)  Can use valueNegationInd for refuted"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.severity"/>
+   <short value="Subjective severity of condition"/>
+   <definition value="A subjective assessment of the severity of the condition as evaluated by the clinician."/>
+   <comments value="Coding of the severity with a terminology is preferred, where possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="A subjective assessment of the severity of the condition as evaluated by the clinician."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/condition-severity"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PRB-26 / ABS-3"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Can be pre/post-coordinated into value.  Or ./inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=&quot;severity&quot;].value"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="grade"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.onset[x]"/>
+   <short value="Estimated or actual date,  date-time, or age"/>
+   <definition value="Estimated or actual date or date-time  the condition began, in the opinion of the clinician."/>
+   <comments value="Age is generally used when the patient reports an age at which the Condition began to occur."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Age"/>
+   </type>
+   <type>
+    <code value="Period"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="PRB-16"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".effectiveTime.low or .inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=&quot;age at onset&quot;].value"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.init"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.abatement[x]"/>
+   <short value="If/when in resolution/remission"/>
+   <definition value="The date or estimated date that the condition resolved or went into remission. This is called &quot;abatement&quot; because of the many overloaded connotations associated with &quot;remission&quot; or &quot;resolution&quot; - Conditions are never really resolved, but they can abate."/>
+   <comments value="There is no explicit distinction between resolution and remission because in many cases the distinction is not clear. Age is generally used when the patient reports an age at which the Condition abated.  If there is no abatement element, it is unknown whether the condition has resolved or entered remission; applications and users should generally assume that the condition is still valid."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Age"/>
+   </type>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <type>
+    <code value="Period"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".effectiveTime.high or .inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=&quot;age at remission&quot;].value or .inboundRelationship[typeCode=SUBJ]source[classCode=CONC, moodCode=EVN].status=completed"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.done"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.stage"/>
+   <short value="Stage/grade, usually assessed formally"/>
+   <definition value="Clinical stage or grade of a condition. May include formal severity assessments."/>
+   <min value="0"/>
+   <max value="1"/>
+   <constraint>
+    <key value="con-1"/>
+    <severity value="error"/>
+    <human value="Stage SHALL have summary or assessment"/>
+    <xpath value="exists(f:summary) or exists(f:assessment)"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=&quot;stage/grade&quot;]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.stage.summary"/>
+   <short value="Simple summary (disease specific)"/>
+   <definition value="A simple summary of the stage such as &quot;Stage 3&quot;. The determination of the stage is disease-specific."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <condition value="con-1"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".value"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.stage.assessment"/>
+   <short value="Formal record of assessment"/>
+   <definition value="Reference to a formal record of the evidence on which the staging assessment is based."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/ClinicalImpression"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/DiagnosticReport"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Observation"/>
+   </type>
+   <condition value="con-1"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".self"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.evidence"/>
+   <short value="Supporting evidence"/>
+   <definition value="Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed."/>
+   <comments value="The evidence may be a simple list of coded symptoms/manifestations, or references to observations or formal assessments, or both."/>
+   <min value="0"/>
+   <max value="*"/>
+   <constraint>
+    <key value="con-2"/>
+    <severity value="error"/>
+    <human value="evidence SHALL have code or details"/>
+    <xpath value="exists(f:code) or exists(f:detail)"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".outboundRelationship[typeCode=SPRT].target[classCode=OBS, moodCode=EVN]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.evidence.code"/>
+   <short value="Manifestation/symptom"/>
+   <definition value="A manifestation or symptom that led to the recording of this condition."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <condition value="con-2"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Codes that describe the manifestation or symptoms of a condition."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/manifestation-or-symptom"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="[code=&quot;diagnosis&quot;].value"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.evidence.detail"/>
+   <short value="Supporting information found elsewhere"/>
+   <definition value="Links to other relevant information, including pathology reports."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+   </type>
+   <condition value="con-2"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".self"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.bodySite"/>
+   <short value="Anatomical location, if relevant"/>
+   <definition value="The anatomical location where this condition manifests itself."/>
+   <comments value="May be a summary code, or a reference to a very precise definition of the location, or both."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Codes describing anatomical locations. May include laterality"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/body-site"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".targetBodySiteCode"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Condition.notes"/>
+   <short value="Additional information about the Condition"/>
+   <definition value="Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="NTE child of PRB"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=&quot;annotation&quot;].value"/>
+   </mapping>
+  </element>
+ </differential>
+</StructureDefinition>

@@ -16,12 +16,12 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>11400</WindowHeight>
-  <WindowWidth>22575</WindowWidth>
+  <WindowHeight>12975</WindowHeight>
+  <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <TabRatio>893</TabRatio>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>5</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -4343,7 +4343,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4438,9 +4437,9 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">ValueSet</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">A value set with only one import SHALL also have an include and/or an exclude unless the value set defines its own codes</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">A value set with only one import SHALL also have an include and/or an exclude unless the value set includes and inline code system</Data></Cell>
     <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude) or exists(f:define))</Data></Cell>
+    <Cell ss:StyleID="s110"><Data ss:Type="String">not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude) or exists(f:codeSystem))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
     <Cell ss:StyleID="s109"><Data ss:Type="Number">3</Data><NamedCell
@@ -4458,9 +4457,9 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">ValueSet</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Value set SHALL contain at least one of a define, a compose, or an expansion element</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Value set SHALL contain at least one of a codeSystem, a compose, or an expansion element</Data></Cell>
     <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">exists(f:define) or exists(f:compose) or exists(f:expansion)</Data></Cell>
+    <Cell ss:StyleID="s110"><Data ss:Type="String">exists(f:codeSystem) or exists(f:compose) or exists(f:expansion)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s109"><Data ss:Type="Number">6</Data><NamedCell
@@ -4480,7 +4479,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">ValueSet</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">A defined code system (if present) SHALL have a different identifier to the value set itself</Data></Cell>
     <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s110"><Data ss:Type="String">not(f:define/f:system/@value = f:identifier/@value)</Data></Cell>
+    <Cell ss:StyleID="s110"><Data ss:Type="String">not(f:codeSystem/f:system/@value = f:identifier/@value)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
     <Cell ss:StyleID="s109"><Data ss:Type="Number">8</Data><NamedCell
@@ -4906,8 +4905,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>7</ActiveRow>
-     <ActiveCol>1</ActiveCol>
+     <ActiveRow>8</ActiveRow>
+     <ActiveCol>4</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -5915,7 +5914,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>37</TopRowBottomPane>
+   <TopRowBottomPane>20</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -5932,8 +5931,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>38</ActiveRow>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>25</ActiveRow>
+     <ActiveCol>7</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -5947,7 +5946,7 @@
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Events!R1C1:R1C9"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="21" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="20" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s114" ss:DefaultColumnWidth="51"
    ss:DefaultRowHeight="15">
    <Column ss:StyleID="s114" ss:AutoFitWidth="0" ss:Width="82.5" ss:Span="1"/>
@@ -6000,17 +5999,6 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s118"/>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="90">
-    <Cell ss:StyleID="s119"><Data ss:Type="String">!valueset-validate</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">currency</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Validate that a coded value is in the set of codes allowed by a value set. The coded value is carried as an extension in the message header. The outcome is an OperationOutcome with hints, warnings, or errors. </Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">The coded value to validate is carried using the extension [[[http://hl7.org/fhir/StructureDefinition/codedSource]]]</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">ValueSet</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">OperationOutcome</Data></Cell>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s121"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"/>
@@ -6213,6 +6201,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6232,8 +6221,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>37</ActiveRow>
-     <ActiveCol>3</ActiveCol>
+     <ActiveCol>2</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

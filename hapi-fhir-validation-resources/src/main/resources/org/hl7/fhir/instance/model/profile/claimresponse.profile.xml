@@ -1,0 +1,2918 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="ClaimResponse"/>
+ <meta>
+  <lastUpdated value="2015-08-27T19:45:13.172-04:00"/>
+ </meta>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+  <valueInteger value="0"/>
+ </extension>
+ <url value="http://hl7.org/fhir/StructureDefinition/ClaimResponse"/>
+ <name value="ClaimResponse"/>
+ <publisher value="Health Level Seven International (Financial Management)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org/Special/committees/fm/index.cfm"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for ClaimResponse Resource"/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="cdanetv4"/>
+  <uri value="http://www.cda-adc.ca/en/services/cdanet/"/>
+  <name value="Canadian Dental Association eclaims standard"/>
+ </mapping>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
+ <snapshot>
+  <element>
+   <path value="ClaimResponse"/>
+   <short value="Remittance resource"/>
+   <definition value="This resource provides the adjudication details from the processing of a Claim resource."/>
+   <alias value="Remittance Advice"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.identifier"/>
+   <short value="Response  number"/>
+   <definition value="The Response Business Identifier."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.request"/>
+   <short value="Id of resource triggering adjudication"/>
+   <definition value="Original request resource referrence."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Claim"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="A02|G01"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.ruleset"/>
+   <short value="Resource version"/>
+   <definition value="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="The static and dynamic model to which contents conform, may be business version or standard and version."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/ruleset"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.originalRuleset"/>
+   <short value="Original version"/>
+   <definition value="The style (standard) and version of the original material which was converted into this resource."/>
+   <requirements value="Knowledge of the original version can inform the processing of this instance so that information which is processable by the originating system may be generated."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="The static and dynamic model to which contents conform, may be business version or standard and version."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/ruleset"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.created"/>
+   <short value="Creation date"/>
+   <definition value="The date when the enclosed suite of services were performed or completed."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.organization"/>
+   <short value="Insurer"/>
+   <definition value="The Insurer who produced this adjudicated response."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.requestProvider"/>
+   <short value="Responsible practitioner"/>
+   <definition value="The practitioner who is responsible for the services rendered to the patient."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="B01"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.requestOrganization"/>
+   <short value="Responsible organization"/>
+   <definition value="The organization which is responsible for the services rendered to the patient."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.outcome"/>
+   <short value="complete | error"/>
+   <definition value="Transaction status: error, complete."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The outcome of the processing."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/remittance-outcome"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.disposition"/>
+   <short value="Disposition Message"/>
+   <definition value="A description of the status of the adjudication."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.payeeType"/>
+   <short value="Party to be paid any benefits payable"/>
+   <definition value="Party to be reimbursed: Subscriber, provider, other."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="A code for the party to be reimbursed."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/payeetype"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Items"/>
+   </extension>
+   <path value="ClaimResponse.item"/>
+   <short value="Line items"/>
+   <definition value="The first tier service adjudications for submitted services."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.sequenceLinkId"/>
+   <short value="Service instance"/>
+   <definition value="A service line number."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="F07"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.noteNumber"/>
+   <short value="List of note numbers which apply"/>
+   <definition value="A list of note references to the notes provided below."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="ItemAdjudication"/>
+   </extension>
+   <path value="ClaimResponse.item.adjudication"/>
+   <short value="Adjudication details"/>
+   <definition value="The adjudications results."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.adjudication.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.adjudication.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.adjudication.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.adjudication.code"/>
+   <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+   <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="The adjudication codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjudication"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.adjudication.amount"/>
+   <short value="Monetary amount"/>
+   <definition value="Monitory amount associated with the code."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.adjudication.value"/>
+   <short value="Non-monitory value"/>
+   <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="ItemDetail"/>
+   </extension>
+   <path value="ClaimResponse.item.detail"/>
+   <short value="Detail line items"/>
+   <definition value="The second tier service adjudications for submitted services."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.sequenceLinkId"/>
+   <short value="Service instance"/>
+   <definition value="A service line number."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="F07"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="DetailAdjudication"/>
+   </extension>
+   <path value="ClaimResponse.item.detail.adjudication"/>
+   <short value="Detail adjudication"/>
+   <definition value="The adjudications results."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.adjudication.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.adjudication.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.adjudication.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.adjudication.code"/>
+   <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+   <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="The adjudication codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjudication"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.adjudication.amount"/>
+   <short value="Monetary amount"/>
+   <definition value="Monitory amount associated with the code."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.adjudication.value"/>
+   <short value="Non-monitory value"/>
+   <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="SubDetail"/>
+   </extension>
+   <path value="ClaimResponse.item.detail.subDetail"/>
+   <short value="Subdetail line items"/>
+   <definition value="The third tier service adjudications for submitted services."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.sequenceLinkId"/>
+   <short value="Service instance"/>
+   <definition value="A service line number."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="F07"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="SubdetailAdjudication"/>
+   </extension>
+   <path value="ClaimResponse.item.detail.subDetail.adjudication"/>
+   <short value="Subdetail adjudication"/>
+   <definition value="The adjudications results."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.adjudication.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.adjudication.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.adjudication.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.adjudication.code"/>
+   <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+   <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="The adjudication codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjudication"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.adjudication.amount"/>
+   <short value="Monetary amount"/>
+   <definition value="Monitory amount associated with the code."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.adjudication.value"/>
+   <short value="Non-monitory value"/>
+   <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="AddedItem"/>
+   </extension>
+   <path value="ClaimResponse.addItem"/>
+   <short value="Insurer added line items"/>
+   <definition value="The first tier service adjudications for payor added services."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.sequenceLinkId"/>
+   <short value="Service instances"/>
+   <definition value="List of input service items which this service line is intended to replace."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.service"/>
+   <short value="Group, Service or Product"/>
+   <definition value="A code to indicate the Professional Service or Product supplied."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Allowable service and product codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/service-uscls"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.fee"/>
+   <short value="Professional fee or Product charge"/>
+   <definition value="The fee charged for the professional service or product.."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.noteNumberLinkId"/>
+   <short value="List of note numbers which apply"/>
+   <definition value="A list of note references to the notes provided below."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="AddedItemAdjudication"/>
+   </extension>
+   <path value="ClaimResponse.addItem.adjudication"/>
+   <short value="Added items adjudication"/>
+   <definition value="The adjudications results."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.adjudication.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.adjudication.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.adjudication.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.adjudication.code"/>
+   <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+   <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="The adjudication codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjudication"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.adjudication.amount"/>
+   <short value="Monetary amount"/>
+   <definition value="Monitory amount associated with the code."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.adjudication.value"/>
+   <short value="Non-monitory value"/>
+   <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="AddedItemsDetail"/>
+   </extension>
+   <path value="ClaimResponse.addItem.detail"/>
+   <short value="Added items details"/>
+   <definition value="The second tier service adjudications for payor added services."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.service"/>
+   <short value="Service or Product"/>
+   <definition value="A code to indicate the Professional Service or Product supplied."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Allowable service and product codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/service-uscls"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.fee"/>
+   <short value="Professional fee or Product charge"/>
+   <definition value="The fee charged for the professional service or product.."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="AddedItemDetailAdjudication"/>
+   </extension>
+   <path value="ClaimResponse.addItem.detail.adjudication"/>
+   <short value="Added items detail adjudication"/>
+   <definition value="The adjudications results."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.adjudication.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.adjudication.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.adjudication.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.adjudication.code"/>
+   <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+   <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="The adjudication codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjudication"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.adjudication.amount"/>
+   <short value="Monetary amount"/>
+   <definition value="Monitory amount associated with the code."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.adjudication.value"/>
+   <short value="Non-monitory value"/>
+   <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Errors"/>
+   </extension>
+   <path value="ClaimResponse.error"/>
+   <short value="Processing errors"/>
+   <definition value="Mutually exclusive with Services Provided (Item)."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.error.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.error.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.error.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.error.sequenceLinkId"/>
+   <short value="Item sequence number"/>
+   <definition value="The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.error.detailSequenceLinkId"/>
+   <short value="Detail sequence number"/>
+   <definition value="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.error.subdetailSequenceLinkId"/>
+   <short value="Subdetail sequence number"/>
+   <definition value="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.error.code"/>
+   <short value="Error code detailing processing issues"/>
+   <definition value="An error code,froma specified code system, which details why the claim could not be adjudicated."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The error codes for adjudication processing"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjudication-error"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.totalCost"/>
+   <short value="Total Cost of service from the Claim"/>
+   <definition value="The total cost of the services reported."/>
+   <requirements value="This is a check value that the receiver calculates and returns."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.unallocDeductable"/>
+   <short value="Unallocated deductable"/>
+   <definition value="The amount of deductable applied which was not allocated to any particular service line."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.totalBenefit"/>
+   <short value="Total benefit payable for the Claim"/>
+   <definition value="Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.paymentAdjustment"/>
+   <short value="Payment adjustment for non-Claim issues"/>
+   <definition value="Adjustment to the payment of this transaction which is not related to adjudication of this transaction."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.paymentAdjustmentReason"/>
+   <short value="Reason for Payment adjustment"/>
+   <definition value="Reason for the payment adjustment."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Adjustment reason codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjustment-reason"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.paymentDate"/>
+   <short value="Expected data of Payment"/>
+   <definition value="Estimated payment data."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="date"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.paymentAmount"/>
+   <short value="Payment amount"/>
+   <definition value="Payable less any payment adjustment."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.paymentRef"/>
+   <short value="Payment identifier"/>
+   <definition value="Payment identifer."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.reserved"/>
+   <short value="Funds reserved status"/>
+   <definition value="Status of funds reservation (For provider, for Patient, None)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="For whom funds are to be reserved: (Patient, Provider, None)"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/fundsreserve"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.form"/>
+   <short value="Printed Form Identifier"/>
+   <definition value="The form to be used for printing the content."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The forms codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/forms"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="G42"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Notes"/>
+   </extension>
+   <path value="ClaimResponse.note"/>
+   <short value="Processing notes"/>
+   <definition value="Note text."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.note.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.note.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.note.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.note.number"/>
+   <short value="Note Number for this note"/>
+   <definition value="An integer associated with each note which may be referred to from each service line item."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.note.type"/>
+   <short value="display | print | printoper"/>
+   <definition value="The note purpose: Print/Display."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The presentation types of notes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/note-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.note.text"/>
+   <short value="Note explanitory text"/>
+   <definition value="The note text."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="G32"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Coverage"/>
+   </extension>
+   <path value="ClaimResponse.coverage"/>
+   <short value="Insurance or medical plan"/>
+   <definition value="Financial instrument by which payment information for health care."/>
+   <requirements value="Health care programs and insurers are significant payors of health service costs."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Coverage"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.sequence"/>
+   <short value="Service instance identifier"/>
+   <definition value="A service line item."/>
+   <requirements value="To maintain order of the coverages."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.focal"/>
+   <short value="Is the focal Coverage"/>
+   <definition value="The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated."/>
+   <requirements value="To identify which coverage is being adjudicated."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.coverage"/>
+   <short value="Insurance information"/>
+   <definition value="Reference to the program or plan identification, underwriter or payor."/>
+   <requirements value="Need to identify the issuer to target for processing and for coordination of benefit processing."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Coverage"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.businessArrangement"/>
+   <short value="Business agreement"/>
+   <definition value="The contract number of a business agreement which describes the terms and conditions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.relationship"/>
+   <short value="Patient relationship to subscriber"/>
+   <definition value="The relationship of the patient to the subscriber."/>
+   <requirements value="To determine relationship between the patient and the subscriber."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="The code for the relationship of the patient to the subscriber"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/relationship"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="C03"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.preAuthRef"/>
+   <short value="Pre-Authorization/Determination Reference"/>
+   <definition value="A list of references from the Insurer to which these services pertain."/>
+   <requirements value="To provide any pre=determination or prior authorization reference."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="F03"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.claimResponse"/>
+   <short value="Adjudication results"/>
+   <definition value="The Coverages adjudication details."/>
+   <requirements value="Used by downstream payers to determine what balance remains and the net payable."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/ClaimResponse"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="EOB"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.originalRuleset"/>
+   <short value="Original version"/>
+   <definition value="The style (standard) and version of the original material which was converted into this resource."/>
+   <requirements value="Knowledge of the original version can inform the processing of this instance so that information which is processable by the originating system may be generated."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="The static and dynamic model to which contents conform, may be business version or standard and version."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/ruleset"/>
+    </valueSetReference>
+   </binding>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="ClaimResponse"/>
+   <short value="Remittance resource"/>
+   <definition value="This resource provides the adjudication details from the processing of a Claim resource."/>
+   <alias value="Remittance Advice"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.identifier"/>
+   <short value="Response  number"/>
+   <definition value="The Response Business Identifier."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.request"/>
+   <short value="Id of resource triggering adjudication"/>
+   <definition value="Original request resource referrence."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Claim"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="A02|G01"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.ruleset"/>
+   <short value="Resource version"/>
+   <definition value="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="The static and dynamic model to which contents conform, may be business version or standard and version."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/ruleset"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.originalRuleset"/>
+   <short value="Original version"/>
+   <definition value="The style (standard) and version of the original material which was converted into this resource."/>
+   <requirements value="Knowledge of the original version can inform the processing of this instance so that information which is processable by the originating system may be generated."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="The static and dynamic model to which contents conform, may be business version or standard and version."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/ruleset"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.created"/>
+   <short value="Creation date"/>
+   <definition value="The date when the enclosed suite of services were performed or completed."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.organization"/>
+   <short value="Insurer"/>
+   <definition value="The Insurer who produced this adjudicated response."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.requestProvider"/>
+   <short value="Responsible practitioner"/>
+   <definition value="The practitioner who is responsible for the services rendered to the patient."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="B01"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.requestOrganization"/>
+   <short value="Responsible organization"/>
+   <definition value="The organization which is responsible for the services rendered to the patient."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.outcome"/>
+   <short value="complete | error"/>
+   <definition value="Transaction status: error, complete."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The outcome of the processing."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/remittance-outcome"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.disposition"/>
+   <short value="Disposition Message"/>
+   <definition value="A description of the status of the adjudication."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.payeeType"/>
+   <short value="Party to be paid any benefits payable"/>
+   <definition value="Party to be reimbursed: Subscriber, provider, other."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="A code for the party to be reimbursed."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/payeetype"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Items"/>
+   </extension>
+   <path value="ClaimResponse.item"/>
+   <short value="Line items"/>
+   <definition value="The first tier service adjudications for submitted services."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.sequenceLinkId"/>
+   <short value="Service instance"/>
+   <definition value="A service line number."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="F07"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.noteNumber"/>
+   <short value="List of note numbers which apply"/>
+   <definition value="A list of note references to the notes provided below."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="ItemAdjudication"/>
+   </extension>
+   <path value="ClaimResponse.item.adjudication"/>
+   <short value="Adjudication details"/>
+   <definition value="The adjudications results."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.adjudication.code"/>
+   <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+   <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="The adjudication codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjudication"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.adjudication.amount"/>
+   <short value="Monetary amount"/>
+   <definition value="Monitory amount associated with the code."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.adjudication.value"/>
+   <short value="Non-monitory value"/>
+   <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="ItemDetail"/>
+   </extension>
+   <path value="ClaimResponse.item.detail"/>
+   <short value="Detail line items"/>
+   <definition value="The second tier service adjudications for submitted services."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.sequenceLinkId"/>
+   <short value="Service instance"/>
+   <definition value="A service line number."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="F07"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="DetailAdjudication"/>
+   </extension>
+   <path value="ClaimResponse.item.detail.adjudication"/>
+   <short value="Detail adjudication"/>
+   <definition value="The adjudications results."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.adjudication.code"/>
+   <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+   <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="The adjudication codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjudication"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.adjudication.amount"/>
+   <short value="Monetary amount"/>
+   <definition value="Monitory amount associated with the code."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.adjudication.value"/>
+   <short value="Non-monitory value"/>
+   <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="SubDetail"/>
+   </extension>
+   <path value="ClaimResponse.item.detail.subDetail"/>
+   <short value="Subdetail line items"/>
+   <definition value="The third tier service adjudications for submitted services."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.sequenceLinkId"/>
+   <short value="Service instance"/>
+   <definition value="A service line number."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="F07"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="SubdetailAdjudication"/>
+   </extension>
+   <path value="ClaimResponse.item.detail.subDetail.adjudication"/>
+   <short value="Subdetail adjudication"/>
+   <definition value="The adjudications results."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.adjudication.code"/>
+   <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+   <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="The adjudication codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjudication"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.adjudication.amount"/>
+   <short value="Monetary amount"/>
+   <definition value="Monitory amount associated with the code."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.item.detail.subDetail.adjudication.value"/>
+   <short value="Non-monitory value"/>
+   <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="AddedItem"/>
+   </extension>
+   <path value="ClaimResponse.addItem"/>
+   <short value="Insurer added line items"/>
+   <definition value="The first tier service adjudications for payor added services."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.sequenceLinkId"/>
+   <short value="Service instances"/>
+   <definition value="List of input service items which this service line is intended to replace."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.service"/>
+   <short value="Group, Service or Product"/>
+   <definition value="A code to indicate the Professional Service or Product supplied."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Allowable service and product codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/service-uscls"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.fee"/>
+   <short value="Professional fee or Product charge"/>
+   <definition value="The fee charged for the professional service or product.."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.noteNumberLinkId"/>
+   <short value="List of note numbers which apply"/>
+   <definition value="A list of note references to the notes provided below."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="AddedItemAdjudication"/>
+   </extension>
+   <path value="ClaimResponse.addItem.adjudication"/>
+   <short value="Added items adjudication"/>
+   <definition value="The adjudications results."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.adjudication.code"/>
+   <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+   <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="The adjudication codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjudication"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.adjudication.amount"/>
+   <short value="Monetary amount"/>
+   <definition value="Monitory amount associated with the code."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.adjudication.value"/>
+   <short value="Non-monitory value"/>
+   <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="AddedItemsDetail"/>
+   </extension>
+   <path value="ClaimResponse.addItem.detail"/>
+   <short value="Added items details"/>
+   <definition value="The second tier service adjudications for payor added services."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.service"/>
+   <short value="Service or Product"/>
+   <definition value="A code to indicate the Professional Service or Product supplied."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="Allowable service and product codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/service-uscls"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.fee"/>
+   <short value="Professional fee or Product charge"/>
+   <definition value="The fee charged for the professional service or product.."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="AddedItemDetailAdjudication"/>
+   </extension>
+   <path value="ClaimResponse.addItem.detail.adjudication"/>
+   <short value="Added items detail adjudication"/>
+   <definition value="The adjudications results."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.adjudication.code"/>
+   <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+   <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="The adjudication codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjudication"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.adjudication.amount"/>
+   <short value="Monetary amount"/>
+   <definition value="Monitory amount associated with the code."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.addItem.detail.adjudication.value"/>
+   <short value="Non-monitory value"/>
+   <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Errors"/>
+   </extension>
+   <path value="ClaimResponse.error"/>
+   <short value="Processing errors"/>
+   <definition value="Mutually exclusive with Services Provided (Item)."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.error.sequenceLinkId"/>
+   <short value="Item sequence number"/>
+   <definition value="The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.error.detailSequenceLinkId"/>
+   <short value="Detail sequence number"/>
+   <definition value="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.error.subdetailSequenceLinkId"/>
+   <short value="Subdetail sequence number"/>
+   <definition value="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.error.code"/>
+   <short value="Error code detailing processing issues"/>
+   <definition value="An error code,froma specified code system, which details why the claim could not be adjudicated."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The error codes for adjudication processing"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjudication-error"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.totalCost"/>
+   <short value="Total Cost of service from the Claim"/>
+   <definition value="The total cost of the services reported."/>
+   <requirements value="This is a check value that the receiver calculates and returns."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.unallocDeductable"/>
+   <short value="Unallocated deductable"/>
+   <definition value="The amount of deductable applied which was not allocated to any particular service line."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.totalBenefit"/>
+   <short value="Total benefit payable for the Claim"/>
+   <definition value="Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.paymentAdjustment"/>
+   <short value="Payment adjustment for non-Claim issues"/>
+   <definition value="Adjustment to the payment of this transaction which is not related to adjudication of this transaction."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.paymentAdjustmentReason"/>
+   <short value="Reason for Payment adjustment"/>
+   <definition value="Reason for the payment adjustment."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="extensible"/>
+    <description value="Adjustment reason codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/adjustment-reason"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.paymentDate"/>
+   <short value="Expected data of Payment"/>
+   <definition value="Estimated payment data."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="date"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.paymentAmount"/>
+   <short value="Payment amount"/>
+   <definition value="Payable less any payment adjustment."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.paymentRef"/>
+   <short value="Payment identifier"/>
+   <definition value="Payment identifer."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.reserved"/>
+   <short value="Funds reserved status"/>
+   <definition value="Status of funds reservation (For provider, for Patient, None)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="For whom funds are to be reserved: (Patient, Provider, None)"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/fundsreserve"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.form"/>
+   <short value="Printed Form Identifier"/>
+   <definition value="The form to be used for printing the content."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The forms codes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/forms"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="G42"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Notes"/>
+   </extension>
+   <path value="ClaimResponse.note"/>
+   <short value="Processing notes"/>
+   <definition value="Note text."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.note.number"/>
+   <short value="Note Number for this note"/>
+   <definition value="An integer associated with each note which may be referred to from each service line item."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.note.type"/>
+   <short value="display | print | printoper"/>
+   <definition value="The note purpose: Print/Display."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The presentation types of notes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/note-type"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ClaimResponse.note.text"/>
+   <short value="Note explanitory text"/>
+   <definition value="The note text."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="G32"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="Coverage"/>
+   </extension>
+   <path value="ClaimResponse.coverage"/>
+   <short value="Insurance or medical plan"/>
+   <definition value="Financial instrument by which payment information for health care."/>
+   <requirements value="Health care programs and insurers are significant payors of health service costs."/>
+   <min value="0"/>
+   <max value="*"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Coverage"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.sequence"/>
+   <short value="Service instance identifier"/>
+   <definition value="A service line item."/>
+   <requirements value="To maintain order of the coverages."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.focal"/>
+   <short value="Is the focal Coverage"/>
+   <definition value="The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated."/>
+   <requirements value="To identify which coverage is being adjudicated."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.coverage"/>
+   <short value="Insurance information"/>
+   <definition value="Reference to the program or plan identification, underwriter or payor."/>
+   <requirements value="Need to identify the issuer to target for processing and for coordination of benefit processing."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Coverage"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.businessArrangement"/>
+   <short value="Business agreement"/>
+   <definition value="The contract number of a business agreement which describes the terms and conditions."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.relationship"/>
+   <short value="Patient relationship to subscriber"/>
+   <definition value="The relationship of the patient to the subscriber."/>
+   <requirements value="To determine relationship between the patient and the subscriber."/>
+   <min value="1"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="The code for the relationship of the patient to the subscriber"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/relationship"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="C03"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.preAuthRef"/>
+   <short value="Pre-Authorization/Determination Reference"/>
+   <definition value="A list of references from the Insurer to which these services pertain."/>
+   <requirements value="To provide any pre=determination or prior authorization reference."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="F03"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.claimResponse"/>
+   <short value="Adjudication results"/>
+   <definition value="The Coverages adjudication details."/>
+   <requirements value="Used by downstream payers to determine what balance remains and the net payable."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/ClaimResponse"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="cdanetv4"/>
+    <map value="EOB"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ClaimResponse.coverage.originalRuleset"/>
+   <short value="Original version"/>
+   <definition value="The style (standard) and version of the original material which was converted into this resource."/>
+   <requirements value="Knowledge of the original version can inform the processing of this instance so that information which is processable by the originating system may be generated."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="The static and dynamic model to which contents conform, may be business version or standard and version."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/ruleset"/>
+    </valueSetReference>
+   </binding>
+  </element>
+ </differential>
+</StructureDefinition>

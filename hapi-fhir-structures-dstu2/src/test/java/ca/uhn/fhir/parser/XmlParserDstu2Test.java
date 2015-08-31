@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.dstu2.composite.AnnotationDt;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
@@ -44,7 +45,6 @@ import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt;
 import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt.Binding;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
@@ -55,7 +55,7 @@ import ca.uhn.fhir.model.dstu2.resource.DataElement;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
-import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -553,9 +553,9 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testEncodeAndReEncodeContainedJson() {
 		Composition comp = new Composition();
-		comp.addSection().addEntry().setResource(new AllergyIntolerance().setComment("Section0_Allergy0"));
-		comp.addSection().addEntry().setResource(new AllergyIntolerance().setComment("Section1_Allergy0"));
-		comp.addSection().addEntry().setResource(new AllergyIntolerance().setComment("Section2_Allergy0"));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNotes(new AnnotationDt().setText("Section0_Allergy0")));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNotes(new AnnotationDt().setText("Section1_Allergy0")));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNotes(new AnnotationDt().setText("Section2_Allergy0")));
 
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
 
@@ -578,9 +578,9 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testEncodeAndReEncodeContainedXml() {
 		Composition comp = new Composition();
-		comp.addSection().addEntry().setResource(new AllergyIntolerance().setComment("Section0_Allergy0"));
-		comp.addSection().addEntry().setResource(new AllergyIntolerance().setComment("Section1_Allergy0"));
-		comp.addSection().addEntry().setResource(new AllergyIntolerance().setComment("Section2_Allergy0"));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNotes(new AnnotationDt().setText("Section0_Allergy0")));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNotes(new AnnotationDt().setText("Section1_Allergy0")));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNotes(new AnnotationDt().setText("Section2_Allergy0")));
 
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 
@@ -660,7 +660,7 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testEncodeContainedResources() {
 
-		MedicationPrescription medicationPrescript = new MedicationPrescription();
+		MedicationOrder medicationPrescript = new MedicationOrder();
 
 		String medId = "123";
 		CodeableConceptDt codeDt = new CodeableConceptDt("urn:sys", "code1");
@@ -685,8 +685,8 @@ public class XmlParserDstu2Test {
 		ourLog.info(encoded);
 
 		// @formatter:on
-		assertThat(encoded, stringContainsInOrder("<MedicationPrescription xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>", "<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>",
-				"</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>", "<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationPrescription>"));
+		assertThat(encoded, stringContainsInOrder("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>", "<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>",
+				"</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>", "<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
 		//@formatter:off
 
 	}
@@ -697,7 +697,7 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testEncodeContainedResourcesAutomatic() {
 		
-		MedicationPrescription medicationPrescript = new MedicationPrescription();
+		MedicationOrder medicationPrescript = new MedicationOrder();
 		String nameDisp = "MedRef";
 		CodeableConceptDt codeDt = new CodeableConceptDt("urn:sys", "code1");
 		
@@ -718,8 +718,8 @@ public class XmlParserDstu2Test {
 		ourLog.info(encoded);
 		
 		//@formatter:on
-		assertThat(encoded, stringContainsInOrder("<MedicationPrescription xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"1\"/>", "<code>", "<coding>", "<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>",
-				"</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#1\"/>", "<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationPrescription>"));
+		assertThat(encoded, stringContainsInOrder("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"1\"/>", "<code>", "<coding>", "<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>",
+				"</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#1\"/>", "<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
 		//@formatter:off
 	}
 
@@ -730,7 +730,7 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testEncodeContainedResourcesManualContainUsingNonLocalId() {
 		
-		MedicationPrescription medicationPrescript = new MedicationPrescription();
+		MedicationOrder medicationPrescript = new MedicationOrder();
 		
 		String medId = "123";
 		CodeableConceptDt codeDt = new CodeableConceptDt("urn:sys", "code1");
@@ -755,8 +755,8 @@ public class XmlParserDstu2Test {
 		ourLog.info(encoded);
 		
 		//@formatter:on
-		assertThat(encoded, stringContainsInOrder("<MedicationPrescription xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>", "<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>",
-				"</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>", "<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationPrescription>"));
+		assertThat(encoded, stringContainsInOrder("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>", "<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>",
+				"</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>", "<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>"));
 		//@formatter:off
 
 	}
@@ -1073,17 +1073,17 @@ public class XmlParserDstu2Test {
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
 		assertEquals("searchset", parsed.getType().getValue());
 		assertEquals(3, parsed.getTotalResults().getValue().intValue());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLinkNext().getValue());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLinkSelf().getValue());
+		assertEquals("https://example.com/base/MedicationOrder?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLinkNext().getValue());
+		assertEquals("https://example.com/base/MedicationOrder?patient=347&_include=MedicationOrder.medication", parsed.getLinkSelf().getValue());
 
 		assertEquals(2, parsed.getEntries().size());
 		assertEquals("http://foo?search", parsed.getEntries().get(0).getLinkSearch().getValue());
 
-		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", parsed.getEntries().get(0).getLinkAlternate().getValue());
-		MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
+		assertEquals("http://example.com/base/MedicationOrder/3123/_history/1", parsed.getEntries().get(0).getLinkAlternate().getValue());
+		MedicationOrder p = (MedicationOrder) parsed.getEntries().get(0).getResource();
 		assertEquals("Patient/347", p.getPatient().getReference().getValue());
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
-		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
+		assertEquals("http://example.com/base/MedicationOrder/3123/_history/1", p.getId().getValue());
 
 		Medication m = (Medication) parsed.getEntries().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
@@ -1108,18 +1108,18 @@ public class XmlParserDstu2Test {
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
 		assertEquals("searchset", parsed.getType());
 		assertEquals(3, parsed.getTotal().intValue());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink().get(0).getUrlElement().getValueAsString());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
+		assertEquals("https://example.com/base/MedicationOrder?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink().get(0).getUrlElement().getValueAsString());
+		assertEquals("https://example.com/base/MedicationOrder?patient=347&_include=MedicationOrder.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
 
 		assertEquals(2, parsed.getEntry().size());
 		assertEquals("alternate", parsed.getEntry().get(0).getLink().get(0).getRelation());
-		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", parsed.getEntry().get(0).getLink().get(0).getUrl());
+		assertEquals("http://example.com/base/MedicationOrder/3123/_history/1", parsed.getEntry().get(0).getLink().get(0).getUrl());
 		assertEquals("http://foo?search", parsed.getEntry().get(0).getRequest().getUrlElement().getValueAsString());
 
-		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
+		MedicationOrder p = (MedicationOrder) parsed.getEntry().get(0).getResource();
 		assertEquals("Patient/347", p.getPatient().getReference().getValue());
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
-		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
+		assertEquals("http://example.com/base/MedicationOrder/3123/_history/1", p.getId().getValue());
 //		assertEquals("3123", p.getId().getValue());
 
 		Medication m = (Medication) parsed.getEntry().get(1).getResource();

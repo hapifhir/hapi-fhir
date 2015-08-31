@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -890,7 +890,7 @@ public class AuditEvent extends DomainResource {
          * The reason (purpose of use), specific to this participant, that was used during the event being recorded.
          */
         @Child(name = "purposeOfUse", type = {Coding.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Purpose of use for this participant", formalDefinition="The reason (purpose of use), specific to this participant, that was used during the event being recorded." )
+        @Description(shortDefinition="Reason given for this user", formalDefinition="The reason (purpose of use), specific to this participant, that was used during the event being recorded." )
         protected List<Coding> purposeOfUse;
 
         private static final long serialVersionUID = -1783296995L;

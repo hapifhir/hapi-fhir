@@ -2,11 +2,12 @@ package ca.uhn.fhir.tinder;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -287,7 +288,7 @@ public class ValueSetGenerator {
 		}
 
 		File f = new File(theOutputDirectory, theValueSetTm.getClassName() + ".java");
-		FileWriter w = new FileWriter(f, false);
+		OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
 
 		ourLog.debug("Writing file: {}", f.getAbsolutePath());
 
@@ -302,7 +303,7 @@ public class ValueSetGenerator {
 		v.setProperty("runtime.references.strict", Boolean.TRUE);
 
 		InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/valueset.vm");
-		InputStreamReader templateReader = new InputStreamReader(templateIs);
+		InputStreamReader templateReader = new InputStreamReader(templateIs, "UTF-8");
 		v.evaluate(ctx, w, "", templateReader);
 
 		w.close();

@@ -2245,7 +2245,7 @@ See wiki for guidance</Font>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
-					<Data ss:Type="String">CodeableConcept | boolean | Quantity | Range</Data>
+					<Data ss:Type="String">CodeableConcept | boolean | SimpleQuantity | Range</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">

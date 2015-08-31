@@ -1,0 +1,501 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="Account"/>
+ <meta>
+  <lastUpdated value="2015-08-27T19:45:13.172-04:00"/>
+ </meta>
+ <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+  <valueInteger value="0"/>
+ </extension>
+ <url value="http://hl7.org/fhir/StructureDefinition/Account"/>
+ <name value="Account"/>
+ <publisher value="Health Level Seven International (Patient Administration)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"/>
+  </telecom>
+ </contact>
+ <description value="Base StructureDefinition for Account Resource"/>
+ <status value="draft"/>
+ <date value="2015-08-27T19:45:13-04:00"/>
+ <mapping>
+  <identity value="rim"/>
+  <uri value="http://hl7.org/v3"/>
+  <name value="RIM"/>
+ </mapping>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
+ <snapshot>
+  <element>
+   <path value="Account"/>
+   <definition value="A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centres, etc."/>
+   <alias value="Cost center"/>
+   <alias value="Record"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="Account.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Account.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Account.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Account.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="Account.identifier"/>
+   <short value="Account number"/>
+   <definition value="Unique identifier used to reference the account.  May or may not be intended for human use.  (E.g. credit card number)."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.name"/>
+   <short value="Human-readable label"/>
+   <definition value="Name used for the account when displaying it to humans in reports, etc."/>
+   <alias value="Title"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.type"/>
+   <short value="E.g. patient, expense, depreciation"/>
+   <definition value="Categorizes the account for reporting and searching purposes."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.status"/>
+   <short value="active | inactive"/>
+   <definition value="Indicates whether the account is presently used/useable or not."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="Indicates whether the account is available to be used"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/account-status"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Account.activePeriod"/>
+   <short value="Valid from..to"/>
+   <definition value="Indicates the period of time over which the account is allowed."/>
+   <comments value="Transactions cannot typically be posted to account outside of its &quot;active&quot; period."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Period"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.currency"/>
+   <short value="Base currency in which balance is tracked"/>
+   <definition value="Identifies the currency to which transactions must be converted when crediting or debiting the account."/>
+   <comments value="Tracked separately from balance because currency might be known when balance is not.  In some cases, balance might be expressed in a currency other than the base currency for the account."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.balance"/>
+   <short value="How much is in account?"/>
+   <definition value="Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.coveragePeriod"/>
+   <short value="Transaction window"/>
+   <definition value="Identifies the period of time the account applies to.  E.g. accounts created per fiscal year, quarter, etc."/>
+   <comments value="It is possible for transactions relevant to a coverage period to be posted to the account before or after the coverage period."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Period"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.subject"/>
+   <short value="What is account tied to?"/>
+   <definition value="Identifies the patient, device, practitioner, location or other object the account is associated with."/>
+   <alias value="target"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/HealthcareService"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.owner"/>
+   <short value="Who is responsible?"/>
+   <definition value="Indicates the organization, department, etc. with responsibility for the account."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.description"/>
+   <short value="Explanation of purpose/use"/>
+   <definition value="Provides additional information about what the account tracks and how it is used."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="Account"/>
+   <definition value="A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centres, etc."/>
+   <alias value="Cost center"/>
+   <alias value="Record"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="DomainResource"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.identifier"/>
+   <short value="Account number"/>
+   <definition value="Unique identifier used to reference the account.  May or may not be intended for human use.  (E.g. credit card number)."/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.name"/>
+   <short value="Human-readable label"/>
+   <definition value="Name used for the account when displaying it to humans in reports, etc."/>
+   <alias value="Title"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.type"/>
+   <short value="E.g. patient, expense, depreciation"/>
+   <definition value="Categorizes the account for reporting and searching purposes."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.status"/>
+   <short value="active | inactive"/>
+   <definition value="Indicates whether the account is presently used/useable or not."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="preferred"/>
+    <description value="Indicates whether the account is available to be used"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/account-status"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="Account.activePeriod"/>
+   <short value="Valid from..to"/>
+   <definition value="Indicates the period of time over which the account is allowed."/>
+   <comments value="Transactions cannot typically be posted to account outside of its &quot;active&quot; period."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Period"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.currency"/>
+   <short value="Base currency in which balance is tracked"/>
+   <definition value="Identifies the currency to which transactions must be converted when crediting or debiting the account."/>
+   <comments value="Tracked separately from balance because currency might be known when balance is not.  In some cases, balance might be expressed in a currency other than the base currency for the account."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.balance"/>
+   <short value="How much is in account?"/>
+   <definition value="Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.coveragePeriod"/>
+   <short value="Transaction window"/>
+   <definition value="Identifies the period of time the account applies to.  E.g. accounts created per fiscal year, quarter, etc."/>
+   <comments value="It is possible for transactions relevant to a coverage period to be posted to the account before or after the coverage period."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Period"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.subject"/>
+   <short value="What is account tied to?"/>
+   <definition value="Identifies the patient, device, practitioner, location or other object the account is associated with."/>
+   <alias value="target"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/HealthcareService"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.owner"/>
+   <short value="Who is responsible?"/>
+   <definition value="Indicates the organization, department, etc. with responsibility for the account."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="Account.description"/>
+   <short value="Explanation of purpose/use"/>
+   <definition value="Provides additional information about what the account tracks and how it is used."/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+ </differential>
+</StructureDefinition>
