@@ -13,7 +13,6 @@ import java.util.List;
 import org.hl7.fhir.instance.model.CodeType;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Observation.ObservationStatus;
-import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
@@ -57,7 +56,7 @@ public class FhirInstanceValidatorTest {
       @Override
       public Boolean answer(InvocationOnMock theInvocation) throws Throwable {
         boolean retVal = myDefaultValidationSupport.isCodeSystemSupported((String) theInvocation.getArguments()[0]);
-        ourLog.info("isCodeSystemSupported({}) : {}", theInvocation.getArguments()[0], retVal);
+        ourLog.info("isCodeSystemSupported({}) : {}", new Object[] { theInvocation.getArguments()[0], retVal });
         return retVal;
       }
     });
@@ -68,8 +67,8 @@ public class FhirInstanceValidatorTest {
             IBaseResource retVal = myDefaultValidationSupport.fetchResource(
                 (FhirContext) theInvocation.getArguments()[0], (Class<IBaseResource>) theInvocation.getArguments()[1],
                 (String) theInvocation.getArguments()[2]);
-            ourLog.info("fetchResource({}, {}) : {}", theInvocation.getArguments()[1], theInvocation.getArguments()[2],
-                retVal);
+            ourLog.info("fetchResource({}, {}) : {}",
+                new Object[] { theInvocation.getArguments()[1], theInvocation.getArguments()[2], retVal });
             return retVal;
           }
         });
