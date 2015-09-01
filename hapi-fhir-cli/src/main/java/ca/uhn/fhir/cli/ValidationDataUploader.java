@@ -31,6 +31,9 @@ public class ValidationDataUploader extends BaseCommand {
 
 		IGenericClient client = newClient(ctx);
 
+		int total;
+		int count;
+		
 		// String vsContents =
 		// IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/valuesets.xml"),
 		// "UTF-8");
@@ -50,12 +53,8 @@ public class ValidationDataUploader extends BaseCommand {
 		//
 		// ourLog.info("Finished uploading ValueSets");
 
-		String vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/v3-codesystems.xml"), "UTF-8");
-		Bundle bundle = ctx.newXmlParser().parseResource(Bundle.class, vsContents);
-
-		int total;
-		int count;
-		
+//		String vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/v3-codesystems.xml"), "UTF-8");
+//		Bundle bundle = ctx.newXmlParser().parseResource(Bundle.class, vsContents);
 //		total = bundle.getEntry().size();
 //		count = 1;
 //		for (BundleEntryComponent i : bundle.getEntry()) {
@@ -68,6 +67,22 @@ public class ValidationDataUploader extends BaseCommand {
 //			count++;
 //		}
 
+		
+		String vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/v2-tables.xml"), "UTF-8");
+		Bundle bundle = ctx.newXmlParser().parseResource(Bundle.class, vsContents);
+		total = bundle.getEntry().size();
+		count = 1;
+		for (BundleEntryComponent i : bundle.getEntry()) {
+			if (count > 1900) {
+			ValueSet next = (ValueSet) i.getResource();
+			next.setId(next.getIdElement().toUnqualifiedVersionless());
+
+			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] { count, total, next.getIdElement().getValue() });
+			client.update().resource(next).execute();
+			}
+			count++;
+		}
+
 		ourLog.info("Finished uploading ValueSets");
 
 		ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
@@ -75,12 +90,13 @@ public class ValidationDataUploader extends BaseCommand {
 		total = mappingLocations.length;
 		count = 1;
 		for (Resource i : mappingLocations) {
+			if (count > 140) {
 			StructureDefinition next = ctx.newXmlParser().parseResource(StructureDefinition.class, IOUtils.toString(i.getInputStream(), "UTF-8"));
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading StructureDefinition {}/{} : {}", new Object[] { count, total, next.getIdElement().getValue() });
 			client.update().resource(next).execute();
-
+			}
 			count++;
 		}
 

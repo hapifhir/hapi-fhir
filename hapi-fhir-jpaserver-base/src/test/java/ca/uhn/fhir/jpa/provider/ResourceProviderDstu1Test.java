@@ -556,6 +556,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 
+		ourCtx.getRestfulClientFactory().setSocketTimeout(240 * 1000);
 		ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 

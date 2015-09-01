@@ -633,8 +633,9 @@ class ParserState<T> {
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if (myJsonMode) {
 				string(theValue);
+			} else {
+				super.attributeValue(theName, theValue);
 			}
-			super.attributeValue(theName, theValue);
 		}
 
 		@Override

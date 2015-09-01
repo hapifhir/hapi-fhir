@@ -41,10 +41,10 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 	private static final long serialVersionUID = 1L;
 
 	private Integer myCount;
+	private boolean myEverythingMode = false;
 	private Set<Include> myIncludes;
 	private DateRangeParam myLastUpdated;
 	private Set<Include> myRevIncludes;
-
 	private SortSpec mySort;
 
 	public void add(String theName, IQueryParameterAnd<?> theAnd) {
@@ -113,8 +113,16 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 		return mySort;
 	}
 
+	public boolean isEverythingMode() {
+		return myEverythingMode;
+	}
+
 	public void setCount(Integer theCount) {
 		myCount = theCount;
+	}
+
+	public void setEverythingMode(boolean theConsolidateMatches) {
+		myEverythingMode = theConsolidateMatches;
 	}
 
 	public void setIncludes(Set<Include> theIncludes) {

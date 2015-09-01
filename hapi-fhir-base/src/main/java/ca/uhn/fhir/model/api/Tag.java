@@ -37,6 +37,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  */
 public class Tag extends BaseElement implements IElement {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final String ATTR_LABEL = "label";
 	public static final String ATTR_SCHEME = "scheme";
 	public static final String ATTR_TERM = "term";

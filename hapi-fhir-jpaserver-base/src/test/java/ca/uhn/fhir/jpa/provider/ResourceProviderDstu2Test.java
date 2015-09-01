@@ -657,8 +657,8 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		assertThat(ids, containsInAnyOrder(patientId, devId, obsId, encId, orgId1, orgId2));
 
-		// _revinclude's are counted but not _include's
-		assertEquals(3, b.getTotal().intValue());
+		// Should include everything
+		assertEquals(6, b.getTotal().intValue());
 
 		ourLog.info(ids.toString());
 	}

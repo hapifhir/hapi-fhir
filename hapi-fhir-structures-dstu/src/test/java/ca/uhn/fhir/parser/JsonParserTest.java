@@ -1060,7 +1060,6 @@ public class JsonParserTest {
 
 	}
 
-	@Ignore
 	@Test
 	public void testTotalResultsInJsonBundle() {
 		String json =
@@ -1115,6 +1114,9 @@ public class JsonParserTest {
 
 		IParser jsonParser = ourCtx.newJsonParser();
 		Bundle bundle = jsonParser.parseBundle(json);
+		assertEquals("author-name", bundle.getAuthorName().getValue());
+		assertEquals("uri", bundle.getAuthorUri().getValue());
+		
 	}
 
 	@Test

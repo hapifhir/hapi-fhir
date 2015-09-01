@@ -28,7 +28,8 @@ public class BaseJpaTest {
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
-		for (IBaseResource next : theFound.getResources(0, theFound.size())) {
+		List<IBaseResource> resources = theFound.getResources(0, theFound.size());
+		for (IBaseResource next : resources) {
 			retVal.add((IIdType) next.getIdElement().toUnqualifiedVersionless());
 		}
 		return retVal;

@@ -52,6 +52,7 @@ public class BaseJpaResourceProviderEncounterDstu2 extends JpaResourceProviderDs
 
 			paramMap.setRevIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 			paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
+			paramMap.setEverythingMode(true);
 			paramMap.add("_id", new StringParam(theId.getIdPart()));		
 			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
 			return retVal;

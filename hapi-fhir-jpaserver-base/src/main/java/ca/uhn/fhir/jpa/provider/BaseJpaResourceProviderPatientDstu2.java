@@ -50,6 +50,7 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 
 			paramMap.setRevIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 			paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
+			paramMap.setEverythingMode(true);
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
 			return retVal;

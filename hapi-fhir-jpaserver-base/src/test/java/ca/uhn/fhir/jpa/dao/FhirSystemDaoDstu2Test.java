@@ -48,6 +48,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryResponse;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
@@ -71,6 +72,10 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("family");
 		final IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://foo");
+		myValueSetDao.create(vs);
 		
 		ResourceTable entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
 			@Override

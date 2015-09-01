@@ -35,6 +35,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import ca.uhn.fhir.model.api.Tag;
 
 //@formatter:on
@@ -119,4 +122,28 @@ public class TagDefinition implements Serializable {
 		return new Tag(getSystem(), getCode(), getDisplay());
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof TagDefinition)) {
+			return false;
+		}
+		TagDefinition other = (TagDefinition) obj;
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(myId, other.myId);
+		return b.isEquals();
+	}
+	
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(myId);
+		return b.toHashCode();
+	}
+	
 }

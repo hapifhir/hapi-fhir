@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -46,6 +47,7 @@ import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -652,6 +654,33 @@ public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	public void testSearchParamChangesType() {
+		String name = "testSearchParamChangesType";
+		IIdType id;
+		{
+			Patient patient = new Patient();
+			patient.addName().addFamily(name);
+			id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+		params.put(Patient.SP_FAMILY, new StringDt(name));
+		List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+		assertThat(patients, contains(id));
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem(name).setValue(name);
+		patient.setId(id);
+		myPatientDao.update(patient);
+
+		params = new HashMap<String, IQueryParameterType>();
+		params.put(Patient.SP_FAMILY, new StringDt(name));
+		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+		assertThat(patients, not(contains(id)));
+
+	}
+
+	@Test
 	public void testSearchStringParamReallyLong() {
 		String methodName = "testSearchStringParamReallyLong";
 		String value = StringUtils.rightPad(methodName, 200, 'a');
@@ -1002,6 +1031,7 @@ public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 			params.add(Organization.SP_RES_ID, new StringDt(orgId.getIdPart()));
 			params.addInclude(Organization.INCLUDE_PARTOF.asRecursive());
 			List<IIdType> resources = toUnqualifiedVersionlessIds(myOrganizationDao.search(params));
+			ourLog.info(resources.toString());
 			assertThat(resources, contains(orgId, parentOrgId, parentParentOrgId));
 		}
 	}
@@ -1308,6 +1338,17 @@ public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 
 	}
 
+	@Test
+	public void testSearchWithUriParam() throws Exception {
+		String methodName = "testSearchWithUriParam";
+
+		ValueSet vs = myFhirCtx.newJsonParser().parseResource(ValueSet.class, IOUtils.toString(FhirResourceDaoDstu2SearchTest.class.getResourceAsStream("/valueset-dstu2.json")));
+		myValueSetDao.update(vs);
+
+		IBundleProvider result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/fhir/ValueSet/basic-resource-type"));
+		assertThat(toUnqualifiedVersionlessIds(result), contains((IIdType)new IdDt("ValueSet/testSearchWithUriParam")));
+	}
+	
 	@Test
 	public void testSearchWithSecurityAndProfileParams() {
 		String methodName = "testSearchWithSecurityAndProfileParams";

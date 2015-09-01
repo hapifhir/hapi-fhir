@@ -10,6 +10,7 @@ for i in $(find $FHIRTRUNK/build/source/datatypes | grep xml | grep -v spreadshe
 
 cp $FHIRTRUNK/build/publish/valuesets.xml hapi-fhir-validation-resources/src/main/resources/org/hl7/fhir/instance/model/valueset/
 cp $FHIRTRUNK/build/publish/v3-codesystems.xml hapi-fhir-validation-resources/src/main/resources/org/hl7/fhir/instance/model/valueset/
+cp $FHIRTRUNK/build/publish/v2-codesystems.xml hapi-fhir-validation-resources/src/main/resources/org/hl7/fhir/instance/model/valueset/
 
 # Schematron
 rm hapi-fhir-structures-dstu2/src/main/resources/ca/uhn/fhir/model/dstu2/schema/*.sch

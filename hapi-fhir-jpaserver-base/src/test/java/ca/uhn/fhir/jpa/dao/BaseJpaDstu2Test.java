@@ -23,11 +23,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTag;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
@@ -43,6 +45,7 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 //@formatter:off
@@ -75,6 +78,9 @@ public class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myOrganizationDaoDstu2")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
+	@Autowired
+	@Qualifier("myValueSetDaoDstu2")
+	protected IFhirResourceDao<ValueSet> myValueSetDao;
 	@Autowired
 	@Qualifier("myPatientDaoDstu2")
 	protected IFhirResourceDao<Patient> myPatientDao;
@@ -127,6 +133,8 @@ public class BaseJpaDstu2Test extends BaseJpaTest {
 				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamQuantity.class.getSimpleName() + " d").executeUpdate();
 				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamString.class.getSimpleName() + " d").executeUpdate();
 				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamToken.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamUri.class.getSimpleName() + " d").executeUpdate();
+				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamCoords.class.getSimpleName() + " d").executeUpdate();
 				myEntityManager.createQuery("DELETE from " + ResourceLink.class.getSimpleName() + " d").executeUpdate();
 				return null;
 			}

@@ -19,11 +19,12 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,11 +41,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
@@ -79,6 +82,34 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 	
 	public SearchParamExtractorDstu2(FhirContext theContext) {
 		super(theContext);
+	}
+
+	private void addSearchTerm(ResourceTable theEntity, ArrayList<ResourceIndexedSearchParamString> retVal, String resourceName, String searchTerm) {
+		if (isBlank(searchTerm)) {
+			return;
+		}
+		if (searchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+			searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+		}
+
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseHapiFhirDao.normalizeString(searchTerm), searchTerm);
+		nextEntity.setResource(theEntity);
+		retVal.add(nextEntity);
+	}
+
+	private void addStringParam(ResourceTable theEntity, ArrayList<BaseResourceIndexedSearchParam> retVal, RuntimeSearchParam nextSpDef, String value) {
+		if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+			value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+		}
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(nextSpDef.getName(), BaseHapiFhirDao.normalizeString(value), value);
+		nextEntity.setResource(theEntity);
+		retVal.add(nextEntity);
+	}
+
+	@Override
+	public List<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IResource theResource) {
+		// TODO: implement
+		return Collections.emptyList();
 	}
 
 	/*
@@ -137,8 +168,6 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 				}
 			}
 		}
-
-		theEntity.setParamsDatePopulated(retVal.size() > 0);
 
 		return retVal;
 	}
@@ -234,8 +263,6 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 			}
 		}
 
-		theEntity.setParamsNumberPopulated(retVal.size() > 0);
-
 		return retVal;
 	}
 
@@ -289,8 +316,6 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 				}
 			}
 		}
-
-		theEntity.setParamsNumberPopulated(retVal.size() > 0);
 
 		return retVal;
 	}
@@ -373,22 +398,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 			}
 		}
 
-		theEntity.setParamsStringPopulated(retVal.size() > 0);
-
 		return retVal;
-	}
-
-	private void addSearchTerm(ResourceTable theEntity, ArrayList<ResourceIndexedSearchParamString> retVal, String resourceName, String searchTerm) {
-		if (isBlank(searchTerm)) {
-			return;
-		}
-		if (searchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		}
-
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseHapiFhirDao.normalizeString(searchTerm), searchTerm);
-		nextEntity.setResource(theEntity);
-		retVal.add(nextEntity);
 	}
 
 	/*
@@ -542,20 +552,63 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 
 		}
 
-		theEntity.setParamsTokenPopulated(retVal.size() > 0);
-
 		return retVal;
 	}
 
-	private void addStringParam(ResourceTable theEntity, ArrayList<BaseResourceIndexedSearchParam> retVal, RuntimeSearchParam nextSpDef, String value) {
-		if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		}
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(nextSpDef.getName(), BaseHapiFhirDao.normalizeString(value), value);
-		nextEntity.setResource(theEntity);
-		retVal.add(nextEntity);
-	}
+	@Override
+	public List<ResourceIndexedSearchParamUri> extractSearchParamUri(ResourceTable theEntity, IResource theResource) {
+		ArrayList<ResourceIndexedSearchParamUri> retVal = new ArrayList<ResourceIndexedSearchParamUri>();
 
+		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
+		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
+			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.URI) {
+				continue;
+			}
+
+			String nextPath = nextSpDef.getPath();
+			if (isBlank(nextPath)) {
+				continue;
+			}
+
+			for (Object nextObject : extractValues(nextPath, theResource)) {
+				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
+					continue;
+				}
+
+				String resourceName = nextSpDef.getName();
+				boolean multiType = false;
+				if (nextPath.endsWith("[x]")) {
+					multiType = true;
+				}
+
+				if (nextObject instanceof UriDt) {
+					UriDt nextValue = (UriDt) nextObject;
+					if (isBlank(nextValue.getValue())) {
+						continue;
+					}
+
+					ourLog.info("Adding param: {}, {}", resourceName, nextValue.getValue());
+					
+					ResourceIndexedSearchParamUri nextEntity = new ResourceIndexedSearchParamUri(resourceName, nextValue.getValue());
+					
+					ourLog.info("Added : {}", nextEntity);
+
+					nextEntity.setResource(theEntity);
+					retVal.add(nextEntity);
+				} else {
+					if (!multiType) {
+						throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
+					} else {
+						continue;
+					}
+				}
+			}
+		}
+
+		return retVal;
+	}
+	
+	
 	private void extractTokensFromCodeableConcept(List<String> theSystems, List<String> theCodes, CodeableConceptDt theCodeableConcept, ResourceTable theEntity,
 			ArrayList<BaseResourceIndexedSearchParam> theListToPopulate, RuntimeSearchParam theParameterDef) {
 		for (CodingDt nextCoding : theCodeableConcept.getCoding()) {

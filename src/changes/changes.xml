@@ -137,6 +137,20 @@
 				resources (really only useful after indexes change or bugs are
 				fixed)
 			</action>
+			<action type="fix">
+				JPA server did not correctly index search parameters
+				of type "URI". Thanks to David Hay for reporting! Note that if you are using the JPA server, this change means that
+				there are two new tables added to the database schema. Updating existing resources in the database may fail unless you 
+				set default values for the resource
+				table by issuing a SQL command similar to the following (false may be 0 or something else, depending on the database platform in use)
+				<![CDATA[<br/><code>update hfj_resource set sp_coords_present = false;<br/>
+				update hfj_resource set sp_uri_present = false;</code>]]>
+			</action>
+			<action type="fix">
+				FIx issue in JPA server where profile declarations, tags, and 
+				security labels were not always properly removed by an update that
+				was trying to remove them. Also don't store duplicates.
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

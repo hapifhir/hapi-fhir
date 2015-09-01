@@ -29,6 +29,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 @Entity
 @Table(name = "HFJ_RES_TAG")
 public class ResourceTag extends BaseTag {
@@ -63,6 +66,7 @@ public class ResourceTag extends BaseTag {
 
 	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag) {
 		myResource = theResourceTable;
+		myResourceId = theResourceTable.getId();
 		setTag(theTag);
 	}
 
@@ -80,6 +84,32 @@ public class ResourceTag extends BaseTag {
 
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof ResourceTag)) {
+			return false;
+		}
+		ResourceTag other = (ResourceTag) obj;
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(getResourceId(), other.getResourceId());
+		b.append(getTag(), other.getTag());
+		return b.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getResourceId());
+		b.append(getTag());
+		return b.toHashCode();
 	}
 
 }

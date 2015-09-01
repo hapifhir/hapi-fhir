@@ -15,8 +15,11 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -24,8 +27,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -223,6 +228,82 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		}
 
 	}
+
+	@Test
+	public void testDuplicateProfilesIgnored() {
+		String name = "testDuplicateProfilesIgnored";
+		IIdType id;
+		{
+			Patient patient = new Patient();
+			patient.addName().addFamily(name);
+			
+			List<IdDt> tl = new ArrayList<IdDt>();
+			tl.add(new IdDt("http://foo/bar"));
+			tl.add(new IdDt("http://foo/bar"));
+			tl.add(new IdDt("http://foo/bar"));
+			ResourceMetadataKeyEnum.PROFILES.put(patient, tl);
+			
+			id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		// Do a read
+		{
+			Patient patient = myPatientDao.read(id);
+			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
+			assertEquals(1, tl.size());
+			assertEquals("http://foo/bar", tl.get(0).getValue());
+		}
+
+	}
+	
+	@Test
+	public void testUpdateModifiesProfiles() {
+		String name = "testUpdateModifiesProfiles";
+		IIdType id;
+		{
+			Patient patient = new Patient();
+			patient.addName().addFamily(name);
+			
+			List<IdDt> tl = new ArrayList<IdDt>();
+			tl.add(new IdDt("http://foo/bar"));
+			ResourceMetadataKeyEnum.PROFILES.put(patient, tl);
+			
+			id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		// Do a read
+		{
+			Patient patient = myPatientDao.read(id);
+			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
+			assertEquals(1, tl.size());
+			assertEquals("http://foo/bar", tl.get(0).getValue());
+		}
+
+		// Update
+		{
+			Patient patient = new Patient();
+			patient.setId(id);
+			patient.addName().addFamily(name);
+			
+			List<IdDt> tl = new ArrayList<IdDt>();
+			tl.add(new IdDt("http://foo/baz"));
+			ResourceMetadataKeyEnum.PROFILES.put(patient, tl);
+			
+			id = myPatientDao.update(patient).getId().toUnqualifiedVersionless();
+		}
+
+		// Do a read
+		{
+			Patient patient = myPatientDao.read(id);
+			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
+			assertEquals(1, tl.size());
+			assertEquals("http://foo/baz", tl.get(0).getValue());
+		}
+
+		
+	}
+
+	
 
 	@Test
 	public void testUpdateUnknownNumericIdFails() {
