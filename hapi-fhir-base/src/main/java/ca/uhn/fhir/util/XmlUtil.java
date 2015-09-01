@@ -50,7 +50,6 @@ import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.io.EscapingWriterFactory;
 
 import com.ctc.wstx.api.WstxInputProperties;
-import com.ctc.wstx.stax.WstxInputFactory;
 import com.ctc.wstx.stax.WstxOutputFactory;
 
 /**
@@ -1550,6 +1549,7 @@ public class XmlUtil {
 		if (ourInputFactory == null) {
 
 			try {
+				// Detect if we're running with the Android lib, and force repackaged Woodstox to be used
 				Class.forName("ca.uhn.fhir.repackage.javax.xml.stream.XMLInputFactory");
 				System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
 			} catch (ClassNotFoundException e) {
@@ -1589,6 +1589,7 @@ public class XmlUtil {
 		if (ourOutputFactory == null) {
 
 			try {
+				// Detect if we're running with the Android lib, and force repackaged Woodstox to be used
 				Class.forName("ca.uhn.fhir.repackage.javax.xml.stream.XMLOutputFactory");
 				System.setProperty("javax.xml.stream.XMLOutputFactory", "com.ctc.wstx.stax.WstxOutputFactory");
 			} catch (ClassNotFoundException e) {
@@ -1708,7 +1709,7 @@ public class XmlUtil {
 
 		@Override
 		public Writer createEscapingWriterFor(OutputStream theOut, String theEnc) throws UnsupportedEncodingException {
-			return createEscapingWriterFor(new OutputStreamWriter(theOut), theEnc);
+			return createEscapingWriterFor(new OutputStreamWriter(theOut, theEnc), theEnc);
 		}
 
 		@Override
