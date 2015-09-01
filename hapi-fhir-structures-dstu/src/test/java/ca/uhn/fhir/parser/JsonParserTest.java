@@ -1060,13 +1060,21 @@ public class JsonParserTest {
 
 	}
 
+	@Ignore
 	@Test
 	public void testTotalResultsInJsonBundle() {
 		String json =
 				"{" +
 						"	\"resourceType\" : \"Bundle\"," +
+						"   \"title\" : \"FHIR Atom Feed\"," +
 						"	\"id\" : \"cb095f55-afb0-41e8-89d5-155259b2a032\"," +
 						"	\"updated\" : \"2015-09-01T08:52:02.793-04:00\"," +
+						"   \"author\": [" +
+						"     {" +
+						"       \"name\": \"author-name\", " +
+						"       \"uri\": \"uri\" " +
+						"     }" +
+						"   ]," +
 						"	\"link\" : [{" +
 						"			\"rel\" : \"self\"," +
 						"			\"href\" : \"http://fhirtest.uhn.ca/baseDstu1/Patient/_search?family=Perez\"" +
@@ -1107,8 +1115,6 @@ public class JsonParserTest {
 
 		IParser jsonParser = ourCtx.newJsonParser();
 		Bundle bundle = jsonParser.parseBundle(json);
-		System.out.println("Done");
-
 	}
 
 	@Test
