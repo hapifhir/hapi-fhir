@@ -1060,7 +1060,6 @@ public class JsonParserTest {
 
 	}
 
-	@Ignore
 	@Test
 	public void testTotalResultsInJsonBundle() {
 		String json =

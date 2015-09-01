@@ -117,6 +117,7 @@ public class JsonParser extends BaseParser implements IParser {
 		hashSetDstu1.add("id");
 		hashSetDstu1.add("updated");
 		hashSetDstu1.add("published");
+		hashSetDstu1.add("totalResults");
 		BUNDLE_TEXTNODE_CHILDREN_DSTU1 = Collections.unmodifiableSet(hashSetDstu1);
 
 		HashSet<String> hashSetDstu2 = new HashSet<String>();
