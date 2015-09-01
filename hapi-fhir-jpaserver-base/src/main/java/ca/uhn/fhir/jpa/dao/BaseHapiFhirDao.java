@@ -204,10 +204,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					if (isBlank(typeString)) {
 						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - " + nextValue.getReference().getValue());
 					}
-					Class<? extends IBaseResource> type = getContext().getResourceDefinition(typeString).getImplementingClass();
+					RuntimeResourceDefinition resourceDefinition;
+					try {
+						resourceDefinition = getContext().getResourceDefinition(typeString);
+					} catch (DataFormatException e) {
+						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - " + nextValue.getReference().getValue());
+					}
+					
+					Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
 					String id = nextValue.getReference().getIdPart();
 					if (StringUtils.isBlank(id)) {
-						continue;
+						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource ID - " + nextValue.getReference().getValue());
 					}
 
 					IFhirResourceDao<?> dao = getDao(type);
@@ -540,43 +547,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		}
 		return true;
-	}
-
-	protected List<IBaseResource> loadResourcesById(Set<? extends IIdType> theIncludePids) {
-		Set<Long> pids = new HashSet<Long>();
-		for (IIdType next : theIncludePids) {
-			if (next.isIdPartValidLong()) {
-				pids.add(next.getIdPartAsLong());
-			} else {
-				try {
-					pids.add(translateForcedIdToPid(next));
-				} catch (ResourceNotFoundException e) {
-					ourLog.warn("Failed to translate forced ID [{}] to PID", next.getValue());
-				}
-			}
-		}
-
-		if (pids.isEmpty()) {
-			return new ArrayList<IBaseResource>();
-		}
-
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		// cq.where(builder.equal(from.get("myResourceType"),
-		// getContext().getResourceDefinition(myResourceType).getName()));
-		// if (theIncludePids != null) {
-		cq.where(from.get("myId").in(pids));
-		// }
-		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
-
-		ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
-		for (ResourceTable next : q.getResultList()) {
-			IResource resource = (IResource) toResource(next);
-			retVal.add(resource);
-		}
-
-		return retVal;
 	}
 
 	protected void notifyWriteCompleted() {

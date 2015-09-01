@@ -307,6 +307,50 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	public void testCreateWithInvalidReferenceNoId() {
+		Patient p = new Patient();
+		p.addName().addFamily("Hello");
+		p.getManagingOrganization().setReference("Organization/");
+		
+		try {
+			myPatientDao.create(p);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Does not contain resource ID"));
+		}
+	}
+
+	@Test
+	public void testCreateWithReferenceBadType() {
+		Patient p = new Patient();
+		p.addName().addFamily("Hello");
+		p.getManagingOrganization().setReference("Blah/123");
+		
+		try {
+			myPatientDao.create(p);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Does not contain resource ID"));
+		}
+	}
+
+	@Test
+	public void testCreateWithReferenceNoType() {
+		Patient p = new Patient();
+		p.addName().addFamily("Hello");
+		p.getManagingOrganization().setReference("123");
+		
+		try {
+			myPatientDao.create(p);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Does not contain resource type"));
+		}
+	}
+
+	
+	
+	@Test
 	public void testCreateWithIfNoneExistBasic() {
 		String methodName = "testCreateWithIfNoneExistBasic";
 		MethodOutcome results;
