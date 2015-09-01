@@ -30,6 +30,7 @@ import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -884,25 +885,25 @@ public class JsonParserTest {
 		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
 		ourLog.info(enc);
 		//@formatter:off
-		assertThat(enc, containsString(("{\n" + 
-				"    \"resourceType\":\"Patient\",\n" + 
-				"    \"name\":[\n" + 
-				"        {\n" + 
-				"            \"family\":[\n" + 
-				"                \"Shmoe\"\n" + 
-				"            ],\n" + 
-				"            \"_family\":[\n" + 
-				"                {\n" + 
-				"                    \"extension\":[\n" + 
-				"                        {\n" + 
-				"                            \"url\":\"http://examples.com#givenext\",\n" + 
-				"                            \"valueString\":\"Hello\"\n" + 
-				"                        }\n" + 
-				"                    ]\n" + 
-				"                }\n" + 
-				"            ]\n" + 
-				"        }\n" + 
-				"    ]\n" + 
+		assertThat(enc, containsString(("{\n" +
+				"    \"resourceType\":\"Patient\",\n" +
+				"    \"name\":[\n" +
+				"        {\n" +
+				"            \"family\":[\n" +
+				"                \"Shmoe\"\n" +
+				"            ],\n" +
+				"            \"_family\":[\n" +
+				"                {\n" +
+				"                    \"extension\":[\n" +
+				"                        {\n" +
+				"                            \"url\":\"http://examples.com#givenext\",\n" +
+				"                            \"valueString\":\"Hello\"\n" +
+				"                        }\n" +
+				"                    ]\n" +
+				"                }\n" +
+				"            ]\n" +
+				"        }\n" +
+				"    ]\n" +
 				"}").replace("\n", "").replaceAll(" +", "")));
 		//@formatter:on
 
@@ -1056,6 +1057,58 @@ public class JsonParserTest {
 		assertEquals("Complete Blood Count", res.getName().getText().getValue());
 
 		assertThat(entry.getSummary().getValueAsString(), containsString("CBC Report for Wile"));
+
+	}
+
+	@Ignore
+	@Test
+	public void testTotalResultsInJsonBundle() {
+		String json =
+				"{" +
+						"	\"resourceType\" : \"Bundle\"," +
+						"	\"id\" : \"cb095f55-afb0-41e8-89d5-155259b2a032\"," +
+						"	\"updated\" : \"2015-09-01T08:52:02.793-04:00\"," +
+						"	\"link\" : [{" +
+						"			\"rel\" : \"self\"," +
+						"			\"href\" : \"http://fhirtest.uhn.ca/baseDstu1/Patient/_search?family=Perez\"" +
+						"		}, {" +
+						"			\"rel\" : \"next\"," +
+						"			\"href\" : \"http://fhirtest.uhn.ca/baseDstu1?_getpages=c1db1094-cc46-49f1-ae69-4763ba52458b&_getpagesoffset=10&_count=10&_format=json&_pretty=true\"" +
+						"		}, {" +
+						"			\"rel\" : \"fhir-base\"," +
+						"			\"href\" : \"http://fhirtest.uhn.ca/baseDstu1\"" +
+						"		}" +
+						"	]," +
+						"	\"totalResults\" : \"1\"," +
+						"	\"entry\" : [{" +
+						"			\"title\" : \"GONZALO PEREZ (DNI20425239)\"," +
+						"			\"id\" : \"http://fhirtest.uhn.ca/baseDstu1/Patient/34834\"," +
+						"			\"link\" : [{" +
+						"					\"rel\" : \"self\"," +
+						"					\"href\" : \"http://fhirtest.uhn.ca/baseDstu1/Patient/34834/_history/1\"" +
+						"				}" +
+						"			]," +
+						"			\"updated\" : \"2015-06-10T10:39:38.712-04:00\"," +
+						"			\"published\" : \"2015-06-10T10:39:38.665-04:00\"," +
+						"			\"content\" : {" +
+						"				\"resourceType\" : \"Patient\"," +
+						"				\"name\" : [{" +
+						"						\"family\" : [" +
+						"							\"PEREZ\"" +
+						"						]," +
+						"						\"given\" : [" +
+						"							\"GONZALO\"" +
+						"						]" +
+						"					}" +
+						"				]" +
+						"			}" +
+						"		}" +
+						"	]" +
+						"}";
+
+		IParser jsonParser = ourCtx.newJsonParser();
+		Bundle bundle = jsonParser.parseBundle(json);
+		System.out.println("Done");
 
 	}
 
