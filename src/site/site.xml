@@ -137,10 +137,9 @@
 		</menu>
 		
 		
-		<menu name="Maven Reports" inherit="bottom">
+		<menu name="Reports" inherit="bottom">
 			<item name="Project Developers" href="team-list.html" />
-			<item name="Cobertura (Test Coverage)" href="cobertura/index.html" />
-			<item name="Surefire (Test Status)" href="surefire-report.html" />
+			<item name="Coveralls (Test Coverage)" href="https://coveralls.io/github/jamesagnew/hapi-fhir" />
 			<item name="FindBugs" href="findbugs.html" />
 			<item name="Checkstyle" href="checkstyle.html" />
 		</menu>

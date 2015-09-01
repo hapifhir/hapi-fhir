@@ -1,5 +1,6 @@
 package ca.uhn.fhir.validation;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -8,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.CodeType;
@@ -23,6 +25,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
 
 public class FhirInstanceValidatorTest {
 
@@ -120,26 +124,63 @@ public class FhirInstanceValidatorTest {
   }
 
   @Test
-  public void testValidateJsonResource() {
-    // @formatter:off
-    String input = "{" + "\"resourceType\":\"Patient\"," + "\"id\":\"123\"" + "}";
-    // @formatter:on
+  public void testValidateRawJsonResource() {
+    //@formatter:off
+    String input = 
+        "{" + 
+        "\"resourceType\":\"Patient\"," + 
+        "\"id\":\"123\"" + 
+        "}";
+    //@formatter:on
 
     ValidationResult output = myVal.validateWithResult(input);
     assertEquals(output.toString(), 0, output.getMessages().size());
   }
 
   @Test
-  public void testValidateJsonResourceBadAttributes() {
-    // @formatter:off
-    String input = "{" + "\"resourceType\":\"Patient\"," + "\"id\":\"123\"," + "\"foo\":\"123\"" + "}";
-    // @formatter:on
+  public void testValidateRawJsonResourceBadAttributes() {
+    //@formatter:off
+    String input = 
+        "{" + 
+        "\"resourceType\":\"Patient\"," + 
+        "\"id\":\"123\"," + 
+        "\"foo\":\"123\"" + 
+        "}";
+    //@formatter:on
 
     ValidationResult output = myVal.validateWithResult(input);
     assertEquals(output.toString(), 1, output.getMessages().size());
     ourLog.info(output.getMessages().get(0).getLocationString());
     ourLog.info(output.getMessages().get(0).getMessage());
     assertEquals("/foo", output.getMessages().get(0).getLocationString());
+    assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
+  }
+
+  @Test
+  public void testValidateRawXmlResource() {
+    //@formatter:off
+    String input = 
+      "<Patient xmlns=\"http://hl7.org/fhir\">" + 
+      "<id value=\"123\"/>" + 
+      "</Patient>";
+    //@formatter:on
+
+    ValidationResult output = myVal.validateWithResult(input);
+    assertEquals(output.toString(), 0, output.getMessages().size());
+  }
+
+  @Test
+  public void testValidateRawXmlResourceBadAttributes() {
+    // @formatter:off
+    String input = "<Patient xmlns=\"http://hl7.org/fhir\">" + "<id value=\"123\"/>" + "<foo value=\"222\"/>"
+        + "</Patient>";
+    // @formatter:on
+
+    ValidationResult output = myVal.validateWithResult(input);
+    assertEquals(output.toString(), 1, output.getMessages().size());
+    ourLog.info(output.getMessages().get(0).getLocationString());
+    ourLog.info(output.getMessages().get(0).getMessage());
+    assertEquals("/f:Patient/f:foo", output.getMessages().get(0).getLocationString());
     assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
   }
 
@@ -156,6 +197,68 @@ public class FhirInstanceValidatorTest {
     assertEquals("Element '/f:Observation.status': minimum required = 1, but only found 0",
         output.getMessages().get(0).getMessage());
 
+  }
+
+  @Test
+  public void testValidateResourceContainingProfileDeclarationDoesntResolve() {
+    addValidConcept("http://loinc.org", "12345");
+    
+    Observation input = new Observation();
+    input.getMeta().addProfile("http://foo/myprofile");
+    
+    input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
+    input.setStatus(ObservationStatus.FINAL);
+
+    myInstanceVal.setValidationSupport(myMockSupport);
+    ValidationResult output = myVal.validateWithResult(input);
+    List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+    assertEquals(errors.toString(), 1, errors.size());
+    assertEquals("StructureDefinition reference \"http://foo/myprofile\" could not be resolved", errors.get(0).getMessage());
+  }
+
+  @Test
+  public void testValidateResourceContainingProfileDeclaration() {
+    addValidConcept("http://loinc.org", "12345");
+    
+    Observation input = new Observation();
+    input.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/devicemetricobservation");
+
+    input.addIdentifier().setSystem("http://acme").setValue("12345");
+    input.getEncounter().setReference("http://foo.com/Encounter/9");
+    input.setStatus(ObservationStatus.FINAL);
+    input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
+
+    myInstanceVal.setValidationSupport(myMockSupport);
+    ValidationResult output = myVal.validateWithResult(input);
+    List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+
+    assertThat(errors.toString(), containsString("Element '/f:Observation.subject': minimum required = 1, but only found 0"));
+    assertThat(errors.toString(), containsString("Element encounter @ /f:Observation: max allowed = 0, but found 1"));
+    assertThat(errors.toString(), containsString("Element '/f:Observation.device': minimum required = 1, but only found 0"));
+    assertThat(errors.toString(), containsString(""));
+  }
+
+  @Test
+  public void testValidateResourceWithDefaultValueset() {
+    Observation input = new Observation();
+
+    input.setStatus(ObservationStatus.FINAL);
+    input.getCode().setText("No code here!");
+
+    ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
+
+    ValidationResult output = myVal.validateWithResult(input);
+    assertEquals(output.getMessages().size(), 0);
+  }
+
+  @Test
+  public void testValidateResourceWithDefaultValuesetBadCode() {
+    String input = "<Observation xmlns=\"http://hl7.org/fhir\">\n" + "   <status value=\"notvalidcode\"/>\n"
+        + "   <code>\n" + "      <text value=\"No code here!\"/>\n" + "   </code>\n" + "</Observation>";
+    ValidationResult output = myVal.validateWithResult(input);
+    assertEquals(
+        "Coded value notvalidcode is not in value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status)",
+        output.getMessages().get(0).getMessage());
   }
 
   @Test
@@ -187,53 +290,5 @@ public class FhirInstanceValidatorTest {
     ValidationResult output = myVal.validateWithResult(input);
     List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
     assertEquals(errors.toString(), 0, errors.size());
-  }
-
-  @Test
-  public void testValidateResourceWithDefaultValueset() {
-    Observation input = new Observation();
-
-    input.setStatus(ObservationStatus.FINAL);
-    input.getCode().setText("No code here!");
-
-    ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
-
-    ValidationResult output = myVal.validateWithResult(input);
-    assertEquals(output.getMessages().size(), 0);
-  }
-
-  @Test
-  public void testValidateResourceWithDefaultValuesetBadCode() {
-    String input = "<Observation xmlns=\"http://hl7.org/fhir\">\n" + "   <status value=\"notvalidcode\"/>\n"
-        + "   <code>\n" + "      <text value=\"No code here!\"/>\n" + "   </code>\n" + "</Observation>";
-    ValidationResult output = myVal.validateWithResult(input);
-    assertEquals(
-        "Coded value notvalidcode is not in value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status)",
-        output.getMessages().get(0).getMessage());
-  }
-
-  @Test
-  public void testValidateXmlResource() {
-    // @formatter:off
-    String input = "<Patient xmlns=\"http://hl7.org/fhir\">" + "<id value=\"123\"/>" + "</Patient>";
-    // @formatter:on
-
-    ValidationResult output = myVal.validateWithResult(input);
-    assertEquals(output.toString(), 0, output.getMessages().size());
-  }
-
-  @Test
-  public void testValidateXmlResourceBadAttributes() {
-    // @formatter:off
-    String input = "<Patient xmlns=\"http://hl7.org/fhir\">" + "<id value=\"123\"/>" + "<foo value=\"222\"/>"
-        + "</Patient>";
-    // @formatter:on
-
-    ValidationResult output = myVal.validateWithResult(input);
-    assertEquals(output.toString(), 1, output.getMessages().size());
-    ourLog.info(output.getMessages().get(0).getLocationString());
-    ourLog.info(output.getMessages().get(0).getMessage());
-    assertEquals("/f:Patient/f:foo", output.getMessages().get(0).getLocationString());
-    assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
   }
 }

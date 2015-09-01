@@ -28,6 +28,7 @@ import java.util.Map;
 
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.oclc.purl.dsdl.svrl.SchematronOutputType;
 
@@ -120,12 +121,14 @@ public class SchematronBaseValidator implements IValidatorModule {
 				return retVal;
 			}
 
-			String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase()
-					+ ".sch";
+			String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase() + ".sch";
 			InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
-			if (baseIs == null) {
-				throw new InternalErrorException("No schematron found for resource type: "
-						+ theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getImplementingClass().getCanonicalName());
+			try {
+				if (baseIs == null) {
+					throw new InternalErrorException("No schematron found for resource type: " + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getImplementingClass().getCanonicalName());
+				}
+			} finally {
+				IOUtils.closeQuietly(baseIs);
 			}
 
 			retVal = SchematronResourceSCH.fromClassPath(pathToBase);

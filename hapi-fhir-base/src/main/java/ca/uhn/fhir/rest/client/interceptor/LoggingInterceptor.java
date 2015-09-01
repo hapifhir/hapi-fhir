@@ -152,7 +152,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 				throw new InternalErrorException(e);
 			}
 
-			myLog.info("Client response body:\n{}", new String(bytes));
+			myLog.info("Client response body:\n{}", new String(bytes, "UTF-8"));
 			theResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
 			} else {
 				myLog.info("Client response body: (none)");

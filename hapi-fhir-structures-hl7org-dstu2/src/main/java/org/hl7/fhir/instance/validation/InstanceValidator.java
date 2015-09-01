@@ -890,7 +890,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         String p = stack.addToLiteralPath("meta", "profile", ":"+Integer.toString(i));
         if (rule(errors, IssueType.INVALID, element.line(), element.col(), p, !Utilities.noString(ref), "StructureDefinition reference invalid")) {
           StructureDefinition pr = context.fetchResource(StructureDefinition.class, ref);
-          if (warning(errors, IssueType.INVALID, element.line(), element.col(), p, pr != null, "StructureDefinition reference could not be resolved")) {
+          if (warning(errors, IssueType.INVALID, element.line(), element.col(), p, pr != null, "StructureDefinition reference \"{0}\" could not be resolved", ref)) {
             if (rule(errors, IssueType.STRUCTURE, element.line(), element.col(), p, pr.hasSnapshot(), "StructureDefinition has no snapshot - validation is against the snapshot, so it must be provided")) {
               validateElement(errors, pr, pr.getSnapshot().getElement().get(0), null, null, element, element.getName(), stack);
             }
