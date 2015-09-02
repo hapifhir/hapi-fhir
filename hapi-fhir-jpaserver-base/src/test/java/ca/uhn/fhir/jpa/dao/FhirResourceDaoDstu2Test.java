@@ -1237,7 +1237,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals(2, newMeta.getProfile().size());
 		assertEquals(2, newMeta.getSecurity().size());
 		assertEquals(2, newMeta.getTag().size());
-		assertEquals("2", meta.getVersionId());
+		assertEquals("2", newMeta.getVersionId());
 		
 	}
 
