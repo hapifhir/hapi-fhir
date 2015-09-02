@@ -151,6 +151,10 @@
 				security labels were not always properly removed by an update that
 				was trying to remove them. Also don't store duplicates.
 			</action>
+			<action type="fix">
+				Instance $meta operations on JPA server did not previously return the
+				resource version and lastUpdated time
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

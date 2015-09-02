@@ -143,7 +143,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public ResourceTag addTag(TagDefinition theTag) {
 		ResourceTag tag = new ResourceTag(this, theTag);
-		tag.setResourceType(getResourceType());
 		getTags().add(tag);
 		return tag;
 	}

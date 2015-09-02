@@ -230,8 +230,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testCreateOperationOutcome() {
 		/*
-		 * If any of this ever fails, it means that one of the OperationOutcome issue severity codes has changed code
-		 * value across versions. We store the string as a constant, so something will need to be fixed.
+		 * If any of this ever fails, it means that one of the OperationOutcome issue severity codes has changed code value across versions. We store the string as a constant, so something will need to
+		 * be fixed.
 		 */
 		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_ERROR);
 		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.ERROR.getCode(), BaseHapiFhirResourceDao.OO_SEVERITY_ERROR);
@@ -311,7 +311,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("Hello");
 		p.getManagingOrganization().setReference("Organization/");
-		
+
 		try {
 			myPatientDao.create(p);
 			fail();
@@ -325,12 +325,12 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("Hello");
 		p.getManagingOrganization().setReference("Blah/123");
-		
+
 		try {
 			myPatientDao.create(p);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Does not contain resource ID"));
+			assertThat(e.getMessage(), containsString("Resource type is unknown"));
 		}
 	}
 
@@ -339,7 +339,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("Hello");
 		p.getManagingOrganization().setReference("123");
-		
+
 		try {
 			myPatientDao.create(p);
 			fail();
@@ -348,8 +348,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
-	
-	
 	@Test
 	public void testCreateWithIfNoneExistBasic() {
 		String methodName = "testCreateWithIfNoneExistBasic";
@@ -1109,6 +1107,141 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	public void testInstanceMetaOperations() {
+		String methodName = "testMetaRead";
+		IIdType id;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
+			TagList tagList = new TagList();
+			tagList.addTag("tag_scheme1", "tag_code1", "tag_display1");
+			tagList.addTag("tag_scheme2", "tag_code2", "tag_display2");
+			ResourceMetadataKeyEnum.TAG_LIST.put(patient, tagList);
+
+			List<BaseCodingDt> securityLabels = new ArrayList<BaseCodingDt>();
+			securityLabels.add(new CodingDt().setSystem("seclabel_sys1").setCode("seclabel_code1").setDisplay("seclabel_dis1"));
+			securityLabels.add(new CodingDt().setSystem("seclabel_sys2").setCode("seclabel_code2").setDisplay("seclabel_dis2"));
+			ResourceMetadataKeyEnum.SECURITY_LABELS.put(patient, securityLabels);
+
+			ArrayList<IdDt> profiles = new ArrayList<IdDt>();
+			profiles.add(new IdDt("http://profile/1"));
+			profiles.add(new IdDt("http://profile/2"));
+			ResourceMetadataKeyEnum.PROFILES.put(patient, profiles);
+
+			id = myPatientDao.create(patient).getId();
+		}
+		
+		assertTrue(id.hasVersionIdPart());
+		
+		/*
+		 * Create a second version
+		 */
+		
+		Patient pt = myPatientDao.read(id);
+		pt.addName().addFamily("anotherName");
+		myPatientDao.update(pt);
+		
+		/*
+		 * Meta-Delete on previous version
+		 */
+		
+		MetaDt meta = new MetaDt();
+		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
+		meta.addProfile("http://profile/1");
+		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
+		MetaDt newMeta = myPatientDao.metaDeleteOperation(id.withVersion("1"), meta);
+		assertEquals(1, newMeta.getProfile().size());
+		assertEquals(1, newMeta.getSecurity().size());
+		assertEquals(1, newMeta.getTag().size());
+		assertEquals("tag_code2", newMeta.getTag().get(0).getCode());
+		assertEquals("http://profile/2", newMeta.getProfile().get(0).getValue());
+		assertEquals("seclabel_code2", newMeta.getSecurity().get(0).getCode());
+		
+		/*
+		 * Meta Read on Version
+		 */
+		
+		meta = myPatientDao.metaGetOperation(id.withVersion("1"));
+		assertEquals(1, meta.getProfile().size());
+		assertEquals(1, meta.getSecurity().size());
+		assertEquals(1, meta.getTag().size());
+		assertEquals("tag_code2", meta.getTag().get(0).getCode());
+		assertEquals("http://profile/2", meta.getProfile().get(0).getValue());
+		assertEquals("seclabel_code2", meta.getSecurity().get(0).getCode());
+		
+		/*
+		 * Meta-read on Version 2
+		 */
+		meta = myPatientDao.metaGetOperation(id.withVersion("2"));
+		assertEquals(2, meta.getProfile().size());
+		assertEquals(2, meta.getSecurity().size());
+		assertEquals(2, meta.getTag().size());
+
+		/*
+		 * Meta-read on latest version
+		 */
+		meta = myPatientDao.metaGetOperation(id.toVersionless());
+		assertEquals(2, meta.getProfile().size());
+		assertEquals(2, meta.getSecurity().size());
+		assertEquals(2, meta.getTag().size());
+		assertEquals("2", meta.getVersionId());
+
+		/*
+		 * Meta-Add on previous version
+		 */
+		
+		meta = new MetaDt();
+		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
+		meta.addProfile("http://profile/1");
+		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
+		newMeta = myPatientDao.metaAddOperation(id.withVersion("1"), meta);
+		assertEquals(2, newMeta.getProfile().size());
+		assertEquals(2, newMeta.getSecurity().size());
+		assertEquals(2, newMeta.getTag().size());
+		
+		/*
+		 * Meta Read on Version
+		 */
+		
+		meta = myPatientDao.metaGetOperation(id.withVersion("1"));
+		assertEquals(2, meta.getProfile().size());
+		assertEquals(2, meta.getSecurity().size());
+		assertEquals(2, meta.getTag().size());
+		assertEquals("1", meta.getVersionId());
+
+		/*
+		 * Meta delete on latest
+		 */
+
+		meta = new MetaDt();
+		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
+		meta.addProfile("http://profile/1");
+		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
+		newMeta = myPatientDao.metaDeleteOperation(id.toVersionless(), meta);
+		assertEquals(1, newMeta.getProfile().size());
+		assertEquals(1, newMeta.getSecurity().size());
+		assertEquals(1, newMeta.getTag().size());
+		assertEquals("tag_code2", newMeta.getTag().get(0).getCode());
+		assertEquals("http://profile/2", newMeta.getProfile().get(0).getValue());
+		assertEquals("seclabel_code2", newMeta.getSecurity().get(0).getCode());
+
+		/*
+		 * Meta-Add on latest version
+		 */
+		
+		meta = new MetaDt();
+		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
+		meta.addProfile("http://profile/1");
+		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
+		newMeta = myPatientDao.metaAddOperation(id.toVersionless(), meta);
+		assertEquals(2, newMeta.getProfile().size());
+		assertEquals(2, newMeta.getSecurity().size());
+		assertEquals(2, newMeta.getTag().size());
+		assertEquals("2", meta.getVersionId());
+		
+	}
+
+	@Test
 	public void testResourceInstanceMetaOperation() {
 
 		String methodName = "testResourceInstanceMetaOperation";
@@ -1369,7 +1502,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals(Patient.class, results.get(1).getClass());
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get((IResource) results.get(1)));
 	}
-
 
 	@Test
 	public void testSortByDate() {
@@ -1841,5 +1973,4 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
-	
 }

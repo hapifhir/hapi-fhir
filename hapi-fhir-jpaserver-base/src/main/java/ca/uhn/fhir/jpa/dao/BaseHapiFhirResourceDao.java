@@ -1733,9 +1733,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		}
 
 		myEntityManager.merge(entity);
-
+		myEntityManager.flush();
+		
 		ourLog.info("Processed metaDeleteOperation on {} in {}ms", new Object[] { theResourceId.getValue(), w.getMillisAndRestart() });
-
+		
 		return metaGetOperation(theResourceId);
 	}
 
@@ -1761,16 +1762,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, getResourceName());
 		notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
 
-		Long pid = super.translateForcedIdToPid(theId);
+		Set<TagDefinition> tagDefs = new HashSet<TagDefinition>();
+		BaseHasResource entity = readEntity(theId);
+		for (BaseTag next : entity.getTags()) {
+			tagDefs.add(next.getTag());
+		}
+		MetaDt retVal = super.toMetaDt(tagDefs);
 
-		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type AND t.myResourceId = :res_id)";
-		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
-		q.setParameter("res_type", myResourceName);
-		q.setParameter("res_id", pid);
-		List<TagDefinition> tagDefinitions = q.getResultList();
-
-		MetaDt retVal = super.toMetaDt(tagDefinitions);
-
+		retVal.setLastUpdated(entity.getUpdated());
+		retVal.setVersionId(Long.toString(entity.getVersion()));
+		
 		return retVal;
 	}
 

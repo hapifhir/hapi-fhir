@@ -870,7 +870,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
-	protected MetaDt toMetaDt(List<TagDefinition> tagDefinitions) {
+	protected MetaDt toMetaDt(Collection<TagDefinition> tagDefinitions) {
 		MetaDt retVal = new MetaDt();
 		for (TagDefinition next : tagDefinitions) {
 			switch (next.getTagType()) {
