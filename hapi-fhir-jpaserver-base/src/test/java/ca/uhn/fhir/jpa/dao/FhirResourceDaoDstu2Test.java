@@ -330,7 +330,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			myPatientDao.create(p);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Resource type is unknown"));
+			assertThat(e.getMessage(), containsString("Invalid resource reference"));
 		}
 	}
 
