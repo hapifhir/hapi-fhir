@@ -40,17 +40,18 @@
 			</p>			
 			<p>
 				There are two implementations of <code>IParserErrorHandler</code> worth 
-				mentioning.
+				mentioning. You can also supply your own implementation if you want.
 			</p>
 			<ul>
-				<ul>
+				<li>
 					<a href="./apidocs/ca/uhn/fhir/parser/LenientErrorHandler.html">LenientErrorHandler</a>
-					logs any errors but does not abort parsing. This is the default.
-				</ul>
-				<ul>
+					logs any errors but does not abort parsing. By default this handler is used, and it
+					logs errors at "warning" level. It can also be configured to silently ignore issues.
+				</li>
+				<li>
 					<a href="./apidocs/ca/uhn/fhir/parser/StrictErrorHandler.html">StrictErrorHandler</a>
 					throws a <code>DataFormatException</code> if any errors are detected.
-				</ul>
+				</li>
 			</ul>
 			
 			<p>
@@ -82,37 +83,39 @@
 
 		<!-- RESOURCE VALIDATION -->
 
-		<section name="Resource Validation">
+		<section name="Resource Validation (Schema/Schematron)">
 
 			<p>
 				HAPI provides a built-in and configurable mechanism for validating resources.
-				This mechanism is called the <i>FHIR Validator</i>.
+				This mechanism is called the <i>Resource Validator</i>.
 			</p>
 
-			<subsection name="Background">
-				
-				<p>
-					FHIR resource definitions are distributed with a set of XML schema files (XSD)
-					as well as a set of XML Schematron (SCH) files. These two sets of files are
-					complimentary to each other, meaning that in order to claim compliance to the
-					FHIR specification, your resources must validate against both sets.
-				</p>
-				<p>
-					The two sets of files are included with HAPI, and it uses them to perform
-					validation.
-				</p>
-				
-			</subsection>
-			
+			<p>
+				FHIR resource definitions are distributed with a set of XML schema files (XSD)
+				as well as a set of XML Schematron (SCH) files. These two sets of files are
+				complimentary to each other, meaning that in order to claim compliance to the
+				FHIR specification, your resources must validate against both sets.
+			</p>
+			<p>
+				The two sets of files are included with HAPI, and it uses them to perform
+				validation.
+			</p>
+
 			<subsection name="Preparation">
 				
 				<p>
 					In order to use HAPI's Schematron support, a libaray called 
 					<a href="https://code.google.com/p/phloc-schematron/">Phloc-Schematron</a>
-					is used, so this library must be added to your classpath (or Maven pom file).
-					See <a href="./download.html">Downloads</a> for more information.
+					is used, so this library must be added to your classpath (or Maven POM file, Gradle
+					file, etc.)
+					Note that this library is specified as an optional dependency by HAPI FHIR
+					so you need to explicitly include it if you want to use this
+					functionality. 
 				</p>
-				
+				<p>
+					See <a href="./download.html">Downloads</a> for more information on how
+					to add it.
+				</p>
 			</subsection>
 			
 			<subsection name="Validating a Resource">
@@ -142,6 +145,46 @@
 						
 			</subsection>
 
+		<a name="structure_definition_validation"/>
+		</section>
+		
+		<section name="Resource Validation (StructureDefinition / ValueSet)">
+			
+			<p>
+				As of HAPI FHIR 1.2, HAPI supports validation against StructureDefinition
+				resources. This functionality uses the HL7 "InstanceValidator", which is able
+				to check a resource for conformance to a given profile (StructureDefinition),
+				including validating codes for conformance to their given ValueSets. 
+			</p>
+			<p>
+				StructureDefinition validation can be used to validate a resource against the
+				official structure definitions (produced by HL7) as well as against custom
+				definitions provided either by HL7 or by the user.
+			</p>
+			
+			<subsection name="Preparation">
+				
+				<p>
+					To use this functionality, you must add the following two dependencies
+					to your classpath (or Maven POM file, Gradle file, etc.): 
+				</p>
+				<ul>
+					<li>
+						<b>hapi-fhir-structures-hl7org-dstu2</b>: This file contains the "reference implementation"
+						structures and tooling. You need to include it even if you are not using the RI model 
+						(the StructureDefinition validation will work against HAPI structures as well)
+					</li>
+					<li>
+						<b>hapi-fhir-validation-resources</b>: This file contains the official FHIR
+						StructureDefinition files, and the ValueSets needed to support them.
+					</li>
+				</ul>
+				<p>
+					See the <a href="./download.html">download page</a> for more information.
+				</p>
+
+			</subsection>
+			
 		</section>
 		
 	</body>

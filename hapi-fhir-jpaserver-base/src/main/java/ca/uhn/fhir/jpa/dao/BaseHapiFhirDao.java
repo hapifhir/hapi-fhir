@@ -210,7 +210,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					} catch (DataFormatException e) {
 						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - " + nextValue.getReference().getValue());
 					}
-					
+
 					Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
 					String id = nextValue.getReference().getIdPart();
 					if (StringUtils.isBlank(id)) {
@@ -271,6 +271,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	protected List<ResourceIndexedSearchParamUri> extractSearchParamUri(ResourceTable theEntity, IResource theResource) {
 		return mySearchParamExtractor.extractSearchParamUri(theEntity, theResource);
 	}
+
 	protected List<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IResource theResource) {
 		return mySearchParamExtractor.extractSearchParamCoords(theEntity, theResource);
 	}
@@ -591,7 +592,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		Set<TagDefinition> allDefs = new HashSet<TagDefinition>();
-		
+
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tagList != null) {
 			for (Tag next : tagList) {
@@ -610,8 +611,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.addTag(tag);
 				theEntity.setHasTags(true);
 			}
-		} 
-		
+		}
+
 		List<IdDt> profiles = ResourceMetadataKeyEnum.PROFILES.get(theResource);
 		if (profiles != null) {
 			for (IIdType next : profiles) {
@@ -621,18 +622,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setHasTags(true);
 			}
 		}
-		
-		
+
 		for (ResourceTag next : new ArrayList<ResourceTag>(theEntity.getTags())) {
 			TagDefinition nextDef = next.getTag();
 			if (!allDefs.contains(nextDef)) {
-				theEntity.getTags().remove(next);
+				if (shouldDroppedTagBeRemovedOnUpdate(theEntity, next)) {
+					theEntity.getTags().remove(next);
+				}
 			}
 		}
 		if (theEntity.getTags().size() == 0) {
 			theEntity.setHasTags(false);
 		}
-		
 
 		String title = ResourceMetadataKeyEnum.TITLE.get(theResource);
 		if (title != null && title.length() > BaseHasResource.MAX_TITLE_LENGTH) {
@@ -640,6 +641,29 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 		theEntity.setTitle(title);
 
+	}
+
+	/**
+	 * This method is called when an update to an existing resource detects that the resource supplied for update is
+	 * missing a tag/profile/security label that the currently persisted resource holds.
+	 * <p>
+	 * The default implementation removes any profile declarations, but leaves tags and security labels in place.
+	 * Subclasses may choose to override and change this behaviour.
+	 * </p>
+	 * 
+	 * @param theEntity
+	 *           The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
+	 * @param theTag
+	 *           The tag
+	 * @return Retturns <code>true</code> if the tag should be removed
+	 * @see <a href="http://hl7.org/fhir/2015Sep/resource.html#1.11.3.7">Updates to Tags, Profiles, and Security
+	 *      Labels</a> for a description of the logic that the default behaviour folows.
+	 */
+	protected boolean shouldDroppedTagBeRemovedOnUpdate(ResourceTable theEntity, ResourceTag theTag) {
+		if (theTag.getTag().getTagType() == TagTypeEnum.PROFILE) {
+			return true;
+		}
+		return false;
 	}
 
 	protected <R extends IResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType) {
@@ -1260,17 +1284,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	/**
-	 * This method is invoked immediately before storing a new resource, or an 
-	 * update to an existing resource to allow the DAO to ensure that it is valid
-	 * for persistence. By default, checks for the "subsetted" tag and rejects
-	 * resources which have it. Subclasses should call the superclass implementation to
-	 * preserve this check.
+	 * This method is invoked immediately before storing a new resource, or an update to an existing resource to allow
+	 * the DAO to ensure that it is valid for persistence. By default, checks for the "subsetted" tag and rejects
+	 * resources which have it. Subclasses should call the superclass implementation to preserve this check.
 	 * 
 	 * @param theResource
 	 *           The resource that is about to be persisted
 	 */
 	protected void validateResourceForStorage(T theResource) {
-		IResource res = (IResource)theResource;
+		IResource res = (IResource) theResource;
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(res);
 		if (tagList != null) {
 			Tag tag = tagList.getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);

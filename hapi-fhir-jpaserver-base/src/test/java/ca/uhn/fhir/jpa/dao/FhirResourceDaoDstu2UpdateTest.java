@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.not;
@@ -17,9 +18,8 @@ import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -27,10 +27,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -166,6 +168,62 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		myPatientDao.update(p);
 	}
 
+	/**
+	 * Per the spec, update should preserve tags and security labels but not profiles
+	 */
+	@Test
+	public void testUpdateMaintainsTagsAndSecurityLabels() throws InterruptedException {
+		String methodName = "testUpdateMaintainsTagsAndSecurityLabels";
+
+		IIdType p1id;
+		{
+			Patient p1 = new Patient();
+			p1.addName().addFamily(methodName);
+
+			TagList tagList = new TagList();
+			tagList.addTag("tag_scheme1", "tag_term1");
+			ResourceMetadataKeyEnum.TAG_LIST.put(p1, tagList);
+			List<BaseCodingDt> secList = new ArrayList<BaseCodingDt>();
+			secList.add(new CodingDt("sec_scheme1", "sec_term1"));
+			ResourceMetadataKeyEnum.SECURITY_LABELS.put(p1, secList);
+			List<IdDt> profileList = new ArrayList<IdDt>();
+			profileList.add(new IdDt("http://foo1"));
+			ResourceMetadataKeyEnum.PROFILES.put(p1, profileList);
+
+			p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient p1 = new Patient();
+			p1.setId(p1id);
+			p1.addName().addFamily(methodName);
+
+			TagList tagList = new TagList();
+			tagList.addTag("tag_scheme2", "tag_term2");
+			ResourceMetadataKeyEnum.TAG_LIST.put(p1, tagList);
+			List<BaseCodingDt> secList = new ArrayList<BaseCodingDt>();
+			secList.add(new CodingDt("sec_scheme2", "sec_term2"));
+			ResourceMetadataKeyEnum.SECURITY_LABELS.put(p1, secList);
+			List<IdDt> profileList = new ArrayList<IdDt>();
+			profileList.add(new IdDt("http://foo2"));
+			ResourceMetadataKeyEnum.PROFILES.put(p1, profileList);
+
+			myPatientDao.update(p1);
+		}
+		{
+			Patient p1 = myPatientDao.read(p1id);
+			TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(p1);
+			assertThat(tagList, containsInAnyOrder(new Tag("tag_scheme1", "tag_term1"), new Tag("tag_scheme2", "tag_term2")));
+			List<BaseCodingDt> secList = ResourceMetadataKeyEnum.SECURITY_LABELS.get(p1);
+			Set<String> secListValues = new HashSet<String>();
+			for (BaseCodingDt next : secList) {
+				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
+			}
+			assertThat(secListValues, containsInAnyOrder("sec_scheme1|sec_term1", "sec_scheme2|sec_term2"));
+			List<IdDt> profileList = ResourceMetadataKeyEnum.PROFILES.get(p1);
+			assertThat(profileList, contains(new IdDt("http://foo2"))); // no foo1
+		}
+	}
+
 	@Test
 	public void testUpdateMaintainsSearchParams() throws InterruptedException {
 		Patient p1 = new Patient();
@@ -236,13 +294,13 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		{
 			Patient patient = new Patient();
 			patient.addName().addFamily(name);
-			
+
 			List<IdDt> tl = new ArrayList<IdDt>();
 			tl.add(new IdDt("http://foo/bar"));
 			tl.add(new IdDt("http://foo/bar"));
 			tl.add(new IdDt("http://foo/bar"));
 			ResourceMetadataKeyEnum.PROFILES.put(patient, tl);
-			
+
 			id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 		}
 
@@ -255,7 +313,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		}
 
 	}
-	
+
 	@Test
 	public void testUpdateModifiesProfiles() {
 		String name = "testUpdateModifiesProfiles";
@@ -263,11 +321,11 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		{
 			Patient patient = new Patient();
 			patient.addName().addFamily(name);
-			
+
 			List<IdDt> tl = new ArrayList<IdDt>();
 			tl.add(new IdDt("http://foo/bar"));
 			ResourceMetadataKeyEnum.PROFILES.put(patient, tl);
-			
+
 			id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 		}
 
@@ -284,11 +342,11 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 			Patient patient = new Patient();
 			patient.setId(id);
 			patient.addName().addFamily(name);
-			
+
 			List<IdDt> tl = new ArrayList<IdDt>();
 			tl.add(new IdDt("http://foo/baz"));
 			ResourceMetadataKeyEnum.PROFILES.put(patient, tl);
-			
+
 			id = myPatientDao.update(patient).getId().toUnqualifiedVersionless();
 		}
 
@@ -300,10 +358,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 			assertEquals("http://foo/baz", tl.get(0).getValue());
 		}
 
-		
 	}
-
-	
 
 	@Test
 	public void testUpdateUnknownNumericIdFails() {
