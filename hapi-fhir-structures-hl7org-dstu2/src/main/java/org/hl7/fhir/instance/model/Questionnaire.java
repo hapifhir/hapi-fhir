@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -399,14 +399,14 @@ public class Questionnaire extends DomainResource {
         /**
          * The human-readable name for this section of the questionnaire.
          */
-        @Child(name = "title", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "title", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name to be displayed for group", formalDefinition="The human-readable name for this section of the questionnaire." )
         protected StringType title;
 
         /**
          * Identifies a how this group of questions is known in a particular terminology such as LOINC.
          */
-        @Child(name = "concept", type = {Coding.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "concept", type = {Coding.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Concept that represents this section on a questionnaire", formalDefinition="Identifies a how this group of questions is known in a particular terminology such as LOINC." )
         protected List<Coding> concept;
 
@@ -938,13 +938,20 @@ public class Questionnaire extends DomainResource {
         protected ValueSet optionsTarget;
 
         /**
+         * For a "choice" question, identifies one of the permitted answers for the question.
+         */
+        @Child(name = "option", type = {Coding.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Permitted answer", formalDefinition="For a \"choice\" question, identifies one of the permitted answers for the question." )
+        protected List<Coding> option;
+
+        /**
          * Nested group, containing nested question for this question. The order of groups within the question is relevant.
          */
-        @Child(name = "group", type = {GroupComponent.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "group", type = {GroupComponent.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Nested questionnaire group", formalDefinition="Nested group, containing nested question for this question. The order of groups within the question is relevant." )
         protected List<GroupComponent> group;
 
-        private static final long serialVersionUID = 1655002985L;
+        private static final long serialVersionUID = -1078951042L;
 
     /*
      * Constructor
@@ -1275,6 +1282,46 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
+         * @return {@link #option} (For a "choice" question, identifies one of the permitted answers for the question.)
+         */
+        public List<Coding> getOption() { 
+          if (this.option == null)
+            this.option = new ArrayList<Coding>();
+          return this.option;
+        }
+
+        public boolean hasOption() { 
+          if (this.option == null)
+            return false;
+          for (Coding item : this.option)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #option} (For a "choice" question, identifies one of the permitted answers for the question.)
+         */
+    // syntactic sugar
+        public Coding addOption() { //3
+          Coding t = new Coding();
+          if (this.option == null)
+            this.option = new ArrayList<Coding>();
+          this.option.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public QuestionComponent addOption(Coding t) { //3
+          if (t == null)
+            return this;
+          if (this.option == null)
+            this.option = new ArrayList<Coding>();
+          this.option.add(t);
+          return this;
+        }
+
+        /**
          * @return {@link #group} (Nested group, containing nested question for this question. The order of groups within the question is relevant.)
          */
         public List<GroupComponent> getGroup() { 
@@ -1323,6 +1370,7 @@ public class Questionnaire extends DomainResource {
           childrenList.add(new Property("required", "boolean", "If true, indicates that the question must be answered and have required groups within it also present.  If false, the question and any contained groups may be skipped when answering the questionnaire.", 0, java.lang.Integer.MAX_VALUE, required));
           childrenList.add(new Property("repeats", "boolean", "If true, the question may have more than one answer.", 0, java.lang.Integer.MAX_VALUE, repeats));
           childrenList.add(new Property("options", "Reference(ValueSet)", "Reference to a valueset containing the a list of codes representing permitted answers for the question.", 0, java.lang.Integer.MAX_VALUE, options));
+          childrenList.add(new Property("option", "Coding", "For a \"choice\" question, identifies one of the permitted answers for the question.", 0, java.lang.Integer.MAX_VALUE, option));
           childrenList.add(new Property("group", "@Questionnaire.group", "Nested group, containing nested question for this question. The order of groups within the question is relevant.", 0, java.lang.Integer.MAX_VALUE, group));
         }
 
@@ -1340,6 +1388,11 @@ public class Questionnaire extends DomainResource {
         dst.required = required == null ? null : required.copy();
         dst.repeats = repeats == null ? null : repeats.copy();
         dst.options = options == null ? null : options.copy();
+        if (option != null) {
+          dst.option = new ArrayList<Coding>();
+          for (Coding i : option)
+            dst.option.add(i.copy());
+        };
         if (group != null) {
           dst.group = new ArrayList<GroupComponent>();
           for (GroupComponent i : group)
@@ -1357,7 +1410,8 @@ public class Questionnaire extends DomainResource {
         QuestionComponent o = (QuestionComponent) other;
         return compareDeep(linkId, o.linkId, true) && compareDeep(concept, o.concept, true) && compareDeep(text, o.text, true)
            && compareDeep(type, o.type, true) && compareDeep(required, o.required, true) && compareDeep(repeats, o.repeats, true)
-           && compareDeep(options, o.options, true) && compareDeep(group, o.group, true);
+           && compareDeep(options, o.options, true) && compareDeep(option, o.option, true) && compareDeep(group, o.group, true)
+          ;
       }
 
       @Override
@@ -1374,8 +1428,8 @@ public class Questionnaire extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (linkId == null || linkId.isEmpty()) && (concept == null || concept.isEmpty())
            && (text == null || text.isEmpty()) && (type == null || type.isEmpty()) && (required == null || required.isEmpty())
-           && (repeats == null || repeats.isEmpty()) && (options == null || options.isEmpty()) && (group == null || group.isEmpty())
-          ;
+           && (repeats == null || repeats.isEmpty()) && (options == null || options.isEmpty()) && (option == null || option.isEmpty())
+           && (group == null || group.isEmpty());
       }
 
   }
@@ -1432,7 +1486,7 @@ public class Questionnaire extends DomainResource {
     /**
      * A collection of related questions (or further groupings of questions).
      */
-    @Child(name = "group", type = {}, order=7, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "group", type = {}, order=7, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Grouped questions", formalDefinition="A collection of related questions (or further groupings of questions)." )
     protected GroupComponent group;
 

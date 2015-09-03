@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -221,11 +221,11 @@ public class List_ extends DomainResource {
     @Block()
     public static class ListEntryComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The flag allows the system constructing the list to make one or more statements about the role and significance of the item in the list.
+         * The flag allows the system constructing the list to indicate the role and significance of the item in the list.
          */
-        @Child(name = "flag", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Workflow information about this item", formalDefinition="The flag allows the system constructing the list to make one or more statements about the role and significance of the item in the list." )
-        protected List<CodeableConcept> flag;
+        @Child(name = "flag", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Status/Workflow information about this item", formalDefinition="The flag allows the system constructing the list to indicate the role and significance of the item in the list." )
+        protected CodeableConcept flag;
 
         /**
          * True if this item is marked as deleted in the list.
@@ -253,7 +253,7 @@ public class List_ extends DomainResource {
          */
         protected Resource itemTarget;
 
-        private static final long serialVersionUID = -27973283L;
+        private static final long serialVersionUID = -758164425L;
 
     /*
      * Constructor
@@ -271,42 +271,26 @@ public class List_ extends DomainResource {
       }
 
         /**
-         * @return {@link #flag} (The flag allows the system constructing the list to make one or more statements about the role and significance of the item in the list.)
+         * @return {@link #flag} (The flag allows the system constructing the list to indicate the role and significance of the item in the list.)
          */
-        public List<CodeableConcept> getFlag() { 
+        public CodeableConcept getFlag() { 
           if (this.flag == null)
-            this.flag = new ArrayList<CodeableConcept>();
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ListEntryComponent.flag");
+            else if (Configuration.doAutoCreate())
+              this.flag = new CodeableConcept(); // cc
           return this.flag;
         }
 
         public boolean hasFlag() { 
-          if (this.flag == null)
-            return false;
-          for (CodeableConcept item : this.flag)
-            if (!item.isEmpty())
-              return true;
-          return false;
+          return this.flag != null && !this.flag.isEmpty();
         }
 
         /**
-         * @return {@link #flag} (The flag allows the system constructing the list to make one or more statements about the role and significance of the item in the list.)
+         * @param value {@link #flag} (The flag allows the system constructing the list to indicate the role and significance of the item in the list.)
          */
-    // syntactic sugar
-        public CodeableConcept addFlag() { //3
-          CodeableConcept t = new CodeableConcept();
-          if (this.flag == null)
-            this.flag = new ArrayList<CodeableConcept>();
-          this.flag.add(t);
-          return t;
-        }
-
-    // syntactic sugar
-        public ListEntryComponent addFlag(CodeableConcept t) { //3
-          if (t == null)
-            return this;
-          if (this.flag == null)
-            this.flag = new ArrayList<CodeableConcept>();
-          this.flag.add(t);
+        public ListEntryComponent setFlag(CodeableConcept value) { 
+          this.flag = value;
           return this;
         }
 
@@ -445,7 +429,7 @@ public class List_ extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("flag", "CodeableConcept", "The flag allows the system constructing the list to make one or more statements about the role and significance of the item in the list.", 0, java.lang.Integer.MAX_VALUE, flag));
+          childrenList.add(new Property("flag", "CodeableConcept", "The flag allows the system constructing the list to indicate the role and significance of the item in the list.", 0, java.lang.Integer.MAX_VALUE, flag));
           childrenList.add(new Property("deleted", "boolean", "True if this item is marked as deleted in the list.", 0, java.lang.Integer.MAX_VALUE, deleted));
           childrenList.add(new Property("date", "dateTime", "When this item was added to the list.", 0, java.lang.Integer.MAX_VALUE, date));
           childrenList.add(new Property("item", "Reference(Any)", "A reference to the actual resource from which data was derived.", 0, java.lang.Integer.MAX_VALUE, item));
@@ -454,11 +438,7 @@ public class List_ extends DomainResource {
       public ListEntryComponent copy() {
         ListEntryComponent dst = new ListEntryComponent();
         copyValues(dst);
-        if (flag != null) {
-          dst.flag = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : flag)
-            dst.flag.add(i.copy());
-        };
+        dst.flag = flag == null ? null : flag.copy();
         dst.deleted = deleted == null ? null : deleted.copy();
         dst.date = date == null ? null : date.copy();
         dst.item = item == null ? null : item.copy();

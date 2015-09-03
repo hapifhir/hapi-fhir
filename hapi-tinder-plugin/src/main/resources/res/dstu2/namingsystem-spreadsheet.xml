@@ -16,8 +16,8 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>12975</WindowHeight>
-  <WindowWidth>28800</WindowWidth>
+  <WindowHeight>8400</WindowHeight>
+  <WindowWidth>19170</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>1</ActiveSheet>
@@ -984,7 +984,7 @@
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">infrastructure</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String">conformance.terminology</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1002,7 +1002,8 @@
     <Cell ss:StyleID="s82"><Data ss:Type="String">N/A</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s83"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s82"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">0;0</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s84"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s85"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
@@ -1136,9 +1137,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">right</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="23" ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
@@ -1169,7 +1168,8 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">400;20</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
@@ -1467,7 +1467,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">down</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">400;120</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3731,9 +3731,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>16</TopRowBottomPane>
+   <TopRowBottomPane>4</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>6</LeftColumnRightPane>
+   <LeftColumnRightPane>14</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -3749,8 +3749,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>17</ActiveRow>
-     <ActiveCol>16</ActiveCol>
+     <ActiveRow>5</ActiveRow>
+     <ActiveCol>20</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4371,7 +4371,7 @@
     <Cell ss:Index="7" ss:StyleID="s86"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s117"><Data ss:Type="String">idtype</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">id-type</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"><Data ss:Type="String">NamingSystem.uniqueId.type</Data></Cell>
@@ -4419,7 +4419,7 @@
     <Cell ss:Index="7" ss:StyleID="s86"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s117"><Data ss:Type="String">replacedby</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">replaced-by</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"><Data ss:Type="String">NamingSystem.replacedBy</Data></Cell>
@@ -4527,9 +4527,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>5</ActiveRow>
+     <ActiveRow>14</ActiveRow>
      <ActiveCol>0</ActiveCol>
-     <RangeSelection>R6</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -5768,7 +5767,7 @@
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Examples!R1C1:R2C7"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="41" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="43" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s138" ss:DefaultColumnWidth="260.25"
    ss:DefaultRowHeight="15">
    <Column ss:StyleID="s138" ss:Width="88.5"/>
@@ -5812,7 +5811,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s78"><Data ss:Type="String">xml</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s80"><Data ss:Type="String">Example of how to use Naming System</Data><NamedCell
+    <Cell ss:StyleID="s80"><Data ss:Type="String">Example of how to use Naming System for a code system</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s78"><Data ss:Type="String">example</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -5820,6 +5819,24 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s129"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s141"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s142"><Data ss:Type="String">namingsystem-example-id</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">xml</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Example of naming system for an identifier</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">example-id</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">namingsystem-example-id.xml</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+    <Cell ss:StyleID="s143"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s142"><Data ss:Type="String">namingsystem-example-replaced</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">xml</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Example of a deprecated naming system</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">example-replaced</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">namingsystem-example-replaced.xml</Data></Cell>
+    <Cell ss:StyleID="s132"/>
+    <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s142"><Data ss:Type="String">namingsystem-registry</Data></Cell>
@@ -6191,7 +6208,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
+     <ActiveRow>2</ActiveRow>
      <ActiveCol>4</ActiveCol>
     </Pane>
    </Panes>

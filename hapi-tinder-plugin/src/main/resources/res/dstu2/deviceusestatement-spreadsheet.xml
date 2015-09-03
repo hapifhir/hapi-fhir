@@ -1074,7 +1074,7 @@ See wiki for guidance</Font>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s79">
-					<Data ss:Type="String">clinical</Data>
+					<Data ss:Type="String">workflow.order</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s79">

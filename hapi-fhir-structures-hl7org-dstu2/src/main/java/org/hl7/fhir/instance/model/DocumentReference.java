@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -317,6 +317,148 @@ public class DocumentReference extends DomainResource {
   }
 
     @Block()
+    public static class DocumentReferenceContentComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The document or url to the document along with critical metadata to prove content has integrity.
+         */
+        @Child(name = "attachment", type = {Attachment.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Where to access the document", formalDefinition="The document or url to the document along with critical metadata to prove content has integrity." )
+        protected Attachment attachment;
+
+        /**
+         * An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.
+         */
+        @Child(name = "format", type = {Coding.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Format/content rules for the document", formalDefinition="An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType." )
+        protected List<Coding> format;
+
+        private static final long serialVersionUID = -1412643085L;
+
+    /*
+     * Constructor
+     */
+      public DocumentReferenceContentComponent() {
+        super();
+      }
+
+    /*
+     * Constructor
+     */
+      public DocumentReferenceContentComponent(Attachment attachment) {
+        super();
+        this.attachment = attachment;
+      }
+
+        /**
+         * @return {@link #attachment} (The document or url to the document along with critical metadata to prove content has integrity.)
+         */
+        public Attachment getAttachment() { 
+          if (this.attachment == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DocumentReferenceContentComponent.attachment");
+            else if (Configuration.doAutoCreate())
+              this.attachment = new Attachment(); // cc
+          return this.attachment;
+        }
+
+        public boolean hasAttachment() { 
+          return this.attachment != null && !this.attachment.isEmpty();
+        }
+
+        /**
+         * @param value {@link #attachment} (The document or url to the document along with critical metadata to prove content has integrity.)
+         */
+        public DocumentReferenceContentComponent setAttachment(Attachment value) { 
+          this.attachment = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #format} (An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.)
+         */
+        public List<Coding> getFormat() { 
+          if (this.format == null)
+            this.format = new ArrayList<Coding>();
+          return this.format;
+        }
+
+        public boolean hasFormat() { 
+          if (this.format == null)
+            return false;
+          for (Coding item : this.format)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #format} (An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.)
+         */
+    // syntactic sugar
+        public Coding addFormat() { //3
+          Coding t = new Coding();
+          if (this.format == null)
+            this.format = new ArrayList<Coding>();
+          this.format.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public DocumentReferenceContentComponent addFormat(Coding t) { //3
+          if (t == null)
+            return this;
+          if (this.format == null)
+            this.format = new ArrayList<Coding>();
+          this.format.add(t);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("attachment", "Attachment", "The document or url to the document along with critical metadata to prove content has integrity.", 0, java.lang.Integer.MAX_VALUE, attachment));
+          childrenList.add(new Property("format", "Coding", "An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.", 0, java.lang.Integer.MAX_VALUE, format));
+        }
+
+      public DocumentReferenceContentComponent copy() {
+        DocumentReferenceContentComponent dst = new DocumentReferenceContentComponent();
+        copyValues(dst);
+        dst.attachment = attachment == null ? null : attachment.copy();
+        if (format != null) {
+          dst.format = new ArrayList<Coding>();
+          for (Coding i : format)
+            dst.format.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof DocumentReferenceContentComponent))
+          return false;
+        DocumentReferenceContentComponent o = (DocumentReferenceContentComponent) other;
+        return compareDeep(attachment, o.attachment, true) && compareDeep(format, o.format, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof DocumentReferenceContentComponent))
+          return false;
+        DocumentReferenceContentComponent o = (DocumentReferenceContentComponent) other;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && (attachment == null || attachment.isEmpty()) && (format == null || format.isEmpty())
+          ;
+      }
+
+  }
+
+    @Block()
     public static class DocumentReferenceContextComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Describes the clinical encounter or type of care that the document content is associated with.
@@ -362,7 +504,7 @@ public class DocumentReference extends DomainResource {
          * The Patient Information as known when the document was published. May be a reference to a version specific, or contained.
          */
         @Child(name = "sourcePatientInfo", type = {Patient.class}, order=6, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Source patient info", formalDefinition="The Patient Information as known when the document was published. May be a reference to a version specific, or contained." )
+        @Description(shortDefinition="Patient demographics from source", formalDefinition="The Patient Information as known when the document was published. May be a reference to a version specific, or contained." )
         protected Reference sourcePatientInfo;
 
         /**
@@ -696,7 +838,7 @@ public class DocumentReference extends DomainResource {
          * Related identifier to this DocumentReference. If both id and ref are present they shall refer to the same thing.
          */
         @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Related Identifier", formalDefinition="Related identifier to this DocumentReference. If both id and ref are present they shall refer to the same thing." )
+        @Description(shortDefinition="Identifer of related objects or events", formalDefinition="Related identifier to this DocumentReference. If both id and ref are present they shall refer to the same thing." )
         protected Identifier identifier;
 
         /**
@@ -851,30 +993,23 @@ public class DocumentReference extends DomainResource {
     protected Resource subjectTarget;
 
     /**
-     * Specifies the particular kind of document. This usually equates to the purpose of making the document. It is recommended that the value Set be drawn from a coding scheme providing a fine level of granularity such as LOINC.  (e.g. Patient Summary, Discharge Summary, Prescription, etc.).
+     * Specifies the particular kind of document referenced  (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the document referenced.
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=3, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Kind of document", formalDefinition="Specifies the particular kind of document. This usually equates to the purpose of making the document. It is recommended that the value Set be drawn from a coding scheme providing a fine level of granularity such as LOINC.  (e.g. Patient Summary, Discharge Summary, Prescription, etc.)." )
+    @Description(shortDefinition="Kind of document (LOINC if possible)", formalDefinition="Specifies the particular kind of document referenced  (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the document referenced." )
     protected CodeableConcept type;
 
     /**
-     * A categorization for the type of document - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.
+     * A categorization for the type of document referenced - helps for indexing and searching. This may be implied by or derived from the code specified in the DocumentReference.type.
      */
     @Child(name = "class", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Categorization of document", formalDefinition="A categorization for the type of document - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type." )
+    @Description(shortDefinition="Categorization of document", formalDefinition="A categorization for the type of document referenced - helps for indexing and searching. This may be implied by or derived from the code specified in the DocumentReference.type." )
     protected CodeableConcept class_;
-
-    /**
-     * An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.
-     */
-    @Child(name = "format", type = {Coding.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Format/content rules for the document", formalDefinition="An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType." )
-    protected List<Coding> format;
 
     /**
      * Identifies who is responsible for adding the information to the document.
      */
-    @Child(name = "author", type = {Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "author", type = {Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Who and/or what authored the document", formalDefinition="Identifies who is responsible for adding the information to the document." )
     protected List<Reference> author;
     /**
@@ -886,7 +1021,7 @@ public class DocumentReference extends DomainResource {
     /**
      * Identifies the organization or group who is responsible for ongoing maintenance of and access to the document.
      */
-    @Child(name = "custodian", type = {Organization.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "custodian", type = {Organization.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Org which maintains the document", formalDefinition="Identifies the organization or group who is responsible for ongoing maintenance of and access to the document." )
     protected Reference custodian;
 
@@ -898,7 +1033,7 @@ public class DocumentReference extends DomainResource {
     /**
      * Which person or organization authenticates that this document is valid.
      */
-    @Child(name = "authenticator", type = {Practitioner.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "authenticator", type = {Practitioner.class, Organization.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who/What authenticated the document", formalDefinition="Which person or organization authenticates that this document is valid." )
     protected Reference authenticator;
 
@@ -910,67 +1045,67 @@ public class DocumentReference extends DomainResource {
     /**
      * When the document was created.
      */
-    @Child(name = "created", type = {DateTimeType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "created", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Document creation time", formalDefinition="When the document was created." )
     protected DateTimeType created;
 
     /**
      * When the document reference was created.
      */
-    @Child(name = "indexed", type = {InstantType.class}, order=10, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "indexed", type = {InstantType.class}, order=9, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When this document reference created", formalDefinition="When the document reference was created." )
     protected InstantType indexed;
 
     /**
      * The status of this document reference.
      */
-    @Child(name = "status", type = {CodeType.class}, order=11, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=10, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="current | superseded | entered-in-error", formalDefinition="The status of this document reference." )
     protected Enumeration<DocumentReferenceStatus> status;
 
     /**
      * The status of the underlying document.
      */
-    @Child(name = "docStatus", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "docStatus", type = {CodeableConcept.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="preliminary | final | appended | amended | entered-in-error", formalDefinition="The status of the underlying document." )
     protected CodeableConcept docStatus;
 
     /**
      * Relationships that this document has with other document references that already exist.
      */
-    @Child(name = "relatesTo", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=true, summary=true)
+    @Child(name = "relatesTo", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=true, summary=true)
     @Description(shortDefinition="Relationships to other documents", formalDefinition="Relationships that this document has with other document references that already exist." )
     protected List<DocumentReferenceRelatesToComponent> relatesTo;
 
     /**
      * Human-readable description of the source document. This is sometimes known as the "title".
      */
-    @Child(name = "description", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Human-readable description (title)", formalDefinition="Human-readable description of the source document. This is sometimes known as the \"title\"." )
     protected StringType description;
 
     /**
      * A set of Security-Tag codes specifying the level of privacy/security of the Document. Note that DocumentReference.meta.security is the security labels of the reference to the document, while DocumentReference.securityLabel is the security labels on the document it refers to.
      */
-    @Child(name = "securityLabel", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "securityLabel", type = {CodeableConcept.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Document security-tags", formalDefinition="A set of Security-Tag codes specifying the level of privacy/security of the Document. Note that DocumentReference.meta.security is the security labels of the reference to the document, while DocumentReference.securityLabel is the security labels on the document it refers to." )
     protected List<CodeableConcept> securityLabel;
 
     /**
-     * The document or url to the document along with critical metadata to prove content has integrity.
+     * The document and format referenced. May be multiple content each with a different format.
      */
-    @Child(name = "content", type = {Attachment.class}, order=16, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Where to access the document", formalDefinition="The document or url to the document along with critical metadata to prove content has integrity." )
-    protected List<Attachment> content;
+    @Child(name = "content", type = {}, order=15, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Document referenced", formalDefinition="The document and format referenced. May be multiple content each with a different format." )
+    protected List<DocumentReferenceContentComponent> content;
 
     /**
      * The clinical context in which the document was prepared.
      */
-    @Child(name = "context", type = {}, order=17, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "context", type = {}, order=16, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Clinical context of document", formalDefinition="The clinical context in which the document was prepared." )
     protected DocumentReferenceContextComponent context;
 
-    private static final long serialVersionUID = 2074994054L;
+    private static final long serialVersionUID = -1009325322L;
 
   /*
    * Constructor
@@ -1093,7 +1228,7 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (Specifies the particular kind of document. This usually equates to the purpose of making the document. It is recommended that the value Set be drawn from a coding scheme providing a fine level of granularity such as LOINC.  (e.g. Patient Summary, Discharge Summary, Prescription, etc.).)
+     * @return {@link #type} (Specifies the particular kind of document referenced  (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the document referenced.)
      */
     public CodeableConcept getType() { 
       if (this.type == null)
@@ -1109,7 +1244,7 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @param value {@link #type} (Specifies the particular kind of document. This usually equates to the purpose of making the document. It is recommended that the value Set be drawn from a coding scheme providing a fine level of granularity such as LOINC.  (e.g. Patient Summary, Discharge Summary, Prescription, etc.).)
+     * @param value {@link #type} (Specifies the particular kind of document referenced  (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the document referenced.)
      */
     public DocumentReference setType(CodeableConcept value) { 
       this.type = value;
@@ -1117,7 +1252,7 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @return {@link #class_} (A categorization for the type of document - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.)
+     * @return {@link #class_} (A categorization for the type of document referenced - helps for indexing and searching. This may be implied by or derived from the code specified in the DocumentReference.type.)
      */
     public CodeableConcept getClass_() { 
       if (this.class_ == null)
@@ -1133,50 +1268,10 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @param value {@link #class_} (A categorization for the type of document - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.)
+     * @param value {@link #class_} (A categorization for the type of document referenced - helps for indexing and searching. This may be implied by or derived from the code specified in the DocumentReference.type.)
      */
     public DocumentReference setClass_(CodeableConcept value) { 
       this.class_ = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #format} (An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.)
-     */
-    public List<Coding> getFormat() { 
-      if (this.format == null)
-        this.format = new ArrayList<Coding>();
-      return this.format;
-    }
-
-    public boolean hasFormat() { 
-      if (this.format == null)
-        return false;
-      for (Coding item : this.format)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    /**
-     * @return {@link #format} (An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.)
-     */
-    // syntactic sugar
-    public Coding addFormat() { //3
-      Coding t = new Coding();
-      if (this.format == null)
-        this.format = new ArrayList<Coding>();
-      this.format.add(t);
-      return t;
-    }
-
-    // syntactic sugar
-    public DocumentReference addFormat(Coding t) { //3
-      if (t == null)
-        return this;
-      if (this.format == null)
-        this.format = new ArrayList<Coding>();
-      this.format.add(t);
       return this;
     }
 
@@ -1605,41 +1700,41 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @return {@link #content} (The document or url to the document along with critical metadata to prove content has integrity.)
+     * @return {@link #content} (The document and format referenced. May be multiple content each with a different format.)
      */
-    public List<Attachment> getContent() { 
+    public List<DocumentReferenceContentComponent> getContent() { 
       if (this.content == null)
-        this.content = new ArrayList<Attachment>();
+        this.content = new ArrayList<DocumentReferenceContentComponent>();
       return this.content;
     }
 
     public boolean hasContent() { 
       if (this.content == null)
         return false;
-      for (Attachment item : this.content)
+      for (DocumentReferenceContentComponent item : this.content)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #content} (The document or url to the document along with critical metadata to prove content has integrity.)
+     * @return {@link #content} (The document and format referenced. May be multiple content each with a different format.)
      */
     // syntactic sugar
-    public Attachment addContent() { //3
-      Attachment t = new Attachment();
+    public DocumentReferenceContentComponent addContent() { //3
+      DocumentReferenceContentComponent t = new DocumentReferenceContentComponent();
       if (this.content == null)
-        this.content = new ArrayList<Attachment>();
+        this.content = new ArrayList<DocumentReferenceContentComponent>();
       this.content.add(t);
       return t;
     }
 
     // syntactic sugar
-    public DocumentReference addContent(Attachment t) { //3
+    public DocumentReference addContent(DocumentReferenceContentComponent t) { //3
       if (t == null)
         return this;
       if (this.content == null)
-        this.content = new ArrayList<Attachment>();
+        this.content = new ArrayList<DocumentReferenceContentComponent>();
       this.content.add(t);
       return this;
     }
@@ -1673,9 +1768,8 @@ public class DocumentReference extends DomainResource {
         childrenList.add(new Property("masterIdentifier", "Identifier", "Document identifier as assigned by the source of the document. This identifier is specific to this version of the document. This unique identifier may be used elsewhere to identify this version of the document.", 0, java.lang.Integer.MAX_VALUE, masterIdentifier));
         childrenList.add(new Property("identifier", "Identifier", "Other identifiers associated with the document, including version independent identifiers.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("subject", "Reference(Patient|Practitioner|Group|Device)", "Who or what the document is about. The document can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure).", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("type", "CodeableConcept", "Specifies the particular kind of document. This usually equates to the purpose of making the document. It is recommended that the value Set be drawn from a coding scheme providing a fine level of granularity such as LOINC.  (e.g. Patient Summary, Discharge Summary, Prescription, etc.).", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("class", "CodeableConcept", "A categorization for the type of document - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.", 0, java.lang.Integer.MAX_VALUE, class_));
-        childrenList.add(new Property("format", "Coding", "An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.", 0, java.lang.Integer.MAX_VALUE, format));
+        childrenList.add(new Property("type", "CodeableConcept", "Specifies the particular kind of document referenced  (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the document referenced.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("class", "CodeableConcept", "A categorization for the type of document referenced - helps for indexing and searching. This may be implied by or derived from the code specified in the DocumentReference.type.", 0, java.lang.Integer.MAX_VALUE, class_));
         childrenList.add(new Property("author", "Reference(Practitioner|Organization|Device|Patient|RelatedPerson)", "Identifies who is responsible for adding the information to the document.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("custodian", "Reference(Organization)", "Identifies the organization or group who is responsible for ongoing maintenance of and access to the document.", 0, java.lang.Integer.MAX_VALUE, custodian));
         childrenList.add(new Property("authenticator", "Reference(Practitioner|Organization)", "Which person or organization authenticates that this document is valid.", 0, java.lang.Integer.MAX_VALUE, authenticator));
@@ -1686,7 +1780,7 @@ public class DocumentReference extends DomainResource {
         childrenList.add(new Property("relatesTo", "", "Relationships that this document has with other document references that already exist.", 0, java.lang.Integer.MAX_VALUE, relatesTo));
         childrenList.add(new Property("description", "string", "Human-readable description of the source document. This is sometimes known as the \"title\".", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("securityLabel", "CodeableConcept", "A set of Security-Tag codes specifying the level of privacy/security of the Document. Note that DocumentReference.meta.security is the security labels of the reference to the document, while DocumentReference.securityLabel is the security labels on the document it refers to.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
-        childrenList.add(new Property("content", "Attachment", "The document or url to the document along with critical metadata to prove content has integrity.", 0, java.lang.Integer.MAX_VALUE, content));
+        childrenList.add(new Property("content", "", "The document and format referenced. May be multiple content each with a different format.", 0, java.lang.Integer.MAX_VALUE, content));
         childrenList.add(new Property("context", "", "The clinical context in which the document was prepared.", 0, java.lang.Integer.MAX_VALUE, context));
       }
 
@@ -1702,11 +1796,6 @@ public class DocumentReference extends DomainResource {
         dst.subject = subject == null ? null : subject.copy();
         dst.type = type == null ? null : type.copy();
         dst.class_ = class_ == null ? null : class_.copy();
-        if (format != null) {
-          dst.format = new ArrayList<Coding>();
-          for (Coding i : format)
-            dst.format.add(i.copy());
-        };
         if (author != null) {
           dst.author = new ArrayList<Reference>();
           for (Reference i : author)
@@ -1730,8 +1819,8 @@ public class DocumentReference extends DomainResource {
             dst.securityLabel.add(i.copy());
         };
         if (content != null) {
-          dst.content = new ArrayList<Attachment>();
-          for (Attachment i : content)
+          dst.content = new ArrayList<DocumentReferenceContentComponent>();
+          for (DocumentReferenceContentComponent i : content)
             dst.content.add(i.copy());
         };
         dst.context = context == null ? null : context.copy();
@@ -1751,11 +1840,11 @@ public class DocumentReference extends DomainResource {
         DocumentReference o = (DocumentReference) other;
         return compareDeep(masterIdentifier, o.masterIdentifier, true) && compareDeep(identifier, o.identifier, true)
            && compareDeep(subject, o.subject, true) && compareDeep(type, o.type, true) && compareDeep(class_, o.class_, true)
-           && compareDeep(format, o.format, true) && compareDeep(author, o.author, true) && compareDeep(custodian, o.custodian, true)
-           && compareDeep(authenticator, o.authenticator, true) && compareDeep(created, o.created, true) && compareDeep(indexed, o.indexed, true)
-           && compareDeep(status, o.status, true) && compareDeep(docStatus, o.docStatus, true) && compareDeep(relatesTo, o.relatesTo, true)
-           && compareDeep(description, o.description, true) && compareDeep(securityLabel, o.securityLabel, true)
-           && compareDeep(content, o.content, true) && compareDeep(context, o.context, true);
+           && compareDeep(author, o.author, true) && compareDeep(custodian, o.custodian, true) && compareDeep(authenticator, o.authenticator, true)
+           && compareDeep(created, o.created, true) && compareDeep(indexed, o.indexed, true) && compareDeep(status, o.status, true)
+           && compareDeep(docStatus, o.docStatus, true) && compareDeep(relatesTo, o.relatesTo, true) && compareDeep(description, o.description, true)
+           && compareDeep(securityLabel, o.securityLabel, true) && compareDeep(content, o.content, true) && compareDeep(context, o.context, true)
+          ;
       }
 
       @Override
@@ -1772,12 +1861,11 @@ public class DocumentReference extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (masterIdentifier == null || masterIdentifier.isEmpty()) && (identifier == null || identifier.isEmpty())
            && (subject == null || subject.isEmpty()) && (type == null || type.isEmpty()) && (class_ == null || class_.isEmpty())
-           && (format == null || format.isEmpty()) && (author == null || author.isEmpty()) && (custodian == null || custodian.isEmpty())
-           && (authenticator == null || authenticator.isEmpty()) && (created == null || created.isEmpty())
-           && (indexed == null || indexed.isEmpty()) && (status == null || status.isEmpty()) && (docStatus == null || docStatus.isEmpty())
-           && (relatesTo == null || relatesTo.isEmpty()) && (description == null || description.isEmpty())
-           && (securityLabel == null || securityLabel.isEmpty()) && (content == null || content.isEmpty())
-           && (context == null || context.isEmpty());
+           && (author == null || author.isEmpty()) && (custodian == null || custodian.isEmpty()) && (authenticator == null || authenticator.isEmpty())
+           && (created == null || created.isEmpty()) && (indexed == null || indexed.isEmpty()) && (status == null || status.isEmpty())
+           && (docStatus == null || docStatus.isEmpty()) && (relatesTo == null || relatesTo.isEmpty())
+           && (description == null || description.isEmpty()) && (securityLabel == null || securityLabel.isEmpty())
+           && (content == null || content.isEmpty()) && (context == null || context.isEmpty());
       }
 
   @Override
@@ -1791,16 +1879,14 @@ public class DocumentReference extends DomainResource {
   public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="description", path="DocumentReference.description", description="Human-readable description (title)", type="string" )
   public static final String SP_DESCRIPTION = "description";
-  @SearchParamDefinition(name="language", path="DocumentReference.content.language", description="Human language of the content (BCP-47)", type="token" )
+  @SearchParamDefinition(name="language", path="DocumentReference.content.attachment.language", description="Human language of the content (BCP-47)", type="token" )
   public static final String SP_LANGUAGE = "language";
-  @SearchParamDefinition(name="type", path="DocumentReference.type", description="Kind of document", type="token" )
+  @SearchParamDefinition(name="type", path="DocumentReference.type", description="Kind of document (LOINC if possible)", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="relation", path="DocumentReference.relatesTo.code", description="replaces | transforms | signs | appends", type="token" )
   public static final String SP_RELATION = "relation";
   @SearchParamDefinition(name="setting", path="DocumentReference.context.practiceSetting", description="Additional details about where the content was created (e.g. clinical specialty)", type="token" )
   public static final String SP_SETTING = "setting";
-  @SearchParamDefinition(name="relatedid", path="DocumentReference.context.related.identifier", description="Related Identifier", type="token" )
-  public static final String SP_RELATEDID = "relatedid";
   @SearchParamDefinition(name="patient", path="DocumentReference.subject", description="Who|what is the subject of the document", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="relationship", path="", description="Combination of relation and relatesTo", type="composite" )
@@ -1815,6 +1901,8 @@ public class DocumentReference extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="period", path="DocumentReference.context.period", description="Time of service that is being documented", type="date" )
   public static final String SP_PERIOD = "period";
+  @SearchParamDefinition(name="related-id", path="DocumentReference.context.related.identifier", description="Identifer of related objects or events", type="token" )
+  public static final String SP_RELATEDID = "related-id";
   @SearchParamDefinition(name="custodian", path="DocumentReference.custodian", description="Org which maintains the document", type="reference" )
   public static final String SP_CUSTODIAN = "custodian";
   @SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="When this document reference created", type="date" )
@@ -1823,13 +1911,13 @@ public class DocumentReference extends DomainResource {
   public static final String SP_AUTHOR = "author";
   @SearchParamDefinition(name="created", path="DocumentReference.created", description="Document creation time", type="date" )
   public static final String SP_CREATED = "created";
-  @SearchParamDefinition(name="format", path="DocumentReference.format", description="Format/content rules for the document", type="token" )
+  @SearchParamDefinition(name="format", path="DocumentReference.content.format", description="Format/content rules for the document", type="token" )
   public static final String SP_FORMAT = "format";
-  @SearchParamDefinition(name="relatedref", path="DocumentReference.context.related.ref", description="Related Resource", type="reference" )
-  public static final String SP_RELATEDREF = "relatedref";
   @SearchParamDefinition(name="encounter", path="DocumentReference.context.encounter", description="Context of the document  content", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
-  @SearchParamDefinition(name="location", path="DocumentReference.content.url", description="Uri where the data can be found", type="uri" )
+  @SearchParamDefinition(name="related-ref", path="DocumentReference.context.related.ref", description="Related Resource", type="reference" )
+  public static final String SP_RELATEDREF = "related-ref";
+  @SearchParamDefinition(name="location", path="DocumentReference.content.attachment.url", description="Uri where the data can be found", type="uri" )
   public static final String SP_LOCATION = "location";
   @SearchParamDefinition(name="relatesto", path="DocumentReference.relatesTo.target", description="Target of the relationship", type="reference" )
   public static final String SP_RELATESTO = "relatesto";

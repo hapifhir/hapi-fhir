@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -758,11 +758,11 @@ public class TestScript extends DomainResource {
         /**
          * Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.
          */
-        @Child(name = "capabilities", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "capability", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Capabiltities that are assumed to function correctly on the FHIR server being tested", formalDefinition="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested." )
-        protected List<TestScriptMetadataCapabilitiesComponent> capabilities;
+        protected List<TestScriptMetadataCapabilityComponent> capability;
 
-        private static final long serialVersionUID = -419664800L;
+        private static final long serialVersionUID = 745183328L;
 
     /*
      * Constructor
@@ -812,49 +812,49 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #capabilities} (Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.)
+         * @return {@link #capability} (Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.)
          */
-        public List<TestScriptMetadataCapabilitiesComponent> getCapabilities() { 
-          if (this.capabilities == null)
-            this.capabilities = new ArrayList<TestScriptMetadataCapabilitiesComponent>();
-          return this.capabilities;
+        public List<TestScriptMetadataCapabilityComponent> getCapability() { 
+          if (this.capability == null)
+            this.capability = new ArrayList<TestScriptMetadataCapabilityComponent>();
+          return this.capability;
         }
 
-        public boolean hasCapabilities() { 
-          if (this.capabilities == null)
+        public boolean hasCapability() { 
+          if (this.capability == null)
             return false;
-          for (TestScriptMetadataCapabilitiesComponent item : this.capabilities)
+          for (TestScriptMetadataCapabilityComponent item : this.capability)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
         /**
-         * @return {@link #capabilities} (Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.)
+         * @return {@link #capability} (Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.)
          */
     // syntactic sugar
-        public TestScriptMetadataCapabilitiesComponent addCapabilities() { //3
-          TestScriptMetadataCapabilitiesComponent t = new TestScriptMetadataCapabilitiesComponent();
-          if (this.capabilities == null)
-            this.capabilities = new ArrayList<TestScriptMetadataCapabilitiesComponent>();
-          this.capabilities.add(t);
+        public TestScriptMetadataCapabilityComponent addCapability() { //3
+          TestScriptMetadataCapabilityComponent t = new TestScriptMetadataCapabilityComponent();
+          if (this.capability == null)
+            this.capability = new ArrayList<TestScriptMetadataCapabilityComponent>();
+          this.capability.add(t);
           return t;
         }
 
     // syntactic sugar
-        public TestScriptMetadataComponent addCapabilities(TestScriptMetadataCapabilitiesComponent t) { //3
+        public TestScriptMetadataComponent addCapability(TestScriptMetadataCapabilityComponent t) { //3
           if (t == null)
             return this;
-          if (this.capabilities == null)
-            this.capabilities = new ArrayList<TestScriptMetadataCapabilitiesComponent>();
-          this.capabilities.add(t);
+          if (this.capability == null)
+            this.capability = new ArrayList<TestScriptMetadataCapabilityComponent>();
+          this.capability.add(t);
           return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("link", "", "A link to the FHIR specification that this test is covering.", 0, java.lang.Integer.MAX_VALUE, link));
-          childrenList.add(new Property("capabilities", "", "Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, capabilities));
+          childrenList.add(new Property("capability", "", "Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, capability));
         }
 
       public TestScriptMetadataComponent copy() {
@@ -865,10 +865,10 @@ public class TestScript extends DomainResource {
           for (TestScriptMetadataLinkComponent i : link)
             dst.link.add(i.copy());
         };
-        if (capabilities != null) {
-          dst.capabilities = new ArrayList<TestScriptMetadataCapabilitiesComponent>();
-          for (TestScriptMetadataCapabilitiesComponent i : capabilities)
-            dst.capabilities.add(i.copy());
+        if (capability != null) {
+          dst.capability = new ArrayList<TestScriptMetadataCapabilityComponent>();
+          for (TestScriptMetadataCapabilityComponent i : capability)
+            dst.capability.add(i.copy());
         };
         return dst;
       }
@@ -880,7 +880,7 @@ public class TestScript extends DomainResource {
         if (!(other instanceof TestScriptMetadataComponent))
           return false;
         TestScriptMetadataComponent o = (TestScriptMetadataComponent) other;
-        return compareDeep(link, o.link, true) && compareDeep(capabilities, o.capabilities, true);
+        return compareDeep(link, o.link, true) && compareDeep(capability, o.capability, true);
       }
 
       @Override
@@ -894,7 +894,7 @@ public class TestScript extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (link == null || link.isEmpty()) && (capabilities == null || capabilities.isEmpty())
+        return super.isEmpty() && (link == null || link.isEmpty()) && (capability == null || capability.isEmpty())
           ;
       }
 
@@ -1069,26 +1069,26 @@ public class TestScript extends DomainResource {
   }
 
     @Block()
-    public static class TestScriptMetadataCapabilitiesComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class TestScriptMetadataCapabilityComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The capabilities required of the server in order for this test script to execute.
+         * Whether or not the test execution will require the given capabilities of the server in order for this test script to execute.
          */
         @Child(name = "required", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Required capabilities", formalDefinition="The capabilities required of the server in order for this test script to execute." )
+        @Description(shortDefinition="Are the capabilities required?", formalDefinition="Whether or not the test execution will require the given capabilities of the server in order for this test script to execute." )
         protected BooleanType required;
 
         /**
-         * Whether or not the capabilities are primarily getting validated by this test script.
+         * Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute.
          */
         @Child(name = "validated", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Validated capabilities", formalDefinition="Whether or not the capabilities are primarily getting validated by this test script." )
+        @Description(shortDefinition="Are the capabilities validated?", formalDefinition="Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute." )
         protected BooleanType validated;
 
         /**
          * Description of the capabilities that this test script is requiring the server to support.
          */
         @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The description of the capabilities", formalDefinition="Description of the capabilities that this test script is requiring the server to support." )
+        @Description(shortDefinition="The expected capabilities of the server", formalDefinition="Description of the capabilities that this test script is requiring the server to support." )
         protected StringType description;
 
         /**
@@ -1122,25 +1122,25 @@ public class TestScript extends DomainResource {
     /*
      * Constructor
      */
-      public TestScriptMetadataCapabilitiesComponent() {
+      public TestScriptMetadataCapabilityComponent() {
         super();
       }
 
     /*
      * Constructor
      */
-      public TestScriptMetadataCapabilitiesComponent(Reference conformance) {
+      public TestScriptMetadataCapabilityComponent(Reference conformance) {
         super();
         this.conformance = conformance;
       }
 
         /**
-         * @return {@link #required} (The capabilities required of the server in order for this test script to execute.). This is the underlying object with id, value and extensions. The accessor "getRequired" gives direct access to the value
+         * @return {@link #required} (Whether or not the test execution will require the given capabilities of the server in order for this test script to execute.). This is the underlying object with id, value and extensions. The accessor "getRequired" gives direct access to the value
          */
         public BooleanType getRequiredElement() { 
           if (this.required == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptMetadataCapabilitiesComponent.required");
+              throw new Error("Attempt to auto-create TestScriptMetadataCapabilityComponent.required");
             else if (Configuration.doAutoCreate())
               this.required = new BooleanType(); // bb
           return this.required;
@@ -1155,24 +1155,24 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #required} (The capabilities required of the server in order for this test script to execute.). This is the underlying object with id, value and extensions. The accessor "getRequired" gives direct access to the value
+         * @param value {@link #required} (Whether or not the test execution will require the given capabilities of the server in order for this test script to execute.). This is the underlying object with id, value and extensions. The accessor "getRequired" gives direct access to the value
          */
-        public TestScriptMetadataCapabilitiesComponent setRequiredElement(BooleanType value) { 
+        public TestScriptMetadataCapabilityComponent setRequiredElement(BooleanType value) { 
           this.required = value;
           return this;
         }
 
         /**
-         * @return The capabilities required of the server in order for this test script to execute.
+         * @return Whether or not the test execution will require the given capabilities of the server in order for this test script to execute.
          */
         public boolean getRequired() { 
           return this.required == null || this.required.isEmpty() ? false : this.required.getValue();
         }
 
         /**
-         * @param value The capabilities required of the server in order for this test script to execute.
+         * @param value Whether or not the test execution will require the given capabilities of the server in order for this test script to execute.
          */
-        public TestScriptMetadataCapabilitiesComponent setRequired(boolean value) { 
+        public TestScriptMetadataCapabilityComponent setRequired(boolean value) { 
             if (this.required == null)
               this.required = new BooleanType();
             this.required.setValue(value);
@@ -1180,12 +1180,12 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #validated} (Whether or not the capabilities are primarily getting validated by this test script.). This is the underlying object with id, value and extensions. The accessor "getValidated" gives direct access to the value
+         * @return {@link #validated} (Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute.). This is the underlying object with id, value and extensions. The accessor "getValidated" gives direct access to the value
          */
         public BooleanType getValidatedElement() { 
           if (this.validated == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptMetadataCapabilitiesComponent.validated");
+              throw new Error("Attempt to auto-create TestScriptMetadataCapabilityComponent.validated");
             else if (Configuration.doAutoCreate())
               this.validated = new BooleanType(); // bb
           return this.validated;
@@ -1200,24 +1200,24 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #validated} (Whether or not the capabilities are primarily getting validated by this test script.). This is the underlying object with id, value and extensions. The accessor "getValidated" gives direct access to the value
+         * @param value {@link #validated} (Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute.). This is the underlying object with id, value and extensions. The accessor "getValidated" gives direct access to the value
          */
-        public TestScriptMetadataCapabilitiesComponent setValidatedElement(BooleanType value) { 
+        public TestScriptMetadataCapabilityComponent setValidatedElement(BooleanType value) { 
           this.validated = value;
           return this;
         }
 
         /**
-         * @return Whether or not the capabilities are primarily getting validated by this test script.
+         * @return Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute.
          */
         public boolean getValidated() { 
           return this.validated == null || this.validated.isEmpty() ? false : this.validated.getValue();
         }
 
         /**
-         * @param value Whether or not the capabilities are primarily getting validated by this test script.
+         * @param value Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute.
          */
-        public TestScriptMetadataCapabilitiesComponent setValidated(boolean value) { 
+        public TestScriptMetadataCapabilityComponent setValidated(boolean value) { 
             if (this.validated == null)
               this.validated = new BooleanType();
             this.validated.setValue(value);
@@ -1230,7 +1230,7 @@ public class TestScript extends DomainResource {
         public StringType getDescriptionElement() { 
           if (this.description == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptMetadataCapabilitiesComponent.description");
+              throw new Error("Attempt to auto-create TestScriptMetadataCapabilityComponent.description");
             else if (Configuration.doAutoCreate())
               this.description = new StringType(); // bb
           return this.description;
@@ -1247,7 +1247,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #description} (Description of the capabilities that this test script is requiring the server to support.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
-        public TestScriptMetadataCapabilitiesComponent setDescriptionElement(StringType value) { 
+        public TestScriptMetadataCapabilityComponent setDescriptionElement(StringType value) { 
           this.description = value;
           return this;
         }
@@ -1262,7 +1262,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value Description of the capabilities that this test script is requiring the server to support.
          */
-        public TestScriptMetadataCapabilitiesComponent setDescription(String value) { 
+        public TestScriptMetadataCapabilityComponent setDescription(String value) { 
           if (Utilities.noString(value))
             this.description = null;
           else {
@@ -1279,7 +1279,7 @@ public class TestScript extends DomainResource {
         public IntegerType getDestinationElement() { 
           if (this.destination == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptMetadataCapabilitiesComponent.destination");
+              throw new Error("Attempt to auto-create TestScriptMetadataCapabilityComponent.destination");
             else if (Configuration.doAutoCreate())
               this.destination = new IntegerType(); // bb
           return this.destination;
@@ -1296,7 +1296,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #destination} (Which server these requirements apply to.). This is the underlying object with id, value and extensions. The accessor "getDestination" gives direct access to the value
          */
-        public TestScriptMetadataCapabilitiesComponent setDestinationElement(IntegerType value) { 
+        public TestScriptMetadataCapabilityComponent setDestinationElement(IntegerType value) { 
           this.destination = value;
           return this;
         }
@@ -1311,7 +1311,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value Which server these requirements apply to.
          */
-        public TestScriptMetadataCapabilitiesComponent setDestination(int value) { 
+        public TestScriptMetadataCapabilityComponent setDestination(int value) { 
             if (this.destination == null)
               this.destination = new IntegerType();
             this.destination.setValue(value);
@@ -1351,7 +1351,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #link} (Links to the FHIR specification that describes this interaction and the resources involved in more detail.)
          */
-        public TestScriptMetadataCapabilitiesComponent addLink(String value) { //1
+        public TestScriptMetadataCapabilityComponent addLink(String value) { //1
           UriType t = new UriType();
           t.setValue(value);
           if (this.link == null)
@@ -1378,7 +1378,7 @@ public class TestScript extends DomainResource {
         public Reference getConformance() { 
           if (this.conformance == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptMetadataCapabilitiesComponent.conformance");
+              throw new Error("Attempt to auto-create TestScriptMetadataCapabilityComponent.conformance");
             else if (Configuration.doAutoCreate())
               this.conformance = new Reference(); // cc
           return this.conformance;
@@ -1391,7 +1391,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #conformance} (Minimum conformance required of server for test script to execute successfully.   If server does not meet at a minimum the reference conformance definition, then all tests in this script are skipped.)
          */
-        public TestScriptMetadataCapabilitiesComponent setConformance(Reference value) { 
+        public TestScriptMetadataCapabilityComponent setConformance(Reference value) { 
           this.conformance = value;
           return this;
         }
@@ -1402,7 +1402,7 @@ public class TestScript extends DomainResource {
         public Conformance getConformanceTarget() { 
           if (this.conformanceTarget == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptMetadataCapabilitiesComponent.conformance");
+              throw new Error("Attempt to auto-create TestScriptMetadataCapabilityComponent.conformance");
             else if (Configuration.doAutoCreate())
               this.conformanceTarget = new Conformance(); // aa
           return this.conformanceTarget;
@@ -1411,23 +1411,23 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #conformance} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Minimum conformance required of server for test script to execute successfully.   If server does not meet at a minimum the reference conformance definition, then all tests in this script are skipped.)
          */
-        public TestScriptMetadataCapabilitiesComponent setConformanceTarget(Conformance value) { 
+        public TestScriptMetadataCapabilityComponent setConformanceTarget(Conformance value) { 
           this.conformanceTarget = value;
           return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("required", "boolean", "The capabilities required of the server in order for this test script to execute.", 0, java.lang.Integer.MAX_VALUE, required));
-          childrenList.add(new Property("validated", "boolean", "Whether or not the capabilities are primarily getting validated by this test script.", 0, java.lang.Integer.MAX_VALUE, validated));
+          childrenList.add(new Property("required", "boolean", "Whether or not the test execution will require the given capabilities of the server in order for this test script to execute.", 0, java.lang.Integer.MAX_VALUE, required));
+          childrenList.add(new Property("validated", "boolean", "Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute.", 0, java.lang.Integer.MAX_VALUE, validated));
           childrenList.add(new Property("description", "string", "Description of the capabilities that this test script is requiring the server to support.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("destination", "integer", "Which server these requirements apply to.", 0, java.lang.Integer.MAX_VALUE, destination));
           childrenList.add(new Property("link", "uri", "Links to the FHIR specification that describes this interaction and the resources involved in more detail.", 0, java.lang.Integer.MAX_VALUE, link));
           childrenList.add(new Property("conformance", "Reference(Conformance)", "Minimum conformance required of server for test script to execute successfully.   If server does not meet at a minimum the reference conformance definition, then all tests in this script are skipped.", 0, java.lang.Integer.MAX_VALUE, conformance));
         }
 
-      public TestScriptMetadataCapabilitiesComponent copy() {
-        TestScriptMetadataCapabilitiesComponent dst = new TestScriptMetadataCapabilitiesComponent();
+      public TestScriptMetadataCapabilityComponent copy() {
+        TestScriptMetadataCapabilityComponent dst = new TestScriptMetadataCapabilityComponent();
         copyValues(dst);
         dst.required = required == null ? null : required.copy();
         dst.validated = validated == null ? null : validated.copy();
@@ -1446,9 +1446,9 @@ public class TestScript extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof TestScriptMetadataCapabilitiesComponent))
+        if (!(other instanceof TestScriptMetadataCapabilityComponent))
           return false;
-        TestScriptMetadataCapabilitiesComponent o = (TestScriptMetadataCapabilitiesComponent) other;
+        TestScriptMetadataCapabilityComponent o = (TestScriptMetadataCapabilityComponent) other;
         return compareDeep(required, o.required, true) && compareDeep(validated, o.validated, true) && compareDeep(description, o.description, true)
            && compareDeep(destination, o.destination, true) && compareDeep(link, o.link, true) && compareDeep(conformance, o.conformance, true)
           ;
@@ -1458,9 +1458,9 @@ public class TestScript extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof TestScriptMetadataCapabilitiesComponent))
+        if (!(other instanceof TestScriptMetadataCapabilityComponent))
           return false;
-        TestScriptMetadataCapabilitiesComponent o = (TestScriptMetadataCapabilitiesComponent) other;
+        TestScriptMetadataCapabilityComponent o = (TestScriptMetadataCapabilityComponent) other;
         return compareValues(required, o.required, true) && compareValues(validated, o.validated, true) && compareValues(description, o.description, true)
            && compareValues(destination, o.destination, true) && compareValues(link, o.link, true);
       }
@@ -1687,17 +1687,17 @@ public class TestScript extends DomainResource {
     @Block()
     public static class TestScriptVariableComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Variable name.
+         * Descriptive name for this variable.
          */
         @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Variable name", formalDefinition="Variable name." )
+        @Description(shortDefinition="Descriptive name for this variable", formalDefinition="Descriptive name for this variable." )
         protected StringType name;
 
         /**
-         * Will be used to grab the header field value from the headers that sourceId is pointing to.
+         * Will be used to grab the HTTP header field value from the headers that sourceId is pointing to.
          */
         @Child(name = "headerField", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Header field name", formalDefinition="Will be used to grab the header field value from the headers that sourceId is pointing to." )
+        @Description(shortDefinition="HTTP header field name for source", formalDefinition="Will be used to grab the HTTP header field value from the headers that sourceId is pointing to." )
         protected StringType headerField;
 
         /**
@@ -1708,10 +1708,10 @@ public class TestScript extends DomainResource {
         protected StringType path;
 
         /**
-         * Fixture to evaluate the XPath/JSONPath expression or the headerField  against.
+         * Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable.
          */
         @Child(name = "sourceId", type = {IdType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Fixture Id", formalDefinition="Fixture to evaluate the XPath/JSONPath expression or the headerField  against." )
+        @Description(shortDefinition="Fixture Id of source expression or headerField within this variable", formalDefinition="Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable." )
         protected IdType sourceId;
 
         private static final long serialVersionUID = 1128806685L;
@@ -1732,7 +1732,7 @@ public class TestScript extends DomainResource {
       }
 
         /**
-         * @return {@link #name} (Variable name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @return {@link #name} (Descriptive name for this variable.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
          */
         public StringType getNameElement() { 
           if (this.name == null)
@@ -1752,7 +1752,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #name} (Variable name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @param value {@link #name} (Descriptive name for this variable.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
          */
         public TestScriptVariableComponent setNameElement(StringType value) { 
           this.name = value;
@@ -1760,14 +1760,14 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return Variable name.
+         * @return Descriptive name for this variable.
          */
         public String getName() { 
           return this.name == null ? null : this.name.getValue();
         }
 
         /**
-         * @param value Variable name.
+         * @param value Descriptive name for this variable.
          */
         public TestScriptVariableComponent setName(String value) { 
             if (this.name == null)
@@ -1777,7 +1777,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #headerField} (Will be used to grab the header field value from the headers that sourceId is pointing to.). This is the underlying object with id, value and extensions. The accessor "getHeaderField" gives direct access to the value
+         * @return {@link #headerField} (Will be used to grab the HTTP header field value from the headers that sourceId is pointing to.). This is the underlying object with id, value and extensions. The accessor "getHeaderField" gives direct access to the value
          */
         public StringType getHeaderFieldElement() { 
           if (this.headerField == null)
@@ -1797,7 +1797,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #headerField} (Will be used to grab the header field value from the headers that sourceId is pointing to.). This is the underlying object with id, value and extensions. The accessor "getHeaderField" gives direct access to the value
+         * @param value {@link #headerField} (Will be used to grab the HTTP header field value from the headers that sourceId is pointing to.). This is the underlying object with id, value and extensions. The accessor "getHeaderField" gives direct access to the value
          */
         public TestScriptVariableComponent setHeaderFieldElement(StringType value) { 
           this.headerField = value;
@@ -1805,14 +1805,14 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return Will be used to grab the header field value from the headers that sourceId is pointing to.
+         * @return Will be used to grab the HTTP header field value from the headers that sourceId is pointing to.
          */
         public String getHeaderField() { 
           return this.headerField == null ? null : this.headerField.getValue();
         }
 
         /**
-         * @param value Will be used to grab the header field value from the headers that sourceId is pointing to.
+         * @param value Will be used to grab the HTTP header field value from the headers that sourceId is pointing to.
          */
         public TestScriptVariableComponent setHeaderField(String value) { 
           if (Utilities.noString(value))
@@ -1875,7 +1875,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #sourceId} (Fixture to evaluate the XPath/JSONPath expression or the headerField  against.). This is the underlying object with id, value and extensions. The accessor "getSourceId" gives direct access to the value
+         * @return {@link #sourceId} (Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable.). This is the underlying object with id, value and extensions. The accessor "getSourceId" gives direct access to the value
          */
         public IdType getSourceIdElement() { 
           if (this.sourceId == null)
@@ -1895,7 +1895,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #sourceId} (Fixture to evaluate the XPath/JSONPath expression or the headerField  against.). This is the underlying object with id, value and extensions. The accessor "getSourceId" gives direct access to the value
+         * @param value {@link #sourceId} (Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable.). This is the underlying object with id, value and extensions. The accessor "getSourceId" gives direct access to the value
          */
         public TestScriptVariableComponent setSourceIdElement(IdType value) { 
           this.sourceId = value;
@@ -1903,14 +1903,14 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return Fixture to evaluate the XPath/JSONPath expression or the headerField  against.
+         * @return Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable.
          */
         public String getSourceId() { 
           return this.sourceId == null ? null : this.sourceId.getValue();
         }
 
         /**
-         * @param value Fixture to evaluate the XPath/JSONPath expression or the headerField  against.
+         * @param value Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable.
          */
         public TestScriptVariableComponent setSourceId(String value) { 
           if (Utilities.noString(value))
@@ -1925,10 +1925,10 @@ public class TestScript extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "Variable name.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("headerField", "string", "Will be used to grab the header field value from the headers that sourceId is pointing to.", 0, java.lang.Integer.MAX_VALUE, headerField));
+          childrenList.add(new Property("name", "string", "Descriptive name for this variable.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("headerField", "string", "Will be used to grab the HTTP header field value from the headers that sourceId is pointing to.", 0, java.lang.Integer.MAX_VALUE, headerField));
           childrenList.add(new Property("path", "string", "XPath or JSONPath against the fixture body.  When variables are defined, either headerField must be specified or path, but not both.", 0, java.lang.Integer.MAX_VALUE, path));
-          childrenList.add(new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against.", 0, java.lang.Integer.MAX_VALUE, sourceId));
+          childrenList.add(new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable.", 0, java.lang.Integer.MAX_VALUE, sourceId));
         }
 
       public TestScriptVariableComponent copy() {
@@ -1983,7 +1983,7 @@ public class TestScript extends DomainResource {
          * Action would contain either an operation or an assertion.
          */
         @Child(name = "action", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Action", formalDefinition="Action would contain either an operation or an assertion." )
+        @Description(shortDefinition="A setup operation or assert to perform", formalDefinition="Action would contain either an operation or an assertion." )
         protected List<TestScriptSetupActionComponent> action;
 
         private static final long serialVersionUID = -1836543723L;
@@ -2107,17 +2107,17 @@ public class TestScript extends DomainResource {
     @Block()
     public static class TestScriptSetupActionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * An operation.
+         * The operation to perform.
          */
         @Child(name = "operation", type = {}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="An operation", formalDefinition="An operation." )
+        @Description(shortDefinition="The setup operation to perform", formalDefinition="The operation to perform." )
         protected TestScriptSetupActionOperationComponent operation;
 
         /**
          * Evaluates the results of previous operations to determine if the server under test behaves appropriately.
          */
         @Child(name = "assert", type = {}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Assertion", formalDefinition="Evaluates the results of previous operations to determine if the server under test behaves appropriately." )
+        @Description(shortDefinition="The assertion to perform", formalDefinition="Evaluates the results of previous operations to determine if the server under test behaves appropriately." )
         protected TestScriptSetupActionAssertComponent assert_;
 
         private static final long serialVersionUID = 1411550037L;
@@ -2130,7 +2130,7 @@ public class TestScript extends DomainResource {
       }
 
         /**
-         * @return {@link #operation} (An operation.)
+         * @return {@link #operation} (The operation to perform.)
          */
         public TestScriptSetupActionOperationComponent getOperation() { 
           if (this.operation == null)
@@ -2146,7 +2146,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #operation} (An operation.)
+         * @param value {@link #operation} (The operation to perform.)
          */
         public TestScriptSetupActionComponent setOperation(TestScriptSetupActionOperationComponent value) { 
           this.operation = value;
@@ -2179,7 +2179,7 @@ public class TestScript extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("operation", "", "An operation.", 0, java.lang.Integer.MAX_VALUE, operation));
+          childrenList.add(new Property("operation", "", "The operation to perform.", 0, java.lang.Integer.MAX_VALUE, operation));
           childrenList.add(new Property("assert", "", "Evaluates the results of previous operations to determine if the server under test behaves appropriately.", 0, java.lang.Integer.MAX_VALUE, assert_));
         }
 
@@ -2224,7 +2224,7 @@ public class TestScript extends DomainResource {
          * Server interaction or operation type.
          */
         @Child(name = "type", type = {Coding.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The operation type that will be executed", formalDefinition="Server interaction or operation type." )
+        @Description(shortDefinition="The setup operation type that will be executed", formalDefinition="Server interaction or operation type." )
         protected Coding type;
 
         /**
@@ -2238,14 +2238,14 @@ public class TestScript extends DomainResource {
          * The label would be used for tracking/logging purposes by test engines.
          */
         @Child(name = "label", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Operation label", formalDefinition="The label would be used for tracking/logging purposes by test engines." )
+        @Description(shortDefinition="Tracking/logging operation label", formalDefinition="The label would be used for tracking/logging purposes by test engines." )
         protected StringType label;
 
         /**
          * The description would be used by test engines for tracking and reporting purposes.
          */
         @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Operation description", formalDefinition="The description would be used by test engines for tracking and reporting purposes." )
+        @Description(shortDefinition="Tracking/reporting operation description", formalDefinition="The description would be used by test engines for tracking and reporting purposes." )
         protected StringType description;
 
         /**
@@ -2280,7 +2280,7 @@ public class TestScript extends DomainResource {
          * Path plus parameters after [type].  Used to set parts of the request URL explicitly.
          */
         @Child(name = "params", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Params", formalDefinition="Path plus parameters after [type].  Used to set parts of the request URL explicitly." )
+        @Description(shortDefinition="Explicitly defined path parameters", formalDefinition="Path plus parameters after [type].  Used to set parts of the request URL explicitly." )
         protected StringType params;
 
         /**
@@ -2294,7 +2294,7 @@ public class TestScript extends DomainResource {
          * The fixture id (maybe new) to map to the response.
          */
         @Child(name = "responseId", type = {IdType.class}, order=11, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Response Id", formalDefinition="The fixture id (maybe new) to map to the response." )
+        @Description(shortDefinition="Fixture Id of mapped response", formalDefinition="The fixture id (maybe new) to map to the response." )
         protected IdType responseId;
 
         /**
@@ -3060,14 +3060,14 @@ public class TestScript extends DomainResource {
          * The HTTP header field e.g. "Accept".
          */
         @Child(name = "field", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Header field name", formalDefinition="The HTTP header field e.g. \"Accept\"." )
+        @Description(shortDefinition="HTTP header field name", formalDefinition="The HTTP header field e.g. \"Accept\"." )
         protected StringType field;
 
         /**
          * The value of the header e.g. "application/xml".
          */
         @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Header value", formalDefinition="The value of the header e.g. \"application/xml\"." )
+        @Description(shortDefinition="HTTP headerfield value", formalDefinition="The value of the header e.g. \"application/xml\"." )
         protected StringType value;
 
         private static final long serialVersionUID = 274395337L;
@@ -3225,14 +3225,14 @@ public class TestScript extends DomainResource {
          * The label would be used for tracking/logging purposes by test engines.
          */
         @Child(name = "label", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Assertion label", formalDefinition="The label would be used for tracking/logging purposes by test engines." )
+        @Description(shortDefinition="Tracking/logging assertion label", formalDefinition="The label would be used for tracking/logging purposes by test engines." )
         protected StringType label;
 
         /**
          * The description would be used by test engines for tracking and reporting purposes.
          */
         @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Assertion description", formalDefinition="The description would be used by test engines for tracking and reporting purposes." )
+        @Description(shortDefinition="Tracking/reporting assertion description", formalDefinition="The description would be used by test engines for tracking and reporting purposes." )
         protected StringType description;
 
         /**
@@ -3264,24 +3264,24 @@ public class TestScript extends DomainResource {
         protected Enumeration<ContentType> contentType;
 
         /**
-         * The header field e.g. 'Location'.
+         * The HTTP header field name e.g. 'Location'.
          */
         @Child(name = "headerField", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The header field", formalDefinition="The header field e.g. 'Location'." )
+        @Description(shortDefinition="HTTP header field name", formalDefinition="The HTTP header field name e.g. 'Location'." )
         protected StringType headerField;
 
         /**
          * The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.
          */
         @Child(name = "minimumId", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="MinimumId", formalDefinition="The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId." )
+        @Description(shortDefinition="Fixture Id of minimum content resource", formalDefinition="The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId." )
         protected StringType minimumId;
 
         /**
-         * Navigation Links.
+         * Whether or not the test execution performs validation on the bundle navigation links.
          */
         @Child(name = "navigationLinks", type = {BooleanType.class}, order=9, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Navigation Links", formalDefinition="Navigation Links." )
+        @Description(shortDefinition="Perform validation on navigation links?", formalDefinition="Whether or not the test execution performs validation on the bundle navigation links." )
         protected BooleanType navigationLinks;
 
         /**
@@ -3313,24 +3313,24 @@ public class TestScript extends DomainResource {
         protected Enumeration<AssertionResponseTypes> response;
 
         /**
-         * HTTP Response Code.
+         * The value of the HTTP response code to be tested.
          */
         @Child(name = "responseCode", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Response Code", formalDefinition="HTTP Response Code." )
+        @Description(shortDefinition="HTTP response code to test", formalDefinition="The value of the HTTP response code to be tested." )
         protected StringType responseCode;
 
         /**
          * Fixture to evaluate the XPath/JSONPath expression or the headerField  against.
          */
         @Child(name = "sourceId", type = {IdType.class}, order=15, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Fixture Id", formalDefinition="Fixture to evaluate the XPath/JSONPath expression or the headerField  against." )
+        @Description(shortDefinition="Fixture Id of source expression or headerField", formalDefinition="Fixture to evaluate the XPath/JSONPath expression or the headerField  against." )
         protected IdType sourceId;
 
         /**
          * The ID of the Profile to validate against.
          */
         @Child(name = "validateProfileId", type = {IdType.class}, order=16, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Validate Profile Id", formalDefinition="The ID of the Profile to validate against." )
+        @Description(shortDefinition="Profile Id of validation profile reference", formalDefinition="The ID of the Profile to validate against." )
         protected IdType validateProfileId;
 
         /**
@@ -3341,10 +3341,10 @@ public class TestScript extends DomainResource {
         protected StringType value;
 
         /**
-         * Warning Only.
+         * Whether or not the test execution will produce a warning only on error for this assert.
          */
         @Child(name = "warningOnly", type = {BooleanType.class}, order=18, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Warning Only", formalDefinition="Warning Only." )
+        @Description(shortDefinition="Will this assert produce a warning only on error?", formalDefinition="Whether or not the test execution will produce a warning only on error for this assert." )
         protected BooleanType warningOnly;
 
         private static final long serialVersionUID = -607939856L;
@@ -3651,7 +3651,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #headerField} (The header field e.g. 'Location'.). This is the underlying object with id, value and extensions. The accessor "getHeaderField" gives direct access to the value
+         * @return {@link #headerField} (The HTTP header field name e.g. 'Location'.). This is the underlying object with id, value and extensions. The accessor "getHeaderField" gives direct access to the value
          */
         public StringType getHeaderFieldElement() { 
           if (this.headerField == null)
@@ -3671,7 +3671,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #headerField} (The header field e.g. 'Location'.). This is the underlying object with id, value and extensions. The accessor "getHeaderField" gives direct access to the value
+         * @param value {@link #headerField} (The HTTP header field name e.g. 'Location'.). This is the underlying object with id, value and extensions. The accessor "getHeaderField" gives direct access to the value
          */
         public TestScriptSetupActionAssertComponent setHeaderFieldElement(StringType value) { 
           this.headerField = value;
@@ -3679,14 +3679,14 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The header field e.g. 'Location'.
+         * @return The HTTP header field name e.g. 'Location'.
          */
         public String getHeaderField() { 
           return this.headerField == null ? null : this.headerField.getValue();
         }
 
         /**
-         * @param value The header field e.g. 'Location'.
+         * @param value The HTTP header field name e.g. 'Location'.
          */
         public TestScriptSetupActionAssertComponent setHeaderField(String value) { 
           if (Utilities.noString(value))
@@ -3749,7 +3749,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #navigationLinks} (Navigation Links.). This is the underlying object with id, value and extensions. The accessor "getNavigationLinks" gives direct access to the value
+         * @return {@link #navigationLinks} (Whether or not the test execution performs validation on the bundle navigation links.). This is the underlying object with id, value and extensions. The accessor "getNavigationLinks" gives direct access to the value
          */
         public BooleanType getNavigationLinksElement() { 
           if (this.navigationLinks == null)
@@ -3769,7 +3769,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #navigationLinks} (Navigation Links.). This is the underlying object with id, value and extensions. The accessor "getNavigationLinks" gives direct access to the value
+         * @param value {@link #navigationLinks} (Whether or not the test execution performs validation on the bundle navigation links.). This is the underlying object with id, value and extensions. The accessor "getNavigationLinks" gives direct access to the value
          */
         public TestScriptSetupActionAssertComponent setNavigationLinksElement(BooleanType value) { 
           this.navigationLinks = value;
@@ -3777,14 +3777,14 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return Navigation Links.
+         * @return Whether or not the test execution performs validation on the bundle navigation links.
          */
         public boolean getNavigationLinks() { 
           return this.navigationLinks == null || this.navigationLinks.isEmpty() ? false : this.navigationLinks.getValue();
         }
 
         /**
-         * @param value Navigation Links.
+         * @param value Whether or not the test execution performs validation on the bundle navigation links.
          */
         public TestScriptSetupActionAssertComponent setNavigationLinks(boolean value) { 
             if (this.navigationLinks == null)
@@ -3990,7 +3990,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #responseCode} (HTTP Response Code.). This is the underlying object with id, value and extensions. The accessor "getResponseCode" gives direct access to the value
+         * @return {@link #responseCode} (The value of the HTTP response code to be tested.). This is the underlying object with id, value and extensions. The accessor "getResponseCode" gives direct access to the value
          */
         public StringType getResponseCodeElement() { 
           if (this.responseCode == null)
@@ -4010,7 +4010,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #responseCode} (HTTP Response Code.). This is the underlying object with id, value and extensions. The accessor "getResponseCode" gives direct access to the value
+         * @param value {@link #responseCode} (The value of the HTTP response code to be tested.). This is the underlying object with id, value and extensions. The accessor "getResponseCode" gives direct access to the value
          */
         public TestScriptSetupActionAssertComponent setResponseCodeElement(StringType value) { 
           this.responseCode = value;
@@ -4018,14 +4018,14 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return HTTP Response Code.
+         * @return The value of the HTTP response code to be tested.
          */
         public String getResponseCode() { 
           return this.responseCode == null ? null : this.responseCode.getValue();
         }
 
         /**
-         * @param value HTTP Response Code.
+         * @param value The value of the HTTP response code to be tested.
          */
         public TestScriptSetupActionAssertComponent setResponseCode(String value) { 
           if (Utilities.noString(value))
@@ -4186,7 +4186,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #warningOnly} (Warning Only.). This is the underlying object with id, value and extensions. The accessor "getWarningOnly" gives direct access to the value
+         * @return {@link #warningOnly} (Whether or not the test execution will produce a warning only on error for this assert.). This is the underlying object with id, value and extensions. The accessor "getWarningOnly" gives direct access to the value
          */
         public BooleanType getWarningOnlyElement() { 
           if (this.warningOnly == null)
@@ -4206,7 +4206,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #warningOnly} (Warning Only.). This is the underlying object with id, value and extensions. The accessor "getWarningOnly" gives direct access to the value
+         * @param value {@link #warningOnly} (Whether or not the test execution will produce a warning only on error for this assert.). This is the underlying object with id, value and extensions. The accessor "getWarningOnly" gives direct access to the value
          */
         public TestScriptSetupActionAssertComponent setWarningOnlyElement(BooleanType value) { 
           this.warningOnly = value;
@@ -4214,14 +4214,14 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return Warning Only.
+         * @return Whether or not the test execution will produce a warning only on error for this assert.
          */
         public boolean getWarningOnly() { 
           return this.warningOnly == null || this.warningOnly.isEmpty() ? false : this.warningOnly.getValue();
         }
 
         /**
-         * @param value Warning Only.
+         * @param value Whether or not the test execution will produce a warning only on error for this assert.
          */
         public TestScriptSetupActionAssertComponent setWarningOnly(boolean value) { 
             if (this.warningOnly == null)
@@ -4238,18 +4238,18 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("compareToSourceId", "string", "Id of fixture used to compare the \"sourceId/path\" evaluations to.", 0, java.lang.Integer.MAX_VALUE, compareToSourceId));
           childrenList.add(new Property("compareToSourcePath", "string", "XPath or JSONPath expression against fixture used to compare the \"sourceId/path\" evaluations to.", 0, java.lang.Integer.MAX_VALUE, compareToSourcePath));
           childrenList.add(new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, java.lang.Integer.MAX_VALUE, contentType));
-          childrenList.add(new Property("headerField", "string", "The header field e.g. 'Location'.", 0, java.lang.Integer.MAX_VALUE, headerField));
+          childrenList.add(new Property("headerField", "string", "The HTTP header field name e.g. 'Location'.", 0, java.lang.Integer.MAX_VALUE, headerField));
           childrenList.add(new Property("minimumId", "string", "The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.", 0, java.lang.Integer.MAX_VALUE, minimumId));
-          childrenList.add(new Property("navigationLinks", "boolean", "Navigation Links.", 0, java.lang.Integer.MAX_VALUE, navigationLinks));
+          childrenList.add(new Property("navigationLinks", "boolean", "Whether or not the test execution performs validation on the bundle navigation links.", 0, java.lang.Integer.MAX_VALUE, navigationLinks));
           childrenList.add(new Property("operator", "code", "The operator type.", 0, java.lang.Integer.MAX_VALUE, operator));
           childrenList.add(new Property("path", "string", "The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server.", 0, java.lang.Integer.MAX_VALUE, path));
           childrenList.add(new Property("resource", "code", "The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.", 0, java.lang.Integer.MAX_VALUE, resource));
           childrenList.add(new Property("response", "code", "okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.", 0, java.lang.Integer.MAX_VALUE, response));
-          childrenList.add(new Property("responseCode", "string", "HTTP Response Code.", 0, java.lang.Integer.MAX_VALUE, responseCode));
+          childrenList.add(new Property("responseCode", "string", "The value of the HTTP response code to be tested.", 0, java.lang.Integer.MAX_VALUE, responseCode));
           childrenList.add(new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against.", 0, java.lang.Integer.MAX_VALUE, sourceId));
           childrenList.add(new Property("validateProfileId", "id", "The ID of the Profile to validate against.", 0, java.lang.Integer.MAX_VALUE, validateProfileId));
           childrenList.add(new Property("value", "string", "The value to compare to.", 0, java.lang.Integer.MAX_VALUE, value));
-          childrenList.add(new Property("warningOnly", "boolean", "Warning Only.", 0, java.lang.Integer.MAX_VALUE, warningOnly));
+          childrenList.add(new Property("warningOnly", "boolean", "Whether or not the test execution will produce a warning only on error for this assert.", 0, java.lang.Integer.MAX_VALUE, warningOnly));
         }
 
       public TestScriptSetupActionAssertComponent copy() {
@@ -4327,31 +4327,31 @@ public class TestScript extends DomainResource {
     @Block()
     public static class TestScriptTestComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The name of this test.
+         * The name of this testused for tracking/logging purposes by test engines.
          */
         @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The name of this test", formalDefinition="The name of this test." )
+        @Description(shortDefinition="Tracking/logging name of this test", formalDefinition="The name of this testused for tracking/logging purposes by test engines." )
         protected StringType name;
 
         /**
-         * A short description of the test.
+         * A short description of the test used by test engines for tracking and reporting purposes.
          */
         @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Short description of the test", formalDefinition="A short description of the test." )
+        @Description(shortDefinition="Tracking/reporting short description of the test", formalDefinition="A short description of the test used by test engines for tracking and reporting purposes." )
         protected StringType description;
 
         /**
          * Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.
          */
         @Child(name = "metadata", type = {TestScriptMetadataComponent.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Capabiltities that are assumed to function correctly on the FHIR server being tested", formalDefinition="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested." )
+        @Description(shortDefinition="Capabiltities that are expected to function correctly on the FHIR server being tested", formalDefinition="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested." )
         protected TestScriptMetadataComponent metadata;
 
         /**
          * Action would contain either an operation or an assertion.
          */
         @Child(name = "action", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Action", formalDefinition="Action would contain either an operation or an assertion." )
+        @Description(shortDefinition="A test operation or assert to perform", formalDefinition="Action would contain either an operation or an assertion." )
         protected List<TestScriptTestActionComponent> action;
 
         private static final long serialVersionUID = 408339297L;
@@ -4364,7 +4364,7 @@ public class TestScript extends DomainResource {
       }
 
         /**
-         * @return {@link #name} (The name of this test.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @return {@link #name} (The name of this testused for tracking/logging purposes by test engines.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
          */
         public StringType getNameElement() { 
           if (this.name == null)
@@ -4384,7 +4384,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #name} (The name of this test.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @param value {@link #name} (The name of this testused for tracking/logging purposes by test engines.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
          */
         public TestScriptTestComponent setNameElement(StringType value) { 
           this.name = value;
@@ -4392,14 +4392,14 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return The name of this test.
+         * @return The name of this testused for tracking/logging purposes by test engines.
          */
         public String getName() { 
           return this.name == null ? null : this.name.getValue();
         }
 
         /**
-         * @param value The name of this test.
+         * @param value The name of this testused for tracking/logging purposes by test engines.
          */
         public TestScriptTestComponent setName(String value) { 
           if (Utilities.noString(value))
@@ -4413,7 +4413,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #description} (A short description of the test.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         * @return {@link #description} (A short description of the test used by test engines for tracking and reporting purposes.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
         public StringType getDescriptionElement() { 
           if (this.description == null)
@@ -4433,7 +4433,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #description} (A short description of the test.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         * @param value {@link #description} (A short description of the test used by test engines for tracking and reporting purposes.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
         public TestScriptTestComponent setDescriptionElement(StringType value) { 
           this.description = value;
@@ -4441,14 +4441,14 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return A short description of the test.
+         * @return A short description of the test used by test engines for tracking and reporting purposes.
          */
         public String getDescription() { 
           return this.description == null ? null : this.description.getValue();
         }
 
         /**
-         * @param value A short description of the test.
+         * @param value A short description of the test used by test engines for tracking and reporting purposes.
          */
         public TestScriptTestComponent setDescription(String value) { 
           if (Utilities.noString(value))
@@ -4527,8 +4527,8 @@ public class TestScript extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of this test.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("description", "string", "A short description of the test.", 0, java.lang.Integer.MAX_VALUE, description));
+          childrenList.add(new Property("name", "string", "The name of this testused for tracking/logging purposes by test engines.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("description", "string", "A short description of the test used by test engines for tracking and reporting purposes.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("metadata", "@TestScript.metadata", "Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, metadata));
           childrenList.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
         }
@@ -4581,14 +4581,14 @@ public class TestScript extends DomainResource {
          * An operation would involve a REST request to a server.
          */
         @Child(name = "operation", type = {TestScriptSetupActionOperationComponent.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Operation", formalDefinition="An operation would involve a REST request to a server." )
+        @Description(shortDefinition="The setup operation to perform", formalDefinition="An operation would involve a REST request to a server." )
         protected TestScriptSetupActionOperationComponent operation;
 
         /**
          * Evaluates the results of previous operations to determine if the server under test behaves appropriately.
          */
         @Child(name = "assert", type = {TestScriptSetupActionAssertComponent.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Assertion", formalDefinition="Evaluates the results of previous operations to determine if the server under test behaves appropriately." )
+        @Description(shortDefinition="The setup assertion to perform", formalDefinition="Evaluates the results of previous operations to determine if the server under test behaves appropriately." )
         protected TestScriptSetupActionAssertComponent assert_;
 
         private static final long serialVersionUID = 1411550037L;
@@ -4692,10 +4692,10 @@ public class TestScript extends DomainResource {
     @Block()
     public static class TestScriptTeardownComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Action would contain either an operation or an assertion.
+         * The teardown action will only contain an operation.
          */
         @Child(name = "action", type = {}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Action", formalDefinition="Action would contain either an operation or an assertion." )
+        @Description(shortDefinition="One or more teardown operations to perform", formalDefinition="The teardown action will only contain an operation." )
         protected List<TestScriptTeardownActionComponent> action;
 
         private static final long serialVersionUID = 1850225254L;
@@ -4708,7 +4708,7 @@ public class TestScript extends DomainResource {
       }
 
         /**
-         * @return {@link #action} (Action would contain either an operation or an assertion.)
+         * @return {@link #action} (The teardown action will only contain an operation.)
          */
         public List<TestScriptTeardownActionComponent> getAction() { 
           if (this.action == null)
@@ -4726,7 +4726,7 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @return {@link #action} (Action would contain either an operation or an assertion.)
+         * @return {@link #action} (The teardown action will only contain an operation.)
          */
     // syntactic sugar
         public TestScriptTeardownActionComponent addAction() { //3
@@ -4749,7 +4749,7 @@ public class TestScript extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
+          childrenList.add(new Property("action", "", "The teardown action will only contain an operation.", 0, java.lang.Integer.MAX_VALUE, action));
         }
 
       public TestScriptTeardownComponent copy() {
@@ -4795,7 +4795,7 @@ public class TestScript extends DomainResource {
          * An operation would involve a REST request to a server.
          */
         @Child(name = "operation", type = {TestScriptSetupActionOperationComponent.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Operation", formalDefinition="An operation would involve a REST request to a server." )
+        @Description(shortDefinition="The teardown operation to perform", formalDefinition="An operation would involve a REST request to a server." )
         protected TestScriptSetupActionOperationComponent operation;
 
         private static final long serialVersionUID = 1684092023L;
@@ -4898,86 +4898,93 @@ public class TestScript extends DomainResource {
     protected Enumeration<ConformanceResourceStatus> status;
 
     /**
+     * Identifier for the TestScript assigned for external purposes outside the context of FHIR.
+     */
+    @Child(name = "identifier", type = {Identifier.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="External identifier", formalDefinition="Identifier for the TestScript assigned for external purposes outside the context of FHIR." )
+    protected Identifier identifier;
+
+    /**
      * This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "experimental", type = {BooleanType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The name of the individual or organization that published the Test Script.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "publisher", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the Test Script." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<TestScriptContactComponent> contact;
 
     /**
      * The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "date", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date for this version of the TestScript", formalDefinition="The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change." )
     protected DateTimeType date;
 
     /**
      * A free text natural language description of the TestScript and its use.
      */
-    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Natural language description of the TestScript", formalDefinition="A free text natural language description of the TestScript and its use." )
     protected StringType description;
 
     /**
      * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts.
      */
-    @Child(name = "useContext", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "useContext", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Content intends to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts." )
     protected List<CodeableConcept> useContext;
 
     /**
      * Explains why this Test Script is needed and why it's been constrained as it has.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requirements", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Scope and Usage this Test Script is for", formalDefinition="Explains why this Test Script is needed and why it's been constrained as it has." )
     protected StringType requirements;
 
     /**
      * A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
      */
-    @Child(name = "copyright", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "copyright", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or Publishing restrictions", formalDefinition="A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings." )
     protected StringType copyright;
 
     /**
      * The required capability must exist and is assumed to function correctly on the FHIR server being tested.
      */
-    @Child(name = "metadata", type = {}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "metadata", type = {}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Required capability that is assumed to function correctly on the FHIR server being tested", formalDefinition="The required capability must exist and is assumed to function correctly on the FHIR server being tested." )
     protected TestScriptMetadataComponent metadata;
 
     /**
      * If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.
      */
-    @Child(name = "multiserver", type = {BooleanType.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "multiserver", type = {BooleanType.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Whether or not the tests apply to more than one FHIR server", formalDefinition="If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified." )
     protected BooleanType multiserver;
 
     /**
      * Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.
      */
-    @Child(name = "fixture", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "fixture", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Fixture in the test script - by reference (uri)", formalDefinition="Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute." )
     protected List<TestScriptFixtureComponent> fixture;
 
     /**
      * Reference to the profile to be used for validation.
      */
-    @Child(name = "profile", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "profile", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Reference of the validation profile", formalDefinition="Reference to the profile to be used for validation." )
     protected List<Reference> profile;
     /**
@@ -4989,32 +4996,32 @@ public class TestScript extends DomainResource {
     /**
      * Variable is set based either on element value in response body or on header field value in the response headers.
      */
-    @Child(name = "variable", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Variable", formalDefinition="Variable is set based either on element value in response body or on header field value in the response headers." )
+    @Child(name = "variable", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Placeholder for evaluated elements", formalDefinition="Variable is set based either on element value in response body or on header field value in the response headers." )
     protected List<TestScriptVariableComponent> variable;
 
     /**
      * A series of required setup operations before tests are executed.
      */
-    @Child(name = "setup", type = {}, order=17, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "setup", type = {}, order=18, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="A series of required setup operations before tests are executed", formalDefinition="A series of required setup operations before tests are executed." )
     protected TestScriptSetupComponent setup;
 
     /**
      * A test in this script.
      */
-    @Child(name = "test", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "test", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A test in this script", formalDefinition="A test in this script." )
     protected List<TestScriptTestComponent> test;
 
     /**
      * A series of operations required to clean up after the all the tests are executed (successfully or otherwise).
      */
-    @Child(name = "teardown", type = {}, order=19, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "teardown", type = {}, order=20, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="A series of required clean up steps", formalDefinition="A series of operations required to clean up after the all the tests are executed (successfully or otherwise)." )
     protected TestScriptTeardownComponent teardown;
 
-    private static final long serialVersionUID = -77088763L;
+    private static final long serialVersionUID = -2049162917L;
 
   /*
    * Constructor
@@ -5214,6 +5221,30 @@ public class TestScript extends DomainResource {
         if (this.status == null)
           this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory());
         this.status.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #identifier} (Identifier for the TestScript assigned for external purposes outside the context of FHIR.)
+     */
+    public Identifier getIdentifier() { 
+      if (this.identifier == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create TestScript.identifier");
+        else if (Configuration.doAutoCreate())
+          this.identifier = new Identifier(); // cc
+      return this.identifier;
+    }
+
+    public boolean hasIdentifier() { 
+      return this.identifier != null && !this.identifier.isEmpty();
+    }
+
+    /**
+     * @param value {@link #identifier} (Identifier for the TestScript assigned for external purposes outside the context of FHIR.)
+     */
+    public TestScript setIdentifier(Identifier value) { 
+      this.identifier = value;
       return this;
     }
 
@@ -5879,6 +5910,7 @@ public class TestScript extends DomainResource {
         childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A free text natural language name identifying the TestScript.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("status", "code", "The status of the TestScript.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("identifier", "Identifier", "Identifier for the TestScript assigned for external purposes outside the context of FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("experimental", "boolean", "This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the Test Script.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
@@ -5904,6 +5936,7 @@ public class TestScript extends DomainResource {
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.status = status == null ? null : status.copy();
+        dst.identifier = identifier == null ? null : identifier.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
@@ -5959,13 +5992,13 @@ public class TestScript extends DomainResource {
           return false;
         TestScript o = (TestScript) other;
         return compareDeep(url, o.url, true) && compareDeep(version, o.version, true) && compareDeep(name, o.name, true)
-           && compareDeep(status, o.status, true) && compareDeep(experimental, o.experimental, true) && compareDeep(publisher, o.publisher, true)
-           && compareDeep(contact, o.contact, true) && compareDeep(date, o.date, true) && compareDeep(description, o.description, true)
-           && compareDeep(useContext, o.useContext, true) && compareDeep(requirements, o.requirements, true)
-           && compareDeep(copyright, o.copyright, true) && compareDeep(metadata, o.metadata, true) && compareDeep(multiserver, o.multiserver, true)
-           && compareDeep(fixture, o.fixture, true) && compareDeep(profile, o.profile, true) && compareDeep(variable, o.variable, true)
-           && compareDeep(setup, o.setup, true) && compareDeep(test, o.test, true) && compareDeep(teardown, o.teardown, true)
-          ;
+           && compareDeep(status, o.status, true) && compareDeep(identifier, o.identifier, true) && compareDeep(experimental, o.experimental, true)
+           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(date, o.date, true)
+           && compareDeep(description, o.description, true) && compareDeep(useContext, o.useContext, true)
+           && compareDeep(requirements, o.requirements, true) && compareDeep(copyright, o.copyright, true)
+           && compareDeep(metadata, o.metadata, true) && compareDeep(multiserver, o.multiserver, true) && compareDeep(fixture, o.fixture, true)
+           && compareDeep(profile, o.profile, true) && compareDeep(variable, o.variable, true) && compareDeep(setup, o.setup, true)
+           && compareDeep(test, o.test, true) && compareDeep(teardown, o.teardown, true);
       }
 
       @Override
@@ -5983,14 +6016,14 @@ public class TestScript extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (url == null || url.isEmpty()) && (version == null || version.isEmpty())
-           && (name == null || name.isEmpty()) && (status == null || status.isEmpty()) && (experimental == null || experimental.isEmpty())
-           && (publisher == null || publisher.isEmpty()) && (contact == null || contact.isEmpty()) && (date == null || date.isEmpty())
-           && (description == null || description.isEmpty()) && (useContext == null || useContext.isEmpty())
-           && (requirements == null || requirements.isEmpty()) && (copyright == null || copyright.isEmpty())
-           && (metadata == null || metadata.isEmpty()) && (multiserver == null || multiserver.isEmpty())
-           && (fixture == null || fixture.isEmpty()) && (profile == null || profile.isEmpty()) && (variable == null || variable.isEmpty())
-           && (setup == null || setup.isEmpty()) && (test == null || test.isEmpty()) && (teardown == null || teardown.isEmpty())
-          ;
+           && (name == null || name.isEmpty()) && (status == null || status.isEmpty()) && (identifier == null || identifier.isEmpty())
+           && (experimental == null || experimental.isEmpty()) && (publisher == null || publisher.isEmpty())
+           && (contact == null || contact.isEmpty()) && (date == null || date.isEmpty()) && (description == null || description.isEmpty())
+           && (useContext == null || useContext.isEmpty()) && (requirements == null || requirements.isEmpty())
+           && (copyright == null || copyright.isEmpty()) && (metadata == null || metadata.isEmpty())
+           && (multiserver == null || multiserver.isEmpty()) && (fixture == null || fixture.isEmpty())
+           && (profile == null || profile.isEmpty()) && (variable == null || variable.isEmpty()) && (setup == null || setup.isEmpty())
+           && (test == null || test.isEmpty()) && (teardown == null || teardown.isEmpty());
       }
 
   @Override
@@ -5998,16 +6031,20 @@ public class TestScript extends DomainResource {
     return ResourceType.TestScript;
    }
 
-  @SearchParamDefinition(name="testscript-setup-capabilities", path="TestScript.setup.metadata.capabilities.description", description="TestScript setup required and validated capabilities", type="string" )
-  public static final String SP_TESTSCRIPTSETUPCAPABILITIES = "testscript-setup-capabilities";
-  @SearchParamDefinition(name="name", path="TestScript.name", description="TestScript name", type="string" )
+  @SearchParamDefinition(name="identifier", path="TestScript.identifier", description="TestScript.identifier", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="testscript-test-capability", path="TestScript.test.metadata.capability.description", description="TestScript test required and validated capability", type="string" )
+  public static final String SP_TESTSCRIPTTESTCAPABILITY = "testscript-test-capability";
+  @SearchParamDefinition(name="testscript-setup-capability", path="TestScript.setup.metadata.capability.description", description="TestScript setup required and validated capability", type="string" )
+  public static final String SP_TESTSCRIPTSETUPCAPABILITY = "testscript-setup-capability";
+  @SearchParamDefinition(name="name", path="TestScript.name", description="TestScript.name", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="description", path="TestScript.description", description="TestScript description", type="string" )
   public static final String SP_DESCRIPTION = "description";
-  @SearchParamDefinition(name="testscript-capabilities", path="TestScript.metadata.capabilities.description", description="TestScript required and validated capabilities", type="string" )
-  public static final String SP_TESTSCRIPTCAPABILITIES = "testscript-capabilities";
-  @SearchParamDefinition(name="testscript-test-capabilities", path="TestScript.test.metadata.capabilities.description", description="TestScript test required and validated capabilities", type="string" )
-  public static final String SP_TESTSCRIPTTESTCAPABILITIES = "testscript-test-capabilities";
+  @SearchParamDefinition(name="testscript-capability", path="TestScript.metadata.capability.description", description="TestScript required and validated capability", type="string" )
+  public static final String SP_TESTSCRIPTCAPABILITY = "testscript-capability";
+  @SearchParamDefinition(name="url", path="TestScript.url", description="TestScript url", type="uri" )
+  public static final String SP_URL = "url";
 
 }
 

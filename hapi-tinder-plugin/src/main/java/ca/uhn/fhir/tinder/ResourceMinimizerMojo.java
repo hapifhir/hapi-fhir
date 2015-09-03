@@ -38,17 +38,19 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceMinimizerMojo.class);
 
 	@Parameter(required = true)
-	private File targetDirectory;
-
-	@Parameter(required = true)
 	private String fhirVersion;
 
+	private long myByteCount;
 	private FhirContext myCtx;
+	private int myFileCount;
+
+	@Parameter(required = true)
+	private File targetDirectory;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		ourLog.info("Starting resource minimizer");
-		
+
 		if ("DSTU".equals(fhirVersion)) {
 			myCtx = FhirContext.forDstu1();
 		} else if ("DSTU2".equals(fhirVersion)) {
@@ -87,8 +89,8 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 			} else if (input instanceof org.hl7.fhir.instance.model.Bundle) {
 				for (BundleEntryComponent nextEntry : ((org.hl7.fhir.instance.model.Bundle) input).getEntry()) {
 					if (nextEntry.getResource() instanceof DomainResource) {
-						((DomainResource)nextEntry.getResource()).getText().getDiv().setValueAsString((String) null);
-						((DomainResource)nextEntry.getResource()).getText().getStatusElement().setValueAsString((String) null);
+						((DomainResource) nextEntry.getResource()).getText().getDiv().setValueAsString((String) null);
+						((DomainResource) nextEntry.getResource()).getText().getStatusElement().setValueAsString((String) null);
 					}
 				}
 			} else if (input instanceof DomainResource) {
@@ -112,15 +114,17 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 						break;
 					}
 				}
-				
+
 				b.append(StringUtils.leftPad("", i / 3, ' '));
 				b.append(nextLine.substring(i));
 				b.append("\n");
 			}
 			outputString = b.toString();
-			
+
 			if (!inputString.equals(outputString)) {
 				ourLog.info("Trimming contents of resource: {} - From {} to {}", nextFile, FileUtils.byteCountToDisplaySize(inputString.length()), FileUtils.byteCountToDisplaySize(outputString.length()));
+				myByteCount += (inputString.length() - outputString.length());
+				myFileCount++;
 				try {
 					String f = nextFile.getAbsolutePath();
 					Writer w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
@@ -136,28 +140,47 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		}
 	}
 
+	public long getByteCount() {
+		return myByteCount;
+	}
+
+	public int getFileCount() {
+		return myFileCount;
+	}
+
 	public static void main(String[] args) throws Exception {
-		LoggerContext loggerContext = ((ch.qos.logback.classic.Logger)ourLog).getLoggerContext();
-      URL mainURL = ConfigurationWatchListUtil.getMainWatchURL(loggerContext);
-      System.out.println(mainURL);
-      // or even
-      ourLog.info("Logback used '{}' as the configuration file.", mainURL);
+		LoggerContext loggerContext = ((ch.qos.logback.classic.Logger) ourLog).getLoggerContext();
+		URL mainURL = ConfigurationWatchListUtil.getMainWatchURL(loggerContext);
+		System.out.println(mainURL);
+		// or even
+		ourLog.info("Logback used '{}' as the configuration file.", mainURL);
+
+		int fileCount = 0;
+		long byteCount = 0;
 		
 		ResourceMinimizerMojo m = new ResourceMinimizerMojo();
 		m.targetDirectory = new File("../hapi-tinder-plugin/src/main/resources/vs/dstu2");
 		m.fhirVersion = "DSTU2";
 		m.execute();
-		
-		m = new ResourceMinimizerMojo();
-		m.targetDirectory = new File("../hapi-fhir-validation-resources/src/main/resources/org/hl7/fhir/instance/model/valueset/");
-		m.fhirVersion = "DSTU2";
-		m.execute();
-		
-		m = new ResourceMinimizerMojo();
-		m.targetDirectory = new File("../hapi-fhir-validation-resources/src/main/resources/org/hl7/fhir/instance/model/profile");
-		m.fhirVersion = "DSTU2";
-		m.execute();
+		byteCount += m.getByteCount();
+		fileCount += m.getFileCount();
 
+		m = new ResourceMinimizerMojo();
+		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2/src/main/resources/org/hl7/fhir/instance/model/valueset");
+		m.fhirVersion = "DSTU2";
+		m.execute();
+		byteCount += m.getByteCount();
+		fileCount += m.getFileCount();
+
+		m = new ResourceMinimizerMojo();
+		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2/src/main/resources/org/hl7/fhir/instance/model/profile");
+		m.fhirVersion = "DSTU2";
+		m.execute();
+		byteCount += m.getByteCount();
+		fileCount += m.getFileCount();
+
+		ourLog.info("Trimmed {} files", fileCount);
+		ourLog.info("Trimmed {} bytes", FileUtils.byteCountToDisplaySize(byteCount));
 	}
 
 }

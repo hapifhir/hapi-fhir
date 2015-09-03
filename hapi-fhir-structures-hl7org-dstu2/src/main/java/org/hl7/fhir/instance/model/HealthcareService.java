@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -781,9 +781,23 @@ public class HealthcareService extends DomainResource {
     protected Organization providedByTarget;
 
     /**
+     * Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type.
+     */
+    @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type", formalDefinition="Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type." )
+    protected CodeableConcept serviceCategory;
+
+    /**
+     * A specific type of service that may be delivered or performed.
+     */
+    @Child(name = "serviceType", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="A specific type of service that may be delivered or performed", formalDefinition="A specific type of service that may be delivered or performed." )
+    protected List<ServiceTypeComponent> serviceType;
+
+    /**
      * The location where this healthcare service may be provided.
      */
-    @Child(name = "location", type = {Location.class}, order=2, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "location", type = {Location.class}, order=4, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The location where this healthcare service may be provided", formalDefinition="The location where this healthcare service may be provided." )
     protected Reference location;
 
@@ -791,20 +805,6 @@ public class HealthcareService extends DomainResource {
      * The actual object that is the target of the reference (The location where this healthcare service may be provided.)
      */
     protected Location locationTarget;
-
-    /**
-     * Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type.
-     */
-    @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type", formalDefinition="Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type." )
-    protected CodeableConcept serviceCategory;
-
-    /**
-     * A specific type of service that may be delivered or performed.
-     */
-    @Child(name = "serviceType", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="A specific type of service that may be delivered or performed", formalDefinition="A specific type of service that may be delivered or performed." )
-    protected List<ServiceTypeComponent> serviceType;
 
     /**
      * Further description of the service as it would be presented to a consumer while searching.
@@ -930,7 +930,7 @@ public class HealthcareService extends DomainResource {
     @Description(shortDefinition="A description of Site availability exceptions, e.g., public holiday availability. Succinctly describing all possible exceptions to normal Site availability as details in the Available Times and Not Available Times", formalDefinition="A description of Site availability exceptions, e.g., public holiday availability. Succinctly describing all possible exceptions to normal Site availability as details in the Available Times and Not Available Times." )
     protected StringType availabilityExceptions;
 
-    private static final long serialVersionUID = 543354370L;
+    private static final long serialVersionUID = 683771126L;
 
   /*
    * Constructor
@@ -1032,50 +1032,6 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #location} (The location where this healthcare service may be provided.)
-     */
-    public Reference getLocation() { 
-      if (this.location == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create HealthcareService.location");
-        else if (Configuration.doAutoCreate())
-          this.location = new Reference(); // cc
-      return this.location;
-    }
-
-    public boolean hasLocation() { 
-      return this.location != null && !this.location.isEmpty();
-    }
-
-    /**
-     * @param value {@link #location} (The location where this healthcare service may be provided.)
-     */
-    public HealthcareService setLocation(Reference value) { 
-      this.location = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The location where this healthcare service may be provided.)
-     */
-    public Location getLocationTarget() { 
-      if (this.locationTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create HealthcareService.location");
-        else if (Configuration.doAutoCreate())
-          this.locationTarget = new Location(); // aa
-      return this.locationTarget;
-    }
-
-    /**
-     * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The location where this healthcare service may be provided.)
-     */
-    public HealthcareService setLocationTarget(Location value) { 
-      this.locationTarget = value;
-      return this;
-    }
-
-    /**
      * @return {@link #serviceCategory} (Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type.)
      */
     public CodeableConcept getServiceCategory() { 
@@ -1136,6 +1092,50 @@ public class HealthcareService extends DomainResource {
       if (this.serviceType == null)
         this.serviceType = new ArrayList<ServiceTypeComponent>();
       this.serviceType.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #location} (The location where this healthcare service may be provided.)
+     */
+    public Reference getLocation() { 
+      if (this.location == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create HealthcareService.location");
+        else if (Configuration.doAutoCreate())
+          this.location = new Reference(); // cc
+      return this.location;
+    }
+
+    public boolean hasLocation() { 
+      return this.location != null && !this.location.isEmpty();
+    }
+
+    /**
+     * @param value {@link #location} (The location where this healthcare service may be provided.)
+     */
+    public HealthcareService setLocation(Reference value) { 
+      this.location = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The location where this healthcare service may be provided.)
+     */
+    public Location getLocationTarget() { 
+      if (this.locationTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create HealthcareService.location");
+        else if (Configuration.doAutoCreate())
+          this.locationTarget = new Location(); // aa
+      return this.locationTarget;
+    }
+
+    /**
+     * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The location where this healthcare service may be provided.)
+     */
+    public HealthcareService setLocationTarget(Location value) { 
+      this.locationTarget = value;
       return this;
     }
 
@@ -1885,9 +1885,9 @@ public class HealthcareService extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "External Identifiers for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("providedBy", "Reference(Organization)", "The organization that provides this Healthcare Service.", 0, java.lang.Integer.MAX_VALUE, providedBy));
-        childrenList.add(new Property("location", "Reference(Location)", "The location where this healthcare service may be provided.", 0, java.lang.Integer.MAX_VALUE, location));
         childrenList.add(new Property("serviceCategory", "CodeableConcept", "Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
         childrenList.add(new Property("serviceType", "", "A specific type of service that may be delivered or performed.", 0, java.lang.Integer.MAX_VALUE, serviceType));
+        childrenList.add(new Property("location", "Reference(Location)", "The location where this healthcare service may be provided.", 0, java.lang.Integer.MAX_VALUE, location));
         childrenList.add(new Property("serviceName", "string", "Further description of the service as it would be presented to a consumer while searching.", 0, java.lang.Integer.MAX_VALUE, serviceName));
         childrenList.add(new Property("comment", "string", "Any additional description of the service and/or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName.", 0, java.lang.Integer.MAX_VALUE, comment));
         childrenList.add(new Property("extraDetails", "string", "Extra details about the service that can't be placed in the other fields.", 0, java.lang.Integer.MAX_VALUE, extraDetails));
@@ -1916,13 +1916,13 @@ public class HealthcareService extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.providedBy = providedBy == null ? null : providedBy.copy();
-        dst.location = location == null ? null : location.copy();
         dst.serviceCategory = serviceCategory == null ? null : serviceCategory.copy();
         if (serviceType != null) {
           dst.serviceType = new ArrayList<ServiceTypeComponent>();
           for (ServiceTypeComponent i : serviceType)
             dst.serviceType.add(i.copy());
         };
+        dst.location = location == null ? null : location.copy();
         dst.serviceName = serviceName == null ? null : serviceName.copy();
         dst.comment = comment == null ? null : comment.copy();
         dst.extraDetails = extraDetails == null ? null : extraDetails.copy();
@@ -1987,10 +1987,10 @@ public class HealthcareService extends DomainResource {
           return false;
         HealthcareService o = (HealthcareService) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(providedBy, o.providedBy, true)
-           && compareDeep(location, o.location, true) && compareDeep(serviceCategory, o.serviceCategory, true)
-           && compareDeep(serviceType, o.serviceType, true) && compareDeep(serviceName, o.serviceName, true)
-           && compareDeep(comment, o.comment, true) && compareDeep(extraDetails, o.extraDetails, true) && compareDeep(photo, o.photo, true)
-           && compareDeep(telecom, o.telecom, true) && compareDeep(coverageArea, o.coverageArea, true) && compareDeep(serviceProvisionCode, o.serviceProvisionCode, true)
+           && compareDeep(serviceCategory, o.serviceCategory, true) && compareDeep(serviceType, o.serviceType, true)
+           && compareDeep(location, o.location, true) && compareDeep(serviceName, o.serviceName, true) && compareDeep(comment, o.comment, true)
+           && compareDeep(extraDetails, o.extraDetails, true) && compareDeep(photo, o.photo, true) && compareDeep(telecom, o.telecom, true)
+           && compareDeep(coverageArea, o.coverageArea, true) && compareDeep(serviceProvisionCode, o.serviceProvisionCode, true)
            && compareDeep(eligibility, o.eligibility, true) && compareDeep(eligibilityNote, o.eligibilityNote, true)
            && compareDeep(programName, o.programName, true) && compareDeep(characteristic, o.characteristic, true)
            && compareDeep(referralMethod, o.referralMethod, true) && compareDeep(publicKey, o.publicKey, true)
@@ -2014,8 +2014,8 @@ public class HealthcareService extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (providedBy == null || providedBy.isEmpty())
-           && (location == null || location.isEmpty()) && (serviceCategory == null || serviceCategory.isEmpty())
-           && (serviceType == null || serviceType.isEmpty()) && (serviceName == null || serviceName.isEmpty())
+           && (serviceCategory == null || serviceCategory.isEmpty()) && (serviceType == null || serviceType.isEmpty())
+           && (location == null || location.isEmpty()) && (serviceName == null || serviceName.isEmpty())
            && (comment == null || comment.isEmpty()) && (extraDetails == null || extraDetails.isEmpty())
            && (photo == null || photo.isEmpty()) && (telecom == null || telecom.isEmpty()) && (coverageArea == null || coverageArea.isEmpty())
            && (serviceProvisionCode == null || serviceProvisionCode.isEmpty()) && (eligibility == null || eligibility.isEmpty())

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -408,9 +408,21 @@ public class RiskAssessment extends DomainResource {
     protected Condition conditionTarget;
 
     /**
+     * The encounter where the assessement was performed.
+     */
+    @Child(name = "encounter", type = {Encounter.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Where was assessment performed?", formalDefinition="The encounter where the assessement was performed." )
+    protected Reference encounter;
+
+    /**
+     * The actual object that is the target of the reference (The encounter where the assessement was performed.)
+     */
+    protected Encounter encounterTarget;
+
+    /**
      * The provider or software application that performed the assessment.
      */
-    @Child(name = "performer", type = {Practitioner.class, Device.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "performer", type = {Practitioner.class, Device.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who did assessment?", formalDefinition="The provider or software application that performed the assessment." )
     protected Reference performer;
 
@@ -422,21 +434,21 @@ public class RiskAssessment extends DomainResource {
     /**
      * Business identifier assigned to the risk assessment.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Unique identifier for the assessment", formalDefinition="Business identifier assigned to the risk assessment." )
     protected Identifier identifier;
 
     /**
      * The algorithm, processs or mechanism used to evaluate the risk.
      */
-    @Child(name = "method", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "method", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Evaluation mechanism", formalDefinition="The algorithm, processs or mechanism used to evaluate the risk." )
     protected CodeableConcept method;
 
     /**
      * Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).
      */
-    @Child(name = "basis", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "basis", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Information used in assessment", formalDefinition="Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.)." )
     protected List<Reference> basis;
     /**
@@ -448,18 +460,18 @@ public class RiskAssessment extends DomainResource {
     /**
      * Describes the expected outcome for the subject.
      */
-    @Child(name = "prediction", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "prediction", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Outcome predicted", formalDefinition="Describes the expected outcome for the subject." )
     protected List<RiskAssessmentPredictionComponent> prediction;
 
     /**
      * A description of the steps that might be taken to reduce the identified risk(s).
      */
-    @Child(name = "mitigation", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "mitigation", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="How to reduce risk", formalDefinition="A description of the steps that might be taken to reduce the identified risk(s)." )
     protected StringType mitigation;
 
-    private static final long serialVersionUID = -1516167658L;
+    private static final long serialVersionUID = 724306293L;
 
   /*
    * Constructor
@@ -597,6 +609,50 @@ public class RiskAssessment extends DomainResource {
      */
     public RiskAssessment setConditionTarget(Condition value) { 
       this.conditionTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #encounter} (The encounter where the assessement was performed.)
+     */
+    public Reference getEncounter() { 
+      if (this.encounter == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RiskAssessment.encounter");
+        else if (Configuration.doAutoCreate())
+          this.encounter = new Reference(); // cc
+      return this.encounter;
+    }
+
+    public boolean hasEncounter() { 
+      return this.encounter != null && !this.encounter.isEmpty();
+    }
+
+    /**
+     * @param value {@link #encounter} (The encounter where the assessement was performed.)
+     */
+    public RiskAssessment setEncounter(Reference value) { 
+      this.encounter = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter where the assessement was performed.)
+     */
+    public Encounter getEncounterTarget() { 
+      if (this.encounterTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RiskAssessment.encounter");
+        else if (Configuration.doAutoCreate())
+          this.encounterTarget = new Encounter(); // aa
+      return this.encounterTarget;
+    }
+
+    /**
+     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter where the assessement was performed.)
+     */
+    public RiskAssessment setEncounterTarget(Encounter value) { 
+      this.encounterTarget = value;
       return this;
     }
 
@@ -830,6 +886,7 @@ public class RiskAssessment extends DomainResource {
         childrenList.add(new Property("subject", "Reference(Patient|Group)", "The patient or group the risk assessment applies to.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("date", "dateTime", "The date (and possibly time) the risk assessment was performed.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("condition", "Reference(Condition)", "For assessments or prognosis specific to a particular condition, indicates the condition being assessed.", 0, java.lang.Integer.MAX_VALUE, condition));
+        childrenList.add(new Property("encounter", "Reference(Encounter)", "The encounter where the assessement was performed.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("performer", "Reference(Practitioner|Device)", "The provider or software application that performed the assessment.", 0, java.lang.Integer.MAX_VALUE, performer));
         childrenList.add(new Property("identifier", "Identifier", "Business identifier assigned to the risk assessment.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("method", "CodeableConcept", "The algorithm, processs or mechanism used to evaluate the risk.", 0, java.lang.Integer.MAX_VALUE, method));
@@ -844,6 +901,7 @@ public class RiskAssessment extends DomainResource {
         dst.subject = subject == null ? null : subject.copy();
         dst.date = date == null ? null : date.copy();
         dst.condition = condition == null ? null : condition.copy();
+        dst.encounter = encounter == null ? null : encounter.copy();
         dst.performer = performer == null ? null : performer.copy();
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.method = method == null ? null : method.copy();
@@ -873,9 +931,9 @@ public class RiskAssessment extends DomainResource {
           return false;
         RiskAssessment o = (RiskAssessment) other;
         return compareDeep(subject, o.subject, true) && compareDeep(date, o.date, true) && compareDeep(condition, o.condition, true)
-           && compareDeep(performer, o.performer, true) && compareDeep(identifier, o.identifier, true) && compareDeep(method, o.method, true)
-           && compareDeep(basis, o.basis, true) && compareDeep(prediction, o.prediction, true) && compareDeep(mitigation, o.mitigation, true)
-          ;
+           && compareDeep(encounter, o.encounter, true) && compareDeep(performer, o.performer, true) && compareDeep(identifier, o.identifier, true)
+           && compareDeep(method, o.method, true) && compareDeep(basis, o.basis, true) && compareDeep(prediction, o.prediction, true)
+           && compareDeep(mitigation, o.mitigation, true);
       }
 
       @Override
@@ -890,10 +948,10 @@ public class RiskAssessment extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (subject == null || subject.isEmpty()) && (date == null || date.isEmpty())
-           && (condition == null || condition.isEmpty()) && (performer == null || performer.isEmpty())
-           && (identifier == null || identifier.isEmpty()) && (method == null || method.isEmpty()) && (basis == null || basis.isEmpty())
-           && (prediction == null || prediction.isEmpty()) && (mitigation == null || mitigation.isEmpty())
-          ;
+           && (condition == null || condition.isEmpty()) && (encounter == null || encounter.isEmpty())
+           && (performer == null || performer.isEmpty()) && (identifier == null || identifier.isEmpty())
+           && (method == null || method.isEmpty()) && (basis == null || basis.isEmpty()) && (prediction == null || prediction.isEmpty())
+           && (mitigation == null || mitigation.isEmpty());
       }
 
   @Override
@@ -915,6 +973,8 @@ public class RiskAssessment extends DomainResource {
   public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="patient", path="RiskAssessment.subject", description="Who/what does assessment apply to?", type="reference" )
   public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="encounter", path="RiskAssessment.encounter", description="Where was assessment performed?", type="reference" )
+  public static final String SP_ENCOUNTER = "encounter";
 
 }
 

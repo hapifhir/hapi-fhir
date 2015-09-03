@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -1435,6 +1435,8 @@ public class Condition extends DomainResource {
 
   @SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token" )
   public static final String SP_SEVERITY = "severity";
+  @SearchParamDefinition(name="identifier", path="Condition.identifier", description="A unique identifier of the condition record", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="clinicalstatus", path="Condition.clinicalStatus", description="The clinical status of the condition", type="token" )
   public static final String SP_CLINICALSTATUS = "clinicalstatus";
   @SearchParamDefinition(name="onset-info", path="Condition.onset[x]", description="Other onsets (boolean, age, range, string)", type="string" )

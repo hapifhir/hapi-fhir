@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -194,16 +194,30 @@ public class AppointmentResponse extends DomainResource {
     protected Appointment appointmentTarget;
 
     /**
+     * This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time.
+     */
+    @Child(name = "start", type = {InstantType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Date/Time that the appointment is to take place, or requested new start time", formalDefinition="This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time." )
+    protected InstantType start;
+
+    /**
+     * This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.
+     */
+    @Child(name = "end", type = {InstantType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Date/Time that the appointment is to conclude, or requested new end time", formalDefinition="This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time." )
+    protected InstantType end;
+
+    /**
      * Role of participant in the appointment.
      */
-    @Child(name = "participantType", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "participantType", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Role of participant in the appointment", formalDefinition="Role of participant in the appointment." )
     protected List<CodeableConcept> participantType;
 
     /**
      * A Person, Location/HealthcareService or Device that is participating in the appointment.
      */
-    @Child(name = "actor", type = {Patient.class, Practitioner.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "actor", type = {Patient.class, Practitioner.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="A Person, Location/HealthcareService or Device that is participating in the appointment", formalDefinition="A Person, Location/HealthcareService or Device that is participating in the appointment." )
     protected Reference actor;
 
@@ -215,32 +229,18 @@ public class AppointmentResponse extends DomainResource {
     /**
      * Participation status of the Participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty.
      */
-    @Child(name = "participantStatus", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "participantStatus", type = {CodeType.class}, order=6, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="accepted | declined | tentative | in-process | completed | needs-action", formalDefinition="Participation status of the Participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty." )
     protected Enumeration<ParticipantStatus> participantStatus;
 
     /**
      * This comment is particularly important when the responder is declining, tentative or requesting another time to indicate the reasons why.
      */
-    @Child(name = "comment", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "comment", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Additional comments about the appointment", formalDefinition="This comment is particularly important when the responder is declining, tentative or requesting another time to indicate the reasons why." )
     protected StringType comment;
 
-    /**
-     * This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time.
-     */
-    @Child(name = "start", type = {InstantType.class}, order=6, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Date/Time that the appointment is to take place, or requested new start time", formalDefinition="This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time." )
-    protected InstantType start;
-
-    /**
-     * This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.
-     */
-    @Child(name = "end", type = {InstantType.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Date/Time that the appointment is to conclude, or requested new end time", formalDefinition="This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time." )
-    protected InstantType end;
-
-    private static final long serialVersionUID = -1858624259L;
+    private static final long serialVersionUID = 248548635L;
 
   /*
    * Constructor
@@ -339,6 +339,104 @@ public class AppointmentResponse extends DomainResource {
      */
     public AppointmentResponse setAppointmentTarget(Appointment value) { 
       this.appointmentTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #start} (This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
+     */
+    public InstantType getStartElement() { 
+      if (this.start == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create AppointmentResponse.start");
+        else if (Configuration.doAutoCreate())
+          this.start = new InstantType(); // bb
+      return this.start;
+    }
+
+    public boolean hasStartElement() { 
+      return this.start != null && !this.start.isEmpty();
+    }
+
+    public boolean hasStart() { 
+      return this.start != null && !this.start.isEmpty();
+    }
+
+    /**
+     * @param value {@link #start} (This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
+     */
+    public AppointmentResponse setStartElement(InstantType value) { 
+      this.start = value;
+      return this;
+    }
+
+    /**
+     * @return This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time.
+     */
+    public Date getStart() { 
+      return this.start == null ? null : this.start.getValue();
+    }
+
+    /**
+     * @param value This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time.
+     */
+    public AppointmentResponse setStart(Date value) { 
+      if (value == null)
+        this.start = null;
+      else {
+        if (this.start == null)
+          this.start = new InstantType();
+        this.start.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #end} (This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+     */
+    public InstantType getEndElement() { 
+      if (this.end == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create AppointmentResponse.end");
+        else if (Configuration.doAutoCreate())
+          this.end = new InstantType(); // bb
+      return this.end;
+    }
+
+    public boolean hasEndElement() { 
+      return this.end != null && !this.end.isEmpty();
+    }
+
+    public boolean hasEnd() { 
+      return this.end != null && !this.end.isEmpty();
+    }
+
+    /**
+     * @param value {@link #end} (This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+     */
+    public AppointmentResponse setEndElement(InstantType value) { 
+      this.end = value;
+      return this;
+    }
+
+    /**
+     * @return This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.
+     */
+    public Date getEnd() { 
+      return this.end == null ? null : this.end.getValue();
+    }
+
+    /**
+     * @param value This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.
+     */
+    public AppointmentResponse setEnd(Date value) { 
+      if (value == null)
+        this.end = null;
+      else {
+        if (this.end == null)
+          this.end = new InstantType();
+        this.end.setValue(value);
+      }
       return this;
     }
 
@@ -515,114 +613,16 @@ public class AppointmentResponse extends DomainResource {
       return this;
     }
 
-    /**
-     * @return {@link #start} (This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
-     */
-    public InstantType getStartElement() { 
-      if (this.start == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create AppointmentResponse.start");
-        else if (Configuration.doAutoCreate())
-          this.start = new InstantType(); // bb
-      return this.start;
-    }
-
-    public boolean hasStartElement() { 
-      return this.start != null && !this.start.isEmpty();
-    }
-
-    public boolean hasStart() { 
-      return this.start != null && !this.start.isEmpty();
-    }
-
-    /**
-     * @param value {@link #start} (This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time.). This is the underlying object with id, value and extensions. The accessor "getStart" gives direct access to the value
-     */
-    public AppointmentResponse setStartElement(InstantType value) { 
-      this.start = value;
-      return this;
-    }
-
-    /**
-     * @return This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time.
-     */
-    public Date getStart() { 
-      return this.start == null ? null : this.start.getValue();
-    }
-
-    /**
-     * @param value This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time.
-     */
-    public AppointmentResponse setStart(Date value) { 
-      if (value == null)
-        this.start = null;
-      else {
-        if (this.start == null)
-          this.start = new InstantType();
-        this.start.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #end} (This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
-     */
-    public InstantType getEndElement() { 
-      if (this.end == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create AppointmentResponse.end");
-        else if (Configuration.doAutoCreate())
-          this.end = new InstantType(); // bb
-      return this.end;
-    }
-
-    public boolean hasEndElement() { 
-      return this.end != null && !this.end.isEmpty();
-    }
-
-    public boolean hasEnd() { 
-      return this.end != null && !this.end.isEmpty();
-    }
-
-    /**
-     * @param value {@link #end} (This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
-     */
-    public AppointmentResponse setEndElement(InstantType value) { 
-      this.end = value;
-      return this;
-    }
-
-    /**
-     * @return This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.
-     */
-    public Date getEnd() { 
-      return this.end == null ? null : this.end.getValue();
-    }
-
-    /**
-     * @param value This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.
-     */
-    public AppointmentResponse setEnd(Date value) { 
-      if (value == null)
-        this.end = null;
-      else {
-        if (this.end == null)
-          this.end = new InstantType();
-        this.end.setValue(value);
-      }
-      return this;
-    }
-
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this appointment response concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("appointment", "Reference(Appointment)", "Parent appointment that this response is replying to.", 0, java.lang.Integer.MAX_VALUE, appointment));
+        childrenList.add(new Property("start", "instant", "This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time.", 0, java.lang.Integer.MAX_VALUE, start));
+        childrenList.add(new Property("end", "instant", "This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.", 0, java.lang.Integer.MAX_VALUE, end));
         childrenList.add(new Property("participantType", "CodeableConcept", "Role of participant in the appointment.", 0, java.lang.Integer.MAX_VALUE, participantType));
         childrenList.add(new Property("actor", "Reference(Patient|Practitioner|RelatedPerson|Device|HealthcareService|Location)", "A Person, Location/HealthcareService or Device that is participating in the appointment.", 0, java.lang.Integer.MAX_VALUE, actor));
         childrenList.add(new Property("participantStatus", "code", "Participation status of the Participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty.", 0, java.lang.Integer.MAX_VALUE, participantStatus));
         childrenList.add(new Property("comment", "string", "This comment is particularly important when the responder is declining, tentative or requesting another time to indicate the reasons why.", 0, java.lang.Integer.MAX_VALUE, comment));
-        childrenList.add(new Property("start", "instant", "This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the start time.", 0, java.lang.Integer.MAX_VALUE, start));
-        childrenList.add(new Property("end", "instant", "This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.", 0, java.lang.Integer.MAX_VALUE, end));
       }
 
       public AppointmentResponse copy() {
@@ -634,6 +634,8 @@ public class AppointmentResponse extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.appointment = appointment == null ? null : appointment.copy();
+        dst.start = start == null ? null : start.copy();
+        dst.end = end == null ? null : end.copy();
         if (participantType != null) {
           dst.participantType = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : participantType)
@@ -642,8 +644,6 @@ public class AppointmentResponse extends DomainResource {
         dst.actor = actor == null ? null : actor.copy();
         dst.participantStatus = participantStatus == null ? null : participantStatus.copy();
         dst.comment = comment == null ? null : comment.copy();
-        dst.start = start == null ? null : start.copy();
-        dst.end = end == null ? null : end.copy();
         return dst;
       }
 
@@ -659,9 +659,9 @@ public class AppointmentResponse extends DomainResource {
           return false;
         AppointmentResponse o = (AppointmentResponse) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(appointment, o.appointment, true)
-           && compareDeep(participantType, o.participantType, true) && compareDeep(actor, o.actor, true) && compareDeep(participantStatus, o.participantStatus, true)
-           && compareDeep(comment, o.comment, true) && compareDeep(start, o.start, true) && compareDeep(end, o.end, true)
-          ;
+           && compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(participantType, o.participantType, true)
+           && compareDeep(actor, o.actor, true) && compareDeep(participantStatus, o.participantStatus, true)
+           && compareDeep(comment, o.comment, true);
       }
 
       @Override
@@ -671,15 +671,15 @@ public class AppointmentResponse extends DomainResource {
         if (!(other instanceof AppointmentResponse))
           return false;
         AppointmentResponse o = (AppointmentResponse) other;
-        return compareValues(participantStatus, o.participantStatus, true) && compareValues(comment, o.comment, true)
-           && compareValues(start, o.start, true) && compareValues(end, o.end, true);
+        return compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(participantStatus, o.participantStatus, true)
+           && compareValues(comment, o.comment, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (appointment == null || appointment.isEmpty())
-           && (participantType == null || participantType.isEmpty()) && (actor == null || actor.isEmpty())
-           && (participantStatus == null || participantStatus.isEmpty()) && (comment == null || comment.isEmpty())
-           && (start == null || start.isEmpty()) && (end == null || end.isEmpty());
+           && (start == null || start.isEmpty()) && (end == null || end.isEmpty()) && (participantType == null || participantType.isEmpty())
+           && (actor == null || actor.isEmpty()) && (participantStatus == null || participantStatus.isEmpty())
+           && (comment == null || comment.isEmpty());
       }
 
   @Override
@@ -689,10 +689,12 @@ public class AppointmentResponse extends DomainResource {
 
   @SearchParamDefinition(name="actor", path="AppointmentResponse.actor", description="The Person, Location/HealthcareService or Device that this appointment response replies for", type="reference" )
   public static final String SP_ACTOR = "actor";
-  @SearchParamDefinition(name="partstatus", path="AppointmentResponse.participantStatus", description="The participants acceptance status for this appointment", type="token" )
-  public static final String SP_PARTSTATUS = "partstatus";
+  @SearchParamDefinition(name="identifier", path="AppointmentResponse.identifier", description="An Identifier in this appointment response", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="practitioner", path="AppointmentResponse.actor", description="This Response is for this Practitioner", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
+  @SearchParamDefinition(name="part-status", path="AppointmentResponse.participantStatus", description="The participants acceptance status for this appointment", type="token" )
+  public static final String SP_PARTSTATUS = "part-status";
   @SearchParamDefinition(name="patient", path="AppointmentResponse.actor", description="This Response is for this Patient", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="appointment", path="AppointmentResponse.appointment", description="The appointment that the response is attached to", type="reference" )

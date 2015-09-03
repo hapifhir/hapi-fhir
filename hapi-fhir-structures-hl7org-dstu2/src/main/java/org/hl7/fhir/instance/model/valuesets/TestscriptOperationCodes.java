@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum TestscriptOperationCodes {
@@ -70,14 +70,6 @@ public enum TestscriptOperationCodes {
          * Get a conformance statement for the system
          */
         CONFORMANCE, 
-        /**
-         * Batch Mode Translation
-         */
-        BATCHTRANSLATE, 
-        /**
-         * Batch Mode Validation
-         */
-        BATCHVALIDATE, 
         /**
          * Closure Table Maintenance
          */
@@ -163,10 +155,6 @@ public enum TestscriptOperationCodes {
           return TRANSACTION;
         if ("conformance".equals(codeString))
           return CONFORMANCE;
-        if ("batch-translate".equals(codeString))
-          return BATCHTRANSLATE;
-        if ("batch-validate".equals(codeString))
-          return BATCHVALIDATE;
         if ("closure".equals(codeString))
           return CLOSURE;
         if ("document".equals(codeString))
@@ -210,8 +198,6 @@ public enum TestscriptOperationCodes {
             case SEARCH: return "search";
             case TRANSACTION: return "transaction";
             case CONFORMANCE: return "conformance";
-            case BATCHTRANSLATE: return "batch-translate";
-            case BATCHVALIDATE: return "batch-validate";
             case CLOSURE: return "closure";
             case DOCUMENT: return "document";
             case EVERYTHING: return "everything";
@@ -244,8 +230,6 @@ public enum TestscriptOperationCodes {
             case SEARCH: return "Search based on some filter criteria";
             case TRANSACTION: return "Update, create or delete a set of resources as a single transaction";
             case CONFORMANCE: return "Get a conformance statement for the system";
-            case BATCHTRANSLATE: return "Batch Mode Translation";
-            case BATCHVALIDATE: return "Batch Mode Validation";
             case CLOSURE: return "Closure Table Maintenance";
             case DOCUMENT: return "Generate a Document";
             case EVERYTHING: return "Fetch Encounter/Patient Record";
@@ -275,8 +259,6 @@ public enum TestscriptOperationCodes {
             case SEARCH: return "Search";
             case TRANSACTION: return "Transaction";
             case CONFORMANCE: return "Conformance";
-            case BATCHTRANSLATE: return "$batch-translate";
-            case BATCHVALIDATE: return "$batch-validate";
             case CLOSURE: return "$closure";
             case DOCUMENT: return "$document";
             case EVERYTHING: return "$everything";

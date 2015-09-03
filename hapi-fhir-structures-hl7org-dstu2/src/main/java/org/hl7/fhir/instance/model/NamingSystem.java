@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -1424,12 +1424,10 @@ public class NamingSystem extends DomainResource {
   public static final String SP_PERIOD = "period";
   @SearchParamDefinition(name="kind", path="NamingSystem.kind", description="codesystem | identifier | root", type="token" )
   public static final String SP_KIND = "kind";
-  @SearchParamDefinition(name="replacedby", path="NamingSystem.replacedBy", description="Use this instead", type="reference" )
-  public static final String SP_REPLACEDBY = "replacedby";
   @SearchParamDefinition(name="type", path="NamingSystem.type", description="e.g. driver,  provider,  patient, bank etc", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="idtype", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token" )
-  public static final String SP_IDTYPE = "idtype";
+  @SearchParamDefinition(name="id-type", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token" )
+  public static final String SP_IDTYPE = "id-type";
   @SearchParamDefinition(name="responsible", path="NamingSystem.responsible", description="Who maintains system namespace?", type="string" )
   public static final String SP_RESPONSIBLE = "responsible";
   @SearchParamDefinition(name="contact", path="NamingSystem.contact.name", description="Name of a individual to contact", type="string" )
@@ -1444,6 +1442,8 @@ public class NamingSystem extends DomainResource {
   public static final String SP_TELECOM = "telecom";
   @SearchParamDefinition(name="value", path="NamingSystem.uniqueId.value", description="The unique identifier", type="string" )
   public static final String SP_VALUE = "value";
+  @SearchParamDefinition(name="replaced-by", path="NamingSystem.replacedBy", description="Use this instead", type="reference" )
+  public static final String SP_REPLACEDBY = "replaced-by";
   @SearchParamDefinition(name="status", path="NamingSystem.status", description="draft | active | retired", type="token" )
   public static final String SP_STATUS = "status";
 

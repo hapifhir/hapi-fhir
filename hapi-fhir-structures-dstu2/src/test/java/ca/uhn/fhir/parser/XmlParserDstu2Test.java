@@ -553,9 +553,9 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testEncodeAndReEncodeContainedJson() {
 		Composition comp = new Composition();
-		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNotes(new AnnotationDt().setText("Section0_Allergy0")));
-		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNotes(new AnnotationDt().setText("Section1_Allergy0")));
-		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNotes(new AnnotationDt().setText("Section2_Allergy0")));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNote(new AnnotationDt().setText("Section0_Allergy0")));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNote(new AnnotationDt().setText("Section1_Allergy0")));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNote(new AnnotationDt().setText("Section2_Allergy0")));
 
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
 
@@ -578,9 +578,9 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testEncodeAndReEncodeContainedXml() {
 		Composition comp = new Composition();
-		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNotes(new AnnotationDt().setText("Section0_Allergy0")));
-		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNotes(new AnnotationDt().setText("Section1_Allergy0")));
-		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNotes(new AnnotationDt().setText("Section2_Allergy0")));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNote(new AnnotationDt().setText("Section0_Allergy0")));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNote(new AnnotationDt().setText("Section1_Allergy0")));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setNote(new AnnotationDt().setText("Section2_Allergy0")));
 
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 

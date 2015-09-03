@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * A patient's point-of-time immunization status and recommendation with optional supporting justification.
+ * A patient’s point-in-time immunization and recommendation (i.e. forecasting a patient’s immunization eligibility according to a published schedule) with optional supporting justification.
  */
 @ResourceDef(name="ImmunizationRecommendation", profile="http://hl7.org/fhir/Profile/ImmunizationRecommendation")
 public class ImmunizationRecommendation extends DomainResource {
@@ -58,9 +58,9 @@ public class ImmunizationRecommendation extends DomainResource {
         /**
          * Vaccine that pertains to the recommendation.
          */
-        @Child(name = "vaccineType", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "vaccineCode", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Vaccine recommendation applies to", formalDefinition="Vaccine that pertains to the recommendation." )
-        protected CodeableConcept vaccineType;
+        protected CodeableConcept vaccineCode;
 
         /**
          * This indicates the next recommended dose number (e.g. dose 2 is the next recommended dose).
@@ -79,21 +79,21 @@ public class ImmunizationRecommendation extends DomainResource {
         /**
          * Vaccine date recommendations - e.g. earliest date to administer, latest date to administer, etc.
          */
-        @Child(name = "dateCriterion", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "dateCriterion", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Dates governing proposed immunization", formalDefinition="Vaccine date recommendations - e.g. earliest date to administer, latest date to administer, etc." )
         protected List<ImmunizationRecommendationRecommendationDateCriterionComponent> dateCriterion;
 
         /**
          * Contains information about the protocol under which the vaccine was administered.
          */
-        @Child(name = "protocol", type = {}, order=6, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "protocol", type = {}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Protocol used by recommendation", formalDefinition="Contains information about the protocol under which the vaccine was administered." )
         protected ImmunizationRecommendationRecommendationProtocolComponent protocol;
 
         /**
          * Immunization event history that supports the status and recommendation.
          */
-        @Child(name = "supportingImmunization", type = {Immunization.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "supportingImmunization", type = {Immunization.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Past immunizations supporting recommendation", formalDefinition="Immunization event history that supports the status and recommendation." )
         protected List<Reference> supportingImmunization;
         /**
@@ -105,7 +105,7 @@ public class ImmunizationRecommendation extends DomainResource {
         /**
          * Patient Information that supports the status and recommendation.  This includes patient observations, adverse reactions and allergy/intolerance information.
          */
-        @Child(name = "supportingPatientInformation", type = {Observation.class, AllergyIntolerance.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "supportingPatientInformation", type = {Observation.class, AllergyIntolerance.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Patient observations supporting recommendation", formalDefinition="Patient Information that supports the status and recommendation.  This includes patient observations, adverse reactions and allergy/intolerance information." )
         protected List<Reference> supportingPatientInformation;
         /**
@@ -114,7 +114,7 @@ public class ImmunizationRecommendation extends DomainResource {
         protected List<Resource> supportingPatientInformationTarget;
 
 
-        private static final long serialVersionUID = 366360557L;
+        private static final long serialVersionUID = 1501347482L;
 
     /*
      * Constructor
@@ -126,10 +126,10 @@ public class ImmunizationRecommendation extends DomainResource {
     /*
      * Constructor
      */
-      public ImmunizationRecommendationRecommendationComponent(DateTimeType date, CodeableConcept vaccineType, CodeableConcept forecastStatus) {
+      public ImmunizationRecommendationRecommendationComponent(DateTimeType date, CodeableConcept vaccineCode, CodeableConcept forecastStatus) {
         super();
         this.date = date;
-        this.vaccineType = vaccineType;
+        this.vaccineCode = vaccineCode;
         this.forecastStatus = forecastStatus;
       }
 
@@ -179,26 +179,26 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return {@link #vaccineType} (Vaccine that pertains to the recommendation.)
+         * @return {@link #vaccineCode} (Vaccine that pertains to the recommendation.)
          */
-        public CodeableConcept getVaccineType() { 
-          if (this.vaccineType == null)
+        public CodeableConcept getVaccineCode() { 
+          if (this.vaccineCode == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationComponent.vaccineType");
+              throw new Error("Attempt to auto-create ImmunizationRecommendationRecommendationComponent.vaccineCode");
             else if (Configuration.doAutoCreate())
-              this.vaccineType = new CodeableConcept(); // cc
-          return this.vaccineType;
+              this.vaccineCode = new CodeableConcept(); // cc
+          return this.vaccineCode;
         }
 
-        public boolean hasVaccineType() { 
-          return this.vaccineType != null && !this.vaccineType.isEmpty();
+        public boolean hasVaccineCode() { 
+          return this.vaccineCode != null && !this.vaccineCode.isEmpty();
         }
 
         /**
-         * @param value {@link #vaccineType} (Vaccine that pertains to the recommendation.)
+         * @param value {@link #vaccineCode} (Vaccine that pertains to the recommendation.)
          */
-        public ImmunizationRecommendationRecommendationComponent setVaccineType(CodeableConcept value) { 
-          this.vaccineType = value;
+        public ImmunizationRecommendationRecommendationComponent setVaccineCode(CodeableConcept value) { 
+          this.vaccineCode = value;
           return this;
         }
 
@@ -448,7 +448,7 @@ public class ImmunizationRecommendation extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("date", "dateTime", "The date the immunization recommendation was created.", 0, java.lang.Integer.MAX_VALUE, date));
-          childrenList.add(new Property("vaccineType", "CodeableConcept", "Vaccine that pertains to the recommendation.", 0, java.lang.Integer.MAX_VALUE, vaccineType));
+          childrenList.add(new Property("vaccineCode", "CodeableConcept", "Vaccine that pertains to the recommendation.", 0, java.lang.Integer.MAX_VALUE, vaccineCode));
           childrenList.add(new Property("doseNumber", "positiveInt", "This indicates the next recommended dose number (e.g. dose 2 is the next recommended dose).", 0, java.lang.Integer.MAX_VALUE, doseNumber));
           childrenList.add(new Property("forecastStatus", "CodeableConcept", "Vaccine administration status.", 0, java.lang.Integer.MAX_VALUE, forecastStatus));
           childrenList.add(new Property("dateCriterion", "", "Vaccine date recommendations - e.g. earliest date to administer, latest date to administer, etc.", 0, java.lang.Integer.MAX_VALUE, dateCriterion));
@@ -461,7 +461,7 @@ public class ImmunizationRecommendation extends DomainResource {
         ImmunizationRecommendationRecommendationComponent dst = new ImmunizationRecommendationRecommendationComponent();
         copyValues(dst);
         dst.date = date == null ? null : date.copy();
-        dst.vaccineType = vaccineType == null ? null : vaccineType.copy();
+        dst.vaccineCode = vaccineCode == null ? null : vaccineCode.copy();
         dst.doseNumber = doseNumber == null ? null : doseNumber.copy();
         dst.forecastStatus = forecastStatus == null ? null : forecastStatus.copy();
         if (dateCriterion != null) {
@@ -490,7 +490,7 @@ public class ImmunizationRecommendation extends DomainResource {
         if (!(other instanceof ImmunizationRecommendationRecommendationComponent))
           return false;
         ImmunizationRecommendationRecommendationComponent o = (ImmunizationRecommendationRecommendationComponent) other;
-        return compareDeep(date, o.date, true) && compareDeep(vaccineType, o.vaccineType, true) && compareDeep(doseNumber, o.doseNumber, true)
+        return compareDeep(date, o.date, true) && compareDeep(vaccineCode, o.vaccineCode, true) && compareDeep(doseNumber, o.doseNumber, true)
            && compareDeep(forecastStatus, o.forecastStatus, true) && compareDeep(dateCriterion, o.dateCriterion, true)
            && compareDeep(protocol, o.protocol, true) && compareDeep(supportingImmunization, o.supportingImmunization, true)
            && compareDeep(supportingPatientInformation, o.supportingPatientInformation, true);
@@ -507,7 +507,7 @@ public class ImmunizationRecommendation extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (date == null || date.isEmpty()) && (vaccineType == null || vaccineType.isEmpty())
+        return super.isEmpty() && (date == null || date.isEmpty()) && (vaccineCode == null || vaccineCode.isEmpty())
            && (doseNumber == null || doseNumber.isEmpty()) && (forecastStatus == null || forecastStatus.isEmpty())
            && (dateCriterion == null || dateCriterion.isEmpty()) && (protocol == null || protocol.isEmpty())
            && (supportingImmunization == null || supportingImmunization.isEmpty()) && (supportingPatientInformation == null || supportingPatientInformation.isEmpty())
@@ -521,14 +521,14 @@ public class ImmunizationRecommendation extends DomainResource {
         /**
          * Date classification of recommendation - e.g. earliest date to give, latest date to give, etc.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Type of date", formalDefinition="Date classification of recommendation - e.g. earliest date to give, latest date to give, etc." )
         protected CodeableConcept code;
 
         /**
          * Date recommendation.
          */
-        @Child(name = "value", type = {DateTimeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "value", type = {DateTimeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Recommended date", formalDefinition="Date recommendation." )
         protected DateTimeType value;
 
@@ -665,21 +665,21 @@ public class ImmunizationRecommendation extends DomainResource {
         /**
          * Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.
          */
-        @Child(name = "doseSequence", type = {IntegerType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "doseSequence", type = {IntegerType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Number of dose within sequence", formalDefinition="Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol." )
         protected IntegerType doseSequence;
 
         /**
          * Contains the description about the protocol under which the vaccine was administered.
          */
-        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Protocol details", formalDefinition="Contains the description about the protocol under which the vaccine was administered." )
         protected StringType description;
 
         /**
          * Indicates the authority who published the protocol?  E.g. ACIP.
          */
-        @Child(name = "authority", type = {Organization.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "authority", type = {Organization.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Who is responsible for protocol", formalDefinition="Indicates the authority who published the protocol?  E.g. ACIP." )
         protected Reference authority;
 
@@ -691,7 +691,7 @@ public class ImmunizationRecommendation extends DomainResource {
         /**
          * One possible path to achieve presumed immunity against a disease - within the context of an authority.
          */
-        @Child(name = "series", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "series", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Name of vaccination series", formalDefinition="One possible path to achieve presumed immunity against a disease - within the context of an authority." )
         protected StringType series;
 
@@ -1168,13 +1168,11 @@ public class ImmunizationRecommendation extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="ImmunizationRecommendation.identifier", description="Business identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="Number of dose within sequence", type="token" )
+  @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="Number of dose within sequence", type="number" )
   public static final String SP_DOSESEQUENCE = "dose-sequence";
-  @SearchParamDefinition(name="subject", path="ImmunizationRecommendation.patient", description="Who this profile is for", type="reference" )
-  public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="patient", path="ImmunizationRecommendation.patient", description="Who this profile is for", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="vaccine-type", path="ImmunizationRecommendation.recommendation.vaccineType", description="Vaccine recommendation applies to", type="token" )
+  @SearchParamDefinition(name="vaccine-type", path="ImmunizationRecommendation.recommendation.vaccineCode", description="Vaccine recommendation applies to", type="token" )
   public static final String SP_VACCINETYPE = "vaccine-type";
   @SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="Recommended dose number", type="number" )
   public static final String SP_DOSENUMBER = "dose-number";

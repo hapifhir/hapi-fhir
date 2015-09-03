@@ -151,11 +151,11 @@
 				<p>
 					If you want to use HAPI's 
 					<a href="./doc_validation.html#structure_definition_validation">StructureDefinition validation</a>
-					you will also need to include the <code>hapi-fhir-validation-resources-[version].jar</code>:
+					you will also need to include the <code>hapi-fhir-validation-resources-dstu2-[version].jar</code>:
 				</p>
 			<source><![CDATA[<dependency>
    <groupId>ca.uhn.hapi.fhir</groupId>
-   <artifactId>hapi-fhir-validation-resources</artifactId>
+   <artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
    <version>${hapi_stable_version}</version>
 </dependency>]]></source>
 				
@@ -184,7 +184,7 @@ compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:${hapi_stable_version}']]><
 			</p>
 			<source><![CDATA[compile 'ca.uhn.hapi.fhir:hapi-fhir-base:${hapi_stable_version}'
 compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-hl7org-dstu2:${hapi_stable_version}'
-compile 'ca.uhn.hapi.fhir:hapi-fhir-validation-resources:${hapi_stable_version}']]></source>
+compile 'ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu2:${hapi_stable_version}']]></source>
 		</section>
 
 		<section name="Using Snapshot Builds">

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -233,10 +233,10 @@ public class CommunicationRequest extends DomainResource {
     @Block()
     public static class CommunicationRequestPayloadComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * An individual message part for multi-part messages.
+         * The communicated content (or for multi-part communications, one portion of the communication).
          */
         @Child(name = "content", type = {StringType.class, Attachment.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Message part content", formalDefinition="An individual message part for multi-part messages." )
+        @Description(shortDefinition="Message part content", formalDefinition="The communicated content (or for multi-part communications, one portion of the communication)." )
         protected Type content;
 
         private static final long serialVersionUID = -1763459053L;
@@ -257,14 +257,14 @@ public class CommunicationRequest extends DomainResource {
       }
 
         /**
-         * @return {@link #content} (An individual message part for multi-part messages.)
+         * @return {@link #content} (The communicated content (or for multi-part communications, one portion of the communication).)
          */
         public Type getContent() { 
           return this.content;
         }
 
         /**
-         * @return {@link #content} (An individual message part for multi-part messages.)
+         * @return {@link #content} (The communicated content (or for multi-part communications, one portion of the communication).)
          */
         public StringType getContentStringType() throws Exception { 
           if (!(this.content instanceof StringType))
@@ -277,7 +277,7 @@ public class CommunicationRequest extends DomainResource {
         }
 
         /**
-         * @return {@link #content} (An individual message part for multi-part messages.)
+         * @return {@link #content} (The communicated content (or for multi-part communications, one portion of the communication).)
          */
         public Attachment getContentAttachment() throws Exception { 
           if (!(this.content instanceof Attachment))
@@ -290,7 +290,7 @@ public class CommunicationRequest extends DomainResource {
         }
 
         /**
-         * @return {@link #content} (An individual message part for multi-part messages.)
+         * @return {@link #content} (The communicated content (or for multi-part communications, one portion of the communication).)
          */
         public Reference getContentReference() throws Exception { 
           if (!(this.content instanceof Reference))
@@ -307,7 +307,7 @@ public class CommunicationRequest extends DomainResource {
         }
 
         /**
-         * @param value {@link #content} (An individual message part for multi-part messages.)
+         * @param value {@link #content} (The communicated content (or for multi-part communications, one portion of the communication).)
          */
         public CommunicationRequestPayloadComponent setContent(Type value) { 
           this.content = value;
@@ -316,7 +316,7 @@ public class CommunicationRequest extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("content[x]", "string|Attachment|Reference(Any)", "An individual message part for multi-part messages.", 0, java.lang.Integer.MAX_VALUE, content));
+          childrenList.add(new Property("content[x]", "string|Attachment|Reference(Any)", "The communicated content (or for multi-part communications, one portion of the communication).", 0, java.lang.Integer.MAX_VALUE, content));
         }
 
       public CommunicationRequestPayloadComponent copy() {
@@ -398,17 +398,17 @@ public class CommunicationRequest extends DomainResource {
     protected List<CommunicationRequestPayloadComponent> payload;
 
     /**
-     * The communication medium to be used, e.g., email, fax.
+     * A channel that was used for this communication (e.g. email, fax).
      */
     @Child(name = "medium", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Communication medium", formalDefinition="The communication medium to be used, e.g., email, fax." )
+    @Description(shortDefinition="A channel of communication", formalDefinition="A channel that was used for this communication (e.g. email, fax)." )
     protected List<CodeableConcept> medium;
 
     /**
      * The responsible person who authorizes this order, e.g., physician. This may be different than the author of the order statement, e.g., clerk, who may have entered the statement into the order entry application.
      */
     @Child(name = "requester", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Requester of communication", formalDefinition="The responsible person who authorizes this order, e.g., physician. This may be different than the author of the order statement, e.g., clerk, who may have entered the statement into the order entry application." )
+    @Description(shortDefinition="An individual who requested a communication", formalDefinition="The responsible person who authorizes this order, e.g., physician. This may be different than the author of the order statement, e.g., clerk, who may have entered the statement into the order entry application." )
     protected Reference requester;
 
     /**
@@ -438,9 +438,9 @@ public class CommunicationRequest extends DomainResource {
     /**
      * The time when this communication is to occur.
      */
-    @Child(name = "scheduledTime", type = {DateTimeType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "scheduled", type = {DateTimeType.class, Period.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When scheduled", formalDefinition="The time when this communication is to occur." )
-    protected DateTimeType scheduledTime;
+    protected Type scheduled;
 
     /**
      * The reason or justification for the communication request.
@@ -452,9 +452,9 @@ public class CommunicationRequest extends DomainResource {
     /**
      * The time when the request was made.
      */
-    @Child(name = "orderedOn", type = {DateTimeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "requestedOn", type = {DateTimeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When ordered or proposed", formalDefinition="The time when the request was made." )
-    protected DateTimeType orderedOn;
+    protected DateTimeType requestedOn;
 
     /**
      * The patient who is the focus of this communication request.
@@ -475,7 +475,7 @@ public class CommunicationRequest extends DomainResource {
     @Description(shortDefinition="Message urgency", formalDefinition="Characterizes how quickly the proposed act must be initiated. Includes concepts such as stat, urgent, routine." )
     protected CodeableConcept priority;
 
-    private static final long serialVersionUID = 431529355L;
+    private static final long serialVersionUID = 146906020L;
 
   /*
    * Constructor
@@ -677,7 +677,7 @@ public class CommunicationRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #medium} (The communication medium to be used, e.g., email, fax.)
+     * @return {@link #medium} (A channel that was used for this communication (e.g. email, fax).)
      */
     public List<CodeableConcept> getMedium() { 
       if (this.medium == null)
@@ -695,7 +695,7 @@ public class CommunicationRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #medium} (The communication medium to be used, e.g., email, fax.)
+     * @return {@link #medium} (A channel that was used for this communication (e.g. email, fax).)
      */
     // syntactic sugar
     public CodeableConcept addMedium() { //3
@@ -849,51 +849,47 @@ public class CommunicationRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #scheduledTime} (The time when this communication is to occur.). This is the underlying object with id, value and extensions. The accessor "getScheduledTime" gives direct access to the value
+     * @return {@link #scheduled} (The time when this communication is to occur.)
      */
-    public DateTimeType getScheduledTimeElement() { 
-      if (this.scheduledTime == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create CommunicationRequest.scheduledTime");
-        else if (Configuration.doAutoCreate())
-          this.scheduledTime = new DateTimeType(); // bb
-      return this.scheduledTime;
-    }
-
-    public boolean hasScheduledTimeElement() { 
-      return this.scheduledTime != null && !this.scheduledTime.isEmpty();
-    }
-
-    public boolean hasScheduledTime() { 
-      return this.scheduledTime != null && !this.scheduledTime.isEmpty();
+    public Type getScheduled() { 
+      return this.scheduled;
     }
 
     /**
-     * @param value {@link #scheduledTime} (The time when this communication is to occur.). This is the underlying object with id, value and extensions. The accessor "getScheduledTime" gives direct access to the value
+     * @return {@link #scheduled} (The time when this communication is to occur.)
      */
-    public CommunicationRequest setScheduledTimeElement(DateTimeType value) { 
-      this.scheduledTime = value;
-      return this;
+    public DateTimeType getScheduledDateTimeType() throws Exception { 
+      if (!(this.scheduled instanceof DateTimeType))
+        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.scheduled.getClass().getName()+" was encountered");
+      return (DateTimeType) this.scheduled;
+    }
+
+    public boolean hasScheduledDateTimeType() throws Exception { 
+      return this.scheduled instanceof DateTimeType;
     }
 
     /**
-     * @return The time when this communication is to occur.
+     * @return {@link #scheduled} (The time when this communication is to occur.)
      */
-    public Date getScheduledTime() { 
-      return this.scheduledTime == null ? null : this.scheduledTime.getValue();
+    public Period getScheduledPeriod() throws Exception { 
+      if (!(this.scheduled instanceof Period))
+        throw new Exception("Type mismatch: the type Period was expected, but "+this.scheduled.getClass().getName()+" was encountered");
+      return (Period) this.scheduled;
+    }
+
+    public boolean hasScheduledPeriod() throws Exception { 
+      return this.scheduled instanceof Period;
+    }
+
+    public boolean hasScheduled() { 
+      return this.scheduled != null && !this.scheduled.isEmpty();
     }
 
     /**
-     * @param value The time when this communication is to occur.
+     * @param value {@link #scheduled} (The time when this communication is to occur.)
      */
-    public CommunicationRequest setScheduledTime(Date value) { 
-      if (value == null)
-        this.scheduledTime = null;
-      else {
-        if (this.scheduledTime == null)
-          this.scheduledTime = new DateTimeType();
-        this.scheduledTime.setValue(value);
-      }
+    public CommunicationRequest setScheduled(Type value) { 
+      this.scheduled = value;
       return this;
     }
 
@@ -938,50 +934,50 @@ public class CommunicationRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #orderedOn} (The time when the request was made.). This is the underlying object with id, value and extensions. The accessor "getOrderedOn" gives direct access to the value
+     * @return {@link #requestedOn} (The time when the request was made.). This is the underlying object with id, value and extensions. The accessor "getRequestedOn" gives direct access to the value
      */
-    public DateTimeType getOrderedOnElement() { 
-      if (this.orderedOn == null)
+    public DateTimeType getRequestedOnElement() { 
+      if (this.requestedOn == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create CommunicationRequest.orderedOn");
+          throw new Error("Attempt to auto-create CommunicationRequest.requestedOn");
         else if (Configuration.doAutoCreate())
-          this.orderedOn = new DateTimeType(); // bb
-      return this.orderedOn;
+          this.requestedOn = new DateTimeType(); // bb
+      return this.requestedOn;
     }
 
-    public boolean hasOrderedOnElement() { 
-      return this.orderedOn != null && !this.orderedOn.isEmpty();
+    public boolean hasRequestedOnElement() { 
+      return this.requestedOn != null && !this.requestedOn.isEmpty();
     }
 
-    public boolean hasOrderedOn() { 
-      return this.orderedOn != null && !this.orderedOn.isEmpty();
+    public boolean hasRequestedOn() { 
+      return this.requestedOn != null && !this.requestedOn.isEmpty();
     }
 
     /**
-     * @param value {@link #orderedOn} (The time when the request was made.). This is the underlying object with id, value and extensions. The accessor "getOrderedOn" gives direct access to the value
+     * @param value {@link #requestedOn} (The time when the request was made.). This is the underlying object with id, value and extensions. The accessor "getRequestedOn" gives direct access to the value
      */
-    public CommunicationRequest setOrderedOnElement(DateTimeType value) { 
-      this.orderedOn = value;
+    public CommunicationRequest setRequestedOnElement(DateTimeType value) { 
+      this.requestedOn = value;
       return this;
     }
 
     /**
      * @return The time when the request was made.
      */
-    public Date getOrderedOn() { 
-      return this.orderedOn == null ? null : this.orderedOn.getValue();
+    public Date getRequestedOn() { 
+      return this.requestedOn == null ? null : this.requestedOn.getValue();
     }
 
     /**
      * @param value The time when the request was made.
      */
-    public CommunicationRequest setOrderedOn(Date value) { 
+    public CommunicationRequest setRequestedOn(Date value) { 
       if (value == null)
-        this.orderedOn = null;
+        this.requestedOn = null;
       else {
-        if (this.orderedOn == null)
-          this.orderedOn = new DateTimeType();
-        this.orderedOn.setValue(value);
+        if (this.requestedOn == null)
+          this.requestedOn = new DateTimeType();
+        this.requestedOn.setValue(value);
       }
       return this;
     }
@@ -1061,13 +1057,13 @@ public class CommunicationRequest extends DomainResource {
         childrenList.add(new Property("sender", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "The entity (e.g., person, organization, clinical information system, or device) which is to be the source of the communication.", 0, java.lang.Integer.MAX_VALUE, sender));
         childrenList.add(new Property("recipient", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "The entity (e.g., person, organization, clinical information system, or device) which is the intended target of the communication.", 0, java.lang.Integer.MAX_VALUE, recipient));
         childrenList.add(new Property("payload", "", "Text, attachment(s), or resource(s) to be communicated to the recipient.", 0, java.lang.Integer.MAX_VALUE, payload));
-        childrenList.add(new Property("medium", "CodeableConcept", "The communication medium to be used, e.g., email, fax.", 0, java.lang.Integer.MAX_VALUE, medium));
+        childrenList.add(new Property("medium", "CodeableConcept", "A channel that was used for this communication (e.g. email, fax).", 0, java.lang.Integer.MAX_VALUE, medium));
         childrenList.add(new Property("requester", "Reference(Practitioner|Patient|RelatedPerson)", "The responsible person who authorizes this order, e.g., physician. This may be different than the author of the order statement, e.g., clerk, who may have entered the statement into the order entry application.", 0, java.lang.Integer.MAX_VALUE, requester));
         childrenList.add(new Property("status", "code", "The status of the proposal or order.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "The encounter within which the communication request was created.", 0, java.lang.Integer.MAX_VALUE, encounter));
-        childrenList.add(new Property("scheduledTime", "dateTime", "The time when this communication is to occur.", 0, java.lang.Integer.MAX_VALUE, scheduledTime));
+        childrenList.add(new Property("scheduled[x]", "dateTime|Period", "The time when this communication is to occur.", 0, java.lang.Integer.MAX_VALUE, scheduled));
         childrenList.add(new Property("reason", "CodeableConcept", "The reason or justification for the communication request.", 0, java.lang.Integer.MAX_VALUE, reason));
-        childrenList.add(new Property("orderedOn", "dateTime", "The time when the request was made.", 0, java.lang.Integer.MAX_VALUE, orderedOn));
+        childrenList.add(new Property("requestedOn", "dateTime", "The time when the request was made.", 0, java.lang.Integer.MAX_VALUE, requestedOn));
         childrenList.add(new Property("subject", "Reference(Patient)", "The patient who is the focus of this communication request.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("priority", "CodeableConcept", "Characterizes how quickly the proposed act must be initiated. Includes concepts such as stat, urgent, routine.", 0, java.lang.Integer.MAX_VALUE, priority));
       }
@@ -1100,13 +1096,13 @@ public class CommunicationRequest extends DomainResource {
         dst.requester = requester == null ? null : requester.copy();
         dst.status = status == null ? null : status.copy();
         dst.encounter = encounter == null ? null : encounter.copy();
-        dst.scheduledTime = scheduledTime == null ? null : scheduledTime.copy();
+        dst.scheduled = scheduled == null ? null : scheduled.copy();
         if (reason != null) {
           dst.reason = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reason)
             dst.reason.add(i.copy());
         };
-        dst.orderedOn = orderedOn == null ? null : orderedOn.copy();
+        dst.requestedOn = requestedOn == null ? null : requestedOn.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.priority = priority == null ? null : priority.copy();
         return dst;
@@ -1126,7 +1122,7 @@ public class CommunicationRequest extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(category, o.category, true) && compareDeep(sender, o.sender, true)
            && compareDeep(recipient, o.recipient, true) && compareDeep(payload, o.payload, true) && compareDeep(medium, o.medium, true)
            && compareDeep(requester, o.requester, true) && compareDeep(status, o.status, true) && compareDeep(encounter, o.encounter, true)
-           && compareDeep(scheduledTime, o.scheduledTime, true) && compareDeep(reason, o.reason, true) && compareDeep(orderedOn, o.orderedOn, true)
+           && compareDeep(scheduled, o.scheduled, true) && compareDeep(reason, o.reason, true) && compareDeep(requestedOn, o.requestedOn, true)
            && compareDeep(subject, o.subject, true) && compareDeep(priority, o.priority, true);
       }
 
@@ -1137,17 +1133,16 @@ public class CommunicationRequest extends DomainResource {
         if (!(other instanceof CommunicationRequest))
           return false;
         CommunicationRequest o = (CommunicationRequest) other;
-        return compareValues(status, o.status, true) && compareValues(scheduledTime, o.scheduledTime, true)
-           && compareValues(orderedOn, o.orderedOn, true);
+        return compareValues(status, o.status, true) && compareValues(requestedOn, o.requestedOn, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (category == null || category.isEmpty())
            && (sender == null || sender.isEmpty()) && (recipient == null || recipient.isEmpty()) && (payload == null || payload.isEmpty())
            && (medium == null || medium.isEmpty()) && (requester == null || requester.isEmpty()) && (status == null || status.isEmpty())
-           && (encounter == null || encounter.isEmpty()) && (scheduledTime == null || scheduledTime.isEmpty())
-           && (reason == null || reason.isEmpty()) && (orderedOn == null || orderedOn.isEmpty()) && (subject == null || subject.isEmpty())
-           && (priority == null || priority.isEmpty());
+           && (encounter == null || encounter.isEmpty()) && (scheduled == null || scheduled.isEmpty())
+           && (reason == null || reason.isEmpty()) && (requestedOn == null || requestedOn.isEmpty())
+           && (subject == null || subject.isEmpty()) && (priority == null || priority.isEmpty());
       }
 
   @Override
@@ -1155,27 +1150,27 @@ public class CommunicationRequest extends DomainResource {
     return ResourceType.CommunicationRequest;
    }
 
-  @SearchParamDefinition(name="requester", path="CommunicationRequest.requester", description="Requester of communication", type="reference" )
+  @SearchParamDefinition(name="requester", path="CommunicationRequest.requester", description="An individual who requested a communication", type="reference" )
   public static final String SP_REQUESTER = "requester";
   @SearchParamDefinition(name="identifier", path="CommunicationRequest.identifier", description="Unique identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="ordered", path="CommunicationRequest.orderedOn", description="When ordered or proposed", type="date" )
-  public static final String SP_ORDERED = "ordered";
   @SearchParamDefinition(name="subject", path="CommunicationRequest.subject", description="Focus of message", type="reference" )
   public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="medium", path="CommunicationRequest.medium", description="Communication medium", type="token" )
+  @SearchParamDefinition(name="medium", path="CommunicationRequest.medium", description="A channel of communication", type="token" )
   public static final String SP_MEDIUM = "medium";
   @SearchParamDefinition(name="encounter", path="CommunicationRequest.encounter", description="Encounter leading to message", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
   @SearchParamDefinition(name="priority", path="CommunicationRequest.priority", description="Message urgency", type="token" )
   public static final String SP_PRIORITY = "priority";
+  @SearchParamDefinition(name="requested", path="CommunicationRequest.requestedOn", description="When ordered or proposed", type="date" )
+  public static final String SP_REQUESTED = "requested";
   @SearchParamDefinition(name="sender", path="CommunicationRequest.sender", description="Message sender", type="reference" )
   public static final String SP_SENDER = "sender";
   @SearchParamDefinition(name="patient", path="CommunicationRequest.subject", description="Focus of message", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="recipient", path="CommunicationRequest.recipient", description="Message recipient", type="reference" )
   public static final String SP_RECIPIENT = "recipient";
-  @SearchParamDefinition(name="time", path="CommunicationRequest.scheduledTime", description="When scheduled", type="date" )
+  @SearchParamDefinition(name="time", path="CommunicationRequest.scheduledDateTime", description="When scheduled", type="date" )
   public static final String SP_TIME = "time";
   @SearchParamDefinition(name="category", path="CommunicationRequest.category", description="Message category", type="token" )
   public static final String SP_CATEGORY = "category";

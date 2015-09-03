@@ -437,6 +437,7 @@ public class ServerConformanceProviderDstu2Test {
 		rs.init(createServletConfig());
 
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(conformance);
 		assertTrue(result.getMessages().toString(), result.isSuccessful());

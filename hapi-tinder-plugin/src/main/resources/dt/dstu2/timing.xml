@@ -1434,7 +1434,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">QD | QOD | Q4H | Q6H | BID | TID | QID | AM | PM +</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">A code for the timing pattern. Some codes such as BID are uniquitious, but many institutions define their own additional codes</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">A repeat should always be defined except for the common codes BID, TID, QID, AM and PM, which all systems are required to understand</Data><NamedCell

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -140,10 +140,10 @@ public class Flag extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * Allows an flag to be divided into different categories like clinical, administrative etc.
+     * Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Clinical, administrative, etc.", formalDefinition="Allows an flag to be divided into different categories like clinical, administrative etc." )
+    @Description(shortDefinition="Clinical, administrative, etc.", formalDefinition="Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context." )
     protected CodeableConcept category;
 
     /**
@@ -185,14 +185,14 @@ public class Flag extends DomainResource {
     protected Encounter encounterTarget;
 
     /**
-     * The person or device that created the flag.
+     * The person, organization or device that created the flag.
      */
-    @Child(name = "author", type = {Practitioner.class, Patient.class, Device.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Flag creator", formalDefinition="The person or device that created the flag." )
+    @Child(name = "author", type = {Device.class, Organization.class, Patient.class, Practitioner.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Flag creator", formalDefinition="The person, organization or device that created the flag." )
     protected Reference author;
 
     /**
-     * The actual object that is the target of the reference (The person or device that created the flag.)
+     * The actual object that is the target of the reference (The person, organization or device that created the flag.)
      */
     protected Resource authorTarget;
 
@@ -263,7 +263,7 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (Allows an flag to be divided into different categories like clinical, administrative etc.)
+     * @return {@link #category} (Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.)
      */
     public CodeableConcept getCategory() { 
       if (this.category == null)
@@ -279,7 +279,7 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @param value {@link #category} (Allows an flag to be divided into different categories like clinical, administrative etc.)
+     * @param value {@link #category} (Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.)
      */
     public Flag setCategory(CodeableConcept value) { 
       this.category = value;
@@ -439,7 +439,7 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @return {@link #author} (The person or device that created the flag.)
+     * @return {@link #author} (The person, organization or device that created the flag.)
      */
     public Reference getAuthor() { 
       if (this.author == null)
@@ -455,7 +455,7 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @param value {@link #author} (The person or device that created the flag.)
+     * @param value {@link #author} (The person, organization or device that created the flag.)
      */
     public Flag setAuthor(Reference value) { 
       this.author = value;
@@ -463,14 +463,14 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person or device that created the flag.)
+     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person, organization or device that created the flag.)
      */
     public Resource getAuthorTarget() { 
       return this.authorTarget;
     }
 
     /**
-     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person or device that created the flag.)
+     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person, organization or device that created the flag.)
      */
     public Flag setAuthorTarget(Resource value) { 
       this.authorTarget = value;
@@ -504,12 +504,12 @@ public class Flag extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Identifier assigned to the flag for external use (outside the FHIR environment).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("category", "CodeableConcept", "Allows an flag to be divided into different categories like clinical, administrative etc.", 0, java.lang.Integer.MAX_VALUE, category));
+        childrenList.add(new Property("category", "CodeableConcept", "Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.", 0, java.lang.Integer.MAX_VALUE, category));
         childrenList.add(new Property("status", "code", "Supports basic workflow.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("period", "Period", "The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("subject", "Reference(Patient|Location|Group|Organization|Practitioner)", "The patient, location, group , organization , or practitioner this is about record this flag is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "This alert is only relevant during the encounter.", 0, java.lang.Integer.MAX_VALUE, encounter));
-        childrenList.add(new Property("author", "Reference(Practitioner|Patient|Device)", "The person or device that created the flag.", 0, java.lang.Integer.MAX_VALUE, author));
+        childrenList.add(new Property("author", "Reference(Device|Organization|Patient|Practitioner)", "The person, organization or device that created the flag.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("code", "CodeableConcept", "The coded value or textual component of the flag to display to the user.", 0, java.lang.Integer.MAX_VALUE, code));
       }
 

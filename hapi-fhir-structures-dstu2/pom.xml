@@ -11,13 +11,20 @@
 	<artifactId>hapi-fhir-structures-dstu2</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR Structures - DSTU2 (FHIR v0.5.0)</name>
+	<name>HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>1.2-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
+			<version>1.2-SNAPSHOT</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -31,7 +38,6 @@
 		<dependency>
 			<groupId>xmlunit</groupId>
 			<artifactId>xmlunit</artifactId>
-			<version>${xmlunit_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -167,9 +173,9 @@
 								<baseResourceName>condition</baseResourceName>
 								<baseResourceName>conformance</baseResourceName>
 								<baseResourceName>contract</baseResourceName>
-								<baseResourceName>contraindication</baseResourceName>
 								<baseResourceName>coverage</baseResourceName>
 								<baseResourceName>dataelement</baseResourceName>
+								<baseResourceName>detectedissue</baseResourceName>
 								<baseResourceName>device</baseResourceName>
 								<baseResourceName>devicecomponent</baseResourceName>
 								<baseResourceName>devicemetric</baseResourceName>
@@ -180,7 +186,6 @@
 								<baseResourceName>documentation</baseResourceName>
 								<baseResourceName>documentmanifest</baseResourceName>
 								<baseResourceName>documentreference</baseResourceName>
-								<!--<baseResourceName>domainresource</baseResourceName>-->
 								<baseResourceName>eligibilityrequest</baseResourceName>
 								<baseResourceName>eligibilityresponse</baseResourceName>
 								<baseResourceName>encounter</baseResourceName>
@@ -225,16 +230,13 @@
 								<baseResourceName>procedurerequest</baseResourceName>
 								<baseResourceName>processrequest</baseResourceName>
 								<baseResourceName>processresponse</baseResourceName>
-								<!--<baseResourceName>protocol</baseResourceName>-->
 								<baseResourceName>provenance</baseResourceName>
 								<baseResourceName>questionnaire</baseResourceName>
 								<baseResourceName>questionnaireresponse</baseResourceName>
 								<baseResourceName>referralrequest</baseResourceName>
 								<baseResourceName>relatedperson</baseResourceName>
 								<baseResourceName>remittance</baseResourceName>
-								<!--<baseResourceName>resource</baseResourceName>-->
 								<baseResourceName>riskassessment</baseResourceName>
-
 								<baseResourceName>schedule</baseResourceName>
 								<baseResourceName>searchparameter</baseResourceName>
 								<baseResourceName>slot</baseResourceName>
@@ -245,7 +247,6 @@
 								<baseResourceName>supplydelivery</baseResourceName>
 								<baseResourceName>supplyrequest</baseResourceName>
 								<baseResourceName>supportingdocumentation</baseResourceName>
-								<!--<baseResourceName>template</baseResourceName>-->
 								<baseResourceName>test</baseResourceName>
 								<baseResourceName>testscript</baseResourceName>
 								<baseResourceName>user</baseResourceName>

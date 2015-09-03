@@ -16,11 +16,11 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>7680</WindowHeight>
-  <WindowWidth>20052</WindowWidth>
+  <WindowHeight>6636</WindowHeight>
+  <WindowWidth>21696</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>2</ActiveSheet>
+  <ActiveSheet>3</ActiveSheet>
   <FirstVisibleSheet>1</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
@@ -1007,7 +1007,7 @@
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">administration</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String">workflow.scheduling</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1526,7 +1526,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="90">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">Appointment.order</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">!Appointment.order</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
@@ -3966,9 +3966,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>2</TopRowBottomPane>
+   <TopRowBottomPane>13</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>11</LeftColumnRightPane>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -3976,7 +3976,6 @@
     </Pane>
     <Pane>
      <Number>1</Number>
-     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
@@ -3984,8 +3983,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>4</ActiveRow>
-     <ActiveCol>14</ActiveCol>
+     <ActiveRow>16</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4071,7 +4070,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">Appointment</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Only proposed or cancelled appointments can be missing start/end dates</Data></Cell>
     <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">(not((f:status/@value='proposed') or (f:status/@value='cancelled')) and exists(f:start) and exists(f:end))</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">((exists(f:start) and exists(f:end)) or (f:status/@value='proposed') or (f:status/@value='cancelled'))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s110"><NamedCell ss:Name="Invariantids"/></Cell>
@@ -4510,7 +4509,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4532,7 +4530,7 @@
     <Pane>
      <Number>0</Number>
      <ActiveRow>3</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveCol>6</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4603,7 +4601,7 @@
     <Cell ss:StyleID="s121"><Data ss:Type="String">The number of minutes that the appointment is to go for</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s119"><Data ss:Type="String">partstatus</Data></Cell>
+    <Cell ss:StyleID="s119"><Data ss:Type="String">part-status</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s120"><Data ss:Type="String">Appointment.participant.status</Data></Cell>
@@ -4631,11 +4629,11 @@
     <Cell ss:StyleID="s121"><Data ss:Type="String">This location is listed in the participants of the appointment</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s119"/>
+    <Cell ss:StyleID="s119"><Data ss:Type="String">identifier</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s120"><Data ss:Type="String">Appointment.identifier</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">An Identifier of the Appointment</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"/>
@@ -4793,6 +4791,7 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4812,7 +4811,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>8</ActiveRow>
+     <ActiveRow>5</ActiveRow>
      <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
@@ -6119,11 +6118,11 @@
     <Cell ss:StyleID="s144"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s143"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s143"><Data ss:Type="String">ExampleRequest</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">xml</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Appointment request</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">examplereq</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">appointment-example-request.xml</Data></Cell>
     <Cell ss:StyleID="s133"/>
     <Cell ss:StyleID="s144"/>
    </Row>
@@ -6479,7 +6478,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>2</ActiveRow>
+     <ActiveRow>3</ActiveRow>
      <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>

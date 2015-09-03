@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -2067,10 +2067,10 @@ public class ImplementationGuide extends DomainResource {
     protected StringType copyright;
 
     /**
-     * The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.
+     * The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version.
      */
     @Child(name = "fhirVersion", type = {IdType.class}, order=11, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="FHIR Version this Implementation Guide targets", formalDefinition="The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version." )
+    @Description(shortDefinition="FHIR Version this Implementation Guide targets", formalDefinition="The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version." )
     protected IdType fhirVersion;
 
     /**
@@ -2634,7 +2634,7 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @return {@link #fhirVersion} (The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @return {@link #fhirVersion} (The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
     public IdType getFhirVersionElement() { 
       if (this.fhirVersion == null)
@@ -2654,7 +2654,7 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @param value {@link #fhirVersion} (The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @param value {@link #fhirVersion} (The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
     public ImplementationGuide setFhirVersionElement(IdType value) { 
       this.fhirVersion = value;
@@ -2662,14 +2662,14 @@ public class ImplementationGuide extends DomainResource {
     }
 
     /**
-     * @return The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.
+     * @return The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version.
      */
     public String getFhirVersion() { 
       return this.fhirVersion == null ? null : this.fhirVersion.getValue();
     }
 
     /**
-     * @param value The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.
+     * @param value The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version.
      */
     public ImplementationGuide setFhirVersion(String value) { 
       if (Utilities.noString(value))
@@ -2893,7 +2893,7 @@ public class ImplementationGuide extends DomainResource {
         childrenList.add(new Property("description", "string", "A free text natural language description of the Implementation Guide and its use.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("useContext", "CodeableConcept", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdication for which this implementation guide was defined.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the implementation guide and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.", 0, java.lang.Integer.MAX_VALUE, copyright));
-        childrenList.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.", 0, java.lang.Integer.MAX_VALUE, fhirVersion));
+        childrenList.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.0 for this version.", 0, java.lang.Integer.MAX_VALUE, fhirVersion));
         childrenList.add(new Property("dependency", "", "Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc defined in other implementation guides.", 0, java.lang.Integer.MAX_VALUE, dependency));
         childrenList.add(new Property("package", "", "A logial group of resources. Logical groups can be used when building pages.", 0, java.lang.Integer.MAX_VALUE, package_));
         childrenList.add(new Property("global", "", "A set of profiles that all resources covered by this implementation guide must conform to.", 0, java.lang.Integer.MAX_VALUE, global));

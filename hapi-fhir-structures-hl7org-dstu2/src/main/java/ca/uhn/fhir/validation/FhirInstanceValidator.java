@@ -270,11 +270,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
     }
 
     @Override
-    public List<ConceptMap> allMaps() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
     public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc) {
       throw new UnsupportedOperationException();
     }
@@ -376,6 +371,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
       } else {
         return vso;
       }
+    }
+
+    @Override
+    public List<ConceptMap> findMapsForSource(String theUrl) {
+      throw new UnsupportedOperationException();
     }
   }
 

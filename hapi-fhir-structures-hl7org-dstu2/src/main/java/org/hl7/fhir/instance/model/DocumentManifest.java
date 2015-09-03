@@ -29,20 +29,18 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
-import org.hl7.fhir.instance.model.Enumerations.DocumentReferenceStatus;
-import org.hl7.fhir.instance.model.Enumerations.DocumentReferenceStatusEnumFactory;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
+import java.util.*;
+
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.annotations.Child;
+import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A manifest that defines a set of documents.
  */
@@ -164,7 +162,7 @@ public class DocumentManifest extends DomainResource {
          * Related identifier to this DocumentManifest. If both id and ref are present they shall refer to the same thing.
          */
         @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Related Identifier", formalDefinition="Related identifier to this DocumentManifest. If both id and ref are present they shall refer to the same thing." )
+        @Description(shortDefinition="Identifiers of things that are related", formalDefinition="Related identifier to this DocumentManifest. If both id and ref are present they shall refer to the same thing." )
         protected Identifier identifier;
 
         /**
@@ -378,10 +376,10 @@ public class DocumentManifest extends DomainResource {
     protected StringType description;
 
     /**
-     * The manifest list.
+     * The list of Documents included in the manifest.
      */
     @Child(name = "content", type = {}, order=10, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Contents of the manifest", formalDefinition="The manifest list." )
+    @Description(shortDefinition="The items included", formalDefinition="The list of Documents included in the manifest." )
     protected List<DocumentManifestContentComponent> content;
 
     /**
@@ -826,7 +824,7 @@ public class DocumentManifest extends DomainResource {
     }
 
     /**
-     * @return {@link #content} (The manifest list.)
+     * @return {@link #content} (The list of Documents included in the manifest.)
      */
     public List<DocumentManifestContentComponent> getContent() { 
       if (this.content == null)
@@ -844,7 +842,7 @@ public class DocumentManifest extends DomainResource {
     }
 
     /**
-     * @return {@link #content} (The manifest list.)
+     * @return {@link #content} (The list of Documents included in the manifest.)
      */
     // syntactic sugar
     public DocumentManifestContentComponent addContent() { //3
@@ -917,7 +915,7 @@ public class DocumentManifest extends DomainResource {
         childrenList.add(new Property("source", "uri", "Identifies the source system, application, or software that produced the document manifest.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("status", "code", "The status of this document manifest.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("description", "string", "Human-readable description of the source document. This is sometimes known as the \"title\".", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("content", "", "The manifest list.", 0, java.lang.Integer.MAX_VALUE, content));
+        childrenList.add(new Property("content", "", "The list of Documents included in the manifest.", 0, java.lang.Integer.MAX_VALUE, content));
         childrenList.add(new Property("related", "", "Related identifiers or resources associated with the DocumentManifest.", 0, java.lang.Integer.MAX_VALUE, related));
       }
 
@@ -1003,30 +1001,30 @@ public class DocumentManifest extends DomainResource {
 
   @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier|DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="related-id", path="DocumentManifest.related.identifier", description="Identifiers of things that are related", type="token" )
+  public static final String SP_RELATEDID = "related-id";
+  @SearchParamDefinition(name="content-ref", path="DocumentManifest.content.pReference", description="Contents of this set of documents", type="reference" )
+  public static final String SP_CONTENTREF = "content-ref";
   @SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
   public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the manifest", type="reference" )
   public static final String SP_AUTHOR = "author";
   @SearchParamDefinition(name="created", path="DocumentManifest.created", description="When this document manifest created", type="date" )
   public static final String SP_CREATED = "created";
-  @SearchParamDefinition(name="relatedref", path="DocumentManifest.related.ref", description="Related Resource", type="reference" )
-  public static final String SP_RELATEDREF = "relatedref";
   @SearchParamDefinition(name="description", path="DocumentManifest.description", description="Human-readable description (title)", type="string" )
   public static final String SP_DESCRIPTION = "description";
   @SearchParamDefinition(name="source", path="DocumentManifest.source", description="The source system/application/software", type="uri" )
   public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="type", path="DocumentManifest.type", description="What kind of document set this is", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="relatedid", path="DocumentManifest.related.identifier", description="Related Identifier", type="token" )
-  public static final String SP_RELATEDID = "relatedid";
+  @SearchParamDefinition(name="related-ref", path="DocumentManifest.related.ref", description="Related Resource", type="reference" )
+  public static final String SP_RELATEDREF = "related-ref";
   @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference" )
   public static final String SP_RECIPIENT = "recipient";
   @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superseded | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="contentref", path="DocumentManifest.content.pReference", description="Contents of this set of documents", type="reference" )
-  public static final String SP_CONTENTREF = "contentref";
 
 }
 

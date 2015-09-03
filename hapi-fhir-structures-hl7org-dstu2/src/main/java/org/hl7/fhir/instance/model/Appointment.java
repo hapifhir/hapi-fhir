@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -732,25 +732,13 @@ public class Appointment extends DomainResource {
     protected StringType comment;
 
     /**
-     * An Order that lead to the creation of this appointment.
-     */
-    @Child(name = "order", type = {Order.class}, order=11, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="An Order that lead to the creation of this appointment", formalDefinition="An Order that lead to the creation of this appointment." )
-    protected Reference order;
-
-    /**
-     * The actual object that is the target of the reference (An Order that lead to the creation of this appointment.)
-     */
-    protected Order orderTarget;
-
-    /**
      * List of participants involved in the appointment.
      */
-    @Child(name = "participant", type = {}, order=12, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "participant", type = {}, order=11, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="List of participants involved in the appointment", formalDefinition="List of participants involved in the appointment." )
     protected List<AppointmentParticipantComponent> participant;
 
-    private static final long serialVersionUID = -17820559L;
+    private static final long serialVersionUID = -1403944125L;
 
   /*
    * Constructor
@@ -1248,50 +1236,6 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return {@link #order} (An Order that lead to the creation of this appointment.)
-     */
-    public Reference getOrder() { 
-      if (this.order == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Appointment.order");
-        else if (Configuration.doAutoCreate())
-          this.order = new Reference(); // cc
-      return this.order;
-    }
-
-    public boolean hasOrder() { 
-      return this.order != null && !this.order.isEmpty();
-    }
-
-    /**
-     * @param value {@link #order} (An Order that lead to the creation of this appointment.)
-     */
-    public Appointment setOrder(Reference value) { 
-      this.order = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #order} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (An Order that lead to the creation of this appointment.)
-     */
-    public Order getOrderTarget() { 
-      if (this.orderTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Appointment.order");
-        else if (Configuration.doAutoCreate())
-          this.orderTarget = new Order(); // aa
-      return this.orderTarget;
-    }
-
-    /**
-     * @param value {@link #order} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (An Order that lead to the creation of this appointment.)
-     */
-    public Appointment setOrderTarget(Order value) { 
-      this.orderTarget = value;
-      return this;
-    }
-
-    /**
      * @return {@link #participant} (List of participants involved in the appointment.)
      */
     public List<AppointmentParticipantComponent> getParticipant() { 
@@ -1344,7 +1288,6 @@ public class Appointment extends DomainResource {
         childrenList.add(new Property("minutesDuration", "positiveInt", "Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request).", 0, java.lang.Integer.MAX_VALUE, minutesDuration));
         childrenList.add(new Property("slot", "Reference(Slot)", "The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot.", 0, java.lang.Integer.MAX_VALUE, slot));
         childrenList.add(new Property("comment", "string", "Additional comments about the appointment.", 0, java.lang.Integer.MAX_VALUE, comment));
-        childrenList.add(new Property("order", "Reference(Order)", "An Order that lead to the creation of this appointment.", 0, java.lang.Integer.MAX_VALUE, order));
         childrenList.add(new Property("participant", "", "List of participants involved in the appointment.", 0, java.lang.Integer.MAX_VALUE, participant));
       }
 
@@ -1370,7 +1313,6 @@ public class Appointment extends DomainResource {
             dst.slot.add(i.copy());
         };
         dst.comment = comment == null ? null : comment.copy();
-        dst.order = order == null ? null : order.copy();
         if (participant != null) {
           dst.participant = new ArrayList<AppointmentParticipantComponent>();
           for (AppointmentParticipantComponent i : participant)
@@ -1393,8 +1335,8 @@ public class Appointment extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
            && compareDeep(reason, o.reason, true) && compareDeep(priority, o.priority, true) && compareDeep(description, o.description, true)
            && compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(minutesDuration, o.minutesDuration, true)
-           && compareDeep(slot, o.slot, true) && compareDeep(comment, o.comment, true) && compareDeep(order, o.order, true)
-           && compareDeep(participant, o.participant, true);
+           && compareDeep(slot, o.slot, true) && compareDeep(comment, o.comment, true) && compareDeep(participant, o.participant, true)
+          ;
       }
 
       @Override
@@ -1414,7 +1356,7 @@ public class Appointment extends DomainResource {
            && (type == null || type.isEmpty()) && (reason == null || reason.isEmpty()) && (priority == null || priority.isEmpty())
            && (description == null || description.isEmpty()) && (start == null || start.isEmpty()) && (end == null || end.isEmpty())
            && (minutesDuration == null || minutesDuration.isEmpty()) && (slot == null || slot.isEmpty())
-           && (comment == null || comment.isEmpty()) && (order == null || order.isEmpty()) && (participant == null || participant.isEmpty())
+           && (comment == null || comment.isEmpty()) && (participant == null || participant.isEmpty())
           ;
       }
 
@@ -1427,10 +1369,12 @@ public class Appointment extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="actor", path="Appointment.participant.actor", description="Any one of the individuals participating in the appointment", type="reference" )
   public static final String SP_ACTOR = "actor";
-  @SearchParamDefinition(name="partstatus", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment. Can be used to locate participants that have not responded to meeting requests.", type="token" )
-  public static final String SP_PARTSTATUS = "partstatus";
+  @SearchParamDefinition(name="identifier", path="Appointment.identifier", description="An Identifier of the Appointment", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="practitioner", path="Appointment.participant.actor", description="One of the individuals of the appointment is this practitioner", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
+  @SearchParamDefinition(name="part-status", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment. Can be used to locate participants that have not responded to meeting requests.", type="token" )
+  public static final String SP_PARTSTATUS = "part-status";
   @SearchParamDefinition(name="patient", path="Appointment.participant.actor", description="One of the individuals of the appointment is this patient", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="location", path="Appointment.participant.actor", description="This location is listed in the participants of the appointment", type="reference" )

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * Describes the intended objective(s) of patient care, for example, weight loss, restoring an activity of daily living, etc.
+ * Describes the intended objective(s) for a patient, group or organization care, for example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.;.
  */
 @ResourceDef(name="Goal", profile="http://hl7.org/fhir/Profile/Goal")
 public class Goal extends DomainResource {
@@ -56,6 +56,14 @@ public class Goal extends DomainResource {
          */
         PLANNED, 
         /**
+         * A proposed goal was accepted
+         */
+        ACCEPTED, 
+        /**
+         * A proposed goal was rejected
+         */
+        REJECTED, 
+        /**
          * The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again)
          */
         INPROGRESS, 
@@ -68,17 +76,13 @@ public class Goal extends DomainResource {
          */
         SUSTAINING, 
         /**
+         * The goal remains a long term objective but is no longer being actively pursued for a temporary period of time.
+         */
+        ONHOLD, 
+        /**
          * The goal is no longer being sought
          */
         CANCELLED, 
-        /**
-         * A proposed goal was accepted
-         */
-        ACCEPTED, 
-        /**
-         * A proposed goal was rejected
-         */
-        REJECTED, 
         /**
          * added to help the parsers
          */
@@ -90,30 +94,33 @@ public class Goal extends DomainResource {
           return PROPOSED;
         if ("planned".equals(codeString))
           return PLANNED;
+        if ("accepted".equals(codeString))
+          return ACCEPTED;
+        if ("rejected".equals(codeString))
+          return REJECTED;
         if ("in-progress".equals(codeString))
           return INPROGRESS;
         if ("achieved".equals(codeString))
           return ACHIEVED;
         if ("sustaining".equals(codeString))
           return SUSTAINING;
+        if ("on-hold".equals(codeString))
+          return ONHOLD;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        if ("accepted".equals(codeString))
-          return ACCEPTED;
-        if ("rejected".equals(codeString))
-          return REJECTED;
         throw new Exception("Unknown GoalStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case PROPOSED: return "proposed";
             case PLANNED: return "planned";
+            case ACCEPTED: return "accepted";
+            case REJECTED: return "rejected";
             case INPROGRESS: return "in-progress";
             case ACHIEVED: return "achieved";
             case SUSTAINING: return "sustaining";
+            case ONHOLD: return "on-hold";
             case CANCELLED: return "cancelled";
-            case ACCEPTED: return "accepted";
-            case REJECTED: return "rejected";
             default: return "?";
           }
         }
@@ -121,12 +128,13 @@ public class Goal extends DomainResource {
           switch (this) {
             case PROPOSED: return "http://hl7.org/fhir/goal-status";
             case PLANNED: return "http://hl7.org/fhir/goal-status";
+            case ACCEPTED: return "http://hl7.org/fhir/goal-status";
+            case REJECTED: return "http://hl7.org/fhir/goal-status";
             case INPROGRESS: return "http://hl7.org/fhir/goal-status";
             case ACHIEVED: return "http://hl7.org/fhir/goal-status";
             case SUSTAINING: return "http://hl7.org/fhir/goal-status";
+            case ONHOLD: return "http://hl7.org/fhir/goal-status";
             case CANCELLED: return "http://hl7.org/fhir/goal-status";
-            case ACCEPTED: return "http://hl7.org/fhir/goal-status";
-            case REJECTED: return "http://hl7.org/fhir/goal-status";
             default: return "?";
           }
         }
@@ -134,12 +142,13 @@ public class Goal extends DomainResource {
           switch (this) {
             case PROPOSED: return "A goal is proposed for this patient";
             case PLANNED: return "A goal is planned for this patient";
+            case ACCEPTED: return "A proposed goal was accepted";
+            case REJECTED: return "A proposed goal was rejected";
             case INPROGRESS: return "The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again)";
             case ACHIEVED: return "The goal has been met and no further action is needed";
             case SUSTAINING: return "The goal has been met, but ongoing activity is needed to sustain the goal objective";
+            case ONHOLD: return "The goal remains a long term objective but is no longer being actively pursued for a temporary period of time.";
             case CANCELLED: return "The goal is no longer being sought";
-            case ACCEPTED: return "A proposed goal was accepted";
-            case REJECTED: return "A proposed goal was rejected";
             default: return "?";
           }
         }
@@ -147,12 +156,13 @@ public class Goal extends DomainResource {
           switch (this) {
             case PROPOSED: return "Proposed";
             case PLANNED: return "Planned";
+            case ACCEPTED: return "Accepted";
+            case REJECTED: return "Rejected";
             case INPROGRESS: return "In Progress";
             case ACHIEVED: return "Achieved";
             case SUSTAINING: return "Sustaining";
+            case ONHOLD: return "On Hold";
             case CANCELLED: return "Cancelled";
-            case ACCEPTED: return "Accepted";
-            case REJECTED: return "Rejected";
             default: return "?";
           }
         }
@@ -167,18 +177,20 @@ public class Goal extends DomainResource {
           return GoalStatus.PROPOSED;
         if ("planned".equals(codeString))
           return GoalStatus.PLANNED;
+        if ("accepted".equals(codeString))
+          return GoalStatus.ACCEPTED;
+        if ("rejected".equals(codeString))
+          return GoalStatus.REJECTED;
         if ("in-progress".equals(codeString))
           return GoalStatus.INPROGRESS;
         if ("achieved".equals(codeString))
           return GoalStatus.ACHIEVED;
         if ("sustaining".equals(codeString))
           return GoalStatus.SUSTAINING;
+        if ("on-hold".equals(codeString))
+          return GoalStatus.ONHOLD;
         if ("cancelled".equals(codeString))
           return GoalStatus.CANCELLED;
-        if ("accepted".equals(codeString))
-          return GoalStatus.ACCEPTED;
-        if ("rejected".equals(codeString))
-          return GoalStatus.REJECTED;
         throw new IllegalArgumentException("Unknown GoalStatus code '"+codeString+"'");
         }
     public String toCode(GoalStatus code) {
@@ -186,18 +198,20 @@ public class Goal extends DomainResource {
         return "proposed";
       if (code == GoalStatus.PLANNED)
         return "planned";
+      if (code == GoalStatus.ACCEPTED)
+        return "accepted";
+      if (code == GoalStatus.REJECTED)
+        return "rejected";
       if (code == GoalStatus.INPROGRESS)
         return "in-progress";
       if (code == GoalStatus.ACHIEVED)
         return "achieved";
       if (code == GoalStatus.SUSTAINING)
         return "sustaining";
+      if (code == GoalStatus.ONHOLD)
+        return "on-hold";
       if (code == GoalStatus.CANCELLED)
         return "cancelled";
-      if (code == GoalStatus.ACCEPTED)
-        return "accepted";
-      if (code == GoalStatus.REJECTED)
-        return "rejected";
       return "?";
       }
     }
@@ -208,7 +222,7 @@ public class Goal extends DomainResource {
          * Details of what's changed (or not changed).
          */
         @Child(name = "result", type = {CodeableConcept.class, Observation.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Code or observation that resulted from gual", formalDefinition="Details of what's changed (or not changed)." )
+        @Description(shortDefinition="Code or observation that resulted from goal", formalDefinition="Details of what's changed (or not changed)." )
         protected Type result;
 
         private static final long serialVersionUID = 1994317639L;
@@ -311,49 +325,70 @@ public class Goal extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * Identifies the patient/subject whose intended care is described by the plan.
+     * Identifies the patient, group or organization for whom the goal is being established.
      */
-    @Child(name = "patient", type = {Patient.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The patient for whom this goal is intended for", formalDefinition="Identifies the patient/subject whose intended care is described by the plan." )
-    protected Reference patient;
+    @Child(name = "subject", type = {Patient.class, Group.class, Organization.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Who this goal is intended for", formalDefinition="Identifies the patient, group or organization for whom the goal is being established." )
+    protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (Identifies the patient/subject whose intended care is described by the plan.)
+     * The actual object that is the target of the reference (Identifies the patient, group or organization for whom the goal is being established.)
      */
-    protected Patient patientTarget;
+    protected Resource subjectTarget;
 
     /**
-     * Indicates when the goal is intended to be reached.
+     * The date or event after which the goal should begin being pursued.
      */
-    @Child(name = "targetDate", type = {DateType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Reach goal on or before", formalDefinition="Indicates when the goal is intended to be reached." )
-    protected DateType targetDate;
+    @Child(name = "start", type = {DateType.class, CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="When goal pursuit begins", formalDefinition="The date or event after which the goal should begin being pursued." )
+    protected Type start;
+
+    /**
+     * Indicates either the date or the duration after start by which the goal should be met.
+     */
+    @Child(name = "target", type = {DateType.class, Duration.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Reach goal on or before", formalDefinition="Indicates either the date or the duration after start by which the goal should be met." )
+    protected Type target;
+
+    /**
+     * Indicates a category the goal falls within.
+     */
+    @Child(name = "category", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="E.g. Treatment, dietary, behavioral, etc.", formalDefinition="Indicates a category the goal falls within." )
+    protected List<CodeableConcept> category;
 
     /**
      * Human-readable description of a specific desired objective of care.
      */
-    @Child(name = "description", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=5, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What's the desired outcome?", formalDefinition="Human-readable description of a specific desired objective of care." )
     protected StringType description;
 
     /**
      * Indicates whether the goal has been reached and is still considered relevant.
      */
-    @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="proposed | planned | in-progress | achieved | sustaining | cancelled | accepted | rejected", formalDefinition="Indicates whether the goal has been reached and is still considered relevant." )
+    @Child(name = "status", type = {CodeType.class}, order=6, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="proposed | planned | accepted | rejected | in-progress | achieved | sustaining | on-hold | cancelled", formalDefinition="Indicates whether the goal has been reached and is still considered relevant." )
     protected Enumeration<GoalStatus> status;
 
     /**
      * Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc.
      */
-    @Child(name = "statusDate", type = {DateType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "statusDate", type = {DateType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When goal status took effect", formalDefinition="Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc." )
     protected DateType statusDate;
 
     /**
+     * Captures the reason for the current status.
+     */
+    @Child(name = "statusReason", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Reason for current status", formalDefinition="Captures the reason for the current status." )
+    protected CodeableConcept statusReason;
+
+    /**
      * Indicates whose goal this is - patient goal, practitioner goal, etc.
      */
-    @Child(name = "author", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "author", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who's responsible for creating Goal?", formalDefinition="Indicates whose goal this is - patient goal, practitioner goal, etc." )
     protected Reference author;
 
@@ -363,39 +398,39 @@ public class Goal extends DomainResource {
     protected Resource authorTarget;
 
     /**
-     * Identifies the level of importance associated with reaching/sustaining the goal.
+     * Identifies the mutually agreed level of importance associated with reaching/sustaining the goal.
      */
-    @Child(name = "priority", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="high | medium |low", formalDefinition="Identifies the level of importance associated with reaching/sustaining the goal." )
+    @Child(name = "priority", type = {CodeableConcept.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="high | medium |low", formalDefinition="Identifies the mutually agreed level of importance associated with reaching/sustaining the goal." )
     protected CodeableConcept priority;
 
     /**
      * The identified conditions and other health record elements that are intended to be addressed by the goal.
      */
-    @Child(name = "concern", type = {Condition.class, Observation.class, MedicationStatement.class, NutritionOrder.class, ProcedureRequest.class, RiskAssessment.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Health issues this goal addresses", formalDefinition="The identified conditions and other health record elements that are intended to be addressed by the goal." )
-    protected List<Reference> concern;
+    @Child(name = "addresses", type = {Condition.class, Observation.class, MedicationStatement.class, NutritionOrder.class, ProcedureRequest.class, RiskAssessment.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Issues addressed by this goal", formalDefinition="The identified conditions and other health record elements that are intended to be addressed by the goal." )
+    protected List<Reference> addresses;
     /**
      * The actual objects that are the target of the reference (The identified conditions and other health record elements that are intended to be addressed by the goal.)
      */
-    protected List<Resource> concernTarget;
+    protected List<Resource> addressesTarget;
 
 
     /**
      * Any comments related to the goal.
      */
-    @Child(name = "notes", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Comments about the goal", formalDefinition="Any comments related to the goal." )
-    protected StringType notes;
+    protected List<Annotation> note;
 
     /**
      * Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved.
      */
-    @Child(name = "outcome", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "outcome", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="What was end result of goal?", formalDefinition="Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved." )
     protected List<GoalOutcomeComponent> outcome;
 
-    private static final long serialVersionUID = -314822558L;
+    private static final long serialVersionUID = 2029459056L;
 
   /*
    * Constructor
@@ -454,95 +489,171 @@ public class Goal extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} (Identifies the patient/subject whose intended care is described by the plan.)
+     * @return {@link #subject} (Identifies the patient, group or organization for whom the goal is being established.)
      */
-    public Reference getPatient() { 
-      if (this.patient == null)
+    public Reference getSubject() { 
+      if (this.subject == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Goal.patient");
+          throw new Error("Attempt to auto-create Goal.subject");
         else if (Configuration.doAutoCreate())
-          this.patient = new Reference(); // cc
-      return this.patient;
+          this.subject = new Reference(); // cc
+      return this.subject;
     }
 
-    public boolean hasPatient() { 
-      return this.patient != null && !this.patient.isEmpty();
+    public boolean hasSubject() { 
+      return this.subject != null && !this.subject.isEmpty();
     }
 
     /**
-     * @param value {@link #patient} (Identifies the patient/subject whose intended care is described by the plan.)
+     * @param value {@link #subject} (Identifies the patient, group or organization for whom the goal is being established.)
      */
-    public Goal setPatient(Reference value) { 
-      this.patient = value;
+    public Goal setSubject(Reference value) { 
+      this.subject = value;
       return this;
     }
 
     /**
-     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies the patient/subject whose intended care is described by the plan.)
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies the patient, group or organization for whom the goal is being established.)
      */
-    public Patient getPatientTarget() { 
-      if (this.patientTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Goal.patient");
-        else if (Configuration.doAutoCreate())
-          this.patientTarget = new Patient(); // aa
-      return this.patientTarget;
+    public Resource getSubjectTarget() { 
+      return this.subjectTarget;
     }
 
     /**
-     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies the patient/subject whose intended care is described by the plan.)
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies the patient, group or organization for whom the goal is being established.)
      */
-    public Goal setPatientTarget(Patient value) { 
-      this.patientTarget = value;
+    public Goal setSubjectTarget(Resource value) { 
+      this.subjectTarget = value;
       return this;
     }
 
     /**
-     * @return {@link #targetDate} (Indicates when the goal is intended to be reached.). This is the underlying object with id, value and extensions. The accessor "getTargetDate" gives direct access to the value
+     * @return {@link #start} (The date or event after which the goal should begin being pursued.)
      */
-    public DateType getTargetDateElement() { 
-      if (this.targetDate == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Goal.targetDate");
-        else if (Configuration.doAutoCreate())
-          this.targetDate = new DateType(); // bb
-      return this.targetDate;
-    }
-
-    public boolean hasTargetDateElement() { 
-      return this.targetDate != null && !this.targetDate.isEmpty();
-    }
-
-    public boolean hasTargetDate() { 
-      return this.targetDate != null && !this.targetDate.isEmpty();
+    public Type getStart() { 
+      return this.start;
     }
 
     /**
-     * @param value {@link #targetDate} (Indicates when the goal is intended to be reached.). This is the underlying object with id, value and extensions. The accessor "getTargetDate" gives direct access to the value
+     * @return {@link #start} (The date or event after which the goal should begin being pursued.)
      */
-    public Goal setTargetDateElement(DateType value) { 
-      this.targetDate = value;
+    public DateType getStartDateType() throws Exception { 
+      if (!(this.start instanceof DateType))
+        throw new Exception("Type mismatch: the type DateType was expected, but "+this.start.getClass().getName()+" was encountered");
+      return (DateType) this.start;
+    }
+
+    public boolean hasStartDateType() throws Exception { 
+      return this.start instanceof DateType;
+    }
+
+    /**
+     * @return {@link #start} (The date or event after which the goal should begin being pursued.)
+     */
+    public CodeableConcept getStartCodeableConcept() throws Exception { 
+      if (!(this.start instanceof CodeableConcept))
+        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.start.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.start;
+    }
+
+    public boolean hasStartCodeableConcept() throws Exception { 
+      return this.start instanceof CodeableConcept;
+    }
+
+    public boolean hasStart() { 
+      return this.start != null && !this.start.isEmpty();
+    }
+
+    /**
+     * @param value {@link #start} (The date or event after which the goal should begin being pursued.)
+     */
+    public Goal setStart(Type value) { 
+      this.start = value;
       return this;
     }
 
     /**
-     * @return Indicates when the goal is intended to be reached.
+     * @return {@link #target} (Indicates either the date or the duration after start by which the goal should be met.)
      */
-    public Date getTargetDate() { 
-      return this.targetDate == null ? null : this.targetDate.getValue();
+    public Type getTarget() { 
+      return this.target;
     }
 
     /**
-     * @param value Indicates when the goal is intended to be reached.
+     * @return {@link #target} (Indicates either the date or the duration after start by which the goal should be met.)
      */
-    public Goal setTargetDate(Date value) { 
-      if (value == null)
-        this.targetDate = null;
-      else {
-        if (this.targetDate == null)
-          this.targetDate = new DateType();
-        this.targetDate.setValue(value);
-      }
+    public DateType getTargetDateType() throws Exception { 
+      if (!(this.target instanceof DateType))
+        throw new Exception("Type mismatch: the type DateType was expected, but "+this.target.getClass().getName()+" was encountered");
+      return (DateType) this.target;
+    }
+
+    public boolean hasTargetDateType() throws Exception { 
+      return this.target instanceof DateType;
+    }
+
+    /**
+     * @return {@link #target} (Indicates either the date or the duration after start by which the goal should be met.)
+     */
+    public Duration getTargetDuration() throws Exception { 
+      if (!(this.target instanceof Duration))
+        throw new Exception("Type mismatch: the type Duration was expected, but "+this.target.getClass().getName()+" was encountered");
+      return (Duration) this.target;
+    }
+
+    public boolean hasTargetDuration() throws Exception { 
+      return this.target instanceof Duration;
+    }
+
+    public boolean hasTarget() { 
+      return this.target != null && !this.target.isEmpty();
+    }
+
+    /**
+     * @param value {@link #target} (Indicates either the date or the duration after start by which the goal should be met.)
+     */
+    public Goal setTarget(Type value) { 
+      this.target = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #category} (Indicates a category the goal falls within.)
+     */
+    public List<CodeableConcept> getCategory() { 
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      return this.category;
+    }
+
+    public boolean hasCategory() { 
+      if (this.category == null)
+        return false;
+      for (CodeableConcept item : this.category)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #category} (Indicates a category the goal falls within.)
+     */
+    // syntactic sugar
+    public CodeableConcept addCategory() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public Goal addCategory(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
       return this;
     }
 
@@ -686,6 +797,30 @@ public class Goal extends DomainResource {
     }
 
     /**
+     * @return {@link #statusReason} (Captures the reason for the current status.)
+     */
+    public CodeableConcept getStatusReason() { 
+      if (this.statusReason == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Goal.statusReason");
+        else if (Configuration.doAutoCreate())
+          this.statusReason = new CodeableConcept(); // cc
+      return this.statusReason;
+    }
+
+    public boolean hasStatusReason() { 
+      return this.statusReason != null && !this.statusReason.isEmpty();
+    }
+
+    /**
+     * @param value {@link #statusReason} (Captures the reason for the current status.)
+     */
+    public Goal setStatusReason(CodeableConcept value) { 
+      this.statusReason = value;
+      return this;
+    }
+
+    /**
      * @return {@link #author} (Indicates whose goal this is - patient goal, practitioner goal, etc.)
      */
     public Reference getAuthor() { 
@@ -725,7 +860,7 @@ public class Goal extends DomainResource {
     }
 
     /**
-     * @return {@link #priority} (Identifies the level of importance associated with reaching/sustaining the goal.)
+     * @return {@link #priority} (Identifies the mutually agreed level of importance associated with reaching/sustaining the goal.)
      */
     public CodeableConcept getPriority() { 
       if (this.priority == null)
@@ -741,7 +876,7 @@ public class Goal extends DomainResource {
     }
 
     /**
-     * @param value {@link #priority} (Identifies the level of importance associated with reaching/sustaining the goal.)
+     * @param value {@link #priority} (Identifies the mutually agreed level of importance associated with reaching/sustaining the goal.)
      */
     public Goal setPriority(CodeableConcept value) { 
       this.priority = value;
@@ -749,100 +884,91 @@ public class Goal extends DomainResource {
     }
 
     /**
-     * @return {@link #concern} (The identified conditions and other health record elements that are intended to be addressed by the goal.)
+     * @return {@link #addresses} (The identified conditions and other health record elements that are intended to be addressed by the goal.)
      */
-    public List<Reference> getConcern() { 
-      if (this.concern == null)
-        this.concern = new ArrayList<Reference>();
-      return this.concern;
+    public List<Reference> getAddresses() { 
+      if (this.addresses == null)
+        this.addresses = new ArrayList<Reference>();
+      return this.addresses;
     }
 
-    public boolean hasConcern() { 
-      if (this.concern == null)
+    public boolean hasAddresses() { 
+      if (this.addresses == null)
         return false;
-      for (Reference item : this.concern)
+      for (Reference item : this.addresses)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #concern} (The identified conditions and other health record elements that are intended to be addressed by the goal.)
+     * @return {@link #addresses} (The identified conditions and other health record elements that are intended to be addressed by the goal.)
      */
     // syntactic sugar
-    public Reference addConcern() { //3
+    public Reference addAddresses() { //3
       Reference t = new Reference();
-      if (this.concern == null)
-        this.concern = new ArrayList<Reference>();
-      this.concern.add(t);
+      if (this.addresses == null)
+        this.addresses = new ArrayList<Reference>();
+      this.addresses.add(t);
       return t;
     }
 
     // syntactic sugar
-    public Goal addConcern(Reference t) { //3
+    public Goal addAddresses(Reference t) { //3
       if (t == null)
         return this;
-      if (this.concern == null)
-        this.concern = new ArrayList<Reference>();
-      this.concern.add(t);
+      if (this.addresses == null)
+        this.addresses = new ArrayList<Reference>();
+      this.addresses.add(t);
       return this;
     }
 
     /**
-     * @return {@link #concern} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The identified conditions and other health record elements that are intended to be addressed by the goal.)
+     * @return {@link #addresses} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The identified conditions and other health record elements that are intended to be addressed by the goal.)
      */
-    public List<Resource> getConcernTarget() { 
-      if (this.concernTarget == null)
-        this.concernTarget = new ArrayList<Resource>();
-      return this.concernTarget;
+    public List<Resource> getAddressesTarget() { 
+      if (this.addressesTarget == null)
+        this.addressesTarget = new ArrayList<Resource>();
+      return this.addressesTarget;
     }
 
     /**
-     * @return {@link #notes} (Any comments related to the goal.). This is the underlying object with id, value and extensions. The accessor "getNotes" gives direct access to the value
+     * @return {@link #note} (Any comments related to the goal.)
      */
-    public StringType getNotesElement() { 
-      if (this.notes == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Goal.notes");
-        else if (Configuration.doAutoCreate())
-          this.notes = new StringType(); // bb
-      return this.notes;
+    public List<Annotation> getNote() { 
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      return this.note;
     }
 
-    public boolean hasNotesElement() { 
-      return this.notes != null && !this.notes.isEmpty();
-    }
-
-    public boolean hasNotes() { 
-      return this.notes != null && !this.notes.isEmpty();
+    public boolean hasNote() { 
+      if (this.note == null)
+        return false;
+      for (Annotation item : this.note)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #notes} (Any comments related to the goal.). This is the underlying object with id, value and extensions. The accessor "getNotes" gives direct access to the value
+     * @return {@link #note} (Any comments related to the goal.)
      */
-    public Goal setNotesElement(StringType value) { 
-      this.notes = value;
-      return this;
+    // syntactic sugar
+    public Annotation addNote() { //3
+      Annotation t = new Annotation();
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return t;
     }
 
-    /**
-     * @return Any comments related to the goal.
-     */
-    public String getNotes() { 
-      return this.notes == null ? null : this.notes.getValue();
-    }
-
-    /**
-     * @param value Any comments related to the goal.
-     */
-    public Goal setNotes(String value) { 
-      if (Utilities.noString(value))
-        this.notes = null;
-      else {
-        if (this.notes == null)
-          this.notes = new StringType();
-        this.notes.setValue(value);
-      }
+    // syntactic sugar
+    public Goal addNote(Annotation t) { //3
+      if (t == null)
+        return this;
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
       return this;
     }
 
@@ -889,15 +1015,18 @@ public class Goal extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("patient", "Reference(Patient)", "Identifies the patient/subject whose intended care is described by the plan.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("targetDate", "date", "Indicates when the goal is intended to be reached.", 0, java.lang.Integer.MAX_VALUE, targetDate));
+        childrenList.add(new Property("subject", "Reference(Patient|Group|Organization)", "Identifies the patient, group or organization for whom the goal is being established.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("start[x]", "date|CodeableConcept", "The date or event after which the goal should begin being pursued.", 0, java.lang.Integer.MAX_VALUE, start));
+        childrenList.add(new Property("target[x]", "date|Duration", "Indicates either the date or the duration after start by which the goal should be met.", 0, java.lang.Integer.MAX_VALUE, target));
+        childrenList.add(new Property("category", "CodeableConcept", "Indicates a category the goal falls within.", 0, java.lang.Integer.MAX_VALUE, category));
         childrenList.add(new Property("description", "string", "Human-readable description of a specific desired objective of care.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("status", "code", "Indicates whether the goal has been reached and is still considered relevant.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("statusDate", "date", "Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc.", 0, java.lang.Integer.MAX_VALUE, statusDate));
+        childrenList.add(new Property("statusReason", "CodeableConcept", "Captures the reason for the current status.", 0, java.lang.Integer.MAX_VALUE, statusReason));
         childrenList.add(new Property("author", "Reference(Patient|Practitioner|RelatedPerson)", "Indicates whose goal this is - patient goal, practitioner goal, etc.", 0, java.lang.Integer.MAX_VALUE, author));
-        childrenList.add(new Property("priority", "CodeableConcept", "Identifies the level of importance associated with reaching/sustaining the goal.", 0, java.lang.Integer.MAX_VALUE, priority));
-        childrenList.add(new Property("concern", "Reference(Condition|Observation|MedicationStatement|NutritionOrder|ProcedureRequest|RiskAssessment)", "The identified conditions and other health record elements that are intended to be addressed by the goal.", 0, java.lang.Integer.MAX_VALUE, concern));
-        childrenList.add(new Property("notes", "string", "Any comments related to the goal.", 0, java.lang.Integer.MAX_VALUE, notes));
+        childrenList.add(new Property("priority", "CodeableConcept", "Identifies the mutually agreed level of importance associated with reaching/sustaining the goal.", 0, java.lang.Integer.MAX_VALUE, priority));
+        childrenList.add(new Property("addresses", "Reference(Condition|Observation|MedicationStatement|NutritionOrder|ProcedureRequest|RiskAssessment)", "The identified conditions and other health record elements that are intended to be addressed by the goal.", 0, java.lang.Integer.MAX_VALUE, addresses));
+        childrenList.add(new Property("note", "Annotation", "Any comments related to the goal.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("outcome", "", "Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved.", 0, java.lang.Integer.MAX_VALUE, outcome));
       }
 
@@ -909,19 +1038,30 @@ public class Goal extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        dst.patient = patient == null ? null : patient.copy();
-        dst.targetDate = targetDate == null ? null : targetDate.copy();
+        dst.subject = subject == null ? null : subject.copy();
+        dst.start = start == null ? null : start.copy();
+        dst.target = target == null ? null : target.copy();
+        if (category != null) {
+          dst.category = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : category)
+            dst.category.add(i.copy());
+        };
         dst.description = description == null ? null : description.copy();
         dst.status = status == null ? null : status.copy();
         dst.statusDate = statusDate == null ? null : statusDate.copy();
+        dst.statusReason = statusReason == null ? null : statusReason.copy();
         dst.author = author == null ? null : author.copy();
         dst.priority = priority == null ? null : priority.copy();
-        if (concern != null) {
-          dst.concern = new ArrayList<Reference>();
-          for (Reference i : concern)
-            dst.concern.add(i.copy());
+        if (addresses != null) {
+          dst.addresses = new ArrayList<Reference>();
+          for (Reference i : addresses)
+            dst.addresses.add(i.copy());
         };
-        dst.notes = notes == null ? null : notes.copy();
+        if (note != null) {
+          dst.note = new ArrayList<Annotation>();
+          for (Annotation i : note)
+            dst.note.add(i.copy());
+        };
         if (outcome != null) {
           dst.outcome = new ArrayList<GoalOutcomeComponent>();
           for (GoalOutcomeComponent i : outcome)
@@ -941,10 +1081,11 @@ public class Goal extends DomainResource {
         if (!(other instanceof Goal))
           return false;
         Goal o = (Goal) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(patient, o.patient, true) && compareDeep(targetDate, o.targetDate, true)
-           && compareDeep(description, o.description, true) && compareDeep(status, o.status, true) && compareDeep(statusDate, o.statusDate, true)
-           && compareDeep(author, o.author, true) && compareDeep(priority, o.priority, true) && compareDeep(concern, o.concern, true)
-           && compareDeep(notes, o.notes, true) && compareDeep(outcome, o.outcome, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(subject, o.subject, true) && compareDeep(start, o.start, true)
+           && compareDeep(target, o.target, true) && compareDeep(category, o.category, true) && compareDeep(description, o.description, true)
+           && compareDeep(status, o.status, true) && compareDeep(statusDate, o.statusDate, true) && compareDeep(statusReason, o.statusReason, true)
+           && compareDeep(author, o.author, true) && compareDeep(priority, o.priority, true) && compareDeep(addresses, o.addresses, true)
+           && compareDeep(note, o.note, true) && compareDeep(outcome, o.outcome, true);
       }
 
       @Override
@@ -954,17 +1095,17 @@ public class Goal extends DomainResource {
         if (!(other instanceof Goal))
           return false;
         Goal o = (Goal) other;
-        return compareValues(targetDate, o.targetDate, true) && compareValues(description, o.description, true)
-           && compareValues(status, o.status, true) && compareValues(statusDate, o.statusDate, true) && compareValues(notes, o.notes, true)
+        return compareValues(description, o.description, true) && compareValues(status, o.status, true) && compareValues(statusDate, o.statusDate, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (patient == null || patient.isEmpty())
-           && (targetDate == null || targetDate.isEmpty()) && (description == null || description.isEmpty())
-           && (status == null || status.isEmpty()) && (statusDate == null || statusDate.isEmpty()) && (author == null || author.isEmpty())
-           && (priority == null || priority.isEmpty()) && (concern == null || concern.isEmpty()) && (notes == null || notes.isEmpty())
-           && (outcome == null || outcome.isEmpty());
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (subject == null || subject.isEmpty())
+           && (start == null || start.isEmpty()) && (target == null || target.isEmpty()) && (category == null || category.isEmpty())
+           && (description == null || description.isEmpty()) && (status == null || status.isEmpty())
+           && (statusDate == null || statusDate.isEmpty()) && (statusReason == null || statusReason.isEmpty())
+           && (author == null || author.isEmpty()) && (priority == null || priority.isEmpty()) && (addresses == null || addresses.isEmpty())
+           && (note == null || note.isEmpty()) && (outcome == null || outcome.isEmpty());
       }
 
   @Override
@@ -972,8 +1113,18 @@ public class Goal extends DomainResource {
     return ResourceType.Goal;
    }
 
-  @SearchParamDefinition(name="patient", path="Goal.patient", description="The patient for whom this goal is intended for", type="reference" )
+  @SearchParamDefinition(name="identifier", path="Goal.identifier", description="External Ids for this goal", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="patient", path="Goal.subject", description="Who this goal is intended for", type="reference" )
   public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="subject", path="Goal.subject", description="Who this goal is intended for", type="reference" )
+  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="targetdate", path="Goal.targetDate", description="Reach goal on or before", type="date" )
+  public static final String SP_TARGETDATE = "targetdate";
+  @SearchParamDefinition(name="category", path="Goal.category", description="E.g. Treatment, dietary, behavioral, etc.", type="token" )
+  public static final String SP_CATEGORY = "category";
+  @SearchParamDefinition(name="status", path="Goal.status", description="proposed | planned | accepted | rejected | in-progress | achieved | sustaining | on-hold | cancelled", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

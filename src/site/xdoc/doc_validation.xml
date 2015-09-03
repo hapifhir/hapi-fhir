@@ -175,7 +175,7 @@
 						(the StructureDefinition validation will work against HAPI structures as well)
 					</li>
 					<li>
-						<b>hapi-fhir-validation-resources</b>: This file contains the official FHIR
+						<b>hapi-fhir-validation-resources-dstu2</b>: This file contains the official FHIR
 						StructureDefinition files, and the ValueSets needed to support them.
 					</li>
 				</ul>

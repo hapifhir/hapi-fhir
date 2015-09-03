@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -1137,10 +1137,10 @@ public class Timing extends Type implements ICompositeType {
     protected TimingRepeatComponent repeat;
 
     /**
-     * A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes.
+     * A code for the timing pattern. Some codes such as BID are uniquitious, but many institutions define their own additional codes.
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="QD | QOD | Q4H | Q6H | BID | TID | QID | AM | PM +", formalDefinition="A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes." )
+    @Description(shortDefinition="QD | QOD | Q4H | Q6H | BID | TID | QID | AM | PM +", formalDefinition="A code for the timing pattern. Some codes such as BID are uniquitious, but many institutions define their own additional codes." )
     protected CodeableConcept code;
 
     private static final long serialVersionUID = 791565112L;
@@ -1231,7 +1231,7 @@ public class Timing extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #code} (A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes.)
+     * @return {@link #code} (A code for the timing pattern. Some codes such as BID are uniquitious, but many institutions define their own additional codes.)
      */
     public CodeableConcept getCode() { 
       if (this.code == null)
@@ -1247,7 +1247,7 @@ public class Timing extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #code} (A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes.)
+     * @param value {@link #code} (A code for the timing pattern. Some codes such as BID are uniquitious, but many institutions define their own additional codes.)
      */
     public Timing setCode(CodeableConcept value) { 
       this.code = value;
@@ -1258,7 +1258,7 @@ public class Timing extends Type implements ICompositeType {
         super.listChildren(childrenList);
         childrenList.add(new Property("event", "dateTime", "Identifies specific times when the event occurs.", 0, java.lang.Integer.MAX_VALUE, event));
         childrenList.add(new Property("repeat", "", "A set of rules that describe when the event should occur.", 0, java.lang.Integer.MAX_VALUE, repeat));
-        childrenList.add(new Property("code", "CodeableConcept", "A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("code", "CodeableConcept", "A code for the timing pattern. Some codes such as BID are uniquitious, but many institutions define their own additional codes.", 0, java.lang.Integer.MAX_VALUE, code));
       }
 
       public Timing copy() {

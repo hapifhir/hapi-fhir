@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -45,78 +45,6 @@ import org.hl7.fhir.instance.model.api.*;
  */
 @ResourceDef(name="Medication", profile="http://hl7.org/fhir/Profile/Medication")
 public class Medication extends DomainResource {
-
-    public enum MedicationKind {
-        /**
-         * The medication is a product
-         */
-        PRODUCT, 
-        /**
-         * The medication is a package - a contained group of one of more products
-         */
-        PACKAGE, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static MedicationKind fromCode(String codeString) throws Exception {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("product".equals(codeString))
-          return PRODUCT;
-        if ("package".equals(codeString))
-          return PACKAGE;
-        throw new Exception("Unknown MedicationKind code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case PRODUCT: return "product";
-            case PACKAGE: return "package";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case PRODUCT: return "http://hl7.org/fhir/medication-kind";
-            case PACKAGE: return "http://hl7.org/fhir/medication-kind";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case PRODUCT: return "The medication is a product";
-            case PACKAGE: return "The medication is a package - a contained group of one of more products";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case PRODUCT: return "Product";
-            case PACKAGE: return "Package";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class MedicationKindEnumFactory implements EnumFactory<MedicationKind> {
-    public MedicationKind fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("product".equals(codeString))
-          return MedicationKind.PRODUCT;
-        if ("package".equals(codeString))
-          return MedicationKind.PACKAGE;
-        throw new IllegalArgumentException("Unknown MedicationKind code '"+codeString+"'");
-        }
-    public String toCode(MedicationKind code) {
-      if (code == MedicationKind.PRODUCT)
-        return "product";
-      if (code == MedicationKind.PACKAGE)
-        return "package";
-      return "?";
-      }
-    }
 
     @Block()
     public static class MedicationProductComponent extends BackboneElement implements IBaseBackboneElement {
@@ -922,27 +850,20 @@ public class Medication extends DomainResource {
     protected Organization manufacturerTarget;
 
     /**
-     * Medications are either a single administrable product or a package that contains one or more products.
-     */
-    @Child(name = "kind", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="product | package", formalDefinition="Medications are either a single administrable product or a package that contains one or more products." )
-    protected Enumeration<MedicationKind> kind;
-
-    /**
      * Information that only applies to products (not packages).
      */
-    @Child(name = "product", type = {}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "product", type = {}, order=3, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Administrable medication details", formalDefinition="Information that only applies to products (not packages)." )
     protected MedicationProductComponent product;
 
     /**
      * Information that only applies to packages (not products).
      */
-    @Child(name = "package", type = {}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "package", type = {}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Details about packaged medications", formalDefinition="Information that only applies to packages (not products)." )
     protected MedicationPackageComponent package_;
 
-    private static final long serialVersionUID = -1593137297L;
+    private static final long serialVersionUID = 859308699L;
 
   /*
    * Constructor
@@ -1065,55 +986,6 @@ public class Medication extends DomainResource {
     }
 
     /**
-     * @return {@link #kind} (Medications are either a single administrable product or a package that contains one or more products.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
-     */
-    public Enumeration<MedicationKind> getKindElement() { 
-      if (this.kind == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Medication.kind");
-        else if (Configuration.doAutoCreate())
-          this.kind = new Enumeration<MedicationKind>(new MedicationKindEnumFactory()); // bb
-      return this.kind;
-    }
-
-    public boolean hasKindElement() { 
-      return this.kind != null && !this.kind.isEmpty();
-    }
-
-    public boolean hasKind() { 
-      return this.kind != null && !this.kind.isEmpty();
-    }
-
-    /**
-     * @param value {@link #kind} (Medications are either a single administrable product or a package that contains one or more products.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
-     */
-    public Medication setKindElement(Enumeration<MedicationKind> value) { 
-      this.kind = value;
-      return this;
-    }
-
-    /**
-     * @return Medications are either a single administrable product or a package that contains one or more products.
-     */
-    public MedicationKind getKind() { 
-      return this.kind == null ? null : this.kind.getValue();
-    }
-
-    /**
-     * @param value Medications are either a single administrable product or a package that contains one or more products.
-     */
-    public Medication setKind(MedicationKind value) { 
-      if (value == null)
-        this.kind = null;
-      else {
-        if (this.kind == null)
-          this.kind = new Enumeration<MedicationKind>(new MedicationKindEnumFactory());
-        this.kind.setValue(value);
-      }
-      return this;
-    }
-
-    /**
      * @return {@link #product} (Information that only applies to products (not packages).)
      */
     public MedicationProductComponent getProduct() { 
@@ -1166,7 +1038,6 @@ public class Medication extends DomainResource {
         childrenList.add(new Property("code", "CodeableConcept", "A code (or set of codes) that specify this medication, or a textual description if no code is available. Usage note: This could be a standard medication code such as a code from RxNorm, SNOMED CT, IDMP etc. It could also be a national or local formulary code, optionally with translations to other code systems.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("isBrand", "boolean", "Set to true if the item is attributable to a specific manufacturer.", 0, java.lang.Integer.MAX_VALUE, isBrand));
         childrenList.add(new Property("manufacturer", "Reference(Organization)", "Describes the details of the manufacturer.", 0, java.lang.Integer.MAX_VALUE, manufacturer));
-        childrenList.add(new Property("kind", "code", "Medications are either a single administrable product or a package that contains one or more products.", 0, java.lang.Integer.MAX_VALUE, kind));
         childrenList.add(new Property("product", "", "Information that only applies to products (not packages).", 0, java.lang.Integer.MAX_VALUE, product));
         childrenList.add(new Property("package", "", "Information that only applies to packages (not products).", 0, java.lang.Integer.MAX_VALUE, package_));
       }
@@ -1177,7 +1048,6 @@ public class Medication extends DomainResource {
         dst.code = code == null ? null : code.copy();
         dst.isBrand = isBrand == null ? null : isBrand.copy();
         dst.manufacturer = manufacturer == null ? null : manufacturer.copy();
-        dst.kind = kind == null ? null : kind.copy();
         dst.product = product == null ? null : product.copy();
         dst.package_ = package_ == null ? null : package_.copy();
         return dst;
@@ -1195,8 +1065,7 @@ public class Medication extends DomainResource {
           return false;
         Medication o = (Medication) other;
         return compareDeep(code, o.code, true) && compareDeep(isBrand, o.isBrand, true) && compareDeep(manufacturer, o.manufacturer, true)
-           && compareDeep(kind, o.kind, true) && compareDeep(product, o.product, true) && compareDeep(package_, o.package_, true)
-          ;
+           && compareDeep(product, o.product, true) && compareDeep(package_, o.package_, true);
       }
 
       @Override
@@ -1206,12 +1075,12 @@ public class Medication extends DomainResource {
         if (!(other instanceof Medication))
           return false;
         Medication o = (Medication) other;
-        return compareValues(isBrand, o.isBrand, true) && compareValues(kind, o.kind, true);
+        return compareValues(isBrand, o.isBrand, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (code == null || code.isEmpty()) && (isBrand == null || isBrand.isEmpty())
-           && (manufacturer == null || manufacturer.isEmpty()) && (kind == null || kind.isEmpty()) && (product == null || product.isEmpty())
+           && (manufacturer == null || manufacturer.isEmpty()) && (product == null || product.isEmpty())
            && (package_ == null || package_.isEmpty());
       }
 

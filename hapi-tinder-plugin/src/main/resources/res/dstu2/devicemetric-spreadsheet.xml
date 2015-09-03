@@ -450,7 +450,7 @@
 					<Data ss:Type="String">DomainResource</Data>
 				</Cell>
 				<Cell ss:Index="8">
-					<Data ss:Type="String">administration</Data>
+					<Data ss:Type="String">administrative.device</Data>
 				</Cell>
 				<Cell ss:StyleID="s73">
 					<Data ss:Type="String">Measurement, calculation or setting capability of a medical device</Data>

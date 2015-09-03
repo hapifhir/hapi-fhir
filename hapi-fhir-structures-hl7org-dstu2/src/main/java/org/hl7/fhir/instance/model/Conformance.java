@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -5707,7 +5707,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
      * The version of the FHIR specification on which this conformance statement is based.
      */
     @Child(name = "fhirVersion", type = {IdType.class}, order=14, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="FHIR Version", formalDefinition="The version of the FHIR specification on which this conformance statement is based." )
+    @Description(shortDefinition="FHIR Version the system uses", formalDefinition="The version of the FHIR specification on which this conformance statement is based." )
     protected IdType fhirVersion;
 
     /**

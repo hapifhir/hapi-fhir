@@ -46,6 +46,7 @@ import com.phloc.schematron.xslt.SchematronResourceSCH;
 
 public class SchematronBaseValidator implements IValidatorModule {
 
+	static final String RESOURCES_JAR_NOTE = "Note that as of HAPI FHIR 1.2, DSTU2 validation files are kept in a separate JAR (hapi-fhir-validation-resources-XXX.jar) which must be added to your classpath. See the HAPI FHIR download page for more information.";
 	private Map<Class<? extends IBaseResource>, ISchematronResource> myClassToSchematron = new HashMap<Class<? extends IBaseResource>, ISchematronResource>();
 	private FhirContext myCtx;
 
@@ -125,7 +126,7 @@ public class SchematronBaseValidator implements IValidatorModule {
 			InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
 			try {
 				if (baseIs == null) {
-					throw new InternalErrorException("No schematron found for resource type: " + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getImplementingClass().getCanonicalName());
+					throw new InternalErrorException("Failed to load schematron for resource '" + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName() + "'. " + RESOURCES_JAR_NOTE);
 				}
 			} finally {
 				IOUtils.closeQuietly(baseIs);

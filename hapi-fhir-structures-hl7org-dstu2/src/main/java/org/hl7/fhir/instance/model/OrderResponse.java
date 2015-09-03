@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -688,6 +688,8 @@ public class OrderResponse extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="request", path="OrderResponse.request", description="The order that this is a response to", type="reference" )
   public static final String SP_REQUEST = "request";
+  @SearchParamDefinition(name="identifier", path="OrderResponse.identifier", description="Identifiers assigned to this order by the orderer or by the receiver", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="code", path="OrderResponse.orderStatus", description="pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed", type="token" )
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="fulfillment", path="OrderResponse.fulfillment", description="Details of the outcome of performing the order", type="reference" )

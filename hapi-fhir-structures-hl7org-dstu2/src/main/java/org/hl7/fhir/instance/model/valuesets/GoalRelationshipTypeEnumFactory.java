@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -45,6 +45,8 @@ public class GoalRelationshipTypeEnumFactory implements EnumFactory<GoalRelation
       return GoalRelationshipType.SUCCESSOR;
     if ("replacement".equals(codeString))
       return GoalRelationshipType.REPLACEMENT;
+    if ("component".equals(codeString))
+      return GoalRelationshipType.COMPONENT;
     if ("other".equals(codeString))
       return GoalRelationshipType.OTHER;
     throw new IllegalArgumentException("Unknown GoalRelationshipType code '"+codeString+"'");
@@ -57,6 +59,8 @@ public class GoalRelationshipTypeEnumFactory implements EnumFactory<GoalRelation
       return "successor";
     if (code == GoalRelationshipType.REPLACEMENT)
       return "replacement";
+    if (code == GoalRelationshipType.COMPONENT)
+      return "component";
     if (code == GoalRelationshipType.OTHER)
       return "other";
     return "?";

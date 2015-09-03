@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -276,13 +276,13 @@ public class AllergyIntolerance extends DomainResource {
 
     public enum AllergyIntoleranceType {
         /**
-         * Immune mediated reaction, including allergic reactions and hypersensitivities.
+         * Immune-mediated hypersensitivity reaction.
          */
-        IMMUNE, 
+        ALLERGY, 
         /**
-         * A non-immune mediated reaction, which can include pseudoallergic reactions, side effects, intolerances, drug toxicities (eg to Gentamicin), drug-drug interactions, food-drug interactions, and drug-disease interactions.
+         * Adverse reaction to a substance, not judged to be immune-mediated (non-allergic).  This can include (but is not limited to) pseudoallergic reactions, side effects, drug toxicities (eg to Gentamicin), drug-drug interactions, food-drug interactions, and drug-disease interactions.
          */
-        NONIMMUNE, 
+        INTOLERANCE, 
         /**
          * added to help the parsers
          */
@@ -290,37 +290,37 @@ public class AllergyIntolerance extends DomainResource {
         public static AllergyIntoleranceType fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("immune".equals(codeString))
-          return IMMUNE;
-        if ("non-immune".equals(codeString))
-          return NONIMMUNE;
+        if ("allergy".equals(codeString))
+          return ALLERGY;
+        if ("intolerance".equals(codeString))
+          return INTOLERANCE;
         throw new Exception("Unknown AllergyIntoleranceType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case IMMUNE: return "immune";
-            case NONIMMUNE: return "non-immune";
+            case ALLERGY: return "allergy";
+            case INTOLERANCE: return "intolerance";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case IMMUNE: return "http://hl7.org/fhir/allergy-intolerance-type";
-            case NONIMMUNE: return "http://hl7.org/fhir/allergy-intolerance-type";
+            case ALLERGY: return "http://hl7.org/fhir/allergy-intolerance-type";
+            case INTOLERANCE: return "http://hl7.org/fhir/allergy-intolerance-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case IMMUNE: return "Immune mediated reaction, including allergic reactions and hypersensitivities.";
-            case NONIMMUNE: return "A non-immune mediated reaction, which can include pseudoallergic reactions, side effects, intolerances, drug toxicities (eg to Gentamicin), drug-drug interactions, food-drug interactions, and drug-disease interactions.";
+            case ALLERGY: return "Immune-mediated hypersensitivity reaction.";
+            case INTOLERANCE: return "Adverse reaction to a substance, not judged to be immune-mediated (non-allergic).  This can include (but is not limited to) pseudoallergic reactions, side effects, drug toxicities (eg to Gentamicin), drug-drug interactions, food-drug interactions, and drug-disease interactions.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case IMMUNE: return "Immune Mediated";
-            case NONIMMUNE: return "Non-immune mediated";
+            case ALLERGY: return "Allergy";
+            case INTOLERANCE: return "Intolerance";
             default: return "?";
           }
         }
@@ -331,17 +331,17 @@ public class AllergyIntolerance extends DomainResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("immune".equals(codeString))
-          return AllergyIntoleranceType.IMMUNE;
-        if ("non-immune".equals(codeString))
-          return AllergyIntoleranceType.NONIMMUNE;
+        if ("allergy".equals(codeString))
+          return AllergyIntoleranceType.ALLERGY;
+        if ("intolerance".equals(codeString))
+          return AllergyIntoleranceType.INTOLERANCE;
         throw new IllegalArgumentException("Unknown AllergyIntoleranceType code '"+codeString+"'");
         }
     public String toCode(AllergyIntoleranceType code) {
-      if (code == AllergyIntoleranceType.IMMUNE)
-        return "immune";
-      if (code == AllergyIntoleranceType.NONIMMUNE)
-        return "non-immune";
+      if (code == AllergyIntoleranceType.ALLERGY)
+        return "allergy";
+      if (code == AllergyIntoleranceType.INTOLERANCE)
+        return "intolerance";
       return "?";
       }
     }
@@ -672,11 +672,11 @@ public class AllergyIntolerance extends DomainResource {
         /**
          * Additional text about the Adverse Reaction event not captured in other fields.
          */
-        @Child(name = "notes", type = {Annotation.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "note", type = {Annotation.class}, order=8, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Text about event not captured in other fields", formalDefinition="Additional text about the Adverse Reaction event not captured in other fields." )
-        protected Annotation notes;
+        protected Annotation note;
 
-        private static final long serialVersionUID = 2035921004L;
+        private static final long serialVersionUID = -765664367L;
 
     /*
      * Constructor
@@ -970,26 +970,26 @@ public class AllergyIntolerance extends DomainResource {
         }
 
         /**
-         * @return {@link #notes} (Additional text about the Adverse Reaction event not captured in other fields.)
+         * @return {@link #note} (Additional text about the Adverse Reaction event not captured in other fields.)
          */
-        public Annotation getNotes() { 
-          if (this.notes == null)
+        public Annotation getNote() { 
+          if (this.note == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create AllergyIntoleranceReactionComponent.notes");
+              throw new Error("Attempt to auto-create AllergyIntoleranceReactionComponent.note");
             else if (Configuration.doAutoCreate())
-              this.notes = new Annotation(); // cc
-          return this.notes;
+              this.note = new Annotation(); // cc
+          return this.note;
         }
 
-        public boolean hasNotes() { 
-          return this.notes != null && !this.notes.isEmpty();
+        public boolean hasNote() { 
+          return this.note != null && !this.note.isEmpty();
         }
 
         /**
-         * @param value {@link #notes} (Additional text about the Adverse Reaction event not captured in other fields.)
+         * @param value {@link #note} (Additional text about the Adverse Reaction event not captured in other fields.)
          */
-        public AllergyIntoleranceReactionComponent setNotes(Annotation value) { 
-          this.notes = value;
+        public AllergyIntoleranceReactionComponent setNote(Annotation value) { 
+          this.note = value;
           return this;
         }
 
@@ -1002,7 +1002,7 @@ public class AllergyIntolerance extends DomainResource {
           childrenList.add(new Property("onset", "dateTime", "Record of the date and/or time of the onset of the Reaction.", 0, java.lang.Integer.MAX_VALUE, onset));
           childrenList.add(new Property("severity", "code", "Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations.", 0, java.lang.Integer.MAX_VALUE, severity));
           childrenList.add(new Property("exposureRoute", "CodeableConcept", "Identification of the route by which the subject was exposed to the substance.", 0, java.lang.Integer.MAX_VALUE, exposureRoute));
-          childrenList.add(new Property("notes", "Annotation", "Additional text about the Adverse Reaction event not captured in other fields.", 0, java.lang.Integer.MAX_VALUE, notes));
+          childrenList.add(new Property("note", "Annotation", "Additional text about the Adverse Reaction event not captured in other fields.", 0, java.lang.Integer.MAX_VALUE, note));
         }
 
       public AllergyIntoleranceReactionComponent copy() {
@@ -1019,7 +1019,7 @@ public class AllergyIntolerance extends DomainResource {
         dst.onset = onset == null ? null : onset.copy();
         dst.severity = severity == null ? null : severity.copy();
         dst.exposureRoute = exposureRoute == null ? null : exposureRoute.copy();
-        dst.notes = notes == null ? null : notes.copy();
+        dst.note = note == null ? null : note.copy();
         return dst;
       }
 
@@ -1032,7 +1032,7 @@ public class AllergyIntolerance extends DomainResource {
         AllergyIntoleranceReactionComponent o = (AllergyIntoleranceReactionComponent) other;
         return compareDeep(substance, o.substance, true) && compareDeep(certainty, o.certainty, true) && compareDeep(manifestation, o.manifestation, true)
            && compareDeep(description, o.description, true) && compareDeep(onset, o.onset, true) && compareDeep(severity, o.severity, true)
-           && compareDeep(exposureRoute, o.exposureRoute, true) && compareDeep(notes, o.notes, true);
+           && compareDeep(exposureRoute, o.exposureRoute, true) && compareDeep(note, o.note, true);
       }
 
       @Override
@@ -1050,7 +1050,7 @@ public class AllergyIntolerance extends DomainResource {
         return super.isEmpty() && (substance == null || substance.isEmpty()) && (certainty == null || certainty.isEmpty())
            && (manifestation == null || manifestation.isEmpty()) && (description == null || description.isEmpty())
            && (onset == null || onset.isEmpty()) && (severity == null || severity.isEmpty()) && (exposureRoute == null || exposureRoute.isEmpty())
-           && (notes == null || notes.isEmpty());
+           && (note == null || note.isEmpty());
       }
 
   }
@@ -1134,10 +1134,10 @@ public class AllergyIntolerance extends DomainResource {
     protected Enumeration<AllergyIntoleranceCriticality> criticality;
 
     /**
-     * Identification of the underlying physiological mechanism for the Reaction Risk.
+     * Identification of the underlying physiological mechanism for the reaction risk.
      */
     @Child(name = "type", type = {CodeType.class}, order=9, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="immune | non-immune - Underlying mechanism (if known)", formalDefinition="Identification of the underlying physiological mechanism for the Reaction Risk." )
+    @Description(shortDefinition="allergy | intolerance - Underlying mechanism (if known)", formalDefinition="Identification of the underlying physiological mechanism for the reaction risk." )
     protected Enumeration<AllergyIntoleranceType> type;
 
     /**
@@ -1157,9 +1157,9 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.
      */
-    @Child(name = "notes", type = {Annotation.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Additional text not captured in other fields", formalDefinition="Additional narrative about the propensity for the Adverse Reaction, not captured in other fields." )
-    protected Annotation notes;
+    protected Annotation note;
 
     /**
      * Details about each Adverse Reaction Event linked to exposure to the identified Substance.
@@ -1168,7 +1168,7 @@ public class AllergyIntolerance extends DomainResource {
     @Description(shortDefinition="Adverse Reaction Events linked to exposure to substance", formalDefinition="Details about each Adverse Reaction Event linked to exposure to the identified Substance." )
     protected List<AllergyIntoleranceReactionComponent> reaction;
 
-    private static final long serialVersionUID = 1887747654L;
+    private static final long serialVersionUID = -1657522921L;
 
   /*
    * Constructor
@@ -1569,7 +1569,7 @@ public class AllergyIntolerance extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (Identification of the underlying physiological mechanism for the Reaction Risk.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @return {@link #type} (Identification of the underlying physiological mechanism for the reaction risk.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
     public Enumeration<AllergyIntoleranceType> getTypeElement() { 
       if (this.type == null)
@@ -1589,7 +1589,7 @@ public class AllergyIntolerance extends DomainResource {
     }
 
     /**
-     * @param value {@link #type} (Identification of the underlying physiological mechanism for the Reaction Risk.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @param value {@link #type} (Identification of the underlying physiological mechanism for the reaction risk.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
     public AllergyIntolerance setTypeElement(Enumeration<AllergyIntoleranceType> value) { 
       this.type = value;
@@ -1597,14 +1597,14 @@ public class AllergyIntolerance extends DomainResource {
     }
 
     /**
-     * @return Identification of the underlying physiological mechanism for the Reaction Risk.
+     * @return Identification of the underlying physiological mechanism for the reaction risk.
      */
     public AllergyIntoleranceType getType() { 
       return this.type == null ? null : this.type.getValue();
     }
 
     /**
-     * @param value Identification of the underlying physiological mechanism for the Reaction Risk.
+     * @param value Identification of the underlying physiological mechanism for the reaction risk.
      */
     public AllergyIntolerance setType(AllergyIntoleranceType value) { 
       if (value == null)
@@ -1716,26 +1716,26 @@ public class AllergyIntolerance extends DomainResource {
     }
 
     /**
-     * @return {@link #notes} (Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.)
+     * @return {@link #note} (Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.)
      */
-    public Annotation getNotes() { 
-      if (this.notes == null)
+    public Annotation getNote() { 
+      if (this.note == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create AllergyIntolerance.notes");
+          throw new Error("Attempt to auto-create AllergyIntolerance.note");
         else if (Configuration.doAutoCreate())
-          this.notes = new Annotation(); // cc
-      return this.notes;
+          this.note = new Annotation(); // cc
+      return this.note;
     }
 
-    public boolean hasNotes() { 
-      return this.notes != null && !this.notes.isEmpty();
+    public boolean hasNote() { 
+      return this.note != null && !this.note.isEmpty();
     }
 
     /**
-     * @param value {@link #notes} (Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.)
+     * @param value {@link #note} (Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.)
      */
-    public AllergyIntolerance setNotes(Annotation value) { 
-      this.notes = value;
+    public AllergyIntolerance setNote(Annotation value) { 
+      this.note = value;
       return this;
     }
 
@@ -1790,10 +1790,10 @@ public class AllergyIntolerance extends DomainResource {
         childrenList.add(new Property("substance", "CodeableConcept", "Identification of a substance, or a class of substances, that is considered to be responsible for the Adverse reaction risk.", 0, java.lang.Integer.MAX_VALUE, substance));
         childrenList.add(new Property("status", "code", "Assertion about certainty associated with the propensity, or potential risk, of a reaction to the identified Substance.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("criticality", "code", "Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance.", 0, java.lang.Integer.MAX_VALUE, criticality));
-        childrenList.add(new Property("type", "code", "Identification of the underlying physiological mechanism for the Reaction Risk.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("type", "code", "Identification of the underlying physiological mechanism for the reaction risk.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("category", "code", "Category of the identified Substance.", 0, java.lang.Integer.MAX_VALUE, category));
         childrenList.add(new Property("lastOccurence", "dateTime", "Represents the date and/or time of the last known occurence of a reaction event.", 0, java.lang.Integer.MAX_VALUE, lastOccurence));
-        childrenList.add(new Property("notes", "Annotation", "Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.", 0, java.lang.Integer.MAX_VALUE, notes));
+        childrenList.add(new Property("note", "Annotation", "Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("reaction", "", "Details about each Adverse Reaction Event linked to exposure to the identified Substance.", 0, java.lang.Integer.MAX_VALUE, reaction));
       }
 
@@ -1816,7 +1816,7 @@ public class AllergyIntolerance extends DomainResource {
         dst.type = type == null ? null : type.copy();
         dst.category = category == null ? null : category.copy();
         dst.lastOccurence = lastOccurence == null ? null : lastOccurence.copy();
-        dst.notes = notes == null ? null : notes.copy();
+        dst.note = note == null ? null : note.copy();
         if (reaction != null) {
           dst.reaction = new ArrayList<AllergyIntoleranceReactionComponent>();
           for (AllergyIntoleranceReactionComponent i : reaction)
@@ -1840,7 +1840,7 @@ public class AllergyIntolerance extends DomainResource {
            && compareDeep(recorder, o.recorder, true) && compareDeep(patient, o.patient, true) && compareDeep(reporter, o.reporter, true)
            && compareDeep(substance, o.substance, true) && compareDeep(status, o.status, true) && compareDeep(criticality, o.criticality, true)
            && compareDeep(type, o.type, true) && compareDeep(category, o.category, true) && compareDeep(lastOccurence, o.lastOccurence, true)
-           && compareDeep(notes, o.notes, true) && compareDeep(reaction, o.reaction, true);
+           && compareDeep(note, o.note, true) && compareDeep(reaction, o.reaction, true);
       }
 
       @Override
@@ -1861,7 +1861,7 @@ public class AllergyIntolerance extends DomainResource {
            && (patient == null || patient.isEmpty()) && (reporter == null || reporter.isEmpty()) && (substance == null || substance.isEmpty())
            && (status == null || status.isEmpty()) && (criticality == null || criticality.isEmpty())
            && (type == null || type.isEmpty()) && (category == null || category.isEmpty()) && (lastOccurence == null || lastOccurence.isEmpty())
-           && (notes == null || notes.isEmpty()) && (reaction == null || reaction.isEmpty());
+           && (note == null || note.isEmpty()) && (reaction == null || reaction.isEmpty());
       }
 
   @Override
@@ -1885,7 +1885,7 @@ public class AllergyIntolerance extends DomainResource {
   public static final String SP_CRITICALITY = "criticality";
   @SearchParamDefinition(name="reporter", path="AllergyIntolerance.reporter", description="Source of the information about the allergy", type="reference" )
   public static final String SP_REPORTER = "reporter";
-  @SearchParamDefinition(name="type", path="AllergyIntolerance.type", description="immune | non-immune - Underlying mechanism (if known)", type="token" )
+  @SearchParamDefinition(name="type", path="AllergyIntolerance.type", description="allergy | intolerance - Underlying mechanism (if known)", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="onset", path="AllergyIntolerance.reaction.onset", description="Date(/time) when manifestations showed", type="date" )
   public static final String SP_ONSET = "onset";

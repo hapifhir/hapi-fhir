@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
  xmlns:o="urn:schemas-microsoft-com:office:office"
  xmlns:x="urn:schemas-microsoft-com:office:excel"
@@ -6,20 +7,22 @@
  xmlns:html="http://www.w3.org/TR/REC-html40">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
-  <LastAuthor>Grahame</LastAuthor>
+  <LastAuthor>rik</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2015-06-11T05:49:35Z</LastSaved>
-  <Version>14.0</Version>
+  <LastSaved>2015-08-30T22:29:52Z</LastSaved>
+  <Version>15.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>9120</WindowHeight>
-  <WindowWidth>25600</WindowWidth>
+  <WindowHeight>8923</WindowHeight>
+  <WindowWidth>18514</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>8</ActiveSheet>
+  <FirstVisibleSheet>1</FirstVisibleSheet>
+  <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -33,7 +36,7 @@
    <Protection/>
   </Style>
   <Style ss:ID="s62" ss:Name="Hyperlink">
-   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#0000D4"
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#0000FF"
     ss:Underline="Single"/>
   </Style>
   <Style ss:ID="s63" ss:Name="Normal 2">
@@ -814,7 +817,8 @@
  </Names>
  <Worksheet ss:Name="Instructions">
   <Table ss:ExpandedColumnCount="3" ss:ExpandedRowCount="4" x:FullColumns="1"
-   x:FullRows="1" ss:DefaultColumnWidth="65" ss:DefaultRowHeight="15">
+   x:FullRows="1" ss:DefaultColumnWidth="65.142857142857139"
+   ss:DefaultRowHeight="15">
    <Column ss:AutoFitWidth="0" ss:Width="411"/>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s64"><Data ss:Type="String">FHIR Resource-authoring Spreadsheet</Data></Cell>
@@ -845,7 +849,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <PageLayoutZoom>0</PageLayoutZoom>
    <Panes>
     <Pane>
      <Number>3</Number>
@@ -855,6 +858,7 @@
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
  </Worksheet>
  <Worksheet ss:Name="Data Elements">
@@ -863,146 +867,131 @@
     ss:RefersTo="='Data Elements'!R1C1:R100C25" ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="25" ss:ExpandedRowCount="100" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s69" ss:DefaultColumnWidth="65"
+   x:FullRows="1" ss:StyleID="s69" ss:DefaultColumnWidth="65.142857142857139"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s70" ss:Width="227"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="77"/>
-   <Column ss:StyleID="s69" ss:Width="29"/>
-   <Column ss:StyleID="s69" ss:Width="35"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="119"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="29"/>
+   <Column ss:StyleID="s70" ss:Width="227.14285714285714"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="77.142857142857139"/>
+   <Column ss:StyleID="s69" ss:Width="29.142857142857142"/>
+   <Column ss:StyleID="s69" ss:Width="35.142857142857139"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="119.14285714285714"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="29.142857142857142"/>
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="27"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="107" ss:Span="1"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="107.14285714285714"
+    ss:Span="1"/>
    <Column ss:Index="10" ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="81"/>
-   <Column ss:StyleID="s69" ss:Width="52" ss:Span="1"/>
-   <Column ss:Index="13" ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="80"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="121"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="161"/>
+   <Column ss:StyleID="s69" ss:Width="51.857142857142854" ss:Span="1"/>
+   <Column ss:Index="13" ss:StyleID="s69" ss:AutoFitWidth="0"
+    ss:Width="80.142857142857139"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="120.85714285714286"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="161.14285714285714"/>
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="114"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="135"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="203.14285714285717"/>
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="120"/>
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="135"/>
-   <Column ss:Index="21" ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="104"
-    ss:Span="1"/>
-   <Column ss:Index="23" ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="50"/>
+   <Column ss:Index="21" ss:StyleID="s69" ss:AutoFitWidth="0"
+    ss:Width="104.14285714285714" ss:Span="1"/>
+   <Column ss:Index="23" ss:StyleID="s69" ss:AutoFitWidth="0"
+    ss:Width="50.142857142857139"/>
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="66"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="119"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="119.14285714285714"/>
    <Row ss:AutoFitHeight="0" ss:Height="45" ss:StyleID="s71">
     <Cell ss:StyleID="s72"><Data ss:Type="String">Element</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Format is ResourceName.componentName.componentName</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Format is ResourceName.componentName.componentName</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s73"><Data ss:Type="String">Aliases</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Other names - semi-colon separated</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Other names - semi-colon separated</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s73"><Data ss:Type="String">Card.</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Min and max repetitions n..m</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Card.</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Min and max repetitions n..m</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s73"><Data ss:Type="String">Inv.</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Comma-delimited list of Ids from Invariant tab that controls appearance of this element</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Inv.</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Comma-delimited list of Ids from Invariant tab that controls appearance of this element</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s73"><Data ss:Type="String">Type</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Data type, resource reference, profiles, aggregations, class names, type references, etc. - see the wiki</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Data type, resource reference, profiles, aggregations, class names, type references, etc. - see the wiki</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s73"><Data ss:Type="String">Is Modifier</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">If Y, indicates this element modifies the meaning of sibling or descendant elements.  Defaults to N</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">If Y, indicates this element modifies the meaning of sibling or descendant elements.  Defaults to N</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s73"><Data ss:Type="String">Summary</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">If Y, element is included in the summary view (query with _summary=true).  Default is N</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">If Y, element is included in the summary view (query with _summary=true).  Default is N</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s73"><Data ss:Type="String">Binding</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Binding for coded data - either from local Bindings tab or declared elsewhere</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Binding for coded data - either from local Bindings tab or declared elsewhere</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s73"><Data ss:Type="String">w5</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s73"><Data ss:Type="String">Example</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">An example of the expected sort of value for this element.</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">An example of the expected sort of value for this element.</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s73"><Data ss:Type="String">Default Value</Data><Comment
-      ss:Author="Lloyd"><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">The value to be assumed if the element is omitted from the instance.  Only permitted for simple data types</Font>       </Data></Comment><NamedCell
+      ss:Author="Lloyd"><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The value to be assumed if the element is omitted from the instance.  Only permitted for simple data types</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s73"><Data ss:Type="String">Missing Meaning</Data><Comment
-      ss:Author="Lloyd"><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Semantic inferred if element is omitted from instance</Font>       </Data></Comment><NamedCell
+      ss:Author="Lloyd"><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Semantic inferred if element is omitted from instance</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s73"><Data ss:Type="String">Regex</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Indicates a regular expression that the value of this element must meet.  Only allowed for simple data types.</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Regex</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Indicates a regular expression that the value of this element must meet.  Only allowed for simple data types.</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s73"><Data ss:Type="String">Short Label</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Short description or code1 | code2 | code3 +</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Short description or code1 | code2 | code3 +</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s74"><Data ss:Type="String">Definition</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Full definition - required</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Full definition - required</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">Requirements</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Why element/resource is needed or why selected constraints chosen</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Why element/resource is needed or why selected constraints chosen</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">Comments</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Additional notes for implementers</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional notes for implementers</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s75"><Data ss:Type="String">To Do</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Things to bug you about if they're not done :&gt;</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s75"><Data ss:Type="String">To Do</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Things to bug you about if they're not done :&gt;</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s76"><Data ss:Type="String">RIM Mapping</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">E.g. RIMClass[classCode=foo,moodCode=bar].someAssociation[typeCode=code].attribute</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">E.g. RIMClass[classCode=foo,moodCode=bar].someAssociation[typeCode=code].attribute</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s76"><Data ss:Type="String">v2 Mapping</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">E.g. SEG.1.2.3</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">E.g. SEG.1.2.3</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s76"><Data ss:Type="String">Prov Mapping</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Change column name to one from mappingSpaces.xml.  Add more if needed</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Change column name to one from mappingSpaces.xml.  Add more if needed</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s76"><Data ss:Type="String">??? Mapping</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Change column name to one from mappingSpaces.xml.  Add more if needed</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Change column name to one from mappingSpaces.xml.  Add more if needed</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s76"><Data ss:Type="String">UML</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Guidance for class location in UML diagram.  Only specify on root. See wiki for guidance</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s76"><Data ss:Type="String">UML</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Guidance for class location in UML diagram.  Only specify on root. See wiki for guidance</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s76"><Data ss:Type="String">Display Hint</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Provides guidance to narrative auto-generator.  Check Wiki documentation</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Provides guidance to narrative auto-generator.  Check Wiki documentation</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s77"><Data ss:Type="String">Committee Notes</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Not published</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Not published</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
@@ -1016,7 +1005,7 @@
     <Cell ss:StyleID="s80"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s80"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s80"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s80"><Data ss:Type="String">clinical</Data><NamedCell
+    <Cell ss:StyleID="s80"><Data ss:Type="String">clinical.medication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s80"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s80"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1648,7 +1637,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">How drug was administered</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">A coded value indicating the method by which the medication was introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.  Terminologies used often pre-coordinate this term with the route and or form of administration.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">A coded value indicating the method by which the medication is intended to be or was introduced into or on the body.  This attribute will most often NOT be populated.  It is most commonly used for injections.  Examples: Slow Push, Deep IV.  One of the reasons this attribute is not used often, is that the method is often pre-coordinated with the route and/or form of administration.  This means the codes used in route or form may pre-coordinate the method in the route code or the form code.  The implementation decision about what coding system to use for route or form code will determine how frequently the method code will be populated e.g. if route or form code pre-coordinate method code, then this attribute will not be populated often; if there is no pre-coordination then method code may  be used frequently.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1717,10 +1706,10 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Dose quantity per unit of time</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Identifies the speed with which the medication was introduced into the patient. Typically the rate for an infusion e.g. 200ml in 2 hours.  May also be expressed as a rate per unit of time such as 100ml per hour - the duration is then not specified, or is specified in the quantity.</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Currently we do not specify a default of '1' in the denominator, but this is being discussed.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours. </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">If the rate changes over time, each change should be captured as a distinct &quot;dosage&quot; repetition.  This element should *not* be used to convey an average rate.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">If the rate changes over time, and you want to capture this in Medication Administration, then each change should be captured as a distinct Medication Administration, with a specific MedicationAdministration.dosage.rate, and the date time when the rate change occurred. Typically, the MedicationAdministration.dosage.rate element is not used to convey an average rate.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">rateQuantity</Data><NamedCell
@@ -3854,12 +3843,10 @@
     <VerticalResolution>600</VerticalResolution>
    </Print>
    <Zoom>80</Zoom>
-   <PageLayoutZoom>0</PageLayoutZoom>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>12</TopRowBottomPane>
+   <TopRowBottomPane>16</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -3876,12 +3863,13 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>15</ActiveRow>
-     <ActiveCol>14</ActiveCol>
+     <ActiveRow>19</ActiveRow>
+     <ActiveCol>7</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R100C25"
    xmlns="urn:schemas-microsoft-com:office:excel">
@@ -3893,46 +3881,43 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="51" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s101" ss:DefaultColumnWidth="65"
+   x:FullRows="1" ss:StyleID="s101" ss:DefaultColumnWidth="65.142857142857139"
    ss:DefaultRowHeight="15">
-   <Column ss:Index="2" ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="116"/>
-   <Column ss:StyleID="s101" ss:Width="56"/>
+   <Column ss:Index="2" ss:StyleID="s101" ss:AutoFitWidth="0"
+    ss:Width="116.14285714285714"/>
+   <Column ss:StyleID="s101" ss:Width="56.142857142857146"/>
    <Column ss:StyleID="s101" ss:Width="165"/>
-   <Column ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="205"/>
-   <Column ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="199"/>
-   <Column ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="188"/>
+   <Column ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="204.85714285714286"/>
+   <Column ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="198.85714285714286"/>
+   <Column ss:StyleID="s101" ss:AutoFitWidth="0" ss:Width="188.14285714285714"/>
    <Row ss:AutoFitHeight="0" ss:StyleID="s71">
-    <Cell ss:StyleID="s102"><Data ss:Type="String">Id</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Unique Number</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique Number</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">Name</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Unique short label</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique short label</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Severity</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Indicates impact of violating the invariant.  (Defaults to 'error')</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Indicates impact of violating the invariant.  (Defaults to 'error')</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Context</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Element path at which check should occur.  E.g. ResourceName.element1.element2</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur.  E.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">English</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">English description of constraint</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">English description of constraint</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">OCL</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Optional - OCL expression of the rule</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">OCL</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Optional - OCL expression of the rule</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">XPath</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">XPath 2 expression.  See wiki or make Lloyd do it :&gt;</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">XPath 2 expression.  See wiki or make Lloyd do it :&gt;</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
@@ -3959,7 +3944,7 @@
     <Cell ss:StyleID="s91"/>
     <Cell ss:StyleID="s108"><Data ss:Type="String">not(exists(f:reasonNotGiven) and f:wasNotGiven/@value='false')</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="28">
+   <Row ss:AutoFitHeight="0" ss:Height="27.964285714285715">
     <Cell ss:StyleID="s107"><Data ss:Type="Number">3</Data><NamedCell
       ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">Given reason</Data></Cell>
@@ -4397,7 +4382,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4423,6 +4407,7 @@
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R2C7" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -4433,33 +4418,32 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="32" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s112" ss:DefaultColumnWidth="65"
+   x:FullRows="1" ss:StyleID="s112" ss:DefaultColumnWidth="65.142857142857139"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="71"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="71.142857142857139"/>
    <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="57"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="110"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="329"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="383"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="110.14285714285714"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="329.14285714285711"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="383.14285714285711"/>
    <Row ss:AutoFitHeight="0" ss:StyleID="s113">
-    <Cell ss:StyleID="s102"><Data ss:Type="String">Name</Data><Comment ss:Author=""><Data>Unique name for search parameter - required, lower-case, dash-delimited string    </Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">Unique name for search parameter - required, lower-case, dash-delimited string    </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">Type</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Data type for parameter</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Data type for parameter</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Target Types</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Comma delimited list of target resources</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Comma delimited list of target resources</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">Path</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Corresponding resource element.  E.g. ResourceName.node1.node2</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">Path</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element.  E.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Description</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Explanation of param.  Will default if omitted and Path is specified, otherwise it is required</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Explanation of param.  Will default if omitted and Path is specified, otherwise it is required</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4686,7 +4670,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4712,6 +4695,7 @@
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R1C5" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -4722,55 +4706,54 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s112" ss:DefaultColumnWidth="65"
+   x:FullRows="1" ss:StyleID="s112" ss:DefaultColumnWidth="65.142857142857139"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="131"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="125"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="131.14285714285714"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="125.14285714285714"/>
    <Column ss:StyleID="s112" ss:Width="24"/>
-   <Column ss:StyleID="s112" ss:Width="26"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="107" ss:Span="1"/>
-   <Column ss:Index="7" ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="223"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="254" ss:Span="1"/>
+   <Column ss:StyleID="s112" ss:Width="26.142857142857142"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="107.14285714285714"
+    ss:Span="1"/>
+   <Column ss:Index="7" ss:StyleID="s112" ss:AutoFitWidth="0"
+    ss:Width="222.85714285714286"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="254.14285714285714"
+    ss:Span="1"/>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s125"><Data ss:Type="String">Name</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">The name of the operation or parameter (parameters prefixed by operation name + &quot;.&quot;) </Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s125"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">The name of the operation or parameter (parameters prefixed by operation name + &quot;.&quot;) </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s126"><Data ss:Type="String">Use</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">&quot;System | Resource | Instance&quot; (operation) &quot;In&quot; or &quot;Out&quot; (parameter)</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s126"><Data ss:Type="String">Use</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">&quot;System | Resource | Instance&quot; (operation) &quot;In&quot; or &quot;Out&quot; (parameter)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s126"><Data ss:Type="String">Min</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Minimum cardinality for a parameter (must be a non-negative integer)</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s126"><Data ss:Type="String">Min</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Minimum cardinality for a parameter (must be a non-negative integer)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s126"><Data ss:Type="String">Max</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">maximum cardinality for a parameter - must be &quot;*&quot; or a positive integer</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s126"><Data ss:Type="String">Max</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">maximum cardinality for a parameter - must be &quot;*&quot; or a positive integer</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s126"><Data ss:Type="String">Type</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">query/operation for operation; data type for a parameter</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s126"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">query/operation for operation; data type for a parameter</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s126"><Data ss:Type="String">Profile</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Profile that must apply to parameter's type</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Profile that must apply to parameter's type</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s126"><Data ss:Type="String">Title</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">The descriptive label for the operation</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The descriptive label for the operation</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s127"><Data ss:Type="String">Documentation</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Explanation of the operation or parameter</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Explanation of the operation or parameter</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s128"><Data ss:Type="String">Footer</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Additional usage notes for an operation</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional usage notes for an operation</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5321,7 +5304,6 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
-   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -5346,6 +5328,7 @@
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R2C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -5356,47 +5339,41 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="21" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s112" ss:DefaultColumnWidth="65"
+   x:FullRows="1" ss:StyleID="s112" ss:DefaultColumnWidth="65.142857142857139"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="239"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="83"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="199"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="158"/>
-   <Column ss:StyleID="s112" ss:Width="107"/>
-   <Column ss:StyleID="s112" ss:Width="113"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="239.14285714285717"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="83.142857142857139"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="198.85714285714286"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="158.14285714285717"/>
+   <Column ss:StyleID="s112" ss:Width="107.14285714285714"/>
+   <Column ss:StyleID="s112" ss:Width="113.14285714285714"/>
    <Column ss:StyleID="s112" ss:Width="120"/>
-   <Column ss:StyleID="s112" ss:Width="128"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="74"/>
+   <Column ss:StyleID="s112" ss:Width="128.14285714285714"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="74.142857142857139"/>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s102"><Data ss:Type="String">Event Code</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Unique code for the event.  E.g. patient-link  </Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event.  E.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Category</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Impact of message and time-sensitiveness for processing (see wiki/spec)</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Impact of message and time-sensitiveness for processing (see wiki/spec)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Description</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">What triggers the event and what behavior it drives</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">What triggers the event and what behavior it drives</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Notes</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Additional implementer guidance</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional implementer guidance</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Request Resources</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Comma-separated list of focal resources for request</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Comma-separated list of focal resources for request</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Response Resources</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Comma-separated list of focal resources for response</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Comma-separated list of focal resources for response</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Request Aggregations</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -5628,7 +5605,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -5653,6 +5629,7 @@
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R1C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -5662,30 +5639,28 @@
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R1C4"/>
   </Names>
   <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="37" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s112" ss:DefaultColumnWidth="65"
+   x:FullRows="1" ss:StyleID="s112" ss:DefaultColumnWidth="65.142857142857139"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="158"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="281"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="307"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="158.14285714285717"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="281.14285714285711"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="306.85714285714283"/>
    <Column ss:StyleID="s112" ss:Width="63"/>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s102"><Data ss:Type="String">Name</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Label for profile Comment the row by starting with '!'</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Label for profile Comment the row by starting with '!'</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Filename</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Name of the resulting profile resource-something-profile.xml or …profile.spreadsheet.xml</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Name of the resulting profile resource-something-profile.xml or …profile.spreadsheet.xml</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Source</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Name of profile spreadsheet or XML file.  Defaults to same as Filename </Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Name of profile spreadsheet or XML file.  Defaults to same as Filename </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s104"><Data ss:Type="String">Type</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Type of source (spreadsheet or profile XML file).  Default is spreadsheet</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s104"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Type of source (spreadsheet or profile XML file).  Default is spreadsheet</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">IG Name</Data></Cell>
    </Row>
@@ -5910,7 +5885,6 @@
    </PageSetup>
    <Unsynced/>
    <Zoom>150</Zoom>
-   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -5935,6 +5909,7 @@
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R1C4" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -5945,47 +5920,42 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="41" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s138" ss:DefaultColumnWidth="260"
+   x:FullRows="1" ss:StyleID="s138" ss:DefaultColumnWidth="260.14285714285717"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s138" ss:Width="89"/>
-   <Column ss:StyleID="s138" ss:Width="28"/>
-   <Column ss:StyleID="s138" ss:Width="328"/>
+   <Column ss:StyleID="s138" ss:Width="89.142857142857139"/>
+   <Column ss:StyleID="s138" ss:Width="27.857142857142858"/>
+   <Column ss:StyleID="s138" ss:Width="327.85714285714289"/>
    <Column ss:StyleID="s138" ss:Width="57"/>
-   <Column ss:StyleID="s138" ss:Width="206" ss:Span="1"/>
-   <Column ss:Index="7" ss:StyleID="s138" ss:Width="40"/>
+   <Column ss:StyleID="s138" ss:Width="206.14285714285714" ss:Span="1"/>
+   <Column ss:Index="7" ss:StyleID="s138" ss:Width="39.857142857142861"/>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s102"><Data ss:Type="String">Name</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Descriptive Name</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Descriptive Name</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">Type</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Default = XML.  Leave at default unless told otherwise</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Default = XML.  Leave at default unless told otherwise</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s139"><Data ss:Type="String">Description</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Description of content/purposes of example</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Description of content/purposes of example</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Identity</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">resource id</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">resource id</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Filename</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Filename of XML example file.  E.g. resource-example-file-name.xml</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file.  E.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Profile</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Name of the profile  example is associated with (and should be published with)</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Name of the profile  example is associated with (and should be published with)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">In Book</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Include this example in the book form?</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Include this example in the book form?</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -6358,7 +6328,6 @@
     <HorizontalResolution>-4</HorizontalResolution>
     <VerticalResolution>-4</VerticalResolution>
    </Print>
-   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6384,6 +6353,7 @@
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R2C7" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -6394,81 +6364,74 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="31" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s112" ss:DefaultColumnWidth="65"
+   x:FullRows="1" ss:StyleID="s112" ss:DefaultColumnWidth="65.142857142857139"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="251"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="275"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="251.14285714285714"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="275.14285714285717"/>
    <Column ss:StyleID="s112" ss:Width="51"/>
-   <Column ss:StyleID="s112" ss:Width="45"/>
-   <Column ss:StyleID="s112" ss:Width="146"/>
-   <Column ss:StyleID="s112" ss:Width="173"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="98"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="89"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="67.285714285714292"/>
+   <Column ss:StyleID="s112" ss:Width="146.14285714285714"/>
+   <Column ss:StyleID="s112" ss:Width="173.14285714285714"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="98.142857142857139"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="89.142857142857139"/>
    <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="114"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="173"/>
-   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="166" ss:Span="1"/>
-   <Column ss:Index="13" ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="107"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="173.14285714285714"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="165.85714285714283"
+    ss:Span="1"/>
+   <Column ss:Index="13" ss:StyleID="s112" ss:AutoFitWidth="0"
+    ss:Width="107.14285714285714"/>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s102"><Data ss:Type="String">Binding Name</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Unique name across all resources</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique name across all resources</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Definition</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Formal description of the types of codes allowed for elements with this binding</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Formal description of the types of codes allowed for elements with this binding</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Binding</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">How is the set of codes defined?</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">How is the set of codes defined?</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Conformance</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Y = example, blank = incomplete.  Only relevant if binding is &quot;value set&quot;</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Y = example, blank = incomplete.  Only relevant if binding is &quot;value set&quot;</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Reference</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">#tab-name or value set filename(without extension) or URL for reference </Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">#tab-name or value set filename(without extension) or URL for reference </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Description</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Text to display for reference bindings (not used otherwise)</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Text to display for reference bindings (not used otherwise)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">OID</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">The OID for the code list if one already exists.  (If omitted, one will be assigned)</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">OID</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">The OID for the code list if one already exists.  (If omitted, one will be assigned)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">URI</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Full URI for the code list.  (If not specified, defaults to http://hl7.org/fhir/ValueSet</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">URI</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Full URI for the code list.  (If not specified, defaults to http://hl7.org/fhir/ValueSet</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Website/Email</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Contact information for the code list (if different from standard HL7 FHIR contact info)</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Contact information for the code list (if different from standard HL7 FHIR contact info)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Copyright</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Copyright information associated with the code list.  If not specified, Public Domain assumed</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Copyright information associated with the code list.  If not specified, Public Domain assumed</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">v2</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">uri of v2 value set mapped to</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">v2</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">uri of v2 value set mapped to</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">v3</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">uri of v3 value set mapped to</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">v3</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">uri of v3 value set mapped to</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Committee Notes</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Unpublished notes</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unpublished notes</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
@@ -6501,7 +6464,7 @@
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s119"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="28">
+   <Row ss:AutoFitHeight="0" ss:Height="27.964285714285715">
     <Cell ss:StyleID="s150"><Data ss:Type="String">MedicationAdministrationReason</Data></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">A set of codes indicating the reason why the MedicationAdministration was made.</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">value set</Data></Cell>
@@ -6549,9 +6512,9 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s150"><Data ss:Type="String">MedicationAdministrationMethod</Data></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">A coded concept describing the technique by which the medicine is administered</Data></Cell>
-    <Cell ss:StyleID="s118"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s118"><Data ss:Type="String">example</Data></Cell>
-    <Cell ss:StyleID="Default"><Data ss:Type="String">http://hl7.org/fhir/ValueSet/administration-method-codes</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">unbound</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="Default"/>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s118"/>
@@ -6920,7 +6883,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <PageLayoutZoom>0</PageLayoutZoom>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6940,11 +6903,13 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>2</ActiveRow>
+     <ActiveRow>6</ActiveRow>
+     <ActiveCol>3</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R1C13"
    xmlns="urn:schemas-microsoft-com:office:excel">
@@ -6956,56 +6921,54 @@
     ss:RefersTo="='medication-admin-status'!R1C1:R1C9" ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s138" ss:DefaultColumnWidth="65"
+   x:FullRows="1" ss:StyleID="s138" ss:DefaultColumnWidth="65.142857142857139"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s138" ss:Width="80"/>
-   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="35"/>
-   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="155"/>
-   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="80" ss:Span="1"/>
-   <Column ss:Index="6" ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="245"/>
+   <Column ss:StyleID="s138" ss:Width="80.142857142857139"/>
+   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="35.142857142857139"/>
+   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="155.14285714285714"/>
+   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="80.142857142857139"
+    ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s138" ss:AutoFitWidth="0"
+    ss:Width="245.14285714285714"/>
    <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="242"/>
+   <Column ss:Index="9" ss:StyleID="s138" ss:AutoFitWidth="0"
+    ss:Width="242.14285714285714"/>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s102"><Data ss:Type="String">Code</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">The code to be sent over the wire</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">The code to be sent over the wire</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">Id</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">System</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">The URL of the external code system from which the list is selected.  Must be the same for all codes if specified.</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The URL of the external code system from which the list is selected.  Must be the same for all codes if specified.</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Parent</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">The code this code is a specialization of (if any).  Content should be &quot;#&quot; + the Id of the parent code</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The code this code is a specialization of (if any).  Content should be &quot;#&quot; + the Id of the parent code</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Display</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Definition</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">v2</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Mappings to v2 codes - See wiki for syntax</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">v2</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v2 codes - See wiki for syntax</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">v3</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Mappings to v3 codes - See wiki for syntax</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">v3</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v3 codes - See wiki for syntax</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Committee Notes</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Additional notes about the code.  Not published</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional notes about the code.  Not published</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
@@ -7561,7 +7524,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -7587,6 +7549,7 @@
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R1C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -7597,56 +7560,54 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s138" ss:DefaultColumnWidth="65"
+   x:FullRows="1" ss:StyleID="s138" ss:DefaultColumnWidth="65.142857142857139"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s138" ss:Width="80"/>
-   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="35"/>
-   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="155"/>
-   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="80" ss:Span="1"/>
-   <Column ss:Index="6" ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="245"/>
+   <Column ss:StyleID="s138" ss:Width="80.142857142857139"/>
+   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="35.142857142857139"/>
+   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="155.14285714285714"/>
+   <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="80.142857142857139"
+    ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s138" ss:AutoFitWidth="0"
+    ss:Width="245.14285714285714"/>
    <Column ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s138" ss:AutoFitWidth="0" ss:Width="242"/>
+   <Column ss:Index="9" ss:StyleID="s138" ss:AutoFitWidth="0"
+    ss:Width="242.14285714285714"/>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s102"><Data ss:Type="String">Code</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">The code to be sent over the wire</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s102"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">The code to be sent over the wire</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">Id</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">System</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">The URL of the external code system from which the list is selected.  Must be the same for all codes if specified.</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The URL of the external code system from which the list is selected.  Must be the same for all codes if specified.</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Parent</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">The code this code is a specialization of (if any).  Content should be &quot;#&quot; + the Id of the parent code</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The code this code is a specialization of (if any).  Content should be &quot;#&quot; + the Id of the parent code</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Display</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Definition</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">v2</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Mappings to v2 codes - See wiki for syntax</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">v2</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v2 codes - See wiki for syntax</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s103"><Data ss:Type="String">v3</Data><Comment ss:Author=""><Data>        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Mappings to v3 codes - See wiki for syntax</Font>       </Data></Comment><NamedCell
+    <Cell ss:StyleID="s103"><Data ss:Type="String">v3</Data><Comment ss:Author=""><ss:Data
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v3 codes - See wiki for syntax</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Committee Notes</Data><Comment
-      ss:Author=""><Data>        <Font html:Face="Tahoma" x:Family="Swiss"
-        html:Size="8" html:Color="#000000"
-        xmlns="http://www.w3.org/TR/REC-html40">Additional notes about the code.  Not published</Font>       </Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional notes about the code.  Not published</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -8197,7 +8158,6 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
-   <PageLayoutZoom>0</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -8222,6 +8182,7 @@
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R1C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>

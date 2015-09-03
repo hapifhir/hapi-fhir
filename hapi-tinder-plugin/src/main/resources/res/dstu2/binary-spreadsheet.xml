@@ -987,7 +987,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s80"><Data ss:Type="String">Typically, Binary resources are used for handling content such as:  * CDA Documents (i.e. with XDS) * PDF Documents * Images (the Media resource is preferred for handling images, but not possible when the content is already binary - e.g. XDS)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s80"><Data ss:Type="String">infrastructure</Data><NamedCell
+    <Cell ss:StyleID="s80"><Data ss:Type="String">infrastructure.structure</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s81"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s82"><Data ss:Type="String">N/A</Data><NamedCell

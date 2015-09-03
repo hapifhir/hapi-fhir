@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -57,10 +57,6 @@ public class TestscriptOperationCodesEnumFactory implements EnumFactory<Testscri
       return TestscriptOperationCodes.TRANSACTION;
     if ("conformance".equals(codeString))
       return TestscriptOperationCodes.CONFORMANCE;
-    if ("batch-translate".equals(codeString))
-      return TestscriptOperationCodes.BATCHTRANSLATE;
-    if ("batch-validate".equals(codeString))
-      return TestscriptOperationCodes.BATCHVALIDATE;
     if ("closure".equals(codeString))
       return TestscriptOperationCodes.CLOSURE;
     if ("document".equals(codeString))
@@ -113,10 +109,6 @@ public class TestscriptOperationCodesEnumFactory implements EnumFactory<Testscri
       return "transaction";
     if (code == TestscriptOperationCodes.CONFORMANCE)
       return "conformance";
-    if (code == TestscriptOperationCodes.BATCHTRANSLATE)
-      return "batch-translate";
-    if (code == TestscriptOperationCodes.BATCHVALIDATE)
-      return "batch-validate";
     if (code == TestscriptOperationCodes.CLOSURE)
       return "closure";
     if (code == TestscriptOperationCodes.DOCUMENT)

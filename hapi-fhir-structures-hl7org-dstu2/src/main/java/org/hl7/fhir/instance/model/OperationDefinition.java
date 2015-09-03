@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 27, 2015 19:45-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -356,7 +356,7 @@ public class OperationDefinition extends DomainResource {
          * The name of used to identify the parameter.
          */
         @Child(name = "name", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Name of the parameter", formalDefinition="The name of used to identify the parameter." )
+        @Description(shortDefinition="Name in Parameters.parameter.name or in URL", formalDefinition="The name of used to identify the parameter." )
         protected CodeType name;
 
         /**

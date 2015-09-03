@@ -355,6 +355,11 @@
 				<version>1.7</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.velocity</groupId>
+				<artifactId>velocity-tools</artifactId>
+				<version>2.0</version>
+			</dependency>
+			<dependency>
 				<groupId>org.codehaus.woodstox</groupId>
 				<artifactId>woodstox-core-asl</artifactId>
 				<version>4.4.1</version>
@@ -1206,7 +1211,7 @@
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-structures-dstu</module>
 				<module>hapi-fhir-structures-dstu2</module>
-				<module>hapi-fhir-validation-resources</module>
+				<module>hapi-fhir-validation-resources-dstu2</module>
 				<module>hapi-fhir-structures-hl7org-dstu2</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jpaserver-example</module>
