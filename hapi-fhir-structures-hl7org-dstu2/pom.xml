@@ -22,7 +22,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-validation-resources</artifactId>
+			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
 			<version>1.2-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
