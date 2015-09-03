@@ -65,9 +65,10 @@ public class ResourceTag extends BaseTag {
 	}
 
 	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag) {
-		myResource = theResourceTable;
-		myResourceId = theResourceTable.getId();
 		setTag(theTag);
+		setResource(theResourceTable);
+		setResourceId(theResourceTable.getId());
+		setResourceType(theResourceTable.getResourceType());
 	}
 
 	public ResourceTable getResource() {

@@ -90,6 +90,7 @@ import ca.uhn.fhir.model.dstu2.valueset.AnswerFormatEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SearchEntryModeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -827,10 +828,21 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		p2.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven02");
 		ourClient.create().resource(p2).execute().getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSearchByIdentifier01")).encodedJson().prettyPrint().execute();
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
-		assertEquals(BundleEntrySearchModeEnum.MATCH, actual.getEntries().get(0).getSearchMode().getValueAsEnum());
+		//@formatter:off
+		ca.uhn.fhir.model.dstu2.resource.Bundle actual = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSearchByIdentifier01"))
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+				.execute();
+		//@formatter:on
+		
+		assertEquals(1, actual.getEntry().size());
+		assertEquals(ourServerBase + "/Patient/" + p1Id.getIdPart(), actual.getEntry().get(0).getFullUrl());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
+		assertEquals(SearchEntryModeEnum.MATCH, actual.getEntry().get(0).getSearch().getModeElement().getValueAsEnum());
 	}
 
 	@Test

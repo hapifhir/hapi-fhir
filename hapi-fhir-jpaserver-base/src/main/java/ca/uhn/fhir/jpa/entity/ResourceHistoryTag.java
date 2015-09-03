@@ -77,9 +77,10 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	
 
 	public ResourceHistoryTag(ResourceHistoryTable theResourceHistoryTable, TagDefinition theTag) {
-		myResourceHistory=theResourceHistoryTable;
 		setTag(theTag);
+		setResource(theResourceHistoryTable);
 		setResourceId(theResourceHistoryTable.getResourceId());
+		setResourceType(theResourceHistoryTable.getResourceType());
 	}
 
 	public ResourceHistoryTable getResourceHistory() {
