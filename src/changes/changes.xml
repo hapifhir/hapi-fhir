@@ -159,6 +159,11 @@
 				Server responses populate Bundle.entry.fullUrl if possible. Thanks
 				to Bill de Beaubien for reporting!
 			</action>
+			<action type="fix">
+				XML parser failed to initialize in environments where a very old Woodstox
+				library is in use (earlier than 4.0). Thanks to Bill de Beaubien for
+				reporting!
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

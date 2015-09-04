@@ -1575,7 +1575,11 @@ public class XmlUtil {
 				if (inputFactory instanceof com.ctc.wstx.stax.WstxInputFactory) {
 					// inputFactory.setProperty(WstxInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
 					inputFactory.setProperty(WstxInputProperties.P_UNDECLARED_ENTITY_RESOLVER, XML_RESOLVER);
-					inputFactory.setProperty(WstxInputProperties.P_MAX_ATTRIBUTE_SIZE, "100000000");
+					try {
+						inputFactory.setProperty(WstxInputProperties.P_MAX_ATTRIBUTE_SIZE, "100000000");
+					} catch (IllegalArgumentException e) {
+						// ignore
+					}
 				}
 			} catch (ClassNotFoundException e) {
 				ourLog.debug("WstxOutputFactory (Woodstox) not found on classpath");

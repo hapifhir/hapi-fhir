@@ -35,20 +35,13 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.7</version>
+			<version>1.2-SNAPSHOT</version>
 		</dependency>
-
-		<!-- 
-		Beginning in HAPI 0.8, at least one "structures" JAR must also be included.
-		For now it is commented out. 
-		-->
-		<!-- 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>0.8-SNAPSHOT</version>
+			<version>1.2-SNAPSHOT</version>
 		</dependency>
-		-->
 
 		<!-- 
 		HAPI-FHIR uses Logback for logging support. The logback library is included 

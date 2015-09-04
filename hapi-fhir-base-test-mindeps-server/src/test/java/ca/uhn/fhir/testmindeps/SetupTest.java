@@ -5,10 +5,9 @@ import org.junit.Test;
 public class SetupTest {
 
 	/**
-	 * Ensure that Woodstox is not on the classpath (we're testing that the library works ok without it
-	 * elsewhere)
+	 * Ensure that Woodstox is on the classpath
 	 */
-	@Test(expected=ClassNotFoundException.class)
+	@Test()
 	public void testValidateEnvironment() throws ClassNotFoundException {
 		Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
 	}
