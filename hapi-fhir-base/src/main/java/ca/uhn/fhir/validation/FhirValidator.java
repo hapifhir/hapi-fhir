@@ -54,14 +54,13 @@ public class FhirValidator {
 
 	private static volatile Boolean ourPhlocPresentOnClasspath;
 	private final FhirContext myContext;
-	private volatile List<IValidatorModule> myValidators = new ArrayList<IValidatorModule>();
+	private List<IValidatorModule> myValidators = new ArrayList<IValidatorModule>();
 
 	/**
 	 * Constructor (this should not be called directly, but rather {@link FhirContext#newValidator()} should be called to obtain an instance of {@link FhirValidator})
 	 */
 	public FhirValidator(FhirContext theFhirContext) {
 		myContext = theFhirContext;
-		setValidateAgainstStandardSchema(true);
 
 		if (ourPhlocPresentOnClasspath == null) {
 			try {
@@ -72,10 +71,6 @@ public class FhirValidator {
 				ourPhlocPresentOnClasspath = false;
 			}
 		}
-		if (ourPhlocPresentOnClasspath) {
-			setValidateAgainstStandardSchematron(true);
-		}
-
 	}
 
 	private void addOrRemoveValidator(boolean theValidateAgainstStandardSchema, Class<? extends IValidatorModule> type, IValidatorModule theInstance) {
@@ -183,7 +178,9 @@ public class FhirValidator {
 	@Deprecated
 	public void validate(Bundle theBundle) {
 		Validate.notNull(theBundle, "theBundle must not be null");
-
+		
+		applyDefaultValidators();
+		
 		IValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
 
 		for (IValidatorModule next : myValidators) {
@@ -197,6 +194,15 @@ public class FhirValidator {
 
 	}
 
+	private void applyDefaultValidators() {
+		if (myValidators.isEmpty()) {
+			setValidateAgainstStandardSchema(true);
+			if (ourPhlocPresentOnClasspath) {
+				setValidateAgainstStandardSchematron(true);
+			}
+		}
+	}
+
 	/**
 	 * Validates a resource instance, throwing a {@link ValidationFailureException} if the validation fails
 	 * 
@@ -208,6 +214,9 @@ public class FhirValidator {
 	 */
 	@Deprecated
 	public void validate(IResource theResource) throws ValidationFailureException {
+		
+		applyDefaultValidators();
+		
 		ValidationResult validationResult = validateWithResult(theResource);
 		if (!validationResult.isSuccessful()) {
 			throw new ValidationFailureException(myContext, validationResult.toOperationOutcome());
@@ -224,7 +233,9 @@ public class FhirValidator {
 	 */
 	public ValidationResult validateWithResult(Bundle theBundle) {
 		Validate.notNull(theBundle, "theBundle must not be null");
-
+		
+		applyDefaultValidators();
+		
 		IValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
 
 		for (IValidatorModule next : myValidators) {
@@ -244,7 +255,9 @@ public class FhirValidator {
 	 */
 	public ValidationResult validateWithResult(IBaseResource theResource) {
 		Validate.notNull(theResource, "theResource must not be null");
-
+		
+		applyDefaultValidators();
+		
 		IValidationContext<IBaseResource> ctx = ValidationContext.forResource(myContext, theResource);
 
 		for (IValidatorModule next : myValidators) {
@@ -264,7 +277,9 @@ public class FhirValidator {
 	 */
 	public ValidationResult validateWithResult(String theResource) {
 		Validate.notNull(theResource, "theResource must not be null");
-
+		
+		applyDefaultValidators();
+		
 		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource);
 
 		for (IValidatorModule next : myValidators) {

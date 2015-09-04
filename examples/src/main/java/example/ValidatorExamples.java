@@ -8,17 +8,22 @@ import javax.servlet.ServletException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.validation.FhirInstanceValidator;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.IValidationSupport;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
@@ -114,10 +119,88 @@ public class ValidatorExamples {
    }
 
    public static void main(String[] args) throws Exception {
-      validateFiles();
+      instanceValidator();
 
    }
 
+   private static void instanceValidator() throws Exception {
+      // START SNIPPET: instanceValidator
+      FhirContext ctx = FhirContext.forDstu2();
+
+      // Create a FhirInstanceValidator and register it to a validator
+      FhirValidator validator = ctx.newValidator();
+      FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+      validator.registerValidatorModule(instanceValidator);
+      
+      /*
+       * Let's create a resource to validate. This Observation has some fields
+       * populated, but it is missing Observation.status, which is mandatory.
+       */
+      Observation obs = new Observation();
+      obs.getCode().addCoding().setSystem("http://loinc.org").setCode("12345-6");
+      obs.setValue(new StringDt("This is a value"));
+      
+      // Validate
+      ValidationResult result = validator.validateWithResult(obs);
+      
+      // Do we have any errors or fatal errors?
+      System.out.println(result.isSuccessful()); // false
+      
+      // Show the issues
+      for (SingleValidationMessage next : result.getMessages()) {
+         System.out.println(" Next issue " + next.getSeverity() + " - " + next.getLocationString() + " - " + next.getMessage());
+      }
+      // Prints:
+      // Next issue ERROR - /f:Observation - Element '/f:Observation.status': minimum required = 1, but only found 0
+      // Next issue WARNING - /f:Observation/f:code - Unable to validate code "12345-6" in code system "http://loinc.org"
+      
+      // You can also convert the result into an operation outcome if you 
+      // need to return one from a server
+      OperationOutcome oo = (OperationOutcome) result.toOperationOutcome();
+      // END SNIPPET: instanceValidator
+   }
+   
+   private static void instanceValidatorCustom() throws Exception {
+      // START SNIPPET: instanceValidatorCustom
+      FhirContext ctx = FhirContext.forDstu2();
+
+      // Create a FhirInstanceValidator and register it to a validator
+      FhirValidator validator = ctx.newValidator();
+      FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+      validator.registerValidatorModule(instanceValidator);
+      
+      IValidationSupport valSupport = new IValidationSupport() {
+         
+         @Override
+         public org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult validateCode(String theCodeSystem, String theCode, String theDisplay) {
+            // TODO: Implement
+            return null;
+         }
+         
+         @Override
+         public boolean isCodeSystemSupported(String theSystem) {
+            // TODO: Implement
+            return false;
+         }
+         
+         @Override
+         public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+            // TODO: Implement
+            return null;
+         }
+         
+         @Override
+         public ValueSet fetchCodeSystem(String theSystem) {
+            // TODO: Implement
+            return null;
+         }
+      };
+      instanceValidator.setValidationSupport(valSupport);
+   
+      // END SNIPPET: instanceValidatorCustom
+   }
+   
+   @SuppressWarnings("unused")
    private static void validateFiles() throws Exception {
       // START SNIPPET: validateFiles
       FhirContext ctx = FhirContext.forDstu2();

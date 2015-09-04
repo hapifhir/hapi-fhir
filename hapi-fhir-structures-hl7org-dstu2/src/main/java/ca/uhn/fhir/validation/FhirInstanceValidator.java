@@ -93,10 +93,17 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
   /**
    * Returns the "best practice" warning level (default is
-   * {@link BestPracticeWarningLevel#Hint})
+   * {@link BestPracticeWarningLevel#Hint}). 
+   * <p>
+   * The FHIR Instance Validator has
+   * a number of checks for best practices in terms of FHIR usage. If this setting
+   * is set to {@link BestPracticeWarningLevel#Error}, any resource data which does not
+   * meet these best practices will be reported at the ERROR level. If this setting
+   * is set to {@link BestPracticeWarningLevel#Ignore}, best practice guielines will
+   * be ignored.
+   * </p> 
    * 
-   * @see #setBestPracticeWarningLevel(BestPracticeWarningLevel) for more
-   *      information on this value
+   * @see {@link #setBestPracticeWarningLevel(BestPracticeWarningLevel)}
    */
   public BestPracticeWarningLevel getBestPracticeWarningLevel() {
     return myBestPracticeWarningLevel;
@@ -115,10 +122,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
   /**
    * Sets the "best practice warning level". When validating, any deviations
    * from best practices will be reported at this level.
-   * {@link BestPracticeWarningLevel#Ignore} means that best practice deviations
-   * will not be reported, {@link BestPracticeWarningLevel#Warning} means that
-   * best practice deviations will be reported as warnings, etc. Default is
-   * {@link BestPracticeWarningLevel#Hint}
+   * <p>
+   * The FHIR Instance Validator has
+   * a number of checks for best practices in terms of FHIR usage. If this setting
+   * is set to {@link BestPracticeWarningLevel#Error}, any resource data which does not
+   * meet these best practices will be reported at the ERROR level. If this setting
+   * is set to {@link BestPracticeWarningLevel#Ignore}, best practice guielines will
+   * be ignored.
+   * </p> 
    * 
    * @param theBestPracticeWarningLevel
    *          The level, must not be <code>null</code>

@@ -59,7 +59,10 @@ public class ValidationResult {
 	}
 
 	/**
-	 * Was the validation successful
+	 * Was the validation successful (in other words, do we have no issues that are at
+	 * severity {@link ResultSeverityEnum#ERROR} or {@link ResultSeverityEnum#FATAL}. A validation
+	 * is still considered successful if it only has issues at level {@link ResultSeverityEnum#WARNING} or
+	 * lower. 
 	 * 
 	 * @return true if the validation was successful
 	 */
