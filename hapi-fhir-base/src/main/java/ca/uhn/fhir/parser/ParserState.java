@@ -1552,6 +1552,8 @@ class ParserState<T> {
 				}
 			} else if ("url".equals(theName) && myInstance instanceof ExtensionDt) {
 				((ExtensionDt) myInstance).setUrl(theValue);
+			} else {
+				super.attributeValue(theName, theValue);
 			}
 		}
 

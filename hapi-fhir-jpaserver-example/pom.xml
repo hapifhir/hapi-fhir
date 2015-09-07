@@ -194,6 +194,7 @@
 							<artifactId>hapi-fhir-testpage-overlay</artifactId>
 						</overlay>
 					</overlays>
+					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
 				</configuration>
 			</plugin>
 

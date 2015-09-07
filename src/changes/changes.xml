@@ -164,6 +164,10 @@
 				library is in use (earlier than 4.0). Thanks to Bill de Beaubien for
 				reporting!
 			</action>
+			<action type="fix" issue="216">
+				Invalid/unexpected attributes found when parsing composite elements
+				should be logged or reported to the parser error handler
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

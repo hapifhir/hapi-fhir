@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.not;
@@ -11,6 +12,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -22,11 +27,13 @@ import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -64,6 +71,7 @@ import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
 import ca.uhn.fhir.model.dstu2.valueset.DocumentReferenceStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierTypeCodesEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.model.dstu2.valueset.NameUseEnum;
@@ -74,6 +82,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -203,6 +212,70 @@ public class XmlParserDstu2Test {
 		Bundle parsed = ourCtx.newXmlParser().parseBundle(str);
 		assertThat(parsed.getEntries().get(0).getResource().getId().getValue(), emptyOrNullString());
 		assertTrue(parsed.getEntries().get(0).getResource().getId().isEmpty());
+	}
+
+	/**
+	 * See #216
+	 */
+	@Test
+	public void testEncodeAndParseIdentifierDstu2() {
+		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("SYS").setValue("VAL").setType(IdentifierTypeCodesEnum.MR);
+		
+		String out = xmlParser.encodeResourceToString(patient);
+		ourLog.info(out);
+		
+		//@formatter:off
+		assertThat(out, stringContainsInOrder("<identifier>", 
+				"<type>",
+				"<coding>",
+				"<system value=\"http://hl7.org/fhir/v2/0203\"/>", 
+				"<code value=\"MR\"/>", 
+				"</coding>", 
+				"</type>",
+				"<system value=\"SYS\"/>", 
+				"<value value=\"VAL\"/>", 
+				"</identifier>"));
+		//@formatter:on
+		
+		patient = ourCtx.newXmlParser().parseResource(Patient.class, out);
+		assertThat(patient.getIdentifier().get(0).getType().getValueAsEnum(), contains(IdentifierTypeCodesEnum.MR));
+		assertEquals("http://hl7.org/fhir/v2/0203", patient.getIdentifier().get(0).getType().getCoding().get(0).getSystem());		
+		assertEquals("MR", patient.getIdentifier().get(0).getType().getCoding().get(0).getCode());		
+	}
+
+	/**
+	 * See #216
+	 */
+	@Test
+	public void testParseMalformedIdentifierDstu2() {
+
+		// This was changed from 0.5 to 1.0.0
+		
+		//@formatter:off
+		String out = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+				"   <identifier>\n" + 
+				"      <type value=\"MRN\"/>\n" + 
+				"      <system value=\"SYS\"/>\n" + 
+				"      <value value=\"VAL\"/>\n" + 
+				"   </identifier>\n" + 
+				"</Patient>";
+		//@formatter:on
+		
+		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+		
+		IParser p = ourCtx.newXmlParser();
+		p.setParserErrorHandler(errorHandler);
+		
+		Patient patient = p.parseResource(Patient.class, out);
+		assertThat(patient.getIdentifier().get(0).getType().getValueAsEnum(), IsEmptyCollection.empty());
+		
+		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
+		verify(errorHandler, times(1)).unknownAttribute(any(IParseLocation.class), capt.capture());
+		
+		assertEquals("value", capt.getValue());
 	}
 
 	@Test
