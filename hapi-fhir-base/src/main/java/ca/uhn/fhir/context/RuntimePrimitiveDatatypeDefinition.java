@@ -74,7 +74,7 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 		if (myProfileOfType != null) {
 			myProfileOf = theClassToElementDefinitions.get(myProfileOfType);
 			if (myProfileOf == null) {
-				throw new ConfigurationException("Unknown profileOf value: " + myProfileOfType);
+				throw new ConfigurationException("Unknown profileOf value: " + myProfileOfType + " in type " + getImplementingClass().getName());
 			}
 		}
 	}
