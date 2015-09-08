@@ -215,7 +215,6 @@
 		<hibernate_version>4.2.17.Final</hibernate_version>
 		<hibernate_validator_version>5.1.0.Final</hibernate_validator_version>
 		<jetty_version>9.2.6.v20141205</jetty_version>
-		<jscience_version>4.3.1</jscience_version>
 		<maven_build_helper_plugin_version>1.9.1</maven_build_helper_plugin_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_failsafe_plugin_version>2.18.1</maven_failsafe_plugin_version>
@@ -238,7 +237,11 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<!-- Set dependency versions -->
+			<dependency>
+				<groupId>aopalliance</groupId>
+				<artifactId>aopalliance</artifactId>
+				<version>1.0</version>
+			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
@@ -270,14 +273,34 @@
 				<version>1.10</version>
 			</dependency>
 			<dependency>
+				<groupId>javax.el</groupId>
+				<artifactId>javax.el-api</artifactId>
+				<version>3.0.0</version>
+			</dependency>
+			<dependency>
 				<groupId>javax.json</groupId>
 				<artifactId>javax.json-api</artifactId>
 				<version>1.0</version>
 			</dependency>
 			<dependency>
+				<groupId>javax.mail</groupId>
+				<artifactId>javax.mail-api</artifactId>
+				<version>1.5.0</version>
+			</dependency>
+			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
 				<version>3.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.transaction</groupId>
+				<artifactId>jta</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>1.1.0.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>lt.velykis.maven.skins</groupId>
@@ -401,8 +424,38 @@
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish</groupId>
+				<artifactId>javax.el</artifactId>
+				<version>3.0.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish</groupId>
 				<artifactId>javax.json</artifactId>
 				<version>1.0.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jscience</groupId>
+				<artifactId>jscience</artifactId>
+				<version>4.3.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>${hibernate_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-ehcache</artifactId>
+				<version>${hibernate_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-entitymanager</artifactId>
+				<version>${hibernate_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>${hibernate_validator_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
