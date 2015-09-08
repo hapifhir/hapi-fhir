@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.composite.MoneyDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
@@ -40,6 +41,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UnsignedIntDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -59,12 +61,16 @@ public class OperationServerTest {
 	private static Server ourServer;
 	private static String ourLastMethod;
 	private static List<StringDt> ourLastParam3;
+	private static UnsignedIntDt ourLastParamUnsignedInt1;
+	private static MoneyDt ourLastParamMoney1;
 
 	@Before
 	public void before() {
 		ourLastParam1 = null;
 		ourLastParam2 = null;
 		ourLastParam3 = null;
+		ourLastParamUnsignedInt1 = null;
+		ourLastParamMoney1 = null;
 		ourLastId = null;
 		ourLastMethod = "";
 	}
@@ -174,6 +180,58 @@ public class OperationServerTest {
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
 		assertEquals("RET1", resp.getParameter().get(0).getName());
+	}
+
+	@Test
+	public void testOperationWithProfileDatatypeUrl() throws Exception {
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient/$OP_PROFILE_DT?PARAM1=123");
+		HttpResponse status = ourClient.execute(httpPost);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals("$OP_PROFILE_DT", ourLastMethod);
+		assertEquals("123", ourLastParamUnsignedInt1.getValueAsString());
+	}
+
+	@Test
+	public void testOperationWithProfileDatatypeParams() throws Exception {
+		Parameters p = new Parameters();
+		p.addParameter().setName("PARAM1").setValue(new IntegerDt("123"));
+		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$OP_PROFILE_DT");
+		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals("$OP_PROFILE_DT", ourLastMethod);
+		assertEquals("123", ourLastParamUnsignedInt1.getValueAsString());
+	}
+
+	@Test
+	public void testOperationWithProfileDatatypeParams2() throws Exception {
+		Parameters p = new Parameters();
+		MoneyDt money = new MoneyDt();
+		money.setCode("CODE");
+		money.setSystem("SYSTEM");
+		money.setValue(123L);
+		p.addParameter().setName("PARAM1").setValue(money);
+		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$OP_PROFILE_DT2");
+		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals("$OP_PROFILE_DT2", ourLastMethod);
+		assertEquals("CODE", ourLastParamMoney1.getCode());
+		assertEquals("SYSTEM", ourLastParamMoney1.getSystem());
+		assertEquals("123", ourLastParamMoney1.getValue().toString());
 	}
 
 	@Test
@@ -498,6 +556,36 @@ public class OperationServerTest {
 			ourLastMethod = "$OP_TYPE_RET_BUNDLE";
 			ourLastParam1 = theParam1;
 			ourLastParam2 = theParam2;
+
+			Bundle retVal = new Bundle();
+			retVal.addEntry().getResponse().setStatus("100");
+			return retVal;
+		}
+
+		//@formatter:off
+		@Operation(name="$OP_PROFILE_DT", idempotent=true)
+		public Bundle opProfileDt(
+				@OperationParam(name="PARAM1") UnsignedIntDt theParam1
+				) {
+			//@formatter:on
+
+			ourLastMethod = "$OP_PROFILE_DT";
+			ourLastParamUnsignedInt1 = theParam1;
+
+			Bundle retVal = new Bundle();
+			retVal.addEntry().getResponse().setStatus("100");
+			return retVal;
+		}
+
+		//@formatter:off
+		@Operation(name="$OP_PROFILE_DT2", idempotent=true)
+		public Bundle opProfileDt(
+				@OperationParam(name="PARAM1") MoneyDt theParam1
+				) {
+			//@formatter:on
+
+			ourLastMethod = "$OP_PROFILE_DT2";
+			ourLastParamMoney1 = theParam1;
 
 			Bundle retVal = new Bundle();
 			retVal.addEntry().getResponse().setStatus("100");

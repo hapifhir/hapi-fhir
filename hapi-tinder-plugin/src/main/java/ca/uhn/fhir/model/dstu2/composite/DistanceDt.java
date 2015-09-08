@@ -1,11 +1,12 @@
-package ca.uhn.fhir.context;
+package ca.uhn.fhir.model.dstu2.composite;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
  * Copyright (C) 2014 - 2015 University Health Network
  * %%
@@ -23,14 +24,7 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
  * #L%
  */
 
-public interface IRuntimeDatatypeDefinition {
-
-	boolean isSpecialization();
-	
-	public BaseRuntimeElementDefinition<?> getProfileOf();
-
-	boolean isProfileOf(Class<? extends IBaseDatatype> theType);
-	
-	public Class<? extends IBase> getImplementingClass();
+@DatatypeDef(name="DistanceDt", profileOf=QuantityDt.class) 
+public class DistanceDt extends QuantityDt {
 
 }

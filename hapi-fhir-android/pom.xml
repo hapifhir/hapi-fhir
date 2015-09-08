@@ -20,6 +20,7 @@
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>1.2-SNAPSHOT</version>
 			<exclusions>
+				<!--
 				<exclusion>
 					<groupId>org.apache.httpcomponents</groupId>
 					<artifactId>httpclient</artifactId>
@@ -28,6 +29,7 @@
 					<groupId>org.apache.httpcomponents</groupId>
 					<artifactId>httpcore</artifactId>
 				</exclusion>
+				-->
 				<exclusion>
 					<groupId>commons-codec</groupId>
 					<artifactId>commons-codec</artifactId>
@@ -94,7 +96,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>${maven_failsafe_plugin_version}</version>
 				<configuration>
 					<classpathDependencyScopeExclude>compile+runtime+test+provided</classpathDependencyScopeExclude>
 					<additionalClasspathElements>
@@ -102,8 +103,6 @@
 					</additionalClasspathElements>
 					<classpathDependencyExcludes>
 						<classpathDependencyExclude>ca.uhn.hapi.fhir:hapi-fhir-base</classpathDependencyExclude>
-						<!-- <classpathDependencyExclude>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</classpathDependencyExclude>  -->
-						<!-- <classpathDependencyExclude>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</classpathDependencyExclude> -->
 						<classpathDependencyExclude>org.codehaus.woodstox:*</classpathDependencyExclude>
 						<classpathDependencyExclude>javax.json:*</classpathDependencyExclude>
 						<classpathDependencyExclude>org.glassfish:javax.json</classpathDependencyExclude>

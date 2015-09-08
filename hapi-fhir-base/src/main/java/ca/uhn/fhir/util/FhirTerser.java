@@ -32,6 +32,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -515,6 +516,51 @@ public class FhirTerser {
 		} else {
 			return retVal.get(0);
 		}
+	}
+
+	/**
+	 * Clones all values from a source object into the equivalent fields in a target object
+	 * @param theSource The source object (must not be null)
+	 * @param theTarget The target object to copy values into (must not be null)
+	 * @param theIgnoreMissingFields The ignore fields in the target which do not exist (if false, an exception will be thrown if the target is unable to accept a value from the source)
+	 */
+	public void cloneInto(IBase theSource, IBase theTarget, boolean theIgnoreMissingFields) {
+		Validate.notNull(theSource, "theSource must not be null");
+		Validate.notNull(theTarget, "theTarget must not be null");
+		
+		if (theSource instanceof IPrimitiveType<?>) {
+			if (theTarget instanceof IPrimitiveType<?>) {
+				((IPrimitiveType<?>)theTarget).setValueAsString(((IPrimitiveType<?>)theSource).getValueAsString());
+				return;
+			} else {
+				if (theIgnoreMissingFields) {
+					return;
+				} else {
+					throw new DataFormatException("Can not copy value from primitive of type " + theSource.getClass().getName() + " into type " + theTarget.getClass().getName());
+				}
+			}
+		}
+		
+		BaseRuntimeElementCompositeDefinition<?> sourceDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theSource.getClass()); 
+		BaseRuntimeElementCompositeDefinition<?> targetDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theTarget.getClass());
+		
+		for (BaseRuntimeChildDefinition nextChild : sourceDef.getChildren()) {
+			for (IBase nextValue : nextChild.getAccessor().getValues(theSource)) {
+				BaseRuntimeChildDefinition targetChild = targetDef.getChildByName(nextChild.getElementName());
+				if (targetChild == null) {
+					if (theIgnoreMissingFields) {
+						continue;
+					} else {
+						throw new DataFormatException("Type " + theTarget.getClass().getName() + " does not have a child with name " + nextChild.getElementName());
+					}
+				}
+				
+				IBase target = targetChild.getChildByName(nextChild.getElementName()).newInstance();
+				targetChild.getMutator().addValue(theTarget, target);
+				cloneInto(nextValue, target, theIgnoreMissingFields);
+			}
+		}
+		
 	}
 
 }

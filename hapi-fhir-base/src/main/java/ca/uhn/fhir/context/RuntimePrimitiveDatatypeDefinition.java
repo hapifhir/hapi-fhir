@@ -79,5 +79,17 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 		}
 	}
 
+	@Override
+	public boolean isProfileOf(Class<? extends IBaseDatatype> theType) {
+		if (myProfileOfType != null) {
+			if (myProfileOfType.equals(theType)) {
+				return true;
+			} else if (myProfileOf instanceof IRuntimeDatatypeDefinition) {
+				return ((IRuntimeDatatypeDefinition) myProfileOf).isProfileOf(theType);
+			}
+		}
+		return false;
+	}
+
 
 }

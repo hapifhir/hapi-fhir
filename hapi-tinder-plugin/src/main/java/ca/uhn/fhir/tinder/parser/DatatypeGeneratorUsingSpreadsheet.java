@@ -77,6 +77,20 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 			throw new MojoFailureException(e.getMessage(), e);
 		}
 
+		try {
+			ImmutableSet<ClassInfo> tlc = ClassPath.from(getClass().getClassLoader()).getTopLevelClasses(thePackageBase + ".composite");
+			for (ClassInfo classInfo : tlc) {
+				DatatypeDef def = Class.forName(classInfo.getName()).getAnnotation(DatatypeDef.class);
+				if (def != null) {
+					getNameToDatatypeClass().put(def.name(), classInfo.getName());
+				}
+			}
+		} catch (IOException e) {
+			throw new MojoFailureException(e.getMessage(), e);
+		} catch (ClassNotFoundException e) {
+			throw new MojoFailureException(e.getMessage(), e);
+		}
+
 		super.writeAll(theOutputDirectory, theResourceOutputDirectory, thePackageBase);
 	}
 

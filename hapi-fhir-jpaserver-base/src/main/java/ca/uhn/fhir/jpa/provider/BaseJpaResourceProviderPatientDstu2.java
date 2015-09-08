@@ -35,8 +35,12 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 
 	@Operation(name = "everything", idempotent = true)
 	public ca.uhn.fhir.rest.server.IBundleProvider everything(
+
 			javax.servlet.http.HttpServletRequest theServletRequest,
-			@IdParam ca.uhn.fhir.model.primitive.IdDt theId,
+
+			@IdParam 
+			ca.uhn.fhir.model.primitive.IdDt theId,
+			
 			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
 			@OperationParam(name = "_count") 
 			ca.uhn.fhir.model.primitive.UnsignedIntDt theCount) {
