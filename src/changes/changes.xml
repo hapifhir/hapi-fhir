@@ -168,6 +168,10 @@
 				Invalid/unexpected attributes found when parsing composite elements
 				should be logged or reported to the parser error handler
 			</action>
+			<action type="add">
+				JPA server can now store Conformance resources, per a request
+				from David Hay
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">
