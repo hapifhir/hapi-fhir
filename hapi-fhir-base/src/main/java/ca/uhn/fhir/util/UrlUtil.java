@@ -29,6 +29,10 @@ import java.net.URLEncoder;
 public class UrlUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UrlUtil.class);
 
+	public static void main(String[] args) {
+		System.out.println(escape("http://snomed.info/sct?fhir_vs=isa/126851005"));
+	}
+	
 	/**
 	 * Resolve a relative URL - THIS METHOD WILL NOT FAIL but will log a warning and return theEndpoint if the input is
 	 * invalid.

@@ -1,6 +1,8 @@
 package org.hl7.fhir.instance.validation;
 
 
+import static org.apache.commons.lang3.StringUtils.lowerCase;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -663,17 +665,25 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     public String path() {
       WrapperElement n = child.getNextSibling();
       if (parent.isXml()) {
-      String sfx = "";
-      if (n != null && n.getName().equals(child.getName())) { 
-        sfx = "["+Integer.toString(lastCount+1)+"]";
-      }
-      return basePath+"/f:"+name()+sfx;
+        String sfx = "";
+        if (n != null && n.getName().equals(child.getName())) { 
+          sfx = "["+Integer.toString(lastCount+1)+"]";
+        }
+        String prefix;
+        String namespace = element().getNamespace();
+        if ("http://www.w3.org/1999/xhtml".equals(namespace)) {
+          prefix = "/h:";
+        } else {
+          prefix = "/f:";
+        }
+        String retVal = basePath + prefix+name() + sfx;
+        return retVal;
       } else {
         String sfx = "";
-      	if (n != null && n.getName().equals(child.getName())) { 
-      		sfx = "/"+Integer.toString(lastCount+1);
-      	}
-      	return basePath+"/"+name()+sfx;
+        if (n != null && n.getName().equals(child.getName())) { 
+          sfx = "/"+Integer.toString(lastCount+1);
+        }
+        return basePath+"/"+name()+sfx;
       }
     }
 
@@ -1116,7 +1126,8 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     		} else if (ei.definition.getType().size() > 1) {
 
             String prefix = tail(ei.definition.getPath());
-            assert prefix.endsWith("[x]");
+            assert typesAreAllReference(ei.definition.getType()) || prefix.endsWith("[x]") : prefix;
+            
             prefix = prefix.substring(0, prefix.length()-3);
             for (TypeRefComponent t : ei.definition.getType())
               if ((prefix+Utilities.capitalize(t.getCode())).equals(ei.name))
@@ -1140,7 +1151,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
           }
         }       
     		NodeStack localStack = stack.push(ei.element, ei.count, ei.definition, type == null ? typeDefn : resolveType(type));
-    		assert(ei.path.equals(localStack.getLiteralPath()));
+    		String localStackLiterapPath = localStack.getLiteralPath();
+        String eiPath = ei.path;
+        assert(eiPath.equals(localStackLiterapPath)) : "ei.path: " + ei.path + "  -  localStack.getLiterapPath: " + localStackLiterapPath;
 
       if (type != null) {
         if (typeIsPrimitive(type)) 
@@ -1174,6 +1187,15 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
   }
     
+  private boolean typesAreAllReference(List<TypeRefComponent> theType) {
+    for (TypeRefComponent typeRefComponent : theType) {
+      if (typeRefComponent.getCode().equals("Reference") == false) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
   /**
    * 
    * @param element - the candidate that might be in the slice
