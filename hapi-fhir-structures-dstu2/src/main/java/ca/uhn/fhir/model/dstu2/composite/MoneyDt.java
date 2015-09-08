@@ -23,7 +23,7 @@ import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
  * #L%
  */
 
-@DatatypeDef(name="Money") 
+@DatatypeDef(name="Money", profileOf=QuantityDt.class) 
 public class MoneyDt extends QuantityDt {
 
 }

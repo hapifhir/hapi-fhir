@@ -1699,17 +1699,18 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     ElementDefinitionBindingComponent binding = context.getBinding();
     if (binding.hasValueSet() && binding.getValueSet() instanceof Reference) {
       ValueSet vs = resolveBindingReference(binding.getValueSet());
-      if (warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, vs != null, "ValueSet "+describeReference(binding.getValueSet())+" not found")) {
+      if (warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, vs != null, "ValueSet {0} not found", describeReference(binding.getValueSet()))) {
         try {
-          vs = cache.getExpander().expand(vs).getValueset();
-          if (warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, vs != null, "Unable to expand value set for "+describeReference(binding.getValueSet()))) {
+          ValueSetExpansionOutcome expansionOutcome = cache.getExpander().expand(vs);
+          vs = expansionOutcome != null ? expansionOutcome.getValueset() : null;
+          if (warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, vs != null, "Unable to expand value set for {0}", describeReference(binding.getValueSet()))) {
             boolean ok = codeInExpansion(vs, null, value);
             if (binding.getStrength() == BindingStrength.REQUIRED)
-              rule(errors, IssueType.CODEINVALID, element.line(), element.col(), path, ok, "Coded value "+value+" is not in value set "+describeReference(binding.getValueSet())+" ("+vs.getUrl()+")");
+              rule(errors, IssueType.CODEINVALID, element.line(), element.col(), path, ok, "Coded value {0} is not in value set {1} ({2})", value, describeReference(binding.getValueSet()), vs.getUrl());
             else if (binding.getStrength() == BindingStrength.EXTENSIBLE)
-              warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, ok, "Coded value "+value+" is not in value set "+describeReference(binding.getValueSet())+" ("+vs.getUrl()+")");
+              warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, ok, "Coded value {0} is not in value set {1} ({2})", value, describeReference(binding.getValueSet()), vs.getUrl());
             else
-              hint(errors, IssueType.CODEINVALID, element.line(), element.col(), path, ok, "Coded value "+value+" is not in value set "+describeReference(binding.getValueSet())+" ("+vs.getUrl()+")");
+              hint(errors, IssueType.CODEINVALID, element.line(), element.col(), path, ok, "Coded value {0} is not in value set {1} ({2})", value, describeReference(binding.getValueSet()), vs.getUrl());
           }
         } catch (ETooCostly e) {
           if (e.getMessage() == null)

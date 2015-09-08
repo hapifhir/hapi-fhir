@@ -23,7 +23,7 @@ import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
  * #L%
  */
 
-@DatatypeDef(name="DurationDt") 
+@DatatypeDef(name="DurationDt", profileOf=QuantityDt.class) 
 public class DurationDt extends QuantityDt  {
 
 }

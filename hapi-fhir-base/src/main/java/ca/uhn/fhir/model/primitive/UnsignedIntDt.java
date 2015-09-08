@@ -25,7 +25,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 
-@DatatypeDef(name = "unsignedInt")
+@DatatypeDef(name = "unsignedInt", profileOf=IntegerDt.class)
 @CoverageIgnore
 public class UnsignedIntDt extends IntegerDt {
 

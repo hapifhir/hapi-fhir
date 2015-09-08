@@ -35,7 +35,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 /**
  * Primitive type "oid" in FHIR: an OID represented as urn:oid:0.1.2.3.4...
  */
-@DatatypeDef(name="oid")
+@DatatypeDef(name="oid", profileOf=UriType.class)
 public class OidType extends UriType {
 
 	private static final long serialVersionUID = 3L;

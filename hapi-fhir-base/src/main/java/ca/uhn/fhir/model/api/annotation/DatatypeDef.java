@@ -25,6 +25,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 
@@ -49,4 +51,12 @@ public @interface DatatypeDef {
 	 */
 	boolean isSpecialization() default false;
 	
+	/**
+	 * Indicates that this datatype is a profile of the given datatype, which
+	 * implies certain parsing/encoding rules (e.g. a choice element named
+	 * foo[x] which allows a Markdown value will still be encoded as
+	 * fooString because Markdown is a profile of string.
+	 */
+	Class<? extends IBaseDatatype> profileOf() default IBaseDatatype.class;
+
 }

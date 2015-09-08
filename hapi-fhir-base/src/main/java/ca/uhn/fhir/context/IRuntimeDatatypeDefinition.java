@@ -24,4 +24,6 @@ public interface IRuntimeDatatypeDefinition {
 
 	boolean isSpecialization();
 	
+	public BaseRuntimeElementDefinition<?> getProfileOf();
+
 }

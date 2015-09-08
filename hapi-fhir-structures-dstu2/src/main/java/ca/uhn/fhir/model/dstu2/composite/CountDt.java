@@ -23,7 +23,7 @@ import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
  * #L%
  */
 
-@DatatypeDef(name="CountDt") 
+@DatatypeDef(name="CountDt", profileOf=QuantityDt.class) 
 public class CountDt extends QuantityDt {
 
 }

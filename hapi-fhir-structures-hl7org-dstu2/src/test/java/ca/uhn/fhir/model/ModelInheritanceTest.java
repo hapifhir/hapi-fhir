@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.Base;
 import org.hl7.fhir.instance.model.Binary;
 import org.hl7.fhir.instance.model.BooleanType;
 import org.hl7.fhir.instance.model.Bundle;
+import org.hl7.fhir.instance.model.CodeType;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.DomainResource;
@@ -24,40 +25,43 @@ import org.hl7.fhir.instance.model.Identifier.IdentifierUseEnumFactory;
 import org.hl7.fhir.instance.model.IntegerType;
 import org.hl7.fhir.instance.model.List_;
 import org.hl7.fhir.instance.model.Meta;
+import org.hl7.fhir.instance.model.Money;
 import org.hl7.fhir.instance.model.Narrative;
 import org.hl7.fhir.instance.model.Parameters;
 import org.hl7.fhir.instance.model.PrimitiveType;
+import org.hl7.fhir.instance.model.Quantity;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.Timing;
 import org.hl7.fhir.instance.model.Type;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
 import org.hl7.fhir.instance.model.api.IBaseDecimalDatatype;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.Test;
 
@@ -153,7 +157,15 @@ public class ModelInheritanceTest {
         assertTrue(IBase.class.isAssignableFrom(Base.class));
     }
 
-
+    @Test
+    public void testProfiledDatatype() {
+      assertEquals(StringType.class, CodeType.class.getSuperclass());
+      assertEquals(StringType.class, CodeType.class.getAnnotation(DatatypeDef.class).profileOf());
+      assertEquals(Quantity.class, Money.class.getSuperclass());
+      assertEquals(Quantity.class, Money.class.getAnnotation(DatatypeDef.class).profileOf());
+    }
+    
+    
     @Test
     public void testBinary() {
         assertTrue(IBaseBinary.class.isAssignableFrom(Binary.class));

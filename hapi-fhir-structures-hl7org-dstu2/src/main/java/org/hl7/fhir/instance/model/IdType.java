@@ -81,7 +81,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
  * Regex for ID: [a-z0-9\-\.]{1,36}
  * </p>
  */
-@DatatypeDef(name = "id")
+@DatatypeDef(name = "id", profileOf=Type.class)
 public final class IdType extends UriType implements IPrimitiveType<String>, IIdType {
   /**
    * This is the maximum length for the ID

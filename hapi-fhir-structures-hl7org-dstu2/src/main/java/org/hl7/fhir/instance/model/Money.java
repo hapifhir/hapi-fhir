@@ -37,7 +37,7 @@ import org.hl7.fhir.instance.model.api.*;
 /**
  * A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.
  */
-@DatatypeDef(name="Money")
+@DatatypeDef(name="Money", profileOf=Quantity.class)
 public class Money extends Quantity {
 
     private static final long serialVersionUID = 1069574054L;

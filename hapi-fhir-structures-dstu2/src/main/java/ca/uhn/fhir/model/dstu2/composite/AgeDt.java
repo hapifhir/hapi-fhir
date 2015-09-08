@@ -2,6 +2,7 @@ package ca.uhn.fhir.model.dstu2.composite;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 
 /*
  * #%L
@@ -23,7 +24,7 @@ import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
  * #L%
  */
 
-@DatatypeDef(name="AgeDt") 
+@DatatypeDef(name="AgeDt", profileOf=QuantityDt.class) 
 public class AgeDt extends QuantityDt {
 
 }

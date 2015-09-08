@@ -189,6 +189,7 @@
 				</p>
 				<ul>
 					<li>
+					<!-- TODO: add search.maven.org links to these -->
 						<b>hapi-fhir-structures-hl7org-dstu2</b>
 						: This file contains the "reference implementation"
 						structures and tooling. You need to include it even if you are not using the RI model

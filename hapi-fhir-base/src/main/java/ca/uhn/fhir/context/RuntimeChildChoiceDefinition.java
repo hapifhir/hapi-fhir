@@ -98,7 +98,20 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 				
 			} else {
 				nextDef = theClassToElementDefinitions.get(next);
-				elementName = getElementName() + StringUtils.capitalize(nextDef.getName());
+				BaseRuntimeElementDefinition<?> nextDefForChoice = nextDef;
+				if (nextDef instanceof IRuntimeDatatypeDefinition) {
+					IRuntimeDatatypeDefinition nextDefDatatype = (IRuntimeDatatypeDefinition) nextDef;
+					if (nextDefDatatype.getProfileOf() != null) {
+						/*
+						 * Elements which are called foo[x] and have a choice which is a profiled datatype
+						 * must use the unprofiled datatype as the element name. E.g. if foo[x] allows 
+						 * markdown as a datatype, it calls the element fooString when encoded, because
+						 * markdown is a profile of string. This is according to the FHIR spec
+						 */
+						nextDefForChoice = nextDefDatatype.getProfileOf();
+					}
+				}
+				elementName = getElementName() + StringUtils.capitalize(nextDefForChoice.getName());
 			}
 
 			myNameToChildDefinition.put(elementName, nextDef);

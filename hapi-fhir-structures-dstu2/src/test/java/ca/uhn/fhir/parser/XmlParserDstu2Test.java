@@ -53,6 +53,7 @@ import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt.Binding;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.composite.SimpleQuantityDt;
 import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
@@ -63,6 +64,7 @@ import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
+import ca.uhn.fhir.model.dstu2.resource.MedicationStatement;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -214,6 +216,22 @@ public class XmlParserDstu2Test {
 		assertTrue(parsed.getEntries().get(0).getResource().getId().isEmpty());
 	}
 
+	/**
+	 * See #216 - Profiled datatypes should use their unprofiled parent type as the choice[x] name
+	 */
+	@Test
+	public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
+		IParser xmlParser = ourCtx.newXmlParser();
+
+		String input = IOUtils.toString(XmlParser.class.getResourceAsStream("/medicationstatement_invalidelement.xml"));
+		MedicationStatement ms = xmlParser.parseResource(MedicationStatement.class, input);
+		SimpleQuantityDt q = (SimpleQuantityDt) ms.getDosage().get(0).getQuantity();
+		assertEquals("1", q.getValueElement().getValueAsString());
+		
+		String output = xmlParser.encodeResourceToString(ms);
+		assertThat(output, containsString("<quantityQuantity><value value=\"1\"/></quantityQuantity>"));
+	}
+	
 	/**
 	 * See #216
 	 */

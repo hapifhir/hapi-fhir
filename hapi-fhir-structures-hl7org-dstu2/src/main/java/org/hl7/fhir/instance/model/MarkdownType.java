@@ -35,8 +35,8 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 /**
  * Primitive type "code" in FHIR, when not bound to an enumerated list of codes
  */
-@DatatypeDef(name="markdown")
-public class MarkdownType extends PrimitiveType<String> implements Comparable<MarkdownType>  {
+@DatatypeDef(name="markdown", profileOf=StringType.class)
+public class MarkdownType extends StringType implements Comparable<MarkdownType>  {
 
 	private static final long serialVersionUID = 3L;
 

@@ -52,7 +52,7 @@ import ca.uhn.fhir.util.UrlUtil;
  * regex: [a-z0-9\-\.]{1,36}
  * </p>
  */
-@DatatypeDef(name = "id")
+@DatatypeDef(name = "id", profileOf=StringDt.class)
 public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 
 	private String myBaseUrl;

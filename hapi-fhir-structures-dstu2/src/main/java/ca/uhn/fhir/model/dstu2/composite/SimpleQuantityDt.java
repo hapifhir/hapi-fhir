@@ -25,7 +25,7 @@ import ca.uhn.fhir.model.dstu2.valueset.QuantityComparatorEnum;
  * #L%
  */
 
-@DatatypeDef(name="SimpleQuantity") 
+@DatatypeDef(name="SimpleQuantity", profileOf=QuantityDt.class) 
 public class SimpleQuantityDt extends QuantityDt {
 
 	private static final long serialVersionUID = 1L;

@@ -9,9 +9,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.CodeType;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Observation.ObservationStatus;
@@ -25,8 +25,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
 
 public class FhirInstanceValidatorTest {
 
@@ -196,6 +194,19 @@ public class FhirInstanceValidatorTest {
     assertThat(output.getMessages().size(), greaterThan(0));
     assertEquals("Element '/f:Observation.status': minimum required = 1, but only found 0",
         output.getMessages().get(0).getMessage());
+
+  }
+
+  /**
+   * See #216
+   */
+  @Test
+  public void testValidateRawXmlInvalidChoiceName() throws Exception {
+    String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/medicationstatement_invalidelement.xml"));
+    ValidationResult output = myVal.validateWithResult(input);
+    
+    List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
+    assertEquals(output.toString(), 0, res.size());
 
   }
 

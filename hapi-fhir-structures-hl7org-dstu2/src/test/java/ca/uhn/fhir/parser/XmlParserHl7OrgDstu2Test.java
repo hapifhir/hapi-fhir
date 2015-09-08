@@ -1,7 +1,14 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -39,6 +46,7 @@ import org.hl7.fhir.instance.model.HumanName;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
 import org.hl7.fhir.instance.model.InstantType;
+import org.hl7.fhir.instance.model.MedicationStatement;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Organization;
@@ -46,6 +54,7 @@ import org.hl7.fhir.instance.model.Patient;
 import org.hl7.fhir.instance.model.PrimitiveType;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.SimpleQuantity;
 import org.hl7.fhir.instance.model.Specimen;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -78,6 +87,23 @@ public class XmlParserHl7OrgDstu2Test {
 		return htmlNoNs.replace("<div>", "<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">");
 	}
 
+	 /**
+   * See #216 - Profiled datatypes should use their unprofiled parent type as the choice[x] name
+   */
+  @Test
+  public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
+    IParser xmlParser = ourCtx.newXmlParser();
+
+    String input = IOUtils.toString(XmlParser.class.getResourceAsStream("/medicationstatement_invalidelement.xml"));
+    MedicationStatement ms = xmlParser.parseResource(MedicationStatement.class, input);
+    SimpleQuantity q = (SimpleQuantity) ms.getDosage().get(0).getQuantity();
+    assertEquals("1", q.getValueElement().getValueAsString());
+    
+    String output = xmlParser.encodeResourceToString(ms);
+    assertThat(output, containsString("<quantityQuantity><value value=\"1\"/></quantityQuantity>"));
+  }
+
+	
 	@Test
 	public void testComposition() {
 
