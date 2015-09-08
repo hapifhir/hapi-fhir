@@ -172,6 +172,12 @@
 				JPA server can now store Conformance resources, per a request
 				from David Hay
 			</action>
+			<action type="add">
+				ResponseHighlightingInterceptor now skips handling responses if it 
+				finds a URL parameter of <![CDATA[<code>_raw=true</code>]]> (in other
+				words, if this parameter is found, the response won't be returned as
+				HTML even if the request is detected as coming from a browser.
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

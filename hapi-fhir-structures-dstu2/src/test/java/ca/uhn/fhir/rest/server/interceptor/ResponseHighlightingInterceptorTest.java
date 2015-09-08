@@ -3,7 +3,10 @@ package ca.uhn.fhir.rest.server.interceptor;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,7 +31,6 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -172,6 +174,40 @@ public class ResponseHighlightingInterceptorTest {
 	}
 
 	@Test
+	public void testHighlightForceRaw() throws Exception {
+		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
+
+		HttpServletRequest req = mock(HttpServletRequest.class);
+		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
+			@Override
+			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ArrayEnumeration<String>("text/html,application/xhtml+xml,application/xml;q=0.9");
+			}
+		});
+
+		HttpServletResponse resp = mock(HttpServletResponse.class);
+		StringWriter sw = new StringWriter();
+		when(resp.getWriter()).thenReturn(new PrintWriter(sw));
+
+		Patient resource = new Patient();
+		resource.addName().addFamily("FAMILY");
+
+		RequestDetails reqDetails = new RequestDetails();
+		reqDetails.setRequestType(RequestTypeEnum.GET);
+		HashMap<String, String[]> params = new HashMap<String, String[]>();
+		params.put(Constants.PARAM_PRETTY, new String[] { Constants.PARAM_PRETTY_VALUE_TRUE });
+		params.put(Constants.PARAM_FORMAT, new String[] { Constants.CT_XML });
+		params.put(ResponseHighlighterInterceptor.PARAM_RAW, new String[] { ResponseHighlighterInterceptor.PARAM_RAW_TRUE });
+		reqDetails.setParameters(params);
+		reqDetails.setServer(new RestfulServer());
+		reqDetails.setServletRequest(req);
+
+		// true means it decided to not handle the request..
+		assertTrue(ic.outgoingResponse(reqDetails, resource, req, resp));
+
+	}
+
+	@Test
 	public void testHighlightNormalResponse() throws Exception {
 		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();
 
@@ -202,6 +238,7 @@ public class ResponseHighlightingInterceptorTest {
 		ourLog.info(output);
 		assertThat(output, containsString("<span class='hlTagName'>Patient</span>"));
 		assertThat(output, not(stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
+		assertThat(output, containsString("<a href=\"?_raw=true\">"));
 	}
 
 	/**

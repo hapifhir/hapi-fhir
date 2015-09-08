@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -39,15 +41,18 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.UrlUtil;
 
 /**
- * This interceptor detects when a request is coming from a browser, and automatically
- * returns a response with syntax highlighted (coloured) HTML for the response instead
- * of just returning raw XML/JSON.
+ * This interceptor detects when a request is coming from a browser, and automatically returns a response with syntax
+ * highlighted (coloured) HTML for the response instead of just returning raw XML/JSON.
  * 
  * @since 1.0
  */
 public class ResponseHighlighterInterceptor extends InterceptorAdapter {
+
+	public static final String PARAM_RAW_TRUE = "true";
+	public static final String PARAM_RAW = "_raw";
 
 	private String format(String theResultBody, EncodingEnum theEncodingEnum) {
 		String str = StringEscapeUtils.escapeHtml4(theResultBody);
@@ -161,8 +166,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	}
 
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-			throws AuthenticationException {
+	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 
 		/*
 		 * It's not a browser...
@@ -171,9 +175,9 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		if (highestRankedAcceptValues.contains(Constants.CT_HTML) == false) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
-		
+
 		/*
-		 * It's an AJAX request, so no HTML 
+		 * It's an AJAX request, so no HTML
 		 */
 		String requestedWith = theServletRequest.getHeader("X-Requested-With");
 		if (requestedWith != null) {
@@ -186,9 +190,14 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		if (theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
-		
+
+		String[] rawParamValues = theRequestDetails.getParameters().get(PARAM_RAW);
+		if (rawParamValues != null && rawParamValues.length > 0 && rawParamValues[0].equals(PARAM_RAW_TRUE)) {
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+		}
+
 		streamResponse(theRequestDetails, theServletResponse, theResponseObject);
-		
+
 		return false;
 	}
 
@@ -201,43 +210,67 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			p = defaultResponseEncoding.newParser(theRequestDetails.getServer().getFhirContext());
 			RestfulServerUtils.configureResponseParser(theRequestDetails, p);
 		}
-		
-		EncodingEnum encoding = p.getEncoding(); 
+
+		EncodingEnum encoding = p.getEncoding();
 		String encoded = p.encodeResourceToString(resource);
-		
+
 		theServletResponse.setContentType(Constants.CT_HTML_WITH_UTF8);
+
+		StringBuilder rawB = new StringBuilder();
+		for (String next : theRequestDetails.getParameters().keySet()) {
+			if (next.equals(PARAM_RAW)) {
+				continue;
+			}
+			for (String nextValue : theRequestDetails.getParameters().get(next)) {
+				if (isBlank(nextValue)) {
+					continue;
+				}
+				if (rawB.length() == 0) {
+					rawB.append('?');
+				}else {
+					rawB.append('&');
+				}
+				rawB.append(UrlUtil.escape(next));
+				rawB.append('=');
+				rawB.append(UrlUtil.escape(nextValue));
+			}
+		}
+		if (rawB.length() == 0) {
+			rawB.append('?');
+		}else {
+			rawB.append('&');
+		}
+		rawB.append(PARAM_RAW).append('=').append(PARAM_RAW_TRUE);
 		
-		//@formatter:on
-		String out = "<html lang=\"en\">\n" + 
-				"	<head>\n" + 
-				"		<meta charset=\"utf-8\" />\n" +
-				"       <style>\n" + 
-				".hlQuot {\n" + 
-				"	color: #88F;\n" + 
-				"}\n" + 
-				".hlAttr {\n" + 
-				"	color: #888;\n" + 
-				"}\n" + 
-				".hlTagName {\n" + 
-				"	color: #006699;\n" + 
-				"}\n" + 
-				".hlControl {\n" + 
-				"	color: #660000;\n" + 
-				"}\n" + 
-				".hlText {\n" + 
-				"	color: #000000;\n" + 
-				"}\n" + 
-				".hlUrlBase {\n" + 
-				"}" +
-				"       </style>\n" + 
-				"	</head>\n" + 
-				"\n" + 
-				"	<body>" +
-				"<pre>" + format(encoded, encoding) + "</pre>" +
-				"   </body>" +
-				"</html>";
 		//@formatter:off
-		
+		String out = "<html lang=\"en\">\n" + 
+		"	<head>\n" + 
+		"		<meta charset=\"utf-8\" />\n" + 
+		"       <style>\n" + ".hlQuot {\n" + 
+		"	color: #88F;\n" + "}\n" + 
+		".hlAttr {\n" +
+		"	color: #888;\n" + 
+		"}\n" + ".hlTagName {\n" + 
+		"	color: #006699;\n" + "}\n" + 
+		".hlControl {\n" + 
+		"	color: #660000;\n" + 
+		"}\n" + ".hlText {\n" + 
+		"	color: #000000;\n" + 
+		"}\n" + 
+		".hlUrlBase {\n" + 
+		"}" + 
+		"       </style>\n" + 
+		"	</head>\n" + 
+		"\n" + 
+		"	<body>" + 
+		"This result is being rendered in HTML for easy viewing. <a href=\"" + rawB.toString() + "\">Click here</a> to disable this.<br/><br/>" +
+		"<pre>" + 
+		format(encoded, encoding) + 
+		"</pre>" + 
+		"   </body>" + 
+		"</html>";
+		//@formatter:on
+
 		try {
 			theServletResponse.getWriter().append(out);
 			theServletResponse.getWriter().close();
@@ -255,9 +288,9 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		if (!accept.contains(Constants.CT_HTML)) {
 			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
 		}
-		
+
 		/*
-		 * It's an AJAX request, so no HTML 
+		 * It's an AJAX request, so no HTML
 		 */
 		String requestedWith = theServletRequest.getHeader("X-Requested-With");
 		if (requestedWith != null) {
@@ -270,15 +303,14 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		if (theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
 			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
 		}
-		
+
 		if (theException.getOperationOutcome() == null) {
 			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
 		}
-		
+
 		streamResponse(theRequestDetails, theServletResponse, theException.getOperationOutcome());
-		
+
 		return false;
 	}
-
 
 }
