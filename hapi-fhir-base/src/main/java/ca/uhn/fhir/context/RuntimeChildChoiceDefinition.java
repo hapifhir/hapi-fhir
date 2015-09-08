@@ -86,16 +86,17 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 			String elementName;
 			BaseRuntimeElementDefinition<?> nextDef;
+			boolean nonPreferred = false;
 			if (IBaseResource.class.isAssignableFrom(next)) {
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add((Class<? extends IBaseResource>) next);
 				nextDef = new RuntimeResourceReferenceDefinition(elementName, types, false);
 				nextDef.sealAndInitialize(theContext, theClassToElementDefinitions);
-				
+
 				myNameToChildDefinition.put(getElementName() + "Reference", nextDef);
 				myNameToChildDefinition.put(getElementName() + "Resource", nextDef);
-				
+
 			} else {
 				nextDef = theClassToElementDefinitions.get(next);
 				BaseRuntimeElementDefinition<?> nextDefForChoice = nextDef;
@@ -103,23 +104,26 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 					IRuntimeDatatypeDefinition nextDefDatatype = (IRuntimeDatatypeDefinition) nextDef;
 					if (nextDefDatatype.getProfileOf() != null) {
 						/*
-						 * Elements which are called foo[x] and have a choice which is a profiled datatype
-						 * must use the unprofiled datatype as the element name. E.g. if foo[x] allows 
-						 * markdown as a datatype, it calls the element fooString when encoded, because
-						 * markdown is a profile of string. This is according to the FHIR spec
+						 * Elements which are called foo[x] and have a choice which is a profiled datatype must use the
+						 * unprofiled datatype as the element name. E.g. if foo[x] allows markdown as a datatype, it calls the
+						 * element fooString when encoded, because markdown is a profile of string. This is according to the
+						 * FHIR spec
 						 */
 						nextDefForChoice = nextDefDatatype.getProfileOf();
+						nonPreferred = true;
 					}
 				}
 				elementName = getElementName() + StringUtils.capitalize(nextDefForChoice.getName());
 			}
 
-			myNameToChildDefinition.put(elementName, nextDef);
-			
+			if (myNameToChildDefinition.containsKey(elementName) == false || !nonPreferred) {
+				myNameToChildDefinition.put(elementName, nextDef);
+			}
+
 			if (IBaseResource.class.isAssignableFrom(next)) {
 				Class<? extends IBase> refType = theContext.getVersion().getResourceReferenceType();
 				myDatatypeToElementDefinition.put(refType, nextDef);
-				
+
 				String alternateElementName;
 				if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
 					alternateElementName = getElementName() + "Resource";
@@ -128,7 +132,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 				}
 				myDatatypeToElementName.put(refType, alternateElementName);
 			}
-			
+
 			myDatatypeToElementDefinition.put(next, nextDef);
 			myDatatypeToElementName.put(next, elementName);
 		}
