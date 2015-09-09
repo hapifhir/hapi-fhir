@@ -30,10 +30,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
 public class RequestDetails {
@@ -43,18 +42,17 @@ public class RequestDetails {
 	private String myFhirServerBase;
 	private IdDt myId;
 	private String myOperation;
-	private OtherOperationTypeEnum myOtherOperationType;
 	private Map<String, String[]> myParameters;
+	private byte[] myRawRequest;
 	private String myRequestPath;
 	private RequestTypeEnum myRequestType;
 	private String myResourceName;
-	private RestfulOperationTypeEnum myResourceOperationType;
 	private boolean myRespondGzip;
+	private RestOperationTypeEnum myRestOperationType;
 	private String mySecondaryOperation;
 	private RestfulServer myServer;
 	private HttpServletRequest myServletRequest;
 	private HttpServletResponse myServletResponse;
-	private RestfulOperationSystemEnum mySystemOperationType;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
 
 	public String getCompartmentName() {
@@ -77,12 +75,12 @@ public class RequestDetails {
 		return myOperation;
 	}
 
-	public OtherOperationTypeEnum getOtherOperationType() {
-		return myOtherOperationType;
-	}
-
 	public Map<String, String[]> getParameters() {
 		return myParameters;
+	}
+
+	public byte[] getRawRequest() {
+		return myRawRequest;
 	}
 
 	/**
@@ -103,8 +101,8 @@ public class RequestDetails {
 		return myResourceName;
 	}
 
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return myResourceOperationType;
+	public RestOperationTypeEnum getRestOperationType() {
+		return myRestOperationType;
 	}
 
 	public String getSecondaryOperation() {
@@ -121,10 +119,6 @@ public class RequestDetails {
 
 	public HttpServletResponse getServletResponse() {
 		return myServletResponse;
-	}
-
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return mySystemOperationType;
 	}
 
 	public Map<String, List<String>> getUnqualifiedToQualifiedNames() {
@@ -155,10 +149,6 @@ public class RequestDetails {
 		myOperation = theOperation;
 	}
 
-	public void setOtherOperationType(OtherOperationTypeEnum theOtherOperationType) {
-		myOtherOperationType = theOtherOperationType;
-	}
-
 	public void setParameters(Map<String, String[]> theParams) {
 		myParameters = theParams;
 
@@ -187,6 +177,10 @@ public class RequestDetails {
 
 	}
 
+	public void setRawRequest(byte[] theRawRequest) {
+		myRawRequest = theRawRequest;
+	}
+
 	public void setRequestPath(String theRequestPath) {
 		assert theRequestPath.length() == 0 || theRequestPath.charAt(0) != '/';
 		myRequestPath = theRequestPath;
@@ -200,12 +194,12 @@ public class RequestDetails {
 		myResourceName = theResourceName;
 	}
 
-	public void setResourceOperationType(RestfulOperationTypeEnum theResourceOperationType) {
-		myResourceOperationType = theResourceOperationType;
-	}
-
 	public void setRespondGzip(boolean theRespondGzip) {
 		myRespondGzip = theRespondGzip;
+	}
+
+	public void setRestOperationType(RestOperationTypeEnum theRestOperationType) {
+		myRestOperationType = theRestOperationType;
 	}
 
 	public void setSecondaryOperation(String theSecondaryOperation) {
@@ -222,10 +216,6 @@ public class RequestDetails {
 
 	public void setServletResponse(HttpServletResponse theServletResponse) {
 		myServletResponse = theServletResponse;
-	}
-
-	public void setSystemOperationType(RestfulOperationSystemEnum theSystemOperationType) {
-		mySystemOperationType = theSystemOperationType;
 	}
 
 	public static RequestDetails withResourceAndParams(String theResourceName, RequestTypeEnum theRequestType, Set<String> theParamNames) {

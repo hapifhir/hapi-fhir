@@ -1,8 +1,22 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.apache.commons.lang3.StringUtils.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -37,14 +52,13 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.theories.suppliers.TestedOn;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
@@ -70,12 +84,13 @@ import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
-import ca.uhn.fhir.model.dstu2.resource.QuestionnaireAnswers;
+import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.AnswerFormatEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SearchEntryModeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -86,7 +101,6 @@ import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -94,7 +108,6 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -112,13 +125,17 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2Test.class);
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	private static int ourPort;
-	// private static IFhirResourceDao<Observation> ourObservationDao;
-	// private static IFhirResourceDao<Patient> ourPatientDao;
-	// private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
 	private static Server ourServer;
 	private static String ourServerBase;
 
 	// private static JpaConformanceProvider ourConfProvider;
+
+	private void checkParamMissing(String paramName) throws IOException, ClientProtocolException {
+		HttpGet get = new HttpGet(ourServerBase + "/Observation?" + paramName + ":missing=false");
+		CloseableHttpResponse resp = ourHttpClient.execute(get);
+		IOUtils.closeQuietly(resp.getEntity().getContent());
+		assertEquals(200, resp.getStatusLine().getStatusCode());
+	}
 
 	private void delete(String theResourceType, String theParamName, String theParamValue) {
 		Bundle resources;
@@ -135,148 +152,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		} while (resources.size() > 0);
 	}
 
-	/**
-	 * See #198
-	 */
-	@Test
-	public void testSortFromResourceProvider() {
-		Patient p;
-		String methodName = "testSortFromResourceProvider";
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Daniel").addFamily("Adams");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Aaron").addFamily("Alexis");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Carol").addFamily("Allen");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Ruth").addFamily("Black");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Brian").addFamily("Brooks");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Susan").addFamily("Clark");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Amy").addFamily("Clark");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Anthony").addFamily("Coleman");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Steven").addFamily("Coleman");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Lisa").addFamily("Coleman");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Ruth").addFamily("Cook");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Betty").addFamily("Davis");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Joshua").addFamily("Diaz");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Brian").addFamily("Gracia");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Stephan").addFamily("Graham");
-		ourClient.create().resource(p).execute();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addGiven("Sarah").addFamily("Graham");
-		ourClient.create().resource(p).execute();
-
-		//@formatter:off
-		Bundle resp = ourClient
-			.search()
-			.forResource(Patient.class)
-			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", methodName))
-			.sort().ascending(Patient.FAMILY)
-			.sort().ascending(Patient.GIVEN)
-			.limitTo(100)
-			.execute();
-		//@formatter:on
-
-		List<String> names = toNameList(resp);
-
-		ourLog.info(StringUtils.join(names, '\n'));
-
-		//@formatter:off
-		assertThat(names, contains( // this matches in order only
-			"Daniel Adams",
-			"Aaron Alexis",
-			"Carol Allen",
-			"Ruth Black",
-			"Brian Brooks",
-			"Amy Clark",
-			"Susan Clark",
-			"Anthony Coleman",
-			"Lisa Coleman",
-			"Steven Coleman",
-			"Ruth Cook",
-			"Betty Davis",
-			"Joshua Diaz",
-			"Brian Gracia",
-			"Sarah Graham",
-			"Stephan Graham"));
-		//@formatter:om
-			
-	}
-
-
-	private List<String> toNameList(Bundle resp) {
-		List<String> names = new ArrayList<String>();
-		for (BundleEntry next : resp.getEntries()) {
-			Patient nextPt= (Patient) next.getResource();
-			String nextStr = nextPt.getNameFirstRep().getGivenAsSingleString()+ " " + nextPt.getNameFirstRep().getFamilyAsSingleString();
-			if (isNotBlank(nextStr)) {
-			names.add(nextStr);
-			}
-		}
-		return names;
-	}
-	
 	private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue) {
 		Bundle resources = ourClient.search().forResource(theResourceType).where(new TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
 		for (IResource next : resources.toListOfResources()) {
@@ -337,46 +212,34 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	}
 
 	@Test
-	public void testMetaOperations() throws Exception {
-		String methodName = "testMetaOperations";
+	public void testCreateQuestionnaireResponseWithValidation() throws IOException {
+		ValueSet options = new ValueSet();
+		options.getCodeSystem().setSystem("urn:system").addConcept().setCode("code0");
+		IIdType optId = ourClient.create().resource(options).execute().getId();
 
-		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
-		IIdType id = ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+		Questionnaire q = new Questionnaire();
+		q.getGroup().addQuestion().setLinkId("link0").setRequired(false).setType(AnswerFormatEnum.CHOICE).setOptions(new ResourceReferenceDt(optId));
+		IIdType qId = ourClient.create().resource(q).execute().getId();
 
-		MetaDt meta = ourClient.meta().get(MetaDt.class).fromResource(id).execute();
-		assertEquals(0, meta.getTag().size());
+		QuestionnaireResponse qa;
 
-		MetaDt inMeta = new MetaDt();
-		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
-		meta = ourClient.meta().add().onResource(id).meta(inMeta).execute();
-		assertEquals(1, meta.getTag().size());
+		// Good code
 
-		inMeta = new MetaDt();
-		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
-		meta = ourClient.meta().delete().onResource(id).meta(inMeta).execute();
-		assertEquals(0, meta.getTag().size());
+		qa = new QuestionnaireResponse();
+		qa.getQuestionnaire().setReference(qId.toUnqualifiedVersionless().getValue());
+		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new CodingDt().setSystem("urn:system").setCode("code0"));
+		ourClient.create().resource(qa).execute();
 
-	}
+		// Bad code
 
-	@Test
-	public void testGetResourceCountsOperation() throws Exception {
-		String methodName = "testMetaOperations";
-
-		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
-		ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
-
-		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
+		qa = new QuestionnaireResponse();
+		qa.getQuestionnaire().setReference(qId.toUnqualifiedVersionless().getValue());
+		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new CodingDt().setSystem("urn:system").setCode("code1"));
 		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(response.getEntity().getContent());
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			ourLog.info(output);
-			assertThat(output, containsString("<parameter><name value=\"Patient\"/><valueInteger value=\""));
-		} finally {
-			response.close();
+			ourClient.create().resource(qa).execute();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Question with linkId[link0]"));
 		}
 	}
 
@@ -417,36 +280,22 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	}
 
 	@Test
-	public void testCreateQuestionnaireAnswersWithValidation() throws IOException {
-		String methodName = "testCreateQuestionnaireAnswersWithValidation";
+	public void testCreateResourceReturnsOperationOutcomeByDefault() throws IOException {
+		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
-		ValueSet options = new ValueSet();
-		options.getDefine().setSystem("urn:system").addConcept().setCode("code0");
-		IIdType optId = ourClient.create().resource(options).execute().getId();
-		
-		Questionnaire q = new Questionnaire();
-		q.getGroup().addQuestion().setLinkId("link0").setRequired(false).setType(AnswerFormatEnum.CHOICE).setOptions(new ResourceReferenceDt(optId));
-		IIdType qId = ourClient.create().resource(q).execute().getId();
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		QuestionnaireAnswers qa;
-
-		// Good code
-
-		qa = new QuestionnaireAnswers();
-		qa.getQuestionnaire().setReference(qId.toUnqualifiedVersionless().getValue());
-		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new CodingDt().setSystem("urn:system").setCode("code0"));
-		ourClient.create().resource(qa).execute();
-
-		// Bad code
-
-		qa = new QuestionnaireAnswers();
-		qa.getQuestionnaire().setReference(qId.toUnqualifiedVersionless().getValue());
-		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new CodingDt().setSystem("urn:system").setCode("code1"));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
-			ourClient.create().resource(qa).execute();
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Question with linkId[link0]"));
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String respString = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(response.toString());
+			ourLog.info(respString);
+			assertThat(respString, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
+		} finally {
+			response.getEntity().getContent().close();
+			response.close();
 		}
 	}
 
@@ -470,27 +319,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		}
 	}
 
-	@Test
-	public void testCreateResourceReturnsOperationOutcomeByDefault() throws IOException {
-		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
-
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String respString = IOUtils.toString(response.getEntity().getContent());
-			ourLog.info(response.toString());
-			ourLog.info(respString);
-			assertThat(respString, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
-		} finally {
-			response.getEntity().getContent().close();
-			response.close();
-		}
-	}
-
-	
 	@Test
 	public void testDeepChaining() {
 		delete("Location", Location.SP_NAME, "testDeepChainingL1");
@@ -519,8 +347,8 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		Bundle res = ourClient.search()
 			.forResource(Encounter.class)
 			.where(Encounter.IDENTIFIER.exactly().systemAndCode("urn:foo", "testDeepChainingE1"))
-			.include(Encounter.INCLUDE_LOCATION)
-			.include(Location.INCLUDE_PARTOF)
+			.include(Encounter.INCLUDE_LOCATION.asRecursive())
+			.include(Location.INCLUDE_PARTOF.asRecursive())
 			.execute();
 		//@formatter:on
 
@@ -596,8 +424,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		}
 
 		/*
-		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to
-		 * make sure that works too..
+		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to make sure that works too..
 		 */
 		Socket sock = new Socket();
 		sock.setSoTimeout(3000);
@@ -707,12 +534,12 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient.transaction().withBundle(b).execute();
 		List<IdDt> ids = new ArrayList<IdDt>();
 		for (Entry next : resp.getEntry()) {
-			IdDt toAdd = new IdDt(next.getTransactionResponse().getLocation()).toUnqualifiedVersionless();
+			IdDt toAdd = new IdDt(next.getResponse().getLocation()).toUnqualifiedVersionless();
 			ids.add(toAdd);
 		}
 		ourLog.info("Created: " + ids.toString());
 
-		IdDt patientId = new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation());
+		IdDt patientId = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals("Patient", patientId.getResourceType());
 
 		{
@@ -763,17 +590,17 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
 		Patient p = new Patient();
 		p.setId("1");
-		b.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.POST);
+		b.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.POST);
 
 		Condition c = new Condition();
 		c.getPatient().setReference("Patient/1");
-		b.addEntry().setResource(c).getTransaction().setMethod(HTTPVerbEnum.POST);
+		b.addEntry().setResource(c).getRequest().setMethod(HTTPVerbEnum.POST);
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient.transaction().withBundle(b).execute();
 
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		IdDt patientId = new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation());
+		IdDt patientId = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals("Patient", patientId.getResourceType());
 
 		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
@@ -796,45 +623,66 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		Organization org1 = new Organization();
 		org1.setName(methodName + "1");
-		IIdType orgId1 = ourClient.create().resource(org1).execute().getId();
+		IIdType orgId1 = ourClient.create().resource(org1).execute().getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
 		p.addName().addFamily(methodName);
 		p.getManagingOrganization().setReference(orgId1);
-		IIdType patientId = ourClient.create().resource(p).execute().getId();
+		IIdType patientId = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		Organization org2 = new Organization();
 		org2.setName(methodName + "1");
-		IIdType orgId2 = ourClient.create().resource(org2).execute().getId();
+		IIdType orgId2 = ourClient.create().resource(org2).execute().getId().toUnqualifiedVersionless();
 
 		Device dev = new Device();
 		dev.setModel(methodName);
 		dev.getOwner().setReference(orgId2);
-		IIdType devId = ourClient.create().resource(dev).execute().getId();
+		IIdType devId = ourClient.create().resource(dev).execute().getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId);
 		obs.getDevice().setReference(devId);
-		IIdType obsId = ourClient.create().resource(obs).execute().getId();
+		IIdType obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc = new Encounter();
 		enc.getPatient().setReference(patientId);
-		IIdType encId = ourClient.create().resource(enc).execute().getId();
+		IIdType encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
 
 		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
 		ca.uhn.fhir.model.dstu2.resource.Bundle b = (ca.uhn.fhir.model.dstu2.resource.Bundle) output.getParameterFirstRep().getResource();
 
 		Set<IdDt> ids = new HashSet<IdDt>();
 		for (Entry next : b.getEntry()) {
-			ids.add(next.getResource().getId());
+			ids.add(next.getResource().getId().toUnqualifiedVersionless());
 		}
 
 		assertThat(ids, containsInAnyOrder(patientId, devId, obsId, encId, orgId1, orgId2));
 
-		// _revinclude's are counted but not _include's
-		assertEquals(3, b.getTotal().intValue());
+		// Should include everything
+		assertEquals(6, b.getTotal().intValue());
 
 		ourLog.info(ids.toString());
+	}
+
+	@Test
+	public void testGetResourceCountsOperation() throws Exception {
+		String methodName = "testMetaOperations";
+
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent());
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			assertThat(output, containsString("<parameter><name value=\"Patient\"/><valueInteger value=\""));
+		} finally {
+			response.close();
+		}
 	}
 
 	/**
@@ -852,6 +700,29 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		int newSize = client.search().forResource(ImagingStudy.class).execute().size();
 
 		assertEquals(1, newSize - initialSize);
+
+	}
+
+	@Test
+	public void testMetaOperations() throws Exception {
+		String methodName = "testMetaOperations";
+
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		IIdType id = ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		MetaDt meta = ourClient.meta().get(MetaDt.class).fromResource(id).execute();
+		assertEquals(0, meta.getTag().size());
+
+		MetaDt inMeta = new MetaDt();
+		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
+		meta = ourClient.meta().add().onResource(id).meta(inMeta).execute();
+		assertEquals(1, meta.getTag().size());
+
+		inMeta = new MetaDt();
+		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
+		meta = ourClient.meta().delete().onResource(id).meta(inMeta).execute();
+		assertEquals(0, meta.getTag().size());
 
 	}
 
@@ -957,10 +828,21 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		p2.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven02");
 		ourClient.create().resource(p2).execute().getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSearchByIdentifier01")).encodedJson().prettyPrint().execute();
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
-		assertEquals(BundleEntrySearchModeEnum.MATCH, actual.getEntries().get(0).getSearchMode().getValueAsEnum());
+		//@formatter:off
+		ca.uhn.fhir.model.dstu2.resource.Bundle actual = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSearchByIdentifier01"))
+				.encodedJson()
+				.prettyPrint()
+				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+				.execute();
+		//@formatter:on
+		
+		assertEquals(1, actual.getEntry().size());
+		assertEquals(ourServerBase + "/Patient/" + p1Id.getIdPart(), actual.getEntry().get(0).getFullUrl());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
+		assertEquals(SearchEntryModeEnum.MATCH, actual.getEntry().get(0).getSearch().getModeElement().getValueAsEnum());
 	}
 
 	@Test
@@ -971,7 +853,8 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
 		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
+				.execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
@@ -1165,6 +1048,33 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	}
 
 	@Test
+	public void testSearchWithTextInexactMatch() throws Exception {
+		Observation obs = new Observation();
+		obs.getCode().setText("THIS_IS_THE_TEXT");
+		obs.getCode().addCoding().setSystem("SYSTEM").setCode("CODE").setDisplay("THIS_IS_THE_DISPLAY");
+		ourClient.create().resource(obs).execute();
+
+		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_TEXT");
+		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_");
+		testSearchReturnsResults("/Observation?code%3Atext=this_is_the_");
+		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_DISPLAY");
+		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_disp");
+	}
+
+	private void testSearchReturnsResults(String search) throws IOException, ClientProtocolException {
+		int matches;
+		HttpGet get = new HttpGet(ourServerBase + search);
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		String resp = IOUtils.toString(response.getEntity().getContent());
+		IOUtils.closeQuietly(response.getEntity().getContent());
+		ourLog.info(resp);
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp);
+		matches = bundle.getTotal();
+
+		assertThat(matches, greaterThan(0));
+	}
+
+	@Test
 	public void testSearchWithMissing() throws Exception {
 		ourLog.info("Starting testSearchWithMissing");
 
@@ -1234,6 +1144,144 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		assertThat("Wanted " + orgMissing + " but found: " + list, list, containsInRelativeOrder(orgMissing));
 	}
 
+	@Test
+	public void testSearchWithMissing2() throws Exception {
+		checkParamMissing(Observation.SP_CODE);
+		checkParamMissing(Observation.SP_CATEGORY);
+		checkParamMissing(Observation.SP_VALUE_STRING);
+		checkParamMissing(Observation.SP_ENCOUNTER);
+		checkParamMissing(Observation.SP_DATE);
+	}
+
+	/**
+	 * See #198
+	 */
+	@Test
+	public void testSortFromResourceProvider() {
+		Patient p;
+		String methodName = "testSortFromResourceProvider";
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Daniel").addFamily("Adams");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Aaron").addFamily("Alexis");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Carol").addFamily("Allen");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Ruth").addFamily("Black");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Brian").addFamily("Brooks");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Susan").addFamily("Clark");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Amy").addFamily("Clark");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Anthony").addFamily("Coleman");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Steven").addFamily("Coleman");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Lisa").addFamily("Coleman");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Ruth").addFamily("Cook");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Betty").addFamily("Davis");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Joshua").addFamily("Diaz");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Brian").addFamily("Gracia");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Stephan").addFamily("Graham");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Sarah").addFamily("Graham");
+		ourClient.create().resource(p).execute();
+
+		//@formatter:off
+		Bundle resp = ourClient
+			.search()
+			.forResource(Patient.class)
+			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", methodName))
+			.sort().ascending(Patient.FAMILY)
+			.sort().ascending(Patient.GIVEN)
+			.limitTo(100)
+			.execute();
+		//@formatter:on
+
+		List<String> names = toNameList(resp);
+
+		ourLog.info(StringUtils.join(names, '\n'));
+
+		//@formatter:off
+		assertThat(names, contains( // this matches in order only
+			"Daniel Adams",
+			"Aaron Alexis",
+			"Carol Allen",
+			"Ruth Black",
+			"Brian Brooks",
+			"Amy Clark",
+			"Susan Clark",
+			"Anthony Coleman",
+			"Lisa Coleman",
+			"Steven Coleman",
+			"Ruth Cook",
+			"Betty Davis",
+			"Joshua Diaz",
+			"Brian Gracia",
+			"Sarah Graham",
+			"Stephan Graham"));
+		//@formatter:om
+			
+	}
+	
 	/**
 	 * Test for issue #60
 	 */
@@ -1498,21 +1546,21 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			// @formatter:off
-			assertThat(
-					resp,
-					stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">", 
-							"<compose>", 
-							"<include>", 
+			assertThat(resp,
+				stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">", 
+					"<expansion>", 
+						"<contains>", 
 							"<system value=\"http://loinc.org\"/>",
-							"<concept>", 
 							"<code value=\"11378-7\"/>",
 							"<display value=\"Systolic blood pressure at First encounter\"/>", 
-							"</concept>",
-							"<concept>",
+						"</contains>",
+						"<contains>", 
+							"<system value=\"http://loinc.org\"/>",
 							"<code value=\"8450-9\"/>", 
 							"<display value=\"Systolic blood pressure--expiration\"/>", 
-							"</concept>"
-							));
+						"</contains>",
+					"</expansion>" 
+						));
 			//@formatter:on
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
@@ -1570,11 +1618,38 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		return list;
 	}
 
+	private List<String> toNameList(Bundle resp) {
+		List<String> names = new ArrayList<String>();
+		for (BundleEntry next : resp.getEntries()) {
+			Patient nextPt = (Patient) next.getResource();
+			String nextStr = nextPt.getNameFirstRep().getGivenAsSingleString() + " " + nextPt.getNameFirstRep().getFamilyAsSingleString();
+			if (isNotBlank(nextStr)) {
+				names.add(nextStr);
+			}
+		}
+		return names;
+	}
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
 		ourAppCtx.stop();
 		ourHttpClient.close();
+	}
+
+	@Test
+	public void testMetadata() throws Exception {
+		HttpGet get = new HttpGet(ourServerBase + "/metadata");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(resp, stringContainsInOrder("THIS IS THE DESC"));
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1600,6 +1675,11 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		JpaSystemProviderDstu2 systemProv = ourAppCtx.getBean(JpaSystemProviderDstu2.class, "mySystemProviderDstu2");
 		restServer.setPlainProviders(systemProv);
+
+		IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle> systemDao = ourAppCtx.getBean(IFhirSystemDao.class);
+		JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(restServer, systemDao);
+		confProvider.setImplementationDescription("THIS IS THE DESC");
+		restServer.setServerConformanceProvider(confProvider);
 
 		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 

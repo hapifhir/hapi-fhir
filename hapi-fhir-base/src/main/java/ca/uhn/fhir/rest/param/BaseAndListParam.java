@@ -33,10 +33,13 @@ public abstract class BaseAndListParam<T extends IQueryParameterOr<?>> implement
 
 	private List<T> myValues=new ArrayList<T>(); 
 	
-	public void addValue(T theValue) {
+	public BaseAndListParam<T> addValue(T theValue) {
 		myValues.add(theValue);
+		return this;
 	}
 	
+	public abstract BaseAndListParam<T> addAnd(T theValue);
+
 	@Override
 	public void setValuesAsQueryTokens(List<QualifiedParamList> theParameters) throws InvalidRequestException {
 		myValues.clear();

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -50,14 +50,14 @@ public class RelatedPerson extends DomainResource {
     /**
      * Identifier for a person within a particular scope.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="A Human identifier for this person", formalDefinition="Identifier for a person within a particular scope." )
     protected List<Identifier> identifier;
 
     /**
      * The patient this person is related to.
      */
-    @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The patient this person is related to", formalDefinition="The patient this person is related to." )
     protected Reference patient;
 
@@ -69,60 +69,60 @@ public class RelatedPerson extends DomainResource {
     /**
      * The nature of the relationship between a patient and the related person.
      */
-    @Child(name = "relationship", type = {CodeableConcept.class}, order=2, min=0, max=1)
+    @Child(name = "relationship", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The nature of the relationship", formalDefinition="The nature of the relationship between a patient and the related person." )
     protected CodeableConcept relationship;
 
     /**
      * A name associated with the person.
      */
-    @Child(name = "name", type = {HumanName.class}, order=3, min=0, max=1)
+    @Child(name = "name", type = {HumanName.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="A name associated with the person", formalDefinition="A name associated with the person." )
     protected HumanName name;
 
     /**
      * A contact detail for the person, e.g. a telephone number or an email address.
      */
-    @Child(name = "telecom", type = {ContactPoint.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "telecom", type = {ContactPoint.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="A contact detail for the person", formalDefinition="A contact detail for the person, e.g. a telephone number or an email address." )
     protected List<ContactPoint> telecom;
 
     /**
      * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      */
-    @Child(name = "gender", type = {CodeType.class}, order=5, min=0, max=1)
+    @Child(name = "gender", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes." )
     protected Enumeration<AdministrativeGender> gender;
 
     /**
      * The date on which the related person was born.
      */
-    @Child(name = "birthDate", type = {DateType.class}, order=6, min=0, max=1)
+    @Child(name = "birthDate", type = {DateType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The date on which the related person was born", formalDefinition="The date on which the related person was born." )
     protected DateType birthDate;
 
     /**
      * Address where the related person can be contacted or visited.
      */
-    @Child(name = "address", type = {Address.class}, order=7, min=0, max=1)
+    @Child(name = "address", type = {Address.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Address where the related person can be contacted or visited", formalDefinition="Address where the related person can be contacted or visited." )
-    protected Address address;
+    protected List<Address> address;
 
     /**
      * Image of the person.
      */
-    @Child(name = "photo", type = {Attachment.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "photo", type = {Attachment.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Image of the person", formalDefinition="Image of the person." )
     protected List<Attachment> photo;
 
     /**
      * The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.
      */
-    @Child(name = "period", type = {Period.class}, order=9, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Period of time that this relationship is considered valid", formalDefinition="The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown." )
     protected Period period;
 
-    private static final long serialVersionUID = 1434295859L;
+    private static final long serialVersionUID = 7777543L;
 
   /*
    * Constructor
@@ -412,24 +412,40 @@ public class RelatedPerson extends DomainResource {
     /**
      * @return {@link #address} (Address where the related person can be contacted or visited.)
      */
-    public Address getAddress() { 
+    public List<Address> getAddress() { 
       if (this.address == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RelatedPerson.address");
-        else if (Configuration.doAutoCreate())
-          this.address = new Address(); // cc
+        this.address = new ArrayList<Address>();
       return this.address;
     }
 
     public boolean hasAddress() { 
-      return this.address != null && !this.address.isEmpty();
+      if (this.address == null)
+        return false;
+      for (Address item : this.address)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #address} (Address where the related person can be contacted or visited.)
+     * @return {@link #address} (Address where the related person can be contacted or visited.)
      */
-    public RelatedPerson setAddress(Address value) { 
-      this.address = value;
+    // syntactic sugar
+    public Address addAddress() { //3
+      Address t = new Address();
+      if (this.address == null)
+        this.address = new ArrayList<Address>();
+      this.address.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public RelatedPerson addAddress(Address t) { //3
+      if (t == null)
+        return this;
+      if (this.address == null)
+        this.address = new ArrayList<Address>();
+      this.address.add(t);
       return this;
     }
 
@@ -529,7 +545,11 @@ public class RelatedPerson extends DomainResource {
         };
         dst.gender = gender == null ? null : gender.copy();
         dst.birthDate = birthDate == null ? null : birthDate.copy();
-        dst.address = address == null ? null : address.copy();
+        if (address != null) {
+          dst.address = new ArrayList<Address>();
+          for (Address i : address)
+            dst.address.add(i.copy());
+        };
         if (photo != null) {
           dst.photo = new ArrayList<Attachment>();
           for (Attachment i : photo)
@@ -592,8 +612,10 @@ public class RelatedPerson extends DomainResource {
   public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
   @SearchParamDefinition(name="address-country", path="RelatedPerson.address.country", description="A country specified in an address", type="string" )
   public static final String SP_ADDRESSCOUNTRY = "address-country";
-  @SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
+  @SearchParamDefinition(name="phonetic", path="RelatedPerson.name", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
+  @SearchParamDefinition(name="phone", path="RelatedPerson.telecom(system=phone)", description="A value in a phone contact", type="token" )
+  public static final String SP_PHONE = "phone";
   @SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part", type="string" )
@@ -604,6 +626,8 @@ public class RelatedPerson extends DomainResource {
   public static final String SP_TELECOM = "telecom";
   @SearchParamDefinition(name="address-city", path="RelatedPerson.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESSCITY = "address-city";
+  @SearchParamDefinition(name="email", path="RelatedPerson.telecom(system=email)", description="A value in an email contact", type="token" )
+  public static final String SP_EMAIL = "email";
 
 }
 

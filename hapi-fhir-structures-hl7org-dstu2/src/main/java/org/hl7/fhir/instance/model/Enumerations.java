@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 import org.hl7.fhir.instance.model.api.*;
@@ -672,6 +672,10 @@ public class Enumerations {
          */
         ERROR, 
         /**
+         * NaN, standing for not a number, is a numeric data type value representing an undefined or unrepresentable value
+         */
+        NAN, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -694,6 +698,8 @@ public class Enumerations {
           return ASTEXT;
         if ("error".equals(codeString))
           return ERROR;
+        if ("NaN".equals(codeString))
+          return NAN;
         throw new Exception("Unknown DataAbsentReason code '"+codeString+"'");
         }
         public String toCode() {
@@ -706,6 +712,7 @@ public class Enumerations {
             case UNSUPPORTED: return "unsupported";
             case ASTEXT: return "astext";
             case ERROR: return "error";
+            case NAN: return "NaN";
             default: return "?";
           }
         }
@@ -719,6 +726,7 @@ public class Enumerations {
             case UNSUPPORTED: return "http://hl7.org/fhir/data-absent-reason";
             case ASTEXT: return "http://hl7.org/fhir/data-absent-reason";
             case ERROR: return "http://hl7.org/fhir/data-absent-reason";
+            case NAN: return "http://hl7.org/fhir/data-absent-reason";
             default: return "?";
           }
         }
@@ -732,6 +740,7 @@ public class Enumerations {
             case UNSUPPORTED: return "The source system wasn't capable of supporting this element";
             case ASTEXT: return "The content of the data is represented in the resource narrative";
             case ERROR: return "Some system or workflow process error means that the information is not available";
+            case NAN: return "NaN, standing for not a number, is a numeric data type value representing an undefined or unrepresentable value";
             default: return "?";
           }
         }
@@ -745,6 +754,7 @@ public class Enumerations {
             case UNSUPPORTED: return "Unsupported";
             case ASTEXT: return "As Text";
             case ERROR: return "Error";
+            case NAN: return "Not a Number";
             default: return "?";
           }
         }
@@ -771,6 +781,8 @@ public class Enumerations {
           return DataAbsentReason.ASTEXT;
         if ("error".equals(codeString))
           return DataAbsentReason.ERROR;
+        if ("NaN".equals(codeString))
+          return DataAbsentReason.NAN;
         throw new IllegalArgumentException("Unknown DataAbsentReason code '"+codeString+"'");
         }
     public String toCode(DataAbsentReason code) {
@@ -790,6 +802,8 @@ public class Enumerations {
         return "astext";
       if (code == DataAbsentReason.ERROR)
         return "error";
+      if (code == DataAbsentReason.NAN)
+        return "NaN";
       return "?";
       }
     }
@@ -1303,7 +1317,7 @@ public class Enumerations {
             case NUMBER: return "Search parameter SHALL be a number (a whole number, or a decimal)";
             case DATE: return "Search parameter is on a date/time. The date format is the standard XML format, though other formats may be supported";
             case STRING: return "Search parameter is a simple string, like a name part. Search is case-insensitive and accent-insensitive. May match just the start of a string. String parameters may contain spaces";
-            case TOKEN: return "Search parameter on a coded element or identifier. May be used to search through the text, displayname, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a '|', depending on the modifier used";
+            case TOKEN: return "Search parameter on a coded element or identifier. May be used to search through the text, displayname, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a \"|\", depending on the modifier used";
             case REFERENCE: return "A reference to another resource";
             case COMPOSITE: return "A composite search parameter that combines a search on two values together";
             case QUANTITY: return "A search parameter that searches on a quantity";

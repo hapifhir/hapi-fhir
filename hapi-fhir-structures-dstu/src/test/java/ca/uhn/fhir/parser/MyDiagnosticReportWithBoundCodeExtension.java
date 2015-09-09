@@ -17,6 +17,8 @@ import ca.uhn.fhir.util.ElementUtil;
 @ResourceDef(name = "DiagnosticReport")
 public class MyDiagnosticReportWithBoundCodeExtension extends DiagnosticReport {
 
+	private static final long serialVersionUID = 1L;
+
 	public static final String SP_IMAGING_STUDY = "ImagingStudy";
 
 	/**

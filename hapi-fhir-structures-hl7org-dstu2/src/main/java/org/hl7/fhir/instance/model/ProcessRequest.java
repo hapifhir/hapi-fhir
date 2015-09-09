@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -152,7 +152,7 @@ public class ProcessRequest extends DomainResource {
         /**
          * A service line number.
          */
-        @Child(name = "sequenceLinkId", type = {IntegerType.class}, order=1, min=1, max=1)
+        @Child(name = "sequenceLinkId", type = {IntegerType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Service instance", formalDefinition="A service line number." )
         protected IntegerType sequenceLinkId;
 
@@ -259,42 +259,42 @@ public class ProcessRequest extends DomainResource {
     /**
      * The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.
      */
-    @Child(name = "action", type = {CodeType.class}, order=0, min=1, max=1)
+    @Child(name = "action", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="cancel | poll | reprocess | status", formalDefinition="The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest." )
     protected Enumeration<ActionList> action;
 
     /**
      * The ProcessRequest Business Identifier.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Business Identifier", formalDefinition="The ProcessRequest Business Identifier." )
     protected List<Identifier> identifier;
 
     /**
      * The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.
      */
-    @Child(name = "ruleset", type = {Coding.class}, order=2, min=0, max=1)
+    @Child(name = "ruleset", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Resource version", formalDefinition="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources." )
     protected Coding ruleset;
 
     /**
      * The style (standard) and version of the original material which was converted into this resource.
      */
-    @Child(name = "originalRuleset", type = {Coding.class}, order=3, min=0, max=1)
+    @Child(name = "originalRuleset", type = {Coding.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Original version", formalDefinition="The style (standard) and version of the original material which was converted into this resource." )
     protected Coding originalRuleset;
 
     /**
      * The date when this resource was created.
      */
-    @Child(name = "created", type = {DateTimeType.class}, order=4, min=0, max=1)
+    @Child(name = "created", type = {DateTimeType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Creation date", formalDefinition="The date when this resource was created." )
     protected DateTimeType created;
 
     /**
      * The organization which is target  of the request.
      */
-    @Child(name = "target", type = {Organization.class}, order=5, min=0, max=1)
+    @Child(name = "target", type = {Organization.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Target of the request", formalDefinition="The organization which is target  of the request." )
     protected Reference target;
 
@@ -306,7 +306,7 @@ public class ProcessRequest extends DomainResource {
     /**
      * The practitioner who is responsible for the action specified in thise request.
      */
-    @Child(name = "provider", type = {Practitioner.class}, order=6, min=0, max=1)
+    @Child(name = "provider", type = {Practitioner.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the action specified in thise request." )
     protected Reference provider;
 
@@ -318,7 +318,7 @@ public class ProcessRequest extends DomainResource {
     /**
      * The organization which is responsible for the action speccified in thise request.
      */
-    @Child(name = "organization", type = {Organization.class}, order=7, min=0, max=1)
+    @Child(name = "organization", type = {Organization.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the action speccified in thise request." )
     protected Reference organization;
 
@@ -330,7 +330,7 @@ public class ProcessRequest extends DomainResource {
     /**
      * Reference of resource which is the target or subject of this action.
      */
-    @Child(name = "request", type = {}, order=8, min=0, max=1)
+    @Child(name = "request", type = {}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Request reference", formalDefinition="Reference of resource which is the target or subject of this action." )
     protected Reference request;
 
@@ -342,7 +342,7 @@ public class ProcessRequest extends DomainResource {
     /**
      * Reference of a prior response to resource which is the target or subject of this action.
      */
-    @Child(name = "response", type = {}, order=9, min=0, max=1)
+    @Child(name = "response", type = {}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Response reference", formalDefinition="Reference of a prior response to resource which is the target or subject of this action." )
     protected Reference response;
 
@@ -354,42 +354,42 @@ public class ProcessRequest extends DomainResource {
     /**
      * If true remove all history excluding audit.
      */
-    @Child(name = "nullify", type = {BooleanType.class}, order=10, min=0, max=1)
+    @Child(name = "nullify", type = {BooleanType.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Nullify", formalDefinition="If true remove all history excluding audit." )
     protected BooleanType nullify;
 
     /**
      * A reference to supply which authenticates the process.
      */
-    @Child(name = "reference", type = {StringType.class}, order=11, min=0, max=1)
+    @Child(name = "reference", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Reference number/string", formalDefinition="A reference to supply which authenticates the process." )
     protected StringType reference;
 
     /**
      * List of top level items to be re-adjudicated, if none specified then the entire submission is re-adjudicated.
      */
-    @Child(name = "item", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "item", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Items to re-adjudicate", formalDefinition="List of top level items to be re-adjudicated, if none specified then the entire submission is re-adjudicated." )
     protected List<ItemsComponent> item;
 
     /**
      * Names of resource types to include.
      */
-    @Child(name = "include", type = {StringType.class}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "include", type = {StringType.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Resource type(s) to include", formalDefinition="Names of resource types to include." )
     protected List<StringType> include;
 
     /**
      * Names of resource types to exclude.
      */
-    @Child(name = "exclude", type = {StringType.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "exclude", type = {StringType.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Resource type(s) to exclude", formalDefinition="Names of resource types to exclude." )
     protected List<StringType> exclude;
 
     /**
      * A period of time during which the fulfilling resources would have been created.
      */
-    @Child(name = "period", type = {Period.class}, order=15, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Period", formalDefinition="A period of time during which the fulfilling resources would have been created." )
     protected Period period;
 

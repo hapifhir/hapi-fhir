@@ -59,18 +59,16 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class ResourceParameter implements IParameter {
 
-	private boolean myBinary;
 	private Mode myMode;
 	private Class<? extends IBaseResource> myResourceType;
 
 	public ResourceParameter(Class<? extends IResource> theParameterType, Object theProvider, Mode theMode) {
 		Validate.notNull(theParameterType, "theParameterType can not be null");
 		Validate.notNull(theMode, "theMode can not be null");
-		
+
 		myResourceType = theParameterType;
-		myBinary = IBaseBinary.class.isAssignableFrom(theParameterType);
 		myMode = theMode;
-		
+
 		Class<? extends IBaseResource> providerResourceType = null;
 		if (theProvider instanceof IResourceProvider) {
 			providerResourceType = ((IResourceProvider) theProvider).getResourceType();
@@ -85,7 +83,7 @@ public class ResourceParameter implements IParameter {
 	public Mode getMode() {
 		return myMode;
 	}
-	
+
 	public Class<? extends IBaseResource> getResourceType() {
 		return myResourceType;
 	}
@@ -96,13 +94,15 @@ public class ResourceParameter implements IParameter {
 	}
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource)
+			throws InternalErrorException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding)
+			throws InternalErrorException, InvalidRequestException {
 		switch (myMode) {
 		case BODY:
 			try {
@@ -116,18 +116,8 @@ public class ResourceParameter implements IParameter {
 		case RESOURCE:
 			break;
 		}
-		
-		if (myBinary) {
-			FhirContext ctx = theRequest.getServer().getFhirContext();
-			String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
-			IBaseBinary binary = (IBaseBinary) ctx.getResourceDefinition("Binary").newInstance();
-			binary.setContentType(ct);
-			binary.setContent(theRequestContents);
-			
-			return binary;
-		}
-		
-		IBaseResource retVal = loadResourceFromRequest(theRequest, theRequestContents, theMethodBinding, myResourceType);
+
+		IBaseResource retVal = parseResourceFromRequest(theRequest, theMethodBinding, myResourceType);
 
 		return retVal;
 	}
@@ -155,18 +145,18 @@ public class ResourceParameter implements IParameter {
 		return charset;
 	}
 
-	public static IBaseResource loadResourceFromRequest(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
+	public static IBaseResource loadResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
 		FhirContext ctx = theRequest.getServer().getFhirContext();
 
 		final Charset charset = determineRequestCharset(theRequest);
-		Reader requestReader = createRequestReader(theRequestContents, charset);
-		
+		Reader requestReader = createRequestReader(theRequest.getRawRequest(), charset);
+
 		EncodingEnum encoding = RestfulServerUtils.determineRequestEncodingNoDefault(theRequest);
 		if (encoding == null) {
 			String ctValue = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
 			if (ctValue != null) {
 				if (ctValue.startsWith("application/x-www-form-urlencoded")) {
-					String msg = theRequest.getServer().getFhirContext().getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getResourceOrSystemOperationType());
+					String msg = theRequest.getServer().getFhirContext().getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getRestOperationType());
 					throw new InvalidRequestException(msg);
 				}
 			}
@@ -183,17 +173,17 @@ public class ResourceParameter implements IParameter {
 				}
 				encoding = MethodUtil.detectEncodingNoDefault(body);
 				if (encoding == null) {
-					String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", theMethodBinding.getResourceOrSystemOperationType());
+					String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", theMethodBinding.getRestOperationType());
 					throw new InvalidRequestException(msg);
 				} else {
-					requestReader = new InputStreamReader(new ByteArrayInputStream(theRequestContents), charset);
+					requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.getRawRequest()), charset);
 				}
 			} else {
-				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getResourceOrSystemOperationType());
+				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getRestOperationType());
 				throw new InvalidRequestException(msg);
 			}
-		} 
-		
+		}
+
 		IParser parser = encoding.newParser(ctx);
 
 		IBaseResource retVal;
@@ -214,13 +204,29 @@ public class ResourceParameter implements IParameter {
 				MethodUtil.parseTagValue(tagList, nextTagComplete);
 			}
 			if (tagList.isEmpty() == false) {
-				((IResource)retVal).getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
+				((IResource) retVal).getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
 			}
 		}
 		return retVal;
 	}
 
-	public enum Mode{
+	public static IBaseResource parseResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
+		IBaseResource retVal;
+		if (IBaseBinary.class.isAssignableFrom(theResourceType)) {
+			FhirContext ctx = theRequest.getServer().getFhirContext();
+			String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
+			IBaseBinary binary = (IBaseBinary) ctx.getResourceDefinition("Binary").newInstance();
+			binary.setContentType(ct);
+			binary.setContent(theRequest.getRawRequest());
+
+			retVal = binary;
+		} else {
+			retVal = loadResourceFromRequest(theRequest, theMethodBinding, theResourceType);
+		}
+		return retVal;
+	}
+
+	public enum Mode {
 		BODY, ENCODING, RESOURCE
 	}
 

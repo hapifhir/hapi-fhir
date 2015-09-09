@@ -39,8 +39,10 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
 
 /**
@@ -74,6 +76,8 @@ public class InterceptorTest {
 		order.verify(myInterceptor2, times(1)).incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class));
 		order.verify(myInterceptor1, times(1)).incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
 		order.verify(myInterceptor2, times(1)).incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
+		order.verify(myInterceptor1, times(1)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
+		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
 		
 		order.verify(myInterceptor2, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
 		order.verify(myInterceptor1, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class));

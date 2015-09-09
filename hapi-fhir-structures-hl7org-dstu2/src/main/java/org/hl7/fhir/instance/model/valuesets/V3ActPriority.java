@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3ActPriority {
@@ -159,14 +159,14 @@ public enum V3ActPriority {
         public String getDefinition() {
           switch (this) {
             case A: return "As soon as possible, next highest priority after stat.";
-            case CR: return "Filler should contact the placer as soon as results are available, even for preliminary results.  (Was 'C' in HL7 verion 2.3's reporting priority.)";
-            case CS: return "Filler should contact the placer (or target) to schedule the service.  (Was 'C' in HL7 version 2.3's TQ-priority component.)";
-            case CSP: return "Filler should contact the placer to schedule the service.  (Was 'C' in HL7 version 2.3's TQ-priority component.)";
-            case CSR: return "Filler should contact the service recipient (target) to schedule the service.  (Was 'C' in HL7 version 2.3's TQ-priority component.)";
+            case CR: return "Filler should contact the placer as soon as results are available, even for preliminary results.  (Was \"C\" in HL7 verion 2.3's reporting priority.)";
+            case CS: return "Filler should contact the placer (or target) to schedule the service.  (Was \"C\" in HL7 version 2.3's TQ-priority component.)";
+            case CSP: return "Filler should contact the placer to schedule the service.  (Was \"C\" in HL7 version 2.3's TQ-priority component.)";
+            case CSR: return "Filler should contact the service recipient (target) to schedule the service.  (Was \"C\" in HL7 version 2.3's TQ-priority component.)";
             case EL: return "Beneficial to the patient but not essential for survival.";
             case EM: return "An unforeseen combination of circumstances or the resulting state that calls for immediate action.";
             case P: return "Used to indicate that a service is to be performed prior to a scheduled surgery.  When ordering a service and using the pre-op priority, a check is done to see the amount of time that must be allowed for performance of the service.  When the order is placed, a message can be generated indicating the time needed for the service so that it is not ordered in conflict with a scheduled operation.";
-            case PRN: return "An 'as needed' order should be accompanied by a description of what constitutes a need. This description is represented by an observation service predicate as a precondition.";
+            case PRN: return "An \"as needed\" order should be accompanied by a description of what constitutes a need. This description is represented by an observation service predicate as a precondition.";
             case R: return "Routine service, do at usual work hours.";
             case RR: return "A report should be prepared and sent as quickly as possible.";
             case S: return "With highest priority (e.g., emergency).";

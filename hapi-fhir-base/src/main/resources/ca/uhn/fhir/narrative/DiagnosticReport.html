@@ -13,9 +13,18 @@
 		display value on the first coding, and if that's missing too show a default "Untitled"
 		value 
 		*/-->
-		<th:block th:if="${not resource.name.textElement.empty}" th:text="${resource.name.textElement.value}"/>
-		<th:block th:if="    ${resource.name.textElement.empty} and ${not resource.name.codingFirstRep.displayElement.empty}" th:text="${resource.name.codingFirstRep.display}"/>
-		<th:block th:if=    "${resource.name.textElement.empty} and     ${resource.name.codingFirstRep.displayElement.empty}" th:text="Untitled Diagnostic Report"/>
+		<th:block th:switch="${fhirVersion}">
+			<th:block th:case="'DSTU1'">
+				<th:block th:if="${not resource.name.textElement.empty}" th:text="${resource.name.textElement.value}"/>
+				<th:block th:if="    ${resource.name.textElement.empty} and ${not resource.name.codingFirstRep.displayElement.empty}" th:text="${resource.name.codingFirstRep.display}"/>
+				<th:block th:if=    "${resource.name.textElement.empty} and     ${resource.name.codingFirstRep.displayElement.empty}" th:text="Untitled Diagnostic Report"/>
+			</th:block>
+			<th:block th:case="*">
+				<th:block th:if="${not resource.code.textElement.empty}" th:text="${resource.code.textElement.value}"/>
+				<th:block th:if="    ${resource.code.textElement.empty} and ${not resource.code.codingFirstRep.displayElement.empty}" th:text="${resource.code.codingFirstRep.display}"/>
+				<th:block th:if=    "${resource.code.textElement.empty} and     ${resource.code.codingFirstRep.displayElement.empty}" th:text="Untitled Diagnostic Report"/>
+			</th:block>
+		</th:block>
 		<!--/*--> Complete Blood Count <!--*/-->
 	</div>
 	
@@ -56,7 +65,7 @@
 								<th:block th:if="${result.resource.name.textElement.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${not result.resource.name.coding[0].displayElement.empty}" th:text="${result.resource.name.coding[0].display}"/>
 								<th:block th:if="${result.resource.name.textElement.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${result.resource.name.coding[0].displayElement.empty}" th:text="'?'"/>
 							</th:block>
-							<th:block th:case="'*'">
+							<th:block th:case="*">
 								<th:block th:if="${not result.resource.code.textElement.empty}" th:text="${result.resource.code.textElement.value}"/>
 								<th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${not result.resource.code.coding[0].displayElement.empty}" th:text="${result.resource.code.coding[0].display}"/>
 								<th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${result.resource.code.coding[0].displayElement.empty}" th:text="'?'"/>

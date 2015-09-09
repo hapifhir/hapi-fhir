@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
@@ -1546,7 +1547,17 @@ public class XmlUtil {
 
 	private static XMLInputFactory getOrCreateInputFactory() throws FactoryConfigurationError {
 		if (ourInputFactory == null) {
-			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+
+			try {
+				// Detect if we're running with the Android lib, and force repackaged Woodstox to be used
+				Class.forName("ca.uhn.fhir.repackage.javax.xml.stream.XMLInputFactory");
+				System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
+			} catch (ClassNotFoundException e) {
+				// ok
+			}
+			
+			XMLInputFactory inputFactory;
+			inputFactory = XMLInputFactory.newInstance();
 
 			if (!ourHaveLoggedStaxImplementation) {
 				logStaxImplementation(inputFactory.getClass());
@@ -1564,7 +1575,11 @@ public class XmlUtil {
 				if (inputFactory instanceof com.ctc.wstx.stax.WstxInputFactory) {
 					// inputFactory.setProperty(WstxInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
 					inputFactory.setProperty(WstxInputProperties.P_UNDECLARED_ENTITY_RESOLVER, XML_RESOLVER);
-					inputFactory.setProperty(WstxInputProperties.P_MAX_ATTRIBUTE_SIZE, "100000000");
+					try {
+						inputFactory.setProperty(WstxInputProperties.P_MAX_ATTRIBUTE_SIZE, "100000000");
+					} catch (IllegalArgumentException e) {
+						// ignore
+					}
 				}
 			} catch (ClassNotFoundException e) {
 				ourLog.debug("WstxOutputFactory (Woodstox) not found on classpath");
@@ -1576,6 +1591,15 @@ public class XmlUtil {
 
 	private static XMLOutputFactory getOrCreateOutputFactory() throws FactoryConfigurationError {
 		if (ourOutputFactory == null) {
+
+			try {
+				// Detect if we're running with the Android lib, and force repackaged Woodstox to be used
+				Class.forName("ca.uhn.fhir.repackage.javax.xml.stream.XMLOutputFactory");
+				System.setProperty("javax.xml.stream.XMLOutputFactory", "com.ctc.wstx.stax.WstxOutputFactory");
+			} catch (ClassNotFoundException e) {
+				// ok
+			}
+
 			XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
 
 			if (!ourHaveLoggedStaxImplementation) {
@@ -1668,8 +1692,8 @@ public class XmlUtil {
 		}
 	}
 
-	public static void main(String[] args) {
-		System.out.println(Character.toString((char) 167));
+	public static void main(String[] args) throws FactoryConfigurationError, XMLStreamException {
+		createXmlWriter(new StringWriter());
 	}
 
 	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
@@ -1689,7 +1713,7 @@ public class XmlUtil {
 
 		@Override
 		public Writer createEscapingWriterFor(OutputStream theOut, String theEnc) throws UnsupportedEncodingException {
-			return createEscapingWriterFor(new OutputStreamWriter(theOut), theEnc);
+			return createEscapingWriterFor(new OutputStreamWriter(theOut, theEnc), theEnc);
 		}
 
 		@Override

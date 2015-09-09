@@ -5,7 +5,7 @@
 #macro ( childVars $childElements )
 #foreach ( $child in $childElements )
 #if (${child.resourceRef} || ${child.hasMultipleTypes}) 
-	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, type={
+	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, summary=${child.summary}, modifier=${child.modifier}, type={
 #foreach ($nextType in ${child.referenceTypesForMultiple})
 #if ( ${child.resourceRef} && ${nextType} != "IResource" )
 		${nextType}.class#{if}($foreach.hasNext), #{end}
@@ -15,9 +15,9 @@
 #end
 	})
 #elseif ($!child.block)
-	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})	
+	@Child(name="${child.elementNameSimplified}", order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, summary=${child.summary}, modifier=${child.modifier})
 #else
-	@Child(name="${child.elementNameSimplified}", type=${child.annotationType}.class, order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation})	
+	@Child(name="${child.elementNameSimplified}", type=${child.annotationType}.class, order=${foreach.index}, min=${child.cardMin}, max=${child.cardMaxForChildAnnotation}, summary=${child.summary}, modifier=${child.modifier})	
 #end
 #if ( $child.hasExtensionUrl )
 	@Extension(url = "${child.extensionUrl}", isModifier=${child.extensionModifier}, definedLocally=${child.extensionLocal})
@@ -338,6 +338,17 @@
 	
 #childVars( $blockChild.children )
 #childAccessors( $blockChild.children )
+
+#if ( ${className} == "OperationOutcome" && ${blockChild.className} == "Issue" )
+	/**
+	 * This method actually populated {@link ${hash}setDetails(String) OperationOutcome.details} but
+	 * it is provided for consistency with DSTU2+ 
+	 */
+	@Override
+	public BaseIssue setDiagnostics(String theString) {
+		return setDetails(theString);
+	}
+#end
 
 	}
 

@@ -1,10 +1,14 @@
 package ca.uhn.fhir.testmindeps;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.validation.FhirValidator;
 
 public class ValidatorTest {
@@ -15,6 +19,8 @@ public class ValidatorTest {
 		FhirContext ctx = new FhirContext();
 		FhirValidator val = ctx.newValidator();
 
+		val.validateWithResult(new Patient());
+		
 		// Phloc is not onthe classpath
 		assertTrue(val.isValidateAgainstStandardSchema());
 		assertFalse(val.isValidateAgainstStandardSchematron());

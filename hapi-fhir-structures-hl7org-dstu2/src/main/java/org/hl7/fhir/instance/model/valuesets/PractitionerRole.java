@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum PractitionerRole {
@@ -106,10 +106,10 @@ public enum PractitionerRole {
         }
         public String getDisplay() {
           switch (this) {
-            case DOCTOR: return "doctor";
-            case NURSE: return "nurse";
-            case PHARMACIST: return "pharmacist";
-            case RESEARCHER: return "researcher";
+            case DOCTOR: return "Doctor";
+            case NURSE: return "Nurse";
+            case PHARMACIST: return "Pharmacist";
+            case RESEARCHER: return "Researcher";
             case TEACHER: return "Teacher/educator";
             case ICT: return "ICT professional";
             default: return "?";

@@ -27,9 +27,10 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 
 import org.hl7.fhir.instance.model.ValueSet;
+
 public interface ValueSetExpander {
   public class ETooCostly extends Exception {
 
@@ -45,33 +46,39 @@ public interface ValueSetExpander {
    * 
    * @author Grahame
    */
-	 public class ValueSetExpansionOutcome {
-	   private ValueSet valueset;
-	   private ValueSetChecker service;
-	   private String error;
-	   public ValueSetExpansionOutcome(ValueSet valueset, String error) {
-	     super();
-	     this.valueset = valueset;
-	     this.service = null;
-	     this.error = error;
-	   }
-	   public ValueSetExpansionOutcome(ValueSetChecker service, String error) {
-	     super();
-	     this.valueset = null;
-	     this.service = service;
-       this.error = error;
-	   }
-	   public ValueSetExpansionOutcome(String error) {
-       this.valueset = null;
-       this.service = null;
-       this.error = error;
+  public class ValueSetExpansionOutcome {
+    private ValueSet valueset;
+    private ValueSetChecker service;
+    private String error;
+    public ValueSetExpansionOutcome(ValueSet valueset) {
+      super();
+      this.valueset = valueset;
+      this.service = null;
+      this.error = null;
     }
-	   public ValueSet getValueset() {
-	     return valueset;
-	   }
-	   public ValueSetChecker getService() {
-	     return service;
-	   }
+    public ValueSetExpansionOutcome(ValueSet valueset, String error) {
+      super();
+      this.valueset = valueset;
+      this.service = null;
+      this.error = error;
+    }
+    public ValueSetExpansionOutcome(ValueSetChecker service, String error) {
+      super();
+      this.valueset = null;
+      this.service = service;
+      this.error = error;
+    }
+    public ValueSetExpansionOutcome(String error) {
+      this.valueset = null;
+      this.service = null;
+      this.error = error;
+    }
+    public ValueSet getValueset() {
+      return valueset;
+    }
+    public ValueSetChecker getService() {
+      return service;
+    }
     public String getError() {
       return error;
     }
@@ -79,5 +86,5 @@ public interface ValueSetExpander {
 
   }
 
-  public ValueSetExpansionOutcome expand(ValueSet source) throws ETooCostly;
+  public ValueSetExpansionOutcome expand(ValueSet source) throws ETooCostly, Exception;
 }

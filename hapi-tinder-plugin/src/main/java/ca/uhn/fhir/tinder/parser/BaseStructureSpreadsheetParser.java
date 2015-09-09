@@ -37,14 +37,16 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseStructureSpreadsheetParser.class);
-	private int myColBinding;
-	private int myColCard;
-	private int myColDefinition;
-	private int myColName;
-	private int myColRequirements;
-	private int myColShortName;
-	private int myColType;
-	private int myColV2Mapping;
+	private int myColBinding = -1;
+	private int myColModifier = -1;
+	private int myColSummary = -1;
+	private int myColCard = -1;
+	private int myColDefinition =-1;
+	private int myColName=-1;
+	private int myColRequirements=-1;
+	private int myColShortName=-1;
+	private int myColType=-1;
+	private int myColV2Mapping=-1;
 
 	public void parse() throws Exception {
 		int index = 0;
@@ -134,6 +136,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				}
 
 				parseBasicElements(nextRow, elem, type);
+				postProcess(elem);
 
 				elements.put(elem.getName(), elem);
 				BaseElement parent = elements.get(elem.getElementParentName());
@@ -153,6 +156,8 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 
 			}
 
+			postProcess(resource);
+			
 			for (SearchParameter nextParam : resource.getSearchParameters()) {
 				if (nextParam.getType().equals("reference")) {
 					String path = nextParam.getPath();
@@ -273,7 +278,10 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 						 * Paths have changed in DSTU2
 						 */
 						for (SearchParameter nextParam : theResource.getSearchParameters()) {
-							if (nextPart.equals("value[x]") && nextParam.getName().startsWith("value-")) {
+							if (nextPart.equals("value[x]") && (nextParam.getName().startsWith("value-"))) {
+								part.add(nextParam);
+							}
+							if (nextPart.equals("component-value[x]") && (nextParam.getName().startsWith("component-value-"))) {
 								part.add(nextParam);
 							}
 						}
@@ -316,24 +324,53 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			if (nextName == null) {
 				continue;
 			}
-			nextName = nextName.toLowerCase().trim().replace(".", "");
+			nextName = nextName.toLowerCase().trim().replace(".", "").replace(" ", "");
 			if ("element".equals(nextName)) {
 				myColName = i;
+			} else if ("ismodifier".equals(nextName)) {
+				myColModifier = i;
+			} else if ("summary".equals(nextName)) {
+				myColSummary = i;
 			} else if ("card".equals(nextName)) {
 				myColCard = i;
 			} else if ("type".equals(nextName)) {
 				myColType = i;
 			} else if ("binding".equals(nextName)) {
 				myColBinding = i;
-			} else if ("short name".equals(nextName)) {
+			} else if ("shortname".equals(nextName)) {
 				myColShortName = i;
 			} else if ("definition".equals(nextName)) {
 				myColDefinition = i;
 			} else if ("requirements".equals(nextName)) {
 				myColRequirements = i;
-			} else if ("v2 mapping".equals(nextName)) {
+			} else if ("v2mapping".equals(nextName)) {
 				myColV2Mapping = i;
 			}
+		}
+		
+		if (myColName == -1) {
+			throw new IllegalArgumentException("Unable to determine column: name");
+		}
+		if (myColModifier == -1) {
+			throw new IllegalArgumentException("Unable to determine column: modifier");
+		}
+		if (myColCard == -1) {
+			throw new IllegalArgumentException("Unable to determine column: card");
+		}
+		if (myColType == -1) {
+			throw new IllegalArgumentException("Unable to determine column: type");
+		}
+		if (myColBinding == -1) {
+			throw new IllegalArgumentException("Unable to determine column: binding");
+		}
+		if (myColDefinition == -1) {
+			throw new IllegalArgumentException("Unable to determine column: definition");
+		}
+		if (myColRequirements == -1) {
+			throw new IllegalArgumentException("Unable to determine column: requirements");
+		}
+		if (myColV2Mapping == -1) {
+			throw new IllegalArgumentException("Unable to determine column: v2 mapping");
 		}
 	}
 
@@ -357,6 +394,16 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 		theTarget.setDefinition(cellValue(theRowXml, myColDefinition));
 		theTarget.setRequirement(cellValue(theRowXml, myColRequirements));
 		theTarget.setV2Mapping(cellValue(theRowXml, myColV2Mapping));
+		theTarget.setSummary(cellValue(theRowXml,myColSummary));
+		theTarget.setModifier(cellValue(theRowXml,myColModifier));
+		
+	}
+
+	/**
+	 * Subclasses may override
+	 */
+	protected void postProcess(BaseElement theTarget) {
+		// nothing
 	}
 
 }

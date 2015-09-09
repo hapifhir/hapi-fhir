@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -106,8 +108,6 @@ public abstract class BaseQueryParameter implements IParameter {
 			}
 		} else {
 			List<QualifiedParamList> value = encode(theContext, theSourceClientArgument);
-			ArrayList<String> paramValues = new ArrayList<String>(value.size());
-			String qualifier = null;
 
 			for (QualifiedParamList nextParamEntry : value) {
 				StringBuilder b = new StringBuilder();
@@ -115,16 +115,20 @@ public abstract class BaseQueryParameter implements IParameter {
 					if (b.length() > 0) {
 						b.append(",");
 					}
-					b.append(str.replace(",", "\\,"));
+					b.append(str);
 				}
-				paramValues.add(b.toString());
 
-				if (StringUtils.isBlank(qualifier)) {
-					qualifier = nextParamEntry.getQualifier();
+				String qualifier = nextParamEntry.getQualifier();
+				String paramName = isNotBlank(qualifier) ? getName() + qualifier : getName();
+				List<String> paramValues = theTargetQueryArguments.get(paramName);
+				if (paramValues == null) {
+					paramValues = new ArrayList<String>(value.size());
+					theTargetQueryArguments.put(paramName, paramValues);
 				}
+
+				paramValues.add(b.toString());
 			}
 
-			theTargetQueryArguments.put(getName() + StringUtils.defaultString(qualifier), paramValues);
 		}
 	}
 
@@ -144,7 +148,7 @@ public abstract class BaseQueryParameter implements IParameter {
 
 		if (paramList.isEmpty()) {
 
-			ourLog.debug("No value for parameter '{}' - Qualified names {} and qualifier whitelist {}", new Object[] { getName(), qualified, getQualifierWhitelist() } );
+			ourLog.debug("No value for parameter '{}' - Qualified names {} and qualifier whitelist {}", new Object[] { getName(), qualified, getQualifierWhitelist() });
 
 			if (handlesMissing()) {
 				return parse(theRequest.getServer().getFhirContext(), paramList);

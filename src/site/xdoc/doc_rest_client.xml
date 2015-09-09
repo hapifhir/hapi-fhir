@@ -223,6 +223,33 @@
 					<param name="file"
 						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
+
+				<h4>Search - Subsetting (_summary and _elements)</h4>
+				<p>
+					Sometimes you may want to only ask the server to include some parts of returned
+					resources (instead of the whole resource). Typically this is for performance or
+					optimization reasons, but there may also be privacy reasons for doing this.
+				</p>
+				<p>
+					To request that the server return only "summary" elements (those elements
+					defined in the specification with the "Σ" flag), you can use the
+					<code>summaryMode(SummaryEnum)</code> qualifier: 
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchSubsetSummary" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+				<p>
+					To request that the server return only elements from a custom list
+					provided by the client, you can use the <code>elementsSubset(String...)</code>
+					qualifier:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchSubsetElements" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
 				
 			</subsection>			
 

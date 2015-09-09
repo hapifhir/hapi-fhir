@@ -36,13 +36,12 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -55,10 +54,10 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 
-	private Class<? extends IBaseResource> myType;
 	private Integer myIdParamIndex;
-	private Integer myVersionIdParamIndex;
 	private String myResourceName;
+	private Class<? extends IBaseResource> myType;
+	private Integer myVersionIdParamIndex;
 
 	public GetTagsMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider, GetTags theAnnotation) {
 		super(theMethod, theConetxt, theProvider);
@@ -68,7 +67,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		} else {
 			myType = theAnnotation.type();
 		}
-		
+
 		if (!Modifier.isInterface(myType.getModifiers())) {
 			myResourceName = theConetxt.getResourceDefinition(myType).getName();
 		}
@@ -77,20 +76,9 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		myVersionIdParamIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 
 		if (myIdParamIndex != null && myType.equals(IResource.class)) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' does not specify a resource type, but has an @" + IdParam.class.getSimpleName() + " parameter. Please specity a resource type in the @" + GetTags.class.getSimpleName() + " annotation");
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' does not specify a resource type, but has an @" + IdParam.class.getSimpleName()
+					+ " parameter. Please specity a resource type in the @" + GetTags.class.getSimpleName() + " annotation");
 		}
-	}
-
-	@Override
-	public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
-		if (theResponseStatusCode == Constants.STATUS_HTTP_200_OK) {
-			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theResponseStatusCode);
-			TagList retVal = parser.parseTagList(theResponseReader);
-			return retVal;
-		} else {
-			throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
-		}
-
 	}
 
 	@Override
@@ -99,13 +87,33 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 	}
 
 	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return null;
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.GET_TAGS;
 	}
 
 	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return null;
+	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+		if (theRequest.getRequestType() != RequestTypeEnum.GET) {
+			return false;
+		}
+		if (!Constants.PARAM_TAGS.equals(theRequest.getOperation())) {
+			return false;
+		}
+		if (myResourceName == null) {
+			if (getResourceName() != null) {
+				return false;
+			}
+		} else if (!myResourceName.equals(theRequest.getResourceName())) {
+			return false;
+
+		}
+		if ((myIdParamIndex != null) != (theRequest.getId() != null)) {
+			return false;
+		}
+		// if ((myVersionIdParamIndex != null) != (theRequest.getVersionId() != null)) {
+		// return false;
+		// }
+		return true;
 	}
 
 	@Override
@@ -125,7 +133,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 			if (id != null) {
 				if (versionId != null) {
 					retVal = new HttpGetClientInvocation(getResourceName(), id.getIdPart(), Constants.PARAM_HISTORY, versionId.getValue(), Constants.PARAM_TAGS);
-				} else if (id.hasVersionIdPart()){
+				} else if (id.hasVersionIdPart()) {
 					retVal = new HttpGetClientInvocation(getResourceName(), id.getIdPart(), Constants.PARAM_HISTORY, id.getVersionIdPart(), Constants.PARAM_TAGS);
 				} else {
 					retVal = new HttpGetClientInvocation(getResourceName(), id.getIdPart(), Constants.PARAM_TAGS);
@@ -148,6 +156,18 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 	}
 
 	@Override
+	public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+		if (theResponseStatusCode == Constants.STATUS_HTTP_200_OK) {
+			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theResponseStatusCode);
+			TagList retVal = parser.parseTagList(theResponseReader);
+			return retVal;
+		} else {
+			throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
+		}
+
+	}
+
+	@Override
 	public void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 		Object[] params = createParametersForServerRequest(theRequest, null);
 
@@ -158,7 +178,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 			params[myVersionIdParamIndex] = theRequest.getId();
 		}
 
-		TagList resp = (TagList) invokeServerMethod(params);
+		TagList resp = (TagList) invokeServerMethod(theServer, theRequest, params);
 
 		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 			IServerInterceptor next = theServer.getInterceptors().get(i);
@@ -167,13 +187,13 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 				return;
 			}
 		}
-		
+
 		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
 
 		HttpServletResponse response = theRequest.getServletResponse();
 		response.setContentType(responseEncoding.getResourceContentType());
 		response.setStatus(Constants.STATUS_HTTP_200_OK);
-		response.setCharacterEncoding(Constants.CHARSETNAME_UTF_8);
+		response.setCharacterEncoding(Constants.CHARSET_NAME_UTF8);
 
 		theServer.addHeadersToResponse(response);
 
@@ -185,36 +205,6 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		} finally {
 			writer.close();
 		}
-	}
-
-	@Override
-	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		if (theRequest.getRequestType()!=RequestTypeEnum.GET) {
-			return false;
-		}
-		if (!Constants.PARAM_TAGS.equals(theRequest.getOperation())) {
-			return false;
-		}
-		if (myResourceName == null) {
-			if (getResourceName() != null) {
-				return false;
-			}
-		} else if (!myResourceName.equals(theRequest.getResourceName())) {
-			return false;
-
-		}
-		if ((myIdParamIndex != null) != (theRequest.getId() != null)) {
-			return false;
-		}
-//		if ((myVersionIdParamIndex != null) != (theRequest.getVersionId() != null)) {
-//			return false;
-//		}
-		return true;
-	}
-
-	@Override
-	public OtherOperationTypeEnum getOtherOperationType() {
-		return OtherOperationTypeEnum.GET_TAGS;
 	}
 
 }

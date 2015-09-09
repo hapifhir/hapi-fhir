@@ -29,13 +29,13 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum ResourceValidationMode {
 
         /**
-         * The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not validate any uniqueness constraints)
+         * The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not violate any uniqueness constraints)
          */
         CREATE, 
         /**
@@ -74,7 +74,7 @@ public enum ResourceValidationMode {
         }
         public String getDefinition() {
           switch (this) {
-            case CREATE: return "The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not validate any uniqueness constraints)";
+            case CREATE: return "The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not violate any uniqueness constraints)";
             case UPDATE: return "The server checks the content, and then checks that it would accept it as an update against the nominated specific resource (e.g. that there are no changes to immutable fields the server does not allow to change, and checking version integrity if appropriate)";
             case DELETE: return "The server ignores the content, and checks that the nominated resource is allowed to be deleted (e.g. checking referential integrity rules)";
             default: return "?";

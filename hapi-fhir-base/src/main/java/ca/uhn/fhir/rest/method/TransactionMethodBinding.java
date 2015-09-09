@@ -19,8 +19,7 @@ package ca.uhn.fhir.rest.method;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
@@ -35,17 +34,17 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.TransactionParameter;
 import ca.uhn.fhir.rest.param.TransactionParameter.ParamStyle;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -77,8 +76,8 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return null;
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.TRANSACTION;
 	}
 
 	@Override
@@ -89,11 +88,6 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	@Override
 	public ReturnTypeEnum getReturnType() {
 		return ReturnTypeEnum.BUNDLE;
-	}
-
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return RestfulOperationSystemEnum.TRANSACTION;
 	}
 
 	@Override
@@ -125,7 +119,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public Object invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 
 		/*
 		 * The design of HAPI's transaction method for DSTU1 support assumed that a transaction was just an update on a
@@ -134,7 +128,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		 */
 		if (myTransactionParamStyle == ParamStyle.RESOURCE_BUNDLE) {
 			// This is the DSTU2 style
-			Object response = invokeServerMethod(theMethodParams);
+			Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 			return response;
 		}
 
@@ -152,7 +146,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		// Call the server implementation method
-		Object response = invokeServerMethod(theMethodParams);
+		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
 
 		/*

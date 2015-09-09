@@ -15,6 +15,8 @@ import ca.uhn.fhir.model.primitive.StringDt;
 @ResourceDef()
 public class MyPatient extends Patient {
 
+	private static final long serialVersionUID = 1L;
+
 	@Child(name = "importantDates", max = Child.MAX_UNLIMITED)
 	@Extension(url = "http://example.com/dontuse#importantDates", definedLocally = false, isModifier = true)
 	@Description(shortDefinition = "Some dates of note for the patient")

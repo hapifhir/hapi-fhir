@@ -27,11 +27,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -72,8 +72,8 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
-		IBaseResource conf = (IBaseResource) invokeServerMethod(theMethodParams);
+	public IBundleProvider invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
+		IBaseResource conf = (IBaseResource) invokeServerMethod(theServer, theRequest, theMethodParams);
 		return new SimpleBundleProvider(conf);
 	}
 
@@ -91,18 +91,8 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return null;
-	}
-
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return null;
-	}
-
-	@Override
-	public OtherOperationTypeEnum getOtherOperationType() {
-		return OtherOperationTypeEnum.METADATA;
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.METADATA;
 	}
 
 	@Override

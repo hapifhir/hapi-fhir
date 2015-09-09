@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import net.sourceforge.cobertura.CoverageIgnore;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -26,6 +28,13 @@ public class DateOrListParam  extends BaseOrListParam<DateParam> {
 	@Override
 	DateParam newInstance() {
 		return new DateParam();
+	}
+	
+	@CoverageIgnore
+	@Override
+	public DateOrListParam addOr(DateParam theParameter) {
+		add(theParameter);
+		return this;
 	}
 
 }

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3ActExposureLevelCode {
@@ -81,7 +81,7 @@ public enum V3ActExposureLevelCode {
         }
         public String getDefinition() {
           switch (this) {
-            case _ACTEXPOSURELEVELCODE: return "A qualitative measure of the degree of exposure to the causative agent.  This includes concepts such as 'low', 'medium' and 'high'.  This quantifies how the quantity that was available to be administered to the target differs from typical or background levels of the substance.";
+            case _ACTEXPOSURELEVELCODE: return "A qualitative measure of the degree of exposure to the causative agent.  This includes concepts such as \"low\", \"medium\" and \"high\".  This quantifies how the quantity that was available to be administered to the target differs from typical or background levels of the substance.";
             case HIGH: return "Description: Exposure to an agent at a relatively high level above background.";
             case LOW: return "Description: Exposure to an agent at a relatively low level above background.";
             case MEDIUM: return "Description: Exposure to an agent at a relatively moderate level above background.A";

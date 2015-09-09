@@ -39,16 +39,17 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.annotation.Elements;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -93,25 +94,30 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	@Override
+	public RestOperationTypeEnum getRestOperationType(RequestDetails theRequestDetails) {
+		if (mySupportsVersion && theRequestDetails.getId().hasVersionIdPart()) {
+			return RestOperationTypeEnum.VREAD;
+		} else {
+			return RestOperationTypeEnum.READ;
+		}
+	}
+
+	@Override
 	public List<Class<?>> getAllowableParamAnnotations() {
 		ArrayList<Class<?>> retVal = new ArrayList<Class<?>>();
 		retVal.add(IdParam.class);
+		retVal.add(Elements.class);
 		return retVal;
 	}
 
 	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return isVread() ? RestfulOperationTypeEnum.VREAD : RestfulOperationTypeEnum.READ;
+	public RestOperationTypeEnum getRestOperationType() {
+		return isVread() ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
 	}
 
 	@Override
 	public ReturnTypeEnum getReturnType() {
 		return ReturnTypeEnum.RESOURCE;
-	}
-
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return null;
 	}
 
 	@Override
@@ -198,13 +204,13 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	@Override
-	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		theMethodParams[myIdIndex] = MethodUtil.convertIdToType(theRequest.getId(), myIdParameterType);
 		if (myVersionIdIndex != null) {
 			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getId().getVersionIdPart());
 		}
 
-		Object response = invokeServerMethod(theMethodParams);
+		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
 
 		if (theRequest.getServer().getETagSupport() == ETagSupportEnum.ENABLED) {

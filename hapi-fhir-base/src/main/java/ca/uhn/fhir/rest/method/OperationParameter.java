@@ -28,14 +28,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.IRuntimeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -48,6 +51,7 @@ import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ParametersUtil;
 
 public class OperationParameter implements IParameter {
@@ -172,7 +176,7 @@ public class OperationParameter implements IParameter {
 			}
 
 			Class<? extends IBaseResource> wantedResourceType = theMethodBinding.getContext().getResourceDefinition("Parameters").getImplementingClass();
-			IBaseResource requestContents = ResourceParameter.loadResourceFromRequest(theRequest, theRequestContents, theMethodBinding, wantedResourceType);
+			IBaseResource requestContents = ResourceParameter.loadResourceFromRequest(theRequest, theMethodBinding, wantedResourceType);
 
 			RuntimeResourceDefinition def = ctx.getResourceDefinition(requestContents);
 
@@ -229,6 +233,7 @@ public class OperationParameter implements IParameter {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void tryToAddValues(List<IBase> theParamValues, List<Object> theMatchingParamValues) {
 		for (Object nextValue : theParamValues) {
 			if (nextValue == null) {
@@ -238,10 +243,28 @@ public class OperationParameter implements IParameter {
 				nextValue = myConverter.incomingServer(nextValue);
 			}
 			if (!myParameterType.isAssignableFrom(nextValue.getClass())) {
-				throw new InvalidRequestException("Request has parameter " + myName + " of type " + nextValue.getClass().getSimpleName() + " but method expects type " + myParameterType.getSimpleName());
+				Class<? extends IBaseDatatype> sourceType = (Class<? extends IBaseDatatype>) nextValue.getClass();
+				Class<? extends IBaseDatatype> targetType = (Class<? extends IBaseDatatype>) myParameterType;
+				BaseRuntimeElementDefinition<?> sourceTypeDef = myContext.getElementDefinition(sourceType);
+				BaseRuntimeElementDefinition<?> targetTypeDef = myContext.getElementDefinition(targetType);
+				if (targetTypeDef instanceof IRuntimeDatatypeDefinition && sourceTypeDef instanceof IRuntimeDatatypeDefinition) {
+					IRuntimeDatatypeDefinition targetTypeDtDef = (IRuntimeDatatypeDefinition) targetTypeDef;
+					if (targetTypeDtDef.isProfileOf(sourceType)) {
+						FhirTerser terser = myContext.newTerser();
+						IBase newTarget = targetTypeDef.newInstance();
+						terser.cloneInto((IBase) nextValue, newTarget, true);
+						theMatchingParamValues.add(newTarget);
+						continue;
+					}
+				}
+				throwWrongParamType(nextValue);
 			}
 			theMatchingParamValues.add(nextValue);
 		}
+	}
+
+	private void throwWrongParamType(Object nextValue) {
+		throw new InvalidRequestException("Request has parameter " + myName + " of type " + nextValue.getClass().getSimpleName() + " but method expects type " + myParameterType.getSimpleName());
 	}
 
 	public interface IConverter {

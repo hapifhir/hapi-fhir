@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3OrderableDrugForm {
@@ -1241,7 +1241,7 @@ public enum V3OrderableDrugForm {
             case TOPCRM: return "Topical Cream";
             case VAGCRM: return "Vaginal Cream";
             case VAGCRMAPL: return "Vaginal Cream with Applicator";
-            case LTN: return "The term 'lotion' has been used to categorize many topical suspensions, solutions and emulsions intended for application to the skin.";
+            case LTN: return "The term \"lotion\" has been used to categorize many topical suspensions, solutions and emulsions intended for application to the skin.";
             case TOPLTN: return "Topical Lotion";
             case OINT: return "A semisolid preparation intended for external application to the skin or mucous membranes.";
             case NASOINT: return "Nasal Ointment";
@@ -1298,7 +1298,7 @@ public enum V3OrderableDrugForm {
             case TPATHWK: return "Weekly Transdermal Patch";
             case PELLET: return "A small sterile solid mass consisting of a highly purified drug (with or without excipients) made by the formation of granules, or by compression and molding.";
             case PILL: return "A small, round solid dosage form containing a medicinal agent intended for oral administration.";
-            case CAP: return "A solid dosage form in which the drug is enclosed within either a hard or soft soluble container or 'shell' made from a suitable form of gelatin.";
+            case CAP: return "A solid dosage form in which the drug is enclosed within either a hard or soft soluble container or \"shell\" made from a suitable form of gelatin.";
             case ORCAP: return "Oral Capsule";
             case ENTCAP: return "Enteric Coated Capsule";
             case ERENTCAP: return "Extended Release Enteric Coated Capsule";

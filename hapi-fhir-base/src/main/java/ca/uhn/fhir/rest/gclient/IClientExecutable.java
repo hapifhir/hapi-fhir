@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
+import ca.uhn.fhir.rest.api.SummaryEnum;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -23,12 +25,6 @@ package ca.uhn.fhir.rest.gclient;
 
 public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
 
-	Y execute();
-
-	T encodedJson();
-
-	T encodedXml();
-
 	/**
 	 * If set to true, the client will log the request and response to the SLF4J logger. This can be useful for
 	 * debugging, but is generally not desirable in a production situation.
@@ -38,6 +34,24 @@ public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
 	@Deprecated
 	T andLogRequestAndResponse(boolean theLogRequestAndResponse);
 
+	/**
+	 * Request that the server return subsetted resources, containing only the elements specified in the given parameters. 
+	 * For example: <code>subsetElements("name", "identifier")</code> requests that the server only return
+	 * the "name" and "identifier" fields in the returned resource, and omit any others.  
+	 */
+	T elementsSubset(String... theElements);
+
+	T encodedJson();
+
+	T encodedXml();
+
+	Y execute();
+
 	T prettyPrint();
+
+	/**
+	 * Request that the server modify the response using the <code>_summary</code> param 
+	 */
+	T summaryMode(SummaryEnum theSummary);
 
 }

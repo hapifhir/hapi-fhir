@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -49,21 +49,21 @@ public class Schedule extends DomainResource {
     /**
      * External Ids for this item.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="External Ids for this item", formalDefinition="External Ids for this item." )
     protected List<Identifier> identifier;
 
     /**
      * The schedule type can be used for the categorization of healthcare services or other appointment types.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="The schedule type can be used for the categorization of healthcare services or other appointment types", formalDefinition="The schedule type can be used for the categorization of healthcare services or other appointment types." )
     protected List<CodeableConcept> type;
 
     /**
      * The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, Device, Patient or RelatedPerson.
      */
-    @Child(name = "actor", type = {Patient.class, Practitioner.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=2, min=1, max=1)
+    @Child(name = "actor", type = {Patient.class, Practitioner.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, Device, Patient or RelatedPerson", formalDefinition="The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, Device, Patient or RelatedPerson." )
     protected Reference actor;
 
@@ -75,14 +75,14 @@ public class Schedule extends DomainResource {
     /**
      * The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a "template" for planning outside these dates.
      */
-    @Child(name = "planningHorizon", type = {Period.class}, order=3, min=0, max=1)
-    @Description(shortDefinition="The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a 'template' for planning outside these dates", formalDefinition="The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a 'template' for planning outside these dates." )
+    @Child(name = "planningHorizon", type = {Period.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates", formalDefinition="The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates." )
     protected Period planningHorizon;
 
     /**
      * Comments on the availability to describe any extended information. Such as custom constraints on the slot(s) that may be associated.
      */
-    @Child(name = "comment", type = {StringType.class}, order=4, min=0, max=1)
+    @Child(name = "comment", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Comments on the availability to describe any extended information. Such as custom constraints on the slot(s) that may be associated", formalDefinition="Comments on the availability to describe any extended information. Such as custom constraints on the slot(s) that may be associated." )
     protected StringType comment;
 
@@ -300,7 +300,7 @@ public class Schedule extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "External Ids for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("type", "CodeableConcept", "The schedule type can be used for the categorization of healthcare services or other appointment types.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("actor", "Reference(Patient|Practitioner|RelatedPerson|Device|HealthcareService|Location)", "The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, Device, Patient or RelatedPerson.", 0, java.lang.Integer.MAX_VALUE, actor));
-        childrenList.add(new Property("planningHorizon", "Period", "The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a 'template' for planning outside these dates.", 0, java.lang.Integer.MAX_VALUE, planningHorizon));
+        childrenList.add(new Property("planningHorizon", "Period", "The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates.", 0, java.lang.Integer.MAX_VALUE, planningHorizon));
         childrenList.add(new Property("comment", "string", "Comments on the availability to describe any extended information. Such as custom constraints on the slot(s) that may be associated.", 0, java.lang.Integer.MAX_VALUE, comment));
       }
 
@@ -364,6 +364,8 @@ public class Schedule extends DomainResource {
   public static final String SP_ACTOR = "actor";
   @SearchParamDefinition(name="date", path="Schedule.planningHorizon", description="Search for Schedule resources that have a period that contains this date specified", type="date" )
   public static final String SP_DATE = "date";
+  @SearchParamDefinition(name="identifier", path="Schedule.identifier", description="A Schedule Identifier", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="type", path="Schedule.type", description="The type of appointments that can be booked into associated slot(s)", type="token" )
   public static final String SP_TYPE = "type";
 

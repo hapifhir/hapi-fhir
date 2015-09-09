@@ -1,16 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -18,9 +9,6 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
-
-import net.sf.json.JSON;
-import net.sf.json.JSONSerializer;
 
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
@@ -32,7 +20,9 @@ import org.hl7.fhir.instance.model.Address.AddressUse;
 import org.hl7.fhir.instance.model.Binary;
 import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Conformance;
+import org.hl7.fhir.instance.model.Conformance.UnknownContentCode;
 import org.hl7.fhir.instance.model.DateTimeType;
 import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.DecimalType;
@@ -66,6 +56,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.rest.server.Constants;
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
 
 public class JsonParserHl7OrgTest {
 	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
@@ -77,6 +70,25 @@ public class JsonParserHl7OrgTest {
 	}
 
 	
+	@Test
+	public void testEncodeNarrativeSuppressed() throws Exception {
+		Patient patient = new Patient();
+		patient.setId("Patient/1/_history/1");
+		patient.getText().setDivAsString("<div>THE DIV</div>");
+		patient.addName().addFamily("FAMILY");
+		patient.getMaritalStatus().addCoding().setCode("D");
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSuppressNarratives(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		
+		assertThat(encoded, containsString("Patient"));
+		assertThat(encoded, stringContainsInOrder(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE));
+		assertThat(encoded, not(containsString("text")));
+		assertThat(encoded, not(containsString("THE DIV")));
+		assertThat(encoded, containsString("family"));
+		assertThat(encoded, containsString("maritalStatus"));
+	}
+
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
 
@@ -117,39 +129,12 @@ public class JsonParserHl7OrgTest {
 		ourLog.info(output);
 
 		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
-		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("{\"resourceType\":\"Patient\",",
-				"\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
-				"{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"
-		));
-		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("\"modifierExtension\":[" +
-				"{" +
-				"\"url\":\"http://example.com/extensions#modext\"," +
-				"\"valueDate\":\"1995-01-02\"" +
-				"}" +
-				"],"));
-		assertThat(enc, containsString("\"_given\":[" +
-				"{" +
-				"\"extension\":[" +
-				"{" +
-				"\"url\":\"http://examples.com#givenext\"," +
-				"\"valueString\":\"given\"" +
-				"}" +
-				"]" +
-				"}," +
-				"{" +
-				"\"extension\":[" +
-				"{" +
-				"\"url\":\"http://examples.com#givenext_parent\"," +
-				"\"extension\":[" +
-				"{" +
-				"\"url\":\"http://examples.com#givenext_child\"," +
-				"\"valueString\":\"CHILD\"" +
-				"}" +
-				"]" +
-				"}" +
-				"]" +
-				"}"));
-		
+		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
+				"{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"));
+		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],"));
+		assertThat(enc, containsString("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext_parent\"," + "\"extension\":[" + "{"
+				+ "\"url\":\"http://examples.com#givenext_child\"," + "\"valueString\":\"CHILD\"" + "}" + "]" + "}" + "]" + "}"));
+
 		/*
 		 * Now parse this back
 		 */
@@ -188,7 +173,6 @@ public class JsonParserHl7OrgTest {
 
 	}
 
-
 	@Test
 	public void testEncodeBinaryResource() {
 
@@ -200,7 +184,6 @@ public class JsonParserHl7OrgTest {
 		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
 
 	}
-
 
 	@Test
 	public void testEncodeBundle() throws InterruptedException {
@@ -225,7 +208,7 @@ public class JsonParserHl7OrgTest {
 		BundleEntryComponent deletedEntry = b.addEntry();
 		Patient dp = new Patient();
 		deletedEntry.setResource(dp);
-		
+
 		dp.setId(("3"));
 		InstantType nowDt = InstantType.withCurrentTime();
 		dp.getMeta().setLastUpdatedElement(nowDt);
@@ -233,11 +216,11 @@ public class JsonParserHl7OrgTest {
 		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
 
-//		List<String> strings = new ArrayList<String>();
-//		strings.addAll(Arrays.asList("\"published\":\"" + pub.getValueAsString() + "\""));
-//		strings.addAll(Arrays.asList("\"id\":\"1\""));
-//		strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));
-//		strings.addAll(Arrays.asList("\"deleted\":\"" + nowDt.getValueAsString() + "\"", "\"id\":\"Patient/3\""));
+		// List<String> strings = new ArrayList<String>();
+		// strings.addAll(Arrays.asList("\"published\":\"" + pub.getValueAsString() + "\""));
+		// strings.addAll(Arrays.asList("\"id\":\"1\""));
+		// strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));
+		// strings.addAll(Arrays.asList("\"deleted\":\"" + nowDt.getValueAsString() + "\"", "\"id\":\"Patient/3\""));
 
 		//@formatter:off
 		String[] strings = new String[] {
@@ -261,8 +244,8 @@ public class JsonParserHl7OrgTest {
 		assertThat(bundleString, not(containsString("deleted")));
 
 	}
-	
-	
+
+
 	@Test
 	public void testEncodeBundleCategory() {
 
@@ -290,7 +273,8 @@ public class JsonParserHl7OrgTest {
 		assertEquals("idsystem", p.getIdentifier().get(0).getSystem());
 
 	}
-	
+
+
 	@Test
 	public void testEncodeBundleEntryCategory() {
 
@@ -312,7 +296,8 @@ public class JsonParserHl7OrgTest {
 		assertEquals("label", b.getEntry().get(0).getResource().getMeta().getTag().get(0).getDisplay());
 
 	}
-
+	
+	
 	@Test
 	public void testEncodeContained() {
 		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
@@ -375,7 +360,7 @@ public class JsonParserHl7OrgTest {
 		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("\"contained\":", "[", "\"contained\":"))));
 		
 	}
-
+	
 	@Test
 	public void testEncodeContained__() {
 		// Create an organization
@@ -403,8 +388,6 @@ public class JsonParserHl7OrgTest {
 		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\"", "resourceType\":\"Organization", "id\":\"1\"")));
 		assertThat(encoded, containsString("reference\":\"#1\""));
 	}
-
-	
 
 	@Test
 	public void testEncodeContainedResourcesMore() throws Exception {
@@ -453,6 +436,8 @@ public class JsonParserHl7OrgTest {
 		
 	}
 
+	
+
 	@Test
 	public void testEncodeDeclaredExtensionWithAddressContent() {
 		IParser parser = ourCtx.newJsonParser();
@@ -490,8 +475,6 @@ public class JsonParserHl7OrgTest {
 		assertEquals("Organization/123", ref.getReference());
 
 	}
-
-
 
 	@Test
 	public void testEncodeExt() throws Exception {
@@ -531,6 +514,8 @@ public class JsonParserHl7OrgTest {
 
 	}
 
+
+
 	@Test
 	public void testEncodeExtensionInPrimitiveElement() {
 
@@ -548,7 +533,7 @@ public class JsonParserHl7OrgTest {
 		ourLog.info("---------------");
 
 		c = new Conformance();
-		c.getAcceptUnknownElement().setValue(true);
+		c.getAcceptUnknownElement().setValue(UnknownContentCode.EXTENSIONS);
 		c.getAcceptUnknownElement().addExtension().setUrl("http://foo").setValue( new StringType("AAA"));
 
 		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(c);
@@ -556,11 +541,10 @@ public class JsonParserHl7OrgTest {
 
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
 		ourLog.info(encoded);
-		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"acceptUnknown\":true,\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}");
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"acceptUnknown\":\"extensions\",\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}");
 
 	}
-	
-	
+
 	@Test
 	public void testEncodeExtensionInResourceElement() {
 
@@ -587,7 +571,8 @@ public class JsonParserHl7OrgTest {
 		assertThat(encoded, containsString("\"useContext\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}"));
 
 	}
-
+	
+	
 	@Test
 	public void testEncodeExtensionWithResourceContent() {
 		IParser parser = ourCtx.newJsonParser();
@@ -608,7 +593,7 @@ public class JsonParserHl7OrgTest {
 		assertEquals("Organization/123", ref.getReference());
 
 	}
-	
+
 	@Test
 	public void testEncodeIds() {
 		Patient pt = new Patient();
@@ -629,8 +614,8 @@ public class JsonParserHl7OrgTest {
 		enc = enc.replace("\"id\"", "\"_id\"");
 		parsed = ourCtx.newJsonParser().parseResource(List_.class,enc);
 		assertEquals(Patient.class, parsed.getEntry().get(0).getItem().getResource().getClass());
-}	
-	
+}
+
 	@Test
 	public void testEncodeInvalidChildGoodException() {
 		Observation obs = new Observation();
@@ -644,9 +629,6 @@ public class JsonParserHl7OrgTest {
 			assertThat(e.getMessage(), StringContains.containsString("DecimalType"));
 		}
 	}
-	
-	
-
 	
 	@Test
 	public void testEncodeNarrativeBlockInBundle() throws Exception {
@@ -669,8 +651,8 @@ public class JsonParserHl7OrgTest {
 		// Backslashes need to be escaped because they are in a JSON value
 		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\">hello</xhtml:div>"));
 
-	}
-
+	}	
+	
 	@Test
 	public void testEncodeNonContained() {
 		Organization org = new Organization();
@@ -695,7 +677,10 @@ public class JsonParserHl7OrgTest {
 		assertThat(encoded, not(containsString("contained")));
 		assertThat(encoded, containsString("\"reference\":\"Organization/65546\""));
 	}
+	
+	
 
+	
 	@Test
 	public void testEncodeResourceRef() throws DataFormatException {
 
@@ -716,6 +701,47 @@ public class JsonParserHl7OrgTest {
 		str = p.encodeResourceToString(patient);
 		assertThat(str, StringContains.containsString("\"contained\":[{\"resourceType\":\"Organization\""));
 
+	}
+
+	@Test
+	public void testEncodeSummary() throws Exception {
+		Patient patient = new Patient();
+		patient.setId("Patient/1/_history/1");
+		patient.getText().setDivAsString("<div>THE DIV</div>");
+		patient.addName().addFamily("FAMILY");
+		patient.setMaritalStatus(new CodeableConcept().setText("D"));
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		
+		assertThat(encoded, containsString("Patient"));
+		assertThat(encoded, stringContainsInOrder("\"tag\"", 
+				"\"system\":\"" + Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\":\"" + Constants.TAG_SUBSETTED_CODE+"\","));
+		assertThat(encoded, not(containsString("THE DIV")));
+		assertThat(encoded, containsString("family"));
+		assertThat(encoded, not(containsString("maritalStatus")));
+	}
+
+	@Test
+	public void testEncodeSummary2() throws Exception {
+		Patient patient = new Patient();
+		patient.setId("Patient/1/_history/1");
+		patient.getText().setDivAsString("<div>THE DIV</div>");
+		patient.addName().addFamily("FAMILY");
+		patient.setMaritalStatus(new CodeableConcept().setText("D"));
+
+		patient.getMeta().addTag().setSystem("foo").setCode("bar");
+		
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		
+		assertThat(encoded, containsString("Patient"));
+		assertThat(encoded, stringContainsInOrder("\"tag\"", 
+				"\"system\":\"foo\",", "\"code\":\"bar\"",
+				"\"system\":\"" + Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\":\"" + Constants.TAG_SUBSETTED_CODE+"\","));
+		assertThat(encoded, not(containsString("THE DIV")));
+		assertThat(encoded, containsString("family"));
+		assertThat(encoded, not(containsString("maritalStatus")));
 	}
 
 	@Test
@@ -822,7 +848,7 @@ public class JsonParserHl7OrgTest {
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, new StringReader(enc));
 		assertEquals(1, parsed.getName().get(0).getFamily().get(0).getExtension().size());
 		Extension ext = parsed.getName().get(0).getFamily().get(0).getExtension().get(0);
-		assertEquals("Hello", ((IPrimitiveType<?>)ext.getValue()).getValue());
+		assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
 
 	}
 
@@ -893,7 +919,7 @@ public class JsonParserHl7OrgTest {
 				"        }" + 
 				"    ]").replace(" ", "")));
 		//@formatter:on
-		
+
 		//@formatter:off
 		assertThat(enc, containsString((
 				"            \"given\":[" + 
@@ -926,11 +952,10 @@ public class JsonParserHl7OrgTest {
 		//@formatter:on
 	}
 
-
-	/* 
+	/*
 	 * Narrative generation is disabled for HL7org structs for now
 	 */
-//	@Test
+	// @Test
 	public void testNarrativeGeneration() throws DataFormatException, IOException {
 
 		Patient patient = new Patient();
@@ -964,8 +989,9 @@ public class JsonParserHl7OrgTest {
 			@Override
 			public void setFhirContext(FhirContext theFhirContext) {
 				// nothing
-			}};
-			
+			}
+		};
+
 		FhirContext context = ourCtx;
 		context.setNarrativeGenerator(gen);
 		IParser p = context.newJsonParser();
@@ -976,7 +1002,6 @@ public class JsonParserHl7OrgTest {
 
 		assertThat(str, StringContains.containsString(",\"text\":{\"status\":\"generated\",\"div\":\"<div>help</div>\"},"));
 	}
-
 
 	@Test
 	public void testNestedContainedResources() {
@@ -1049,12 +1074,11 @@ public class JsonParserHl7OrgTest {
 		assertTrue(div.getChildNodes().isEmpty());
 	}
 
-
 	@Test
 	public void testParseSimpleBundle() {
 		String bundle = "{\"resourceType\":\"Bundle\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"idsystem\"}]}}]}";
 		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
-		
+
 		assertNotNull(b.getEntry().get(0).getResource());
 		Patient p = (Patient) b.getEntry().get(0).getResource();
 		assertEquals("idsystem", p.getIdentifier().get(0).getSystem());
@@ -1099,7 +1123,6 @@ public class JsonParserHl7OrgTest {
 
 	}
 
-
 	@Test
 	public void testSimpleResourceEncode() throws IOException {
 
@@ -1133,7 +1156,6 @@ public class JsonParserHl7OrgTest {
 
 	}
 
-
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException, SAXException {
 
@@ -1158,7 +1180,7 @@ public class JsonParserHl7OrgTest {
 
 		ourLog.info("Expected: " + xmlString);
 		ourLog.info("Actual  : " + encoded);
-		
+
 		String expected = (xmlString);
 		String actual = (encoded.trim());
 
@@ -1234,12 +1256,11 @@ public class JsonParserHl7OrgTest {
 
 	}
 
-
 	@ResourceDef(name = "Patient")
 	public static class MyPatientWithOneDeclaredAddressExtension extends Patient {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		@Child(order = 0, name = "foo")
 		@org.hl7.fhir.instance.model.annotations.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
 		private Address myFoo;
@@ -1258,7 +1279,7 @@ public class JsonParserHl7OrgTest {
 	public static class MyPatientWithOneDeclaredEnumerationExtension extends Patient {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		@Child(order = 0, name = "foo")
 		@org.hl7.fhir.instance.model.annotations.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
 		private Enumeration<AddressUse> myFoo;
@@ -1277,7 +1298,7 @@ public class JsonParserHl7OrgTest {
 	public static class MyPatientWithOneDeclaredExtension extends Patient {
 
 		private static final long serialVersionUID = 1L;
-		
+
 		@Child(order = 0, name = "foo")
 		@org.hl7.fhir.instance.model.annotations.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
 		private Reference myFoo;

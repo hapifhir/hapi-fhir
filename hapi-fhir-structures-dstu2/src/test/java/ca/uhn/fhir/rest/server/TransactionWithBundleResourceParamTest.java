@@ -93,8 +93,8 @@ public class TransactionWithBundleResourceParamTest {
 		entry.setResource(p2);
 
 		Entry deletedEntry = b.addEntry();
-		deletedEntry.getTransaction().setMethod(HTTPVerbEnum.DELETE);
-		deletedEntry.getTransaction().setUrl("http://base.com/Patient/123");
+		deletedEntry.getRequest().setMethod(HTTPVerbEnum.DELETE);
+		deletedEntry.getRequest().setUrl("http://base.com/Patient/123");
 
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
@@ -113,13 +113,13 @@ public class TransactionWithBundleResourceParamTest {
 		assertEquals(3, bundle.getEntry().size());
 
 		Entry entry0 = bundle.getEntry().get(0);
-		assertEquals("Patient/81/_history/91", entry0.getTransactionResponse().getLocation());
+		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 		Entry entry1 = bundle.getEntry().get(1);
-		assertEquals( "Patient/82/_history/92", entry1.getTransactionResponse().getLocation());
+		assertEquals( "Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		Entry entry2 = bundle.getEntry().get(2);
-		assertEquals("Patient/123/_history/93", entry2.getTransactionResponse().getLocation());
+		assertEquals("Patient/123/_history/93", entry2.getResponse().getLocation());
 	}
 
 	@Test
@@ -140,8 +140,8 @@ public class TransactionWithBundleResourceParamTest {
 		entry.setResource(p2);
 
 		Entry deletedEntry = b.addEntry();
-		deletedEntry.getTransaction().setMethod(HTTPVerbEnum.DELETE);
-		deletedEntry.getTransaction().setUrl("http://base.com/Patient/123");
+		deletedEntry.getRequest().setMethod(HTTPVerbEnum.DELETE);
+		deletedEntry.getRequest().setUrl("http://base.com/Patient/123");
 
 		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
@@ -161,13 +161,13 @@ public class TransactionWithBundleResourceParamTest {
 		assertEquals(3, bundle.getEntry().size());
 
 		Entry entry0 = bundle.getEntry().get(0);
-		assertEquals("Patient/81/_history/91", entry0.getTransactionResponse().getLocation());
+		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 		Entry entry1 = bundle.getEntry().get(1);
-		assertEquals( "Patient/82/_history/92", entry1.getTransactionResponse().getLocation());
+		assertEquals( "Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		Entry entry2 = bundle.getEntry().get(2);
-		assertEquals("Patient/123/_history/93", entry2.getTransactionResponse().getLocation());
+		assertEquals("Patient/123/_history/93", entry2.getResponse().getLocation());
 	}
 
 	@Test
@@ -190,8 +190,8 @@ public class TransactionWithBundleResourceParamTest {
 		entry.setResource(p2);
 
 		Entry deletedEntry = b.addEntry();
-		deletedEntry.getTransaction().setMethod(HTTPVerbEnum.DELETE);
-		deletedEntry.getTransaction().setUrl(new IdDt("Patient/3"));
+		deletedEntry.getRequest().setMethod(HTTPVerbEnum.DELETE);
+		deletedEntry.getRequest().setUrl(new IdDt("Patient/3"));
 
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
@@ -214,13 +214,13 @@ public class TransactionWithBundleResourceParamTest {
 		assertEquals(OperationOutcome.class, bundle.getEntry().get(0).getResource().getClass());
 
 		Entry entry0 = bundle.getEntry().get(1);
-		assertEquals("Patient/81/_history/91", entry0.getTransactionResponse().getLocation());
+		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 		Entry entry1 = bundle.getEntry().get(2);
-		assertEquals("Patient/82/_history/92", entry1.getTransactionResponse().getLocation());
+		assertEquals("Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		Entry entry2 = bundle.getEntry().get(3);
-		assertEquals( "Patient/3/_history/93", entry2.getTransactionResponse().getLocation());
+		assertEquals( "Patient/3/_history/93", entry2.getResponse().getLocation());
 	}
 
 	@AfterClass
@@ -272,11 +272,11 @@ public class TransactionWithBundleResourceParamTest {
 			int index = 1;
 			for (Entry nextEntry : theResources.getEntry()) {
 				String newId = "8" + Integer.toString(index);
-				if (nextEntry.getTransaction().getMethodElement().getValueAsEnum() == HTTPVerbEnum.DELETE) {
-					newId = new IdDt(nextEntry.getTransaction().getUrlElement()).getIdPart();
+				if (nextEntry.getRequest().getMethodElement().getValueAsEnum() == HTTPVerbEnum.DELETE) {
+					newId = new IdDt(nextEntry.getRequest().getUrlElement()).getIdPart();
 				}
 				IdDt newIdDt = (new IdDt("Patient", newId, "9" + Integer.toString(index)));
-				retVal.addEntry().getTransactionResponse().setLocation(newIdDt.getValue());
+				retVal.addEntry().getResponse().setLocation(newIdDt.getValue());
 				index++;
 			}
 

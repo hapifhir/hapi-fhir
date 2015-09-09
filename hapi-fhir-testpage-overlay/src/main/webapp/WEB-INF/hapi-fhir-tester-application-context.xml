@@ -11,6 +11,8 @@
 	<mvc:annotation-driven />
 	<context:component-scan base-package="ca.uhn.fhir.to" />
 
+	<bean class="ca.uhn.fhir.to.mvc.AnnotationMethodHandlerAdapterConfigurer" init-method="init"/>
+
 	<mvc:resources location="/css/" mapping="/css/**" />
 	<mvc:resources location="/fa/" mapping="/fa/**" />
 	<mvc:resources location="/fonts/" mapping="/fonts/**" />

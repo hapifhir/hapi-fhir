@@ -19,19 +19,20 @@ package ca.uhn.fhir.rest.client;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +50,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -67,6 +69,8 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
@@ -225,7 +229,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return delete(theType, new IdDt(theId));
 	}
 
-	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches) {
+	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint, SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
 		String resName = toResourceName(theType);
 		IIdType id = theId;
 		if (!id.hasBaseUrl()) {
@@ -254,13 +258,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			invocation.addHeader(Constants.HEADER_IF_NONE_MATCH, '"' + theIfVersionMatches + '"');
 		}
 
-		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, id);
+		boolean allowHtmlResponse = (theSummary == SummaryEnum.TEXT) || (theSummary == null && getSummary() == SummaryEnum.TEXT);
+		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, id, allowHtmlResponse);
 
 		if (theNotModifiedHandler == null) {
-			return invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
+			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements);
 		} else {
 			try {
-				return invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
+				return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements);
 			} catch (NotModifiedException e) {
 				return theNotModifiedHandler.call();
 			}
@@ -383,6 +388,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
+	public IMeta meta() {
+		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+			throw new IllegalStateException("Can not call $meta operations on a DSTU1 client");
+		}
+		return new MetaInternal();
+	}
+
+	@Override
 	public IOperation operation() {
 		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1) == false) {
 			throw new IllegalStateException("Operations are only supported in FHIR DSTU2 and later. This client was created using a context configured for " + myContext.getVersion().getVersion().name());
@@ -403,7 +416,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	@Override
 	public <T extends IBaseResource> T read(final Class<T> theType, UriDt theUrl) {
 		IdDt id = theUrl instanceof IdDt ? ((IdDt) theUrl) : new IdDt(theUrl);
-		return doReadOrVRead(theType, id, false, null, null);
+		return doReadOrVRead(theType, id, false, null, null, false, null, null, null);
 	}
 
 	@Override
@@ -549,7 +562,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		if (theId.hasVersionIdPart() == false) {
 			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_NO_VERSION_ID_FOR_VREAD, theId.getValue()));
 		}
-		return doReadOrVRead(theType, theId, true, null, null);
+		return doReadOrVRead(theType, theId, true, null, null, false, null, null, null);
 	}
 
 	/* also deprecated in interface */
@@ -579,9 +592,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private abstract class BaseClientExecutable<T extends IClientExecutable<?, ?>, Y> implements IClientExecutable<T, Y> {
-		private EncodingEnum myParamEncoding;
-		private Boolean myPrettyPrint;
+		protected EncodingEnum myParamEncoding;
+		protected Boolean myPrettyPrint;
 		private boolean myQueryLogRequestAndResponse;
+		private HashSet<String> mySubsetElements;
+		protected SummaryEnum mySummaryMode;
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -608,6 +623,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return myParamEncoding;
 		}
 
+		protected HashSet<String> getSubsetElements() {
+			return mySubsetElements;
+		}
+
 		protected <Z> Z invoke(Map<String, List<String>> theParams, IClientResponseHandler<Z> theHandler, BaseHttpClientInvocation theInvocation) {
 			// if (myParamEncoding != null) {
 			// theParams.put(Constants.PARAM_FORMAT, Collections.singletonList(myParamEncoding.getFormatContentType()));
@@ -621,7 +640,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
 			}
 
-			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse);
+			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse, mySummaryMode, mySubsetElements);
 			return resp;
 		}
 
@@ -638,6 +657,24 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public T prettyPrint() {
 			myPrettyPrint = true;
 			return (T) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T elementsSubset(String... theElements) {
+			if (theElements != null && theElements.length > 0) {
+				mySubsetElements = new HashSet<String>(Arrays.asList(theElements));
+			} else {
+				mySubsetElements = null;
+			}
+			return (T) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T summaryMode(SummaryEnum theSummary) {
+			mySummaryMode = theSummary;
+			return ((T) this);
 		}
 
 	}
@@ -661,7 +698,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-	private class CreateInternal extends BaseClientExecutable<ICreateTyped, MethodOutcome> implements ICreate, ICreateTyped, ICreateWithQuery, ICreateWithQueryTyped {
+	private class CreateInternal extends BaseClientExecutable<ICreateTyped, MethodOutcome>implements ICreate, ICreateTyped, ICreateWithQuery, ICreateWithQueryTyped {
 
 		private CriterionList myCriterionList;
 		private String myId;
@@ -781,7 +818,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class DeleteInternal extends BaseClientExecutable<IDeleteTyped, BaseOperationOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
+	private class DeleteInternal extends BaseClientExecutable<IDeleteTyped, BaseOperationOutcome>implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
 
 		private CriterionList myCriterionList;
 		private IIdType myId;
@@ -895,7 +932,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private class GetPageInternal extends BaseClientExecutable<IGetPageTyped<Object>, Object> implements IGetPageTyped<Object> {
+	private class GetPageInternal extends BaseClientExecutable<IGetPageTyped<Object>, Object>implements IGetPageTyped<Object> {
 
 		private Class<? extends IBaseBundle> myBundleType;
 		private String myUrl;
@@ -925,7 +962,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class GetTagsInternal extends BaseClientExecutable<IGetTags, TagList> implements IGetTags {
+	private class GetTagsInternal extends BaseClientExecutable<IGetTags, TagList>implements IGetTags {
 
 		private String myId;
 		private String myResourceName;
@@ -1168,6 +1205,154 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@SuppressWarnings("rawtypes")
+	private class MetaInternal extends BaseClientExecutable implements IMeta, IMetaAddOrDeleteUnsourced, IMetaGetUnsourced, IMetaAddOrDeleteSourced {
+
+		private IIdType myId;
+		private IBaseMetaType myMeta;
+		private Class<? extends IBaseMetaType> myMetaType;
+		private String myOnType;
+		private MetaOperation myOperation;
+
+		@Override
+		public IMetaAddOrDeleteUnsourced add() {
+			myOperation = MetaOperation.ADD;
+			return this;
+		}
+
+		@Override
+		public IMetaAddOrDeleteUnsourced delete() {
+			myOperation = MetaOperation.DELETE;
+			return this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Object execute() {
+
+			BaseHttpClientInvocation invocation = null;
+
+			IBaseParameters parameters = ParametersUtil.newInstance(myContext);
+			switch (myOperation) {
+			case ADD:
+				ParametersUtil.addParameterToParameters(myContext, parameters, myMeta, "meta");
+				invocation = OperationMethodBinding.createOperationInvocation(myContext, myId.getResourceType(), myId.getIdPart(), "$meta-add", parameters, false);
+				break;
+			case DELETE:
+				ParametersUtil.addParameterToParameters(myContext, parameters, myMeta, "meta");
+				invocation = OperationMethodBinding.createOperationInvocation(myContext, myId.getResourceType(), myId.getIdPart(), "$meta-delete", parameters, false);
+				break;
+			case GET:
+				if (myId != null) {
+					invocation = OperationMethodBinding.createOperationInvocation(myContext, myOnType, myId.getIdPart(), "$meta", parameters, true);
+				} else if (myOnType != null) {
+					invocation = OperationMethodBinding.createOperationInvocation(myContext, myOnType, null, "$meta", parameters, true);
+				} else {
+					invocation = OperationMethodBinding.createOperationInvocation(myContext, null, null, "$meta", parameters, true);
+				}
+				break;
+			}
+
+			// Should not happen
+			if (invocation == null) {
+				throw new IllegalStateException();
+			}
+
+			IClientResponseHandler handler;
+			handler = new MetaParametersResponseHandler(myMetaType);
+			return invoke(null, handler, invocation);
+		}
+
+		@Override
+		public IClientExecutable fromResource(IIdType theId) {
+			setIdInternal(theId);
+			return this;
+		}
+
+		@Override
+		public IClientExecutable fromServer() {
+			return this;
+		}
+
+		@Override
+		public IClientExecutable fromType(String theResourceName) {
+			Validate.notBlank(theResourceName, "theResourceName must not be blank");
+			myOnType = theResourceName;
+			return this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends IBaseMetaType> IMetaGetUnsourced<T> get(Class<T> theType) {
+			myMetaType = theType;
+			myOperation = MetaOperation.GET;
+			return this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends IBaseMetaType> IClientExecutable<IClientExecutable<?, ?>, T> meta(T theMeta) {
+			Validate.notNull(theMeta, "theMeta must not be null");
+			myMeta = theMeta;
+			myMetaType = myMeta.getClass();
+			return this;
+		}
+
+		@Override
+		public IMetaAddOrDeleteSourced onResource(IIdType theId) {
+			setIdInternal(theId);
+			return this;
+		}
+
+		private void setIdInternal(IIdType theId) {
+			Validate.notBlank(theId.getResourceType(), "theId must contain a resource type");
+			Validate.notBlank(theId.getIdPart(), "theId must contain an ID part");
+			myOnType = theId.getResourceType();
+			myId = theId;
+		}
+
+	}
+
+	private enum MetaOperation {
+		ADD, DELETE, GET
+	}
+
+	private final class MetaParametersResponseHandler<T extends IBaseMetaType> implements IClientResponseHandler<T> {
+
+		private Class<T> myType;
+
+		public MetaParametersResponseHandler(Class<T> theMetaType) {
+			myType = theMetaType;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
+			if (respType == null) {
+				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
+			}
+			IParser parser = respType.newParser(myContext);
+			RuntimeResourceDefinition type = myContext.getResourceDefinition("Parameters");
+			IBaseResource retVal = parser.parseResource(type.getImplementingClass(), theResponseReader);
+
+			BaseRuntimeChildDefinition paramChild = type.getChildByName("parameter");
+			BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+			List<IBase> parameter = paramChild.getAccessor().getValues(retVal);
+			if (parameter == null || parameter.isEmpty()) {
+				return (T) myContext.getElementDefinition(myType).newInstance();
+			}
+			IBase param = parameter.get(0);
+
+			List<IBase> meta = paramChildElem.getChildByName("value[x]").getAccessor().getValues(param);
+			if (meta.isEmpty()) {
+				return (T) myContext.getElementDefinition(myType).newInstance();
+			}
+			return (T) meta.get(0);
+
+		}
+	}
+
+	@SuppressWarnings("rawtypes")
 	private class OperationInternal extends BaseClientExecutable implements IOperation, IOperationUnnamed, IOperationUntyped, IOperationUntypedWithInput {
 
 		private IIdType myId;
@@ -1321,11 +1506,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private RuntimeResourceDefinition myType;
 
 		@Override
-		public Object execute() {
+		public Object execute() {//AAA
 			if (myId.hasVersionIdPart()) {
-				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches);
+				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements());
 			} else {
-				return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches);
+				return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements());
 			}
 		}
 
@@ -1404,6 +1589,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
+		public IReadExecutable withId(Long theId) {
+			Validate.notNull(theId, "The ID can not be null");
+			myId = new IdDt(myType.getName(), theId);
+			return this;
+		}
+
+		@Override
 		public IReadExecutable withId(String theId) {
 			Validate.notBlank(theId, "The ID can not be blank");
 			myId = new IdDt(myType.getName(), theId);
@@ -1444,7 +1636,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public List<IBaseResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+		public List<IBaseResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+				throws BaseServerResponseException {
 			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 				Class<? extends IBaseResource> bundleType = myContext.getResourceDefinition("Bundle").getImplementingClass();
 				ResourceResponseHandler<IBaseResource> handler = new ResourceResponseHandler<IBaseResource>((Class<IBaseResource>) bundleType, null);
@@ -1460,6 +1653,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private final class ResourceResponseHandler<T extends IBaseResource> implements IClientResponseHandler<T> {
 
+		private boolean myAllowHtmlResponse;
 		private IIdType myId;
 		private Class<T> myType;
 
@@ -1468,10 +1662,19 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myId = theId;
 		}
 
+		public ResourceResponseHandler(Class<T> theType, IIdType theId, boolean theAllowHtmlResponse) {
+			myType = theType;
+			myId = theId;
+			myAllowHtmlResponse = theAllowHtmlResponse;
+		}
+
 		@Override
 		public T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
+				if (myAllowHtmlResponse && theResponseMimeType.toLowerCase().contains(Constants.CT_HTML) && myType != null) {
+					return readHtmlResponse(theResponseReader);
+				}
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
 			}
 			IParser parser = respType.newParser(myContext);
@@ -1481,59 +1684,49 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			return retVal;
 		}
-	}
-
-	private final class MetaParametersResponseHandler<T extends IBaseMetaType> implements IClientResponseHandler<T> {
-
-		private Class<T> myType;
-
-		public MetaParametersResponseHandler(Class<T> theMetaType) {
-			myType = theMetaType;
-		}
 
 		@SuppressWarnings("unchecked")
-		@Override
-		public T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
-			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
-			if (respType == null) {
-				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
+		private T readHtmlResponse(Reader theResponseReader) {
+			RuntimeResourceDefinition resDef = myContext.getResourceDefinition(myType);
+			IBaseResource instance = resDef.newInstance();
+			BaseRuntimeChildDefinition textChild = resDef.getChildByName("text");
+			BaseRuntimeElementCompositeDefinition<?> textElement = (BaseRuntimeElementCompositeDefinition<?>) textChild.getChildByName("text");
+			IBase textInstance = textElement.newInstance();
+			textChild.getMutator().addValue(instance, textInstance);
+			
+			BaseRuntimeChildDefinition divChild = textElement.getChildByName("div");
+			BaseRuntimeElementDefinition<?> divElement = divChild.getChildByName("div");
+			IPrimitiveType<?> divInstance = (IPrimitiveType<?>) divElement.newInstance();
+			try {
+				divInstance.setValueAsString(IOUtils.toString(theResponseReader));
+			} catch (IllegalArgumentException e) {
+				throw new InvalidResponseException(400, "Failed to process HTML response from server", e);
+			} catch (IOException e) {
+				throw new InvalidResponseException(400, "Failed to process HTML response from server", e);
 			}
-			IParser parser = respType.newParser(myContext);
-			RuntimeResourceDefinition type = myContext.getResourceDefinition("Parameters");
-			IBaseResource retVal = parser.parseResource(type.getImplementingClass(), theResponseReader);
-
-			BaseRuntimeChildDefinition paramChild = type.getChildByName("parameter");
-			BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
-			List<IBase> parameter = paramChild.getAccessor().getValues(retVal);
-			if (parameter == null || parameter.isEmpty()) {
-				return (T) myContext.getElementDefinition(myType).newInstance();
-			}
-			IBase param = parameter.get(0);
-
-			List<IBase> meta = paramChildElem.getChildByName("value[x]").getAccessor().getValues(param);
-			if (meta.isEmpty()) {
-				return (T) myContext.getElementDefinition(myType).newInstance();
-			}
-			return (T) meta.get(0);
-
+			divChild.getMutator().addValue(textInstance, divInstance);
+			return (T) instance;
 		}
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private class SearchInternal extends BaseClientExecutable<IQuery<Object>, Object> implements IQuery<Object>, IUntypedQuery {
+	private class SearchInternal extends BaseClientExecutable<IQuery<Object>, Object>implements IQuery<Object>, IUntypedQuery {
 
 		private String myCompartmentName;
 		private CriterionList myCriterion = new CriterionList();
 		private List<Include> myInclude = new ArrayList<Include>();
 		private DateRangeParam myLastUpdated;
 		private Integer myParamLimit;
+		private List<String> myProfile = new ArrayList<String>();
 		private String myResourceId;
 		private String myResourceName;
 		private Class<? extends IBaseResource> myResourceType;
 		private Class<? extends IBaseBundle> myReturnBundleType;
 		private List<Include> myRevInclude = new ArrayList<Include>();
 		private SearchStyleEnum mySearchStyle;
+		private List<TokenParam> mySecurity = new ArrayList<TokenParam>();
 		private List<SortInternal> mySort = new ArrayList<SortInternal>();
+		private List<TokenParam> myTags = new ArrayList<TokenParam>();
 
 		public SearchInternal() {
 			myResourceType = null;
@@ -1561,8 +1754,20 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				addParam(params, Constants.PARAM_TAG, next.getValueAsQueryToken());
 			}
 
+			for (TokenParam next : mySecurity) {
+				addParam(params, Constants.PARAM_SECURITY, next.getValueAsQueryToken());
+			}
+
+			for (String next : myProfile) {
+				addParam(params, Constants.PARAM_PROFILE, next);
+			}
+
 			for (Include next : myInclude) {
-				addParam(params, Constants.PARAM_INCLUDE, next.getValue());
+				if (next.isRecurse()) {
+					addParam(params, Constants.PARAM_INCLUDE_RECURSE, next.getValue());
+				} else {
+					addParam(params, Constants.PARAM_INCLUDE, next.getValue());
+				}
 			}
 
 			for (Include next : myRevInclude) {
@@ -1643,7 +1848,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IClientExecutable returnBundle(Class theClass) {
+		public IQuery returnBundle(Class theClass) {
 			if (theClass == null) {
 				throw new NullPointerException("theClass must not be null");
 			}
@@ -1694,8 +1899,20 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
-		private List<TokenParam> myTags = new ArrayList<TokenParam>();
-		
+		@Override
+		public IQuery<Object> withProfile(String theProfileUri) {
+			Validate.notBlank(theProfileUri, "theProfileUri must not be null or empty");
+			myProfile.add(theProfileUri);
+			return this;
+		}
+
+		@Override
+		public IQuery<Object> withSecurity(String theSystem, String theCode) {
+			Validate.notBlank(theCode, "theCode must not be null or empty");
+			mySecurity.add(new TokenParam(theSystem, theCode));
+			return this;
+		}
+
 		@Override
 		public IQuery<Object> withTag(String theSystem, String theCode) {
 			Validate.notBlank(theCode, "theCode must not be null or empty");
@@ -1750,7 +1967,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class StringResponseHandler implements IClientResponseHandler<String> {
 
 		@Override
-		public String invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public String invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+				throws IOException, BaseServerResponseException {
 			return IOUtils.toString(theResponseReader);
 		}
 	}
@@ -1768,7 +1986,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-	private final class TransactionExecutable<T> extends BaseClientExecutable<ITransactionTyped<T>, T> implements ITransactionTyped<T> {
+	private final class TransactionExecutable<T> extends BaseClientExecutable<ITransactionTyped<T>, T>implements ITransactionTyped<T> {
 
 		private IBaseBundle myBaseBundle;
 		private Bundle myBundle;
@@ -1858,7 +2076,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class UpdateInternal extends BaseClientExecutable<IUpdateExecutable, MethodOutcome> implements IUpdate, IUpdateTyped, IUpdateExecutable, IUpdateWithQuery, IUpdateWithQueryTyped {
+	private class UpdateInternal extends BaseClientExecutable<IUpdateExecutable, MethodOutcome>implements IUpdate, IUpdateTyped, IUpdateExecutable, IUpdateWithQuery, IUpdateWithQueryTyped {
 
 		private CriterionList myCriterionList;
 		private IIdType myId;
@@ -1975,7 +2193,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class ValidateInternal extends BaseClientExecutable<IValidateUntyped, MethodOutcome> implements IValidate, IValidateUntyped {
+	private class ValidateInternal extends BaseClientExecutable<IValidateUntyped, MethodOutcome>implements IValidate, IValidateUntyped {
 		private IBaseResource myResource;
 
 		@Override
@@ -2015,126 +2233,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
-	}
-
-	@SuppressWarnings("rawtypes")
-	private class MetaInternal extends BaseClientExecutable implements IMeta, IMetaAddOrDeleteUnsourced, IMetaGetUnsourced, IMetaAddOrDeleteSourced {
-
-		private MetaOperation myOperation;
-		private String myOnType;
-		private IIdType myId;
-		private Class<? extends IBaseMetaType> myMetaType;
-		private IBaseMetaType myMeta;
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public Object execute() {
-
-			BaseHttpClientInvocation invocation = null;
-
-			IBaseParameters parameters = ParametersUtil.newInstance(myContext);
-			switch (myOperation) {
-			case ADD:
-				ParametersUtil.addParameterToParameters(myContext, parameters, myMeta, "meta");
-				invocation = OperationMethodBinding.createOperationInvocation(myContext, myId.getResourceType(), myId.getIdPart(), "$meta-add", parameters, false);
-				break;
-			case DELETE:
-				ParametersUtil.addParameterToParameters(myContext, parameters, myMeta, "meta");
-				invocation = OperationMethodBinding.createOperationInvocation(myContext, myId.getResourceType(), myId.getIdPart(), "$meta-delete", parameters, false);
-				break;
-			case GET:
-				if (myId != null) {
-					invocation = OperationMethodBinding.createOperationInvocation(myContext, myOnType, myId.getIdPart(), "$meta", parameters, true);
-				} else if (myOnType != null) {
-					invocation = OperationMethodBinding.createOperationInvocation(myContext, myOnType, null, "$meta", parameters, true);
-				} else {
-					invocation = OperationMethodBinding.createOperationInvocation(myContext, null, null, "$meta", parameters, true);
-				}
-				break;
-			}
-
-			// Should not happen
-			if (invocation == null) {
-				throw new IllegalStateException();
-			}
-
-			IClientResponseHandler handler;
-			handler = new MetaParametersResponseHandler(myMetaType);
-			return invoke(null, handler, invocation);
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public <T extends IBaseMetaType> IMetaGetUnsourced<T> get(Class<T> theType) {
-			myMetaType = theType;
-			myOperation = MetaOperation.GET;
-			return this;
-		}
-
-		@Override
-		public IMetaAddOrDeleteUnsourced add() {
-			myOperation = MetaOperation.ADD;
-			return this;
-		}
-
-		@Override
-		public IMetaAddOrDeleteUnsourced delete() {
-			myOperation = MetaOperation.DELETE;
-			return this;
-		}
-
-		@Override
-		public IClientExecutable fromServer() {
-			return this;
-		}
-
-		@Override
-		public IClientExecutable fromType(String theResourceName) {
-			Validate.notBlank(theResourceName, "theResourceName must not be blank");
-			myOnType = theResourceName;
-			return this;
-		}
-
-		@Override
-		public IClientExecutable fromResource(IIdType theId) {
-			setIdInternal(theId);
-			return this;
-		}
-
-		@Override
-		public IMetaAddOrDeleteSourced onResource(IIdType theId) {
-			setIdInternal(theId);
-			return this;
-		}
-
-		private void setIdInternal(IIdType theId) {
-			Validate.notBlank(theId.getResourceType(), "theId must contain a resource type");
-			Validate.notBlank(theId.getIdPart(), "theId must contain an ID part");
-			myOnType = theId.getResourceType();
-			myId = theId;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public <T extends IBaseMetaType> IClientExecutable<IClientExecutable<?, ?>, T> meta(T theMeta) {
-			Validate.notNull(theMeta, "theMeta must not be null");
-			myMeta = theMeta;
-			myMetaType = myMeta.getClass();
-			return this;
-		}
-
-	}
-
-	private enum MetaOperation {
-		DELETE, ADD, GET
-	}
-
-	@Override
-	public IMeta meta() {
-		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
-			throw new IllegalStateException("Can not call $meta operations on a DSTU1 client");
-		}
-		return new MetaInternal();
 	}
 
 }

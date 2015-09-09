@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -127,6 +127,12 @@ public class V3ObservationInterpretationEnumFactory implements EnumFactory<V3Obs
       return V3ObservationInterpretation.POS;
     if ("DET".equals(codeString))
       return V3ObservationInterpretation.DET;
+    if ("ObservationInterpretationExpectation".equals(codeString))
+      return V3ObservationInterpretation.OBSERVATIONINTERPRETATIONEXPECTATION;
+    if ("EXP".equals(codeString))
+      return V3ObservationInterpretation.EXP;
+    if ("UNE".equals(codeString))
+      return V3ObservationInterpretation.UNE;
     if ("ReactivityObservationInterpretation".equals(codeString))
       return V3ObservationInterpretation.REACTIVITYOBSERVATIONINTERPRETATION;
     if ("NR".equals(codeString))
@@ -227,6 +233,12 @@ public class V3ObservationInterpretationEnumFactory implements EnumFactory<V3Obs
       return "POS";
     if (code == V3ObservationInterpretation.DET)
       return "DET";
+    if (code == V3ObservationInterpretation.OBSERVATIONINTERPRETATIONEXPECTATION)
+      return "ObservationInterpretationExpectation";
+    if (code == V3ObservationInterpretation.EXP)
+      return "EXP";
+    if (code == V3ObservationInterpretation.UNE)
+      return "UNE";
     if (code == V3ObservationInterpretation.REACTIVITYOBSERVATIONINTERPRETATION)
       return "ReactivityObservationInterpretation";
     if (code == V3ObservationInterpretation.NR)

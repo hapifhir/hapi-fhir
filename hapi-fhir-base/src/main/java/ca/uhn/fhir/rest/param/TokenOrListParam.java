@@ -5,6 +5,7 @@ import java.util.List;
 
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import net.sourceforge.cobertura.CoverageIgnore;
 
 /*
  * #%L
@@ -89,6 +90,7 @@ public class TokenOrListParam extends BaseOrListParam<TokenParam> {
 		return retVal;
 	}
 
+	@CoverageIgnore
 	@Override
 	TokenParam newInstance() {
 		return new TokenParam();
@@ -105,4 +107,12 @@ public class TokenOrListParam extends BaseOrListParam<TokenParam> {
 		}
 		return false;
 	}
+	
+	@CoverageIgnore
+	@Override
+	public TokenOrListParam addOr(TokenParam theParameter) {
+		add(theParameter);
+		return this;
+	}
+
 }

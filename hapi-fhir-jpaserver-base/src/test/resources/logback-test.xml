@@ -18,7 +18,8 @@
 		<appender-ref ref="STDOUT" />
 	</logger>
 	
-	<logger name="org.hibernate.SQL" additivity="false" level="trace">
+	<!-- Set to 'trace' to enable SQL logging -->
+	<logger name="org.hibernate.SQL" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
 

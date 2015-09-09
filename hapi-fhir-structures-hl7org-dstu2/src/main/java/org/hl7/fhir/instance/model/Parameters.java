@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -51,29 +51,29 @@ public class Parameters extends Resource implements IBaseParameters {
         /**
          * The name of the parameter (reference to the operation definition).
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Name from the definition", formalDefinition="The name of the parameter (reference to the operation definition)." )
         protected StringType name;
 
         /**
          * If the parameter is a data type.
          */
-        @Child(name = "value", type = {}, order=2, min=0, max=1)
+        @Child(name = "value", type = {}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="If parameter is a data type", formalDefinition="If the parameter is a data type." )
         protected org.hl7.fhir.instance.model.Type value;
 
         /**
          * If the parameter is a whole resource.
          */
-        @Child(name = "resource", type = {Resource.class}, order=3, min=0, max=1)
+        @Child(name = "resource", type = {Resource.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="If parameter is a whole resource", formalDefinition="If the parameter is a whole resource." )
         protected Resource resource;
 
         /**
          * A named part of a parameter. In many implementation context, a set of named parts is known as a "Tuple".
          */
-        @Child(name = "part", type = {ParametersParameterComponent.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Named part of a parameter (e.g. Tuple)", formalDefinition="A named part of a parameter. In many implementation context, a set of named parts is known as a 'Tuple'." )
+        @Child(name = "part", type = {ParametersParameterComponent.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Named part of a parameter (e.g. Tuple)", formalDefinition="A named part of a parameter. In many implementation context, a set of named parts is known as a \"Tuple\"." )
         protected List<ParametersParameterComponent> part;
 
         private static final long serialVersionUID = 1129239796L;
@@ -221,7 +221,7 @@ public class Parameters extends Resource implements IBaseParameters {
           childrenList.add(new Property("name", "string", "The name of the parameter (reference to the operation definition).", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("value[x]", "*", "If the parameter is a data type.", 0, java.lang.Integer.MAX_VALUE, value));
           childrenList.add(new Property("resource", "Resource", "If the parameter is a whole resource.", 0, java.lang.Integer.MAX_VALUE, resource));
-          childrenList.add(new Property("part", "@Parameters.parameter", "A named part of a parameter. In many implementation context, a set of named parts is known as a 'Tuple'.", 0, java.lang.Integer.MAX_VALUE, part));
+          childrenList.add(new Property("part", "@Parameters.parameter", "A named part of a parameter. In many implementation context, a set of named parts is known as a \"Tuple\".", 0, java.lang.Integer.MAX_VALUE, part));
         }
 
       public ParametersParameterComponent copy() {
@@ -269,7 +269,7 @@ public class Parameters extends Resource implements IBaseParameters {
     /**
      * A parameter passed to or received from the operation.
      */
-    @Child(name = "parameter", type = {}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "parameter", type = {}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Operation Parameter", formalDefinition="A parameter passed to or received from the operation." )
     protected List<ParametersParameterComponent> parameter;
 

@@ -6,22 +6,22 @@
     "lastUpdated": "2014-08-18T01:43:30Z"
   },
   "type": "searchset",
-  "base": "http://example.com/base",
   "total": 3,
   "link": [
     {
       "relation": "next",
-      "url": "https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2"
+      "url": "https://example.com/base/MedicationOrder?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2"
     },
     {
       "relation": "self",
-      "url": "https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication"
+      "url": "https://example.com/base/MedicationOrder?patient=347&_include=MedicationOrder.medication"
     }
   ],
   "entry": [
     {
+		"fullUrl": "http://example.com/base/MedicationOrder/3123/_history/1",
       "resource": {
-        "resourceType": "MedicationPrescription",
+        "resourceType": "MedicationOrder",
         "id": "3123",
         "meta" : {
         	"versionId" : "1",
@@ -30,7 +30,7 @@
         "patient": {
           "reference": "Patient/347"
         },
-        "medication": {
+        "medicationReference": {
           "reference": "Medication/example"
         }
       },
@@ -40,6 +40,7 @@
       }
     },
     {
+		"fullUrl": "http://example.com/base/Medication/example",
       "resource": {
         "resourceType": "Medication",
         "id": "example"

@@ -120,6 +120,8 @@
 			<item name="Core API" href="./apidocs/index.html" />
 			<item name="Model API (DSTU1)" href="./apidocs-dstu/index.html" />
 			<item name="Model API (DSTU2)" href="./apidocs-dstu2/index.html" />
+			<item name="Model API (RI DSTU2)" href="./apidocs-hl7org-dstu2/index.html" />
+			<item name="JPA Server API" href="./apidocs-jpaserver/index.html" />
 		</menu>
 		<menu name="JXR" inherit="top">
 			<item name="Core" href="./xref-base/index.html" />
@@ -137,10 +139,9 @@
 		</menu>
 		
 		
-		<menu name="Maven Reports" inherit="bottom">
+		<menu name="Reports" inherit="bottom">
 			<item name="Project Developers" href="team-list.html" />
-			<item name="Cobertura (Test Coverage)" href="cobertura/index.html" />
-			<item name="Surefire (Test Status)" href="surefire-report.html" />
+			<item name="Coveralls (Test Coverage)" href="https://coveralls.io/github/jamesagnew/hapi-fhir" />
 			<item name="FindBugs" href="findbugs.html" />
 			<item name="Checkstyle" href="checkstyle.html" />
 		</menu>

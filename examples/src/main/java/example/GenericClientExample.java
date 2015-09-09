@@ -23,6 +23,7 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
@@ -228,7 +229,7 @@ public class GenericClientExample {
       }
       {
          // START SNIPPET: search
-         Bundle response = client.search()
+         ca.uhn.fhir.model.dstu2.resource.Bundle response = client.search()
                .forResource(Patient.class)
                .where(Patient.BIRTHDATE.beforeOrEquals().day("2011-01-01"))
                .and(Patient.CAREPROVIDER.hasChainedProperty(Organization.NAME.matches().value("Health")))
@@ -259,9 +260,27 @@ public class GenericClientExample {
                .forResource(Patient.class)
                .withIdAndCompartment("123", "condition")
                .where(Patient.ADDRESS.matches().values("Toronto"))
-               .returnBundle(Bundle.class)
+               .returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
                .execute();
          // END SNIPPET: searchCompartment
+
+         // START SNIPPET: searchSubsetSummary
+         response = client.search()
+               .forResource(Patient.class)
+               .where(Patient.ADDRESS.matches().values("Toronto"))
+               .returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+               .summaryMode(SummaryEnum.TRUE)
+               .execute();
+         // END SNIPPET: searchSubsetSummary
+
+         // START SNIPPET: searchSubsetElements
+         response = client.search()
+               .forResource(Patient.class)
+               .where(Patient.ADDRESS.matches().values("Toronto"))
+               .returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+               .elementsSubset("identifier", "name") // only include the identifier and name
+               .execute();
+         // END SNIPPET: searchSubsetElements
 
          // START SNIPPET: searchAdv
          response = client.search()
@@ -270,7 +289,8 @@ public class GenericClientExample {
                .where(Patient.BIRTHDATE.beforeOrEquals().day("2012-01-22"))
                .and(Patient.BIRTHDATE.after().day("2011-01-01"))
                .withTag("http://acme.org/codes", "needs-review")
-               .include(Patient.INCLUDE_ORGANIZATION)
+               .include(Patient.INCLUDE_ORGANIZATION.asRecursive())
+               .include(Patient.INCLUDE_CAREPROVIDER.asNonRecursive())
                .revInclude(Provenance.INCLUDE_TARGET)
                .lastUpdated(new DateRangeParam("2011-01-01", null))
                .sort().ascending(Patient.BIRTHDATE)

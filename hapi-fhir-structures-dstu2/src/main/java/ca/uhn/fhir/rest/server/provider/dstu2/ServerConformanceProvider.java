@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
 
 /*
  * #%L
- * HAPI FHIR Structures - DSTU2 (FHIR v0.5.0)
+ * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
  * Copyright (C) 2014 - 2015 University Health Network
  * %%
@@ -49,12 +49,15 @@ import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceInteraction;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition.Parameter;
+import ca.uhn.fhir.model.dstu2.valueset.ConditionalDeleteStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ConformanceResourceStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ConformanceStatementKindEnum;
 import ca.uhn.fhir.model.dstu2.valueset.OperationParameterUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SystemRestfulInteractionEnum;
 import ca.uhn.fhir.model.dstu2.valueset.TypeRestfulInteractionEnum;
+import ca.uhn.fhir.model.dstu2.valueset.UnknownContentCodeEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -80,10 +83,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
  * 
  * <p>
- * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is
- * always returned unless {@link #setCache(boolean)} is called with a value of <code>false</code>. This means that if
- * you are adding anything to the returned conformance instance on each call you should call
- * <code>setCache(false)</code> in your provider constructor.
+ * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is always returned unless {@link #setCache(boolean)} is called with a value of
+ * <code>false</code>. This means that if you are adding anything to the returned conformance instance on each call you should call <code>setCache(false)</code> in your provider constructor.
  * </p>
  */
 public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
@@ -114,12 +115,12 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	private void checkBindingForSystemOps(Rest rest, Set<SystemRestfulInteractionEnum> systemOps, BaseMethodBinding<?> nextMethodBinding) {
-		if (nextMethodBinding.getSystemOperationType() != null) {
-			String sysOpCode = nextMethodBinding.getSystemOperationType().getCode();
+		if (nextMethodBinding.getRestOperationType() != null) {
+			String sysOpCode = nextMethodBinding.getRestOperationType().getCode();
 			if (sysOpCode != null) {
 				SystemRestfulInteractionEnum sysOp = SystemRestfulInteractionEnum.VALUESET_BINDER.fromCodeString(sysOpCode);
 				if (sysOp == null) {
-					throw new InternalErrorException("Unknown system-restful-interaction: " + sysOpCode);
+					return;
 				}
 				if (systemOps.contains(sysOp) == false) {
 					systemOps.add(sysOp);
@@ -155,9 +156,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	/**
-	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a
-	 * mandatory element, the value should not be null (although this is not enforced). The value defaults to
-	 * "Not provided" but may be set to null, which will cause this element to be omitted.
+	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
+	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
 	 */
 	public String getPublisher() {
 		return myPublisher;
@@ -174,11 +174,12 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 		retVal.setPublisher(myPublisher);
 		retVal.setDate(DateTimeDt.withCurrentTime());
-		retVal.setFhirVersion("0.5.0"); // TODO: pull from model
-		retVal.setAcceptUnknown(false); // TODO: make this configurable - this is a fairly big effort since the parser
+		retVal.setFhirVersion("1.0.0"); // TODO: pull from model
+		retVal.setAcceptUnknown(UnknownContentCodeEnum.UNKNOWN_EXTENSIONS); // TODO: make this configurable - this is a fairly big effort since the parser
 		// needs to be modified to actually allow it
 
 		retVal.getImplementation().setDescription(myRestfulServer.getImplementationDescription());
+		retVal.setKind(ConformanceStatementKindEnum.INSTANCE);
 		retVal.getSoftware().setName(myRestfulServer.getServerName());
 		retVal.getSoftware().setVersion(myRestfulServer.getServerVersion());
 		retVal.addFormat(Constants.CT_FHIR_XML);
@@ -206,39 +207,42 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				// Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
 				// Conformance.RestResourceSearchParam>();
 				for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
-					if (nextMethodBinding.getResourceOperationType() != null) {
-						String resOpCode = nextMethodBinding.getResourceOperationType().getCode();
+					if (nextMethodBinding.getRestOperationType() != null) {
+						String resOpCode = nextMethodBinding.getRestOperationType().getCode();
 						if (resOpCode != null) {
 							TypeRestfulInteractionEnum resOp = TypeRestfulInteractionEnum.VALUESET_BINDER.fromCodeString(resOpCode);
-							if (resOp == null) {
-								throw new InternalErrorException("Unknown type-restful-interaction: " + resOpCode);
-							}
-							if (resourceOps.contains(resOp) == false) {
-								resourceOps.add(resOp);
-								resource.addInteraction().setCode(resOp);
-							}
-							if ("vread".equals(resOpCode)) {
-								// vread implies read
-								resOp = TypeRestfulInteractionEnum.READ;
+							if (resOp != null) {
 								if (resourceOps.contains(resOp) == false) {
 									resourceOps.add(resOp);
 									resource.addInteraction().setCode(resOp);
 								}
-							}
+								if ("vread".equals(resOpCode)) {
+									// vread implies read
+									resOp = TypeRestfulInteractionEnum.READ;
+									if (resourceOps.contains(resOp) == false) {
+										resourceOps.add(resOp);
+										resource.addInteraction().setCode(resOp);
+									}
+								}
 
-							if (nextMethodBinding.isSupportsConditional()) {
-								switch (resOp) {
-								case CREATE:
-									resource.setConditionalCreate(true);
-									break;
-								case DELETE:
-									resource.setConditionalDelete(true);
-									break;
-								case UPDATE:
-									resource.setConditionalUpdate(true);
-									break;
-								default:
-									break;
+								if (nextMethodBinding.isSupportsConditional()) {
+									switch (resOp) {
+									case CREATE:
+										resource.setConditionalCreate(true);
+										break;
+									case DELETE:
+										if (nextMethodBinding.isSupportsConditionalMultiple()) {
+											resource.setConditionalDelete(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED);
+										} else {
+											resource.setConditionalDelete(ConditionalDeleteStatusEnum.SINGLE_DELETES_SUPPORTED);
+										}
+										break;
+									case UPDATE:
+										resource.setConditionalUpdate(true);
+										break;
+									default:
+										break;
+									}
 								}
 							}
 						}
@@ -458,7 +462,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 		Set<String> inParams = new HashSet<String>();
 		Set<String> outParams = new HashSet<String>();
-		
+
 		for (OperationMethodBinding sharedDescription : sharedDescriptions) {
 			if (isNotBlank(sharedDescription.getDescription())) {
 				op.setDescription(sharedDescription.getDescription());
@@ -523,9 +527,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	/**
-	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a
-	 * mandatory element, the value should not be null (although this is not enforced). The value defaults to
-	 * "Not provided" but may be set to null, which will cause this element to be omitted.
+	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
+	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
 	 */
 	public void setPublisher(String thePublisher) {
 		myPublisher = thePublisher;

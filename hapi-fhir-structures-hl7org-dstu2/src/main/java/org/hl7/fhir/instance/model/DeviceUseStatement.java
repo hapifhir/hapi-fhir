@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -49,21 +49,21 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * Indicates the site on the subject's body where the device was used ( i.e. the target site).
      */
-    @Child(name = "bodySite", type = {CodeableConcept.class, BodySite.class}, order=0, min=0, max=1)
+    @Child(name = "bodySite", type = {CodeableConcept.class, BodySite.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Target body site", formalDefinition="Indicates the site on the subject's body where the device was used ( i.e. the target site)." )
     protected Type bodySite;
 
     /**
      * The time period over which the device was used.
      */
-    @Child(name = "whenUsed", type = {Period.class}, order=1, min=0, max=1)
+    @Child(name = "whenUsed", type = {Period.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="", formalDefinition="The time period over which the device was used." )
     protected Period whenUsed;
 
     /**
      * The details of the device used.
      */
-    @Child(name = "device", type = {Device.class}, order=2, min=1, max=1)
+    @Child(name = "device", type = {Device.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="", formalDefinition="The details of the device used." )
     protected Reference device;
 
@@ -75,35 +75,35 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * An external identifier for this statement such as an IRI.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="", formalDefinition="An external identifier for this statement such as an IRI." )
     protected List<Identifier> identifier;
 
     /**
      * Reason or justification for the use of the device.
      */
-    @Child(name = "indication", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "indication", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="", formalDefinition="Reason or justification for the use of the device." )
     protected List<CodeableConcept> indication;
 
     /**
      * Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.
      */
-    @Child(name = "notes", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "notes", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="", formalDefinition="Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement." )
     protected List<StringType> notes;
 
     /**
      * The time at which the statement was made/recorded.
      */
-    @Child(name = "recordedOn", type = {DateTimeType.class}, order=6, min=0, max=1)
+    @Child(name = "recordedOn", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="", formalDefinition="The time at which the statement was made/recorded." )
     protected DateTimeType recordedOn;
 
     /**
      * The patient who used the device.
      */
-    @Child(name = "subject", type = {Patient.class}, order=7, min=1, max=1)
+    @Child(name = "subject", type = {Patient.class}, order=7, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="", formalDefinition="The patient who used the device." )
     protected Reference subject;
 
@@ -115,7 +115,7 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * How often the device was used.
      */
-    @Child(name = "timing", type = {Timing.class, Period.class, DateTimeType.class}, order=8, min=0, max=1)
+    @Child(name = "timing", type = {Timing.class, Period.class, DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="", formalDefinition="How often the device was used." )
     protected Type timing;
 

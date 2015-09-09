@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -151,14 +151,14 @@ public class Provenance extends DomainResource {
         /**
          * The function of the agent with respect to the activity.
          */
-        @Child(name = "role", type = {Coding.class}, order=1, min=1, max=1)
-        @Description(shortDefinition="Agents Role", formalDefinition="The function of the agent with respect to the activity." )
+        @Child(name = "role", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="What the agents involvement was", formalDefinition="The function of the agent with respect to the activity." )
         protected Coding role;
 
         /**
          * The individual, device or organization that participated in the event.
          */
-        @Child(name = "actor", type = {Practitioner.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=2, min=0, max=1)
+        @Child(name = "actor", type = {Practitioner.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Individual, device or organization playing role", formalDefinition="The individual, device or organization that participated in the event." )
         protected Reference actor;
 
@@ -170,11 +170,18 @@ public class Provenance extends DomainResource {
         /**
          * The identify of the agent as known by the authorization system.
          */
-        @Child(name = "userId", type = {Identifier.class}, order=3, min=0, max=1)
+        @Child(name = "userId", type = {Identifier.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Authorization-system identifier for the agent", formalDefinition="The identify of the agent as known by the authorization system." )
         protected Identifier userId;
 
-        private static final long serialVersionUID = -1847456681L;
+        /**
+         * A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest.
+         */
+        @Child(name = "relatedAgent", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Track delegation between agents", formalDefinition="A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest." )
+        protected List<ProvenanceAgentRelatedAgentComponent> relatedAgent;
+
+        private static final long serialVersionUID = 1792758952L;
 
     /*
      * Constructor
@@ -278,11 +285,52 @@ public class Provenance extends DomainResource {
           return this;
         }
 
+        /**
+         * @return {@link #relatedAgent} (A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest.)
+         */
+        public List<ProvenanceAgentRelatedAgentComponent> getRelatedAgent() { 
+          if (this.relatedAgent == null)
+            this.relatedAgent = new ArrayList<ProvenanceAgentRelatedAgentComponent>();
+          return this.relatedAgent;
+        }
+
+        public boolean hasRelatedAgent() { 
+          if (this.relatedAgent == null)
+            return false;
+          for (ProvenanceAgentRelatedAgentComponent item : this.relatedAgent)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #relatedAgent} (A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest.)
+         */
+    // syntactic sugar
+        public ProvenanceAgentRelatedAgentComponent addRelatedAgent() { //3
+          ProvenanceAgentRelatedAgentComponent t = new ProvenanceAgentRelatedAgentComponent();
+          if (this.relatedAgent == null)
+            this.relatedAgent = new ArrayList<ProvenanceAgentRelatedAgentComponent>();
+          this.relatedAgent.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public ProvenanceAgentComponent addRelatedAgent(ProvenanceAgentRelatedAgentComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.relatedAgent == null)
+            this.relatedAgent = new ArrayList<ProvenanceAgentRelatedAgentComponent>();
+          this.relatedAgent.add(t);
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("role", "Coding", "The function of the agent with respect to the activity.", 0, java.lang.Integer.MAX_VALUE, role));
           childrenList.add(new Property("actor", "Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, java.lang.Integer.MAX_VALUE, actor));
           childrenList.add(new Property("userId", "Identifier", "The identify of the agent as known by the authorization system.", 0, java.lang.Integer.MAX_VALUE, userId));
+          childrenList.add(new Property("relatedAgent", "", "A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents - e.g. this human author used this device, or one person acted on another's behest.", 0, java.lang.Integer.MAX_VALUE, relatedAgent));
         }
 
       public ProvenanceAgentComponent copy() {
@@ -291,6 +339,11 @@ public class Provenance extends DomainResource {
         dst.role = role == null ? null : role.copy();
         dst.actor = actor == null ? null : actor.copy();
         dst.userId = userId == null ? null : userId.copy();
+        if (relatedAgent != null) {
+          dst.relatedAgent = new ArrayList<ProvenanceAgentRelatedAgentComponent>();
+          for (ProvenanceAgentRelatedAgentComponent i : relatedAgent)
+            dst.relatedAgent.add(i.copy());
+        };
         return dst;
       }
 
@@ -302,7 +355,7 @@ public class Provenance extends DomainResource {
           return false;
         ProvenanceAgentComponent o = (ProvenanceAgentComponent) other;
         return compareDeep(role, o.role, true) && compareDeep(actor, o.actor, true) && compareDeep(userId, o.userId, true)
-          ;
+           && compareDeep(relatedAgent, o.relatedAgent, true);
       }
 
       @Override
@@ -317,7 +370,152 @@ public class Provenance extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (role == null || role.isEmpty()) && (actor == null || actor.isEmpty())
-           && (userId == null || userId.isEmpty());
+           && (userId == null || userId.isEmpty()) && (relatedAgent == null || relatedAgent.isEmpty())
+          ;
+      }
+
+  }
+
+    @Block()
+    public static class ProvenanceAgentRelatedAgentComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The type of relationship between agents.
+         */
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Type of relationship between agents", formalDefinition="The type of relationship between agents." )
+        protected CodeableConcept type;
+
+        /**
+         * An internal reference to another agent listed in this provenance by it's id.
+         */
+        @Child(name = "target", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Reference to other agent in this resource by id", formalDefinition="An internal reference to another agent listed in this provenance by it's id." )
+        protected UriType target;
+
+        private static final long serialVersionUID = 794181198L;
+
+    /*
+     * Constructor
+     */
+      public ProvenanceAgentRelatedAgentComponent() {
+        super();
+      }
+
+    /*
+     * Constructor
+     */
+      public ProvenanceAgentRelatedAgentComponent(CodeableConcept type, UriType target) {
+        super();
+        this.type = type;
+        this.target = target;
+      }
+
+        /**
+         * @return {@link #type} (The type of relationship between agents.)
+         */
+        public CodeableConcept getType() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProvenanceAgentRelatedAgentComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new CodeableConcept(); // cc
+          return this.type;
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (The type of relationship between agents.)
+         */
+        public ProvenanceAgentRelatedAgentComponent setType(CodeableConcept value) { 
+          this.type = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #target} (An internal reference to another agent listed in this provenance by it's id.). This is the underlying object with id, value and extensions. The accessor "getTarget" gives direct access to the value
+         */
+        public UriType getTargetElement() { 
+          if (this.target == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProvenanceAgentRelatedAgentComponent.target");
+            else if (Configuration.doAutoCreate())
+              this.target = new UriType(); // bb
+          return this.target;
+        }
+
+        public boolean hasTargetElement() { 
+          return this.target != null && !this.target.isEmpty();
+        }
+
+        public boolean hasTarget() { 
+          return this.target != null && !this.target.isEmpty();
+        }
+
+        /**
+         * @param value {@link #target} (An internal reference to another agent listed in this provenance by it's id.). This is the underlying object with id, value and extensions. The accessor "getTarget" gives direct access to the value
+         */
+        public ProvenanceAgentRelatedAgentComponent setTargetElement(UriType value) { 
+          this.target = value;
+          return this;
+        }
+
+        /**
+         * @return An internal reference to another agent listed in this provenance by it's id.
+         */
+        public String getTarget() { 
+          return this.target == null ? null : this.target.getValue();
+        }
+
+        /**
+         * @param value An internal reference to another agent listed in this provenance by it's id.
+         */
+        public ProvenanceAgentRelatedAgentComponent setTarget(String value) { 
+            if (this.target == null)
+              this.target = new UriType();
+            this.target.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("type", "CodeableConcept", "The type of relationship between agents.", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("target", "uri", "An internal reference to another agent listed in this provenance by it's id.", 0, java.lang.Integer.MAX_VALUE, target));
+        }
+
+      public ProvenanceAgentRelatedAgentComponent copy() {
+        ProvenanceAgentRelatedAgentComponent dst = new ProvenanceAgentRelatedAgentComponent();
+        copyValues(dst);
+        dst.type = type == null ? null : type.copy();
+        dst.target = target == null ? null : target.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof ProvenanceAgentRelatedAgentComponent))
+          return false;
+        ProvenanceAgentRelatedAgentComponent o = (ProvenanceAgentRelatedAgentComponent) other;
+        return compareDeep(type, o.type, true) && compareDeep(target, o.target, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof ProvenanceAgentRelatedAgentComponent))
+          return false;
+        ProvenanceAgentRelatedAgentComponent o = (ProvenanceAgentRelatedAgentComponent) other;
+        return compareValues(target, o.target, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && (type == null || type.isEmpty()) && (target == null || target.isEmpty())
+          ;
       }
 
   }
@@ -327,35 +525,35 @@ public class Provenance extends DomainResource {
         /**
          * How the entity was used during the activity.
          */
-        @Child(name = "role", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "role", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="derivation | revision | quotation | source", formalDefinition="How the entity was used during the activity." )
         protected Enumeration<ProvenanceEntityRole> role;
 
         /**
          * The type of the entity. If the entity is a resource, then this is a resource type.
          */
-        @Child(name = "type", type = {Coding.class}, order=2, min=1, max=1)
-        @Description(shortDefinition="Entity Type", formalDefinition="The type of the entity. If the entity is a resource, then this is a resource type." )
+        @Child(name = "type", type = {Coding.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The type of resource in this entity", formalDefinition="The type of the entity. If the entity is a resource, then this is a resource type." )
         protected Coding type;
 
         /**
          * Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.
          */
-        @Child(name = "reference", type = {UriType.class}, order=3, min=1, max=1)
+        @Child(name = "reference", type = {UriType.class}, order=3, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Identity of entity", formalDefinition="Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative." )
         protected UriType reference;
 
         /**
          * Human-readable description of the entity.
          */
-        @Child(name = "display", type = {StringType.class}, order=4, min=0, max=1)
+        @Child(name = "display", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Human description of entity", formalDefinition="Human-readable description of the entity." )
         protected StringType display;
 
         /**
          * The entity is attributed to an agent to express the agent's responsibility for that entity, possibly along with other agents. This description can be understood as shorthand for saying that the agent was responsible for the activity which generated the entity.
          */
-        @Child(name = "agent", type = {ProvenanceAgentComponent.class}, order=5, min=0, max=1)
+        @Child(name = "agent", type = {ProvenanceAgentComponent.class}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Entity is attributed to this agent", formalDefinition="The entity is attributed to an agent to express the agent's responsibility for that entity, possibly along with other agents. This description can be understood as shorthand for saying that the agent was responsible for the activity which generated the entity." )
         protected ProvenanceAgentComponent agent;
 
@@ -618,7 +816,7 @@ public class Provenance extends DomainResource {
     /**
      * The Reference(s) that were generated or updated by  the activity described in this resource. A provenance can point to more than one target if multiple resources were created/updated by the same activity.
      */
-    @Child(name = "target", type = {}, order=0, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "target", type = {}, order=0, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Target Reference(s) (usually version specific)", formalDefinition="The Reference(s) that were generated or updated by  the activity described in this resource. A provenance can point to more than one target if multiple resources were created/updated by the same activity." )
     protected List<Reference> target;
     /**
@@ -630,35 +828,35 @@ public class Provenance extends DomainResource {
     /**
      * The period during which the activity occurred.
      */
-    @Child(name = "period", type = {Period.class}, order=1, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the activity occurred", formalDefinition="The period during which the activity occurred." )
     protected Period period;
 
     /**
      * The instant of time at which the activity was recorded.
      */
-    @Child(name = "recorded", type = {InstantType.class}, order=2, min=1, max=1)
+    @Child(name = "recorded", type = {InstantType.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the activity was recorded / updated", formalDefinition="The instant of time at which the activity was recorded." )
     protected InstantType recorded;
 
     /**
      * The reason that the activity was taking place.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "reason", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Reason the activity is occurring", formalDefinition="The reason that the activity was taking place." )
     protected List<CodeableConcept> reason;
 
     /**
      * An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.
      */
-    @Child(name = "activity", type = {CodeableConcept.class}, order=4, min=0, max=1)
+    @Child(name = "activity", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Activity that occurred", formalDefinition="An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities." )
     protected CodeableConcept activity;
 
     /**
      * Where the activity occurred, if relevant.
      */
-    @Child(name = "location", type = {Location.class}, order=5, min=0, max=1)
+    @Child(name = "location", type = {Location.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Where the activity occurred, if relevant", formalDefinition="Where the activity occurred, if relevant." )
     protected Reference location;
 
@@ -670,28 +868,28 @@ public class Provenance extends DomainResource {
     /**
      * Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc.
      */
-    @Child(name = "policy", type = {UriType.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "policy", type = {UriType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Policy or plan the activity was defined by", formalDefinition="Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc." )
     protected List<UriType> policy;
 
     /**
      * An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility.
      */
-    @Child(name = "agent", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "agent", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Agents involved in creating resource", formalDefinition="An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility." )
     protected List<ProvenanceAgentComponent> agent;
 
     /**
      * An entity used in this activity.
      */
-    @Child(name = "entity", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "entity", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="An entity used in this activity", formalDefinition="An entity used in this activity." )
     protected List<ProvenanceEntityComponent> entity;
 
     /**
      * A digital signature on the target Reference(s). The signer should match a Provenance.agent. The purpose of the signature is indicated.
      */
-    @Child(name = "signature", type = {Signature.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "signature", type = {Signature.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Signature on target", formalDefinition="A digital signature on the target Reference(s). The signer should match a Provenance.agent. The purpose of the signature is indicated." )
     protected List<Signature> signature;
 
@@ -1209,9 +1407,9 @@ public class Provenance extends DomainResource {
   public static final String SP_SIGTYPE = "sigtype";
   @SearchParamDefinition(name="agent", path="Provenance.agent.actor", description="Individual, device or organization playing role", type="reference" )
   public static final String SP_AGENT = "agent";
-  @SearchParamDefinition(name="entitytype", path="Provenance.entity.reference", description="Identity of entity", type="uri" )
+  @SearchParamDefinition(name="entitytype", path="Provenance.entity.type", description="The type of resource in this entity", type="token" )
   public static final String SP_ENTITYTYPE = "entitytype";
-  @SearchParamDefinition(name="patient", path="", description="A patient that the target resource(s) refer to", type="reference" )
+  @SearchParamDefinition(name="patient", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="start", path="Provenance.period.start", description="Starting time with inclusive boundary", type="date" )
   public static final String SP_START = "start";
@@ -1221,7 +1419,7 @@ public class Provenance extends DomainResource {
   public static final String SP_LOCATION = "location";
   @SearchParamDefinition(name="userid", path="Provenance.agent.userId", description="Authorization-system identifier for the agent", type="token" )
   public static final String SP_USERID = "userid";
-  @SearchParamDefinition(name="entity", path="Provenance.entity.type", description="Entity Type", type="token" )
+  @SearchParamDefinition(name="entity", path="Provenance.entity.reference", description="Identity of entity", type="uri" )
   public static final String SP_ENTITY = "entity";
   @SearchParamDefinition(name="target", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference" )
   public static final String SP_TARGET = "target";

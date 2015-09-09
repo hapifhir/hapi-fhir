@@ -73,11 +73,11 @@ public class SystemProviderDstu2Test  extends BaseJpaTest {
 		ourLog.info(response);
 		
 		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
-		IdDt id1_1 = new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation());
+		IdDt id1_1 = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals("Provenance", id1_1.getResourceType());
-		IdDt id1_2 = new IdDt(resp.getEntry().get(2).getTransactionResponse().getLocation());
-		IdDt id1_3 = new IdDt(resp.getEntry().get(3).getTransactionResponse().getLocation());
-		IdDt id1_4 = new IdDt(resp.getEntry().get(4).getTransactionResponse().getLocation());
+		IdDt id1_2 = new IdDt(resp.getEntry().get(1).getResponse().getLocation());
+		IdDt id1_3 = new IdDt(resp.getEntry().get(2).getResponse().getLocation());
+		IdDt id1_4 = new IdDt(resp.getEntry().get(3).getResponse().getLocation());
 
 		/*
 		 * Same bundle!
@@ -89,10 +89,10 @@ public class SystemProviderDstu2Test  extends BaseJpaTest {
 		ourLog.info(response);
 		
 		resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
-		IdDt id2_1 = new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation());
-		IdDt id2_2 = new IdDt(resp.getEntry().get(2).getTransactionResponse().getLocation());
-		IdDt id2_3 = new IdDt(resp.getEntry().get(3).getTransactionResponse().getLocation());
-		IdDt id2_4 = new IdDt(resp.getEntry().get(4).getTransactionResponse().getLocation());
+		IdDt id2_1 = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
+		IdDt id2_2 = new IdDt(resp.getEntry().get(1).getResponse().getLocation());
+		IdDt id2_3 = new IdDt(resp.getEntry().get(2).getResponse().getLocation());
+		IdDt id2_4 = new IdDt(resp.getEntry().get(3).getResponse().getLocation());
 		
 		assertNotEquals(id1_1.toVersionless(), id2_1.toVersionless());
 		assertEquals("Provenance", id2_1.getResourceType());

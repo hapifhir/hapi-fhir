@@ -30,14 +30,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -86,23 +86,18 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 	}
 
 	@Override
-	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
 
-		Object response = invokeServerMethod(theMethodParams);
+		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 		return toResourceList(response);
 	}
 
 	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return RestfulOperationTypeEnum.SEARCH_TYPE;
-	}
-
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return null;
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.SEARCH_TYPE;
 	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DynamicSearchMethodBinding.class);

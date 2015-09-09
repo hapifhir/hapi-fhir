@@ -1,8 +1,11 @@
 package ca.uhn.fhir.rest.client;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
+
+import java.net.URL;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
@@ -25,9 +28,13 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.PortUtil;
+import ch.qos.logback.classic.BasicConfigurator;
 import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.classic.util.LogbackMDCAdapter;
 import ch.qos.logback.core.Appender;
 
 /**
@@ -44,12 +51,16 @@ public class LoggingInterceptorTest {
 	@SuppressWarnings("unchecked")
 	@Before
 	public void before() {
+
 		/*
 		 * This is a bit funky, but it's useful for verifying that the headers actually get logged
 		 */
-		myLoggerRoot = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
 		myMockAppender = mock(Appender.class);
 		when(myMockAppender.getName()).thenReturn("MOCK");
+
+		org.slf4j.Logger logger = LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+
+		myLoggerRoot = (ch.qos.logback.classic.Logger) logger;
 		myLoggerRoot.addAppender(myMockAppender);
 	}
 
@@ -83,6 +94,15 @@ public class LoggingInterceptorTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
+
+		URL conf = LoggingInterceptor.class.getResource("/logback-test-dstuforce.xml");
+		assertNotNull(conf);
+		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+		JoranConfigurator configurator = new JoranConfigurator();
+		configurator.setContext(context);
+		context.reset();
+		configurator.doConfigure(conf);
+
 		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3EntityNamePartType {
@@ -90,7 +90,7 @@ public enum V3EntityNamePartType {
           switch (this) {
             case DEL: return "A delimiter has no meaning other than being literally printed in this name representation.  A delimiter has no implicit leading and trailing white space.";
             case FAM: return "Family name, this is the name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.";
-            case GIV: return "Given name (don't call it 'first name' since this given names do not always come first)";
+            case GIV: return "Given name (don't call it \"first name\" since this given names do not always come first)";
             case PFX: return "A prefix has a strong association to the immediately following name part. A prefix has no implicit trailing white space (it has implicit leading white space though). Note that prefixes can be inverted.";
             case SFX: return "Description:A suffix has a strong association to the immediately preceding name part. A suffix has no implicit leading white space (it has implicit trailing white space though). Suffices cannot be inverted.";
             default: return "?";

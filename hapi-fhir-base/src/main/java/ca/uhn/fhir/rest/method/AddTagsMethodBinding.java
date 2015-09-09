@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.AddTags;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 
 class AddTagsMethodBinding extends BaseAddOrDeleteTagsMethodBinding {
 
@@ -37,8 +38,8 @@ class AddTagsMethodBinding extends BaseAddOrDeleteTagsMethodBinding {
 	}
 
 	@Override
-	public OtherOperationTypeEnum getOtherOperationType() {
-		return OtherOperationTypeEnum.ADD_TAGS;
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.ADD_TAGS;
 	}
 
 }

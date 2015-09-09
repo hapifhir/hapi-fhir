@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3EntityNamePartTypeR2 {
@@ -86,7 +86,7 @@ public enum V3EntityNamePartTypeR2 {
           switch (this) {
             case DEL: return "Description:A delimiter has no meaning other than being literally printed in this name representation. A delimiter has no implicit leading and trailing white space.";
             case FAM: return "Description:Family name, this is the name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.";
-            case GIV: return "Description:Given name. Note: don't call it 'first name' since the given names do not always come first.";
+            case GIV: return "Description:Given name. Note: don't call it \"first name\" since the given names do not always come first.";
             case TITLE: return "Description:Part of the name that is acquired as a title due to academic, legal, employment or nobility status etc.\r\n\n                        \n                           Note:Title name parts include name parts that come after the name such as qualifications, even if they are not always considered to be titles.";
             default: return "?";
           }

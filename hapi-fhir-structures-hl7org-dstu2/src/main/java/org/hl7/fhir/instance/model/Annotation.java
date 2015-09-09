@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -48,21 +48,21 @@ public class Annotation extends Type implements ICompositeType {
     /**
      * The individual responsible for making the annotation.
      */
-    @Child(name = "author", type = {Practitioner.class, Patient.class, RelatedPerson.class, StringType.class}, order=0, min=0, max=1)
+    @Child(name = "author", type = {Practitioner.class, Patient.class, RelatedPerson.class, StringType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Individual responsible for the annotation", formalDefinition="The individual responsible for making the annotation." )
     protected Type author;
 
     /**
      * Indicates when this particular annotation was made.
      */
-    @Child(name = "time", type = {DateTimeType.class}, order=1, min=0, max=1)
+    @Child(name = "time", type = {DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the annotation was made", formalDefinition="Indicates when this particular annotation was made." )
     protected DateTimeType time;
 
     /**
      * The text of the annotation.
      */
-    @Child(name = "text", type = {StringType.class}, order=2, min=1, max=1)
+    @Child(name = "text", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The annotation  - text content", formalDefinition="The text of the annotation." )
     protected StringType text;
 

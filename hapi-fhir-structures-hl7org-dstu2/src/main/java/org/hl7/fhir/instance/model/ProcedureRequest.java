@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -330,166 +330,57 @@ public class ProcedureRequest extends DomainResource {
       }
     }
 
-    @Block()
-    public static class ProcedureRequestBodySiteComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Indicates the site on the subject's body where the procedure should be performed ( i.e. the target sites).
-         */
-        @Child(name = "site", type = {CodeableConcept.class, BodySite.class}, order=1, min=1, max=1)
-        @Description(shortDefinition="Target body site", formalDefinition="Indicates the site on the subject's body where the procedure should be performed ( i.e. the target sites)." )
-        protected Type site;
-
-        private static final long serialVersionUID = 1429072605L;
-
-    /*
-     * Constructor
-     */
-      public ProcedureRequestBodySiteComponent() {
-        super();
-      }
-
-    /*
-     * Constructor
-     */
-      public ProcedureRequestBodySiteComponent(Type site) {
-        super();
-        this.site = site;
-      }
-
-        /**
-         * @return {@link #site} (Indicates the site on the subject's body where the procedure should be performed ( i.e. the target sites).)
-         */
-        public Type getSite() { 
-          return this.site;
-        }
-
-        /**
-         * @return {@link #site} (Indicates the site on the subject's body where the procedure should be performed ( i.e. the target sites).)
-         */
-        public CodeableConcept getSiteCodeableConcept() throws Exception { 
-          if (!(this.site instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.site.getClass().getName()+" was encountered");
-          return (CodeableConcept) this.site;
-        }
-
-        public boolean hasSiteCodeableConcept() throws Exception { 
-          return this.site instanceof CodeableConcept;
-        }
-
-        /**
-         * @return {@link #site} (Indicates the site on the subject's body where the procedure should be performed ( i.e. the target sites).)
-         */
-        public Reference getSiteReference() throws Exception { 
-          if (!(this.site instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.site.getClass().getName()+" was encountered");
-          return (Reference) this.site;
-        }
-
-        public boolean hasSiteReference() throws Exception { 
-          return this.site instanceof Reference;
-        }
-
-        public boolean hasSite() { 
-          return this.site != null && !this.site.isEmpty();
-        }
-
-        /**
-         * @param value {@link #site} (Indicates the site on the subject's body where the procedure should be performed ( i.e. the target sites).)
-         */
-        public ProcedureRequestBodySiteComponent setSite(Type value) { 
-          this.site = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("site[x]", "CodeableConcept|Reference(BodySite)", "Indicates the site on the subject's body where the procedure should be performed ( i.e. the target sites).", 0, java.lang.Integer.MAX_VALUE, site));
-        }
-
-      public ProcedureRequestBodySiteComponent copy() {
-        ProcedureRequestBodySiteComponent dst = new ProcedureRequestBodySiteComponent();
-        copyValues(dst);
-        dst.site = site == null ? null : site.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ProcedureRequestBodySiteComponent))
-          return false;
-        ProcedureRequestBodySiteComponent o = (ProcedureRequestBodySiteComponent) other;
-        return compareDeep(site, o.site, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ProcedureRequestBodySiteComponent))
-          return false;
-        ProcedureRequestBodySiteComponent o = (ProcedureRequestBodySiteComponent) other;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && (site == null || site.isEmpty());
-      }
-
-  }
-
     /**
      * Identifiers assigned to this order by the order or by the receiver.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Identifier", formalDefinition="Identifiers assigned to this order by the order or by the receiver." )
     protected List<Identifier> identifier;
 
     /**
-     * The patient who will receive the procedure.
+     * The patient who will receive the procedure or a group of subjects.
      */
-    @Child(name = "subject", type = {Patient.class}, order=1, min=1, max=1)
-    @Description(shortDefinition="Subject", formalDefinition="The patient who will receive the procedure." )
+    @Child(name = "subject", type = {Patient.class, Group.class}, order=1, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Subject", formalDefinition="The patient who will receive the procedure or a group of subjects." )
     protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (The patient who will receive the procedure.)
+     * The actual object that is the target of the reference (The patient who will receive the procedure or a group of subjects.)
      */
-    protected Patient subjectTarget;
+    protected Resource subjectTarget;
 
     /**
      * The specific procedure that is ordered. Use text if the exact nature of the procedure can't be coded.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=1, max=1)
-    @Description(shortDefinition="Procedure Type", formalDefinition="The specific procedure that is ordered. Use text if the exact nature of the procedure can't be coded." )
-    protected CodeableConcept type;
+    @Child(name = "code", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Procedure Code", formalDefinition="The specific procedure that is ordered. Use text if the exact nature of the procedure can't be coded." )
+    protected CodeableConcept code;
 
     /**
      * Indicates the sites on the subject's body where the procedure should be performed ( i.e. the target sites).
      */
-    @Child(name = "bodySite", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "bodySite", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Target body sites", formalDefinition="Indicates the sites on the subject's body where the procedure should be performed ( i.e. the target sites)." )
-    protected List<ProcedureRequestBodySiteComponent> bodySite;
+    protected List<CodeableConcept> bodySite;
 
     /**
      * The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance.
      */
-    @Child(name = "indication", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "reason", type = {CodeableConcept.class, Condition.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Indication", formalDefinition="The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance." )
-    protected List<CodeableConcept> indication;
+    protected Type reason;
 
     /**
      * The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".
      */
-    @Child(name = "timing", type = {DateTimeType.class, Period.class, Timing.class}, order=5, min=0, max=1)
-    @Description(shortDefinition="Procedure timing schedule", formalDefinition="The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. 'Every 8 hours'; 'Three times a day'; '1/2 an hour before breakfast for 10 days from 23-Dec 2011:'; '15 Oct 2013, 17 Oct 2013 and 1 Nov 2013'." )
-    protected Type timing;
+    @Child(name = "scheduled", type = {DateTimeType.class, Period.class, Timing.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Procedure timing schedule", formalDefinition="The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. \"Every 8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\"; \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\"." )
+    protected Type scheduled;
 
     /**
      * The encounter within which the procedure proposal or request was created.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=6, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Encounter", formalDefinition="The encounter within which the procedure proposal or request was created." )
     protected Reference encounter;
 
@@ -501,7 +392,7 @@ public class ProcedureRequest extends DomainResource {
     /**
      * E.g. surgeon, anaethetist, endoscopist.
      */
-    @Child(name = "performer", type = {Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, order=7, min=0, max=1)
+    @Child(name = "performer", type = {Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Performer", formalDefinition="E.g. surgeon, anaethetist, endoscopist." )
     protected Reference performer;
 
@@ -513,35 +404,35 @@ public class ProcedureRequest extends DomainResource {
     /**
      * The status of the order.
      */
-    @Child(name = "status", type = {CodeType.class}, order=8, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=8, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="proposed | draft | requested | received | accepted | in-progress | completed | suspended | rejected | aborted", formalDefinition="The status of the order." )
     protected Enumeration<ProcedureRequestStatus> status;
 
     /**
      * Any other notes associated with this proposal or order - e.g., provider instructions.
      */
-    @Child(name = "notes", type = {StringType.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "notes", type = {Annotation.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Notes", formalDefinition="Any other notes associated with this proposal or order - e.g., provider instructions." )
-    protected List<StringType> notes;
+    protected List<Annotation> notes;
 
     /**
      * If a CodeableConcept is present, it indicates the pre-condition for performing the procedure.
      */
-    @Child(name = "asNeeded", type = {BooleanType.class, CodeableConcept.class}, order=10, min=0, max=1)
+    @Child(name = "asNeeded", type = {BooleanType.class, CodeableConcept.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="PRN", formalDefinition="If a CodeableConcept is present, it indicates the pre-condition for performing the procedure." )
     protected Type asNeeded;
 
     /**
      * The time when the request was made.
      */
-    @Child(name = "orderedOn", type = {DateTimeType.class}, order=11, min=0, max=1)
+    @Child(name = "orderedOn", type = {DateTimeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When Requested", formalDefinition="The time when the request was made." )
     protected DateTimeType orderedOn;
 
     /**
      * The healthcare professional responsible for proposing or ordering the procedure.
      */
-    @Child(name = "orderer", type = {Practitioner.class, Patient.class, RelatedPerson.class, Device.class}, order=12, min=0, max=1)
+    @Child(name = "orderer", type = {Practitioner.class, Patient.class, RelatedPerson.class, Device.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Ordering Party", formalDefinition="The healthcare professional responsible for proposing or ordering the procedure." )
     protected Reference orderer;
 
@@ -553,11 +444,11 @@ public class ProcedureRequest extends DomainResource {
     /**
      * The clinical priority associated with this order.
      */
-    @Child(name = "priority", type = {CodeType.class}, order=13, min=0, max=1)
+    @Child(name = "priority", type = {CodeType.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="routine | urgent | stat | asap", formalDefinition="The clinical priority associated with this order." )
     protected Enumeration<ProcedureRequestPriority> priority;
 
-    private static final long serialVersionUID = -1687850759L;
+    private static final long serialVersionUID = -916650578L;
 
   /*
    * Constructor
@@ -569,10 +460,10 @@ public class ProcedureRequest extends DomainResource {
   /*
    * Constructor
    */
-    public ProcedureRequest(Reference subject, CodeableConcept type) {
+    public ProcedureRequest(Reference subject, CodeableConcept code) {
       super();
       this.subject = subject;
-      this.type = type;
+      this.code = code;
     }
 
     /**
@@ -616,7 +507,7 @@ public class ProcedureRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} (The patient who will receive the procedure.)
+     * @return {@link #subject} (The patient who will receive the procedure or a group of subjects.)
      */
     public Reference getSubject() { 
       if (this.subject == null)
@@ -632,7 +523,7 @@ public class ProcedureRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #subject} (The patient who will receive the procedure.)
+     * @param value {@link #subject} (The patient who will receive the procedure or a group of subjects.)
      */
     public ProcedureRequest setSubject(Reference value) { 
       this.subject = value;
@@ -640,62 +531,57 @@ public class ProcedureRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient who will receive the procedure.)
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient who will receive the procedure or a group of subjects.)
      */
-    public Patient getSubjectTarget() { 
-      if (this.subjectTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ProcedureRequest.subject");
-        else if (Configuration.doAutoCreate())
-          this.subjectTarget = new Patient(); // aa
+    public Resource getSubjectTarget() { 
       return this.subjectTarget;
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient who will receive the procedure.)
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient who will receive the procedure or a group of subjects.)
      */
-    public ProcedureRequest setSubjectTarget(Patient value) { 
+    public ProcedureRequest setSubjectTarget(Resource value) { 
       this.subjectTarget = value;
       return this;
     }
 
     /**
-     * @return {@link #type} (The specific procedure that is ordered. Use text if the exact nature of the procedure can't be coded.)
+     * @return {@link #code} (The specific procedure that is ordered. Use text if the exact nature of the procedure can't be coded.)
      */
-    public CodeableConcept getType() { 
-      if (this.type == null)
+    public CodeableConcept getCode() { 
+      if (this.code == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ProcedureRequest.type");
+          throw new Error("Attempt to auto-create ProcedureRequest.code");
         else if (Configuration.doAutoCreate())
-          this.type = new CodeableConcept(); // cc
-      return this.type;
+          this.code = new CodeableConcept(); // cc
+      return this.code;
     }
 
-    public boolean hasType() { 
-      return this.type != null && !this.type.isEmpty();
+    public boolean hasCode() { 
+      return this.code != null && !this.code.isEmpty();
     }
 
     /**
-     * @param value {@link #type} (The specific procedure that is ordered. Use text if the exact nature of the procedure can't be coded.)
+     * @param value {@link #code} (The specific procedure that is ordered. Use text if the exact nature of the procedure can't be coded.)
      */
-    public ProcedureRequest setType(CodeableConcept value) { 
-      this.type = value;
+    public ProcedureRequest setCode(CodeableConcept value) { 
+      this.code = value;
       return this;
     }
 
     /**
      * @return {@link #bodySite} (Indicates the sites on the subject's body where the procedure should be performed ( i.e. the target sites).)
      */
-    public List<ProcedureRequestBodySiteComponent> getBodySite() { 
+    public List<CodeableConcept> getBodySite() { 
       if (this.bodySite == null)
-        this.bodySite = new ArrayList<ProcedureRequestBodySiteComponent>();
+        this.bodySite = new ArrayList<CodeableConcept>();
       return this.bodySite;
     }
 
     public boolean hasBodySite() { 
       if (this.bodySite == null)
         return false;
-      for (ProcedureRequestBodySiteComponent item : this.bodySite)
+      for (CodeableConcept item : this.bodySite)
         if (!item.isEmpty())
           return true;
       return false;
@@ -705,119 +591,124 @@ public class ProcedureRequest extends DomainResource {
      * @return {@link #bodySite} (Indicates the sites on the subject's body where the procedure should be performed ( i.e. the target sites).)
      */
     // syntactic sugar
-    public ProcedureRequestBodySiteComponent addBodySite() { //3
-      ProcedureRequestBodySiteComponent t = new ProcedureRequestBodySiteComponent();
-      if (this.bodySite == null)
-        this.bodySite = new ArrayList<ProcedureRequestBodySiteComponent>();
-      this.bodySite.add(t);
-      return t;
-    }
-
-    // syntactic sugar
-    public ProcedureRequest addBodySite(ProcedureRequestBodySiteComponent t) { //3
-      if (t == null)
-        return this;
-      if (this.bodySite == null)
-        this.bodySite = new ArrayList<ProcedureRequestBodySiteComponent>();
-      this.bodySite.add(t);
-      return this;
-    }
-
-    /**
-     * @return {@link #indication} (The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance.)
-     */
-    public List<CodeableConcept> getIndication() { 
-      if (this.indication == null)
-        this.indication = new ArrayList<CodeableConcept>();
-      return this.indication;
-    }
-
-    public boolean hasIndication() { 
-      if (this.indication == null)
-        return false;
-      for (CodeableConcept item : this.indication)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    /**
-     * @return {@link #indication} (The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance.)
-     */
-    // syntactic sugar
-    public CodeableConcept addIndication() { //3
+    public CodeableConcept addBodySite() { //3
       CodeableConcept t = new CodeableConcept();
-      if (this.indication == null)
-        this.indication = new ArrayList<CodeableConcept>();
-      this.indication.add(t);
+      if (this.bodySite == null)
+        this.bodySite = new ArrayList<CodeableConcept>();
+      this.bodySite.add(t);
       return t;
     }
 
     // syntactic sugar
-    public ProcedureRequest addIndication(CodeableConcept t) { //3
+    public ProcedureRequest addBodySite(CodeableConcept t) { //3
       if (t == null)
         return this;
-      if (this.indication == null)
-        this.indication = new ArrayList<CodeableConcept>();
-      this.indication.add(t);
+      if (this.bodySite == null)
+        this.bodySite = new ArrayList<CodeableConcept>();
+      this.bodySite.add(t);
       return this;
     }
 
     /**
-     * @return {@link #timing} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
+     * @return {@link #reason} (The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance.)
      */
-    public Type getTiming() { 
-      return this.timing;
+    public Type getReason() { 
+      return this.reason;
     }
 
     /**
-     * @return {@link #timing} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
+     * @return {@link #reason} (The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance.)
      */
-    public DateTimeType getTimingDateTimeType() throws Exception { 
-      if (!(this.timing instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
-      return (DateTimeType) this.timing;
+    public CodeableConcept getReasonCodeableConcept() throws Exception { 
+      if (!(this.reason instanceof CodeableConcept))
+        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.reason;
     }
 
-    public boolean hasTimingDateTimeType() throws Exception { 
-      return this.timing instanceof DateTimeType;
+    public boolean hasReasonCodeableConcept() throws Exception { 
+      return this.reason instanceof CodeableConcept;
     }
 
     /**
-     * @return {@link #timing} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
+     * @return {@link #reason} (The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance.)
      */
-    public Period getTimingPeriod() throws Exception { 
-      if (!(this.timing instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.timing.getClass().getName()+" was encountered");
-      return (Period) this.timing;
+    public Reference getReasonReference() throws Exception { 
+      if (!(this.reason instanceof Reference))
+        throw new Exception("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
+      return (Reference) this.reason;
     }
 
-    public boolean hasTimingPeriod() throws Exception { 
-      return this.timing instanceof Period;
+    public boolean hasReasonReference() throws Exception { 
+      return this.reason instanceof Reference;
+    }
+
+    public boolean hasReason() { 
+      return this.reason != null && !this.reason.isEmpty();
     }
 
     /**
-     * @return {@link #timing} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
+     * @param value {@link #reason} (The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance.)
      */
-    public Timing getTimingTiming() throws Exception { 
-      if (!(this.timing instanceof Timing))
-        throw new Exception("Type mismatch: the type Timing was expected, but "+this.timing.getClass().getName()+" was encountered");
-      return (Timing) this.timing;
-    }
-
-    public boolean hasTimingTiming() throws Exception { 
-      return this.timing instanceof Timing;
-    }
-
-    public boolean hasTiming() { 
-      return this.timing != null && !this.timing.isEmpty();
+    public ProcedureRequest setReason(Type value) { 
+      this.reason = value;
+      return this;
     }
 
     /**
-     * @param value {@link #timing} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
+     * @return {@link #scheduled} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
-    public ProcedureRequest setTiming(Type value) { 
-      this.timing = value;
+    public Type getScheduled() { 
+      return this.scheduled;
+    }
+
+    /**
+     * @return {@link #scheduled} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
+     */
+    public DateTimeType getScheduledDateTimeType() throws Exception { 
+      if (!(this.scheduled instanceof DateTimeType))
+        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.scheduled.getClass().getName()+" was encountered");
+      return (DateTimeType) this.scheduled;
+    }
+
+    public boolean hasScheduledDateTimeType() throws Exception { 
+      return this.scheduled instanceof DateTimeType;
+    }
+
+    /**
+     * @return {@link #scheduled} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
+     */
+    public Period getScheduledPeriod() throws Exception { 
+      if (!(this.scheduled instanceof Period))
+        throw new Exception("Type mismatch: the type Period was expected, but "+this.scheduled.getClass().getName()+" was encountered");
+      return (Period) this.scheduled;
+    }
+
+    public boolean hasScheduledPeriod() throws Exception { 
+      return this.scheduled instanceof Period;
+    }
+
+    /**
+     * @return {@link #scheduled} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
+     */
+    public Timing getScheduledTiming() throws Exception { 
+      if (!(this.scheduled instanceof Timing))
+        throw new Exception("Type mismatch: the type Timing was expected, but "+this.scheduled.getClass().getName()+" was encountered");
+      return (Timing) this.scheduled;
+    }
+
+    public boolean hasScheduledTiming() throws Exception { 
+      return this.scheduled instanceof Timing;
+    }
+
+    public boolean hasScheduled() { 
+      return this.scheduled != null && !this.scheduled.isEmpty();
+    }
+
+    /**
+     * @param value {@link #scheduled} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
+     */
+    public ProcedureRequest setScheduled(Type value) { 
+      this.scheduled = value;
       return this;
     }
 
@@ -956,16 +847,16 @@ public class ProcedureRequest extends DomainResource {
     /**
      * @return {@link #notes} (Any other notes associated with this proposal or order - e.g., provider instructions.)
      */
-    public List<StringType> getNotes() { 
+    public List<Annotation> getNotes() { 
       if (this.notes == null)
-        this.notes = new ArrayList<StringType>();
+        this.notes = new ArrayList<Annotation>();
       return this.notes;
     }
 
     public boolean hasNotes() { 
       if (this.notes == null)
         return false;
-      for (StringType item : this.notes)
+      for (Annotation item : this.notes)
         if (!item.isEmpty())
           return true;
       return false;
@@ -975,36 +866,22 @@ public class ProcedureRequest extends DomainResource {
      * @return {@link #notes} (Any other notes associated with this proposal or order - e.g., provider instructions.)
      */
     // syntactic sugar
-    public StringType addNotesElement() {//2 
-      StringType t = new StringType();
+    public Annotation addNotes() { //3
+      Annotation t = new Annotation();
       if (this.notes == null)
-        this.notes = new ArrayList<StringType>();
+        this.notes = new ArrayList<Annotation>();
       this.notes.add(t);
       return t;
     }
 
-    /**
-     * @param value {@link #notes} (Any other notes associated with this proposal or order - e.g., provider instructions.)
-     */
-    public ProcedureRequest addNotes(String value) { //1
-      StringType t = new StringType();
-      t.setValue(value);
+    // syntactic sugar
+    public ProcedureRequest addNotes(Annotation t) { //3
+      if (t == null)
+        return this;
       if (this.notes == null)
-        this.notes = new ArrayList<StringType>();
+        this.notes = new ArrayList<Annotation>();
       this.notes.add(t);
       return this;
-    }
-
-    /**
-     * @param value {@link #notes} (Any other notes associated with this proposal or order - e.g., provider instructions.)
-     */
-    public boolean hasNotes(String value) { 
-      if (this.notes == null)
-        return false;
-      for (StringType v : this.notes)
-        if (v.equals(value)) // string
-          return true;
-      return false;
     }
 
     /**
@@ -1192,15 +1069,15 @@ public class ProcedureRequest extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Identifiers assigned to this order by the order or by the receiver.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("subject", "Reference(Patient)", "The patient who will receive the procedure.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("type", "CodeableConcept", "The specific procedure that is ordered. Use text if the exact nature of the procedure can't be coded.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("bodySite", "", "Indicates the sites on the subject's body where the procedure should be performed ( i.e. the target sites).", 0, java.lang.Integer.MAX_VALUE, bodySite));
-        childrenList.add(new Property("indication", "CodeableConcept", "The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance.", 0, java.lang.Integer.MAX_VALUE, indication));
-        childrenList.add(new Property("timing[x]", "dateTime|Period|Timing", "The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. 'Every 8 hours'; 'Three times a day'; '1/2 an hour before breakfast for 10 days from 23-Dec 2011:'; '15 Oct 2013, 17 Oct 2013 and 1 Nov 2013'.", 0, java.lang.Integer.MAX_VALUE, timing));
+        childrenList.add(new Property("subject", "Reference(Patient|Group)", "The patient who will receive the procedure or a group of subjects.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("code", "CodeableConcept", "The specific procedure that is ordered. Use text if the exact nature of the procedure can't be coded.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("bodySite", "CodeableConcept", "Indicates the sites on the subject's body where the procedure should be performed ( i.e. the target sites).", 0, java.lang.Integer.MAX_VALUE, bodySite));
+        childrenList.add(new Property("reason[x]", "CodeableConcept|Reference(Condition)", "The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance.", 0, java.lang.Integer.MAX_VALUE, reason));
+        childrenList.add(new Property("scheduled[x]", "dateTime|Period|Timing", "The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. \"Every 8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\"; \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\".", 0, java.lang.Integer.MAX_VALUE, scheduled));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "The encounter within which the procedure proposal or request was created.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("performer", "Reference(Practitioner|Organization|Patient|RelatedPerson)", "E.g. surgeon, anaethetist, endoscopist.", 0, java.lang.Integer.MAX_VALUE, performer));
         childrenList.add(new Property("status", "code", "The status of the order.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("notes", "string", "Any other notes associated with this proposal or order - e.g., provider instructions.", 0, java.lang.Integer.MAX_VALUE, notes));
+        childrenList.add(new Property("notes", "Annotation", "Any other notes associated with this proposal or order - e.g., provider instructions.", 0, java.lang.Integer.MAX_VALUE, notes));
         childrenList.add(new Property("asNeeded[x]", "boolean|CodeableConcept", "If a CodeableConcept is present, it indicates the pre-condition for performing the procedure.", 0, java.lang.Integer.MAX_VALUE, asNeeded));
         childrenList.add(new Property("orderedOn", "dateTime", "The time when the request was made.", 0, java.lang.Integer.MAX_VALUE, orderedOn));
         childrenList.add(new Property("orderer", "Reference(Practitioner|Patient|RelatedPerson|Device)", "The healthcare professional responsible for proposing or ordering the procedure.", 0, java.lang.Integer.MAX_VALUE, orderer));
@@ -1216,24 +1093,20 @@ public class ProcedureRequest extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.subject = subject == null ? null : subject.copy();
-        dst.type = type == null ? null : type.copy();
+        dst.code = code == null ? null : code.copy();
         if (bodySite != null) {
-          dst.bodySite = new ArrayList<ProcedureRequestBodySiteComponent>();
-          for (ProcedureRequestBodySiteComponent i : bodySite)
+          dst.bodySite = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : bodySite)
             dst.bodySite.add(i.copy());
         };
-        if (indication != null) {
-          dst.indication = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : indication)
-            dst.indication.add(i.copy());
-        };
-        dst.timing = timing == null ? null : timing.copy();
+        dst.reason = reason == null ? null : reason.copy();
+        dst.scheduled = scheduled == null ? null : scheduled.copy();
         dst.encounter = encounter == null ? null : encounter.copy();
         dst.performer = performer == null ? null : performer.copy();
         dst.status = status == null ? null : status.copy();
         if (notes != null) {
-          dst.notes = new ArrayList<StringType>();
-          for (StringType i : notes)
+          dst.notes = new ArrayList<Annotation>();
+          for (Annotation i : notes)
             dst.notes.add(i.copy());
         };
         dst.asNeeded = asNeeded == null ? null : asNeeded.copy();
@@ -1254,8 +1127,8 @@ public class ProcedureRequest extends DomainResource {
         if (!(other instanceof ProcedureRequest))
           return false;
         ProcedureRequest o = (ProcedureRequest) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(subject, o.subject, true) && compareDeep(type, o.type, true)
-           && compareDeep(bodySite, o.bodySite, true) && compareDeep(indication, o.indication, true) && compareDeep(timing, o.timing, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(subject, o.subject, true) && compareDeep(code, o.code, true)
+           && compareDeep(bodySite, o.bodySite, true) && compareDeep(reason, o.reason, true) && compareDeep(scheduled, o.scheduled, true)
            && compareDeep(encounter, o.encounter, true) && compareDeep(performer, o.performer, true) && compareDeep(status, o.status, true)
            && compareDeep(notes, o.notes, true) && compareDeep(asNeeded, o.asNeeded, true) && compareDeep(orderedOn, o.orderedOn, true)
            && compareDeep(orderer, o.orderer, true) && compareDeep(priority, o.priority, true);
@@ -1268,17 +1141,17 @@ public class ProcedureRequest extends DomainResource {
         if (!(other instanceof ProcedureRequest))
           return false;
         ProcedureRequest o = (ProcedureRequest) other;
-        return compareValues(status, o.status, true) && compareValues(notes, o.notes, true) && compareValues(orderedOn, o.orderedOn, true)
-           && compareValues(priority, o.priority, true);
+        return compareValues(status, o.status, true) && compareValues(orderedOn, o.orderedOn, true) && compareValues(priority, o.priority, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (subject == null || subject.isEmpty())
-           && (type == null || type.isEmpty()) && (bodySite == null || bodySite.isEmpty()) && (indication == null || indication.isEmpty())
-           && (timing == null || timing.isEmpty()) && (encounter == null || encounter.isEmpty()) && (performer == null || performer.isEmpty())
-           && (status == null || status.isEmpty()) && (notes == null || notes.isEmpty()) && (asNeeded == null || asNeeded.isEmpty())
-           && (orderedOn == null || orderedOn.isEmpty()) && (orderer == null || orderer.isEmpty()) && (priority == null || priority.isEmpty())
-          ;
+           && (code == null || code.isEmpty()) && (bodySite == null || bodySite.isEmpty()) && (reason == null || reason.isEmpty())
+           && (scheduled == null || scheduled.isEmpty()) && (encounter == null || encounter.isEmpty())
+           && (performer == null || performer.isEmpty()) && (status == null || status.isEmpty()) && (notes == null || notes.isEmpty())
+           && (asNeeded == null || asNeeded.isEmpty()) && (orderedOn == null || orderedOn.isEmpty())
+           && (orderer == null || orderer.isEmpty()) && (priority == null || priority.isEmpty());
       }
 
   @Override
@@ -1286,6 +1159,8 @@ public class ProcedureRequest extends DomainResource {
     return ResourceType.ProcedureRequest;
    }
 
+  @SearchParamDefinition(name="identifier", path="ProcedureRequest.identifier", description="A unique identifier of the Procedure Request", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="performer", path="ProcedureRequest.performer", description="Performer", type="reference" )
   public static final String SP_PERFORMER = "performer";
   @SearchParamDefinition(name="subject", path="ProcedureRequest.subject", description="Search by subject", type="reference" )

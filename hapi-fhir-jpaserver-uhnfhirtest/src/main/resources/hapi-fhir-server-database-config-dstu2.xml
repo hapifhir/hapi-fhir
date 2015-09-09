@@ -1,7 +1,5 @@
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:security="http://www.springframework.org/schema/security"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context" xmlns:security="http://www.springframework.org/schema/security"
 	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
 	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
@@ -13,33 +11,19 @@
 	<context:annotation-config />
 	<context:mbean-server />
 
-	<bean depends-on="dbServer" id="myPersistenceDataSource"
-		class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
-		<!-- ;create=true /opt/glassfish/glassfish4/glassfish/nodes/localhost-domain1/fhirtest/fhirdb -->
-		<!-- <property name="url" value="jdbc:hsqldb:hsql://localhost/uhnfhirdb"/> -->
-		<!-- <property name="url" value="jdbc:derby:directory:#{systemproperties['fhir.db.location']};create=true" 
-			/> -->
+	<bean depends-on="dbServer" id="myPersistenceDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="org.apache.derby.jdbc.ClientDriver"></property>
-		<property name="url"
-			value="jdbc:derby://localhost:1527/#{systemProperties['fhir.db.location.dstu2']};create=true" />
-		<!-- <property name="url" value="jdbc:derby://localhost:1527//opt/glassfish/fhirtest/fhirtest;create=true" 
-			/> -->
-		<!--<property name="url" value="jdbc:derby://localhost:1527#{systemProperties['fhir.db.location']};create=true" 
-			/> -->
+		<property name="url" value="jdbc:derby://localhost:1527/#{systemProperties['fhir.db.location.dstu2']};create=true" />
 		<property name="username" value="SA" />
 		<property name="password" value="SA" />
 	</bean>
 
 	<!--for mysql -->
-	<!-- <bean depends-on="dbServer" id="myPersistenceDataSource" class="org.apache.commons.dbcp2.BasicDataSource" 
-		destroy-method="close"> <property name="driverClassName" value="com.mysql.jdbc.Driver"></property> 
-		<property name="url" value="jdbc:mysql://fhirdb.url/fhirdbname" /> <property 
-		name="username" value="sa"/> <property name="password" value="sa"/> <property 
-		name="testOnBorrow" value="true"/> <property name="validationQuery" value="select 
-		1;"/> </bean> -->
+	<!-- <bean depends-on="dbServer" id="myPersistenceDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close"> <property name="driverClassName" 
+		value="com.mysql.jdbc.Driver"></property> <property name="url" value="jdbc:mysql://fhirdb.url/fhirdbname" /> <property name="username" value="sa"/> <property name="password" 
+		value="sa"/> <property name="testOnBorrow" value="true"/> <property name="validationQuery" value="select 1;"/> </bean> -->
 
-	<bean depends-on="dbServer" id="entityManagerFactory"
-		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+	<bean depends-on="dbServer" id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="myPersistenceDataSource" />
 		<property name="persistenceXmlLocation" value="classpath:META-INF/fhirtest_persistence.xml" />
 		<property name="persistenceUnitName" value="FHIR_UT" />
@@ -48,10 +32,8 @@
 				<property name="showSql" value="false" />
 				<property name="generateDdl" value="true" />
 				<property name="databasePlatform" value="org.hibernate.dialect.DerbyTenSevenDialect" />
-				<!-- <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect" 
-					/> -->
-				<!-- <property name="databasePlatform" value="org.hibernate.dialect.MySQL5Dialect" 
-					/> -->
+				<!-- <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect" /> -->
+				<!-- <property name="databasePlatform" value="org.hibernate.dialect.MySQL5Dialect" /> -->
 			</bean>
 		</property>
 	</bean>

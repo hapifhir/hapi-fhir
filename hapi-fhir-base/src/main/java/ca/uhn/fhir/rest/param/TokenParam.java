@@ -42,20 +42,22 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	}
 
 	/**
-	 * Constructor which copies the {@link InternalCodingDt#getSystemElement() system} and {@link InternalCodingDt#getCodeElement() code} from a {@link InternalCodingDt} instance and adds it as a parameter
+	 * Constructor which copies the {@link InternalCodingDt#getSystemElement() system} and {@link InternalCodingDt#getCodeElement() code} from a {@link InternalCodingDt} instance and adds it as a
+	 * parameter
 	 * 
 	 * @param theCodingDt
-	 *            The coding
+	 *           The coding
 	 */
 	public TokenParam(BaseCodingDt theCodingDt) {
 		this(toSystemValue(theCodingDt.getSystemElement()), theCodingDt.getCodeElement().getValue());
 	}
 
 	/**
-	 * Constructor which copies the {@link BaseIdentifierDt#getSystemElement() system} and {@link BaseIdentifierDt#getValueElement() value} from a {@link BaseIdentifierDt} instance and adds it as a parameter
+	 * Constructor which copies the {@link BaseIdentifierDt#getSystemElement() system} and {@link BaseIdentifierDt#getValueElement() value} from a {@link BaseIdentifierDt} instance and adds it as a
+	 * parameter
 	 * 
 	 * @param theIdentifierDt
-	 *            The identifier
+	 *           The identifier
 	 */
 	public TokenParam(BaseIdentifierDt theIdentifierDt) {
 		this(toSystemValue(theIdentifierDt.getSystemElement()), theIdentifierDt.getValueElement().getValue());
@@ -102,12 +104,18 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	 */
 	@Override
 	void doSetValueAsQueryToken(String theQualifier, String theParameter) {
-		int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
-		if (barIndex != -1) {
-			setSystem(theParameter.substring(0, barIndex));
-			setValue(ParameterUtil.unescape(theParameter.substring(barIndex + 1)));
+		setText(Constants.PARAMQUALIFIER_TOKEN_TEXT.equals(theQualifier));
+		setSystem(null);
+		if (theParameter == null) {
+			setValue(null);
 		} else {
-			setValue(ParameterUtil.unescape(theParameter));
+			int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
+			if (barIndex != -1) {
+				setSystem(theParameter.substring(0, barIndex));
+				setValue(ParameterUtil.unescape(theParameter.substring(barIndex + 1)));
+			} else {
+				setValue(ParameterUtil.unescape(theParameter));
+			}
 		}
 	}
 

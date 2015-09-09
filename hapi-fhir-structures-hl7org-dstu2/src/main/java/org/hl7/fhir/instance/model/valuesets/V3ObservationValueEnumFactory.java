@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -199,6 +199,14 @@ public class V3ObservationValueEnumFactory implements EnumFactory<V3ObservationV
       return V3ObservationValue.IND;
     if ("SSP".equals(codeString))
       return V3ObservationValue.SSP;
+    if ("_CriticalityObservationValue".equals(codeString))
+      return V3ObservationValue._CRITICALITYOBSERVATIONVALUE;
+    if ("CRITH".equals(codeString))
+      return V3ObservationValue.CRITH;
+    if ("CRITL".equals(codeString))
+      return V3ObservationValue.CRITL;
+    if ("CRITU".equals(codeString))
+      return V3ObservationValue.CRITU;
     if ("_GeneticObservationValue".equals(codeString))
       return V3ObservationValue._GENETICOBSERVATIONVALUE;
     if ("Homozygote".equals(codeString))
@@ -281,6 +289,8 @@ public class V3ObservationValueEnumFactory implements EnumFactory<V3ObservationV
       return V3ObservationValue.PSEUDED;
     if ("REDACTED".equals(codeString))
       return V3ObservationValue.REDACTED;
+    if ("SUBSETTED".equals(codeString))
+      return V3ObservationValue.SUBSETTED;
     if ("SYNTAC".equals(codeString))
       return V3ObservationValue.SYNTAC;
     if ("TRSLT".equals(codeString))
@@ -641,6 +651,14 @@ public class V3ObservationValueEnumFactory implements EnumFactory<V3ObservationV
       return "IND";
     if (code == V3ObservationValue.SSP)
       return "SSP";
+    if (code == V3ObservationValue._CRITICALITYOBSERVATIONVALUE)
+      return "_CriticalityObservationValue";
+    if (code == V3ObservationValue.CRITH)
+      return "CRITH";
+    if (code == V3ObservationValue.CRITL)
+      return "CRITL";
+    if (code == V3ObservationValue.CRITU)
+      return "CRITU";
     if (code == V3ObservationValue._GENETICOBSERVATIONVALUE)
       return "_GeneticObservationValue";
     if (code == V3ObservationValue.HOMOZYGOTE)
@@ -723,6 +741,8 @@ public class V3ObservationValueEnumFactory implements EnumFactory<V3ObservationV
       return "PSEUDED";
     if (code == V3ObservationValue.REDACTED)
       return "REDACTED";
+    if (code == V3ObservationValue.SUBSETTED)
+      return "SUBSETTED";
     if (code == V3ObservationValue.SYNTAC)
       return "SYNTAC";
     if (code == V3ObservationValue.TRSLT)

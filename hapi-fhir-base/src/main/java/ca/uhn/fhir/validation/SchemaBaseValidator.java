@@ -38,6 +38,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.w3c.dom.ls.LSInput;
@@ -128,7 +129,7 @@ class SchemaBaseValidator implements IValidatorModule {
 		ourLog.debug("Going to load resource: {}", pathToBase);
 		InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
 		if (baseIs == null) {
-			throw new InternalErrorException("No FHIR-BASE schema found");
+			throw new InternalErrorException("Schema not found. " + SchematronBaseValidator.RESOURCES_JAR_NOTE);
 		}
 		baseIs = new BOMInputStream(baseIs, false);
 		InputStreamReader baseReader = new InputStreamReader(baseIs, Charset.forName("UTF-8"));
@@ -203,6 +204,7 @@ class SchemaBaseValidator implements IValidatorModule {
 
 				InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
 				if (baseIs == null) {
+					IOUtils.closeQuietly(baseIs);
 					throw new InternalErrorException("Schema file not found: " + pathToBase);
 				}
 

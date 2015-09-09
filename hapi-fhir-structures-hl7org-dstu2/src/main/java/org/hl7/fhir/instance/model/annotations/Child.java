@@ -124,6 +124,16 @@ public @interface Child {
 	 */
 	Class<? extends IBaseEnumFactory<?>> enumFactory() default NoEnumFactory.class;
 
+	/**
+	 * Is this element a modifier?
+	 */
+	boolean modifier() default false;	
+
+	/**
+	 * Should this element be included in the summary view
+	 */
+	boolean summary() default false;	
+
 	// Not implemented
 //	/**
 //	 * This value is used when extending a built-in model class and defining a

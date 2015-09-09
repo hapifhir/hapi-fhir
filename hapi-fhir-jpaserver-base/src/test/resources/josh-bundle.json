@@ -1,0 +1,39 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:oid:1",
+      "request": {
+        "method": "POST",
+        "url": "Patient"
+      },
+      "resource": {
+        "resourceType": "Patient",
+        "gender": "female",
+        "birthDate": "1960-09-13"
+      }
+    },
+    {
+      "fullUrl": "urn:oid:2",
+      "request": {
+        "method": "POST",
+        "url": "Appointment"
+      },
+      "resource": {
+        "resourceType": "Appointment",
+        "status": "booked",
+        "start": "2015-08-01T09:00:00Z",
+        "end": "2015-08-01T09:20:00Z",
+        "participant": [
+          {
+            "actor": {
+              "reference": "urn:oid:1"
+            },
+            "status": "accepted"
+          }
+        ]
+      }
+    }
+  ]
+}

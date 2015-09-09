@@ -26,11 +26,10 @@ import java.util.Set;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -45,13 +44,8 @@ public class ValidateMethodBindingDstu1 extends BaseOutcomeReturningMethodBindin
 	}
 
 	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return RestfulOperationTypeEnum.VALIDATE;
-	}
-
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return null;
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.VALIDATE;
 	}
 
 	@Override

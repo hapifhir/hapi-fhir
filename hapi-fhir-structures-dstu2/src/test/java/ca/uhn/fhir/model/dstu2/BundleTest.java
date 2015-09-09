@@ -10,8 +10,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
 public class BundleTest {
 
 	@Test
-	public void testGetLink() {
-		
+	public void testGetLink() {		
 		Bundle b = new Bundle();
 		Link link = b.getLink(Bundle.LINK_NEXT);
 		

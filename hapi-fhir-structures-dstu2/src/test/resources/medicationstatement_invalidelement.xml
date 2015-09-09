@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><MedicationStatement xmlns="http://hl7.org/fhir">
+  <id value="example001"/>
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <p>Tylenol No 1 tablet - Taking 1 tablet four times daily as needed for pain</p>
+    </div>
+  </text>
+  <patient>
+    <reference value="Patient/pat1"/>
+  </patient>
+  <informationSource>
+    <reference value="Patient/pat2"/>
+  </informationSource>
+  <dateAsserted value="2015-02-22"/>
+  <status value="completed"/>
+  <wasNotTaken value="false"/>
+<reasonForUseCodeableConcept>
+  <coding>
+    <system value="http://snomed.info/sct"/>
+    <code value="22253000"/>
+    <display value="Pain"/>
+  </coding>
+</reasonForUseCodeableConcept>
+<effectiveDateTime value="2015-01-23"/>
+  <note value="Patient indicates they miss the occasional dose"/>
+  <medicationReference> <!--  Linked to a RESOURCE Medication  -->
+    <reference value="Medication/MedicationExample7"/>
+  </medicationReference> 
+  <dosage>
+    <text value="one tablet four times daily as needed for pain"/>
+    <timing>
+      <repeat>
+        <frequency value="4"/>
+        <period value="1"/>
+        <periodUnits value="d"/>
+      </repeat>
+    </timing>
+    <asNeededBoolean value="true"/>
+    <route>
+      <coding>
+      <system value="http://snomed.info/sct"/>
+      <code value="260548002"/>
+      <display value="Oral"/>
+      </coding>
+    </route>
+    <quantityQuantity>
+      <value value="1"/>
+    </quantityQuantity>
+    <maxDosePerPeriod>
+      <numerator>
+        <value value="4"/>
+        <unit value="tablets"/>
+        <system value="http://snomed.info/sct"/>
+        <code value="385055001"/>
+      </numerator>
+      <denominator>
+      <value value="1"/>
+      <system value="http://unitsofmeasure.org"/>
+      <code value="d"/>
+      </denominator>
+    </maxDosePerPeriod>
+  </dosage>
+</MedicationStatement>

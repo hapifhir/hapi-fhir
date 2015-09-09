@@ -167,6 +167,25 @@ public class ${className}
 		setUnits(theUnits);
 	}
 
+#if (${version}!="dstu")
+	/**
+	 * @deprecated Use {@link ${hash}setUnit(String)} instead - Quantity.units was renamed to Quantity.unit in DSTU2
+	 */
+	@Deprecated
+	@Override
+	public BaseQuantityDt setUnits(String theString) {
+		return setUnit(theString);
+	}
+
+	/**
+	 * @deprecated Use {@link ${hash}getUnitElement()} - Quantity.units was renamed to Quantity.unit in DSTU2
+	 */
+	@Deprecated
+	@Override
+	public StringDt getUnitsElement() {
+		return getUnitElement();
+	}
+#end
 #end
 #if ( ${className} == "MetaDt" )
 	@Override

@@ -49,22 +49,26 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	@JoinColumn(name = "RES_ID", referencedColumnName="RES_ID")
 	private ResourceTable myResource;
 
+	@Column(name = "RES_ID", insertable = false, updatable = false)
+	private Long myResourcePid;
+
 	@Column(name = "RES_TYPE", nullable=false)
 	private String myResourceType;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
-	private Long myResourcePid;
+	protected Long getId() {
+		return myId;
+	}
 
 	public String getParamName() {
 		return myParamName;
 	}
 
-	public void setParamName(String theName) {
-		myParamName = theName;
-	}
-
 	public ResourceTable getResource() {
 		return myResource;
+	}
+
+	public void setParamName(String theName) {
+		myParamName = theName;
 	}
 
 	public void setResource(ResourceTable theResource) {

@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -79,6 +80,11 @@ public class InterceptorAdapter implements IServerInterceptor {
 	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException,
 			IOException {
 		return true;
+	}
+
+	@Override
+	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theRequestDetails) {
+		// nothing
 	}
 
 }

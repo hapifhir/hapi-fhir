@@ -19,13 +19,13 @@
 	<description value="an enumeration of codes defined by LOINC" />
 	<status value="draft" />
 	<experimental value="true" />
-	<define>
+	<codeSystem>
 		<system value="http://loinc.org" />
 		<concept>
 			<code value="8450-9" />
 			<display value="Systolic blood pressure--expiration" />
 		</concept>
-	</define>
+	</codeSystem>
 	<compose>
 		<include>
 			<system value="http://loinc.org" />

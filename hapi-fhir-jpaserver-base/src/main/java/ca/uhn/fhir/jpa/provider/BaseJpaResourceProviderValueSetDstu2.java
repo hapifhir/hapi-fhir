@@ -20,97 +20,77 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeInclude;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeIncludeConcept;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet.DefineConcept;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 
 public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDstu2<ValueSet> {
 
+	//@formatter:off
 	@Operation(name = "$expand", idempotent = true)
-	public ValueSet everything(HttpServletRequest theServletRequest, @IdParam IdDt theId, @OperationParam(name = "filter") StringDt theFilter) {
+	public ValueSet everything(
+			HttpServletRequest theServletRequest,
+			@IdParam IdDt theId, 
+			@OperationParam(name = "filter") StringDt theFilter) {
+		//@formatter:on
+		
 		startRequest(theServletRequest);
 		try {
-			ValueSet retVal = new ValueSet();
-			retVal.setDate(DateTimeDt.withCurrentTime());
-
-			ValueSet source = read(theServletRequest, theId);
-
-			Map<String, ComposeInclude> systemToCompose = new HashMap<String, ComposeInclude>();
-
-			/*
-			 * Add composed concepts
-			 */
-			
-			for (ComposeInclude nextInclude : source.getCompose().getInclude()) {
-				for (ComposeIncludeConcept next : nextInclude.getConcept()) {
-					ComposeInclude include = null;
-					if (theFilter == null || theFilter.isEmpty()) {
-						if (include == null) {
-							include = getOrAddComposeInclude(retVal, systemToCompose, nextInclude.getSystem());
-						}
-						include.addConcept(next);
-					} else {
-						String filter = theFilter.getValue().toLowerCase();
-						if (next.getDisplay().toLowerCase().contains(filter) || next.getCode().toLowerCase().contains(filter)) {
-							if (include == null) {
-								include = getOrAddComposeInclude(retVal, systemToCompose, nextInclude.getSystem());
-							}
-							include.addConcept(next);
-						}
-					}
-				}
-			}
-
-			/*
-			 * Add defined concepts
-			 */
-			
-			ComposeInclude include = null;
-			for (DefineConcept next : source.getDefine().getConcept()) {
-				if (theFilter == null || theFilter.isEmpty()) {
-					if (include == null) {
-						include = getOrAddComposeInclude(retVal, systemToCompose, source.getDefine().getSystem());
-					}
-					include.addConcept(new ComposeIncludeConcept().setCode(next.getCode()).setDisplay(next.getDisplay()));
-				} else {
-					String filter = theFilter.getValue().toLowerCase();
-					if (next.getDisplay().toLowerCase().contains(filter) || next.getCode().toLowerCase().contains(filter)) {
-						if (include == null) {
-							include = getOrAddComposeInclude(retVal, systemToCompose, source.getDefine().getSystem());
-						}
-						include.addConcept(new ComposeIncludeConcept().setCode(next.getCode()).setDisplay(next.getDisplay()));
-					}
-				}
-			}
-
-			return retVal;
-
+			IFhirResourceDaoValueSet<ValueSet> dao = (IFhirResourceDaoValueSet<ValueSet>) getDao();
+			return dao.expand(theId, theFilter);
 		} finally {
 			endRequest(theServletRequest);
 		}
 	}
 
-	private ComposeInclude getOrAddComposeInclude(ValueSet retVal, Map<String, ComposeInclude> systemToCompose, String system) {
-		ComposeInclude include;
-		include = systemToCompose.get(system);
-		if (include == null) {
-			include = retVal.getCompose().addInclude();
-			include.setSystem(system);
-			systemToCompose.put(system, include);
+	//@formatter:off
+	@Operation(name = "$validate-code", idempotent = true, returnParameters= {
+		@OperationParam(name="result", type=BooleanDt.class, min=1),
+		@OperationParam(name="message", type=StringDt.class),
+		@OperationParam(name="display", type=StringDt.class)
+	})
+	public Parameters everything(
+			HttpServletRequest theServletRequest,
+			@IdParam IdDt theId, 
+			@OperationParam(name="identifier") UriDt theValueSetIdentifier, 
+			@OperationParam(name="code") CodeDt theCode, 
+			@OperationParam(name="system") UriDt theSystem,
+			@OperationParam(name="display") StringDt theDisplay,
+			@OperationParam(name="coding") CodingDt theCoding,
+			@OperationParam(name="codeableConcept") CodeableConceptDt theCodeableConcept
+			) {
+		//@formatter:on
+		
+		startRequest(theServletRequest);
+		try {
+			IFhirResourceDaoValueSet<ValueSet> dao = (IFhirResourceDaoValueSet<ValueSet>) getDao();
+			ValidateCodeResult result = dao.validateCode(theValueSetIdentifier, theId, theCode, theSystem, theDisplay, theCoding, theCodeableConcept);
+			Parameters retVal = new Parameters();
+			retVal.addParameter().setName("result").setValue(new BooleanDt(result.isResult()));
+			if (isNotBlank(result.getMessage())) {
+				retVal.addParameter().setName("message").setValue(new StringDt(result.getMessage()));
+			}
+			if (isNotBlank(result.getDisplay())) {
+				retVal.addParameter().setName("display").setValue(new StringDt(result.getDisplay()));
+			}
+			return retVal;
+		} finally {
+			endRequest(theServletRequest);
 		}
-		return include;
 	}
-
 }

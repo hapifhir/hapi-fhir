@@ -29,6 +29,8 @@ public interface IReadTyped<T extends IBaseResource> {
 
 	IReadExecutable<T> withIdAndVersion(String theId, String theVersion);
 
+	IReadExecutable<T> withId(Long theId);
+	
 	/**
 	 * Search using an ID. Note that even if theId contains a base URL it will be
 	 * ignored in favour of the base url for the given client. If you want to specify 
@@ -40,4 +42,5 @@ public interface IReadTyped<T extends IBaseResource> {
 	IReadExecutable<T> withUrl(String theUrl);
 
 	IReadExecutable<T> withUrl(IIdType theUrl);
+
 }

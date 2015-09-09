@@ -2,7 +2,7 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
 	<properties>
-		<title>Server Interceptors - HAPI FHIR</title>
+		<title>Server Interceptors</title>
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
 	</properties>
 
@@ -10,22 +10,28 @@
 
 		<!-- The body of the document contains a number of sections -->
 		<section name="Server Interceptors">
-			
-			<img src="svg/restful-server-interceptors.svg" alt="Interceptors" align="right"/>
-			
+
 			<p>
 				The RESTful server provides a powerful mechanism for adding cross-cutting behaviour
+				(e.g. requests, such as authnorization, auditing, fancy output, logging, etc.)
 				to each incoming request that it processes. This mechanism consists of defining one or
 				more <b>interceptors</b> that will be invoked at defined points in the processing of 
 				each incoming request.
 			</p>
-			
+
+			<img src="svg/restful-server-interceptors.svg" alt="Interceptors"/>
+
 			<p>
 				Interceptors will intercept the incoming request, and can take action such as 
 				logging or auditing it, or examining/injecting headers. They can optionally choose 
-				to handle the request themself and the cancel any subsequent processing. Interceptors
+				to handle the request directly and the cancel any subsequent processing (in other words,
+				the interceptor can choose to supply a response to the client, and can then signal
+				to the server that it does not need to do so). 
+			</p>
+			<p>
+				Interceptors
 				may also be notified of responses prior to those responses being served to a client, 
-				and may audit or even cancel response. The diagram on the right shows the 
+				and may audit or even cancel the response. The diagram on the right shows the 
 				lifecycle of a normal (non failing) request which is subject to an interceptor.  
 			</p>
 			
@@ -34,7 +40,7 @@
 				<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/IServerInterceptor.html">IServerInterceptor</a>
 				interface (or extend the convenience 
 				<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/InterceptorAdapter.html">InterceptorAdapter</a> 
-				class provided). The RESTful server will normally invoke the interceptor at three 
+				class provided). The RESTful server will normally invoke the interceptor at several 
 				points in the execution of the client request. 
 			</p>
 			
@@ -43,17 +49,62 @@
 					Before any processing at all is performed on the request,
 					<b>incomingRequestPreProcessed</b> will be invoked. This can be useful
 					if you wish to handle some requests completely outside of HAPI's processing
-					mechanism. If you are handling a request in your interceptor, you may
-					return <code>false</code> from your implementation method to signal to
-					HAPI that processing of the request should stop immediately.
+					mechanism. 
+					<ul>
+						<li>
+							If this method returns <code>true</code>, processing continues to the 
+							next interceptor, and ultimately to the next phase of processing.
+						</li>
+						<li>
+							If this method returns <code>false</code>, processing stops immediately.
+							This is useful if the interceptor wishes to supply its own response
+							by directly calling methods on the <code>HttpServletResponse</code>
+						</li>
+						<li>
+							If this method throws any subclass of
+							<a href="./apidocs/ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html">BaseServerResponseException</a>,
+							processing is stopped immedicately and the corresponding status is returned to the client.
+							This is useful if an interceptor wishes to abort the request (e.g. because
+							it did not detect valid credentials)
+						</li>
+					</ul>
 				</li>
 				<li>
-					Once the request is parsed (but before it is handled),
+					Once the request is classified (meaning that the URL and request headers are 
+					examined to determine exactly what kind of request is being made),
 					<b>incomingRequestPostProcessed</b> will be invoked. This method has
 					an additional parameter, the
 					<a href="./apidocs/ca/uhn/fhir/rest/method/RequestDetails.html">RequestDetails</a>
 					object which contains details about what operation is about to be
 					called, and what request parameters were receievd with that request.
+					<ul>
+						<li>
+							If this method returns <code>true</code>, processing continues to the 
+							next interceptor, and ultimately to the next phase of processing.
+						</li>
+						<li>
+							If this method returns <code>false</code>, processing stops immediately.
+							This is useful if the interceptor wishes to supply its own response
+							by directly calling methods on the <code>HttpServletResponse</code>
+						</li>
+						<li>
+							If this method throws any subclass of
+							<a href="./apidocs/ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html">BaseServerResponseException</a>,
+							processing is stopped immedicately and the corresponding status is returned to the client.
+							This is useful if an interceptor wishes to abort the request (e.g. because
+							it did not detect valid credentials)
+						</li>
+					</ul>
+				</li>
+				<li>
+					Once the request is being handled,
+					<b>incomingRequestPreHandled</b> will be invoked. This method is useful in that
+					it provides details about the FHIR operation being invoked (e.g. is this a "read" or a "create"? what
+					is the resource type and ID of the resource being accessed, etc.). This method can be 
+					useful for adding finer grained access controls. Note that <code>incomingRequestPreHandled</code>
+					is not able to directly supply a response, but it may throw a
+					<a href="./apidocs/ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html">BaseServerResponseException</a>
+					to abort processing.
 				</li>
 				<li>
 					After the operation is handled (by invoking the corresponding ResourceProvider or PlainProvider method),

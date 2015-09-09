@@ -34,6 +34,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.PathSpecification;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -71,21 +72,24 @@ class IncludeParameter extends BaseQueryParameter {
 		ArrayList<QualifiedParamList> retVal = new ArrayList<QualifiedParamList>();
 
 		if (myInstantiableCollectionType == null) {
-			if (mySpecType == Include.class) {
-				retVal.add(QualifiedParamList.singleton(((Include) theObject).getValue()));
-			} else if (mySpecType == PathSpecification.class) {
-				retVal.add(QualifiedParamList.singleton(((PathSpecification) theObject).getValue()));
+			if (mySpecType == Include.class || mySpecType == PathSpecification.class) {
+				convertAndAddIncludeToList(retVal, (Include) theObject);
 			} else {
 				retVal.add(QualifiedParamList.singleton(((String) theObject)));
 			}
 		} else {
 			Collection<Include> val = (Collection<Include>) theObject;
-			for (Include pathSpec : val) {
-				retVal.add(QualifiedParamList.singleton(pathSpec.getValue()));
+			for (Include include : val) {
+				convertAndAddIncludeToList(retVal, include);
 			}
 		}
 
 		return retVal;
+	}
+
+	private void convertAndAddIncludeToList(ArrayList<QualifiedParamList> retVal, Include include) {
+		String qualifier = include.isRecurse() ? Constants.PARAM_INCLUDE_QUALIFIER_RECURSE : null;
+		retVal.add(QualifiedParamList.singleton(qualifier, include.getValue()));
 	}
 
 	public Set<String> getAllow() {
@@ -115,6 +119,7 @@ class IncludeParameter extends BaseQueryParameter {
 	@Override
 	public Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		Collection<Include> retValCollection = null;
+
 		if (myInstantiableCollectionType != null) {
 			try {
 				retValCollection = myInstantiableCollectionType.newInstance();
@@ -123,13 +128,15 @@ class IncludeParameter extends BaseQueryParameter {
 			}
 		}
 
-		for (List<String> nextParamList : theString) {
+		for (QualifiedParamList nextParamList : theString) {
 			if (nextParamList.isEmpty()) {
 				continue;
 			}
 			if (nextParamList.size() > 1) {
 				throw new InvalidRequestException(theContext.getLocalizer().getMessage(IncludeParameter.class, "orIncludeInRequest"));
 			}
+
+			boolean recurse = Constants.PARAM_INCLUDE_QUALIFIER_RECURSE.equals(nextParamList.getQualifier());
 
 			String value = nextParamList.get(0);
 			if (myAllow != null && !myAllow.isEmpty()) {
@@ -140,20 +147,14 @@ class IncludeParameter extends BaseQueryParameter {
 					}
 				}
 			}
-			if (retValCollection == null) {
+			if (myInstantiableCollectionType == null) {
 				if (mySpecType == String.class) {
 					return value;
-				} else if (mySpecType == PathSpecification.class) {
-					return new PathSpecification(value);
 				} else {
-					return new Include(value);
+					return new Include(value, recurse);
 				}
 			} else {
-				if (mySpecType == PathSpecification.class) {
-					retValCollection.add(new PathSpecification(value));
-				} else {
-					retValCollection.add(new Include(value));
-				}
+				retValCollection.add(new Include(value, recurse));
 			}
 		}
 

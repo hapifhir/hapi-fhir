@@ -159,22 +159,24 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			// Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
 			// Conformance.RestResourceSearchParam>();
 			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
-				RestfulOperationTypeEnum resOp = nextMethodBinding.getResourceOperationType();
-				if (resOp != null) {
-					if (resourceOps.contains(resOp) == false) {
-						resourceOps.add(resOp);
-						resource.addOperation().setCode(resOp);
+				if (nextMethodBinding.getRestOperationType() != null) {
+					RestfulOperationTypeEnum resOp = RestfulOperationTypeEnum.VALUESET_BINDER.fromCodeString(nextMethodBinding.getRestOperationType().getCode());
+					if (resOp != null) {
+						if (resourceOps.contains(resOp) == false) {
+							resourceOps.add(resOp);
+							resource.addOperation().setCode(resOp);
+						}
+					}
+	
+					RestfulOperationSystemEnum sysOp = RestfulOperationSystemEnum.VALUESET_BINDER.fromCodeString(nextMethodBinding.getRestOperationType().getCode());
+					if (sysOp != null) {
+						if (systemOps.contains(sysOp) == false) {
+							systemOps.add(sysOp);
+							rest.addOperation().setCode(sysOp);
+						}
 					}
 				}
-
-				RestfulOperationSystemEnum sysOp = nextMethodBinding.getSystemOperationType();
-				if (sysOp != null) {
-					if (systemOps.contains(sysOp) == false) {
-						systemOps.add(sysOp);
-						rest.addOperation().setCode(sysOp);
-					}
-				}
-
+				
 				if (nextMethodBinding instanceof SearchMethodBinding) {
 					handleSearchMethodBinding(rest, resource, resourceName, def, includes, (SearchMethodBinding) nextMethodBinding);
 				} else if (nextMethodBinding instanceof DynamicSearchMethodBinding) {

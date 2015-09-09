@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3AddressPartType {
@@ -263,17 +263,17 @@ public enum V3AddressPartType {
         }
         public String getDefinition() {
           switch (this) {
-            case ADL: return "This can be a unit designator, such as apartment number, suite number, or floor. There may be several unit designators in an address (e.g., '3rd floor, Appt. 342'). This can also be a designator pointing away from the location, rather than specifying a smaller location within some larger one (e.g., Dutch 't.o.' means 'opposite to' for house boats located across the street facing houses).";
+            case ADL: return "This can be a unit designator, such as apartment number, suite number, or floor. There may be several unit designators in an address (e.g., \"3rd floor, Appt. 342\"). This can also be a designator pointing away from the location, rather than specifying a smaller location within some larger one (e.g., Dutch \"t.o.\" means \"opposite to\" for house boats located across the street facing houses).";
             case AL: return "Description: An address line is for either an additional locator, a delivery address or a street address.";
             case DAL: return "A delivery address line is frequently used instead of breaking out delivery mode, delivery installation, etc.  An address generally has only a delivery address line or a street address line, but not both.";
             case SAL: return "Description: A street address line is frequently used instead of breaking out build number, street name, street type, etc. An address generally has only a delivery address line or a street address line, but not both.";
             case BNN: return "The numeric portion of a building number";
-            case BNR: return "The number of a building, house or lot alongside the street.  Also known as 'primary street number'.  This does not number the street but rather the building.";
+            case BNR: return "The number of a building, house or lot alongside the street.  Also known as \"primary street number\".  This does not number the street but rather the building.";
             case BNS: return "Any alphabetic character, fraction or other text that may appear after the numeric portion of a building number";
             case CAR: return "The name of the party who will take receipt at the specified address, and will take on responsibility for ensuring delivery to the target recipient";
             case CEN: return "A geographic sub-unit delineated for demographic purposes.";
             case CNT: return "Country";
-            case CPA: return "A sub-unit of a state or province. (49 of the United States of America use the term 'county;' Louisiana uses the term 'parish'.)";
+            case CPA: return "A sub-unit of a state or province. (49 of the United States of America use the term \"county;\" Louisiana uses the term \"parish\".)";
             case CTY: return "The name of the city, town, village, or other community or delivery center";
             case DEL: return "Delimiters are printed without framing white space.  If no value component is provided, the delimiter appears as a line break.";
             case DINST: return "Indicates the type of delivery installation (the facility to which the mail will be delivered prior to final shipping via the delivery mode.) Example: post office, letter carrier depot, community mail center, station, etc.";

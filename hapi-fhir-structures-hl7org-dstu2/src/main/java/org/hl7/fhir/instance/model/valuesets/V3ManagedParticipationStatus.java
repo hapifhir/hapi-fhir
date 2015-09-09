@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3ManagedParticipationStatus {
@@ -95,7 +95,7 @@ public enum V3ManagedParticipationStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case NORMAL: return "The 'typical' state. Excludes 'nullified' which represents the termination state of a participation instance that was created in error.";
+            case NORMAL: return "The 'typical' state. Excludes \"nullified\" which represents the termination state of a participation instance that was created in error.";
             case ACTIVE: return "The state representing the fact that the Participation is in progress.";
             case CANCELLED: return "The terminal state resulting from cancellation of the Participation prior to activation.";
             case COMPLETED: return "The terminal state representing the successful completion of the Participation.";

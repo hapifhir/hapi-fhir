@@ -26,10 +26,9 @@ import java.util.Set;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 
 public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
@@ -39,13 +38,8 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return RestfulOperationTypeEnum.CREATE;
-	}
-
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return null;
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.CREATE;
 	}
 
 	@Override

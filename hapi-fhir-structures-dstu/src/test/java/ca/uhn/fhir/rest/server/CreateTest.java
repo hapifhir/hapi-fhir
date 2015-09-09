@@ -84,11 +84,10 @@ public class CreateTest {
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), StringContains.containsString("UTF-8"));
+		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().toUpperCase(), StringContains.containsString("UTF-8"));
 
 		assertThat(ourLastResourceBody, stringContainsInOrder("<Patient ", "<identifier>","<value value=\"001"));
 		assertEquals(EncodingEnum.XML, ourLastEncoding);
-		
 	}
 
 	@Test
@@ -183,6 +182,7 @@ public class CreateTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("001");
 		patient.addIdentifier().setValue("002");
+		patient.addName().addFamily("line1\nline2");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
@@ -197,6 +197,8 @@ public class CreateTest {
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
 
+		ourLog.info(ourLastResourceBody);
+		assertEquals("{\"resourceType\":\"Patient\",\"identifier\":[{\"value\":\"001\"},{\"value\":\"002\"}],\"name\":[{\"family\":[\"line1\\nline2\"]}]}", ourLastResourceBody);
 	}
 
 	@Test

@@ -1,12 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<!--
-	The parent of this project is the deployable POM. This project isn't deployable,
-	but this keeps it before the root pom in the reactor order when building the site.
-	I don't know why this works... Need to investigate this.
-	-->
+	<!-- The parent of this project is the deployable POM. This project isn't deployable, but this keeps it before the root pom in the reactor order when building the site. I don't know why this works... 
+		Need to investigate this. -->
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
@@ -42,6 +38,11 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources</artifactId>
+			<version>1.2-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
 			<version>1.2-SNAPSHOT</version>
 		</dependency>
@@ -49,86 +50,63 @@
 		<dependency>
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-schematron</artifactId>
-			<version>${phloc_schematron_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-commons</artifactId>
-			<version>${phloc_commons_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf</artifactId>
-			<version>${thymeleaf-version}</version>
 		</dependency>
 
-		<!-- Use an older version of SLF4j -->
-      <dependency>
-         <groupId>org.slf4j</groupId>
-         <artifactId>slf4j-api</artifactId>
-         <version>1.6.0</version>
-      </dependency>
-      <dependency>
-         <groupId>org.slf4j</groupId>
-         <artifactId>slf4j-simple</artifactId>
-         <version>1.6.0</version>
-      </dependency>
+		<!-- Use an older version of SLF4j just to make sure we compile correctly against old SLF4j - Some people can't upgrade and we have no real need for recent features. -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
 
 		<!-- Test Database -->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
-			<version>${derby_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>commons-dbcp</groupId>
-			<artifactId>commons-dbcp</artifactId>
-			<version>1.4</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-dbcp2</artifactId>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlets</artifactId>
-			<version>${jetty_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>${jetty_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>${jetty_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-util</artifactId>
-			<version>${jetty_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -164,26 +142,22 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>java-hamcrest</artifactId>
-			<version>${hamcrest_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>${guava_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ebaysf.web</groupId>
 			<artifactId>cors-filter</artifactId>
-			<version>${ebay_cors_filter_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>xmlunit</groupId>
 			<artifactId>xmlunit</artifactId>
-			<version>${xmlunit_version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -202,38 +176,10 @@
 						<skipDeploy>true</skipDeploy>
 					</configuration>
 				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>cobertura-maven-plugin</artifactId>
-					<version>${maven_cobertura_plugin_version}</version>
-					<configuration>
-						<skip>false</skip>
-						<formats>
-							<format>html</format>
-							<format>xml</format>
-						</formats>
-						<maxmem>256m</maxmem>
-						<instrumentation>
-							<ignores>
-								<ignore>ca.uhn.fhir.model.dstu.valueset.*</ignore>
-							</ignores>
-							<excludes>
-								<ignore>**/valueset/*.class</ignore>
-								<ignore>**/exceptions/*.class</ignore>
-							</excludes>
-							<!-- <ignoreMethodAnnotations> <ignoreMethodAnnotation>net.sourceforge.cobertura.CoverageIgnore</ignoreMethodAnnotation> 
-								</ignoreMethodAnnotations> -->
-						</instrumentation>
-					</configuration>
-					<executions>
-						<execution>
-							<phase>verify</phase>
-							<goals>
-								<goal>check</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
+
+				<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>cobertura-maven-plugin</artifactId> <configuration> <skip>false</skip> <formats> <format>html</format> <format>xml</format> </formats> 
+					<maxmem>256m</maxmem> <instrumentation> <ignores> <ignore>ca.uhn.fhir.model.dstu.valueset.*</ignore> </ignores> <excludes> <ignore>**/valueset/*.class</ignore> <ignore>**/exceptions/*.class</ignore> </excludes> 
+					</instrumentation> </configuration> <executions> <execution> <phase>verify</phase> <goals> <goal>check</goal> </goals> </execution> </executions> </plugin> -->
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -242,11 +188,6 @@
 				<artifactId>coveralls-maven-plugin</artifactId>
 				<version>3.1.0</version>
 				<configuration>
-					<coberturaReports>
-						<coberturaReport>
-							${basedir}/target/coverage.xml
-						</coberturaReport>
-					</coberturaReports>
 					<sourceEncoding>UTF-8</sourceEncoding>
 					<serviceName>travis-ci</serviceName>
 					<serviceJobId>${env.TRAVIS_JOB_ID}</serviceJobId>
@@ -300,7 +241,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>-Xms512m -Xmx1024m</argLine>
+					<argLine>-Xms512m -Xmx1024m ${argLine}</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -319,29 +260,25 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>${maven_cobertura_plugin_version}</version>
-				<configuration>
-				</configuration>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.5.201505241946</version>
 				<executions>
 					<execution>
-						<phase>verify</phase>
+						<id>prepare-agent</id>
 						<goals>
-							<goal>check</goal>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-site</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>report</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
-			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>cobertura-maven-plugin</artifactId> 
-				<version>${maven_cobertura_plugin_version}</version> <configuration> <check> 
-				<branchRate>85</branchRate> <lineRate>85</lineRate> <haltOnFailure>true</haltOnFailure> 
-				<totalBranchRate>85</totalBranchRate> <totalLineRate>85</totalLineRate> <packageLineRate>85</packageLineRate> 
-				<packageBranchRate>85</packageBranchRate> <regexes> <regex> <pattern>com.example.reallyimportant.*</pattern> 
-				<branchRate>90</branchRate> <lineRate>80</lineRate> </regex> <regex> <pattern>com.example.boringcode.*</pattern> 
-				<branchRate>40</branchRate> <lineRate>30</lineRate> </regex> </regexes> </check> 
-				</configuration> <executions> <execution> <goals> <goal>clean</goal> <goal>check</goal> 
-				</goals> </execution> </executions> </plugin> -->
 		</plugins>
 		<resources>
 		</resources>
@@ -362,18 +299,6 @@
 	</build>
 	<reporting>
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>${maven_cobertura_plugin_version}</version>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>cobertura</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>

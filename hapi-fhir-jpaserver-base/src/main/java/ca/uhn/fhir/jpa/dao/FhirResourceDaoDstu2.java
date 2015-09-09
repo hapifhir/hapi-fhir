@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
+import java.util.ArrayList;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -22,7 +24,6 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,8 +42,10 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.IParserErrorHandler;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -70,12 +73,15 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage) {
 		OperationOutcome oo = new OperationOutcome();
 		oo.getIssueFirstRep().getSeverityElement().setValue(theSeverity);
-		oo.getIssueFirstRep().getDetailsElement().setValue(theMessage);
+		oo.getIssueFirstRep().getDiagnosticsElement().setValue(theMessage);
 		return oo;
 	}
 
 	@Override
 	public MethodOutcome validate(T theResource, IdDt theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile) {
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, null, theResource);
+		notifyInterceptors(RestOperationTypeEnum.VALIDATE, requestDetails);
+		
 		final OperationOutcome oo = new OperationOutcome();
 
 		IParser parser = theEncoding.newParser(getContext());
@@ -83,17 +89,17 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 
 			@Override
 			public void unknownAttribute(IParseLocation theLocation, String theAttributeName) {
-				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setCode(IssueTypeEnum.INVALID_CONTENT).setDetails("Unknown attribute found: " + theAttributeName);
+				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setCode(IssueTypeEnum.INVALID_CONTENT).setDiagnostics("Unknown attribute found: " + theAttributeName);
 			}
 
 			@Override
 			public void unknownElement(IParseLocation theLocation, String theElementName) {
-				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setCode(IssueTypeEnum.INVALID_CONTENT).setDetails("Unknown element found: " + theElementName);
+				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setCode(IssueTypeEnum.INVALID_CONTENT).setDiagnostics("Unknown element found: " + theElementName);
 			}
 
 			@Override
 			public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
-				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setCode(IssueTypeEnum.INVALID_CONTENT).setDetails("Multiple repetitions of non-repeatable element found: " + theElementName);
+				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setCode(IssueTypeEnum.INVALID_CONTENT).setDiagnostics("Multiple repetitions of non-repeatable element found: " + theElementName);
 			}
 		});
 
@@ -108,11 +114,12 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 
 		// This method returns a MethodOutcome object
 		MethodOutcome retVal = new MethodOutcome();
-		oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Validation succeeded");
+		oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Validation succeeded");
 		retVal.setOperationOutcome(oo);
 		
 		return retVal;
 	}
+
 
 	
 }

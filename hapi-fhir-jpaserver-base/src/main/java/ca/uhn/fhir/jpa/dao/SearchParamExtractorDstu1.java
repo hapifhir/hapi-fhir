@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,11 +41,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
@@ -65,10 +68,15 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 
-class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISearchParamExtractor {
+public class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	public SearchParamExtractorDstu1(FhirContext theContext) {
 		super(theContext);
+	}
+
+	@Override
+	public List<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IResource theResource) {
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -122,8 +130,6 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 				}
 			}
 		}
-
-		theEntity.setParamsDatePopulated(retVal.size() > 0);
 
 		return retVal;
 	}
@@ -220,8 +226,6 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 			}
 		}
 
-		theEntity.setParamsNumberPopulated(retVal.size() > 0);
-
 		return retVal;
 	}
 
@@ -269,8 +273,6 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 				}
 			}
 		}
-
-		theEntity.setParamsNumberPopulated(retVal.size() > 0);
 
 		return retVal;
 	}
@@ -357,8 +359,6 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 				}
 			}
 		}
-
-		theEntity.setParamsStringPopulated(retVal.size() > 0);
 
 		return retVal;
 	}
@@ -468,9 +468,12 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 
 		}
 
-		theEntity.setParamsTokenPopulated(retVal.size() > 0);
-
 		return retVal;
+	}
+
+	@Override
+	public List<ResourceIndexedSearchParamUri> extractSearchParamUri(ResourceTable theEntity, IResource theResource) {
+		return Collections.emptyList();
 	}
 
 }

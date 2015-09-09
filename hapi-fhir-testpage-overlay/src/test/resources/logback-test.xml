@@ -1,0 +1,30 @@
+<configuration>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%file:%line] - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="org.eclipse" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="org.apache" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="org.thymeleaf" additivity="false" level="warn">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<!-- 
+	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="trace">
+		<appender-ref ref="STDOUT" />
+	</logger>
+ 	-->
+ 	
+	<root level="info">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>

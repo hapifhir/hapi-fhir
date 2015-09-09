@@ -30,38 +30,13 @@ public abstract class BaseRuntimeChildDefinition {
 
 	public abstract IAccessor getAccessor();
 
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + "[" + getElementName() + "]";
-	}
-
 	public abstract BaseRuntimeElementDefinition<?> getChildByName(String theName);
 
 	public abstract BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType);
 
 	public abstract String getChildNameByDatatype(Class<? extends IBase> theDatatype);
 
-	public abstract IMutator getMutator();
-
-	public abstract Set<String> getValidChildNames();
-
-	abstract void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions);
-
-	public interface IAccessor {
-		List<IBase> getValues(Object theTarget);
-	}
-
 	public abstract String getElementName();
-
-	public abstract int getMax();
-
-	public abstract int getMin();
-
-	public interface IMutator {
-		void setValue(Object theTarget, IBase theValue);
-
-		void addValue(Object theTarget, IBase theValue);
-	}
 
 	public String getExtensionUrl() {
 		return null;
@@ -69,6 +44,33 @@ public abstract class BaseRuntimeChildDefinition {
 
 	public Object getInstanceConstructorArguments() {
 		return null;
+	}
+
+	public abstract int getMax();
+
+	public abstract int getMin();
+
+	public abstract IMutator getMutator();
+
+	public abstract Set<String> getValidChildNames();
+
+	public abstract boolean isSummary();
+
+	abstract void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions);
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + getElementName() + "]";
+	}
+
+	public interface IAccessor {
+		List<IBase> getValues(Object theTarget);
+	}
+
+	public interface IMutator {
+		void addValue(Object theTarget, IBase theValue);
+
+		void setValue(Object theTarget, IBase theValue);
 	}
 
 	// public String getExtensionUrl() {

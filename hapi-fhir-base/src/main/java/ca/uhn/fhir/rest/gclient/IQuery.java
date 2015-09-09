@@ -29,7 +29,13 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<IQuery<T>> {
 
 	/**
-	 * Add an "_include" specification
+	 * Add an "_include" specification or an "_include:recurse" specification. If you are using
+	 * a constant from one of the built-in structures you can select whether you want recursive
+	 * behaviour by using the following syntax:
+	 * <ul>
+	 * <li><b>Recurse:</b> <code>.include(Patient.INCLUDE_ORGANIZATION.asRecursive())</code>
+	 * <li><b>No Recurse:</b> <code>.include(Patient.INCLUDE_ORGANIZATION.asNonRecursive())</code>
+	 * </ul>
 	 */
 	IQuery<T> include(Include theInclude);
 
@@ -44,6 +50,22 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	 * @param theCode The tag code. Must not be <code>null</code> or empty.
 	 */
 	IQuery<T> withTag(String theSystem, String theCode);
+
+	/**
+	 * Match only resources where the resource has the given security tag. This parameter corresponds to
+	 * the <code>_security</code> URL parameter.
+	 * @param theSystem The tag code system, or <code>null</code> to match any code system (this may not be supported on all servers)
+	 * @param theCode The tag code. Must not be <code>null</code> or empty.
+	 */
+	IQuery<T> withSecurity(String theSystem, String theCode);
+
+	/**
+	 * Match only resources where the resource has the given profile declaration. This parameter corresponds to
+	 * the <code>_profile</code> URL parameter.
+	 * @param theSystem The tag code system, or <code>null</code> to match any code system (this may not be supported on all servers)
+	 * @param theCode The tag code. Must not be <code>null</code> or empty.
+	 */
+	IQuery<T> withProfile(String theProfileUri);
 
 	/**
 	 * Forces the query to perform the search using the given method (allowable methods are described in the 
@@ -74,6 +96,20 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	 * Request that the client return the specified bundle type, e.g. <code>org.hl7.fhir.instance.model.Bundle.class</code>
 	 * or <code>ca.uhn.fhir.model.dstu2.resource.Bundle.class</code>
 	 */
-	<B extends IBaseBundle> IClientExecutable<IQuery<B>, B> returnBundle(Class<B> theClass);
-	
+	<B extends IBaseBundle> IQuery<B> returnBundle(Class<B> theClass);
+
+	/**
+	 * {@inheritDoc}
+	 */
+	// This is here as an overridden method to allow mocking clients with Mockito to work
+	@Override
+	IQuery<T> where(ICriterion<?> theCriterion);
+
+	/**
+	 * {@inheritDoc}
+	 */
+	// This is here as an overridden method to allow mocking clients with Mockito to work
+	@Override
+	IQuery<T> and(ICriterion<?> theCriterion);
+
 }

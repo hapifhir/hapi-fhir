@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3DataOperation {
@@ -201,17 +201,17 @@ public enum V3DataOperation {
             case UPDATE: return "Definition:Fundamental operation in an Information System (IS) that results only in the revision or alteration of an object. Note: The preceding definition is taken from the HL7 RBAC specification. There is no restriction on how the operation is invoked, e.g., via a user interface.";
             case APPEND: return "Description:Fundamental operation in an Information System (IS) that results only in the addition of information to an object already in existence. Note: The preceding definition is taken from the HL7 RBAC specification.  There is no restriction on how the operation is invoked, e.g., via a user interface.";
             case MODIFYSTATUS: return "Description:Change the status of an object representing an Act.";
-            case ABORT: return "Description:Change the status of an object representing an Act to 'aborted', i.e., terminated prior to the originally intended completion. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
-            case ACTIVATE: return "Description:Change the status of an object representing an Act to 'active', i.e., so it can be performed or is being performed, for the first time. (Contrast with REACTIVATE.) For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
-            case CANCEL: return "Description:Change the status of an object representing an Act to 'cancelled', i.e., abandoned before activation. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
-            case COMPLETE: return "Description:Change the status of an object representing an Act to 'completed', i.e., terminated normally after all of its constituents have been performed. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
-            case HOLD: return "Description:Change the status of an object representing an Act to 'held', i.e., put aside an Act that is still in preparatory stages.  No action can occur until the Act is released. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
+            case ABORT: return "Description:Change the status of an object representing an Act to \"aborted\", i.e., terminated prior to the originally intended completion. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
+            case ACTIVATE: return "Description:Change the status of an object representing an Act to \"active\", i.e., so it can be performed or is being performed, for the first time. (Contrast with REACTIVATE.) For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
+            case CANCEL: return "Description:Change the status of an object representing an Act to \"cancelled\", i.e., abandoned before activation. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
+            case COMPLETE: return "Description:Change the status of an object representing an Act to \"completed\", i.e., terminated normally after all of its constituents have been performed. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
+            case HOLD: return "Description:Change the status of an object representing an Act to \"held\", i.e., put aside an Act that is still in preparatory stages.  No action can occur until the Act is released. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
             case JUMP: return "Description:Change the status of an object representing an Act to a normal state. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
-            case NULLIFY: return "Description:Change the status of an object representing an Act to 'nullified', i.e., treat as though it never existed. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
-            case OBSOLETE: return "Description:Change the status of an object representing an Act to 'obsolete' when it has been replaced by a new instance. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
-            case REACTIVATE: return "Description:Change the status of a formerly active object representing an Act to 'active', i.e., so it can again be performed or is being performed. (Contrast with ACTIVATE.) For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
-            case RELEASE: return "Description:Change the status of an object representing an Act so it is no longer 'held', i.e., allow action to occur. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
-            case RESUME: return "Description:Change the status of a suspended object representing an Act to 'active', i.e., so it can be performed or is being performed. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
+            case NULLIFY: return "Description:Change the status of an object representing an Act to \"nullified\", i.e., treat as though it never existed. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
+            case OBSOLETE: return "Description:Change the status of an object representing an Act to \"obsolete\" when it has been replaced by a new instance. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
+            case REACTIVATE: return "Description:Change the status of a formerly active object representing an Act to \"active\", i.e., so it can again be performed or is being performed. (Contrast with ACTIVATE.) For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
+            case RELEASE: return "Description:Change the status of an object representing an Act so it is no longer \"held\", i.e., allow action to occur. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
+            case RESUME: return "Description:Change the status of a suspended object representing an Act to \"active\", i.e., so it can be performed or is being performed. For an HL7 Act, the state transitions per the HL7 Reference Information Model.";
             case SUSPEND: return "Definition:Change the status of an object representing an Act to suspended, i.e., so it is temporarily not in service.";
             default: return "?";
           }

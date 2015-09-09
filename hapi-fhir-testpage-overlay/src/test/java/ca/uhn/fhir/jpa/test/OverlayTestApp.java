@@ -124,6 +124,7 @@ public class OverlayTestApp {
 			IdDt orgId = (IdDt) create.getId();
 
 			Patient p1 = new Patient();
+			p1.getText().getDiv().setValueAsString("<div>HELP IM A BUG</div>");
 			p1.addIdentifier("foo:bar", "12345");
 			p1.addName().addFamily("Smith").addGiven("John");
 			p1.getManagingOrganization().setReference(orgId);
@@ -132,10 +133,6 @@ public class OverlayTestApp {
 			list.addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
 			ResourceMetadataKeyEnum.TAG_LIST.put(p1, list);
 			client.create(p1);
-
-			List<IResource> resources = restServerDstu1.getFhirContext().newJsonParser().parseBundle(IOUtils.toString(OverlayTestApp.class.getResourceAsStream("/test-server-seed-bundle.json"))).toListOfResources();
-			client.transaction().withResources(resources).execute();
-
 			client.create(p1);
 			client.create(p1);
 			client.create(p1);

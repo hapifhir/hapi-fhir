@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 
 public abstract class BaseElement {
 
-	private String myDeclaringClassNameComplete;
 	private String myBinding;
 	private String myBindingClass;
 	private String myCardMax;
@@ -20,28 +19,19 @@ public abstract class BaseElement {
 	private Map<String, Slicing> myChildElementNameToSlicing = new HashMap<String, Slicing>();
 	private List<BaseElement> myChildren;
 	private String myComments;
+	private String myDeclaringClassNameComplete;
 	private String myDefinition;
 	private String myElementName;
 	private String myElementParentName;
+	private String myExtensionUrl;
+	private boolean myModifier;
 	private String myName;
 	private String myRequirement;
 	private boolean myResourceRef = false;
 	private String myShortName;
+	private boolean mySummary;
 	private List<String> myType;
 	private String myV2Mapping;
-	private String myExtensionUrl;
-
-	public String getDeclaringClassNameComplete() {
-		return myDeclaringClassNameComplete;
-	}
-
-	public String getDeclaringClassNameCompleteForChildren() {
-		return getDeclaringClassNameComplete();
-	}
-
-	public void setDeclaringClassNameComplete(String theDeclaringClassNameComplete) {
-		myDeclaringClassNameComplete = theDeclaringClassNameComplete;
-	}
 
 	public void addChild(Child theElem) {
 		if (myChildren == null) {
@@ -52,8 +42,12 @@ public abstract class BaseElement {
 		// if (theElem.getDeclaringClassNameComplete()==null) {
 		theElem.setDeclaringClassNameComplete(getDeclaringClassNameCompleteForChildren());
 		// }
-		
-//		clearTypes();
+
+		// clearTypes();
+	}
+
+	public void clearTypes() {
+		getType().clear();
 	}
 
 	public String getBinding() {
@@ -87,25 +81,16 @@ public abstract class BaseElement {
 		return myComments;
 	}
 
-	public String getDefinition() {
-		return toStringConstant(myDefinition);
+	public String getDeclaringClassNameComplete() {
+		return myDeclaringClassNameComplete;
 	}
 
-	static String toStringConstant(String theDefinition) {
-		if (theDefinition == null) {
-			return "";
-		}
-		StringBuffer b = new StringBuffer();
-		for (char next : theDefinition.toCharArray()) {
-			if (next < ' ') {
-				continue;
-			}
-			if (next == '"') {
-				b.append('\\');
-			}
-			b.append(next);
-		}
-		return b.toString().trim();
+	public String getDeclaringClassNameCompleteForChildren() {
+		return getDeclaringClassNameComplete();
+	}
+
+	public String getDefinition() {
+		return toStringConstant(myDefinition);
 	}
 
 	public String getElementName() {
@@ -114,6 +99,10 @@ public abstract class BaseElement {
 
 	public String getElementParentName() {
 		return myElementParentName;
+	}
+
+	public String getExtensionUrl() {
+		return myExtensionUrl;
 	}
 
 	public String getName() {
@@ -149,12 +138,32 @@ public abstract class BaseElement {
 		return myV2Mapping;
 	}
 
+	public boolean isExtensionLocal() {
+		return false; // TODO: implemment
+	}
+
+	public boolean isExtensionModifier() {
+		return false; // TODO: implemment
+	}
+
+	public boolean isHasExtensionUrl() {
+		return StringUtils.isNotBlank(myExtensionUrl);
+	}
+
 	public boolean isHasMultipleTypes() {
 		return getType().size() > 1;
 	}
 
+	public boolean isModifier() {
+		return myModifier;
+	}
+
 	public boolean isResourceRef() {
 		return myResourceRef;
+	}
+
+	public boolean isSummary() {
+		return mySummary;
 	}
 
 	public void setBinding(String theCellValue) {
@@ -181,6 +190,10 @@ public abstract class BaseElement {
 		myComments = theComments;
 	}
 
+	public void setDeclaringClassNameComplete(String theDeclaringClassNameComplete) {
+		myDeclaringClassNameComplete = theDeclaringClassNameComplete;
+	}
+
 	public void setDefinition(String theDefinition) {
 		myDefinition = theDefinition;
 	}
@@ -201,6 +214,18 @@ public abstract class BaseElement {
 		}
 	}
 
+	public void setExtensionUrl(String theExtensionUrl) {
+		myExtensionUrl = theExtensionUrl;
+	}
+
+	public void setModifier(String theModifier) {
+		if (theModifier == null) {
+			myModifier = false;
+		} else {
+			myModifier = "Y".equals(theModifier.toUpperCase());
+		}
+	}
+
 	public void setName(String theName) {
 		myName = theName;
 	}
@@ -217,8 +242,12 @@ public abstract class BaseElement {
 		myShortName = theShortName;
 	}
 
-	public void clearTypes() {
-		getType().clear();
+	public void setSummary(String theSummary) {
+		if (theSummary == null) {
+			mySummary = false;
+		} else {
+			mySummary = "Y".equals(theSummary.toUpperCase());
+		}
 	}
 
 	public void setTypeFromString(String theType) {
@@ -230,44 +259,44 @@ public abstract class BaseElement {
 		typeString = typeString.replace("Reference (", "Reference(");
 		typeString = typeString.replace("Resource (", "Reference(");
 		typeString = typeString.replace("Resource(", "Reference(").trim();
-		
-//		if (typeString.toLowerCase().startsWith("resource(")) {
-//			typeString = typeString.substring("Resource(".length(), typeString.length());
-//			myResourceRef = true;
-//		} else if (typeString.toLowerCase().startsWith("reference(")) {
-//			typeString = typeString.substring("Reference(".length(), typeString.length());
-//			myResourceRef = true;
-//		} else 
-		
+
+		// if (typeString.toLowerCase().startsWith("resource(")) {
+		// typeString = typeString.substring("Resource(".length(), typeString.length());
+		// myResourceRef = true;
+		// } else if (typeString.toLowerCase().startsWith("reference(")) {
+		// typeString = typeString.substring("Reference(".length(), typeString.length());
+		// myResourceRef = true;
+		// } else
+
 		boolean datatype = true;
 		if (typeString.startsWith("@")) {
 			typeString = typeString.substring(1);
 			typeString = ResourceBlock.convertFhirPathNameToClassName(typeString);
 			datatype = false;
-//		} else if (typeString.equals("Reference(Any)")) {
-//			typeString = "Reference(IResource)";
-//			datatype = false;
+			// } else if (typeString.equals("Reference(Any)")) {
+			// typeString = "Reference(IResource)";
+			// datatype = false;
 		} else if (typeString.equals("*")) {
 			typeString = "IDatatype";
 			datatype = false;
 		}
 
 		if (StringUtils.isNotBlank(typeString)) {
-			
+
 			int idx = typeString.indexOf("Reference(");
 			if (idx != -1) {
 				int endIdx = typeString.indexOf(")");
-				typeString = typeString.substring(0,idx) + typeString.substring(idx, endIdx).replace("|", ",") + typeString.substring(endIdx);
- 			}
-			
+				typeString = typeString.substring(0, idx) + typeString.substring(idx, endIdx).replace("|", ",") + typeString.substring(endIdx);
+			}
+
 			if (idx == 0 && typeString.endsWith(")")) {
 				myResourceRef = true;
 			}
-			
+
 			if (typeString.startsWith("=")) {
 				datatype = false;
 			}
-			
+
 			String[] types = typeString.replace("=", "").split("\\|");
 			for (String nextType : types) {
 				nextType = nextType.trim();
@@ -301,29 +330,26 @@ public abstract class BaseElement {
 		myV2Mapping = theV2Mapping;
 	}
 
-	public void setExtensionUrl(String theExtensionUrl) {
-		myExtensionUrl = theExtensionUrl;
-	}
-
-	public boolean isExtensionModifier() {
-		return false; // TODO: implemment
-	}
-
-	public boolean isExtensionLocal() {
-		return false; // TODO: implemment
-	}
-
-	public boolean isHasExtensionUrl() {
-		return StringUtils.isNotBlank(myExtensionUrl);
-	}
-
-	public String getExtensionUrl() {
-		return myExtensionUrl;
-	}
-
 	public static void main(String[] args) {
 		SimpleChild child = new SimpleChild();
 		child.setTypeFromString("CodeableConcept | Resource(Any)");
 	}
-	
+
+	static String toStringConstant(String theDefinition) {
+		if (theDefinition == null) {
+			return "";
+		}
+		StringBuffer b = new StringBuffer();
+		for (char next : theDefinition.toCharArray()) {
+			if (next < ' ') {
+				continue;
+			}
+			if (next == '"') {
+				b.append('\\');
+			}
+			b.append(next);
+		}
+		return b.toString().trim();
+	}
+
 }

@@ -12,26 +12,38 @@
 			<table>
 				<thead>
 					<tr>
-						<td>HAPI Structure Library</td>
-						<td>HAPI Version</td>
-						<td>FHIR Specification Version</td>
+						<td><b>HAPI Structure Library</b></td>
+						<td><b>HAPI Version</b></td>
+						<td><b>FHIR Specification Version</b></td>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<td>hapi-fhir-structures-dstu</td>
+						<td rowspan="2">hapi-fhir-structures-dstu</td>
 						<td>1.1</td>
 						<td><a href="http://www.hl7.org/fhir/DSTU1/index.html">DSTU1 0.0.82</a></td>
 					</tr>
 					<tr>
-						<td>hapi-fhir-structures-dstu2</td>
+						<td>1.2</td>
+						<td><a href="http://www.hl7.org/fhir/DSTU1/index.html">DSTU1 0.0.82</a></td>
+					</tr>
+					<tr>
+						<td rowspan="2">hapi-fhir-structures-dstu2</td>
 						<td>1.1</td>
 						<td><a href="http://www.hl7.org/fhir/2015May/index.html">DSTU2 0.5.0</a></td>
 					</tr>
 					<tr>
-						<td>hapi-fhir-structures-hl7org-dstu2</td>
+						<td>1.2</td>
+						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.0</a></td>
+					</tr>
+					<tr>
+						<td rowspan="2">hapi-fhir-structures-hl7org-dstu2</td>
 						<td>1.1</td>
-						<td><a href="http://hl7-fhir.github.io/">DSTU2 Latest Dev</a> (SVN 5843)</td>
+						<td><a href="http://hl7-fhir.github.io/">DSTU2 0.5.0 Snapshot</a> (SVN 5843)</td>
+					</tr>
+					<tr>
+						<td>1.2</td>
+						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.0</a></td>
 					</tr>
 				</tbody>
 			</table>
@@ -62,7 +74,7 @@
 				</p>
 				<p>
 					See <a href="#Using_Snapshot_Builds">using snapshot builds</a> below to find out
-					how to get these builds.S
+					how to get these builds.
 				</p>
 			</subsection>
 
@@ -78,11 +90,10 @@
 
 			<subsection name="DSTU1 Resources - HAPI Structures">
 				<p>
-					At this time, the only official release of FHIR is the "DSTU1" release,
-					which is available by including the <code>hapi-fhir-structures-dstu-[version].jar</code>.
-					Note that the ballot process for the next release (DSTU2) has not yet been
-					completed, but many users are already targeting it for new development as it
-					is likely to be approved without significant changes.
+					HAPI supports multiple versions of the FHIR specification. Code which 
+					needs to interact with or implement the DSTU1 specification (which is
+					now gradually beginning to be replaced by newer specifications) can do
+					so using <code>hapi-fhir-structures-dstu-[version].jar</code>.
 				</p>
 				<p>
 					If you use Maven, you can include these JARs with the following dependency tags
@@ -137,6 +148,17 @@
    <version>${hapi_stable_version}</version>
 </dependency>]]></source>
 				
+				<p>
+					If you want to use HAPI's 
+					<a href="./doc_validation.html#structure_definition_validation">StructureDefinition validation</a>
+					you will also need to include the <code>hapi-fhir-validation-resources-dstu2-[version].jar</code>:
+				</p>
+			<source><![CDATA[<dependency>
+   <groupId>ca.uhn.hapi.fhir</groupId>
+   <artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
+   <version>${hapi_stable_version}</version>
+</dependency>]]></source>
+				
 			</subsection>
 		
 		</section>
@@ -153,10 +175,16 @@
 			<source><![CDATA[compile 'ca.uhn.hapi.fhir:hapi-fhir-base:${hapi_stable_version}'
 compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu:${hapi_stable_version}']]></source>
 			<p>
-				DSTU2:
+				DSTU2 (HAPI):
 			</p>
 			<source><![CDATA[compile 'ca.uhn.hapi.fhir:hapi-fhir-base:${hapi_stable_version}'
 compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:${hapi_stable_version}']]></source>
+			<p>
+				DSTU2 (RI):
+			</p>
+			<source><![CDATA[compile 'ca.uhn.hapi.fhir:hapi-fhir-base:${hapi_stable_version}'
+compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-hl7org-dstu2:${hapi_stable_version}'
+compile 'ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu2:${hapi_stable_version}']]></source>
 		</section>
 
 		<section name="Using Snapshot Builds">

@@ -10,18 +10,17 @@
   <LastAuthor>Grahame</LastAuthor>
   <Created>2012-03-21T19:16:26Z</Created>
   <LastSaved>2015-03-30T11:54:36Z</LastSaved>
-  <Version>14.00</Version>
+  <Version>15.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>9120</WindowHeight>
-  <WindowWidth>15270</WindowWidth>
-  <WindowTopX>630</WindowTopX>
-  <WindowTopY>780</WindowTopY>
+  <WindowHeight>11400</WindowHeight>
+  <WindowWidth>22575</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>0</WindowTopY>
   <ActiveSheet>1</ActiveSheet>
-  <DoNotCalculateBeforeSave/>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -39,9 +38,16 @@
    <Alignment ss:Vertical="Top" ss:WrapText="1"/>
   </Style>
   <Style ss:ID="s65">
-   <Alignment ss:Horizontal="Left" ss:Vertical="Top"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
   </Style>
   <Style ss:ID="s66">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s67">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
   </Style>
  </Styles>
@@ -79,6 +85,7 @@
     <Cell><Data ss:Type="String">A whole number</Data></Cell>
     <Cell><Data ss:Type="String">32 bit number; for values larger than this, use decimal</Data></Cell>
     <Cell><Data ss:Type="String">int</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">-?([0]|([1-9][0-9]*))</Data></Cell>
     <Cell ss:Index="7"><Data ss:Type="String">INT</Data></Cell>
     <Cell><Data ss:Type="String">~NM/~SI</Data></Cell>
    </Row>
@@ -87,6 +94,7 @@
     <Cell><Data ss:Type="String">A rational number with implicit precision</Data></Cell>
     <Cell><Data ss:Type="String">Do not use a IEEE type floating point type, instead use something that works like a true decimal, with inbuilt precision (e.g. Java BigInteger)</Data></Cell>
     <Cell><Data ss:Type="String">decimal</Data></Cell>
+    <Cell><Data ss:Type="String">-?([0]|([1-9][0-9]*))(\.[0-9]+)?</Data></Cell>
     <Cell ss:Index="7"><Data ss:Type="String">REAL</Data></Cell>
     <Cell><Data ss:Type="String">~NM</Data></Cell>
    </Row>
@@ -101,7 +109,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell><Data ss:Type="String">instant</Data></Cell>
     <Cell><Data ss:Type="String">An instant in time - known at least to the second</Data></Cell>
-    <Cell><Data ss:Type="String">Note: For system observed times, not human-reported times (see date and dateTime below). Time zone is always required</Data></Cell>
+    <Cell><Data ss:Type="String">Note: This is intended for precisely observed times, typically system logs etc, and not human-reported times - for them, see date and dateTime below. Time zone is always required</Data></Cell>
     <Cell><Data ss:Type="String">dateTime</Data></Cell>
     <Cell ss:Index="7"><Data ss:Type="String">TS</Data></Cell>
     <Cell><Data ss:Type="String">DTM</Data></Cell>
@@ -124,9 +132,9 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="59.25" ss:StyleID="s62">
     <Cell><Data ss:Type="String">date</Data></Cell>
-    <Cell><ss:Data ss:Type="String" xmlns="http://www.w3.org/TR/REC-html40"><Font
-       html:Color="#000000">A date, or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  </Font><B><Font
-        html:Color="#000000">Dates SHALL be valid dates.</Font></B></ss:Data></Cell>
+    <Cell ss:StyleID="s65"><ss:Data ss:Type="String"
+      xmlns="http://www.w3.org/TR/REC-html40">       <Font html:Color="#000000">A date, or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  </Font><Font>       </Font><B>        <Font
+        html:Color="#000000">Dates SHALL be valid dates.</Font><Font>       </Font></B><Font>      </Font></ss:Data></Cell>
     <Cell ss:Index="4"><Data ss:Type="String">xs:gYear, xs:gYearMonth, xs:date</Data></Cell>
     <Cell><Data ss:Type="String" x:Ticked="1">-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1]))?)?</Data></Cell>
     <Cell><Data ss:Type="String">Could get fancy and check legal days/month or even leap years, but not worth it.</Data></Cell>
@@ -135,22 +143,22 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="109.5" ss:StyleID="s62">
     <Cell><Data ss:Type="String">dateTime</Data></Cell>
-    <Cell><ss:Data ss:Type="String" xmlns="http://www.w3.org/TR/REC-html40"><Font
-       html:Color="#000000">A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.  </Font><B><Font
-        html:Color="#000000">Dates SHALL be valid dates.</Font></B></ss:Data></Cell>
+    <Cell ss:StyleID="s65"><ss:Data ss:Type="String"
+      xmlns="http://www.w3.org/TR/REC-html40">       <Font html:Color="#000000">A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.  </Font><Font>       </Font><B>        <Font
+        html:Color="#000000">Dates SHALL be valid dates.</Font><Font>       </Font></B><Font>      </Font></ss:Data></Cell>
     <Cell ss:Index="4"><Data ss:Type="String">xs:gYear, xs:gYearMonth, xs:date, xs:dateTime</Data></Cell>
     <Cell><Data ss:Type="String" x:Ticked="1">-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?</Data></Cell>
     <Cell ss:Index="7"><Data ss:Type="String">TS</Data></Cell>
     <Cell><Data ss:Type="String">DTM</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="100.5" ss:StyleID="s65">
+   <Row ss:AutoFitHeight="0" ss:Height="100.5" ss:StyleID="s66">
     <Cell><Data ss:Type="String">time</Data></Cell>
     <Cell><Data ss:Type="String">A time during the day, with no date specified </Data></Cell>
-    <Cell ss:Index="4" ss:StyleID="s66"><Data ss:Type="String">xs:time</Data></Cell>
-    <Cell ss:StyleID="s66"><Data ss:Type="String" x:Ticked="1">([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?</Data></Cell>
-    <Cell ss:StyleID="s66"/>
-    <Cell ss:StyleID="s66"><Data ss:Type="String">n/a</Data></Cell>
-    <Cell ss:StyleID="s66"><Data ss:Type="String">TM</Data></Cell>
+    <Cell ss:Index="4" ss:StyleID="s67"><Data ss:Type="String">time</Data></Cell>
+    <Cell ss:StyleID="s67"><Data ss:Type="String" x:Ticked="1">([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?</Data></Cell>
+    <Cell ss:StyleID="s67"/>
+    <Cell ss:StyleID="s67"><Data ss:Type="String">n/a</Data></Cell>
+    <Cell ss:StyleID="s67"><Data ss:Type="String">TM</Data></Cell>
    </Row>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
@@ -163,7 +171,8 @@
    <Panes>
     <Pane>
      <Number>3</Number>
-     <ActiveRow>11</ActiveRow>
+     <ActiveRow>7</ActiveRow>
+     <ActiveCol>1</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -179,7 +188,7 @@
    <NamedRange ss:Name="oid" ss:RefersTo="=Patterns!R3C1"/>
    <NamedRange ss:Name="uuid" ss:RefersTo="=Patterns!R4C1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="7" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="8" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s62" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="74.25"/>
    <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="233.25"/>
@@ -200,7 +209,7 @@
     <Cell><Data ss:Type="String">A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents</Data></Cell>
     <Cell ss:Index="4"><Data ss:Type="String">string</Data></Cell>
     <Cell><Data ss:Type="String">xs:token</Data></Cell>
-    <Cell><Data ss:Type="String">[^\s]+([\s]+[^\s]+)*</Data></Cell>
+    <Cell><Data ss:Type="String">[^\s]+([\s][^\s]+)*</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="14.25">
     <Cell><Data ss:Type="String">oid</Data><NamedCell ss:Name="oid"/></Cell>
@@ -220,7 +229,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="105">
     <Cell><Data ss:Type="String">id</Data><NamedCell ss:Name="id"/></Cell>
-    <Cell><Data ss:Type="String">Any combination of lowercase letters, numerals, &quot;-&quot; and &quot;.&quot;, with a length limit of 36 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Systems SHALL send ids as lower-case but SHOULD interpret them case-insensitively.</Data></Cell>
+    <Cell><Data ss:Type="String">Any combination of letters, numerals, &quot;-&quot; and &quot;.&quot;, with a length limit of 64 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Ids are case-insensitive.</Data></Cell>
     <Cell><Data ss:Type="String">RFC 4122</Data></Cell>
     <Cell><Data ss:Type="String">string</Data></Cell>
     <Cell><Data ss:Type="String">xs:string+</Data></Cell>
@@ -231,14 +240,21 @@
     <Cell><Data ss:Type="String">An integer with a value that is not negative (e.g. &gt;= 0)</Data></Cell>
     <Cell ss:Index="4"><Data ss:Type="String">integer</Data></Cell>
     <Cell><Data ss:Type="String">xs:nonNegativeInteger </Data></Cell>
-    <Cell><Data ss:Type="String">[0-9]+</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">[0]|([1-9][0-9]*)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell><Data ss:Type="String">positiveInt</Data></Cell>
     <Cell><Data ss:Type="String">An integer with a value that is positive (e.g. &gt;0)</Data></Cell>
     <Cell ss:Index="4"><Data ss:Type="String">integer</Data></Cell>
     <Cell><Data ss:Type="String">xs:positiveInteger</Data></Cell>
-    <Cell><Data ss:Type="String">[1-9][0-9]+</Data></Cell>
+    <Cell><Data ss:Type="String">[1-9][0-9]*</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">markdown</Data></Cell>
+    <Cell><Data ss:Type="String">A string that may contain markdown syntax for optional processing by a mark down presentation engine</Data></Cell>
+    <Cell><Data ss:Type="String">Systems are not required to have markdown support, and there is considerable variation in markdown syntax, so the text should be readable without markdown processing. The preferred markdown syntax is described here: http://daringfireball.net/projects/markdown/syntax (and tests here: http://daringfireball.net/projects/downloads/MarkdownTest_1.0.zip) </Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">xs:string</Data></Cell>
    </Row>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
@@ -258,8 +274,8 @@
    <Panes>
     <Pane>
      <Number>3</Number>
-     <ActiveRow>7</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveRow>4</ActiveRow>
+     <ActiveCol>2</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

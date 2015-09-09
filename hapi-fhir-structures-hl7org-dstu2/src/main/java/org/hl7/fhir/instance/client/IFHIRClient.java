@@ -406,4 +406,12 @@ public interface IFHIRClient {
    * @return
    */
 	public <T extends Resource> Parameters operateType(Class<T> resourceClass, String name, Parameters params);
+
+
+	/**
+	 * for debugging- the server address that the client is using
+	 * 
+	 * @return
+	 */
+  public String getAddress();
 }

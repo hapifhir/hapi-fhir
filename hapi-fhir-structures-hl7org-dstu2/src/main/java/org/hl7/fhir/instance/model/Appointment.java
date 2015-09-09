@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -47,6 +47,10 @@ import org.hl7.fhir.instance.model.api.*;
 public class Appointment extends DomainResource {
 
     public enum AppointmentStatus {
+        /**
+         * None of the participant(s) have finalized their acceptance of the appointment request, and the start/end time may not be set yet
+         */
+        PROPOSED, 
         /**
          * Some or all of the participant(s) have not finalized their acceptance of the appointment request
          */
@@ -78,6 +82,8 @@ public class Appointment extends DomainResource {
         public static AppointmentStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("proposed".equals(codeString))
+          return PROPOSED;
         if ("pending".equals(codeString))
           return PENDING;
         if ("booked".equals(codeString))
@@ -94,6 +100,7 @@ public class Appointment extends DomainResource {
         }
         public String toCode() {
           switch (this) {
+            case PROPOSED: return "proposed";
             case PENDING: return "pending";
             case BOOKED: return "booked";
             case ARRIVED: return "arrived";
@@ -105,6 +112,7 @@ public class Appointment extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
+            case PROPOSED: return "http://hl7.org/fhir/appointmentstatus";
             case PENDING: return "http://hl7.org/fhir/appointmentstatus";
             case BOOKED: return "http://hl7.org/fhir/appointmentstatus";
             case ARRIVED: return "http://hl7.org/fhir/appointmentstatus";
@@ -116,6 +124,7 @@ public class Appointment extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
+            case PROPOSED: return "None of the participant(s) have finalized their acceptance of the appointment request, and the start/end time may not be set yet";
             case PENDING: return "Some or all of the participant(s) have not finalized their acceptance of the appointment request";
             case BOOKED: return "All participant(s) have been considered and the appointment is confirmed to go ahead at the date/times specified";
             case ARRIVED: return "Some of the patients have arrived";
@@ -127,6 +136,7 @@ public class Appointment extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
+            case PROPOSED: return "Proposed";
             case PENDING: return "Pending";
             case BOOKED: return "Booked";
             case ARRIVED: return "Arrived";
@@ -143,6 +153,8 @@ public class Appointment extends DomainResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("proposed".equals(codeString))
+          return AppointmentStatus.PROPOSED;
         if ("pending".equals(codeString))
           return AppointmentStatus.PENDING;
         if ("booked".equals(codeString))
@@ -158,6 +170,8 @@ public class Appointment extends DomainResource {
         throw new IllegalArgumentException("Unknown AppointmentStatus code '"+codeString+"'");
         }
     public String toCode(AppointmentStatus code) {
+      if (code == AppointmentStatus.PROPOSED)
+        return "proposed";
       if (code == AppointmentStatus.PENDING)
         return "pending";
       if (code == AppointmentStatus.BOOKED)
@@ -365,14 +379,14 @@ public class Appointment extends DomainResource {
         /**
          * Role of participant in the appointment.
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Role of participant in the appointment", formalDefinition="Role of participant in the appointment." )
         protected List<CodeableConcept> type;
 
         /**
          * A Person, Location/HealthcareService or Device that is participating in the appointment.
          */
-        @Child(name = "actor", type = {Patient.class, Practitioner.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=2, min=0, max=1)
+        @Child(name = "actor", type = {Patient.class, Practitioner.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="A Person, Location/HealthcareService or Device that is participating in the appointment", formalDefinition="A Person, Location/HealthcareService or Device that is participating in the appointment." )
         protected Reference actor;
 
@@ -384,14 +398,14 @@ public class Appointment extends DomainResource {
         /**
          * Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.
          */
-        @Child(name = "required", type = {CodeType.class}, order=3, min=0, max=1)
+        @Child(name = "required", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="required | optional | information-only", formalDefinition="Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present." )
         protected Enumeration<ParticipantRequired> required;
 
         /**
          * Participation status of the Patient.
          */
-        @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1)
+        @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="accepted | declined | tentative | needs-action", formalDefinition="Participation status of the Patient." )
         protected Enumeration<ParticipationStatus> status;
 
@@ -638,63 +652,70 @@ public class Appointment extends DomainResource {
     /**
      * This records identifiers associated with this appointment concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="External Ids for this item", formalDefinition="This records identifiers associated with this appointment concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * The overall status of the Appointment. Each of the participants has their own participation status which indicates their involvement in the process, however this status indicates the shared status.
      */
-    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1)
-    @Description(shortDefinition="pending | booked | arrived | fulfilled | cancelled | noshow", formalDefinition="The overall status of the Appointment. Each of the participants has their own participation status which indicates their involvement in the process, however this status indicates the shared status." )
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="proposed | pending | booked | arrived | fulfilled | cancelled | noshow", formalDefinition="The overall status of the Appointment. Each of the participants has their own participation status which indicates their involvement in the process, however this status indicates the shared status." )
     protected Enumeration<AppointmentStatus> status;
 
     /**
      * The type of appointment that is being booked (This may also be associated with participants for location, and/or a HealthcareService).
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The type of appointment that is being booked", formalDefinition="The type of appointment that is being booked (This may also be associated with participants for location, and/or a HealthcareService)." )
     protected CodeableConcept type;
 
     /**
      * The reason that this appointment is being scheduled, this is more clinical than administrative.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=3, min=0, max=1)
+    @Child(name = "reason", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The reason that this appointment is being scheduled, this is more clinical than administrative", formalDefinition="The reason that this appointment is being scheduled, this is more clinical than administrative." )
     protected CodeableConcept reason;
 
     /**
      * The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority).
      */
-    @Child(name = "priority", type = {UnsignedIntType.class}, order=4, min=0, max=1)
+    @Child(name = "priority", type = {UnsignedIntType.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority)", formalDefinition="The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority)." )
     protected UnsignedIntType priority;
 
     /**
      * The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field.
      */
-    @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field", formalDefinition="The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field." )
     protected StringType description;
 
     /**
      * Date/Time that the appointment is to take place.
      */
-    @Child(name = "start", type = {InstantType.class}, order=6, min=1, max=1)
+    @Child(name = "start", type = {InstantType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date/Time that the appointment is to take place", formalDefinition="Date/Time that the appointment is to take place." )
     protected InstantType start;
 
     /**
      * Date/Time that the appointment is to conclude.
      */
-    @Child(name = "end", type = {InstantType.class}, order=7, min=1, max=1)
+    @Child(name = "end", type = {InstantType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date/Time that the appointment is to conclude", formalDefinition="Date/Time that the appointment is to conclude." )
     protected InstantType end;
 
     /**
+     * Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request).
+     */
+    @Child(name = "minutesDuration", type = {PositiveIntType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request)", formalDefinition="Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request)." )
+    protected PositiveIntType minutesDuration;
+
+    /**
      * The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot.
      */
-    @Child(name = "slot", type = {Slot.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "slot", type = {Slot.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot", formalDefinition="The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot." )
     protected List<Reference> slot;
     /**
@@ -706,30 +727,18 @@ public class Appointment extends DomainResource {
     /**
      * Additional comments about the appointment.
      */
-    @Child(name = "comment", type = {StringType.class}, order=9, min=0, max=1)
+    @Child(name = "comment", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Additional comments about the appointment", formalDefinition="Additional comments about the appointment." )
     protected StringType comment;
 
     /**
-     * An Order that lead to the creation of this appointment.
-     */
-    @Child(name = "order", type = {Order.class}, order=10, min=0, max=1)
-    @Description(shortDefinition="An Order that lead to the creation of this appointment", formalDefinition="An Order that lead to the creation of this appointment." )
-    protected Reference order;
-
-    /**
-     * The actual object that is the target of the reference (An Order that lead to the creation of this appointment.)
-     */
-    protected Order orderTarget;
-
-    /**
      * List of participants involved in the appointment.
      */
-    @Child(name = "participant", type = {}, order=11, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "participant", type = {}, order=11, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="List of participants involved in the appointment", formalDefinition="List of participants involved in the appointment." )
     protected List<AppointmentParticipantComponent> participant;
 
-    private static final long serialVersionUID = -1918687958L;
+    private static final long serialVersionUID = -1403944125L;
 
   /*
    * Constructor
@@ -741,11 +750,9 @@ public class Appointment extends DomainResource {
   /*
    * Constructor
    */
-    public Appointment(Enumeration<AppointmentStatus> status, InstantType start, InstantType end) {
+    public Appointment(Enumeration<AppointmentStatus> status) {
       super();
       this.status = status;
-      this.start = start;
-      this.end = end;
     }
 
     /**
@@ -1014,9 +1021,13 @@ public class Appointment extends DomainResource {
      * @param value Date/Time that the appointment is to take place.
      */
     public Appointment setStart(Date value) { 
+      if (value == null)
+        this.start = null;
+      else {
         if (this.start == null)
           this.start = new InstantType();
         this.start.setValue(value);
+      }
       return this;
     }
 
@@ -1059,9 +1070,58 @@ public class Appointment extends DomainResource {
      * @param value Date/Time that the appointment is to conclude.
      */
     public Appointment setEnd(Date value) { 
+      if (value == null)
+        this.end = null;
+      else {
         if (this.end == null)
           this.end = new InstantType();
         this.end.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #minutesDuration} (Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request).). This is the underlying object with id, value and extensions. The accessor "getMinutesDuration" gives direct access to the value
+     */
+    public PositiveIntType getMinutesDurationElement() { 
+      if (this.minutesDuration == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Appointment.minutesDuration");
+        else if (Configuration.doAutoCreate())
+          this.minutesDuration = new PositiveIntType(); // bb
+      return this.minutesDuration;
+    }
+
+    public boolean hasMinutesDurationElement() { 
+      return this.minutesDuration != null && !this.minutesDuration.isEmpty();
+    }
+
+    public boolean hasMinutesDuration() { 
+      return this.minutesDuration != null && !this.minutesDuration.isEmpty();
+    }
+
+    /**
+     * @param value {@link #minutesDuration} (Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request).). This is the underlying object with id, value and extensions. The accessor "getMinutesDuration" gives direct access to the value
+     */
+    public Appointment setMinutesDurationElement(PositiveIntType value) { 
+      this.minutesDuration = value;
+      return this;
+    }
+
+    /**
+     * @return Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request).
+     */
+    public int getMinutesDuration() { 
+      return this.minutesDuration == null || this.minutesDuration.isEmpty() ? 0 : this.minutesDuration.getValue();
+    }
+
+    /**
+     * @param value Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request).
+     */
+    public Appointment setMinutesDuration(int value) { 
+        if (this.minutesDuration == null)
+          this.minutesDuration = new PositiveIntType();
+        this.minutesDuration.setValue(value);
       return this;
     }
 
@@ -1176,50 +1236,6 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return {@link #order} (An Order that lead to the creation of this appointment.)
-     */
-    public Reference getOrder() { 
-      if (this.order == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Appointment.order");
-        else if (Configuration.doAutoCreate())
-          this.order = new Reference(); // cc
-      return this.order;
-    }
-
-    public boolean hasOrder() { 
-      return this.order != null && !this.order.isEmpty();
-    }
-
-    /**
-     * @param value {@link #order} (An Order that lead to the creation of this appointment.)
-     */
-    public Appointment setOrder(Reference value) { 
-      this.order = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #order} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (An Order that lead to the creation of this appointment.)
-     */
-    public Order getOrderTarget() { 
-      if (this.orderTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Appointment.order");
-        else if (Configuration.doAutoCreate())
-          this.orderTarget = new Order(); // aa
-      return this.orderTarget;
-    }
-
-    /**
-     * @param value {@link #order} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (An Order that lead to the creation of this appointment.)
-     */
-    public Appointment setOrderTarget(Order value) { 
-      this.orderTarget = value;
-      return this;
-    }
-
-    /**
      * @return {@link #participant} (List of participants involved in the appointment.)
      */
     public List<AppointmentParticipantComponent> getParticipant() { 
@@ -1269,9 +1285,9 @@ public class Appointment extends DomainResource {
         childrenList.add(new Property("description", "string", "The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("start", "instant", "Date/Time that the appointment is to take place.", 0, java.lang.Integer.MAX_VALUE, start));
         childrenList.add(new Property("end", "instant", "Date/Time that the appointment is to conclude.", 0, java.lang.Integer.MAX_VALUE, end));
+        childrenList.add(new Property("minutesDuration", "positiveInt", "Number of minutes that the appointment is to take. This can be less than the duration between the start and end times (where actual time of appointment is only an estimate or is a planned appointment request).", 0, java.lang.Integer.MAX_VALUE, minutesDuration));
         childrenList.add(new Property("slot", "Reference(Slot)", "The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot.", 0, java.lang.Integer.MAX_VALUE, slot));
         childrenList.add(new Property("comment", "string", "Additional comments about the appointment.", 0, java.lang.Integer.MAX_VALUE, comment));
-        childrenList.add(new Property("order", "Reference(Order)", "An Order that lead to the creation of this appointment.", 0, java.lang.Integer.MAX_VALUE, order));
         childrenList.add(new Property("participant", "", "List of participants involved in the appointment.", 0, java.lang.Integer.MAX_VALUE, participant));
       }
 
@@ -1290,13 +1306,13 @@ public class Appointment extends DomainResource {
         dst.description = description == null ? null : description.copy();
         dst.start = start == null ? null : start.copy();
         dst.end = end == null ? null : end.copy();
+        dst.minutesDuration = minutesDuration == null ? null : minutesDuration.copy();
         if (slot != null) {
           dst.slot = new ArrayList<Reference>();
           for (Reference i : slot)
             dst.slot.add(i.copy());
         };
         dst.comment = comment == null ? null : comment.copy();
-        dst.order = order == null ? null : order.copy();
         if (participant != null) {
           dst.participant = new ArrayList<AppointmentParticipantComponent>();
           for (AppointmentParticipantComponent i : participant)
@@ -1318,8 +1334,8 @@ public class Appointment extends DomainResource {
         Appointment o = (Appointment) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
            && compareDeep(reason, o.reason, true) && compareDeep(priority, o.priority, true) && compareDeep(description, o.description, true)
-           && compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(slot, o.slot, true)
-           && compareDeep(comment, o.comment, true) && compareDeep(order, o.order, true) && compareDeep(participant, o.participant, true)
+           && compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(minutesDuration, o.minutesDuration, true)
+           && compareDeep(slot, o.slot, true) && compareDeep(comment, o.comment, true) && compareDeep(participant, o.participant, true)
           ;
       }
 
@@ -1331,16 +1347,17 @@ public class Appointment extends DomainResource {
           return false;
         Appointment o = (Appointment) other;
         return compareValues(status, o.status, true) && compareValues(priority, o.priority, true) && compareValues(description, o.description, true)
-           && compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(comment, o.comment, true)
-          ;
+           && compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(minutesDuration, o.minutesDuration, true)
+           && compareValues(comment, o.comment, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
            && (type == null || type.isEmpty()) && (reason == null || reason.isEmpty()) && (priority == null || priority.isEmpty())
            && (description == null || description.isEmpty()) && (start == null || start.isEmpty()) && (end == null || end.isEmpty())
-           && (slot == null || slot.isEmpty()) && (comment == null || comment.isEmpty()) && (order == null || order.isEmpty())
-           && (participant == null || participant.isEmpty());
+           && (minutesDuration == null || minutesDuration.isEmpty()) && (slot == null || slot.isEmpty())
+           && (comment == null || comment.isEmpty()) && (participant == null || participant.isEmpty())
+          ;
       }
 
   @Override
@@ -1352,10 +1369,12 @@ public class Appointment extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="actor", path="Appointment.participant.actor", description="Any one of the individuals participating in the appointment", type="reference" )
   public static final String SP_ACTOR = "actor";
-  @SearchParamDefinition(name="partstatus", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment. Can be used to locate participants that have not responded to meeting requests.", type="token" )
-  public static final String SP_PARTSTATUS = "partstatus";
+  @SearchParamDefinition(name="identifier", path="Appointment.identifier", description="An Identifier of the Appointment", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="practitioner", path="Appointment.participant.actor", description="One of the individuals of the appointment is this practitioner", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
+  @SearchParamDefinition(name="part-status", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment. Can be used to locate participants that have not responded to meeting requests.", type="token" )
+  public static final String SP_PARTSTATUS = "part-status";
   @SearchParamDefinition(name="patient", path="Appointment.participant.actor", description="One of the individuals of the appointment is this patient", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="location", path="Appointment.participant.actor", description="This location is listed in the participants of the appointment", type="reference" )

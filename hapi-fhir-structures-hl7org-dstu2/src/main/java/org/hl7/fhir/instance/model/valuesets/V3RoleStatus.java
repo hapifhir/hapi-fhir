@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3RoleStatus {
@@ -102,11 +102,11 @@ public enum V3RoleStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case NORMAL: return "The 'typical' state. Excludes 'nullified' which represents the termination state of a Role instance that was created in error.";
+            case NORMAL: return "The 'typical' state. Excludes \"nullified\" which represents the termination state of a Role instance that was created in error.";
             case ACTIVE: return "The state representing the fact that the Entity is currently active in the Role.";
             case CANCELLED: return "The terminal state resulting from cancellation of the role prior to activation.";
             case PENDING: return "The state representing that fact that the role has not yet become active.";
-            case SUSPENDED: return "The state that represents a suspension of the Entity playing the Role. This state is arrived at from the 'active' state.";
+            case SUSPENDED: return "The state that represents a suspension of the Entity playing the Role. This state is arrived at from the \"active\" state.";
             case TERMINATED: return "The state representing the successful termination of the Role.";
             case NULLIFIED: return "The state representing the termination of a Role instance that was created in error.";
             default: return "?";

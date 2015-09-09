@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3RoleLinkStatus {
@@ -95,7 +95,7 @@ public enum V3RoleLinkStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case NORMAL: return "Description: The 'typical' state. Excludes 'nullified' which represents the termination state of a RoleLink instance that was created in error.";
+            case NORMAL: return "Description: The 'typical' state. Excludes \"nullified\" which represents the termination state of a RoleLink instance that was created in error.";
             case ACTIVE: return "Description: The state indicates the RoleLink is in progress.";
             case CANCELLED: return "Description: The terminal state resulting from abandoning the RoleLink prior to or after activation.";
             case COMPLETED: return "Description: The terminal state representing the successful completion of the RoleLink.";

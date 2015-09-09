@@ -19,8 +19,7 @@ package ca.uhn.fhir.rest.method;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -28,12 +27,11 @@ import java.util.Set;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -49,13 +47,8 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 	}
 
 	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return RestfulOperationTypeEnum.UPDATE;
-	}
-
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return null;
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.UPDATE;
 	}
 
 	@Override

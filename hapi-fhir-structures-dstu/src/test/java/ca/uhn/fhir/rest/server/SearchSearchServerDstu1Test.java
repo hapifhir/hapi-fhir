@@ -1,14 +1,20 @@
 package ca.uhn.fhir.rest.server;
 
+import static ca.uhn.fhir.util.UrlUtil.escape;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -20,8 +26,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -34,9 +38,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.google.common.net.UrlEscapers;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
@@ -47,6 +54,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -54,14 +62,12 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.util.PortUtil;
-
-import com.google.common.net.UrlEscapers;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -74,14 +80,48 @@ public class SearchSearchServerDstu1Test {
 	private static int ourPort;
 
 	private static Server ourServer;
-	private static NarrativeModeEnum ourLastNarrativeMode;
 	private static RestfulServer ourServlet;
 	private static IServerAddressStrategy ourDefaultAddressStrategy;
+	private static Set<Include> ourLastIncludes;
+	private static StringAndListParam ourLastAndList;
 
 	@Before
 	public void before() {
-		ourLastNarrativeMode=null;
 		ourServlet.setServerAddressStrategy(ourDefaultAddressStrategy);
+		ourLastIncludes = null;
+		ourLastAndList = null;
+	}
+
+	@Test
+	public void testParseEscapedValues() throws Exception {
+
+		StringBuilder b = new StringBuilder();
+		b.append("http://localhost:");
+		b.append(ourPort);
+		b.append("/Patient?");
+		b.append(escape("findPatientWithAndList")).append('=').append(escape("NE\\,NE,NE\\,NE")).append('&');
+		b.append(escape("findPatientWithAndList")).append('=').append(escape("NE\\\\NE")).append('&');
+		b.append(escape("findPatientWithAndList:exact")).append('=').append(escape("E\\$E")).append('&');
+		b.append(escape("findPatientWithAndList:exact")).append('=').append(escape("E\\|E")).append('&');
+
+		HttpGet httpGet = new HttpGet(b.toString());
+		
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals(4, ourLastAndList.getValuesAsQueryTokens().size());
+		assertEquals(2, ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
+		assertFalse(ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).isExact());
+		assertEquals("NE,NE", ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("NE,NE", ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValue());
+		assertEquals("NE\\NE", ourLastAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue());
+		assertTrue(ourLastAndList.getValuesAsQueryTokens().get(2).getValuesAsQueryTokens().get(0).isExact());
+		assertEquals("E$E", ourLastAndList.getValuesAsQueryTokens().get(2).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("E|E", ourLastAndList.getValuesAsQueryTokens().get(3).getValuesAsQueryTokens().get(0).getValue());
 	}
 	
 	@Test
@@ -99,36 +139,6 @@ public class SearchSearchServerDstu1Test {
 	}
 
 	@Test
-	public void testNarrativeParamNone() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithNarrative");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(null, ourLastNarrativeMode);
-	}
-
-	@Test
-	public void testNarrativeParamPopulated() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithNarrative&_narrative=ONly");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(NarrativeModeEnum.ONLY, ourLastNarrativeMode);
-	}
-
-	@Test
-	public void testNarrativeParamPopulatedInvalid() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithNarrative&_narrative=BLAH");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(null, ourLastNarrativeMode);
-	}
-
-	@Test
 	public void testOmitEmptyOptionalParam() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=");
 		HttpResponse status = ourClient.execute(httpGet);
@@ -142,7 +152,6 @@ public class SearchSearchServerDstu1Test {
 		assertEquals(null, p.getNameFirstRep().getFamilyFirstRep().getValue());
 	}
 
-	
 	@Test
 	public void testReturnLinks() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=findWithLinks");
@@ -164,13 +173,51 @@ public class SearchSearchServerDstu1Test {
 
 	}
 
+	@Test
+	public void testSearchIncludesParametersNone() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchIncludes");
+
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertThat(ourLastIncludes, empty());
+	}
+
+	@Test
+	public void testSearchIncludesParametersIncludes() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchIncludes&_include=foo&_include:recurse=bar");
+
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals(2, ourLastIncludes.size());
+		assertThat(ourLastIncludes, containsInAnyOrder(new Include("foo", false), new Include("bar", true)));
+	}
+
+	@Test
+	public void testSearchIncludesParametersIncludesList() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchIncludesList&_include=foo&_include:recurse=bar");
+
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals(2, ourLastIncludes.size());
+		assertThat(ourLastIncludes, containsInAnyOrder(new Include("foo", false), new Include("bar", true)));
+	}
+
 	/**
 	 * #149
 	 */
 	@Test
 	public void testReturnLinksWithAddressStrategy() throws Exception {
 		ourServlet.setServerAddressStrategy(new HardcodedServerAddressStrategy("https://blah.com/base"));
-		
+
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=findWithLinks");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -180,7 +227,7 @@ public class SearchSearchServerDstu1Test {
 		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 
 		ourLog.info(responseContent);
-		
+
 		assertEquals(10, bundle.getEntries().size());
 		assertEquals("https://blah.com/base", bundle.getLinkBase().getValue());
 		assertEquals("https://blah.com/base/Patient?_query=findWithLinks", bundle.getLinkSelf().getValue());
@@ -195,7 +242,7 @@ public class SearchSearchServerDstu1Test {
 		String linkNext = bundle.getLinkNext().getValue();
 		ourLog.info(linkNext);
 		assertThat(linkNext, startsWith("https://blah.com/base?_getpages="));
-		
+
 		/*
 		 * Load the second page
 		 */
@@ -210,7 +257,7 @@ public class SearchSearchServerDstu1Test {
 		bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 
 		ourLog.info(responseContent);
-		
+
 		assertEquals(10, bundle.getEntries().size());
 		assertEquals("https://blah.com/base", bundle.getLinkBase().getValue());
 		assertEquals(linkNext, bundle.getLinkSelf().getValue());
@@ -223,17 +270,17 @@ public class SearchSearchServerDstu1Test {
 		assertEquals("https://blah.com/base/Patient/998811", ResourceMetadataKeyEnum.LINK_ALTERNATE.get(p));
 
 	}
-	
+
 	/**
 	 * Try loading the page as a POST just to make sure we get the right error
 	 */
 	@Test
 	public void testGetPagesWithPost() throws Exception {
-		
+
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort);
 		List<? extends NameValuePair> parameters = Collections.singletonList(new BasicNameValuePair("_getpages", "AAA"));
 		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
-		
+
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -242,7 +289,6 @@ public class SearchSearchServerDstu1Test {
 		assertThat(responseContent, containsString("Requests for _getpages must use HTTP GET"));
 	}
 
-	
 	@Test
 	public void testSearchById() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa");
@@ -270,7 +316,6 @@ public class SearchSearchServerDstu1Test {
 		assertEquals("IDAAA (identifier123)", bundle.getEntries().get(0).getTitle().getValue());
 	}
 
-	
 	@Test
 	public void testSearchWithOrList() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?findPatientWithOrList=aaa,bbb");
@@ -285,11 +330,11 @@ public class SearchSearchServerDstu1Test {
 		assertEquals("aaa", p.getIdentifier().get(0).getValue().getValue());
 		assertEquals("bbb", p.getIdentifier().get(1).getValue().getValue());
 	}
-	
+
 	@Test
 	public void testSearchWithTokenParameter() throws Exception {
 		String token = UrlEscapers.urlFragmentEscaper().asFunction().apply("http://www.dmix.gov/vista/2957|301");
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?tokenParam="+token);
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?tokenParam=" + token);
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -301,8 +346,7 @@ public class SearchSearchServerDstu1Test {
 		assertEquals("http://www.dmix.gov/vista/2957", p.getNameFirstRep().getFamilyAsSingleString());
 		assertEquals("301", p.getNameFirstRep().getGivenAsSingleString());
 	}
-	
-	
+
 	@Test
 	public void testSearchByPost() throws Exception {
 		HttpPost filePost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search");
@@ -345,7 +389,7 @@ public class SearchSearchServerDstu1Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		
+
 		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(1, bundle.getEntries().size());
 
@@ -360,7 +404,8 @@ public class SearchSearchServerDstu1Test {
 	 */
 	@Test
 	public void testSearchByPostWithInvalidPostUrl() throws Exception {
-		HttpPost filePost = new HttpPost("http://localhost:" + ourPort + "/Patient?name=Central"); // should end with _search
+		HttpPost filePost = new HttpPost("http://localhost:" + ourPort + "/Patient?name=Central"); // should end with
+																																	// _search
 
 		// add parameters to the post method
 		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
@@ -382,9 +427,10 @@ public class SearchSearchServerDstu1Test {
 	 */
 	@Test
 	public void testSearchByPostWithMissingContentType() throws Exception {
-		HttpPost filePost = new HttpPost("http://localhost:" + ourPort + "/Patient?name=Central"); // should end with _search
+		HttpPost filePost = new HttpPost("http://localhost:" + ourPort + "/Patient?name=Central"); // should end with
+																																	// _search
 
-		HttpEntity sendentity = new ByteArrayEntity(new byte[] {1,2,3,4} );
+		HttpEntity sendentity = new ByteArrayEntity(new byte[] { 1, 2, 3, 4 });
 		filePost.setEntity(sendentity);
 
 		HttpResponse status = ourClient.execute(filePost);
@@ -408,7 +454,7 @@ public class SearchSearchServerDstu1Test {
 
 		Patient p = bundle.getResources(Patient.class).get(0);
 		assertEquals("fooCompartment", p.getIdentifierFirstRep().getValue().getValue());
-		assertThat(bundle.getEntries().get(0).getId().getValue(), containsString("Patient/123"));
+		assertThat(bundle.getEntries().get(0).getResource().getId().getValue(), containsString("Patient/123"));
 	}
 
 	@Test
@@ -418,7 +464,7 @@ public class SearchSearchServerDstu1Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(1, bundle.getEntries().size());
@@ -491,7 +537,6 @@ public class SearchSearchServerDstu1Test {
 		ourDefaultAddressStrategy = ourServlet.getServerAddressStrategy();
 	}
 
-	
 	public static class DummyObservationResourceProvider implements IResourceProvider {
 
 		@Override
@@ -526,7 +571,7 @@ public class SearchSearchServerDstu1Test {
 		public MethodOutcome create(@ResourceParam Patient thePatient) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		@Search(compartmentName = "fooCompartment")
 		public List<Patient> compartment(@IdParam IdDt theId) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
@@ -538,15 +583,7 @@ public class SearchSearchServerDstu1Test {
 			return retVal;
 		}
 
-		@Search(queryName="searchWithNarrative")
-		public Patient searchWithNarrative(NarrativeModeEnum theNarrativeMode) {
-			ourLastNarrativeMode = theNarrativeMode;
-			Patient patient = new Patient();
-			patient.setId("Patient/1/_history/1");
-			return patient;
-		}
-
-		@Search(queryName="searchWithRef")
+		@Search(queryName = "searchWithRef")
 		public Patient searchWithRef() {
 			Patient patient = new Patient();
 			patient.setId("Patient/1/_history/1");
@@ -554,9 +591,8 @@ public class SearchSearchServerDstu1Test {
 			return patient;
 		}
 
-
 		@Search
-		public List<Patient> findPatient(@RequiredParam(name = "_id") StringParam theParam, @OptionalParam(name="name") StringParam theName) {
+		public List<Patient> findPatient(@RequiredParam(name = "_id") StringParam theParam, @OptionalParam(name = "name") StringParam theName) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			Patient patient = new Patient();
@@ -583,7 +619,6 @@ public class SearchSearchServerDstu1Test {
 			return retVal;
 		}
 
-
 		@Search(queryName = "findPatientByAAA")
 		public List<Patient> findPatientByAAA02Named(@OptionalParam(name = "AAA") StringParam theParam) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
@@ -608,7 +643,13 @@ public class SearchSearchServerDstu1Test {
 			return retVal;
 		}
 
-		
+		@Search()
+		public List<Patient> findPatientWithAndList(@RequiredParam(name = "findPatientWithAndList") StringAndListParam theParam) {
+			ourLastAndList = theParam;
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+			return retVal;
+		}
+
 		@Search()
 		public List<Patient> findPatientWithToken(@RequiredParam(name = "tokenParam") TokenParam theParam) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
@@ -620,20 +661,37 @@ public class SearchSearchServerDstu1Test {
 			return retVal;
 		}
 
-		
 		@Search(queryName = "findWithLinks")
 		public List<Patient> findWithLinks() {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			for (int i = 1; i <= 20; i++) {
 				Patient patient = new Patient();
-				patient.setId(""+i);
+				patient.setId("" + i);
 				patient.addIdentifier("system", "AAANamed");
-				ResourceMetadataKeyEnum.LINK_SEARCH.put(patient, ("http://foo/Patient?_id="+i));
+				ResourceMetadataKeyEnum.LINK_SEARCH.put(patient, ("http://foo/Patient?_id=" + i));
 				ResourceMetadataKeyEnum.LINK_ALTERNATE.put(patient, ("Patient/9988" + i));
 				retVal.add(patient);
 			}
-			
+
+			return retVal;
+		}
+
+		@Search(queryName = "searchIncludes")
+		public List<Patient> searchIncludes(@IncludeParam Set<Include> theIncludes) {
+			ourLastIncludes = theIncludes;
+
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+			return retVal;
+		}
+
+		@Search(queryName = "searchIncludesList")
+		public List<Patient> searchIncludesList(@IncludeParam List<Include> theIncludes) {
+			if (theIncludes != null) {
+				ourLastIncludes = new HashSet<Include>(theIncludes);
+			}
+
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
 			return retVal;
 		}
 

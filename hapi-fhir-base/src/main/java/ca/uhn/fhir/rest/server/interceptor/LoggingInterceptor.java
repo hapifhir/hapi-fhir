@@ -141,19 +141,13 @@ public class LoggingInterceptor extends InterceptorAdapter {
 			 */
 
 			if ("operationType".equals(theKey)) {
-				if (myRequestDetails.getResourceOperationType() != null) {
-					return myRequestDetails.getResourceOperationType().getCode();
-				}
-				if (myRequestDetails.getSystemOperationType() != null) {
-					return myRequestDetails.getSystemOperationType().getCode();
-				}
-				if (myRequestDetails.getOtherOperationType() != null) {
-					return myRequestDetails.getOtherOperationType().getCode();
+				if (myRequestDetails.getRestOperationType() != null) {
+					return myRequestDetails.getRestOperationType().getCode();
 				}
 				return "";
 			} else if ("operationName".equals(theKey)) {
-				if (myRequestDetails.getOtherOperationType() != null) {
-					switch (myRequestDetails.getOtherOperationType()) {
+				if (myRequestDetails.getRestOperationType() != null) {
+					switch (myRequestDetails.getRestOperationType()) {
 					case EXTENDED_OPERATION_INSTANCE:
 					case EXTENDED_OPERATION_SERVER:
 					case EXTENDED_OPERATION_TYPE:

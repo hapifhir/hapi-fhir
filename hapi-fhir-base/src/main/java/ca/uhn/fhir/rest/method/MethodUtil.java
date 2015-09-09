@@ -45,13 +45,13 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
+import ca.uhn.fhir.rest.annotation.Elements;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -68,6 +68,8 @@ import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.OperationParameter.IConverter;
@@ -84,7 +86,6 @@ import ca.uhn.fhir.rest.param.TransactionParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.rest.server.SearchParameterMap;
 import ca.uhn.fhir.util.ReflectionUtil;
 
@@ -348,7 +349,7 @@ public class MethodUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<IParameter> getResourceParameters(FhirContext theContext, Method theMethod, Object theProvider, RestfulOperationTypeEnum theRestfulOperationTypeEnum) {
+	public static List<IParameter> getResourceParameters(FhirContext theContext, Method theMethod, Object theProvider, RestOperationTypeEnum theRestfulOperationTypeEnum) {
 		List<IParameter> parameters = new ArrayList<IParameter>();
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
@@ -385,10 +386,10 @@ public class MethodUtil {
 			}
 			if (parameterType.equals(HttpServletRequest.class) || parameterType.equals(ServletRequest.class)) {
 				param = new ServletRequestParameter();
+			} else if (parameterType.equals(SummaryEnum.class)) {
+				param = new SummaryEnumParameter();
 			} else if (parameterType.equals(HttpServletResponse.class) || parameterType.equals(ServletResponse.class)) {
 				param = new ServletResponseParameter();
-			} else if (parameterType.equals(NarrativeModeEnum.class)) {
-				param = new NarrativeModeParameter();
 			} else {
 				for (int i = 0; i < annotations.length && param == null; i++) {
 					Annotation nextAnnotation = annotations[i];
@@ -444,6 +445,8 @@ public class MethodUtil {
 						param = new NullParameter();
 					} else if (nextAnnotation instanceof ServerBase) {
 						param = new ServerBaseParamBinder();
+					} else if (nextAnnotation instanceof Elements) {
+						param = new ElementsParameter();
 					} else if (nextAnnotation instanceof Since) {
 						param = new SinceParameter();
 					} else if (nextAnnotation instanceof Count) {
@@ -453,7 +456,7 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof TransactionParam) {
 						param = new TransactionParameter(theContext);
 					} else if (nextAnnotation instanceof ConditionalUrlParam) {
-						param = new ConditionalParamBinder(theRestfulOperationTypeEnum);
+						param = new ConditionalParamBinder(theRestfulOperationTypeEnum, ((ConditionalUrlParam)nextAnnotation).supportsMultiple());
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
 						param = new OperationParameter(theContext, op.name(), ((OperationParam) nextAnnotation));

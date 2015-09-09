@@ -36,7 +36,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 /**
  * Primitive type "integer" in FHIR: A signed 32-bit integer
  */
-@DatatypeDef(name = "positiveInt")
+@DatatypeDef(name = "positiveInt", profileOf=IntegerType.class)
 public class PositiveIntType extends IntegerType {
 
 	/**

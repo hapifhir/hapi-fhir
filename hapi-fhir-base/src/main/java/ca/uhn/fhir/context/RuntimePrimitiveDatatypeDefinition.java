@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -32,6 +33,8 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefinition<IPrimitiveType<?>> implements IRuntimeDatatypeDefinition {
 
+	private BaseRuntimeElementDefinition<?> myProfileOf;
+	private Class<? extends IBaseDatatype> myProfileOfType;
 	private boolean mySpecialization;
 
 	public RuntimePrimitiveDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveType<?>> theImplementingClass, boolean theStandardType) {
@@ -43,6 +46,20 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 		}
 		
 		mySpecialization = theDef.isSpecialization();
+		myProfileOfType = theDef.profileOf();
+		if (myProfileOfType.equals(IBaseDatatype.class)) {
+			myProfileOfType = null;
+		}
+	}
+
+	@Override
+	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+		return ChildTypeEnum.PRIMITIVE_DATATYPE;
+	}
+
+	@Override
+	public BaseRuntimeElementDefinition<?> getProfileOf() {
+		return myProfileOf;
 	}
 
 	@Override
@@ -52,12 +69,26 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 
 	@Override
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		// nothing
+		super.sealAndInitialize(theContext, theClassToElementDefinitions);
+		
+		if (myProfileOfType != null) {
+			myProfileOf = theClassToElementDefinitions.get(myProfileOfType);
+			if (myProfileOf == null) {
+				throw new ConfigurationException("Unknown profileOf value: " + myProfileOfType + " in type " + getImplementingClass().getName());
+			}
+		}
 	}
 
 	@Override
-	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
-		return ChildTypeEnum.PRIMITIVE_DATATYPE;
+	public boolean isProfileOf(Class<? extends IBaseDatatype> theType) {
+		if (myProfileOfType != null) {
+			if (myProfileOfType.equals(theType)) {
+				return true;
+			} else if (myProfileOf instanceof IRuntimeDatatypeDefinition) {
+				return ((IRuntimeDatatypeDefinition) myProfileOf).isProfileOf(theType);
+			}
+		}
+		return false;
 	}
 
 

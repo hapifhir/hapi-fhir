@@ -120,7 +120,7 @@ public class ${className} extends ca.uhn.fhir.model.${version}.resource.BaseReso
 	 * link is found which matches the given relation, returns the first matching Link.
 	 * 
 	 * @param theRelation
-	 *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle#LINK_SELF} and {@link IBaseBundle#LINK_NEXT}.
+	 *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle${hash}LINK_SELF} and {@link IBaseBundle${hash}LINK_NEXT}.
 	 * @return Returns a matching Link, or <code>null</code>
 	 * @see IBaseBundle#LINK_NEXT
 	 * @see IBaseBundle#LINK_PREV
@@ -143,7 +143,7 @@ public class ${className} extends ca.uhn.fhir.model.${version}.resource.BaseReso
 	 * link is found which matches the given relation, returns the first matching Link.
 	 * 
 	 * @param theRelation
-	 *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle#LINK_SELF} and {@link IBaseBundle#LINK_NEXT}.
+	 *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle${hash}LINK_SELF} and {@link IBaseBundle${hash}LINK_NEXT}.
 	 * @return Returns a matching Link, or <code>null</code>
 	 * @see IBaseBundle#LINK_NEXT
 	 * @see IBaseBundle#LINK_PREV

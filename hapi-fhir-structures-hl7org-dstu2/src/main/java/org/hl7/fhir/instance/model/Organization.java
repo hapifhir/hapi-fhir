@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -51,28 +51,28 @@ public class Organization extends DomainResource {
         /**
          * Indicates a purpose for which the contact can be reached.
          */
-        @Child(name = "purpose", type = {CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "purpose", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The type of contact", formalDefinition="Indicates a purpose for which the contact can be reached." )
         protected CodeableConcept purpose;
 
         /**
          * A name associated with the contact.
          */
-        @Child(name = "name", type = {HumanName.class}, order=2, min=0, max=1)
+        @Child(name = "name", type = {HumanName.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="A name associated with the contact", formalDefinition="A name associated with the contact." )
         protected HumanName name;
 
         /**
          * A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.
          */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "telecom", type = {ContactPoint.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Contact details (telephone, email, etc)  for a contact", formalDefinition="A contact detail (e.g. a telephone number or an email address) by which the party may be contacted." )
         protected List<ContactPoint> telecom;
 
         /**
          * Visiting or postal addresses for the contact.
          */
-        @Child(name = "address", type = {Address.class}, order=4, min=0, max=1)
+        @Child(name = "address", type = {Address.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Visiting or postal addresses for the contact", formalDefinition="Visiting or postal addresses for the contact." )
         protected Address address;
 
@@ -250,42 +250,49 @@ public class Organization extends DomainResource {
     /**
      * Identifier for the organization that is used to identify the organization across multiple disparate systems.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Identifies this organization  across multiple systems", formalDefinition="Identifier for the organization that is used to identify the organization across multiple disparate systems." )
     protected List<Identifier> identifier;
 
     /**
-     * A name associated with the organization.
+     * Whether the organization's record is still in active use.
      */
-    @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
-    @Description(shortDefinition="Name used for the organization", formalDefinition="A name associated with the organization." )
-    protected StringType name;
+    @Child(name = "active", type = {BooleanType.class}, order=1, min=0, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="Whether the organization's record is still in active use", formalDefinition="Whether the organization's record is still in active use." )
+    protected BooleanType active;
 
     /**
      * The kind of organization that this is.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Kind of organization", formalDefinition="The kind of organization that this is." )
     protected CodeableConcept type;
 
     /**
+     * A name associated with the organization.
+     */
+    @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Name used for the organization", formalDefinition="A name associated with the organization." )
+    protected StringType name;
+
+    /**
      * A contact detail for the organization.
      */
-    @Child(name = "telecom", type = {ContactPoint.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "telecom", type = {ContactPoint.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A contact detail for the organization", formalDefinition="A contact detail for the organization." )
     protected List<ContactPoint> telecom;
 
     /**
      * An address for the organization.
      */
-    @Child(name = "address", type = {Address.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "address", type = {Address.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="An address for the organization", formalDefinition="An address for the organization." )
     protected List<Address> address;
 
     /**
      * The organization of which this organization forms a part.
      */
-    @Child(name = "partOf", type = {Organization.class}, order=5, min=0, max=1)
+    @Child(name = "partOf", type = {Organization.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The organization of which this organization forms a part", formalDefinition="The organization of which this organization forms a part." )
     protected Reference partOf;
 
@@ -297,18 +304,11 @@ public class Organization extends DomainResource {
     /**
      * Contact for the organization for a certain purpose.
      */
-    @Child(name = "contact", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contact for the organization for a certain purpose", formalDefinition="Contact for the organization for a certain purpose." )
     protected List<OrganizationContactComponent> contact;
 
-    /**
-     * Whether the organization's record is still in active use.
-     */
-    @Child(name = "active", type = {BooleanType.class}, order=7, min=0, max=1)
-    @Description(shortDefinition="Whether the organization's record is still in active use", formalDefinition="Whether the organization's record is still in active use." )
-    protected BooleanType active;
-
-    private static final long serialVersionUID = 1766834739L;
+    private static final long serialVersionUID = -749567123L;
 
   /*
    * Constructor
@@ -358,6 +358,75 @@ public class Organization extends DomainResource {
     }
 
     /**
+     * @return {@link #active} (Whether the organization's record is still in active use.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     */
+    public BooleanType getActiveElement() { 
+      if (this.active == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Organization.active");
+        else if (Configuration.doAutoCreate())
+          this.active = new BooleanType(); // bb
+      return this.active;
+    }
+
+    public boolean hasActiveElement() { 
+      return this.active != null && !this.active.isEmpty();
+    }
+
+    public boolean hasActive() { 
+      return this.active != null && !this.active.isEmpty();
+    }
+
+    /**
+     * @param value {@link #active} (Whether the organization's record is still in active use.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     */
+    public Organization setActiveElement(BooleanType value) { 
+      this.active = value;
+      return this;
+    }
+
+    /**
+     * @return Whether the organization's record is still in active use.
+     */
+    public boolean getActive() { 
+      return this.active == null || this.active.isEmpty() ? false : this.active.getValue();
+    }
+
+    /**
+     * @param value Whether the organization's record is still in active use.
+     */
+    public Organization setActive(boolean value) { 
+        if (this.active == null)
+          this.active = new BooleanType();
+        this.active.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #type} (The kind of organization that this is.)
+     */
+    public CodeableConcept getType() { 
+      if (this.type == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Organization.type");
+        else if (Configuration.doAutoCreate())
+          this.type = new CodeableConcept(); // cc
+      return this.type;
+    }
+
+    public boolean hasType() { 
+      return this.type != null && !this.type.isEmpty();
+    }
+
+    /**
+     * @param value {@link #type} (The kind of organization that this is.)
+     */
+    public Organization setType(CodeableConcept value) { 
+      this.type = value;
+      return this;
+    }
+
+    /**
      * @return {@link #name} (A name associated with the organization.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public StringType getNameElement() { 
@@ -403,30 +472,6 @@ public class Organization extends DomainResource {
           this.name = new StringType();
         this.name.setValue(value);
       }
-      return this;
-    }
-
-    /**
-     * @return {@link #type} (The kind of organization that this is.)
-     */
-    public CodeableConcept getType() { 
-      if (this.type == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Organization.type");
-        else if (Configuration.doAutoCreate())
-          this.type = new CodeableConcept(); // cc
-      return this.type;
-    }
-
-    public boolean hasType() { 
-      return this.type != null && !this.type.isEmpty();
-    }
-
-    /**
-     * @param value {@link #type} (The kind of organization that this is.)
-     */
-    public Organization setType(CodeableConcept value) { 
-      this.type = value;
       return this;
     }
 
@@ -594,61 +639,16 @@ public class Organization extends DomainResource {
       return this;
     }
 
-    /**
-     * @return {@link #active} (Whether the organization's record is still in active use.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
-     */
-    public BooleanType getActiveElement() { 
-      if (this.active == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Organization.active");
-        else if (Configuration.doAutoCreate())
-          this.active = new BooleanType(); // bb
-      return this.active;
-    }
-
-    public boolean hasActiveElement() { 
-      return this.active != null && !this.active.isEmpty();
-    }
-
-    public boolean hasActive() { 
-      return this.active != null && !this.active.isEmpty();
-    }
-
-    /**
-     * @param value {@link #active} (Whether the organization's record is still in active use.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
-     */
-    public Organization setActiveElement(BooleanType value) { 
-      this.active = value;
-      return this;
-    }
-
-    /**
-     * @return Whether the organization's record is still in active use.
-     */
-    public boolean getActive() { 
-      return this.active == null || this.active.isEmpty() ? false : this.active.getValue();
-    }
-
-    /**
-     * @param value Whether the organization's record is still in active use.
-     */
-    public Organization setActive(boolean value) { 
-        if (this.active == null)
-          this.active = new BooleanType();
-        this.active.setValue(value);
-      return this;
-    }
-
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Identifier for the organization that is used to identify the organization across multiple disparate systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("name", "string", "A name associated with the organization.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("active", "boolean", "Whether the organization's record is still in active use.", 0, java.lang.Integer.MAX_VALUE, active));
         childrenList.add(new Property("type", "CodeableConcept", "The kind of organization that this is.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("name", "string", "A name associated with the organization.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("telecom", "ContactPoint", "A contact detail for the organization.", 0, java.lang.Integer.MAX_VALUE, telecom));
         childrenList.add(new Property("address", "Address", "An address for the organization.", 0, java.lang.Integer.MAX_VALUE, address));
         childrenList.add(new Property("partOf", "Reference(Organization)", "The organization of which this organization forms a part.", 0, java.lang.Integer.MAX_VALUE, partOf));
         childrenList.add(new Property("contact", "", "Contact for the organization for a certain purpose.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("active", "boolean", "Whether the organization's record is still in active use.", 0, java.lang.Integer.MAX_VALUE, active));
       }
 
       public Organization copy() {
@@ -659,8 +659,9 @@ public class Organization extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        dst.name = name == null ? null : name.copy();
+        dst.active = active == null ? null : active.copy();
         dst.type = type == null ? null : type.copy();
+        dst.name = name == null ? null : name.copy();
         if (telecom != null) {
           dst.telecom = new ArrayList<ContactPoint>();
           for (ContactPoint i : telecom)
@@ -677,7 +678,6 @@ public class Organization extends DomainResource {
           for (OrganizationContactComponent i : contact)
             dst.contact.add(i.copy());
         };
-        dst.active = active == null ? null : active.copy();
         return dst;
       }
 
@@ -692,9 +692,9 @@ public class Organization extends DomainResource {
         if (!(other instanceof Organization))
           return false;
         Organization o = (Organization) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(name, o.name, true) && compareDeep(type, o.type, true)
-           && compareDeep(telecom, o.telecom, true) && compareDeep(address, o.address, true) && compareDeep(partOf, o.partOf, true)
-           && compareDeep(contact, o.contact, true) && compareDeep(active, o.active, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(type, o.type, true)
+           && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true) && compareDeep(address, o.address, true)
+           && compareDeep(partOf, o.partOf, true) && compareDeep(contact, o.contact, true);
       }
 
       @Override
@@ -704,13 +704,13 @@ public class Organization extends DomainResource {
         if (!(other instanceof Organization))
           return false;
         Organization o = (Organization) other;
-        return compareValues(name, o.name, true) && compareValues(active, o.active, true);
+        return compareValues(active, o.active, true) && compareValues(name, o.name, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (name == null || name.isEmpty())
-           && (type == null || type.isEmpty()) && (telecom == null || telecom.isEmpty()) && (address == null || address.isEmpty())
-           && (partOf == null || partOf.isEmpty()) && (contact == null || contact.isEmpty()) && (active == null || active.isEmpty())
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (active == null || active.isEmpty())
+           && (type == null || type.isEmpty()) && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
+           && (address == null || address.isEmpty()) && (partOf == null || partOf.isEmpty()) && (contact == null || contact.isEmpty())
           ;
       }
 
@@ -723,7 +723,7 @@ public class Organization extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference" )
   public static final String SP_PARTOF = "partof";
-  @SearchParamDefinition(name="phonetic", path="", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string" )
+  @SearchParamDefinition(name="phonetic", path="Organization.name", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="address", path="Organization.address", description="A (part of the) address of the Organization", type="string" )
   public static final String SP_ADDRESS = "address";

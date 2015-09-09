@@ -19,8 +19,8 @@ package ca.uhn.fhir.rest.method;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -39,16 +39,16 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -128,8 +128,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return RestfulOperationTypeEnum.SEARCH_TYPE;
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.SEARCH_TYPE;
 	}
 
 	@Override
@@ -140,11 +140,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	public ReturnTypeEnum getReturnType() {
 		return ReturnTypeEnum.BUNDLE;
-	}
-
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return null;
 	}
 
 	@Override
@@ -192,11 +187,14 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 					if (qualifiers.passes(temp.getQualifierWhitelist(), temp.getQualifierBlacklist())) {
 						methodParamsTemp.add(name);
 					}
-				} else if (unqualifiedNames.contains(name)) {
+				}
+				if (unqualifiedNames.contains(name)) {
 					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
 					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
 					methodParamsTemp.addAll(qualifiedNames);
-				} else {
+				}
+				if (!qualifiedParamNames.contains(name) && !unqualifiedNames.contains(name))
+				{
 					ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), name);
 					return false;
 				}
@@ -207,11 +205,13 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 					if (qualifiers.passes(temp.getQualifierWhitelist(), temp.getQualifierBlacklist())) {
 						methodParamsTemp.add(name);
 					}
-				} else if (unqualifiedNames.contains(name)) {
+				} 
+				if (unqualifiedNames.contains(name)) {
 					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
 					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
 					methodParamsTemp.addAll(qualifiedNames);
-				} else {
+				}
+				if (!qualifiedParamNames.contains(name) && !qualifiedParamNames.contains(name)) { 
 					methodParamsTemp.add(name);
 				}
 			}
@@ -283,12 +283,12 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
 
-		Object response = invokeServerMethod(theMethodParams);
+		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 
 		return toResourceList(response);
 

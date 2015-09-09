@@ -10,6 +10,7 @@ import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu2.composite.SimpleQuantityDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
@@ -128,8 +129,8 @@ public class FhirDataModel {
       // If you need to set other fields (such as the display name) after
       // using the Enum type, you may still do so.
       patient.getMaritalStatus().getCodingFirstRep().setDisplay("Married");
-      patient.getMaritalStatus().getCodingFirstRep().setPrimary(true);
       patient.getMaritalStatus().getCodingFirstRep().setVersion("1.0");
+      patient.getMaritalStatus().getCodingFirstRep().setUserSelected(true);
       
       // You can use accessors to retrieve values from CodeableConcept fields
       
@@ -167,8 +168,8 @@ public class FhirDataModel {
       observation.setValue(q);
       
       // Set the reference range
-      observation.getReferenceRangeFirstRep().setLow(new QuantityDt(100));
-      observation.getReferenceRangeFirstRep().setHigh(new QuantityDt(200));
+      observation.getReferenceRangeFirstRep().setLow(new SimpleQuantityDt(100));
+      observation.getReferenceRangeFirstRep().setHigh(new SimpleQuantityDt(200));
       
       // END SNIPPET: observation
       

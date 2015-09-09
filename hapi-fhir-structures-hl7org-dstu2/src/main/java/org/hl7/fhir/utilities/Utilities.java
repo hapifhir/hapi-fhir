@@ -578,7 +578,7 @@ public class Utilities {
       else if (c == '\n')
         b.append("\\n");
       else if (c == '"')
-        b.append("'");
+        b.append("\\\"");
       else if (c == '\\')
         b.append("\\\\");
       else 

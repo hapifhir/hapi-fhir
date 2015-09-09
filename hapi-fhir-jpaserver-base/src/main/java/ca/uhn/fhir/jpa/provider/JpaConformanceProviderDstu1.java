@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.provider;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -39,8 +41,6 @@ import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.util.ExtensionConstants;
-
-import javax.servlet.http.HttpServletRequest;
 
 public class JpaConformanceProviderDstu1 extends ServerConformanceProvider {
 

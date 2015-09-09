@@ -3,7 +3,6 @@ package org.hl7.fhir.instance.validation;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.StructureDefinition;
-import org.hl7.fhir.instance.validation.IResourceValidator.BestPracticeWarningLevel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -86,7 +85,7 @@ public interface IResourceValidator {
   List<ValidationMessage> validate(Element element) throws Exception;
 
   /**
-   * Given a DOM element, return a list of errors in the resource 
+   * Given a DOM element, return a list of errors in the resource
    * 
    * @param errors
    * @param elem

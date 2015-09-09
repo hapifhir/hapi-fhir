@@ -24,6 +24,7 @@ package ca.uhn.fhir.rest.client.api;
 import org.apache.http.client.HttpClient;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
@@ -41,6 +42,17 @@ public interface IRestfulClient {
 	HttpClient getHttpClient();
 	
 	/**
+	 * Base URL for the server, with no trailing "/"
+	 */
+	String getServerBase();
+	
+	/**
+	 * Register a new interceptor for this client. An interceptor can be used to add additional
+	 * logging, or add security headers, or pre-process responses, etc. 
+	 */
+	void registerInterceptor(IClientInterceptor theInterceptor);
+	
+	/**
 	 * Specifies that the client should use the given encoding to do its 
 	 * queries. This means that the client will append the "_format" param
 	 * to GET methods (read/search/etc), and will add an appropriate header for
@@ -50,7 +62,7 @@ public interface IRestfulClient {
 	 * an encoding (which generally implies the use of XML). The default is <code>null</code>.
 	 */
 	void setEncoding(EncodingEnum theEncoding);
-	
+
 	/**
 	 * Specifies that the client should request that the server respond with "pretty printing"
 	 * enabled. Note that this is a non-standard parameter, not all servers will
@@ -61,15 +73,10 @@ public interface IRestfulClient {
 	void setPrettyPrint(Boolean thePrettyPrint);
 	
 	/**
-	 * Base URL for the server, with no trailing "/"
+	 * If not set to <code>null</code>, specifies a value for the <code>_summary</code> parameter
+	 * to be applied globally on this client.
 	 */
-	String getServerBase();
-	
-	/**
-	 * Register a new interceptor for this client. An interceptor can be used to add additional
-	 * logging, or add security headers, or pre-process responses, etc. 
-	 */
-	void registerInterceptor(IClientInterceptor theInterceptor);
+	void setSummary(SummaryEnum theSummary);
 
 	/**
 	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}

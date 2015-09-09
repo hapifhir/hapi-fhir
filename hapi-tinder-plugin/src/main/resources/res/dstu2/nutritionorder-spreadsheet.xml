@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
  xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -7,26 +7,21 @@
  xmlns:html="http://www.w3.org/TR/REC-html40">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
-  <LastAuthor>Eric Haas</LastAuthor>
+  <LastAuthor>Grahame</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2015-03-23T03:51:10Z</LastSaved>
-  <Version>14.00</Version>
+  <LastSaved>2015-06-11T11:36:55Z</LastSaved>
+  <Version>12.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <SupBook>
-   <Path>Invariants</Path>
-   <SheetName>Invariants</SheetName>
-  </SupBook>
-  <WindowHeight>11820</WindowHeight>
-  <WindowWidth>24915</WindowWidth>
-  <WindowTopX>120</WindowTopX>
-  <WindowTopY>60</WindowTopY>
+  <WindowHeight>11640</WindowHeight>
+  <WindowWidth>20610</WindowWidth>
+  <WindowTopX>-285</WindowTopX>
+  <WindowTopY>450</WindowTopY>
   <TabRatio>896</TabRatio>
-  <ActiveSheet>1</ActiveSheet>
-  <FirstVisibleSheet>1</FirstVisibleSheet>
+  <ActiveSheet>7</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -795,7 +790,7 @@
    </Borders>
    <Interior/>
   </Style>
-  <Style ss:ID="s151">
+  <Style ss:ID="s152">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
     ss:WrapText="1"/>
    <Borders>
@@ -804,7 +799,7 @@
    </Borders>
    <Interior/>
   </Style>
-  <Style ss:ID="s153" ss:Parent="s63">
+  <Style ss:ID="s154" ss:Parent="s63">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
@@ -814,7 +809,7 @@
    <NumberFormat/>
    <Protection/>
   </Style>
-  <Style ss:ID="s154" ss:Parent="s63">
+  <Style ss:ID="s155" ss:Parent="s63">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders/>
    <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
@@ -822,7 +817,7 @@
    <NumberFormat/>
    <Protection/>
   </Style>
-  <Style ss:ID="s155" ss:Parent="s63">
+  <Style ss:ID="s156" ss:Parent="s63">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="3"/>
@@ -837,7 +832,7 @@
   <NamedRange ss:Name="Invariantids" ss:RefersTo="=Invariants!R2C1:R50C1"/>
  </Names>
  <Worksheet ss:Name="Instructions">
-  <Table ss:ExpandedColumnCount="1" ss:ExpandedRowCount="3" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="2" ss:ExpandedRowCount="4" x:FullColumns="1"
    x:FullRows="1" ss:DefaultRowHeight="15">
    <Column ss:AutoFitWidth="0" ss:Width="411"/>
    <Row ss:AutoFitHeight="0">
@@ -850,6 +845,10 @@
     <Cell ss:StyleID="s67" ss:HRef="http://wiki.hl7.org/?title=FHIR_Spreadsheet_Authoring"><Data
       ss:Type="String">http://wiki.hl7.org?title=FHIR_Spreadsheet_Authoring</Data></Cell>
    </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">fmm</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+   </Row>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -861,7 +860,8 @@
    <Panes>
     <Pane>
      <Number>3</Number>
-     <ActiveRow>1</ActiveRow>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>1</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -871,12 +871,12 @@
  <Worksheet ss:Name="Data Elements">
   <Names>
    <NamedRange ss:Name="_FilterDatabase"
-    ss:RefersTo="='Data Elements'!R1C1:R104C25" ss:Hidden="1"/>
+    ss:RefersTo="='Data Elements'!R1C1:R105C25" ss:Hidden="1"/>
    <NamedRange ss:Name="_GoBack" ss:RefersTo="='Data Elements'!R44C19"/>
    <NamedRange ss:Name="Component4" ss:RefersTo="='Data Elements'!R9C19"/>
    <NamedRange ss:Name="SupplyRequest" ss:RefersTo="='Data Elements'!R2C19"/>
   </Names>
-  <Table ss:ExpandedColumnCount="25" ss:ExpandedRowCount="104" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="25" ss:ExpandedRowCount="105" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s68" ss:DefaultColumnWidth="69.75"
    ss:DefaultRowHeight="22.5">
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="336"/>
@@ -885,102 +885,102 @@
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="113.25"/>
    <Row ss:AutoFitHeight="0" ss:StyleID="s70">
     <Cell ss:StyleID="s71"><Data ss:Type="String">Element</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Format is ResourceName.componentName.componentName</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Format is ResourceName.componentName.componentName</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Aliases</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Other names - semi-colon separated</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Other names - semi-colon separated</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Card.</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Min and max repetitions n..m</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Min and max repetitions n..m</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Inv.</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Comma-delimited list of Ids from Invariant tab that controls appearance of this element</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Comma-delimited list of Ids from Invariant tab that controls appearance of this element</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Data type, resource reference, profiles, aggregations, class names, type references, etc. - see the wiki</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Data type, resource reference, profiles, aggregations, class names, type references, etc. - see the wiki</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Is Modifier</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">If Y, indicates this element modifies the meaning of sibling or descendant elements.  Defaults to N</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">If Y, indicates this element modifies the meaning of sibling or descendant elements.  Defaults to N</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Summary</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">If Y, element is included in the summary view (query with _summary=true).  Default is N</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">If Y, element is included in the summary view (query with _summary=true).  Default is N</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Binding</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Binding for coded data - either from local Bindings tab or declared elsewhere</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Binding for coded data - either from local Bindings tab or declared elsewhere</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">w5</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Example</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">An example of the expected sort of value for this element.</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">An example of the expected sort of value for this element.</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Default Value</Data><Comment
-      ss:Author="Lloyd"><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The value to be assumed if the element is omitted from the instance.  Only permitted for simple data types</Font> </ss:Data></Comment><NamedCell
+      ss:Author="Lloyd"><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The value to be assumed if the element is omitted from the instance.  Only permitted for simple data types</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Missing Meaning</Data><Comment
-      ss:Author="Lloyd"><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Semantic inferred if element is omitted from instance</Font> </ss:Data></Comment><NamedCell
+      ss:Author="Lloyd"><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Semantic inferred if element is omitted from instance</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Regex</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Indicates a regular expression that the value of this element must meet.  Only allowed for simple data types.</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Indicates a regular expression that the value of this element must meet.  Only allowed for simple data types.</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">Short Label</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Short description or code1 | code2 | code3 +</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Short description or code1 | code2 | code3 +</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s73"><Data ss:Type="String">Definition</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Full definition - required</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Full definition - required</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s74"><Data ss:Type="String">Requirements</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Why element/resource is needed or why selected constraints chosen</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Why element/resource is needed or why selected constraints chosen</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s74"><Data ss:Type="String">Comments</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional notes for implementers</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional notes for implementers</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s74"><Data ss:Type="String">To Do</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Things to bug you about if they're not done :&gt;</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Things to bug you about if they're not done :&gt;</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">RIM Mapping</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">E.g. RIMClass[classCode=foo,moodCode=bar].someAssociation[typeCode=code].attribute</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">E.g. RIMClass[classCode=foo,moodCode=bar].someAssociation[typeCode=code].attribute</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">v2 Mapping</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">E.g. SEG.1.2.3</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">E.g. SEG.1.2.3</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">Notes on mapping</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Change column name to one from mappingSpaces.xml.  Add more if needed</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Change column name to one from mappingSpaces.xml.  Add more if needed</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">??? Mapping</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Change column name to one from mappingSpaces.xml.  Add more if needed</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Change column name to one from mappingSpaces.xml.  Add more if needed</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">UML</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Guidance for class location in UML diagram.  Only specify on root.&#10;See wiki for guidance</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Guidance for class location in UML diagram.  Only specify on root. See wiki for guidance</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">Display Hint</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Provides guidance to narrative auto-generator.  Check Wiki documentation</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Provides guidance to narrative auto-generator.  Check Wiki documentation</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s76"><Data ss:Type="String">Committee Notes</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Not published</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Not published</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -995,7 +995,7 @@
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">clinical</Data><NamedCell
+    <Cell ss:StyleID="s79"><Data ss:Type="String">clinical.careprovision</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1013,7 +1013,7 @@
       ss:Name="SupplyRequest"/><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s82"><Data ss:Type="String">ORC / ODS</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">RIM - code [1..1] (M)&#10;Supply (CV) {CNE:C:ActCode:DIET, fixed value= &quot;DIET&quot;} &#10;v2. Chapter 4 - ODS Segment</Data><NamedCell
+    <Cell ss:StyleID="s83"><Data ss:Type="String">RIM - code [1..1] (M) Supply (CV) {CNE:C:ActCode:DIET, fixed value= &quot;DIET&quot;}  v2. Chapter 4 - ODS Segment</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s83"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s82"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1039,7 +1039,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">The person who requires the diet, formula or nutritional supplement&#10;</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">The person who requires the diet, formula or nutritional supplement </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">The person (patient) who needs the nutrition order for an oral diet, nutritional supplement and/or enteral or formula feeding.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1141,7 +1141,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">when.context</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">context</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1229,7 +1229,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">Typically the system placing the order sets the status to requested. There after, the order is maintained by the receiver that updates the status as the request is handled.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">.statusCode&#10;</Data><NamedCell
+    <Cell ss:StyleID="s93"><Data ss:Type="String">.statusCode </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">ORC-1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1309,7 +1309,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Discussion at WGM Mon Q3 - maybe .foodPreferenceModifier&#10;&#45;-how to convey the patient No Soy, No Red Meat? (without a negation indicator)&#10;Do what domain expects e.g. ExcludeFoodType and IncludeFoodPreference</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Discussion at WGM Mon Q3 - maybe .foodPreferenceModifier &#45;-how to convey the patient No Soy, No Red Meat? (without a negation indicator) Do what domain expects e.g. ExcludeFoodType and IncludeFoodPreference</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="48.75">
@@ -1332,7 +1332,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Order-specific modifier about the type of food that should not be given</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free.  While it should not be necessary to repeat allergy or intolerance information captured in the referenced allergyIntolerance resource in the excludeFoodModifier, this element may be used to convey additional specificity related to foods that should be eliminated from the patient’s diet for any reason.  This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">Information on a patient's food allergies and intolerances, and preferences inform healthcare personnel about the type  of foods that the patient should receive or consume.</Data><NamedCell
@@ -1345,7 +1345,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Discussion at WGM Mon Q3 - maybe .foodPreferenceModifier&#10;&#45;-how to convey the patient No Soy, No Red Meat? (without a negation indicator)&#10;Do what domain expects e.g. ExcludeFoodType and IncludeFoodPreference</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Discussion at WGM Mon Q3 - maybe .foodPreferenceModifier &#45;-how to convey the patient No Soy, No Red Meat? (without a negation indicator) Do what domain expects e.g. ExcludeFoodType and IncludeFoodPreference</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -1378,7 +1378,7 @@
     <Cell ss:StyleID="s91"><Data ss:Type="String">down</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">use either HL7 Supply code that represents Nutrition Order Item or SNOMED/LOINC (i.e. parent concept for the diet regimes/therapies - figure out what to use for supplements and tube feedings).  reasons we may need a type - query for specific part of the order&#10;Per WGM Mon Q3 - remove this and move attributes to each instance&#10;2/4/2015 EH: [#3996] deprecate</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">use either HL7 Supply code that represents Nutrition Order Item or SNOMED/LOINC (i.e. parent concept for the diet regimes/therapies - figure out what to use for supplements and tube feedings).  reasons we may need a type - query for specific part of the order Per WGM Mon Q3 - remove this and move attributes to each instance 2/4/2015 EH: [#3996] deprecate</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -1413,7 +1413,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">(not sure where we include the elements such as start date - time, start meal, meal or timing schedule(this is like administration instructions) - date-time, a period, or a schedule interval)&#10;Per WGM MonQ3 - you need a schedule for each order component oralDiet.schedule, supplement.schedule, enteral.schedule&#10;2/4/2015 EH: [#3996] deprecate</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">(not sure where we include the elements such as start date - time, start meal, meal or timing schedule(this is like administration instructions) - date-time, a period, or a schedule interval) Per WGM MonQ3 - you need a schedule for each order component oralDiet.schedule, supplement.schedule, enteral.schedule 2/4/2015 EH: [#3996] deprecate</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -1446,7 +1446,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Per WGM Mon Q3 - may not need if status provides same info&#10;2/4/2015 EH: [#3996] deprecate</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Per WGM Mon Q3 - may not need if status provides same info 2/4/2015 EH: [#3996] deprecate</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -1523,11 +1523,11 @@
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.oralDiet.scheduled</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.oralDiet.schedule</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">frequency</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Timing</Data><NamedCell
@@ -1554,7 +1554,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">2/4/2015 EH: [#3996] Remove NutritionOrder.Item and push schedule/timing down into each type&#10;</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">2/4/2015 EH: [#3996] Remove NutritionOrder.Item and push schedule/timing down into each type  #8181 </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -1633,7 +1633,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Quantity</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SimpleQuantity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1812,7 +1812,8 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">string</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Y</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1946,11 +1947,11 @@
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.supplement.scheduled</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.supplement.schedule</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">frequency</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Timing</Data><NamedCell
@@ -1978,7 +1979,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">2/4/2015 EH: [#3996] Remove NutritionOrder.Item and push schedule/timing down into each type&#10;</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">2/4/2015 EH: [#3996] Remove NutritionOrder.Item and push schedule/timing down into each type.  #8181 </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -1988,7 +1989,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Quantity</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SimpleQuantity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2025,7 +2026,8 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">string</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Y</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2085,41 +2087,6 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">right</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.enteralFormula.administrationInstructions</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">string</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Formula feeding instructions expressed as text</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Free text formula administration, feeding instructions or additional instructions or information. </Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Free text dosage instructions can be used for cases where the instructions are too complex to code.</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">.outboundRelationship [typeCode =COMP], target [classCode=SBADM, moodCode=RQO, code=]</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">ODS-4</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
@@ -2192,42 +2159,6 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">2/4/2015 EH: [#4000][#4001][#4002] change ...name to ...productName</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.enteralFormula.scheduled</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">frequency</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Timing</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Scheduled frequency of enteral feeding</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The time period and frequency at which the enteral formula should be delivered to the patient</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">.effectiveUseTime</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">ODS-2,TQ1-7/8</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">2/4/2015 EH: [#3996] Remove NutritionOrder.Item and push schedule/timing down into each type&#10;</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -2307,7 +2238,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Quantity</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SimpleQuantity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2370,13 +2301,85 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.enteralFormula.quantity</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.enteralFormula.administration</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Formula feeding instruction as structured data</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Formula administration instructions as structured data.  This repeating structure allows for changing the administration rate or volume over time for both bolus and continuous feeding.  An example of this would be an instruction to increase the rate of continuous feeding every 2 hours.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">See implementation notes below for further discussion on how to order continuous vs bolus enteral feeding using this resource.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">.outboundRelationship [typeCode =COMP], target [classCode=SBADM, moodCode=RQO]</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">ODS-4</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">down</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">#6100, 6111</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.enteralFormula.administration.schedule</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">frequency</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Timing</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Scheduled frequency of enteral feeding</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The time period and frequency at which the enteral formula should be delivered to the patient</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">.effectiveUseTime</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">ODS-2,TQ1-7/8</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">2/4/2015 EH: [#3996] Remove NutritionOrder.Item and push schedule/timing down into each type, #6101,#6100, 6111 </Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.enteralFormula.administration.quantity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Quantity</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SimpleQuantity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2401,16 +2404,17 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">#6100, 6111</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.enteralFormula.rate</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.enteralFormula.administration.rate[x]</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Ratio</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SimpleQuantity|Ratio</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2425,7 +2429,8 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">The rate of administration of formula via a feeding pump, e.g., 60 mL per hour, according to the specified schedule.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Ratio is used when the quantity value in the denominator is not &quot;1&quot;, otherwise use Quantity. For example, the Ratio datatype is used for &quot;200 mL/4 hrs&quot; versus the Quantity datatype for &quot;50 mL/hr&quot;.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s96"><Data ss:Type="String">.rateQuantity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -2435,16 +2440,17 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">4/15/2015 EH:  #6100,# 6111</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.enteralFormula.rateAdjustment</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">!NutritionOrder.enteralFormula.rateAdjustment</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Quantity</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Ratio</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2469,7 +2475,8 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">4/15/2015 EH:  #6111</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.enteralFormula.maxVolumeToDeliver</Data><NamedCell
@@ -2478,7 +2485,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Quantity</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">SimpleQuantity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2504,6 +2511,43 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s86"><Data ss:Type="String">NutritionOrder.enteralFormula.administrationInstruction</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">string</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Y</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Formula feeding instructions expressed as text</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Free text formula administration, feeding instructions or additional instructions or information. </Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Free text dosage instructions can be used for cases where the instructions are too complex to code.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">N/A</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">ODS-4</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">8177, 6102</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4138,13 +4182,12 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>12</TopRowBottomPane>
+   <TopRowBottomPane>7</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>16</LeftColumnRightPane>
+   <LeftColumnRightPane>3</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -4160,219 +4203,16 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>31</ActiveRow>
-     <ActiveCol>22</ActiveCol>
+     <ActiveRow>9</ActiveRow>
+     <ActiveCol>4</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C23:R104C23</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;left,right,up,down,[xpixels];[ypixels]&quot;</Value>
-   <ErrorHide/>
-   <ErrorStyle>Info</ErrorStyle>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R45C19:R104C22,R40C19:R40C20,R2C19:R6C19,R7C20:R39C20,R18C19:R21C19,R23C19:R24C19,R26C19:R36C19,R2C21:R44C22,R2C20:R5C20,R41C20:R44C20,R10C19:R15C19</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;N/A&quot;</Value>
-   <ErrorHide/>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C8:R104C9</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;Bindings!A2..A30&quot;</Value>
-   <ErrorHide/>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C6:R104C7</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;Y,N&quot;</Value>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C5</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;DomainResource,Type,Resource,Structure&quot;</Value>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C5:R104C5</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;*,Reference(A|B),boolean,string,code,id,oid,uuid,integer,decimal,date,dateTime,time,instant,uri,base64Binary,CodeableConcept,Coding,Identifier,Period,Timing,Range,Quantity,Age,Distance,Duration,Count,Money,Ratio,HumanName,Address,ContactPoint,SampledData&quot;</Value>
-   <ErrorHide/>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4,R4C4:R104C4</Range>
-   <Type>List</Type>
-   <Value>Invariants!#REF!</Value>
-   <ErrorHide/>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R104C3</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;0..1,1..1,0..*,1..*&quot;</Value>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C4</Range>
-   <Type>List</Type>
-   <Value>Invariantids</Value>
-   <ErrorHide/>
-  </DataValidation>
-  <AutoFilter x:Range="R1C1:R104C25"
+  <AutoFilter x:Range="R1C1:R105C25"
    xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C14:R104C14</Range>
-   <Condition>
-    <Value1>(RC1=&quot;&quot;)&lt;&gt;(RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:yellow'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C17:R9C17,R12C17,R14C17:R15C17,R2C19:R6C19,R18C17:R104C17,R2C1:R104C16,R2C18:R104C18,R45C19:R104C19,R10C19:R15C19,R18C19:R21C19,R23C19:R24C19,R26C19:R36C19,R40C19,R2C21:R104C25,R2C20:R5C20,R7C20:R104C20</Range>
-   <Condition>
-    <Value1>RC3=&quot;0..0&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:#F2F2F2'/>
-   </Condition>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,RC1=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R19C1:R28C1,R33C1:R36C1,R2C1:R8C1,R10C1:R16C1,R38C1:R44C1,R46C1:R104C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-1]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C24,R2C3:R2C4,R2C6:R2C13</Range>
-   <Condition>
-    <Value1>RC&lt;&gt;&quot;&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C3:R104C3,R2C15:R104C15</Range>
-   <Condition>
-    <Value1>(RC1=&quot;&quot;)&lt;&gt;(RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C10:R104C10,R2C13:R104C13</Range>
-   <Condition>
-    <Value1>AND(SEARCH(&quot;|&quot;,RC5)&lt;&gt;0,RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C11:R104C11,R2C13:R104C13</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,NOT(EXACT(LEFT(RC5,1),LOWER(LEFT(RC5,1)))))</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C11:R104C12</Range>
-   <Condition>
-    <Value1>AND(RC11&lt;&gt;&quot;&quot;,RC12&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C14:R104C15</Range>
-   <Condition>
-    <Value1>AND(RC14&lt;&gt;&quot;&quot;,RC14=RC15)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C19:R2C20</Range>
-   <Condition>
-    <Value1>RC=&quot;&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:orange'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C19:R6C19,R45C19:R104C19,R10C19:R15C19,R18C19:R21C19,R23C19:R24C19,R26C19:R36C19,R40C19,R3C20:R5C20,R7C20:R104C20</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,ISERR(SEARCH(&quot;N/A&quot;,R2C)),RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:orange'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R18C23:R26C23,R32C23:R34C23,R2C23:R6C23,R9C23:R15C23,R37C23:R43C23,R45C23:R104C23</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,LEFT(RC5,1)&lt;&gt;&quot;@&quot;,LEFT(R[1]C1,LEN(RC1)+1)&lt;&gt;(RC1&amp;&quot;.&quot;),LEFT(R[1]C1,LEN(RC1)+2)&lt;&gt;(&quot;!&quot;&amp;RC1&amp;&quot;.&quot;))</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C17:R9C17,R12C17,R14C17:R15C17,R2C19:R6C19,R18C17:R104C17,R2C1:R104C16,R2C18:R104C18,R45C19:R104C19,R10C19:R15C19,R18C19:R21C19,R23C19:R24C19,R26C19:R36C19,R40C19,R2C21:R104C25,R2C20:R5C20,R7C20:R104C20</Range>
-   <Condition>
-    <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R18C1,R29C1,R37C1,R9C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-2]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R16C23:R17C23,R35C23:R36C23,R7C23:R8C23</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,LEFT(RC5,1)&lt;&gt;&quot;@&quot;,LEFT(R[2]C1,LEN(RC1)+1)&lt;&gt;(RC1&amp;&quot;.&quot;),LEFT(R[2]C1,LEN(RC1)+2)&lt;&gt;(&quot;!&quot;&amp;RC1&amp;&quot;.&quot;))</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R17C1,R32C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,#REF!=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R30C1:R31C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-3]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R27C23</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,LEFT(RC5,1)&lt;&gt;&quot;@&quot;,LEFT(R[3]C1,LEN(RC1)+1)&lt;&gt;(RC1&amp;&quot;.&quot;),LEFT(R[3]C1,LEN(RC1)+2)&lt;&gt;(&quot;!&quot;&amp;RC1&amp;&quot;.&quot;))</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R28C23:R31C23,R44C23</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,LEFT(RC5,1)&lt;&gt;&quot;@&quot;,LEFT(#REF!,LEN(RC1)+1)&lt;&gt;(RC1&amp;&quot;.&quot;),LEFT(#REF!,LEN(RC1)+2)&lt;&gt;(&quot;!&quot;&amp;RC1&amp;&quot;.&quot;))</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R45C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,#REF!=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
  </Worksheet>
  <Worksheet ss:Name="Invariants">
   <Names>
@@ -4389,32 +4229,32 @@
    <Column ss:StyleID="s104" ss:AutoFitWidth="0" ss:Width="188.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="81" ss:StyleID="s70">
     <Cell ss:StyleID="s105"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique Number</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique Number</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique short label</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique short label</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Severity</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Indicates impact of violating the invariant.  (Defaults to 'error')</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Indicates impact of violating the invariant.  (Defaults to 'error')</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Context</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur.  E.g. ResourceName.element1.element2</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur.  E.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">English</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">English description of constraint</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">English description of constraint</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">OCL</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Optional - OCL expression of the rule</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Optional - OCL expression of the rule</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">XPath</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">XPath 2 expression.  See wiki or make Lloyd do it :&gt;</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">XPath 2 expression.  See wiki or make Lloyd do it :&gt;</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
@@ -4903,47 +4743,8 @@
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R50C4</Range>
-   <Type>List</Type>
-   <Value>'Data Elements'!R2C1:R104C1</Value>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R50C3</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;error,warning&quot;</Value>
-  </DataValidation>
   <AutoFilter x:Range="R1C1:R2C7" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R50C7</Range>
-   <Condition>
-    <Value1>AND(RC1=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R50C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-1]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R50C2,R2C4:R50C5,R2C7:R50C7</Range>
-   <Condition>
-    <Value1>(RC1&lt;&gt;&quot;&quot;)&lt;&gt;(RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R50C7</Range>
-   <Condition>
-    <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
-   </Condition>
-  </ConditionalFormatting>
  </Worksheet>
  <Worksheet ss:Name="Search">
   <Names>
@@ -4963,20 +4764,20 @@
        xmlns="http://www.w3.org/TR/REC-html40">Unique name for search parameter - required, lower-case, dash-delimited string    </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Data type for parameter</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Data type for parameter</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Target Types</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Comma delimited list of target resources</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Comma delimited list of target resources</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Path</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element.  E.g. ResourceName.node1.node2</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element.  E.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">Description</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Explanation of param.  Will default if omitted and Path is specified, otherwise it is required</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Explanation of param.  Will default if omitted and Path is specified, otherwise it is required</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">editor notes</Data></Cell>
    </Row>
@@ -5212,78 +5013,15 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>21</ActiveRow>
-     <ActiveCol>2</ActiveCol>
-     <RangeSelection>R21C3:R22C3</RangeSelection>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R30C2</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;number,date,string,token,reference,composite,quantity&quot;</Value>
-  </DataValidation>
   <AutoFilter x:Range="R1C1:R1C5" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R30C5</Range>
-   <Condition>
-    <Value1>AND(RC1=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R30C1</Range>
-   <Condition>
-    <Value1>AND(R[-1]C=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R30C2</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R30C3</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;reference&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R30C4</Range>
-   <Condition>
-    <Value1>AND(RC2=&quot;reference&quot;,RC3=&quot;&quot;,RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R30C4</Range>
-   <Condition>
-    <Value1>AND(RC2=&quot;reference&quot;,RC3&lt;&gt;&quot;&quot;,RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:yellow'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C5:R30C5</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,RC=&quot;&quot;,RC4=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R30C5</Range>
-   <Condition>
-    <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
-   </Condition>
-  </ConditionalFormatting>
  </Worksheet>
  <Worksheet ss:Name="Operations">
   <Names>
@@ -5301,40 +5039,40 @@
    <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="253.5" ss:Span="1"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s127"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">The name of the operation or parameter (parameters prefixed by operation name + &quot;.&quot;)&#10;</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">The name of the operation or parameter (parameters prefixed by operation name + &quot;.&quot;) </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s128"><Data ss:Type="String">Use</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">&quot;System | Resource | Instance&quot; (operation)&#10;&quot;In&quot; or &quot;Out&quot; (parameter)</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">&quot;System | Resource | Instance&quot; (operation) &quot;In&quot; or &quot;Out&quot; (parameter)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s128"><Data ss:Type="String">Min</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Minimum cardinality for a parameter (must be a non-negative integer)</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Minimum cardinality for a parameter (must be a non-negative integer)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s128"><Data ss:Type="String">Max</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">maximum cardinality for a parameter - must be &quot;*&quot; or a positive integer</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">maximum cardinality for a parameter - must be &quot;*&quot; or a positive integer</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s128"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">query/operation for operation; data type for a parameter</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">query/operation for operation; data type for a parameter</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s128"><Data ss:Type="String">Profile</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Profile that must apply to parameter's type</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Profile that must apply to parameter's type</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s128"><Data ss:Type="String">Title</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The descriptive label for the operation</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The descriptive label for the operation</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s129"><Data ss:Type="String">Documentation</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Explanation of the operation or parameter</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Explanation of the operation or parameter</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="String">Footer</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional usage notes for an operation</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional usage notes for an operation</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5910,109 +5648,8 @@
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R50C3</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;0,1,[n]&quot;</Value>
-   <ErrorHide/>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R50C4</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;1,[n],*&quot;</Value>
-   <ErrorHide/>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C5:R50C5</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;query,operation,SomeResource,Reference(SomeResource),boolean,string,token,code,id,oid,uuid,number,integer,decimal,date,dateTime,time,instant,base64Binary,CodeableConcept,Coding,Identifier,Period,Timing,Range,Quantity,Duration,Money,ContactPoint,etc.&quot;</Value>
-   <ErrorHide/>
-  </DataValidation>
   <AutoFilter x:Range="R1C1:R2C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R50C9</Range>
-   <Condition>
-    <Value1>AND(RC1=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R50C1</Range>
-   <Condition>
-    <Value1>AND(R[-1]C=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R50C2,R2C5:R50C5,R2C8:R50C8</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R50C2</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,NOT(ISERR(SEARCH(&quot;.&quot;,RC1))),RC&lt;&gt;&quot;IN&quot;, RC&lt;&gt;&quot;OUT&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R50C3</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,ISERR(VALUE(RC)))</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R50C4</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,ISERR(SEARCH(&quot;.&quot;,RC1))&lt;&gt;(RC=&quot;&quot;))</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R50C4</Range>
-   <Condition>
-    <Value1>AND(RC3&lt;&gt;&quot;&quot;,RC&lt;&gt;&quot;&quot;,RC&lt;&gt;&quot;*&quot;,RC&lt;RC3)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,RC&lt;&gt;&quot;*&quot;,ISERR(VALUE(RC)))</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C5:R50C5</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,NOT(ISERR(SEARCH(&quot;.&quot;,RC1))),RC2&lt;&gt;&quot;QUERY&quot;, RC2&lt;&gt;&quot;OPERATION&quot;)</Value1>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C6:R50C6</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,ISERR(SEARCH(&quot;.&quot;,RC1)),(RC&lt;&gt;&quot;&quot;))</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C9:R50C9</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,NOT(ISERR(SEARCH(&quot;.&quot;,RC1))),RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R50C9</Range>
-   <Condition>
-    <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
-   </Condition>
-  </ConditionalFormatting>
  </Worksheet>
  <Worksheet ss:Name="Events">
   <Names>
@@ -6031,28 +5668,28 @@
    <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="74.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s105"><Data ss:Type="String">Event Code</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event.  E.g. patient-link&#10;&#10;</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event.  E.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Category</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Impact of message and time-sensitiveness for processing (see wiki/spec)</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Impact of message and time-sensitiveness for processing (see wiki/spec)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Description</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">What triggers the event and what behavior it drives</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">What triggers the event and what behavior it drives</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Notes</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional implementer guidance</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional implementer guidance</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Request Resources</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Comma-separated list of focal resources for request</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Comma-separated list of focal resources for request</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Response Resources</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Comma-separated list of focal resources for response</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Comma-separated list of focal resources for response</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Request Aggregations</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -6309,42 +5946,8 @@
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R20C2</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;Consequence,Currency,Notification&quot;</Value>
-  </DataValidation>
   <AutoFilter x:Range="R1C1:R1C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R20C9</Range>
-   <Condition>
-    <Value1>AND(RC1=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R20C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-1]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R20C3</Range>
-   <Condition>
-    <Value1>(RC1&lt;&gt;&quot;&quot;)&lt;&gt;(RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R20C9</Range>
-   <Condition>
-    <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
-   </Condition>
-  </ConditionalFormatting>
  </Worksheet>
  <Worksheet ss:Name="Profiles">
   <Names>
@@ -6358,20 +5961,20 @@
    <Column ss:StyleID="s115" ss:Width="63"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s105"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Label for profile&#10;Comment the row by starting with '!'</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Label for profile Comment the row by starting with '!'</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Filename</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Name of the resulting profile resource-something-profile.xml or …profile.spreadsheet.xml</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Name of the resulting profile resource-something-profile.xml or …profile.spreadsheet.xml</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Source</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Name of profile spreadsheet or XML file.  Defaults to same as Filename&#10;</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Name of profile spreadsheet or XML file.  Defaults to same as Filename </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Type of source (spreadsheet or profile XML file).  Default is spreadsheet</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Type of source (spreadsheet or profile XML file).  Default is spreadsheet</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">IG name</Data></Cell>
    </Row>
@@ -6637,56 +6240,15 @@
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R39C4</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;spreadsheet,profile&quot;</Value>
-  </DataValidation>
   <AutoFilter x:Range="R1C1:R1C4" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R39C4</Range>
-   <Condition>
-    <Value1>AND(RC1=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C1:R39C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-1]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R39C2,R2C4:R39C4</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R39C4</Range>
-   <Condition>
-    <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,#REF!=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
  </Worksheet>
  <Worksheet ss:Name="Examples">
   <Names>
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Examples!R1C1:R2C7"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="42" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="43" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s140" ss:DefaultColumnWidth="260.25"
    ss:DefaultRowHeight="15">
    <Column ss:StyleID="s140" ss:AutoFitWidth="0" ss:Width="125.25"/>
@@ -6695,35 +6257,35 @@
    <Column ss:StyleID="s140" ss:AutoFitWidth="0" ss:Width="162.75"/>
    <Column ss:StyleID="s140" ss:Width="240"/>
    <Column ss:StyleID="s140" ss:Width="205.5"/>
-   <Column ss:StyleID="s140" ss:Width="39.75"/>
+   <Column ss:StyleID="s140" ss:AutoFitWidth="0" ss:Width="57.75"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s105"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Descriptive Name</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Descriptive Name</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Default = XML.  Leave at default unless told otherwise</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Default = XML.  Leave at default unless told otherwise</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s141"><Data ss:Type="String">Description</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Description of content/purposes of example</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Description of content/purposes of example</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Identity</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">resource id</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">resource id</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Filename</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file.  E.g. resource-example-file-name.xml</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file.  E.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Profile</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Name of the profile  example is associated with (and should be published with)</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Name of the profile  example is associated with (and should be published with)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">In Book</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Include this example in the book form?</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Include this example in the book form?</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -6743,7 +6305,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"><Data ss:Type="String">Low Sodium and Fiber Restricted Diet</Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Nutrition Order Low Sodium and Fiber Restricted Diet Example</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Nutrition Order Low Sodium and Fluid Restricted Diet Example</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">cardiacdiet</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">nutritionorder-example-cardiacdiet.xml</Data></Cell>
     <Cell ss:StyleID="s134"/>
@@ -6759,13 +6321,22 @@
     <Cell ss:StyleID="s145"><Data ss:Type="String">Y</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s144"><Data ss:Type="String">Texture Modified Diet</Data></Cell>
+    <Cell ss:StyleID="s87"/>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Nutrition Order Texture Modified Diet Example</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">texturemodified</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">nutritionorder-example-texture-modified.xml</Data></Cell>
+    <Cell ss:StyleID="s134"/>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"><Data ss:Type="String">Pureed Diet</Data></Cell>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Nutrition Order Pureed Diet  Example</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">pureeddiet</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">nutritionorder-example-pureeddiet.xml</Data></Cell>
     <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s145"/>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"><Data ss:Type="String">Renal Diet</Data></Cell>
@@ -6774,7 +6345,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">renaldiet</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">nutritionorder-example-renaldiet.xml</Data></Cell>
     <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s145"/>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"><Data ss:Type="String">Low Fat and Fiber Restricted Diet</Data></Cell>
@@ -6783,7 +6354,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">fiberrestricteddiet</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">nutritionorder-example-fiberrestricteddiet.xml</Data></Cell>
     <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s145"/>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"><Data ss:Type="String">Diabetic Supplement</Data></Cell>
@@ -6792,7 +6363,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">diabeticsupplement</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">nutritionorder-example-diabeticsupplement.xml</Data></Cell>
     <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s145"/>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"><Data ss:Type="String">Protein Supplement</Data></Cell>
@@ -6801,7 +6372,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">proteinsupplement</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">nutritionorder-example-proteinsupplement.xml</Data></Cell>
     <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s145"/>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"><Data ss:Type="String">Energy Supplement </Data></Cell>
@@ -6810,16 +6381,16 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">energysupplement</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">nutritionorder-example-energysupplement.xml</Data></Cell>
     <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s145"/>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s144"><Data ss:Type="String">!Energy Supplement 2</Data></Cell>
+    <Cell ss:StyleID="s144"><Data ss:Type="String">!!Energy Supplement 2</Data></Cell>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Nutrition Order Energy Supplement  Example</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">energysupplement2</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">nutritionorder-example-energysupplement2.xml</Data></Cell>
     <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s145"/>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"><Data ss:Type="String">Enteral Bolus</Data></Cell>
@@ -6828,7 +6399,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">enteralbolus</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">nutritionorder-example-enteralbolus.xml</Data></Cell>
     <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s145"/>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"><Data ss:Type="String">Enteral Continuous Feeding</Data></Cell>
@@ -6837,7 +6408,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">enteralcontinuous</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">nutritionorder-example-enteralcontinuous.xml</Data></Cell>
     <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s145"/>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"><Data ss:Type="String">Infant Enteral</Data></Cell>
@@ -6846,7 +6417,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">infantenteral</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">nutritionorder-example-infantenteral.xml </Data></Cell>
     <Cell ss:StyleID="s134"/>
-    <Cell ss:StyleID="s145"/>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s144"/>
@@ -7104,6 +6675,7 @@
     <ValidPrinterInfo/>
     <VerticalResolution>0</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -7123,89 +6695,15 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>18</ActiveRow>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>10</ActiveRow>
+     <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C7:R41C7</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;Y&quot;</Value>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R41C2</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;xml,csv,tool&quot;</Value>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C6:R41C6</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;Profiles!A2:A40&quot;</Value>
-  </DataValidation>
   <AutoFilter x:Range="R1C1:R2C7" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R41C7</Range>
-   <Condition>
-    <Value1>AND(RC1=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R7C1,R17C1:R41C1,R9C1:R10C1,R12C1:R13C1,R15C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-1]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C5:R41C5,R2C3:R41C3</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R41C7</Range>
-   <Condition>
-    <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R41C4</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,OR(RC2=&quot;&quot;,RC2=&quot;xml&quot;),RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R11C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-2]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R16C1,R14C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,#REF!=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R8C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-4]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
  </Worksheet>
  <Worksheet ss:Name="Bindings">
   <Names>
@@ -7215,7 +6713,7 @@
   <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="31" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s115" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="162"/>
-   <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="336"/>
+   <Column ss:StyleID="s115" ss:Width="421.5"/>
    <Column ss:StyleID="s115" ss:Width="51"/>
    <Column ss:StyleID="s115" ss:Width="45"/>
    <Column ss:StyleID="s115" ss:Width="146.25"/>
@@ -7228,63 +6726,63 @@
    <Column ss:Index="13" ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="106.5"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s105"><Data ss:Type="String">Binding Name</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique name across all resources</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique name across all resources</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Definition</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Formal description of the types of codes allowed for elements with this binding</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Formal description of the types of codes allowed for elements with this binding</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Binding</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">How is the set of codes defined?</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">How is the set of codes defined?</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s106"><Data ss:Type="String">Example</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Y = example, blank = incomplete.  Only relevant if binding is &quot;value set&quot;</Font> </ss:Data></Comment><NamedCell
+    <Cell ss:StyleID="s106"><Data ss:Type="String">Conformance</Data><Comment
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Y = example, blank = incomplete.  Only relevant if binding is &quot;value set&quot;</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Reference</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">#tab-name or value set filename(without extension) or URL for reference&#10;</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">#tab-name or value set filename(without extension) or URL for reference </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Description</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Text to display for reference bindings (not used otherwise)</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Text to display for reference bindings (not used otherwise)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">OID</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">The OID for the code list if one already exists.  (If omitted, one will be assigned)</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">The OID for the code list if one already exists.  (If omitted, one will be assigned)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">URI</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Full URI for the code list.  (If not specified, defaults to http://hl7.org/fhir/vs</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Full URI for the code list.  (If not specified, defaults to http://hl7.org/fhir/ValueSet</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Website/Email</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Contact information for the code list (if different from standard HL7 FHIR contact info)</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Contact information for the code list (if different from standard HL7 FHIR contact info)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Copyright</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Copyright information associated with the code list.  If not specified, Public Domain assumed</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Copyright information associated with the code list.  If not specified, Public Domain assumed</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">v2</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">uri of v2 value set mapped to</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">uri of v2 value set mapped to</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">v3</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">uri of v3 value set mapped to</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">uri of v3 value set mapped to</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">Committee Notes</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unpublished notes</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unpublished notes</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s149"><Data ss:Type="String">NutritionOrderStatus</Data></Cell>
     <Cell ss:StyleID="s78"><Data ss:Type="String">Codes specifying the state of the request. Describes the lifecycle of the nutrition order.</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">code list</Data></Cell>
-    <Cell ss:StyleID="s118"><Data ss:Type="String">n</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">#nutrition-order-status</Data></Cell>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s118"/>
@@ -7299,7 +6797,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">FoodType</Data></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">Codes used to indicate the type of food that should NOT be given to the patient.</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">valueset-food-type</Data></Cell>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
@@ -7314,7 +6812,7 @@
     <Cell ss:StyleID="s150"><Data ss:Type="String">OralDiet</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Codes used to indicate the type of diet being ordered for a patient.</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">valueset-diet-type</Data></Cell>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
@@ -7329,7 +6827,7 @@
     <Cell ss:StyleID="s150"><Data ss:Type="String">NutrientModifier</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Codes for types of nutrient that is being modified such as carbohydrate or sodium.</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">valueset-nutrient-code</Data></Cell>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
@@ -7344,7 +6842,7 @@
     <Cell ss:StyleID="s150"><Data ss:Type="String">TextureModifier</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Codes for food consistency types or texture modifications to apply to foods.</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">valueset-texture-code</Data></Cell>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
@@ -7359,7 +6857,7 @@
     <Cell ss:StyleID="s150"><Data ss:Type="String">TextureModifiedFoodType</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Codes for types of foods that are texture modified.</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">valueset-modified-foodtype</Data></Cell>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
@@ -7374,7 +6872,7 @@
     <Cell ss:StyleID="s150"><Data ss:Type="String">FluidConsistencyType</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Codes used to represent the consistency of fluids and liquids provided to the patient.</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">valueset-consistency-type</Data></Cell>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
@@ -7389,7 +6887,7 @@
     <Cell ss:StyleID="s150"><Data ss:Type="String">SupplementType</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Codes for nutritional supplements to be provided to the patient </Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">valueset-supplement-type</Data></Cell>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
@@ -7404,7 +6902,7 @@
     <Cell ss:StyleID="s150"><Data ss:Type="String">EnteralFormulaType</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Codes for type of enteral formula to be administered to patient.</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">valueset-entformula-type</Data></Cell>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
@@ -7419,7 +6917,7 @@
     <Cell ss:StyleID="s150"><Data ss:Type="String">EnteralFormulaAdditiveType</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Codes for the type of modular component such as protein, carbohydrate or fiber to be provided in addition to or mixed with the base formula.</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">valueset-entformula-additive</Data></Cell>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
@@ -7434,7 +6932,7 @@
     <Cell ss:StyleID="s150"><Data ss:Type="String">EnteralRouteOfAdministration</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Codes specifying the route of administration of enteral formula.</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">extensible</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">valueset-enteral-route</Data></Cell>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
@@ -7446,11 +6944,11 @@
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s121"/>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">PatientDiet</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Medical, cultural or ethical food preferences to help with catering requirements</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">example</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">http://hl7.org/fhir/ValueSet/encounter-diet</Data></Cell>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"/>
@@ -7701,7 +7199,7 @@
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
-    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s124"/>
     <Cell ss:StyleID="s125"/>
     <Cell ss:StyleID="s125"/>
@@ -7748,95 +7246,15 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>15</ActiveRow>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>26</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R30C3</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;code list,value set,reference,special,unbound&quot;</Value>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R30C4</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;Y&quot;</Value>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C1</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;Bindings!A2..A30&quot;</Value>
-   <ErrorHide/>
-  </DataValidation>
   <AutoFilter x:Range="R1C1:R1C13"
    xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R30C1,R2C2,R2C3:R30C13,R4C2:R30C2</Range>
-   <Condition>
-    <Value1>AND(RC1=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R30C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-1]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R30C3,R2C2,R4C2:R30C2</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C5:R30C5</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,(RC3=&quot;unbound&quot;)&lt;&gt;(RC=&quot;&quot;))</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C6:R30C6</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,(RC&lt;&gt;&quot;&quot;)&lt;&gt;(RC3=&quot;reference&quot;))</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C7:R30C10</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,RC3&lt;&gt;&quot;code list&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2,R2C3:R30C13,R4C2:R30C2,R2C1:R30C1</Range>
-   <Condition>
-    <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C1</Range>
-   <Condition>
-    <Value1>RC3=&quot;0..0&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:#F2F2F2'/>
-   </Condition>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,RC1=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
  </Worksheet>
  <Worksheet ss:Name="nutrition-order-status">
   <Names>
@@ -7855,49 +7273,49 @@
    <Column ss:Index="9" ss:StyleID="s140" ss:AutoFitWidth="0" ss:Width="242.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s105"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">The code to be sent over the wire</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">The code to be sent over the wire</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">D</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">The URL of the external code system from which the list is selected.  Must be the same for all codes if specified.</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">The URL of the external code system from which the list is selected.  Must be the same for all codes if specified.</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Parent</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The code this code is a specialization of (if any).  Content should be &quot;#&quot; + the Id of the parent code</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The code this code is a specialization of (if any).  Content should be &quot;#&quot; + the Id of the parent code</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Display</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Definition</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">v2</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v2 codes - See wiki for syntax</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v2 codes - See wiki for syntax</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">v3</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v3 codes - See wiki for syntax</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v3 codes - See wiki for syntax</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">Committee Notes</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional notes about the code.  Not published</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional notes about the code.  Not published</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s142"><Data ss:Type="String">proposed</Data></Cell>
     <Cell ss:StyleID="s131"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s153"/>
+    <Cell ss:StyleID="s154"/>
     <Cell ss:StyleID="s142"><Data ss:Type="String">Proposed</Data></Cell>
-    <Cell ss:StyleID="s153"><Data ss:Type="String">The request has been proposed</Data></Cell>
+    <Cell ss:StyleID="s154"><Data ss:Type="String">The request has been proposed</Data></Cell>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s143"><Data ss:Type="String">2/16/2015 [#3720] EH:  Review</Data></Cell>
@@ -7906,9 +7324,9 @@
     <Cell ss:StyleID="s144"><Data ss:Type="String">draft</Data></Cell>
     <Cell ss:StyleID="s134"><Data ss:Type="Number">12</Data></Cell>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s144"><Data ss:Type="String">Draft</Data></Cell>
-    <Cell ss:StyleID="s154"><Data ss:Type="String">The request is in preliminary form prior to being sent</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">The request is in preliminary form prior to being sent</Data></Cell>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -7917,9 +7335,9 @@
     <Cell ss:StyleID="s144"><Data ss:Type="String">planned</Data></Cell>
     <Cell ss:StyleID="s134"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s144"><Data ss:Type="String">Planned</Data></Cell>
-    <Cell ss:StyleID="s154"><Data ss:Type="String">The request has been planned</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">The request has been planned</Data></Cell>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"><Data ss:Type="String">2/16/2015 [#3720] EH:  Review</Data></Cell>
@@ -7928,9 +7346,9 @@
     <Cell ss:StyleID="s144"><Data ss:Type="String">requested</Data></Cell>
     <Cell ss:StyleID="s134"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s144"><Data ss:Type="String">Requested</Data></Cell>
-    <Cell ss:StyleID="s154"><Data ss:Type="String">The request has been placed</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">The request has been placed</Data></Cell>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"><Data ss:Type="String">2/16/2015 EH:  Review</Data></Cell>
@@ -7939,9 +7357,9 @@
     <Cell ss:StyleID="s144"><Data ss:Type="String">active</Data></Cell>
     <Cell ss:StyleID="s134"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s144"><Data ss:Type="String">Active</Data></Cell>
-    <Cell ss:StyleID="s154"><Data ss:Type="String">The request is 'actionable', but not all actions that are implied by it have occurred yet.</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">The request is 'actionable', but not all actions that are implied by it have occurred yet.</Data></Cell>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"><Data ss:Type="String">2/16/2015 EH:  Review</Data></Cell>
@@ -7950,9 +7368,9 @@
     <Cell ss:StyleID="s144"><Data ss:Type="String">on-hold</Data></Cell>
     <Cell ss:StyleID="s134"><Data ss:Type="Number">6</Data></Cell>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s144"><Data ss:Type="String">On-Hold</Data></Cell>
-    <Cell ss:StyleID="s154"><Data ss:Type="String">Actions implied by the request have been temporarily halted, but are expected to continue later. May also be called &quot;suspended&quot;.</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">Actions implied by the request have been temporarily halted, but are expected to continue later. May also be called &quot;suspended&quot;.</Data></Cell>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"><Data ss:Type="String">2/16/2015 EH:  Review</Data></Cell>
@@ -7961,9 +7379,9 @@
     <Cell ss:StyleID="s144"><Data ss:Type="String">completed</Data></Cell>
     <Cell ss:StyleID="s134"><Data ss:Type="Number">7</Data></Cell>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s144"><Data ss:Type="String">Completed</Data></Cell>
-    <Cell ss:StyleID="s154"><Data ss:Type="String">All actions that are implied by the order have occurred and no continuation is planned (this will rarely be made explicit).</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">All actions that are implied by the order have occurred and no continuation is planned (this will rarely be made explicit).</Data></Cell>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"><Data ss:Type="String">2/16/2015 EH:  Review</Data></Cell>
@@ -7972,9 +7390,9 @@
     <Cell ss:StyleID="s144"><Data ss:Type="String">cancelled</Data></Cell>
     <Cell ss:StyleID="s134"><Data ss:Type="Number">11</Data></Cell>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s144"><Data ss:Type="String">Cancelled</Data></Cell>
-    <Cell ss:StyleID="s154"><Data ss:Type="String">The request has been withdrawn and is no longer actionable.</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">The request has been withdrawn and is no longer actionable.</Data></Cell>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -7983,9 +7401,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -7994,9 +7412,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8005,9 +7423,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8016,9 +7434,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8027,9 +7445,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8038,9 +7456,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8049,9 +7467,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8060,9 +7478,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8071,9 +7489,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8082,9 +7500,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8093,9 +7511,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8104,9 +7522,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8115,9 +7533,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8126,9 +7544,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8137,9 +7555,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8148,9 +7566,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8159,9 +7577,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8170,9 +7588,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8181,9 +7599,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8192,9 +7610,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8203,9 +7621,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8214,9 +7632,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8225,9 +7643,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8236,9 +7654,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8247,9 +7665,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8258,9 +7676,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8269,9 +7687,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8280,9 +7698,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8291,9 +7709,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8302,9 +7720,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8313,9 +7731,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8324,9 +7742,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8335,9 +7753,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8346,9 +7764,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8357,9 +7775,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8368,9 +7786,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8379,9 +7797,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8390,9 +7808,9 @@
     <Cell ss:StyleID="s146"/>
     <Cell ss:StyleID="s137"/>
     <Cell ss:StyleID="s125"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s156"/>
+    <Cell ss:StyleID="s156"/>
+    <Cell ss:StyleID="s156"/>
     <Cell ss:StyleID="s137"/>
     <Cell ss:StyleID="s137"/>
     <Cell ss:StyleID="s148"/>
@@ -8422,69 +7840,6 @@
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R1C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R47C9</Range>
-   <Condition>
-    <Value1>AND(RC1=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R8C1,R10C1:R47C1,R8C5,R2C1:R3C1,R5C1,R2C5:R3C5,R5C5</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-1]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R47C3</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,(RC2=&quot;&quot;)=(RC3=&quot;&quot;))</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C5:R47C6</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,RC3=&quot;&quot;,RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:yellow'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C6:R47C6</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,,RC3=&quot;&quot;,RC5=&quot;&quot;,RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R47C9</Range>
-   <Condition>
-    <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R6C1,R6C5</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-4]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R7C1,R7C5,R9C1,R9C5</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,#REF!=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R4C1,R4C5</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-2]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
  </Worksheet>
  <Worksheet ss:Name="some-code-list">
   <Names>
@@ -8502,49 +7857,49 @@
    <Column ss:Index="9" ss:StyleID="s140" ss:AutoFitWidth="0" ss:Width="242.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s105"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">The code to be sent over the wire</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">The code to be sent over the wire</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">System</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The URL of the external code system from which the list is selected.  Must be the same for all codes if specified.</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The URL of the external code system from which the list is selected.  Must be the same for all codes if specified.</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Parent</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The code this code is a specialization of (if any).  Content should be &quot;#&quot; + the Id of the parent code</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">The code this code is a specialization of (if any).  Content should be &quot;#&quot; + the Id of the parent code</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Display</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Definition</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">v2</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v2 codes - See wiki for syntax</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v2 codes - See wiki for syntax</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">v3</Data><Comment ss:Author=""><ss:Data
-       xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v3 codes - See wiki for syntax</Font> </ss:Data></Comment><NamedCell
+       xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Mappings to v3 codes - See wiki for syntax</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">Committee Notes</Data><Comment
-      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional notes about the code.  Not published</Font> </ss:Data></Comment><NamedCell
+      ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Additional notes about the code.  Not published</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s153"/>
-    <Cell ss:StyleID="s153"/>
-    <Cell ss:StyleID="s153"/>
+    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s154"/>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s143"/>
@@ -8553,9 +7908,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8564,9 +7919,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8575,9 +7930,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8586,9 +7941,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8597,9 +7952,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8608,9 +7963,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8619,9 +7974,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8630,9 +7985,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8641,9 +7996,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8652,9 +8007,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8663,9 +8018,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8674,9 +8029,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8685,9 +8040,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8696,9 +8051,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8707,9 +8062,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8718,9 +8073,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8729,9 +8084,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8740,9 +8095,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8751,9 +8106,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8762,9 +8117,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8773,9 +8128,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8784,9 +8139,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8795,9 +8150,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8806,9 +8161,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8817,9 +8172,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8828,9 +8183,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8839,9 +8194,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8850,9 +8205,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8861,9 +8216,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8872,9 +8227,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8883,9 +8238,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8894,9 +8249,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8905,9 +8260,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8916,9 +8271,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8927,9 +8282,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8938,9 +8293,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8949,9 +8304,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8960,9 +8315,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8971,9 +8326,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8982,9 +8337,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -8993,9 +8348,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -9004,9 +8359,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -9015,9 +8370,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -9026,9 +8381,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -9037,9 +8392,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -9048,9 +8403,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -9059,9 +8414,9 @@
     <Cell ss:StyleID="s144"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s121"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s134"/>
     <Cell ss:StyleID="s145"/>
@@ -9070,9 +8425,9 @@
     <Cell ss:StyleID="s146"/>
     <Cell ss:StyleID="s137"/>
     <Cell ss:StyleID="s125"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s156"/>
+    <Cell ss:StyleID="s156"/>
+    <Cell ss:StyleID="s156"/>
     <Cell ss:StyleID="s137"/>
     <Cell ss:StyleID="s137"/>
     <Cell ss:StyleID="s148"/>
@@ -9113,47 +8468,5 @@
   </WorksheetOptions>
   <AutoFilter x:Range="R1C1:R1C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R50C9</Range>
-   <Condition>
-    <Value1>AND(RC1=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R50C1</Range>
-   <Condition>
-    <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-1]C=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R50C3</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,(RC2=&quot;&quot;)=(RC3=&quot;&quot;))</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C5:R50C6</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,RC3=&quot;&quot;,RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:yellow'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C6:R50C6</Range>
-   <Condition>
-    <Value1>AND(RC1&lt;&gt;&quot;&quot;,,RC3=&quot;&quot;,RC5=&quot;&quot;,RC=&quot;&quot;)</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
-   </Condition>
-  </ConditionalFormatting>
-  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R50C9</Range>
-   <Condition>
-    <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
-    <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
-   </Condition>
-  </ConditionalFormatting>
  </Worksheet>
 </Workbook>

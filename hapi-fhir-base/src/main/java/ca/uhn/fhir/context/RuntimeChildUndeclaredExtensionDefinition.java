@@ -47,6 +47,25 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		// nothing
 	}
 
+	private void addReferenceBinding(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions, String value) {
+		List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
+		types.add(IBaseResource.class);
+		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition(value, types, false);
+		def.sealAndInitialize(theContext, theClassToElementDefinitions);
+
+		myAttributeNameToDefinition.put(value, def);
+		/*
+		 * Resource reference - The correct name is 'valueReference' in DSTU2 and 'valueResource' in DSTU1
+		 */
+		boolean dstu1 = (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1));
+		if ((dstu1 && (value != VALUE_REFERENCE)) || (!dstu1 && (value != VALUE_RESOURCE))) {
+			myDatatypeToAttributeName.put(theContext.getVersion().getResourceReferenceType(), value);
+			myDatatypeToDefinition.put(BaseResourceReferenceDt.class, def);
+			myDatatypeToDefinition.put(theContext.getVersion().getResourceReferenceType(), def);
+		}
+
+	}
+
 	@Override
 	public IAccessor getAccessor() {
 		return new IAccessor() {
@@ -124,6 +143,11 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	}
 
 	@Override
+	public boolean isSummary() {
+		return false;
+	}
+
+	@Override
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 		myDatatypeToAttributeName = new HashMap<Class<? extends IBase>, String>();
@@ -185,25 +209,6 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		 */
 		addReferenceBinding(theContext, theClassToElementDefinitions, VALUE_RESOURCE);
 		addReferenceBinding(theContext, theClassToElementDefinitions, VALUE_REFERENCE);
-	}
-
-	private void addReferenceBinding(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions, String value) {
-		List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
-		types.add(IBaseResource.class);
-		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition(value, types, false);
-		def.sealAndInitialize(theContext, theClassToElementDefinitions);
-
-		myAttributeNameToDefinition.put(value, def);
-		/*
-		 * Resource reference - The correct name is 'valueReference' in DSTU2 and 'valueResource' in DSTU1
-		 */
-		boolean dstu1 = (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1));
-		if ((dstu1 && (value != VALUE_REFERENCE)) || (!dstu1 && (value != VALUE_RESOURCE))) {
-			myDatatypeToAttributeName.put(theContext.getVersion().getResourceReferenceType(), value);
-			myDatatypeToDefinition.put(BaseResourceReferenceDt.class, def);
-			myDatatypeToDefinition.put(theContext.getVersion().getResourceReferenceType(), def);
-		}
-
 	}
 
 	public static String createExtensionChildName(BaseRuntimeElementDefinition<?> next) {

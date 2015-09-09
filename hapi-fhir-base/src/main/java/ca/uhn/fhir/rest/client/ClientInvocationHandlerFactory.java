@@ -28,6 +28,7 @@ import org.apache.http.client.HttpClient;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -35,10 +36,10 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 class ClientInvocationHandlerFactory {
 
 	private final Map<Method, BaseMethodBinding<?>> myBindings = new HashMap<Method, BaseMethodBinding<?>>();
-	private final Map<Method, Object> myMethodToReturnValue = new HashMap<Method, Object>();
-	private final Map<Method, ILambda> myMethodToLambda = new HashMap<Method, ILambda>();
-	private final FhirContext myContext;
 	private final HttpClient myClient;
+	private final FhirContext myContext;
+	private final Map<Method, ILambda> myMethodToLambda = new HashMap<Method, ILambda>();
+	private final Map<Method, Object> myMethodToReturnValue = new HashMap<Method, Object>();
 	private final String myUrlBase;
 
 	public ClientInvocationHandlerFactory(HttpClient theClient, FhirContext theContext, String theUrlBase, Class<? extends IRestfulClient> theClientType) {
@@ -55,6 +56,7 @@ class ClientInvocationHandlerFactory {
 			myMethodToLambda.put(theClientType.getMethod("setPrettyPrint", Boolean.class), new SetPrettyPrintLambda());
 			myMethodToLambda.put(theClientType.getMethod("registerInterceptor", IClientInterceptor.class), new RegisterInterceptorLambda());
 			myMethodToLambda.put(theClientType.getMethod("unregisterInterceptor", IClientInterceptor.class), new UnregisterInterceptorLambda());
+			myMethodToLambda.put(theClientType.getMethod("setSummary", SummaryEnum.class), new SetSummaryLambda());
 
 		} catch (NoSuchMethodException e) {
 			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!", e);
@@ -75,6 +77,15 @@ class ClientInvocationHandlerFactory {
 		Object handle(ClientInvocationHandler theTarget, Object[] theArgs);
 	}
 
+	class RegisterInterceptorLambda implements ILambda {
+		@Override
+		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {
+			IClientInterceptor interceptor = (IClientInterceptor) theArgs[0];
+			theTarget.registerInterceptor(interceptor);
+			return null;
+		}
+	}
+
 	class SetEncodingLambda implements ILambda {
 		@Override
 		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {
@@ -93,20 +104,20 @@ class ClientInvocationHandlerFactory {
 		}
 	}
 
+	class SetSummaryLambda implements ILambda {
+		@Override
+		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {
+			SummaryEnum encoding = (SummaryEnum) theArgs[0];
+			theTarget.setSummary(encoding);
+			return null;
+		}
+	}
+
 	class UnregisterInterceptorLambda implements ILambda {
 		@Override
 		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {
 			IClientInterceptor interceptor = (IClientInterceptor) theArgs[0];
 			theTarget.unregisterInterceptor(interceptor);
-			return null;
-		}
-	}
-
-	class RegisterInterceptorLambda implements ILambda {
-		@Override
-		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {
-			IClientInterceptor interceptor = (IClientInterceptor) theArgs[0];
-			theTarget.registerInterceptor(interceptor);
 			return null;
 		}
 	}

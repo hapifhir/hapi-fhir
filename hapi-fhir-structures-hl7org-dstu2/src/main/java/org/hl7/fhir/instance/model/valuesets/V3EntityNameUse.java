@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3EntityNameUse {
@@ -164,7 +164,7 @@ public enum V3EntityNameUse {
             case ABC: return "Alphabetic transcription of name (Japanese: romaji)";
             case IDE: return "Ideographic representation of name (e.g., Japanese kanji, Chinese characters)";
             case SYL: return "Syllabic transcription of name (e.g., Japanese kana, Korean hangul)";
-            case ASGN: return "A name assigned to a person. Reasons some organizations assign alternate names may include not knowing the person's name, or to maintain anonymity. Some, but not necessarily all, of the name types that people call 'alias' may fit into this category.";
+            case ASGN: return "A name assigned to a person. Reasons some organizations assign alternate names may include not knowing the person's name, or to maintain anonymity. Some, but not necessarily all, of the name types that people call \"alias\" may fit into this category.";
             case C: return "As recorded on a license, record, certificate, etc. (only if different from legal name)";
             case I: return "e.g. Chief Red Cloud";
             case L: return "Known as/conventional/the one you use";

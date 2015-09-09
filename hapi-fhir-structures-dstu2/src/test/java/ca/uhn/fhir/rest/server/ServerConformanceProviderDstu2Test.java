@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.ConditionalDeleteStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SystemRestfulInteractionEnum;
 import ca.uhn.fhir.model.dstu2.valueset.TypeRestfulInteractionEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
@@ -50,6 +51,7 @@ import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
+import ca.uhn.fhir.validation.ValidationResult;
 
 public class ServerConformanceProviderDstu2Test {
 
@@ -90,7 +92,7 @@ public class ServerConformanceProviderDstu2Test {
 		assertEquals("Patient", res.getType());
 
 		assertTrue(res.getConditionalCreate());
-		assertTrue(res.getConditionalDelete());
+		assertEquals(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED, res.getConditionalDeleteElement().getValueAsEnum());
 		assertTrue(res.getConditionalUpdate());
 	}
 
@@ -304,9 +306,9 @@ public class ServerConformanceProviderDstu2Test {
 		assertEquals(DiagnosticReport.SP_SUBJECT, res.getSearchParam().get(0).getName());
 		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
 
-		assertEquals(DiagnosticReport.SP_NAME, res.getSearchParam().get(2).getName());
+		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(1).getName());
 
-		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(1).getName());
+		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
 
 		assertEquals(1, res.getSearchInclude().size());
 		assertEquals("DiagnosticReport.result", res.getSearchIncludeFirstRep().getValue());
@@ -435,8 +437,10 @@ public class ServerConformanceProviderDstu2Test {
 		rs.init(createServletConfig());
 
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
-		assertTrue(ourCtx.newValidator().validateWithResult(conformance).isSuccessful());
+		ValidationResult result = ourCtx.newValidator().validateWithResult(conformance);
+		assertTrue(result.getMessages().toString(), result.isSuccessful());
 	}
 
 	public static class ConditionalProvider implements IResourceProvider {
@@ -447,7 +451,7 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 		@Delete
-		public MethodOutcome delete(@IdParam IdDt theId, @ConditionalUrlParam String theConditionalUrl) {
+		public MethodOutcome delete(@IdParam IdDt theId, @ConditionalUrlParam(supportsMultiple=true) String theConditionalUrl) {
 			return null;
 		}
 
@@ -541,7 +545,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		@Description(shortDefinition = "This is a search for stuff!")
 		@Search
-		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, @OptionalParam(name = DiagnosticReport.SP_NAME) TokenOrListParam theNames,
+		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
 				@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange, @IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
 			return null;
 		}

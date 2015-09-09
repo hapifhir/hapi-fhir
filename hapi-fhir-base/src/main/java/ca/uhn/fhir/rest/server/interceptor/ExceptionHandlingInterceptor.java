@@ -19,10 +19,10 @@ package ca.uhn.fhir.rest.server.interceptor;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -34,9 +34,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -72,9 +71,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 			}
 		}
 
-		boolean requestIsBrowser = RestfulServer.requestIsBrowser(theRequest);
-		String fhirServerBase = theRequestDetails.getFhirServerBase();
-		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser, NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase, false);
+		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, true, Collections.singleton(SummaryEnum.FALSE), statusCode, false, false, theRequestDetails);
 
 		// theResponse.setStatus(statusCode);
 		// theRequestDetails.getServer().addHeadersToResponse(theResponse);
@@ -94,7 +91,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 		} else {
 			retVal = (BaseServerResponseException) theException;
 		}
-		
+
 		if (retVal.getOperationOutcome() == null) {
 			retVal.setOperationOutcome(createOperationOutcome(theException, theRequestDetails.getServer().getFhirContext()));
 		}

@@ -215,11 +215,11 @@ public class TinderStructuresMojo extends AbstractMojo {
 //		ProfileParser pp = new ProfileParser();
 //		pp.parseSingleProfile(new File("../hapi-tinder-test/src/test/resources/profile/patient.xml"), "http://foo");
 
-		ValueSetGenerator vsp = new ValueSetGenerator("dstu");
+		ValueSetGenerator vsp = new ValueSetGenerator("dstu2");
 //		 vsp.setResourceValueSetFiles(theResourceValueSetFiles);Directory("src/main/resources/vs/");
 		vsp.parse();
 
-		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet("dstu", ".");
+		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet("dstu2", ".");
 		dtp.parse();
 		dtp.markResourcesForImports();
 		dtp.bindValueSets(vsp);
@@ -227,8 +227,8 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 		String dtOutputDir = "target/generated-sources/tinder/ca/uhn/fhir/model/dev/composite";
 
-		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet("dstu", ".");
-		rp.setBaseResourceNames(Arrays.asList( "patient", "list"  
+		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet("dstu2", ".");
+		rp.setBaseResourceNames(Arrays.asList( "bundle"  
 //				//, "contract" 
 //				"valueset", "organization", "location" 
 //				, "observation", "conformance"

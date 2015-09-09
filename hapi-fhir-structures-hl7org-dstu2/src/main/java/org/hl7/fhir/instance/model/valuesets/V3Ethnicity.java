@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3Ethnicity {
@@ -396,7 +396,7 @@ public enum V3Ethnicity {
             case _21808: return "Puerto Rican";
             case _21824: return "Cuban";
             case _21840: return "Dominican";
-            case _21865: return "Note that this term remains in the table for completeness, even though within HL7, the notion of 'not otherwise coded' term is deprecated.";
+            case _21865: return "Note that this term remains in the table for completeness, even though within HL7, the notion of \"not otherwise coded\" term is deprecated.";
             default: return "?";
           }
         }

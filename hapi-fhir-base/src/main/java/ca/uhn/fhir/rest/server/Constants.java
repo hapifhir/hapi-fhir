@@ -29,19 +29,18 @@ import java.util.Set;
 
 public class Constants {
 
+	public static final String CHARSET_NAME_UTF8 = "UTF-8";
 	public static final Charset CHARSET_UTF8;
-	public static final String CHARSETNAME_UTF_8 = "UTF-8";
+	public static final String CHARSET_UTF8_CTSUFFIX = "; charset=" + CHARSET_NAME_UTF8;
 	public static final String CT_ATOM_XML = "application/atom+xml";
 	public static final String CT_FHIR_JSON = "application/json+fhir";
-
-	public static final String CTSUFFIX_CHARSET_UTF8 = "; charset=" + CHARSETNAME_UTF_8;
 	public static final String CT_FHIR_XML = "application/xml+fhir";
 	public static final String CT_HTML = "text/html";
-	public static final String CT_HTML_WITH_UTF8 = "text/html" + CTSUFFIX_CHARSET_UTF8;
+	public static final String CT_HTML_WITH_UTF8 = "text/html" + CHARSET_UTF8_CTSUFFIX;
 	public static final String CT_JSON = "application/json";
 	public static final String CT_OCTET_STREAM = "application/octet-stream";
 	public static final String CT_TEXT = "text/plain";
-	public static final String CT_TEXT_WITH_UTF8 = CT_TEXT + CTSUFFIX_CHARSET_UTF8;
+	public static final String CT_TEXT_WITH_UTF8 = CT_TEXT + CHARSET_UTF8_CTSUFFIX;
 	public static final String CT_XML = "application/xml";
 	public static final String ENCODING_GZIP = "gzip";
 	public static final String EXTOP_VALIDATE = "$validate";
@@ -82,8 +81,13 @@ public class Constants {
 	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
 	public static final String HEADER_LOCATION = "Location";
 	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
+	public static final String HEADER_PREFER = "Prefer";
+	public static final String HEADER_PREFER_RETURN = "return";
+	public static final String HEADER_PREFER_RETURN_MINIMAL = "minimal";
+	public static final String HEADER_PREFER_RETURN_REPRESENTATION = "representation";
 	public static final String HEADER_SUFFIX_CT_UTF_8 = "; charset=UTF-8";
 	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
+	public static final Map<Integer, String> HTTP_STATUS_NAMES;
 	public static final String LINK_FHIR_BASE = "fhir-base";
 	public static final String LINK_FIRST = "first";
 	public static final String LINK_LAST = "last";
@@ -93,24 +97,30 @@ public class Constants {
 	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_DELETE = "_delete";
+	public static final String PARAM_ELEMENTS = "_elements";
 	public static final String PARAM_FORMAT = "_format";
 	public static final String PARAM_HISTORY = "_history";
 	public static final String PARAM_INCLUDE = "_include";
+	public static final String PARAM_INCLUDE_QUALIFIER_RECURSE = ":recurse";
+	public static final String PARAM_INCLUDE_RECURSE = "_include"+PARAM_INCLUDE_QUALIFIER_RECURSE;
 	public static final String PARAM_LASTUPDATED = "_lastUpdated";
 	public static final String PARAM_NARRATIVE = "_narrative";
 	public static final String PARAM_PAGINGACTION = "_getpages";
 	public static final String PARAM_PAGINGOFFSET = "_getpagesoffset";
 	public static final String PARAM_PRETTY = "_pretty";
 	public static final String PARAM_PRETTY_VALUE_TRUE = "true";
+	public static final String PARAM_PROFILE = "_profile";
 	public static final String PARAM_QUERY = "_query";
 	public static final String PARAM_REVINCLUDE = "_revinclude";
 	public static final String PARAM_SEARCH = "_search";
+	public static final String PARAM_SECURITY = "_security";
 	public static final String PARAM_SINCE = "_since";
 	public static final String PARAM_SORT = "_sort";
 	public static final String PARAM_SORT_ASC = "_sort:asc";
 	public static final String PARAM_SORT_DESC = "_sort:desc";
-	public static final String PARAM_TAGS = "_tags";
+	public static final String PARAM_SUMMARY = "_summary";
 	public static final String PARAM_TAG = "_tag";
+	public static final String PARAM_TAGS = "_tags";
 	public static final String PARAM_VALIDATE = "_validate";
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
@@ -123,7 +133,7 @@ public class Constants {
 	public static final int STATUS_HTTP_304_NOT_MODIFIED = 304;
 	public static final int STATUS_HTTP_400_BAD_REQUEST = 400;
 	public static final int STATUS_HTTP_401_CLIENT_UNAUTHORIZED = 401;
-	public static final int STATUS_HTTP_403_FORBIDDEN= 403;
+	public static final int STATUS_HTTP_403_FORBIDDEN = 403;
 	public static final int STATUS_HTTP_404_NOT_FOUND = 404;
 	public static final int STATUS_HTTP_405_METHOD_NOT_ALLOWED = 405;
 	public static final int STATUS_HTTP_409_CONFLICT = 409;
@@ -132,12 +142,10 @@ public class Constants {
 	public static final int STATUS_HTTP_422_UNPROCESSABLE_ENTITY = 422;
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
+	public static final String TAG_SUBSETTED_CODE = "SUBSETTED";
+	public static final String TAG_SUBSETTED_SYSTEM = "http://hl7.org/fhir/v3/ObservationValue";
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String URL_TOKEN_METADATA = "metadata";
-	public static final String HEADER_PREFER = "Prefer";
-	public static final String HEADER_PREFER_RETURN = "return";
-	public static final String HEADER_PREFER_RETURN_MINIMAL = "minimal";
-	public static final String HEADER_PREFER_RETURN_REPRESENTATION = "representation";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();
@@ -161,8 +169,74 @@ public class Constants {
 		}
 
 		FORMAT_VAL_TO_ENCODING = Collections.unmodifiableMap(valToEncoding);
-		
-		CHARSET_UTF8 = Charset.forName(CHARSETNAME_UTF_8);
+
+		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);
+
+		HashMap<Integer, String> statusNames = new HashMap<Integer, String>();
+
+		statusNames.put(200, "OK");
+		statusNames.put(201, "Created");
+		statusNames.put(202, "Accepted");
+		statusNames.put(203, "Non-Authoritative Information");
+		statusNames.put(204, "No Content");
+		statusNames.put(205, "Reset Content");
+		statusNames.put(206, "Partial Content");
+		statusNames.put(207, "Multi-Status");
+		statusNames.put(208, "Already Reported");
+		statusNames.put(226, "IM Used");
+		statusNames.put(300, "Multiple Choices");
+		statusNames.put(301, "Moved Permanently");
+		statusNames.put(302, "Found");
+		statusNames.put(302, "Moved Temporarily");
+		statusNames.put(303, "See Other");
+		statusNames.put(304, "Not Modified");
+		statusNames.put(305, "Use Proxy");
+		statusNames.put(307, "Temporary Redirect");
+		statusNames.put(308, "Permanent Redirect");
+		statusNames.put(400, "Bad Request");
+		statusNames.put(401, "Unauthorized");
+		statusNames.put(402, "Payment Required");
+		statusNames.put(403, "Forbidden");
+		statusNames.put(404, "Not Found");
+		statusNames.put(405, "Method Not Allowed");
+		statusNames.put(406, "Not Acceptable");
+		statusNames.put(407, "Proxy Authentication Required");
+		statusNames.put(408, "Request Timeout");
+		statusNames.put(409, "Conflict");
+		statusNames.put(410, "Gone");
+		statusNames.put(411, "Length Required");
+		statusNames.put(412, "Precondition Failed");
+		statusNames.put(413, "Payload Too Large");
+		statusNames.put(413, "Request Entity Too Large");
+		statusNames.put(414, "URI Too Long");
+		statusNames.put(414, "Request-URI Too Long");
+		statusNames.put(415, "Unsupported Media Type");
+		statusNames.put(416, "Requested range not satisfiable");
+		statusNames.put(417, "Expectation Failed");
+		statusNames.put(418, "I'm a teapot");
+		statusNames.put(419, "Insufficient Space On Resource");
+		statusNames.put(420, "Method Failure");
+		statusNames.put(421, "Destination Locked");
+		statusNames.put(422, "Unprocessable Entity");
+		statusNames.put(423, "Locked");
+		statusNames.put(424, "Failed Dependency");
+		statusNames.put(426, "Upgrade Required");
+		statusNames.put(428, "Precondition Required");
+		statusNames.put(429, "Too Many Requests");
+		statusNames.put(431, "Request Header Fields Too Large");
+		statusNames.put(500, "Internal Server Error");
+		statusNames.put(501, "Not Implemented");
+		statusNames.put(502, "Bad Gateway");
+		statusNames.put(503, "Service Unavailable");
+		statusNames.put(504, "Gateway Timeout");
+		statusNames.put(505, "HTTP Version not supported");
+		statusNames.put(506, "Variant Also Negotiates");
+		statusNames.put(507, "Insufficient Storage");
+		statusNames.put(508, "Loop Detected");
+		statusNames.put(509, "Bandwidth Limit Exceeded");
+		statusNames.put(510, "Not Extended");
+		statusNames.put(511, "Network Authentication Required");
+		HTTP_STATUS_NAMES = Collections.unmodifiableMap(statusNames);
 	}
 
 }

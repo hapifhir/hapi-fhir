@@ -28,6 +28,25 @@
 		</label>
 	</div>
 
+	<br /> <label class="navBarButtonLabel">Summary</label>
+	<div class="btn-group top-buffer" data-toggle="buttons" id="summaryBtnGroup">
+		<label class="btn btn-sm btn-default active"> 
+			<input type="radio" name="_summary" id="summary-default" value="" />(none)
+		</label> 
+		<label class="btn btn-sm btn-default"> 
+			<input type="radio" name="_summary" id="summary-true" value="true" />true
+		</label> 
+		<label class="btn btn-sm btn-default"> 
+			<input type="radio" name="_summary" id="summary-text" value="text" />text
+		</label>
+		<label class="btn btn-sm btn-default"> 
+			<input type="radio" name="_summary" id="summary-data" value="data" />data
+		</label>
+		<label class="btn btn-sm btn-default"> 
+			<input type="radio" name="_summary" id="summary-count" value="count" />count
+		</label>
+	</div>
+
 	<script type="text/javascript">
 		
 	$( document ).ready(function() {
@@ -51,6 +70,20 @@
 			</th:block>
 			<th:block th:case="'false'">
 				$('#pretty-false').trigger("click");
+			</th:block>
+		</th:block>
+		<th:block th:switch="${_summary}">
+			<th:block th:case="'true'">
+				$('#summary-true').trigger("click");
+			</th:block>
+			<th:block th:case="'text'">
+				$('#summary-text').trigger("click");
+			</th:block>
+			<th:block th:case="'data'">
+				$('#summary-data').trigger("click");
+			</th:block>
+			<th:block th:case="'count'">
+				$('#summary-count').trigger("click");
 			</th:block>
 		</th:block>
 		

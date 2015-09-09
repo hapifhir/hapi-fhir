@@ -34,7 +34,7 @@ public class IntegerDt extends BasePrimitive<Integer> implements IBaseIntegerDat
 	 * Constructor
 	 */
 	public IntegerDt() {
-		// nothing
+		super();
 	}
 
 	/**

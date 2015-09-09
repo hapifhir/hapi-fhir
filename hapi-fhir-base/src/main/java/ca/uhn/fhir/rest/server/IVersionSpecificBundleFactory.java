@@ -32,8 +32,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 
 /**
- * This interface should be considered experimental and will likely change in future releases
- * of HAPI. Use with caution!
+ * This interface should be considered experimental and will likely change in future releases of HAPI. Use with caution!
  */
 public interface IVersionSpecificBundleFactory {
 

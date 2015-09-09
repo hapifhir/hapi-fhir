@@ -72,7 +72,7 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 			ourPatientDao.create(p);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("clients may only assign IDs which begin with a non-numeric"));
+			assertThat(e.getMessage(), containsString("clients may only assign IDs which contain at least one non-numeric"));
 		}
 	}
 
@@ -117,7 +117,7 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 			ourPatientDao.update(p1);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("clients may only assign IDs which begin with a non-numeric"));
+			assertThat(e.getMessage(), containsString("clients may only assign IDs which contain at least one non-numeric"));
 		}
 
 	}

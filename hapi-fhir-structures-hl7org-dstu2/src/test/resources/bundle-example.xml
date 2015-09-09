@@ -9,15 +9,15 @@
   <total value="3"/>
   <link>
     <relation value="next"/>
-    <url value="https://example.com/base/MedicationPrescription?patient=347&amp;searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&amp;page=2"/>
+    <url value="https://example.com/base/MedicationOrder?patient=347&amp;searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&amp;page=2"/>
   </link>
   <link>
     <relation value="self"/>
-    <url value="https://example.com/base/MedicationPrescription?patient=347&amp;_include=MedicationPrescription.medication"/>
+    <url value="https://example.com/base/MedicationOrder?patient=347&amp;_include=MedicationOrder.medication"/>
   </link>
   <entry>
     <resource>
-      <MedicationPrescription>
+      <MedicationOrder>
         <id value="3123"/>
         <meta>
         	<versionId value="1"/>
@@ -29,7 +29,7 @@
         <medication>
           <reference value="Medication/example"/>
         </medication>
-      </MedicationPrescription>
+      </MedicationOrder>
     </resource>
     <search>
       <mode value="match"/> 

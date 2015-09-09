@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Provides server ports
+ * Finds and provides a free port to use in unit tests
  */
 public class RandomServerPortProvider {
 

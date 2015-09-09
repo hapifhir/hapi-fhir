@@ -5,23 +5,23 @@
     <lastUpdated value="2014-08-18T01:43:30Z"/>
   </meta>
   <type value="searchset"/>  
-  <base value="http://example.com/base"/> 
   <total value="3"/>
   <link>
     <relation value="next"/>
-    <url value="https://example.com/base/MedicationPrescription?patient=347&amp;searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&amp;page=2"/>
+    <url value="https://example.com/base/MedicationOrder?patient=347&amp;searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&amp;page=2"/>
   </link>
   <link>
     <relation value="self"/>
-    <url value="https://example.com/base/MedicationPrescription?patient=347&amp;_include=MedicationPrescription.medication"/>
+    <url value="https://example.com/base/MedicationOrder?patient=347&amp;_include=MedicationOrder.medication"/>
   </link>
   <entry>
   	<link>
   		<relation value="alternate"/>
-  		<url value="http://example.com/base/MedicationPrescription/3123/_history/1"/>
+  		<url value="http://example.com/base/MedicationOrder/3123/_history/1"/>
   	</link>
+    <fullUrl value="http://example.com/base/MedicationOrder/3123/_history/1"/>
     <resource>
-      <MedicationPrescription>
+      <MedicationOrder>
         <id value="3123"/>
         <meta>
         	<versionId value="1"/>
@@ -30,20 +30,21 @@
         <patient>
           <reference value="Patient/347"/>
         </patient>
-        <medication>
+        <medicationReference>
           <reference value="Medication/example"/>
-        </medication>
-      </MedicationPrescription>
+        </medicationReference>
+      </MedicationOrder>
     </resource>
     <search>
       <mode value="match"/> 
       <score value="1"/>
     </search>
-    <transaction>
+    <request>
       <url value="http://foo?search"/>
-    </transaction>
+    </request>
   </entry>
   <entry>
+    <fullUrl value="http://example.com/base/Medication/example"/>
     <resource>
       <Medication>
         <id value="example"/>

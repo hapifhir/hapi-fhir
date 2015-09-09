@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -267,14 +267,14 @@ public class Claim extends DomainResource {
         /**
          * Party to be reimbursed: Subscriber, provider, other.
          */
-        @Child(name = "type", type = {Coding.class}, order=1, min=0, max=1)
+        @Child(name = "type", type = {Coding.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Party to be paid any benefits payable", formalDefinition="Party to be reimbursed: Subscriber, provider, other." )
         protected Coding type;
 
         /**
          * The provider who is to be reimbursed for the claim (the party to whom any benefit is assigned).
          */
-        @Child(name = "provider", type = {Practitioner.class}, order=2, min=0, max=1)
+        @Child(name = "provider", type = {Practitioner.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Provider who is the payee", formalDefinition="The provider who is to be reimbursed for the claim (the party to whom any benefit is assigned)." )
         protected Reference provider;
 
@@ -286,7 +286,7 @@ public class Claim extends DomainResource {
         /**
          * The organization who is to be reimbursed for the claim (the party to whom any benefit is assigned).
          */
-        @Child(name = "organization", type = {Organization.class}, order=3, min=0, max=1)
+        @Child(name = "organization", type = {Organization.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Organization who is the payee", formalDefinition="The organization who is to be reimbursed for the claim (the party to whom any benefit is assigned)." )
         protected Reference organization;
 
@@ -298,7 +298,7 @@ public class Claim extends DomainResource {
         /**
          * The person other than the subscriber who is to be reimbursed for the claim (the party to whom any benefit is assigned).
          */
-        @Child(name = "person", type = {Patient.class}, order=4, min=0, max=1)
+        @Child(name = "person", type = {Patient.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Other person who is the payee", formalDefinition="The person other than the subscriber who is to be reimbursed for the claim (the party to whom any benefit is assigned)." )
         protected Reference person;
 
@@ -524,14 +524,14 @@ public class Claim extends DomainResource {
         /**
          * Sequence of diagnosis which serves to order and provide a link.
          */
-        @Child(name = "sequence", type = {PositiveIntType.class}, order=1, min=1, max=1)
+        @Child(name = "sequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Sequence of diagnosis", formalDefinition="Sequence of diagnosis which serves to order and provide a link." )
         protected PositiveIntType sequence;
 
         /**
          * The diagnosis.
          */
-        @Child(name = "diagnosis", type = {Coding.class}, order=2, min=1, max=1)
+        @Child(name = "diagnosis", type = {Coding.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Patient's list of diagnosis", formalDefinition="The diagnosis." )
         protected Coding diagnosis;
 
@@ -668,21 +668,21 @@ public class Claim extends DomainResource {
         /**
          * A service line item.
          */
-        @Child(name = "sequence", type = {PositiveIntType.class}, order=1, min=1, max=1)
+        @Child(name = "sequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Service instance identifier", formalDefinition="A service line item." )
         protected PositiveIntType sequence;
 
         /**
          * The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated.
          */
-        @Child(name = "focal", type = {BooleanType.class}, order=2, min=1, max=1)
+        @Child(name = "focal", type = {BooleanType.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Is the focal Coverage", formalDefinition="The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated." )
         protected BooleanType focal;
 
         /**
          * Reference to the program or plan identification, underwriter or payor.
          */
-        @Child(name = "coverage", type = {Coverage.class}, order=3, min=1, max=1)
+        @Child(name = "coverage", type = {Coverage.class}, order=3, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Insurance information", formalDefinition="Reference to the program or plan identification, underwriter or payor." )
         protected Reference coverage;
 
@@ -694,28 +694,28 @@ public class Claim extends DomainResource {
         /**
          * The contract number of a business agreement which describes the terms and conditions.
          */
-        @Child(name = "businessArrangement", type = {StringType.class}, order=4, min=0, max=1)
+        @Child(name = "businessArrangement", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Business agreement", formalDefinition="The contract number of a business agreement which describes the terms and conditions." )
         protected StringType businessArrangement;
 
         /**
          * The relationship of the patient to the subscriber.
          */
-        @Child(name = "relationship", type = {Coding.class}, order=5, min=1, max=1)
+        @Child(name = "relationship", type = {Coding.class}, order=5, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Patient relationship to subscriber", formalDefinition="The relationship of the patient to the subscriber." )
         protected Coding relationship;
 
         /**
          * A list of references from the Insurer to which these services pertain.
          */
-        @Child(name = "preAuthRef", type = {StringType.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "preAuthRef", type = {StringType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Pre-Authorization/Determination Reference", formalDefinition="A list of references from the Insurer to which these services pertain." )
         protected List<StringType> preAuthRef;
 
         /**
          * The Coverages adjudication details.
          */
-        @Child(name = "claimResponse", type = {ClaimResponse.class}, order=7, min=0, max=1)
+        @Child(name = "claimResponse", type = {ClaimResponse.class}, order=7, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Adjudication results", formalDefinition="The Coverages adjudication details." )
         protected Reference claimResponse;
 
@@ -727,7 +727,7 @@ public class Claim extends DomainResource {
         /**
          * The style (standard) and version of the original material which was converted into this resource.
          */
-        @Child(name = "originalRuleset", type = {Coding.class}, order=8, min=0, max=1)
+        @Child(name = "originalRuleset", type = {Coding.class}, order=8, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Original version", formalDefinition="The style (standard) and version of the original material which was converted into this resource." )
         protected Coding originalRuleset;
 
@@ -1149,21 +1149,21 @@ public class Claim extends DomainResource {
         /**
          * A service line number.
          */
-        @Child(name = "sequence", type = {PositiveIntType.class}, order=1, min=1, max=1)
+        @Child(name = "sequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Service instance", formalDefinition="A service line number." )
         protected PositiveIntType sequence;
 
         /**
          * The type of product or service.
          */
-        @Child(name = "type", type = {Coding.class}, order=2, min=1, max=1)
+        @Child(name = "type", type = {Coding.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Group or type of product or service", formalDefinition="The type of product or service." )
         protected Coding type;
 
         /**
          * The practitioner who is responsible for the services rendered to the patient.
          */
-        @Child(name = "provider", type = {Practitioner.class}, order=3, min=0, max=1)
+        @Child(name = "provider", type = {Practitioner.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
         protected Reference provider;
 
@@ -1175,102 +1175,102 @@ public class Claim extends DomainResource {
         /**
          * Diagnosis applicable for this service or product line.
          */
-        @Child(name = "diagnosisLinkId", type = {PositiveIntType.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "diagnosisLinkId", type = {PositiveIntType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Diagnosis Link", formalDefinition="Diagnosis applicable for this service or product line." )
         protected List<PositiveIntType> diagnosisLinkId;
 
         /**
          * If a grouping item then 'GROUP' otherwise it is a node therefore a code to indicate the Professional Service or Product supplied.
          */
-        @Child(name = "service", type = {Coding.class}, order=5, min=1, max=1)
+        @Child(name = "service", type = {Coding.class}, order=5, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Item Code", formalDefinition="If a grouping item then 'GROUP' otherwise it is a node therefore a code to indicate the Professional Service or Product supplied." )
         protected Coding service;
 
         /**
          * The date when the enclosed suite of services were performed or completed.
          */
-        @Child(name = "serviceDate", type = {DateType.class}, order=6, min=0, max=1)
+        @Child(name = "serviceDate", type = {DateType.class}, order=6, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Date of Service", formalDefinition="The date when the enclosed suite of services were performed or completed." )
         protected DateType serviceDate;
 
         /**
          * The number of repetitions of a service or product.
          */
-        @Child(name = "quantity", type = {Quantity.class}, order=7, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=7, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Count of Products or Services", formalDefinition="The number of repetitions of a service or product." )
-        protected Quantity quantity;
+        protected SimpleQuantity quantity;
 
         /**
          * If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.
          */
-        @Child(name = "unitPrice", type = {Money.class}, order=8, min=0, max=1)
+        @Child(name = "unitPrice", type = {Money.class}, order=8, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Fee, charge or cost per point", formalDefinition="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group." )
         protected Money unitPrice;
 
         /**
          * A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
          */
-        @Child(name = "factor", type = {DecimalType.class}, order=9, min=0, max=1)
+        @Child(name = "factor", type = {DecimalType.class}, order=9, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Price scaling factor", formalDefinition="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount." )
         protected DecimalType factor;
 
         /**
          * An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.
          */
-        @Child(name = "points", type = {DecimalType.class}, order=10, min=0, max=1)
+        @Child(name = "points", type = {DecimalType.class}, order=10, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Difficulty scaling factor", formalDefinition="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point." )
         protected DecimalType points;
 
         /**
          * The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
          */
-        @Child(name = "net", type = {Money.class}, order=11, min=0, max=1)
+        @Child(name = "net", type = {Money.class}, order=11, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Total item cost", formalDefinition="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
         protected Money net;
 
         /**
          * List of Unique Device Identifiers associated with this line item.
          */
-        @Child(name = "udi", type = {Coding.class}, order=12, min=0, max=1)
+        @Child(name = "udi", type = {Coding.class}, order=12, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Unique Device Identifier", formalDefinition="List of Unique Device Identifiers associated with this line item." )
         protected Coding udi;
 
         /**
          * Physical service site on the patient (limb, tooth, etc).
          */
-        @Child(name = "bodySite", type = {Coding.class}, order=13, min=0, max=1)
+        @Child(name = "bodySite", type = {Coding.class}, order=13, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Service Location", formalDefinition="Physical service site on the patient (limb, tooth, etc)." )
         protected Coding bodySite;
 
         /**
          * A region or surface of the site, eg. limb region or tooth surface(s).
          */
-        @Child(name = "subSite", type = {Coding.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "subSite", type = {Coding.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Service Sub-location", formalDefinition="A region or surface of the site, eg. limb region or tooth surface(s)." )
         protected List<Coding> subSite;
 
         /**
          * Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen.
          */
-        @Child(name = "modifier", type = {Coding.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "modifier", type = {Coding.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Service/Product billing modifiers", formalDefinition="Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen." )
         protected List<Coding> modifier;
 
         /**
          * Second tier of goods and services.
          */
-        @Child(name = "detail", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "detail", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Additional items", formalDefinition="Second tier of goods and services." )
         protected List<DetailComponent> detail;
 
         /**
          * The materials and placement date of prior fixed prosthesis.
          */
-        @Child(name = "prosthesis", type = {}, order=17, min=0, max=1)
+        @Child(name = "prosthesis", type = {}, order=17, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Prosthetic details", formalDefinition="The materials and placement date of prior fixed prosthesis." )
         protected ProsthesisComponent prosthesis;
 
-        private static final long serialVersionUID = -311028698L;
+        private static final long serialVersionUID = 1295830456L;
 
     /*
      * Constructor
@@ -1532,12 +1532,12 @@ public class Claim extends DomainResource {
         /**
          * @return {@link #quantity} (The number of repetitions of a service or product.)
          */
-        public Quantity getQuantity() { 
+        public SimpleQuantity getQuantity() { 
           if (this.quantity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ItemsComponent.quantity");
             else if (Configuration.doAutoCreate())
-              this.quantity = new Quantity(); // cc
+              this.quantity = new SimpleQuantity(); // cc
           return this.quantity;
         }
 
@@ -1548,7 +1548,7 @@ public class Claim extends DomainResource {
         /**
          * @param value {@link #quantity} (The number of repetitions of a service or product.)
          */
-        public ItemsComponent setQuantity(Quantity value) { 
+        public ItemsComponent setQuantity(SimpleQuantity value) { 
           this.quantity = value;
           return this;
         }
@@ -1899,7 +1899,7 @@ public class Claim extends DomainResource {
           childrenList.add(new Property("diagnosisLinkId", "positiveInt", "Diagnosis applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, diagnosisLinkId));
           childrenList.add(new Property("service", "Coding", "If a grouping item then 'GROUP' otherwise it is a node therefore a code to indicate the Professional Service or Product supplied.", 0, java.lang.Integer.MAX_VALUE, service));
           childrenList.add(new Property("serviceDate", "date", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, serviceDate));
-          childrenList.add(new Property("quantity", "Quantity", "The number of repetitions of a service or product.", 0, java.lang.Integer.MAX_VALUE, quantity));
+          childrenList.add(new Property("quantity", "SimpleQuantity", "The number of repetitions of a service or product.", 0, java.lang.Integer.MAX_VALUE, quantity));
           childrenList.add(new Property("unitPrice", "Money", "If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.", 0, java.lang.Integer.MAX_VALUE, unitPrice));
           childrenList.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, java.lang.Integer.MAX_VALUE, factor));
           childrenList.add(new Property("points", "decimal", "An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.", 0, java.lang.Integer.MAX_VALUE, points));
@@ -1997,74 +1997,74 @@ public class Claim extends DomainResource {
         /**
          * A service line number.
          */
-        @Child(name = "sequence", type = {PositiveIntType.class}, order=1, min=1, max=1)
+        @Child(name = "sequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Service instance", formalDefinition="A service line number." )
         protected PositiveIntType sequence;
 
         /**
          * The type of product or service.
          */
-        @Child(name = "type", type = {Coding.class}, order=2, min=1, max=1)
+        @Child(name = "type", type = {Coding.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Group or type of product or service", formalDefinition="The type of product or service." )
         protected Coding type;
 
         /**
          * If a grouping item then 'GROUP' otherwise it is a node therefore a code to indicate the Professional Service or Product supplied.
          */
-        @Child(name = "service", type = {Coding.class}, order=3, min=1, max=1)
+        @Child(name = "service", type = {Coding.class}, order=3, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Additional item codes", formalDefinition="If a grouping item then 'GROUP' otherwise it is a node therefore a code to indicate the Professional Service or Product supplied." )
         protected Coding service;
 
         /**
          * The number of repetitions of a service or product.
          */
-        @Child(name = "quantity", type = {Quantity.class}, order=4, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Count of Products or Services", formalDefinition="The number of repetitions of a service or product." )
-        protected Quantity quantity;
+        protected SimpleQuantity quantity;
 
         /**
          * If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.
          */
-        @Child(name = "unitPrice", type = {Money.class}, order=5, min=0, max=1)
+        @Child(name = "unitPrice", type = {Money.class}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Fee, charge or cost per point", formalDefinition="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group." )
         protected Money unitPrice;
 
         /**
          * A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
          */
-        @Child(name = "factor", type = {DecimalType.class}, order=6, min=0, max=1)
+        @Child(name = "factor", type = {DecimalType.class}, order=6, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Price scaling factor", formalDefinition="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount." )
         protected DecimalType factor;
 
         /**
          * An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.
          */
-        @Child(name = "points", type = {DecimalType.class}, order=7, min=0, max=1)
+        @Child(name = "points", type = {DecimalType.class}, order=7, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Difficulty scaling factor", formalDefinition="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point." )
         protected DecimalType points;
 
         /**
          * The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
          */
-        @Child(name = "net", type = {Money.class}, order=8, min=0, max=1)
+        @Child(name = "net", type = {Money.class}, order=8, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Total additional item cost", formalDefinition="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
         protected Money net;
 
         /**
          * List of Unique Device Identifiers associated with this line item.
          */
-        @Child(name = "udi", type = {Coding.class}, order=9, min=0, max=1)
+        @Child(name = "udi", type = {Coding.class}, order=9, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Unique Device Identifier", formalDefinition="List of Unique Device Identifiers associated with this line item." )
         protected Coding udi;
 
         /**
          * Third tier of goods and services.
          */
-        @Child(name = "subDetail", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "subDetail", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Additional items", formalDefinition="Third tier of goods and services." )
         protected List<SubDetailComponent> subDetail;
 
-        private static final long serialVersionUID = -1641314433L;
+        private static final long serialVersionUID = 5768017L;
 
     /*
      * Constructor
@@ -2179,12 +2179,12 @@ public class Claim extends DomainResource {
         /**
          * @return {@link #quantity} (The number of repetitions of a service or product.)
          */
-        public Quantity getQuantity() { 
+        public SimpleQuantity getQuantity() { 
           if (this.quantity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create DetailComponent.quantity");
             else if (Configuration.doAutoCreate())
-              this.quantity = new Quantity(); // cc
+              this.quantity = new SimpleQuantity(); // cc
           return this.quantity;
         }
 
@@ -2195,7 +2195,7 @@ public class Claim extends DomainResource {
         /**
          * @param value {@link #quantity} (The number of repetitions of a service or product.)
          */
-        public DetailComponent setQuantity(Quantity value) { 
+        public DetailComponent setQuantity(SimpleQuantity value) { 
           this.quantity = value;
           return this;
         }
@@ -2415,7 +2415,7 @@ public class Claim extends DomainResource {
           childrenList.add(new Property("sequence", "positiveInt", "A service line number.", 0, java.lang.Integer.MAX_VALUE, sequence));
           childrenList.add(new Property("type", "Coding", "The type of product or service.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("service", "Coding", "If a grouping item then 'GROUP' otherwise it is a node therefore a code to indicate the Professional Service or Product supplied.", 0, java.lang.Integer.MAX_VALUE, service));
-          childrenList.add(new Property("quantity", "Quantity", "The number of repetitions of a service or product.", 0, java.lang.Integer.MAX_VALUE, quantity));
+          childrenList.add(new Property("quantity", "SimpleQuantity", "The number of repetitions of a service or product.", 0, java.lang.Integer.MAX_VALUE, quantity));
           childrenList.add(new Property("unitPrice", "Money", "If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.", 0, java.lang.Integer.MAX_VALUE, unitPrice));
           childrenList.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, java.lang.Integer.MAX_VALUE, factor));
           childrenList.add(new Property("points", "decimal", "An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.", 0, java.lang.Integer.MAX_VALUE, points));
@@ -2482,67 +2482,67 @@ public class Claim extends DomainResource {
         /**
          * A service line number.
          */
-        @Child(name = "sequence", type = {PositiveIntType.class}, order=1, min=1, max=1)
+        @Child(name = "sequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Service instance", formalDefinition="A service line number." )
         protected PositiveIntType sequence;
 
         /**
          * The type of product or service.
          */
-        @Child(name = "type", type = {Coding.class}, order=2, min=1, max=1)
+        @Child(name = "type", type = {Coding.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Type of product or service", formalDefinition="The type of product or service." )
         protected Coding type;
 
         /**
          * The fee for an addittional service or product or charge.
          */
-        @Child(name = "service", type = {Coding.class}, order=3, min=1, max=1)
+        @Child(name = "service", type = {Coding.class}, order=3, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Additional item codes", formalDefinition="The fee for an addittional service or product or charge." )
         protected Coding service;
 
         /**
          * The number of repetitions of a service or product.
          */
-        @Child(name = "quantity", type = {Quantity.class}, order=4, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Count of Products or Services", formalDefinition="The number of repetitions of a service or product." )
-        protected Quantity quantity;
+        protected SimpleQuantity quantity;
 
         /**
          * The fee for an addittional service or product or charge.
          */
-        @Child(name = "unitPrice", type = {Money.class}, order=5, min=0, max=1)
+        @Child(name = "unitPrice", type = {Money.class}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Fee, charge or cost per point", formalDefinition="The fee for an addittional service or product or charge." )
         protected Money unitPrice;
 
         /**
          * A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
          */
-        @Child(name = "factor", type = {DecimalType.class}, order=6, min=0, max=1)
+        @Child(name = "factor", type = {DecimalType.class}, order=6, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Price scaling factor", formalDefinition="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount." )
         protected DecimalType factor;
 
         /**
          * An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.
          */
-        @Child(name = "points", type = {DecimalType.class}, order=7, min=0, max=1)
+        @Child(name = "points", type = {DecimalType.class}, order=7, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Difficulty scaling factor", formalDefinition="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point." )
         protected DecimalType points;
 
         /**
          * The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
          */
-        @Child(name = "net", type = {Money.class}, order=8, min=0, max=1)
+        @Child(name = "net", type = {Money.class}, order=8, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Net additional item cost", formalDefinition="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
         protected Money net;
 
         /**
          * List of Unique Device Identifiers associated with this line item.
          */
-        @Child(name = "udi", type = {Coding.class}, order=9, min=0, max=1)
+        @Child(name = "udi", type = {Coding.class}, order=9, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Unique Device Identifier", formalDefinition="List of Unique Device Identifiers associated with this line item." )
         protected Coding udi;
 
-        private static final long serialVersionUID = -947666334L;
+        private static final long serialVersionUID = 623567568L;
 
     /*
      * Constructor
@@ -2657,12 +2657,12 @@ public class Claim extends DomainResource {
         /**
          * @return {@link #quantity} (The number of repetitions of a service or product.)
          */
-        public Quantity getQuantity() { 
+        public SimpleQuantity getQuantity() { 
           if (this.quantity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SubDetailComponent.quantity");
             else if (Configuration.doAutoCreate())
-              this.quantity = new Quantity(); // cc
+              this.quantity = new SimpleQuantity(); // cc
           return this.quantity;
         }
 
@@ -2673,7 +2673,7 @@ public class Claim extends DomainResource {
         /**
          * @param value {@link #quantity} (The number of repetitions of a service or product.)
          */
-        public SubDetailComponent setQuantity(Quantity value) { 
+        public SubDetailComponent setQuantity(SimpleQuantity value) { 
           this.quantity = value;
           return this;
         }
@@ -2853,7 +2853,7 @@ public class Claim extends DomainResource {
           childrenList.add(new Property("sequence", "positiveInt", "A service line number.", 0, java.lang.Integer.MAX_VALUE, sequence));
           childrenList.add(new Property("type", "Coding", "The type of product or service.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("service", "Coding", "The fee for an addittional service or product or charge.", 0, java.lang.Integer.MAX_VALUE, service));
-          childrenList.add(new Property("quantity", "Quantity", "The number of repetitions of a service or product.", 0, java.lang.Integer.MAX_VALUE, quantity));
+          childrenList.add(new Property("quantity", "SimpleQuantity", "The number of repetitions of a service or product.", 0, java.lang.Integer.MAX_VALUE, quantity));
           childrenList.add(new Property("unitPrice", "Money", "The fee for an addittional service or product or charge.", 0, java.lang.Integer.MAX_VALUE, unitPrice));
           childrenList.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, java.lang.Integer.MAX_VALUE, factor));
           childrenList.add(new Property("points", "decimal", "An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.", 0, java.lang.Integer.MAX_VALUE, points));
@@ -2914,21 +2914,21 @@ public class Claim extends DomainResource {
         /**
          * Indicates whether this is the initial placement of a fixed prosthesis.
          */
-        @Child(name = "initial", type = {BooleanType.class}, order=1, min=0, max=1)
+        @Child(name = "initial", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Is this the initial service", formalDefinition="Indicates whether this is the initial placement of a fixed prosthesis." )
         protected BooleanType initial;
 
         /**
          * Date of the initial placement.
          */
-        @Child(name = "priorDate", type = {DateType.class}, order=2, min=0, max=1)
+        @Child(name = "priorDate", type = {DateType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Initial service Date", formalDefinition="Date of the initial placement." )
         protected DateType priorDate;
 
         /**
          * Material of the prior denture or bridge prosthesis. (Oral).
          */
-        @Child(name = "priorMaterial", type = {Coding.class}, order=3, min=0, max=1)
+        @Child(name = "priorMaterial", type = {Coding.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Prosthetic Material", formalDefinition="Material of the prior denture or bridge prosthesis. (Oral)." )
         protected Coding priorMaterial;
 
@@ -3108,21 +3108,21 @@ public class Claim extends DomainResource {
         /**
          * The code identifying which tooth is missing.
          */
-        @Child(name = "tooth", type = {Coding.class}, order=1, min=1, max=1)
+        @Child(name = "tooth", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Tooth Code", formalDefinition="The code identifying which tooth is missing." )
         protected Coding tooth;
 
         /**
          * Missing reason may be: E-extraction, O-other.
          */
-        @Child(name = "reason", type = {Coding.class}, order=2, min=0, max=1)
+        @Child(name = "reason", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Reason for missing", formalDefinition="Missing reason may be: E-extraction, O-other." )
         protected Coding reason;
 
         /**
          * The date of the extraction either known from records or patient reported estimate.
          */
-        @Child(name = "extractionDate", type = {DateType.class}, order=3, min=0, max=1)
+        @Child(name = "extractionDate", type = {DateType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Date of Extraction", formalDefinition="The date of the extraction either known from records or patient reported estimate." )
         protected DateType extractionDate;
 
@@ -3287,42 +3287,42 @@ public class Claim extends DomainResource {
     /**
      * The category of claim this is.
      */
-    @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1)
+    @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="institutional | oral | pharmacy | professional | vision", formalDefinition="The category of claim this is." )
     protected Enumeration<ClaimType> type;
 
     /**
      * The business identifier for the instance: invoice number, claim number, pre-determination or pre-authorization number.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Claim number", formalDefinition="The business identifier for the instance: invoice number, claim number, pre-determination or pre-authorization number." )
     protected List<Identifier> identifier;
 
     /**
      * The version of the specification on which this instance relies.
      */
-    @Child(name = "ruleset", type = {Coding.class}, order=2, min=0, max=1)
+    @Child(name = "ruleset", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Current specification followed", formalDefinition="The version of the specification on which this instance relies." )
     protected Coding ruleset;
 
     /**
      * The version of the specification from which the original instance was created.
      */
-    @Child(name = "originalRuleset", type = {Coding.class}, order=3, min=0, max=1)
+    @Child(name = "originalRuleset", type = {Coding.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Original specification followed", formalDefinition="The version of the specification from which the original instance was created." )
     protected Coding originalRuleset;
 
     /**
      * The date when the enclosed suite of services were performed or completed.
      */
-    @Child(name = "created", type = {DateTimeType.class}, order=4, min=0, max=1)
+    @Child(name = "created", type = {DateTimeType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Creation date", formalDefinition="The date when the enclosed suite of services were performed or completed." )
     protected DateTimeType created;
 
     /**
      * Insurer Identifier, typical BIN number (6 digit).
      */
-    @Child(name = "target", type = {Organization.class}, order=5, min=0, max=1)
+    @Child(name = "target", type = {Organization.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Insurer", formalDefinition="Insurer Identifier, typical BIN number (6 digit)." )
     protected Reference target;
 
@@ -3334,7 +3334,7 @@ public class Claim extends DomainResource {
     /**
      * The provider which is responsible for the bill, claim pre-determination, pre-authorization.
      */
-    @Child(name = "provider", type = {Practitioner.class}, order=6, min=0, max=1)
+    @Child(name = "provider", type = {Practitioner.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Responsible provider", formalDefinition="The provider which is responsible for the bill, claim pre-determination, pre-authorization." )
     protected Reference provider;
 
@@ -3346,7 +3346,7 @@ public class Claim extends DomainResource {
     /**
      * The organization which is responsible for the bill, claim pre-determination, pre-authorization.
      */
-    @Child(name = "organization", type = {Organization.class}, order=7, min=0, max=1)
+    @Child(name = "organization", type = {Organization.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the bill, claim pre-determination, pre-authorization." )
     protected Reference organization;
 
@@ -3358,28 +3358,28 @@ public class Claim extends DomainResource {
     /**
      * Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).
      */
-    @Child(name = "use", type = {CodeType.class}, order=8, min=0, max=1)
+    @Child(name = "use", type = {CodeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="complete | proposed | exploratory | other", formalDefinition="Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination)." )
     protected Enumeration<Use> use;
 
     /**
      * Immediate (STAT), best effort (NORMAL), deferred (DEFER).
      */
-    @Child(name = "priority", type = {Coding.class}, order=9, min=0, max=1)
+    @Child(name = "priority", type = {Coding.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Desired processing priority", formalDefinition="Immediate (STAT), best effort (NORMAL), deferred (DEFER)." )
     protected Coding priority;
 
     /**
      * In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved ('Patient' or 'Provider') to pay for the Benefits determined on the subsequent claim(s). 'None' explicitly indicates no funds reserving is requested.
      */
-    @Child(name = "fundsReserve", type = {Coding.class}, order=10, min=0, max=1)
+    @Child(name = "fundsReserve", type = {Coding.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Funds requested to be reserved", formalDefinition="In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved ('Patient' or 'Provider') to pay for the Benefits determined on the subsequent claim(s). 'None' explicitly indicates no funds reserving is requested." )
     protected Coding fundsReserve;
 
     /**
      * Person who created the invoice/claim/pre-determination or pre-authorization.
      */
-    @Child(name = "enterer", type = {Practitioner.class}, order=11, min=0, max=1)
+    @Child(name = "enterer", type = {Practitioner.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Author", formalDefinition="Person who created the invoice/claim/pre-determination or pre-authorization." )
     protected Reference enterer;
 
@@ -3391,7 +3391,7 @@ public class Claim extends DomainResource {
     /**
      * Facility where the services were provided.
      */
-    @Child(name = "facility", type = {Location.class}, order=12, min=0, max=1)
+    @Child(name = "facility", type = {Location.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Servicing Facility", formalDefinition="Facility where the services were provided." )
     protected Reference facility;
 
@@ -3403,7 +3403,7 @@ public class Claim extends DomainResource {
     /**
      * Prescription to support the dispensing of Pharmacy or Vision products.
      */
-    @Child(name = "prescription", type = {MedicationPrescription.class, VisionPrescription.class}, order=13, min=0, max=1)
+    @Child(name = "prescription", type = {MedicationOrder.class, VisionPrescription.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Prescription", formalDefinition="Prescription to support the dispensing of Pharmacy or Vision products." )
     protected Reference prescription;
 
@@ -3415,26 +3415,26 @@ public class Claim extends DomainResource {
     /**
      * Original prescription to support the dispensing of pharmacy services, medications or products.
      */
-    @Child(name = "originalPrescription", type = {MedicationPrescription.class}, order=14, min=0, max=1)
+    @Child(name = "originalPrescription", type = {MedicationOrder.class}, order=14, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Original Prescription", formalDefinition="Original prescription to support the dispensing of pharmacy services, medications or products." )
     protected Reference originalPrescription;
 
     /**
      * The actual object that is the target of the reference (Original prescription to support the dispensing of pharmacy services, medications or products.)
      */
-    protected MedicationPrescription originalPrescriptionTarget;
+    protected MedicationOrder originalPrescriptionTarget;
 
     /**
      * The party to be reimbursed for the services.
      */
-    @Child(name = "payee", type = {}, order=15, min=0, max=1)
+    @Child(name = "payee", type = {}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Payee", formalDefinition="The party to be reimbursed for the services." )
     protected PayeeComponent payee;
 
     /**
      * The referral resource which lists the date, practitioner, reason and other supporting information.
      */
-    @Child(name = "referral", type = {ReferralRequest.class}, order=16, min=0, max=1)
+    @Child(name = "referral", type = {ReferralRequest.class}, order=16, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Treatment Referral", formalDefinition="The referral resource which lists the date, practitioner, reason and other supporting information." )
     protected Reference referral;
 
@@ -3446,21 +3446,21 @@ public class Claim extends DomainResource {
     /**
      * Ordered list of patient diagnosis for which care is sought.
      */
-    @Child(name = "diagnosis", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "diagnosis", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Diagnosis", formalDefinition="Ordered list of patient diagnosis for which care is sought." )
     protected List<DiagnosisComponent> diagnosis;
 
     /**
      * List of patient conditions for which care is sought.
      */
-    @Child(name = "condition", type = {Coding.class}, order=18, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "condition", type = {Coding.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="List of presenting Conditions", formalDefinition="List of patient conditions for which care is sought." )
     protected List<Coding> condition;
 
     /**
      * Patient Resource.
      */
-    @Child(name = "patient", type = {Patient.class}, order=19, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=19, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The subject of the Products and Services", formalDefinition="Patient Resource." )
     protected Reference patient;
 
@@ -3472,67 +3472,67 @@ public class Claim extends DomainResource {
     /**
      * Financial instrument by which payment information for health care.
      */
-    @Child(name = "coverage", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "coverage", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Insurance or medical plan", formalDefinition="Financial instrument by which payment information for health care." )
     protected List<CoverageComponent> coverage;
 
     /**
      * Factors which may influence the applicability of coverage.
      */
-    @Child(name = "exception", type = {Coding.class}, order=21, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "exception", type = {Coding.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Eligibility exceptions", formalDefinition="Factors which may influence the applicability of coverage." )
     protected List<Coding> exception;
 
     /**
      * Name of school for over-aged dependants.
      */
-    @Child(name = "school", type = {StringType.class}, order=22, min=0, max=1)
+    @Child(name = "school", type = {StringType.class}, order=22, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of School", formalDefinition="Name of school for over-aged dependants." )
     protected StringType school;
 
     /**
      * Date of an accident which these services are addressing.
      */
-    @Child(name = "accident", type = {DateType.class}, order=23, min=0, max=1)
+    @Child(name = "accident", type = {DateType.class}, order=23, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Accident Date", formalDefinition="Date of an accident which these services are addressing." )
     protected DateType accident;
 
     /**
      * Type of accident: work, auto, etc.
      */
-    @Child(name = "accidentType", type = {Coding.class}, order=24, min=0, max=1)
+    @Child(name = "accidentType", type = {Coding.class}, order=24, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Accident Type", formalDefinition="Type of accident: work, auto, etc." )
     protected Coding accidentType;
 
     /**
      * A list of intervention and exception codes which may influence the adjudication of the claim.
      */
-    @Child(name = "interventionException", type = {Coding.class}, order=25, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "interventionException", type = {Coding.class}, order=25, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Intervention and exception code (Pharma)", formalDefinition="A list of intervention and exception codes which may influence the adjudication of the claim." )
     protected List<Coding> interventionException;
 
     /**
      * First tier of goods and services.
      */
-    @Child(name = "item", type = {}, order=26, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "item", type = {}, order=26, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Goods and Services", formalDefinition="First tier of goods and services." )
     protected List<ItemsComponent> item;
 
     /**
      * Code to indicate that Xrays, images, emails, documents, models or attachments are being sent in support of this submission.
      */
-    @Child(name = "additionalMaterials", type = {Coding.class}, order=27, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "additionalMaterials", type = {Coding.class}, order=27, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Additional materials, documents, etc.", formalDefinition="Code to indicate that Xrays, images, emails, documents, models or attachments are being sent in support of this submission." )
     protected List<Coding> additionalMaterials;
 
     /**
      * A list of teeth which would be expected but are not found due to having been previously  extracted or for other reasons.
      */
-    @Child(name = "missingTeeth", type = {}, order=28, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "missingTeeth", type = {}, order=28, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Only if type = oral", formalDefinition="A list of teeth which would be expected but are not found due to having been previously  extracted or for other reasons." )
     protected List<MissingTeethComponent> missingTeeth;
 
-    private static final long serialVersionUID = 1120349447L;
+    private static final long serialVersionUID = 4272227L;
 
   /*
    * Constructor
@@ -4115,19 +4115,19 @@ public class Claim extends DomainResource {
     /**
      * @return {@link #originalPrescription} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Original prescription to support the dispensing of pharmacy services, medications or products.)
      */
-    public MedicationPrescription getOriginalPrescriptionTarget() { 
+    public MedicationOrder getOriginalPrescriptionTarget() { 
       if (this.originalPrescriptionTarget == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Claim.originalPrescription");
         else if (Configuration.doAutoCreate())
-          this.originalPrescriptionTarget = new MedicationPrescription(); // aa
+          this.originalPrescriptionTarget = new MedicationOrder(); // aa
       return this.originalPrescriptionTarget;
     }
 
     /**
      * @param value {@link #originalPrescription} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Original prescription to support the dispensing of pharmacy services, medications or products.)
      */
-    public Claim setOriginalPrescriptionTarget(MedicationPrescription value) { 
+    public Claim setOriginalPrescriptionTarget(MedicationOrder value) { 
       this.originalPrescriptionTarget = value;
       return this;
     }
@@ -4701,8 +4701,8 @@ public class Claim extends DomainResource {
         childrenList.add(new Property("fundsReserve", "Coding", "In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved ('Patient' or 'Provider') to pay for the Benefits determined on the subsequent claim(s). 'None' explicitly indicates no funds reserving is requested.", 0, java.lang.Integer.MAX_VALUE, fundsReserve));
         childrenList.add(new Property("enterer", "Reference(Practitioner)", "Person who created the invoice/claim/pre-determination or pre-authorization.", 0, java.lang.Integer.MAX_VALUE, enterer));
         childrenList.add(new Property("facility", "Reference(Location)", "Facility where the services were provided.", 0, java.lang.Integer.MAX_VALUE, facility));
-        childrenList.add(new Property("prescription", "Reference(MedicationPrescription|VisionPrescription)", "Prescription to support the dispensing of Pharmacy or Vision products.", 0, java.lang.Integer.MAX_VALUE, prescription));
-        childrenList.add(new Property("originalPrescription", "Reference(MedicationPrescription)", "Original prescription to support the dispensing of pharmacy services, medications or products.", 0, java.lang.Integer.MAX_VALUE, originalPrescription));
+        childrenList.add(new Property("prescription", "Reference(MedicationOrder|VisionPrescription)", "Prescription to support the dispensing of Pharmacy or Vision products.", 0, java.lang.Integer.MAX_VALUE, prescription));
+        childrenList.add(new Property("originalPrescription", "Reference(MedicationOrder)", "Original prescription to support the dispensing of pharmacy services, medications or products.", 0, java.lang.Integer.MAX_VALUE, originalPrescription));
         childrenList.add(new Property("payee", "", "The party to be reimbursed for the services.", 0, java.lang.Integer.MAX_VALUE, payee));
         childrenList.add(new Property("referral", "Reference(ReferralRequest)", "The referral resource which lists the date, practitioner, reason and other supporting information.", 0, java.lang.Integer.MAX_VALUE, referral));
         childrenList.add(new Property("diagnosis", "", "Ordered list of patient diagnosis for which care is sought.", 0, java.lang.Integer.MAX_VALUE, diagnosis));

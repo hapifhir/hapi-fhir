@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3ActStatus {
@@ -123,7 +123,7 @@ public enum V3ActStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case NORMAL: return "Encompasses the expected states of an Act, but excludes 'nullified' and 'obsolete' which represent unusual terminal states for the life-cycle.";
+            case NORMAL: return "Encompasses the expected states of an Act, but excludes \"nullified\" and \"obsolete\" which represent unusual terminal states for the life-cycle.";
             case ABORTED: return "The Act has been terminated prior to the originally intended completion.";
             case ACTIVE: return "The Act can be performed or is being performed";
             case CANCELLED: return "The Act has been abandoned before activation.";

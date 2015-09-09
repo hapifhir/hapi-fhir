@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -135,84 +135,84 @@ public class Device extends DomainResource {
     /**
      * Unique instance identifiers assigned to a device by organizations like manufacturers or owners .   If the identifier identifies the type of device, Device.type should be used.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Instance id from manufacturer, owner, and others", formalDefinition="Unique instance identifiers assigned to a device by organizations like manufacturers or owners .   If the identifier identifies the type of device, Device.type should be used." )
     protected List<Identifier> identifier;
 
     /**
      * Code or identifier to identify a kind of device.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="What kind of device this is", formalDefinition="Code or identifier to identify a kind of device." )
     protected CodeableConcept type;
 
     /**
      * Descriptive information, usage information or implantation information that is not captured in an existing element.
      */
-    @Child(name = "note", type = {Annotation.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "note", type = {Annotation.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Device notes and comments", formalDefinition="Descriptive information, usage information or implantation information that is not captured in an existing element." )
     protected List<Annotation> note;
 
     /**
      * Status of the Device availability.
      */
-    @Child(name = "status", type = {CodeType.class}, order=3, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=3, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="available | not-available | entered-in-error", formalDefinition="Status of the Device availability." )
     protected Enumeration<DeviceStatus> status;
 
     /**
      * A name of the manufacturer.
      */
-    @Child(name = "manufacturer", type = {StringType.class}, order=4, min=0, max=1)
+    @Child(name = "manufacturer", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Name of device manufacturer", formalDefinition="A name of the manufacturer." )
     protected StringType manufacturer;
 
     /**
      * The "model" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.
      */
-    @Child(name = "model", type = {StringType.class}, order=5, min=0, max=1)
-    @Description(shortDefinition="Model id assigned by the manufacturer", formalDefinition="The 'model' - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type." )
+    @Child(name = "model", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Model id assigned by the manufacturer", formalDefinition="The \"model\" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type." )
     protected StringType model;
 
     /**
      * The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware.
      */
-    @Child(name = "version", type = {StringType.class}, order=6, min=0, max=1)
+    @Child(name = "version", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Version number (i.e. software)", formalDefinition="The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware." )
     protected StringType version;
 
     /**
      * The Date and time when the device was manufactured.
      */
-    @Child(name = "manufactureDate", type = {DateTimeType.class}, order=7, min=0, max=1)
+    @Child(name = "manufactureDate", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Manufacture date", formalDefinition="The Date and time when the device was manufactured." )
     protected DateTimeType manufactureDate;
 
     /**
      * The date and time beyond which this device is no longer valid or should not be used (if applicable).
      */
-    @Child(name = "expiry", type = {DateTimeType.class}, order=8, min=0, max=1)
+    @Child(name = "expiry", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Date and time of expiry of this device (if applicable)", formalDefinition="The date and time beyond which this device is no longer valid or should not be used (if applicable)." )
     protected DateTimeType expiry;
 
     /**
      * United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm.
      */
-    @Child(name = "udi", type = {StringType.class}, order=9, min=0, max=1)
+    @Child(name = "udi", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="FDA Mandated Unique Device Identifier", formalDefinition="United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm." )
     protected StringType udi;
 
     /**
      * Lot number assigned by the manufacturer.
      */
-    @Child(name = "lotNumber", type = {StringType.class}, order=10, min=0, max=1)
+    @Child(name = "lotNumber", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Lot number of manufacture", formalDefinition="Lot number assigned by the manufacturer." )
     protected StringType lotNumber;
 
     /**
      * An organization that is responsible for the provision and ongoing maintenance of the device.
      */
-    @Child(name = "owner", type = {Organization.class}, order=11, min=0, max=1)
+    @Child(name = "owner", type = {Organization.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Organization responsible for device", formalDefinition="An organization that is responsible for the provision and ongoing maintenance of the device." )
     protected Reference owner;
 
@@ -222,21 +222,21 @@ public class Device extends DomainResource {
     protected Organization ownerTarget;
 
     /**
-     * The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. "in/with the patient"), or a coded location.
+     * The place where the device can be found.
      */
-    @Child(name = "location", type = {Location.class}, order=12, min=0, max=1)
-    @Description(shortDefinition="Where the resource is found", formalDefinition="The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. 'in/with the patient'), or a coded location." )
+    @Child(name = "location", type = {Location.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Where the resource is found", formalDefinition="The place where the device can be found." )
     protected Reference location;
 
     /**
-     * The actual object that is the target of the reference (The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. "in/with the patient"), or a coded location.)
+     * The actual object that is the target of the reference (The place where the device can be found.)
      */
     protected Location locationTarget;
 
     /**
      * Patient information, if the resource is affixed to a person.
      */
-    @Child(name = "patient", type = {Patient.class}, order=13, min=0, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="If the resource is affixed to a person", formalDefinition="Patient information, if the resource is affixed to a person." )
     protected Reference patient;
 
@@ -248,14 +248,14 @@ public class Device extends DomainResource {
     /**
      * Contact details for an organization or a particular human that is responsible for the device.
      */
-    @Child(name = "contact", type = {ContactPoint.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {ContactPoint.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Details for human/organization for support", formalDefinition="Contact details for an organization or a particular human that is responsible for the device." )
     protected List<ContactPoint> contact;
 
     /**
      * A network address on which the device may be contacted directly.
      */
-    @Child(name = "url", type = {UriType.class}, order=15, min=0, max=1)
+    @Child(name = "url", type = {UriType.class}, order=15, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Network address to contact device", formalDefinition="A network address on which the device may be contacted directly." )
     protected UriType url;
 
@@ -817,7 +817,7 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return {@link #location} (The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. "in/with the patient"), or a coded location.)
+     * @return {@link #location} (The place where the device can be found.)
      */
     public Reference getLocation() { 
       if (this.location == null)
@@ -833,7 +833,7 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @param value {@link #location} (The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. "in/with the patient"), or a coded location.)
+     * @param value {@link #location} (The place where the device can be found.)
      */
     public Device setLocation(Reference value) { 
       this.location = value;
@@ -841,7 +841,7 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. "in/with the patient"), or a coded location.)
+     * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The place where the device can be found.)
      */
     public Location getLocationTarget() { 
       if (this.locationTarget == null)
@@ -853,7 +853,7 @@ public class Device extends DomainResource {
     }
 
     /**
-     * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. "in/with the patient"), or a coded location.)
+     * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The place where the device can be found.)
      */
     public Device setLocationTarget(Location value) { 
       this.locationTarget = value;
@@ -1000,14 +1000,14 @@ public class Device extends DomainResource {
         childrenList.add(new Property("note", "Annotation", "Descriptive information, usage information or implantation information that is not captured in an existing element.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("status", "code", "Status of the Device availability.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("manufacturer", "string", "A name of the manufacturer.", 0, java.lang.Integer.MAX_VALUE, manufacturer));
-        childrenList.add(new Property("model", "string", "The 'model' - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.", 0, java.lang.Integer.MAX_VALUE, model));
+        childrenList.add(new Property("model", "string", "The \"model\" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.", 0, java.lang.Integer.MAX_VALUE, model));
         childrenList.add(new Property("version", "string", "The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("manufactureDate", "dateTime", "The Date and time when the device was manufactured.", 0, java.lang.Integer.MAX_VALUE, manufactureDate));
         childrenList.add(new Property("expiry", "dateTime", "The date and time beyond which this device is no longer valid or should not be used (if applicable).", 0, java.lang.Integer.MAX_VALUE, expiry));
         childrenList.add(new Property("udi", "string", "United States Food and Drug Administration mandated Unique Device Identifier (UDI). Use the human readable information (the content that the user sees, which is sometimes different to the exact syntax represented in the barcode)  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm.", 0, java.lang.Integer.MAX_VALUE, udi));
         childrenList.add(new Property("lotNumber", "string", "Lot number assigned by the manufacturer.", 0, java.lang.Integer.MAX_VALUE, lotNumber));
         childrenList.add(new Property("owner", "Reference(Organization)", "An organization that is responsible for the provision and ongoing maintenance of the device.", 0, java.lang.Integer.MAX_VALUE, owner));
-        childrenList.add(new Property("location", "Reference(Location)", "The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. 'in/with the patient'), or a coded location.", 0, java.lang.Integer.MAX_VALUE, location));
+        childrenList.add(new Property("location", "Reference(Location)", "The place where the device can be found.", 0, java.lang.Integer.MAX_VALUE, location));
         childrenList.add(new Property("patient", "Reference(Patient)", "Patient information, if the resource is affixed to a person.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("contact", "ContactPoint", "Contact details for an organization or a particular human that is responsible for the device.", 0, java.lang.Integer.MAX_VALUE, contact));
         childrenList.add(new Property("url", "uri", "A network address on which the device may be contacted directly.", 0, java.lang.Integer.MAX_VALUE, url));
@@ -1107,6 +1107,8 @@ public class Device extends DomainResource {
   public static final String SP_UDI = "udi";
   @SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token" )
   public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="url", path="Device.url", description="Network address to contact device", type="uri" )
+  public static final String SP_URL = "url";
   @SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device", type="string" )
   public static final String SP_MANUFACTURER = "manufacturer";
 

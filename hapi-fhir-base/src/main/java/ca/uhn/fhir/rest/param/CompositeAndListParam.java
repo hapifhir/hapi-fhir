@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
+import net.sourceforge.cobertura.CoverageIgnore;
 
 /*
  * #%L
@@ -43,6 +44,13 @@ public class CompositeAndListParam<A extends IQueryParameterType, B extends IQue
 	@Override
 	public RestSearchParameterTypeEnum getSearchParamType() {
 		return RestSearchParameterTypeEnum.COMPOSITE;
+	}
+
+	@CoverageIgnore
+	@Override
+	public CompositeAndListParam<A, B> addAnd(CompositeOrListParam<A, B> theValue) {
+		addValue(theValue);
+		return this;
 	}
 	
 	

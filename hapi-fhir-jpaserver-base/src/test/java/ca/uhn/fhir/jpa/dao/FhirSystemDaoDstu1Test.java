@@ -239,7 +239,6 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
 		assertEquals("testGetAllTagsLabel2", tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2").getLabel());
 
-		o1.getResourceMetadata().remove(ResourceMetadataKeyEnum.TAG_LIST);
 		o1.setId(o1id);
 		IIdType o1id2 = ourObservationDao.update(o1).getId();
 		assertTrue(o1id2.getVersionIdPart() != null);

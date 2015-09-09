@@ -19,7 +19,12 @@ private Map<String, Object> userData;
   /**
    * Round tracking xml comments for testing convenience
    */
-  private List<String> formatComments; 
+  private List<String> formatCommentsPre; 
+   
+  /**
+   * Round tracking xml comments for testing convenience
+   */
+  private List<String> formatCommentsPost; 
    
   
   public Object getUserData(String name) {
@@ -61,13 +66,19 @@ private Map<String, Object> userData;
   }
 
   public boolean hasFormatComment() {
-  	return (formatComments != null && !formatComments.isEmpty());
+  	return (formatCommentsPre != null && !formatCommentsPre.isEmpty()) || (formatCommentsPost != null && !formatCommentsPost.isEmpty());
   }
   
-  public List<String> getFormatComments() {
-    if (formatComments == null)
-    	formatComments = new ArrayList<String>();
-    return formatComments;
+  public List<String> getFormatCommentsPre() {
+    if (formatCommentsPre == null)
+      formatCommentsPre = new ArrayList<String>();
+    return formatCommentsPre;
+  }
+  
+  public List<String> getFormatCommentsPost() {
+    if (formatCommentsPost == null)
+      formatCommentsPost = new ArrayList<String>();
+    return formatCommentsPost;
   }  
   
 	protected abstract void listChildren(List<Property> result) ;
@@ -119,9 +130,9 @@ private Map<String, Object> userData;
   }  
   
 	public static boolean compareDeep(List<? extends Base> e1, List<? extends Base> e2, boolean allowNull) {
-		if (e1 == null && e2 == null && allowNull)
+		if (noList(e1) && noList(e2) && allowNull)
 			return true;
-		if (e1 == null || e2 == null)
+		if (noList(e1) || noList(e2))
 			return false;
 		if (e1.size() != e2.size())
 			return false;
@@ -131,6 +142,11 @@ private Map<String, Object> userData;
 		}
 		return true;
 	}
+	
+	private static boolean noList(List<? extends Base> list) {
+    return list == null || list.isEmpty();
+  }
+
 	public static boolean compareDeep(Base e1, Base e2, boolean allowNull) {
 		if (e1 == null && e2 == null && allowNull)
 			return true;

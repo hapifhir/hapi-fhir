@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
 	<properties>
-		<title>ETags - HAPI FHIR</title>
+		<title>ETags</title>
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
 	</properties>
 

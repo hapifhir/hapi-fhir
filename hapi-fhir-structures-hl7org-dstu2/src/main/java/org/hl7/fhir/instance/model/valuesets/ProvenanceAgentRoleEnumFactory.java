@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -53,6 +53,12 @@ public class ProvenanceAgentRoleEnumFactory implements EnumFactory<ProvenanceAge
       return ProvenanceAgentRole.ATTESTER;
     if ("informant".equals(codeString))
       return ProvenanceAgentRole.INFORMANT;
+    if ("custodian".equals(codeString))
+      return ProvenanceAgentRole.CUSTODIAN;
+    if ("assembler".equals(codeString))
+      return ProvenanceAgentRole.ASSEMBLER;
+    if ("composer".equals(codeString))
+      return ProvenanceAgentRole.COMPOSER;
     throw new IllegalArgumentException("Unknown ProvenanceAgentRole code '"+codeString+"'");
   }
 
@@ -71,6 +77,12 @@ public class ProvenanceAgentRoleEnumFactory implements EnumFactory<ProvenanceAge
       return "attester";
     if (code == ProvenanceAgentRole.INFORMANT)
       return "informant";
+    if (code == ProvenanceAgentRole.CUSTODIAN)
+      return "custodian";
+    if (code == ProvenanceAgentRole.ASSEMBLER)
+      return "assembler";
+    if (code == ProvenanceAgentRole.COMPOSER)
+      return "composer";
     return "?";
   }
 

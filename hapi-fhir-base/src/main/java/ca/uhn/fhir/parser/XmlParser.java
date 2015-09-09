@@ -19,8 +19,9 @@ package ca.uhn.fhir.parser;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -84,6 +85,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.NonPrettyPrintWriterWrapper;
@@ -91,8 +93,7 @@ import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.XmlUtil;
 
 /**
- * This class is the FHIR XML parser/encoder. Users should not interact with this class directly, but should use
- * {@link FhirContext#newXmlParser()} to get an instance.
+ * This class is the FHIR XML parser/encoder. Users should not interact with this class directly, but should use {@link FhirContext#newXmlParser()} to get an instance.
  */
 public class XmlParser extends BaseParser implements IParser {
 
@@ -111,8 +112,7 @@ public class XmlParser extends BaseParser implements IParser {
 	private boolean myPrettyPrint;
 
 	/**
-	 * Do not use this constructor, the recommended way to obtain a new instance of the XML parser is to invoke
-	 * {@link FhirContext#newXmlParser()}.
+	 * Do not use this constructor, the recommended way to obtain a new instance of the XML parser is to invoke {@link FhirContext#newXmlParser()}.
 	 * 
 	 * @param theParserErrorHandler
 	 */
@@ -156,6 +156,39 @@ public class XmlParser extends BaseParser implements IParser {
 			NonPrettyPrintWriterWrapper retVal = new NonPrettyPrintWriterWrapper(eventWriter);
 			return retVal;
 		}
+	}
+
+	@Override
+	public void doEncodeBundleToWriter(Bundle theBundle, Writer theWriter) throws DataFormatException {
+		try {
+			XMLStreamWriter eventWriter = createXmlWriter(theWriter);
+			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+				encodeBundleToWriterDstu2(theBundle, eventWriter);
+			} else {
+				encodeBundleToWriterDstu1(theBundle, eventWriter);
+			}
+		} catch (XMLStreamException e) {
+			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		}
+	}
+
+	@Override
+	public void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws DataFormatException {
+		XMLStreamWriter eventWriter;
+		try {
+			eventWriter = createXmlWriter(theWriter);
+
+			encodeResourceToXmlStreamWriter(theResource, eventWriter, false);
+			eventWriter.flush();
+		} catch (XMLStreamException e) {
+			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		}
+	}
+
+	@Override
+	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
+		XMLEventReader streamReader = createStreamReader(theReader);
+		return parseResource(theResourceType, streamReader);
 	}
 
 	private <T> T doXmlLoop(XMLEventReader streamReader, ParserState<T> parserState) {
@@ -231,20 +264,6 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 
 		return stringWriter.toString();
-	}
-
-	@Override
-	public void doEncodeBundleToWriter(Bundle theBundle, Writer theWriter) throws DataFormatException {
-		try {
-			XMLStreamWriter eventWriter = createXmlWriter(theWriter);
-			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-				encodeBundleToWriterDstu2(theBundle, eventWriter);
-			} else {
-				encodeBundleToWriterDstu1(theBundle, eventWriter);
-			}
-		} catch (XMLStreamException e) {
-			throw new ConfigurationException("Failed to initialize STaX event factory", e);
-		}
 	}
 
 	private void encodeBundleToWriterDstu1(Bundle theBundle, XMLStreamWriter eventWriter) throws XMLStreamException {
@@ -385,9 +404,6 @@ public class XmlParser extends BaseParser implements IParser {
 		String bundleBaseUrl = theBundle.getLinkBase().getValue();
 
 		writeOptionalTagWithValue(theEventWriter, "type", theBundle.getType().getValue());
-		if (!myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-			writeOptionalTagWithValue(theEventWriter, "base", bundleBaseUrl);
-		}
 		writeOptionalTagWithValue(theEventWriter, "total", theBundle.getTotalResults().getValueAsString());
 
 		writeBundleResourceLink(theEventWriter, "first", theBundle.getLinkFirst());
@@ -404,18 +420,12 @@ public class XmlParser extends BaseParser implements IParser {
 				deleted = true;
 			}
 
-			if (!myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-				writeOptionalTagWithValue(theEventWriter, "base", determineResourceBaseUrl(bundleBaseUrl, nextEntry));
-			}
-			
 			writeBundleResourceLink(theEventWriter, "alternate", nextEntry.getLinkAlternate());
 
-			if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-				if (nextEntry.getResource() != null && nextEntry.getResource().getId().getBaseUrl() != null) {
-					writeOptionalTagWithValue(theEventWriter, "fullUrl", nextEntry.getResource().getId().getValue());
-				}
+			if (nextEntry.getResource() != null && nextEntry.getResource().getId().getBaseUrl() != null) {
+				writeOptionalTagWithValue(theEventWriter, "fullUrl", nextEntry.getResource().getId().getValue());
 			}
-			
+
 			IResource resource = nextEntry.getResource();
 			if (resource != null && !resource.isEmpty() && !deleted) {
 				theEventWriter.writeStartElement("resource");
@@ -434,7 +444,7 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 
 			if (nextEntry.getTransactionMethod().isEmpty() == false || nextEntry.getLinkSearch().isEmpty() == false) {
-				theEventWriter.writeStartElement("transaction");
+				theEventWriter.writeStartElement("request");
 				writeOptionalTagWithValue(theEventWriter, "method", nextEntry.getTransactionMethod().getValue());
 				writeOptionalTagWithValue(theEventWriter, "url", nextEntry.getLinkSearch().getValue());
 				theEventWriter.writeEndElement();
@@ -456,7 +466,8 @@ public class XmlParser extends BaseParser implements IParser {
 		theEventWriter.close();
 	}
 
-	private void encodeChildElementToStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, IBase nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeChildElementToStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, IBase nextValue, String childName, BaseRuntimeElementDefinition<?> childDef,
+			String theExtensionUrl, boolean theIncludedResource, CompositeChildElement theParent) throws XMLStreamException, DataFormatException {
 		if (nextValue == null || nextValue.isEmpty()) {
 			if (isChildContained(childDef, theIncludedResource)) {
 				// We still want to go in..
@@ -495,7 +506,7 @@ public class XmlParser extends BaseParser implements IParser {
 				theEventWriter.writeAttribute("url", theExtensionUrl);
 			}
 			BaseRuntimeElementCompositeDefinition<?> childCompositeDef = (BaseRuntimeElementCompositeDefinition<?>) childDef;
-			encodeCompositeElementToStreamWriter(theResource, nextValue, theEventWriter, childCompositeDef, theIncludedResource);
+			encodeCompositeElementToStreamWriter(theResource, nextValue, theEventWriter, childCompositeDef, theIncludedResource, theParent);
 			theEventWriter.writeEndElement();
 			break;
 		}
@@ -511,10 +522,9 @@ public class XmlParser extends BaseParser implements IParser {
 		case CONTAINED_RESOURCE_LIST:
 		case CONTAINED_RESOURCES: {
 			/*
-			 * Disable per #103 for (IResource next : value.getContainedResources()) { if
-			 * (getContainedResources().getResourceId(next) != null) { continue; }
-			 * theEventWriter.writeStartElement("contained"); encodeResourceToXmlStreamWriter(next, theEventWriter, true,
-			 * fixContainedResourceId(next.getId().getValue())); theEventWriter.writeEndElement(); }
+			 * Disable per #103 for (IResource next : value.getContainedResources()) { if (getContainedResources().getResourceId(next) != null) { continue; }
+			 * theEventWriter.writeStartElement("contained"); encodeResourceToXmlStreamWriter(next, theEventWriter, true, fixContainedResourceId(next.getId().getValue()));
+			 * theEventWriter.writeEndElement(); }
 			 */
 			for (IBaseResource next : getContainedResources().getContainedResources()) {
 				IIdType resourceId = getContainedResources().getResourceId(next);
@@ -558,16 +568,13 @@ public class XmlParser extends BaseParser implements IParser {
 
 	}
 
-	private void encodeCompositeElementChildrenToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
-		for (BaseRuntimeChildDefinition nextChild : children) {
-			if (nextChild.getElementName().equals("extension") || nextChild.getElementName().equals("modifierExtension")) {
-				continue;
-			}
-			if (nextChild.getElementName().equals("id")) {
-				continue;
-			}
+	private void encodeCompositeElementChildrenToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> theChildren,
+			boolean theContainedResource, CompositeChildElement theParent) throws XMLStreamException, DataFormatException {
+		for (CompositeChildElement nextChildElem : super.compositeChildIterator(theChildren, theContainedResource, theParent)) {
 
-			if (nextChild instanceof RuntimeChildNarrativeDefinition && !theIncludedResource) {
+			BaseRuntimeChildDefinition nextChild = nextChildElem.getDef();
+
+			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
 				if (theResource instanceof IResource) {
 					BaseNarrativeDt<?> narr = ((IResource) theResource).getText();
@@ -579,36 +586,22 @@ public class XmlParser extends BaseParser implements IParser {
 						RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 						String childName = nextChild.getChildNameByDatatype(child.getDatatype());
 						BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
-						encodeChildElementToStreamWriter(theResource, theEventWriter, narr, childName, type, null, theIncludedResource);
+						encodeChildElementToStreamWriter(theResource, theEventWriter, narr, childName, type, null, theContainedResource, nextChildElem);
 						continue;
 					}
 				} else {
 					// Narrative generation not currently supported for HL7org structures
-					// INarrative narr1 = ((IDomainResource) theResource).getText();
-					// BaseNarrativeDt<?> narr2 = null;
-					// if (gen != null && narr1.isEmpty()) {
-					// // TODO: need to implement this
-					// String resourceProfile = myContext.getResourceDefinition(theResource).getResourceProfile();
-					// gen.generateNarrative(resourceProfile, theResource, null);
-					// }
-					// if (narr2 != null) {
-					// RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
-					// String childName = nextChild.getChildNameByDatatype(child.getDatatype());
-					// BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
-					// encodeChildElementToStreamWriter(theResource, theEventWriter, narr2, childName, type, null,
-					// theIncludedResource);
-					// continue;
-					// }
 				}
 			}
 
 			if (nextChild instanceof RuntimeChildContainedResources) {
-				if (!theIncludedResource) {
-					encodeChildElementToStreamWriter(theResource, theEventWriter, null, nextChild.getChildNameByDatatype(null), nextChild.getChildElementDefinitionByDatatype(null), null, theIncludedResource);
-				}
+				encodeChildElementToStreamWriter(theResource, theEventWriter, null, nextChild.getChildNameByDatatype(null), nextChild.getChildElementDefinitionByDatatype(null), null, theContainedResource,
+						nextChildElem);
 			} else {
 
 				List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
+				values = super.preProcessValues(nextChild, values);
+
 				if (values == null || values.isEmpty()) {
 					continue;
 				}
@@ -627,7 +620,7 @@ public class XmlParser extends BaseParser implements IParser {
 					if (nextValue instanceof IBaseExtension && myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 						// This is called for the Query resource in DSTU1 only
 						extensionUrl = ((IBaseExtension<?, ?>) nextValue).getUrl();
-						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, extensionUrl, theIncludedResource);
+						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, extensionUrl, theContainedResource, nextChildElem);
 
 					} else if (extensionUrl != null && childName.equals("extension") == false) {
 						RuntimeChildDeclaredExtensionDefinition extDef = (RuntimeChildDeclaredExtensionDefinition) nextChild;
@@ -638,22 +631,23 @@ public class XmlParser extends BaseParser implements IParser {
 						}
 
 						theEventWriter.writeAttribute("url", extensionUrl);
-						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, null, theIncludedResource);
+						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, null, theContainedResource, nextChildElem);
 						theEventWriter.writeEndElement();
-					} else if (nextChild instanceof RuntimeChildNarrativeDefinition && theIncludedResource) {
+					} else if (nextChild instanceof RuntimeChildNarrativeDefinition && theContainedResource) {
 						// suppress narratives from contained resources
 					} else {
-						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, extensionUrl, theIncludedResource);
+						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, extensionUrl, theContainedResource, nextChildElem);
 					}
 				}
 			}
 		}
 	}
 
-	private void encodeCompositeElementToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> theElementDefinition, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeCompositeElementToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> theElementDefinition,
+			boolean theIncludedResource, CompositeChildElement theParent) throws XMLStreamException, DataFormatException {
 		encodeExtensionsIfPresent(theResource, theEventWriter, theElement, theIncludedResource);
-		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, theElementDefinition.getExtensions(), theIncludedResource);
-		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, theElementDefinition.getChildren(), theIncludedResource);
+		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, theElementDefinition.getExtensions(), theIncludedResource, theParent);
+		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, theElementDefinition.getChildren(), theIncludedResource, theParent);
 	}
 
 	private void encodeExtensionsIfPresent(IBaseResource theResource, XMLStreamWriter theWriter, IBase theElement, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
@@ -670,17 +664,6 @@ public class XmlParser extends BaseParser implements IParser {
 			IBaseHasModifierExtensions res = (IBaseHasModifierExtensions) theElement;
 			encodeUndeclaredExtensions(theResource, theWriter, res.getModifierExtension(), "modifierExtension", theIncludedResource);
 		}
-	}
-
-	/**
-	 * This is just to work around the fact that casting java.util.List<ca.uhn.fhir.model.api.ExtensionDt> to
-	 * java.util.List<? extends org.hl7.fhir.instance.model.api.IBaseExtension<?, ?>> seems to be rejected by the
-	 * compiler some of the time.
-	 */
-	private <Q extends IBaseExtension<?, ?>> List<IBaseExtension<?, ?>> toBaseExtensionList(final List<Q> theList) {
-		List<IBaseExtension<?, ?>> retVal = new ArrayList<IBaseExtension<?, ?>>(theList.size());
-		retVal.addAll(theList);
-		return retVal;
 	}
 
 	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, IBaseReference theRef, IBaseResource theResource, boolean theIncludedResource) throws XMLStreamException {
@@ -700,10 +683,11 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeResourceToStreamWriterInDstu2Format(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeResourceToStreamWriterInDstu2Format(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter,
+			BaseRuntimeElementCompositeDefinition<?> resDef, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		/*
-		 * DSTU2 requires extensions to come in a specific spot within the encoded content - This is a bit of a messy way
-		 * to make that happen, but hopefully this won't matter as much once we use the HL7 structures
+		 * DSTU2 requires extensions to come in a specific spot within the encoded content - This is a bit of a messy way to make that happen, but hopefully this won't matter as much once we use the HL7
+		 * structures
 		 */
 
 		List<BaseRuntimeChildDefinition> preExtensionChildren = new ArrayList<BaseRuntimeChildDefinition>();
@@ -718,26 +702,16 @@ public class XmlParser extends BaseParser implements IParser {
 				postExtensionChildren.add(next);
 			}
 		}
-		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, preExtensionChildren, theIncludedResource);
+
+		CompositeChildElement parent = new CompositeChildElement(theResDef);
+
+		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, preExtensionChildren, theIncludedResource, parent);
 
 		encodeExtensionsIfPresent(theResource, theEventWriter, theElement, theIncludedResource);
-		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, resDef.getExtensions(), theIncludedResource);
+		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, resDef.getExtensions(), theIncludedResource, parent);
 
-		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, postExtensionChildren, theIncludedResource);
+		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, postExtensionChildren, theIncludedResource, parent);
 
-	}
-
-	@Override
-	public void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws DataFormatException {
-		XMLStreamWriter eventWriter;
-		try {
-			eventWriter = createXmlWriter(theWriter);
-
-			encodeResourceToXmlStreamWriter(theResource, eventWriter, false);
-			eventWriter.flush();
-		} catch (XMLStreamException e) {
-			throw new ConfigurationException("Failed to initialize STaX event factory", e);
-		}
 	}
 
 	private void encodeResourceToXmlStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
@@ -780,7 +754,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 			// HL7.org Structures
 			writeOptionalTagWithValue(theEventWriter, "id", theResourceId);
-			encodeCompositeElementToStreamWriter(theResource, theResource, theEventWriter, resDef, theContainedResource);
+			encodeCompositeElementToStreamWriter(theResource, theResource, theEventWriter, resDef, theContainedResource, new CompositeChildElement(resDef));
 
 		} else {
 
@@ -799,7 +773,8 @@ public class XmlParser extends BaseParser implements IParser {
 				}
 				List<BaseCodingDt> securityLabels = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.SECURITY_LABELS);
 				List<IdDt> profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
-				TagList tags = ResourceMetadataKeyEnum.TAG_LIST.get(resource);
+				TagList tags = getMetaTagsForEncoding((resource));
+
 				if (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
 					theEventWriter.writeStartElement("meta");
 					writeOptionalTagWithValue(theEventWriter, "versionId", versionIdPart);
@@ -815,7 +790,7 @@ public class XmlParser extends BaseParser implements IParser {
 					for (BaseCodingDt securityLabel : securityLabels) {
 						theEventWriter.writeStartElement("security");
 						BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(securityLabel.getClass());
-						encodeCompositeElementChildrenToStreamWriter(resource, securityLabel, theEventWriter, def.getChildren(), theContainedResource);
+						encodeCompositeElementChildrenToStreamWriter(resource, securityLabel, theEventWriter, def.getChildren(), theContainedResource, null);
 						theEventWriter.writeEndElement();
 					}
 					if (tags != null) {
@@ -855,7 +830,7 @@ public class XmlParser extends BaseParser implements IParser {
 					}
 					theEventWriter.writeCharacters(bin.getContentAsBase64());
 				} else {
-					encodeCompositeElementToStreamWriter(theResource, theResource, theEventWriter, resDef, theContainedResource);
+					encodeCompositeElementToStreamWriter(theResource, theResource, theEventWriter, resDef, theContainedResource, new CompositeChildElement(resDef));
 				}
 
 			}
@@ -896,7 +871,8 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeUndeclaredExtensions(IBaseResource theResource, XMLStreamWriter theWriter, List<? extends IBaseExtension<?, ?>> theExtensions, String tagName, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeUndeclaredExtensions(IBaseResource theResource, XMLStreamWriter theWriter, List<? extends IBaseExtension<?, ?>> theExtensions, String tagName, boolean theIncludedResource)
+			throws XMLStreamException, DataFormatException {
 		for (IBaseExtension<?, ?> next : theExtensions) {
 			if (next == null || (ElementUtil.isEmpty(next.getValue()) && next.getExtension().isEmpty())) {
 				continue;
@@ -925,7 +901,7 @@ public class XmlParser extends BaseParser implements IParser {
 						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
 					}
 				}
-				encodeChildElementToStreamWriter(theResource, theWriter, value, childName, childDef, null, theIncludedResource);
+				encodeChildElementToStreamWriter(theResource, theWriter, value, childName, childDef, null, theIncludedResource, null);
 			}
 
 			// child extensions
@@ -936,7 +912,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	private void encodeXhtml(XhtmlDt theDt, XMLStreamWriter theEventWriter) throws XMLStreamException {
-		if (theDt == null || theDt.getValue() == null || getSuppressNarratives()) {
+		if (theDt == null || theDt.getValue() == null) {
 			return;
 		}
 
@@ -1029,6 +1005,11 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	@Override
+	public EncodingEnum getEncoding() {
+		return EncodingEnum.XML;
+	}
+
+	@Override
 	public <T extends IBaseResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader) {
 		XMLEventReader streamReader = createStreamReader(theReader);
 
@@ -1038,12 +1019,6 @@ public class XmlParser extends BaseParser implements IParser {
 	private Bundle parseBundle(XMLEventReader theStreamReader, Class<? extends IBaseResource> theResourceType) {
 		ParserState<Bundle> parserState = ParserState.getPreAtomInstance(myContext, theResourceType, false, getErrorHandler());
 		return doXmlLoop(theStreamReader, parserState);
-	}
-
-	@Override
-	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
-		XMLEventReader streamReader = createStreamReader(theReader);
-		return parseResource(theResourceType, streamReader);
 	}
 
 	private <T extends IBaseResource> T parseResource(Class<T> theResourceType, XMLEventReader theStreamReader) {
@@ -1063,6 +1038,16 @@ public class XmlParser extends BaseParser implements IParser {
 	public IParser setPrettyPrint(boolean thePrettyPrint) {
 		myPrettyPrint = thePrettyPrint;
 		return this;
+	}
+
+	/**
+	 * This is just to work around the fact that casting java.util.List<ca.uhn.fhir.model.api.ExtensionDt> to java.util.List<? extends org.hl7.fhir.instance.model.api.IBaseExtension<?, ?>> seems to be
+	 * rejected by the compiler some of the time.
+	 */
+	private <Q extends IBaseExtension<?, ?>> List<IBaseExtension<?, ?>> toBaseExtensionList(final List<Q> theList) {
+		List<IBaseExtension<?, ?>> retVal = new ArrayList<IBaseExtension<?, ?>>(theList.size());
+		retVal.addAll(theList);
+		return retVal;
 	}
 
 	private void writeAtomLink(XMLStreamWriter theEventWriter, String theRel, StringDt theStringDt) throws XMLStreamException {
@@ -1144,4 +1129,5 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 		theEventWriter.writeEndElement();
 	}
+
 }

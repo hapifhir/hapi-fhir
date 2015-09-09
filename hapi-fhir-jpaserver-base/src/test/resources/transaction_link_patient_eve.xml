@@ -61,10 +61,10 @@
                 <active value="true"/>
             </Patient>
         </resource>
-        <transaction>
+        <request>
             <method value="PUT"/>
             <url value="Patient/a555-44-4444"/>
-        </transaction>
+        </request>
     </entry>
     <entry>
         <resource>
@@ -95,10 +95,10 @@
                 <active value="true"/>
             </Patient>
         </resource>
-        <transaction>
+        <request>
             <method value="PUT"/>
             <url value="Patient/temp6789"/>
-        </transaction>
+        </request>
     </entry>
     <entry>
         <resource>
@@ -106,9 +106,9 @@
                 <id value="GHH"/>
             </Organization>
         </resource>
-        <transaction>
+        <request>
             <method value="PUT"/>
             <url value="Organization/GHH"/>
-        </transaction>
+        </request>
     </entry>
 </Bundle>

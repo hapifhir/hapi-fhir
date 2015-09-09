@@ -19,8 +19,7 @@ package ca.uhn.fhir.rest.method;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -31,18 +30,29 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 class ConditionalParamBinder implements IParameter {
 
-	private RestfulOperationTypeEnum myOperationType;
+	private RestOperationTypeEnum myOperationType;
+	private boolean mySupportsMultiple;
 
-	ConditionalParamBinder(RestfulOperationTypeEnum theOperationType) {
+	ConditionalParamBinder(RestOperationTypeEnum theOperationType, boolean theSupportsMultiple) {
 		Validate.notNull(theOperationType, "theOperationType can not be null");
 		myOperationType = theOperationType;
+		mySupportsMultiple = theSupportsMultiple;
+	}
+
+	@Override
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+		// nothing
+	}
+
+	public boolean isSupportsMultiple() {
+		return mySupportsMultiple;
 	}
 
 	@Override
@@ -53,7 +63,7 @@ class ConditionalParamBinder implements IParameter {
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 
-		if (myOperationType == RestfulOperationTypeEnum.CREATE) {
+		if (myOperationType == RestOperationTypeEnum.CREATE) {
 			String retVal = theRequest.getServletRequest().getHeader(Constants.HEADER_IF_NONE_EXIST);
 			if (isBlank(retVal)) {
 				return null;
@@ -62,7 +72,7 @@ class ConditionalParamBinder implements IParameter {
 				retVal = retVal.substring(theRequest.getFhirServerBase().length());
 			}
 			return retVal;
-		} else if (myOperationType != RestfulOperationTypeEnum.DELETE && myOperationType != RestfulOperationTypeEnum.UPDATE) {
+		} else if (myOperationType != RestOperationTypeEnum.DELETE && myOperationType != RestOperationTypeEnum.UPDATE) {
 			return null;
 		}
 		
@@ -82,11 +92,6 @@ class ConditionalParamBinder implements IParameter {
 		
 		int questionMarkIndex = theRequest.getCompleteUrl().indexOf('?');
 		return theRequest.getResourceName() + theRequest.getCompleteUrl().substring(questionMarkIndex);
-	}
-
-	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		// nothing
 	}
 
 }

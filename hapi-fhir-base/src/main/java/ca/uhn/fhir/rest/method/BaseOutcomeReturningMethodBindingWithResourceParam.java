@@ -35,11 +35,12 @@ import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
 abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
 	private Integer myIdParamIndex;
 	private String myResourceName;
-	private int myResourceParameterIndex;
+	private int myResourceParameterIndex = -1;
 	private Class<? extends IBaseResource> myResourceType;
 	private Class<? extends IIdType> myIdParamType;
 
@@ -84,6 +85,22 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a resource parameter annotated with @" + ResourceParam.class.getSimpleName());
 		}
 
+	}
+
+	@Override
+	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails theDetails, Object[] theMethodParams) {
+		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theDetails, theMethodParams);
+		
+		/*
+		 * If the method has no parsed resource parameter, we parse here in order to have something for the interceptor.
+		 */
+		if (myResourceParameterIndex != -1) {
+			theDetails.setResource((IBaseResource) theMethodParams[myResourceParameterIndex]);
+		} else {
+			theDetails.setResource(ResourceParameter.parseResourceFromRequest(theRequestDetails, this, myResourceType));
+		}
+		
+		
 	}
 
 	@Override

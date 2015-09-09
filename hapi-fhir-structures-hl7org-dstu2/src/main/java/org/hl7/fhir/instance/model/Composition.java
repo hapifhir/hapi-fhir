@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement.
+ * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.
  */
 @ResourceDef(name="Composition", profile="http://hl7.org/fhir/Profile/Composition")
 public class Composition extends DomainResource {
@@ -56,11 +56,7 @@ public class Composition extends DomainResource {
          */
         FINAL, 
         /**
-         * The composition or document has been modified subsequent to being released as "final", and is complete and verified by an authorized person. The modifications added new information to the composition or document, but did not revise existing content
-         */
-        APPENDED, 
-        /**
-         * The composition or document has been modified subsequent to being released as "final", and is complete and verified by an authorized person
+         * The composition content or the referenced resources have been modified (edited or added to) subsequent to being released as "final" and the composition is complete and verified by an authorized person
          */
         AMENDED, 
         /**
@@ -78,8 +74,6 @@ public class Composition extends DomainResource {
           return PRELIMINARY;
         if ("final".equals(codeString))
           return FINAL;
-        if ("appended".equals(codeString))
-          return APPENDED;
         if ("amended".equals(codeString))
           return AMENDED;
         if ("entered-in-error".equals(codeString))
@@ -90,7 +84,6 @@ public class Composition extends DomainResource {
           switch (this) {
             case PRELIMINARY: return "preliminary";
             case FINAL: return "final";
-            case APPENDED: return "appended";
             case AMENDED: return "amended";
             case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
@@ -100,7 +93,6 @@ public class Composition extends DomainResource {
           switch (this) {
             case PRELIMINARY: return "http://hl7.org/fhir/composition-status";
             case FINAL: return "http://hl7.org/fhir/composition-status";
-            case APPENDED: return "http://hl7.org/fhir/composition-status";
             case AMENDED: return "http://hl7.org/fhir/composition-status";
             case ENTEREDINERROR: return "http://hl7.org/fhir/composition-status";
             default: return "?";
@@ -110,8 +102,7 @@ public class Composition extends DomainResource {
           switch (this) {
             case PRELIMINARY: return "This is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified";
             case FINAL: return "This version of the composition is complete and verified by an appropriate person and no further work is planned. Any subsequent updates would be on a new version of the composition.";
-            case APPENDED: return "The composition or document has been modified subsequent to being released as 'final', and is complete and verified by an authorized person. The modifications added new information to the composition or document, but did not revise existing content";
-            case AMENDED: return "The composition or document has been modified subsequent to being released as 'final', and is complete and verified by an authorized person";
+            case AMENDED: return "The composition content or the referenced resources have been modified (edited or added to) subsequent to being released as \"final\" and the composition is complete and verified by an authorized person";
             case ENTEREDINERROR: return "The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid";
             default: return "?";
           }
@@ -120,7 +111,6 @@ public class Composition extends DomainResource {
           switch (this) {
             case PRELIMINARY: return "Preliminary";
             case FINAL: return "Final";
-            case APPENDED: return "Appended ap Appended";
             case AMENDED: return "Amended";
             case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
@@ -137,8 +127,6 @@ public class Composition extends DomainResource {
           return CompositionStatus.PRELIMINARY;
         if ("final".equals(codeString))
           return CompositionStatus.FINAL;
-        if ("appended".equals(codeString))
-          return CompositionStatus.APPENDED;
         if ("amended".equals(codeString))
           return CompositionStatus.AMENDED;
         if ("entered-in-error".equals(codeString))
@@ -150,8 +138,6 @@ public class Composition extends DomainResource {
         return "preliminary";
       if (code == CompositionStatus.FINAL)
         return "final";
-      if (code == CompositionStatus.APPENDED)
-        return "appended";
       if (code == CompositionStatus.AMENDED)
         return "amended";
       if (code == CompositionStatus.ENTEREDINERROR)
@@ -265,21 +251,21 @@ public class Composition extends DomainResource {
         /**
          * The type of attestation the authenticator offers.
          */
-        @Child(name = "mode", type = {CodeType.class}, order=1, min=1, max=Child.MAX_UNLIMITED)
+        @Child(name = "mode", type = {CodeType.class}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="personal | professional | legal | official", formalDefinition="The type of attestation the authenticator offers." )
         protected List<Enumeration<CompositionAttestationMode>> mode;
 
         /**
          * When composition was attested by the party.
          */
-        @Child(name = "time", type = {DateTimeType.class}, order=2, min=0, max=1)
+        @Child(name = "time", type = {DateTimeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="When composition attested", formalDefinition="When composition was attested by the party." )
         protected DateTimeType time;
 
         /**
          * Who attested the composition in the specified way.
          */
-        @Child(name = "party", type = {Patient.class, Practitioner.class, Organization.class}, order=3, min=0, max=1)
+        @Child(name = "party", type = {Patient.class, Practitioner.class, Organization.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Who attested the composition", formalDefinition="Who attested the composition in the specified way." )
         protected Reference party;
 
@@ -492,25 +478,25 @@ public class Composition extends DomainResource {
         /**
          * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a "History and Physical Report" in which the procedure being documented is necessarily a "History and Physical" act.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Code(s) that apply to the event being documented", formalDefinition="This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a 'History and Physical Report' in which the procedure being documented is necessarily a 'History and Physical' act." )
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Code(s) that apply to the event being documented", formalDefinition="This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act." )
         protected List<CodeableConcept> code;
 
         /**
          * The period of time covered by the documentation. There is no assertion that the documentation is a complete representation for this period, only that it documents events during this time.
          */
-        @Child(name = "period", type = {Period.class}, order=2, min=0, max=1)
+        @Child(name = "period", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The period covered by the documentation", formalDefinition="The period of time covered by the documentation. There is no assertion that the documentation is a complete representation for this period, only that it documents events during this time." )
         protected Period period;
 
         /**
-         * Full details for the event(s) the composition/documentation consents.
+         * The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.
          */
-        @Child(name = "detail", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Full details for the event(s) the composition consents", formalDefinition="Full details for the event(s) the composition/documentation consents." )
+        @Child(name = "detail", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="The event(s) being documented", formalDefinition="The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy." )
         protected List<Reference> detail;
         /**
-         * The actual objects that are the target of the reference (Full details for the event(s) the composition/documentation consents.)
+         * The actual objects that are the target of the reference (The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.)
          */
         protected List<Resource> detailTarget;
 
@@ -589,7 +575,7 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return {@link #detail} (Full details for the event(s) the composition/documentation consents.)
+         * @return {@link #detail} (The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.)
          */
         public List<Reference> getDetail() { 
           if (this.detail == null)
@@ -607,7 +593,7 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return {@link #detail} (Full details for the event(s) the composition/documentation consents.)
+         * @return {@link #detail} (The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.)
          */
     // syntactic sugar
         public Reference addDetail() { //3
@@ -629,7 +615,7 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return {@link #detail} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Full details for the event(s) the composition/documentation consents.)
+         * @return {@link #detail} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.)
          */
         public List<Resource> getDetailTarget() { 
           if (this.detailTarget == null)
@@ -639,9 +625,9 @@ public class Composition extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("code", "CodeableConcept", "This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a 'History and Physical Report' in which the procedure being documented is necessarily a 'History and Physical' act.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("code", "CodeableConcept", "This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("period", "Period", "The period of time covered by the documentation. There is no assertion that the documentation is a complete representation for this period, only that it documents events during this time.", 0, java.lang.Integer.MAX_VALUE, period));
-          childrenList.add(new Property("detail", "Reference(Any)", "Full details for the event(s) the composition/documentation consents.", 0, java.lang.Integer.MAX_VALUE, detail));
+          childrenList.add(new Property("detail", "Reference(Any)", "The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.", 0, java.lang.Integer.MAX_VALUE, detail));
         }
 
       public CompositionEventComponent copy() {
@@ -694,37 +680,65 @@ public class Composition extends DomainResource {
         /**
          * The label for this particular section.  This will be part of the rendered content for the document, and is often used to build a table of contents.
          */
-        @Child(name = "title", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "title", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Label for section (e.g. for ToC)", formalDefinition="The label for this particular section.  This will be part of the rendered content for the document, and is often used to build a table of contents." )
         protected StringType title;
 
         /**
          * A code identifying the kind of content contained within the section. This must be consistent with the section title.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1)
+        @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Classification of section (recommended)", formalDefinition="A code identifying the kind of content contained within the section. This must be consistent with the section title." )
         protected CodeableConcept code;
 
         /**
-         * The content (narrative and data entries) associated with the section.
+         * A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it "clinically safe" for a human to just read the narrative.
          */
-        @Child(name = "content", type = {List_.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="The Content of the section (narrative + data entries)", formalDefinition="The content (narrative and data entries) associated with the section." )
-        protected Reference content;
+        @Child(name = "text", type = {Narrative.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Text summary of the section, for human interpretation", formalDefinition="A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it \"clinically safe\" for a human to just read the narrative." )
+        protected Narrative text;
 
         /**
-         * The actual object that is the target of the reference (The content (narrative and data entries) associated with the section.)
+         * How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
          */
-        protected List_ contentTarget;
+        @Child(name = "mode", type = {CodeType.class}, order=4, min=0, max=1, modifier=true, summary=true)
+        @Description(shortDefinition="working | snapshot | changes", formalDefinition="How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted." )
+        protected CodeType mode;
+
+        /**
+         * What order applies to the items in the section entries.
+         */
+        @Child(name = "orderedBy", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="What order the section entries are in", formalDefinition="What order applies to the items in the section entries." )
+        protected CodeableConcept orderedBy;
+
+        /**
+         * A reference to the actual resource from which the narrative in the section is derived.
+         */
+        @Child(name = "entry", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="A reference to data that supports this section", formalDefinition="A reference to the actual resource from which the narrative in the section is derived." )
+        protected List<Reference> entry;
+        /**
+         * The actual objects that are the target of the reference (A reference to the actual resource from which the narrative in the section is derived.)
+         */
+        protected List<Resource> entryTarget;
+
+
+        /**
+         * If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason.
+         */
+        @Child(name = "emptyReason", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Why the section is empty", formalDefinition="If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason." )
+        protected CodeableConcept emptyReason;
 
         /**
          * A nested sub-section within this section.
          */
-        @Child(name = "section", type = {SectionComponent.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "section", type = {SectionComponent.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Nested Section", formalDefinition="A nested sub-section within this section." )
         protected List<SectionComponent> section;
 
-        private static final long serialVersionUID = -1683518435L;
+        private static final long serialVersionUID = -726390626L;
 
     /*
      * Constructor
@@ -807,46 +821,172 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return {@link #content} (The content (narrative and data entries) associated with the section.)
+         * @return {@link #text} (A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it "clinically safe" for a human to just read the narrative.)
          */
-        public Reference getContent() { 
-          if (this.content == null)
+        public Narrative getText() { 
+          if (this.text == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SectionComponent.content");
+              throw new Error("Attempt to auto-create SectionComponent.text");
             else if (Configuration.doAutoCreate())
-              this.content = new Reference(); // cc
-          return this.content;
+              this.text = new Narrative(); // cc
+          return this.text;
         }
 
-        public boolean hasContent() { 
-          return this.content != null && !this.content.isEmpty();
+        public boolean hasText() { 
+          return this.text != null && !this.text.isEmpty();
         }
 
         /**
-         * @param value {@link #content} (The content (narrative and data entries) associated with the section.)
+         * @param value {@link #text} (A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it "clinically safe" for a human to just read the narrative.)
          */
-        public SectionComponent setContent(Reference value) { 
-          this.content = value;
+        public SectionComponent setText(Narrative value) { 
+          this.text = value;
           return this;
         }
 
         /**
-         * @return {@link #content} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The content (narrative and data entries) associated with the section.)
+         * @return {@link #mode} (How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
          */
-        public List_ getContentTarget() { 
-          if (this.contentTarget == null)
+        public CodeType getModeElement() { 
+          if (this.mode == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SectionComponent.content");
+              throw new Error("Attempt to auto-create SectionComponent.mode");
             else if (Configuration.doAutoCreate())
-              this.contentTarget = new List_(); // aa
-          return this.contentTarget;
+              this.mode = new CodeType(); // bb
+          return this.mode;
+        }
+
+        public boolean hasModeElement() { 
+          return this.mode != null && !this.mode.isEmpty();
+        }
+
+        public boolean hasMode() { 
+          return this.mode != null && !this.mode.isEmpty();
         }
 
         /**
-         * @param value {@link #content} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The content (narrative and data entries) associated with the section.)
+         * @param value {@link #mode} (How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
          */
-        public SectionComponent setContentTarget(List_ value) { 
-          this.contentTarget = value;
+        public SectionComponent setModeElement(CodeType value) { 
+          this.mode = value;
+          return this;
+        }
+
+        /**
+         * @return How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
+         */
+        public String getMode() { 
+          return this.mode == null ? null : this.mode.getValue();
+        }
+
+        /**
+         * @param value How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
+         */
+        public SectionComponent setMode(String value) { 
+          if (Utilities.noString(value))
+            this.mode = null;
+          else {
+            if (this.mode == null)
+              this.mode = new CodeType();
+            this.mode.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #orderedBy} (What order applies to the items in the section entries.)
+         */
+        public CodeableConcept getOrderedBy() { 
+          if (this.orderedBy == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SectionComponent.orderedBy");
+            else if (Configuration.doAutoCreate())
+              this.orderedBy = new CodeableConcept(); // cc
+          return this.orderedBy;
+        }
+
+        public boolean hasOrderedBy() { 
+          return this.orderedBy != null && !this.orderedBy.isEmpty();
+        }
+
+        /**
+         * @param value {@link #orderedBy} (What order applies to the items in the section entries.)
+         */
+        public SectionComponent setOrderedBy(CodeableConcept value) { 
+          this.orderedBy = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #entry} (A reference to the actual resource from which the narrative in the section is derived.)
+         */
+        public List<Reference> getEntry() { 
+          if (this.entry == null)
+            this.entry = new ArrayList<Reference>();
+          return this.entry;
+        }
+
+        public boolean hasEntry() { 
+          if (this.entry == null)
+            return false;
+          for (Reference item : this.entry)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #entry} (A reference to the actual resource from which the narrative in the section is derived.)
+         */
+    // syntactic sugar
+        public Reference addEntry() { //3
+          Reference t = new Reference();
+          if (this.entry == null)
+            this.entry = new ArrayList<Reference>();
+          this.entry.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public SectionComponent addEntry(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.entry == null)
+            this.entry = new ArrayList<Reference>();
+          this.entry.add(t);
+          return this;
+        }
+
+        /**
+         * @return {@link #entry} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. A reference to the actual resource from which the narrative in the section is derived.)
+         */
+        public List<Resource> getEntryTarget() { 
+          if (this.entryTarget == null)
+            this.entryTarget = new ArrayList<Resource>();
+          return this.entryTarget;
+        }
+
+        /**
+         * @return {@link #emptyReason} (If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason.)
+         */
+        public CodeableConcept getEmptyReason() { 
+          if (this.emptyReason == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SectionComponent.emptyReason");
+            else if (Configuration.doAutoCreate())
+              this.emptyReason = new CodeableConcept(); // cc
+          return this.emptyReason;
+        }
+
+        public boolean hasEmptyReason() { 
+          return this.emptyReason != null && !this.emptyReason.isEmpty();
+        }
+
+        /**
+         * @param value {@link #emptyReason} (If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason.)
+         */
+        public SectionComponent setEmptyReason(CodeableConcept value) { 
+          this.emptyReason = value;
           return this;
         }
 
@@ -894,7 +1034,11 @@ public class Composition extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("title", "string", "The label for this particular section.  This will be part of the rendered content for the document, and is often used to build a table of contents.", 0, java.lang.Integer.MAX_VALUE, title));
           childrenList.add(new Property("code", "CodeableConcept", "A code identifying the kind of content contained within the section. This must be consistent with the section title.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("content", "Reference(List)", "The content (narrative and data entries) associated with the section.", 0, java.lang.Integer.MAX_VALUE, content));
+          childrenList.add(new Property("text", "Narrative", "A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it \"clinically safe\" for a human to just read the narrative.", 0, java.lang.Integer.MAX_VALUE, text));
+          childrenList.add(new Property("mode", "code", "How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.", 0, java.lang.Integer.MAX_VALUE, mode));
+          childrenList.add(new Property("orderedBy", "CodeableConcept", "What order applies to the items in the section entries.", 0, java.lang.Integer.MAX_VALUE, orderedBy));
+          childrenList.add(new Property("entry", "Reference(Any)", "A reference to the actual resource from which the narrative in the section is derived.", 0, java.lang.Integer.MAX_VALUE, entry));
+          childrenList.add(new Property("emptyReason", "CodeableConcept", "If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason.", 0, java.lang.Integer.MAX_VALUE, emptyReason));
           childrenList.add(new Property("section", "@Composition.section", "A nested sub-section within this section.", 0, java.lang.Integer.MAX_VALUE, section));
         }
 
@@ -903,7 +1047,15 @@ public class Composition extends DomainResource {
         copyValues(dst);
         dst.title = title == null ? null : title.copy();
         dst.code = code == null ? null : code.copy();
-        dst.content = content == null ? null : content.copy();
+        dst.text = text == null ? null : text.copy();
+        dst.mode = mode == null ? null : mode.copy();
+        dst.orderedBy = orderedBy == null ? null : orderedBy.copy();
+        if (entry != null) {
+          dst.entry = new ArrayList<Reference>();
+          for (Reference i : entry)
+            dst.entry.add(i.copy());
+        };
+        dst.emptyReason = emptyReason == null ? null : emptyReason.copy();
         if (section != null) {
           dst.section = new ArrayList<SectionComponent>();
           for (SectionComponent i : section)
@@ -919,8 +1071,9 @@ public class Composition extends DomainResource {
         if (!(other instanceof SectionComponent))
           return false;
         SectionComponent o = (SectionComponent) other;
-        return compareDeep(title, o.title, true) && compareDeep(code, o.code, true) && compareDeep(content, o.content, true)
-           && compareDeep(section, o.section, true);
+        return compareDeep(title, o.title, true) && compareDeep(code, o.code, true) && compareDeep(text, o.text, true)
+           && compareDeep(mode, o.mode, true) && compareDeep(orderedBy, o.orderedBy, true) && compareDeep(entry, o.entry, true)
+           && compareDeep(emptyReason, o.emptyReason, true) && compareDeep(section, o.section, true);
       }
 
       @Override
@@ -930,12 +1083,14 @@ public class Composition extends DomainResource {
         if (!(other instanceof SectionComponent))
           return false;
         SectionComponent o = (SectionComponent) other;
-        return compareValues(title, o.title, true);
+        return compareValues(title, o.title, true) && compareValues(mode, o.mode, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (title == null || title.isEmpty()) && (code == null || code.isEmpty())
-           && (content == null || content.isEmpty()) && (section == null || section.isEmpty());
+           && (text == null || text.isEmpty()) && (mode == null || mode.isEmpty()) && (orderedBy == null || orderedBy.isEmpty())
+           && (entry == null || entry.isEmpty()) && (emptyReason == null || emptyReason.isEmpty()) && (section == null || section.isEmpty())
+          ;
       }
 
   }
@@ -943,56 +1098,56 @@ public class Composition extends DomainResource {
     /**
      * Logical Identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Logical identifier of composition (version-independent)", formalDefinition="Logical Identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time." )
     protected Identifier identifier;
 
     /**
      * The composition editing time, when the composition was last logically changed by the author.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=1, min=1, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Composition editing time", formalDefinition="The composition editing time, when the composition was last logically changed by the author." )
     protected DateTimeType date;
 
     /**
      * Specifies the particular kind of composition (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the composition.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=1, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Kind of composition (LOINC if possible)", formalDefinition="Specifies the particular kind of composition (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the composition." )
     protected CodeableConcept type;
 
     /**
      * A categorization for the type of the composition - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.
      */
-    @Child(name = "class", type = {CodeableConcept.class}, order=3, min=0, max=1)
+    @Child(name = "class", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Categorization of Composition", formalDefinition="A categorization for the type of the composition - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type." )
     protected CodeableConcept class_;
 
     /**
      * Official human-readable label for the composition.
      */
-    @Child(name = "title", type = {StringType.class}, order=4, min=0, max=1)
+    @Child(name = "title", type = {StringType.class}, order=4, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Human Readable name/title", formalDefinition="Official human-readable label for the composition." )
     protected StringType title;
 
     /**
      * The workflow/clinical status of this composition. The status is a marker for the clinical standing of the document.
      */
-    @Child(name = "status", type = {CodeType.class}, order=5, min=1, max=1)
-    @Description(shortDefinition="preliminary | final | appended | amended | entered-in-error", formalDefinition="The workflow/clinical status of this composition. The status is a marker for the clinical standing of the document." )
+    @Child(name = "status", type = {CodeType.class}, order=5, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="preliminary | final | amended | entered-in-error", formalDefinition="The workflow/clinical status of this composition. The status is a marker for the clinical standing of the document." )
     protected Enumeration<CompositionStatus> status;
 
     /**
      * The code specifying the level of confidentiality of the Composition.
      */
-    @Child(name = "confidentiality", type = {CodeType.class}, order=6, min=0, max=1)
+    @Child(name = "confidentiality", type = {CodeType.class}, order=6, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="As defined by affinity domain", formalDefinition="The code specifying the level of confidentiality of the Composition." )
     protected CodeType confidentiality;
 
     /**
      * Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure).
      */
-    @Child(name = "subject", type = {}, order=7, min=1, max=1)
+    @Child(name = "subject", type = {}, order=7, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who and/or what the composition is about", formalDefinition="Who or what the composition is about. The composition can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of livestock, or a set of patients that share a common exposure)." )
     protected Reference subject;
 
@@ -1004,7 +1159,7 @@ public class Composition extends DomainResource {
     /**
      * Identifies who is responsible for the information in the composition.  (Not necessarily who typed it in.).
      */
-    @Child(name = "author", type = {Practitioner.class, Device.class, Patient.class, RelatedPerson.class}, order=8, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "author", type = {Practitioner.class, Device.class, Patient.class, RelatedPerson.class}, order=8, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Who and/or what authored the composition", formalDefinition="Identifies who is responsible for the information in the composition.  (Not necessarily who typed it in.)." )
     protected List<Reference> author;
     /**
@@ -1016,14 +1171,14 @@ public class Composition extends DomainResource {
     /**
      * A participant who has attested to the accuracy of the composition/document.
      */
-    @Child(name = "attester", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "attester", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Attests to accuracy of composition", formalDefinition="A participant who has attested to the accuracy of the composition/document." )
     protected List<CompositionAttesterComponent> attester;
 
     /**
      * Identifies the organization or group who is responsible for ongoing maintenance of and access to the composition/document information.
      */
-    @Child(name = "custodian", type = {Organization.class}, order=10, min=0, max=1)
+    @Child(name = "custodian", type = {Organization.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Org which maintains the composition", formalDefinition="Identifies the organization or group who is responsible for ongoing maintenance of and access to the composition/document information." )
     protected Reference custodian;
 
@@ -1035,14 +1190,14 @@ public class Composition extends DomainResource {
     /**
      * The clinical service, such as a colonoscopy or an appendectomy, being documented.
      */
-    @Child(name = "event", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "event", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The clinical service(s) being documented", formalDefinition="The clinical service, such as a colonoscopy or an appendectomy, being documented." )
     protected List<CompositionEventComponent> event;
 
     /**
      * Describes the clinical encounter or type of care this documentation is associated with.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=12, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Context of the conposition", formalDefinition="Describes the clinical encounter or type of care this documentation is associated with." )
     protected Reference encounter;
 
@@ -1054,7 +1209,7 @@ public class Composition extends DomainResource {
     /**
      * The root of the sections that make up the composition.
      */
-    @Child(name = "section", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "section", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Composition is broken into sections", formalDefinition="The root of the sections that make up the composition." )
     protected List<SectionComponent> section;
 
@@ -1070,10 +1225,11 @@ public class Composition extends DomainResource {
   /*
    * Constructor
    */
-    public Composition(DateTimeType date, CodeableConcept type, Enumeration<CompositionStatus> status, Reference subject) {
+    public Composition(DateTimeType date, CodeableConcept type, StringType title, Enumeration<CompositionStatus> status, Reference subject) {
       super();
       this.date = date;
       this.type = type;
+      this.title = title;
       this.status = status;
       this.subject = subject;
     }
@@ -1234,13 +1390,9 @@ public class Composition extends DomainResource {
      * @param value Official human-readable label for the composition.
      */
     public Composition setTitle(String value) { 
-      if (Utilities.noString(value))
-        this.title = null;
-      else {
         if (this.title == null)
           this.title = new StringType();
         this.title.setValue(value);
-      }
       return this;
     }
 
@@ -1744,9 +1896,7 @@ public class Composition extends DomainResource {
   public static final String SP_AUTHOR = "author";
   @SearchParamDefinition(name="confidentiality", path="Composition.confidentiality", description="As defined by affinity domain", type="token" )
   public static final String SP_CONFIDENTIALITY = "confidentiality";
-  @SearchParamDefinition(name="section-code", path="Composition.section.code", description="Classification of section (recommended)", type="token" )
-  public static final String SP_SECTIONCODE = "section-code";
-  @SearchParamDefinition(name="section", path="Composition.section.content", description="The Content of the section (narrative + data entries)", type="reference" )
+  @SearchParamDefinition(name="section", path="Composition.section.code", description="Classification of section (recommended)", type="token" )
   public static final String SP_SECTION = "section";
   @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the conposition", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
@@ -1756,13 +1906,15 @@ public class Composition extends DomainResource {
   public static final String SP_TITLE = "title";
   @SearchParamDefinition(name="attester", path="Composition.attester.party", description="Who attested the composition", type="reference" )
   public static final String SP_ATTESTER = "attester";
+  @SearchParamDefinition(name="entry", path="Composition.section.entry", description="A reference to data that supports this section", type="reference" )
+  public static final String SP_ENTRY = "entry";
   @SearchParamDefinition(name="patient", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="context", path="Composition.event.code", description="Code(s) that apply to the event being documented", type="token" )
   public static final String SP_CONTEXT = "context";
   @SearchParamDefinition(name="class", path="Composition.class", description="Categorization of Composition", type="token" )
   public static final String SP_CLASS = "class";
-  @SearchParamDefinition(name="status", path="Composition.status", description="preliminary | final | appended | amended | entered-in-error", type="token" )
+  @SearchParamDefinition(name="status", path="Composition.status", description="preliminary | final | amended | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
 
 }

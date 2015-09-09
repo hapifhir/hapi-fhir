@@ -52,12 +52,8 @@ public class NumberParam extends BaseParam implements IQueryParameterType {
 	@Override
 	String doGetValueAsQueryToken() {
 		StringBuilder b = new StringBuilder();
-		if (myQuantity.getComparatorElement().isEmpty() == false) {
-			b.append(myQuantity.getComparatorElement().getValue());
-		}
-		if (myQuantity.getValueElement().isEmpty() == false) {
-			b.append(myQuantity.getValueElement().toString());
-		}
+		b.append(ParameterUtil.escapeWithDefault(myQuantity.getComparatorElement().getValue()));
+		b.append(ParameterUtil.escapeWithDefault(myQuantity.getValueElement().toString()));
 		return b.toString();
 	}
 	

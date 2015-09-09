@@ -227,7 +227,7 @@ class ParserState<T> {
 
 	/**
 	 * @param theResourceType
-	 *            May be null
+	 *           May be null
 	 */
 	static <T extends IBaseResource> ParserState<T> getPreResourceInstance(Class<T> theResourceType, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler)
 			throws DataFormatException {
@@ -633,8 +633,9 @@ class ParserState<T> {
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if (myJsonMode) {
 				string(theValue);
+			} else {
+				super.attributeValue(theName, theValue);
 			}
-			super.attributeValue(theName, theValue);
 		}
 
 		@Override
@@ -796,6 +797,10 @@ class ParserState<T> {
 			myPreResourceState = thePreResourceState;
 		}
 
+		/**
+		 * @param theValue
+		 *           The attribute value
+		 */
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			myErrorHandler.unknownAttribute(null, theName);
 		}
@@ -804,6 +809,15 @@ class ParserState<T> {
 			// ignore by default
 		}
 
+		protected void logAndSwallowUnexpectedElement(String theLocalPart) {
+			myErrorHandler.unknownElement(null, theLocalPart);
+			push(new SwallowChildrenWholeState(getPreResourceState()));
+		}
+
+		/**
+		 * @param theNamespaceUri
+		 *           The XML namespace (if XML) or null
+		 */
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			myErrorHandler.unknownElement(null, theLocalPart);
 		}
@@ -860,7 +874,7 @@ class ParserState<T> {
 
 		/**
 		 * @param theData
-		 *            The string value
+		 *           The string value
 		 */
 		public void string(String theData) {
 			// ignore by default
@@ -872,7 +886,7 @@ class ParserState<T> {
 
 		/**
 		 * @param theNextEvent
-		 *            The XML event
+		 *           The XML event
 		 */
 		public void xmlEvent(XMLEvent theNextEvent) {
 			// ignore
@@ -1028,6 +1042,7 @@ class ParserState<T> {
 
 		private BundleEntry myEntry;
 		private Class<? extends IBaseResource> myResourceType;
+		private IdDt myFullUrl;
 
 		public BundleEntryState(Bundle theInstance, Class<? extends IBaseResource> theResourceType) {
 			super(null);
@@ -1046,7 +1061,7 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			if ("base".equals(theLocalPart)) {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getLinkBase()));
-			} else if ("transaction".equals(theLocalPart)) {
+			} else if ("request".equals(theLocalPart)) {
 				push(new BundleEntryTransactionState(myEntry));
 			} else if ("search".equals(theLocalPart)) {
 				push(new BundleEntrySearchState(myEntry));
@@ -1058,6 +1073,9 @@ class ParserState<T> {
 				push(new BundleEntryDeletedState(getPreResourceState(), myEntry));
 			} else if ("link".equals(theLocalPart)) {
 				push(new BundleLinkState(myEntry));
+			} else if ("fullUrl".equals(theLocalPart)) {
+				myFullUrl = new IdDt();
+				push(new PrimitiveState(getPreResourceState(), myFullUrl));
 			} else {
 				throw new DataFormatException("Unexpected element in entry: " + theLocalPart);
 			}
@@ -1076,6 +1094,10 @@ class ParserState<T> {
 			IdDt id = myEntry.getId();
 			if (id != null && id.isEmpty() == false) {
 				myEntry.getResource().setId(id);
+			}
+			
+			if (myFullUrl != null && !myFullUrl.isEmpty()) {
+				myEntry.getResource().setId(myFullUrl);
 			}
 
 			Map<ResourceMetadataKeyEnum<?>, Object> metadata = myEntry.getResource().getResourceMetadata();
@@ -1143,12 +1165,12 @@ class ParserState<T> {
 			} else if ("url".equals(theLocalPart)) {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getLinkSearch()));
 			} else {
-				ourLog.warn("Unexpected element in Bundle.entry.search: " + theLocalPart);
-				push(new SwallowChildrenWholeState(getPreResourceState()));
+				logAndSwallowUnexpectedElement(theLocalPart);
 			}
 		}
 
 	}
+
 
 	private class BundleLinkState extends BaseState {
 
@@ -1226,7 +1248,7 @@ class ParserState<T> {
 		}
 
 	}
-
+	
 	private class BundleState extends BaseState {
 
 		private Bundle myInstance;
@@ -1323,7 +1345,9 @@ class ParserState<T> {
 					} else {
 						baseUrl = bundleBaseUrl;
 					}
-					if (!baseUrl.startsWith("cid:") && !baseUrl.startsWith("urn:")) {
+					if (baseUrl == null) {
+						// nothing
+					} else if (!baseUrl.startsWith("cid:") && !baseUrl.startsWith("urn:")) {
 						nextResource.setId(new IdDt(baseUrl, resourceName, bundleIdPart, version));
 					} else {
 						if (baseUrl.endsWith(":")) {
@@ -1528,6 +1552,8 @@ class ParserState<T> {
 				}
 			} else if ("url".equals(theName) && myInstance instanceof ExtensionDt) {
 				((ExtensionDt) myInstance).setUrl(theValue);
+			} else {
+				super.attributeValue(theName, theValue);
 			}
 		}
 
@@ -1553,13 +1579,13 @@ class ParserState<T> {
 				push(new SwallowChildrenWholeState(getPreResourceState()));
 				return;
 			}
-			
+
 			if ((child.getMax() == 0 || child.getMax() == 1) && !myParsedNonRepeatableNames.add(theChildName)) {
 				myErrorHandler.unexpectedRepeatingElement(null, theChildName);
 				push(new SwallowChildrenWholeState(getPreResourceState()));
 				return;
 			}
-			
+
 			BaseRuntimeElementDefinition<?> target = child.getChildByName(theChildName);
 			if (target == null) {
 				// This is a bug with the structures and shouldn't happen..
@@ -2328,11 +2354,14 @@ class ParserState<T> {
 				} else if ("resource".equals(theLocalPart)) {
 					mySubState = ResourceReferenceSubState.REFERENCE;
 					break;
+				} else {
+					logAndSwallowUnexpectedElement(theLocalPart);
+					break;
 				}
-				//$FALL-THROUGH$
 			case DISPLAY:
 			case REFERENCE:
-				throw new DataFormatException("Unexpected element: " + theLocalPart);
+				logAndSwallowUnexpectedElement(theLocalPart);
+				break;
 			}
 		}
 

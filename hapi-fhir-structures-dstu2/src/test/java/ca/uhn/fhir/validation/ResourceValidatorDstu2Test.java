@@ -10,24 +10,21 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu2.composite.TimingDt;
 import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
-import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
 import ca.uhn.fhir.model.dstu2.valueset.UnitsOfTimeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
 
 public class ResourceValidatorDstu2Test {
 
@@ -63,10 +60,10 @@ public class ResourceValidatorDstu2Test {
 		assertEquals("2001-03-31", new SimpleDateFormat("yyyy-MM-dd").format(p.getBirthDate()));
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(p);
-		String resultString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.getOperationOutcome());
+		String resultString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome)result.getOperationOutcome()).getIssue().size());
+		assertEquals(2, ((OperationOutcome)result.toOperationOutcome()).getIssue().size());
 		assertThat(resultString, StringContains.containsString("2000-15-31"));
 	}
 
@@ -80,11 +77,11 @@ public class ResourceValidatorDstu2Test {
 
 		val.validate(b);
 
-		MedicationPrescription p = (MedicationPrescription) b.getEntries().get(0).getResource();
+		MedicationOrder p = (MedicationOrder) b.getEntries().get(0).getResource();
 		TimingDt timing = new TimingDt();
 		timing.getRepeat().setDuration(123);
 		timing.getRepeat().setDurationUnits((UnitsOfTimeEnum)null);
-		p.getDosageInstructionFirstRep().setScheduled(timing);
+		p.getDosageInstructionFirstRep().setTiming(timing);
 
 		try {
 			val.validate(b);
@@ -106,15 +103,15 @@ public class ResourceValidatorDstu2Test {
 		ValidationResult validationResult = val.validateWithResult(b);
 		assertTrue(validationResult.isSuccessful());
 
-		MedicationPrescription p = (MedicationPrescription) b.getEntries().get(0).getResource();
+		MedicationOrder p = (MedicationOrder) b.getEntries().get(0).getResource();
 		TimingDt timing = new TimingDt();
 		timing.getRepeat().setDuration(123);
 		timing.getRepeat().setDurationUnits((UnitsOfTimeEnum)null);
-		p.getDosageInstructionFirstRep().setScheduled(timing);
+		p.getDosageInstructionFirstRep().setTiming(timing);
 		
 		validationResult = val.validateWithResult(b);
 		assertFalse(validationResult.isSuccessful());
-		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
+		OperationOutcome operationOutcome = (OperationOutcome) validationResult.toOperationOutcome();
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
 		assertThat(encoded, containsString("tim-1:"));
@@ -131,7 +128,7 @@ public class ResourceValidatorDstu2Test {
 
 		ValidationResult result = val.validateWithResult(b);
 
-		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
+		OperationOutcome operationOutcome = (OperationOutcome) result.toOperationOutcome();
 		
 		assertTrue(result.toString(), result.isSuccessful());
 		assertNotNull(operationOutcome);
@@ -179,10 +176,10 @@ public class ResourceValidatorDstu2Test {
 		p.getTelecomFirstRep().setValue("123-4567");
 		validationResult = val.validateWithResult(p);
 		assertFalse(validationResult.isSuccessful());
-		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
+		OperationOutcome operationOutcome = (OperationOutcome) validationResult.toOperationOutcome();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
-		assertThat(operationOutcome.getIssueFirstRep().getDetails(), containsString("cpt-2:"));
+		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics(), containsString("cpt-2:"));
 
 		p.getTelecomFirstRep().setSystem(ContactPointSystemEnum.EMAIL);
 		validationResult = val.validateWithResult(p);

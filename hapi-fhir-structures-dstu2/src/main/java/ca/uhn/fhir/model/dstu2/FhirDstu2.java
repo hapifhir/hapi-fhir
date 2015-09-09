@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.dstu2;
 
 /*
  * #%L
- * HAPI FHIR Structures - DSTU2 (FHIR v0.5.0)
+ * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
  * Copyright (C) 2014 - 2015 University Health Network
  * %%
@@ -102,7 +102,7 @@ public class FhirDstu2 implements IFhirVersion {
 
 	@Override
 	public String getPathToSchemaDefinitions() {
-		return "/ca/uhn/fhir/model/dstu2/schema";
+		return "/org/hl7/fhir/instance/model/schema";
 	}
 
 	@Override

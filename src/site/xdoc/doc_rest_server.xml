@@ -2,7 +2,7 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
 	<properties>
-		<title>RESTful Server - HAPI FHIR</title>
+		<title>RESTful Server</title>
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
 	</properties>
 
@@ -361,20 +361,66 @@
 					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 			
-			
 			</subsection>
 		
-			<subsection name="Accessing the _narrative parameter value">
+			<subsection name="Subsetting: _summary and _elements parameters">
 			
 				<p>
-					There are different ways of 
-					<a href="./doc_narrative.html">generating narratives</a> for use on your server. HAPI's Server
-					also provides a non-standard parameter called <code>_narrative</code> which can be used to
-					control narrative behavour. If you add a parameter to any server (or annotation client) method
-					with a type of <code>NarrativeModeEnum</code>, the value will be populated with the value
-					of this URL parameter.
+					FHIR allows for the a number of special behaviours where only certain
+					portions of resources are returned, instead of the entire resource body.
+					These behaviours are automatically supported in HAPI (as of HAPI 1.2)
+					and no additional effort needs to be taken.
 				</p>
 			
+				<p>
+					The following behaviours are automatically supported by the HAPI server:
+				</p>
+				
+				<table>
+					<thead>
+						<tr>
+							<td><b>Parameter</b></td>
+							<td><b>Description</b></td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>_summary=true</td>
+							<td>
+								Resources will be returned with any elements not marked as summary elements
+								omitted.
+							</td>
+						</tr>
+						<tr>
+							<td>_summary=text</td>
+							<td>
+								Only the narrative portion of returned resources will be returned. For a read/vread 
+								operation, the narrative will be served with a content type of <code>text/html</code>.
+								for other operations, a Bundle will be returned but resources will only include
+								the text element.
+							</td>
+						</tr>
+						<tr>
+							<td>_summary=data</td>
+							<td>
+								The narrative (text) portion of the resource will be omitted.
+							</td>
+						</tr>
+						<tr>
+							<td>_summary=count</td>
+							<td>
+								For a search, only Bundle.count will be returned.
+							</td>
+						</tr>
+						<tr>
+							<td>_elements=[element names]</td>
+							<td>
+								Only the given top level elements of returned resources will be returned, e.g for 
+								a Patient search: <code>_elements=name,contact</code>
+							</td>
+						</tr>
+					</tbody>
+				</table>
 			</subsection>
 			
 		</section>

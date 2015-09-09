@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -121,63 +121,63 @@ public class Account extends DomainResource {
     /**
      * Unique identifier used to reference the account.  May or may not be intended for human use.  (E.g. credit card number).
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Account number", formalDefinition="Unique identifier used to reference the account.  May or may not be intended for human use.  (E.g. credit card number)." )
     protected List<Identifier> identifier;
 
     /**
      * Name used for the account when displaying it to humans in reports, etc.
      */
-    @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
+    @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Human-readable label", formalDefinition="Name used for the account when displaying it to humans in reports, etc." )
     protected StringType name;
 
     /**
      * Categorizes the account for reporting and searching purposes.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="E.g. patient, expense, depreciation", formalDefinition="Categorizes the account for reporting and searching purposes." )
     protected CodeableConcept type;
 
     /**
      * Indicates whether the account is presently used/useable or not.
      */
-    @Child(name = "status", type = {CodeType.class}, order=3, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=3, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | inactive", formalDefinition="Indicates whether the account is presently used/useable or not." )
     protected Enumeration<AccountStatus> status;
 
     /**
      * Indicates the period of time over which the account is allowed.
      */
-    @Child(name = "activePeriod", type = {Period.class}, order=4, min=0, max=1)
+    @Child(name = "activePeriod", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Valid from..to", formalDefinition="Indicates the period of time over which the account is allowed." )
     protected Period activePeriod;
 
     /**
      * Identifies the currency to which transactions must be converted when crediting or debiting the account.
      */
-    @Child(name = "currency", type = {Coding.class}, order=5, min=0, max=1)
+    @Child(name = "currency", type = {Coding.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Base currency in which balance is tracked", formalDefinition="Identifies the currency to which transactions must be converted when crediting or debiting the account." )
     protected Coding currency;
 
     /**
      * Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.
      */
-    @Child(name = "balance", type = {Money.class}, order=6, min=0, max=1)
+    @Child(name = "balance", type = {Money.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="How much is in account?", formalDefinition="Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative." )
     protected Money balance;
 
     /**
      * Identifies the period of time the account applies to.  E.g. accounts created per fiscal year, quarter, etc.
      */
-    @Child(name = "coveragePeriod", type = {Period.class}, order=7, min=0, max=1)
+    @Child(name = "coveragePeriod", type = {Period.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Transaction window", formalDefinition="Identifies the period of time the account applies to.  E.g. accounts created per fiscal year, quarter, etc." )
     protected Period coveragePeriod;
 
     /**
      * Identifies the patient, device, practitioner, location or other object the account is associated with.
      */
-    @Child(name = "subject", type = {Patient.class, Device.class, Practitioner.class, Location.class, HealthcareService.class, Organization.class}, order=8, min=0, max=1)
+    @Child(name = "subject", type = {Patient.class, Device.class, Practitioner.class, Location.class, HealthcareService.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What is account tied to?", formalDefinition="Identifies the patient, device, practitioner, location or other object the account is associated with." )
     protected Reference subject;
 
@@ -189,7 +189,7 @@ public class Account extends DomainResource {
     /**
      * Indicates the organization, department, etc. with responsibility for the account.
      */
-    @Child(name = "owner", type = {Organization.class}, order=9, min=0, max=1)
+    @Child(name = "owner", type = {Organization.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who is responsible?", formalDefinition="Indicates the organization, department, etc. with responsibility for the account." )
     protected Reference owner;
 
@@ -201,7 +201,7 @@ public class Account extends DomainResource {
     /**
      * Provides additional information about what the account tracks and how it is used.
      */
-    @Child(name = "description", type = {StringType.class}, order=10, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Explanation of purpose/use", formalDefinition="Provides additional information about what the account tracks and how it is used." )
     protected StringType description;
 
@@ -688,7 +688,7 @@ public class Account extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="period", path="Account.coveragePeriod", description="Transaction window", type="date" )
   public static final String SP_PERIOD = "period";
-  @SearchParamDefinition(name="balance", path="Account.balance", description="How much is in account?", type="number" )
+  @SearchParamDefinition(name="balance", path="Account.balance", description="How much is in account?", type="quantity" )
   public static final String SP_BALANCE = "balance";
   @SearchParamDefinition(name="subject", path="Account.subject", description="What is account tied to?", type="reference" )
   public static final String SP_SUBJECT = "subject";

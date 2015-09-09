@@ -80,8 +80,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 	@Test
 	public void testTransactionWithXmlRequest() throws Exception {
 		Bundle b = new Bundle();
-		InstantType nowInstant = InstantType.withCurrentTime();
-
+		
 		Patient p1 = new Patient();
 		p1.addName().addFamily("Family1");
 		BundleEntryComponent entry = b.addEntry();
@@ -127,7 +126,6 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 	@Test
 	public void testTransactionWithJsonRequest() throws Exception {
 		Bundle b = new Bundle();
-		InstantType nowInstant = InstantType.withCurrentTime();
 
 		Patient p1 = new Patient();
 		p1.addName().addFamily("Family1");
@@ -177,7 +175,6 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		ourReturnOperationOutcome = true;
 
 		Bundle b = new Bundle();
-		InstantType nowInstant = InstantType.withCurrentTime();
 
 		Patient p1 = new Patient();
 		p1.addName().addFamily("Family1");
@@ -267,7 +264,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 
 			if (ourReturnOperationOutcome) {
 				OperationOutcome oo = new OperationOutcome();
-				oo.addIssue().setDetails("AAAAA");
+				oo.addIssue().setDiagnostics("AAAAA");
 				retVal.addEntry().setResource(oo);
 			}
 

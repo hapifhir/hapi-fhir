@@ -21,6 +21,14 @@ package ca.uhn.fhir.util;
  */
 
 public class ExtensionConstants {
+	
+	/**
+	 * Non instantiable
+	 */
+	private ExtensionConstants() {
+		// nothing
+	}
+	
 	public static final String PARAM_IS_REQUIRED = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#paramIsRequired";
 
 	public static final String QUERY_RETURN_TYPE = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#queryReturnType";

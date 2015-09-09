@@ -1,16 +1,25 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
@@ -50,27 +59,31 @@ import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.rest.annotation.Elements;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.util.UrlUtil;
 
 public class ClientDstu1Test {
 
@@ -168,7 +181,8 @@ public class ClientDstu1Test {
 	}
 
 	/**
-	 * Some servers (older ones?) return the resourcde you created instead of an OperationOutcome. We just need to ignore it.
+	 * Some servers (older ones?) return the resourcde you created instead of an OperationOutcome. We just need to ignore
+	 * it.
 	 */
 	@Test
 	public void testCreateWithResourceResponse() throws Exception {
@@ -245,7 +259,7 @@ public class ClientDstu1Test {
 
 		assertEquals(HttpDelete.class, capt.getValue().getClass());
 		assertEquals("http://foo/Patient/1234", capt.getValue().getURI().toString());
-		assertEquals("Hello", ((OperationOutcome)response.getOperationOutcome()).getIssueFirstRep().getDetailsElement().getValue());
+		assertEquals("Hello", ((OperationOutcome) response.getOperationOutcome()).getIssueFirstRep().getDetailsElement().getValue());
 	}
 
 	@Test
@@ -283,6 +297,7 @@ public class ClientDstu1Test {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testHistoryResourceInstance() throws Exception {
 
@@ -355,6 +370,7 @@ public class ClientDstu1Test {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testHistoryResourceType() throws Exception {
 
@@ -427,6 +443,7 @@ public class ClientDstu1Test {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testHistoryServer() throws Exception {
 		InstantDt date1 = new InstantDt(new Date(20000L));
@@ -552,7 +569,7 @@ public class ClientDstu1Test {
 		// TODO: remove the read annotation and make sure we get a sensible
 		// error message to tell the user why the method isn't working
 		FhirContext ctx = ourCtx;
-		ctx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		ClientWithoutAnnotation client = ctx.newRestfulClient(ClientWithoutAnnotation.class, "http://wildfhir.aegis.net/fhir");
 
@@ -583,8 +600,7 @@ public class ClientDstu1Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		Header[] headers = new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
-				new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+		Header[] headers = new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"), new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
 				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"") };
 
 		when(httpResponse.getAllHeaders()).thenReturn(headers);
@@ -776,6 +792,99 @@ public class ClientDstu1Test {
 	}
 
 	@Test
+	public void testSearchWithSummary() throws Exception {
+
+		final String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}
+		});
+
+		// httpResponse = new BasicHttpResponse(statusline, catalog, locale)
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+
+		ITestClientWithSummary client = ourCtx.newRestfulClient(ITestClientWithSummary.class, "http://foo");
+
+		int idx = 0;
+
+		client.getPatientWithIncludes((SummaryEnum) null);
+		assertEquals("http://foo/Patient", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		client.getPatientWithIncludes(SummaryEnum.COUNT);
+		assertEquals("http://foo/Patient?_summary=count", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		client.getPatientWithIncludes(SummaryEnum.DATA);
+		assertEquals("http://foo/Patient?_summary=data", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		client.getPatientWithIncludes(Arrays.asList(SummaryEnum.DATA));
+		assertEquals("http://foo/Patient?_summary=data", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		client.getPatientWithIncludes(Arrays.asList(SummaryEnum.COUNT, SummaryEnum.DATA));
+		assertThat(capt.getAllValues().get(idx).getURI().toString(), either(equalTo("http://foo/Patient?_summary=data&_summary=count")).or(equalTo("http://foo/Patient?_summary=count&_summary=data")));
+		idx++;
+
+		client.getPatientWithIncludes(new ArrayList<SummaryEnum>());
+		assertEquals("http://foo/Patient", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+	}
+
+	@Test
+	public void testSearchWithElements() throws Exception {
+
+		final String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}
+		});
+
+		// httpResponse = new BasicHttpResponse(statusline, catalog, locale)
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+
+		ITestClientWithElements client = ourCtx.newRestfulClient(ITestClientWithElements.class, "http://foo");
+
+		int idx = 0;
+
+		client.getPatientWithIncludes((String) null);
+		assertEquals("http://foo/Patient", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		client.getPatientWithIncludes((Set<String>) null);
+		assertEquals("http://foo/Patient", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		client.getPatientWithIncludes("test");
+		assertEquals("http://foo/Patient?_elements=test", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		client.getPatientWithIncludes("test,foo");
+		assertEquals("http://foo/Patient?_elements=test%2Cfoo", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		client.getPatientWithIncludes(new HashSet<String>(Arrays.asList("test","foo", "")));
+		assertEquals("http://foo/Patient?_elements=test%2Cfoo", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+	}
+
+	@Test
 	public void testSearchByCompartment() throws Exception {
 
 		String msg = getPatientFeedWithOneResult();
@@ -955,7 +1064,7 @@ public class ClientDstu1Test {
 
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 		client.setEncoding(EncodingEnum.JSON); // this needs to be actually
-												// implemented
+		// implemented
 		client.getPatientByDob(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02&_format=json", capt.getAllValues().get(1).getURI().toString());
 
@@ -978,12 +1087,32 @@ public class ClientDstu1Test {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
-		client.getPatientWithIncludes(new StringParam("aaa"), Arrays.asList(new Include[] { new Include("inc1"), new Include("inc2") }));
+		client.getPatientWithIncludes(new StringParam("aaa"), Arrays.asList(new Include[] { new Include("inc1"), new Include("inc2", true), new Include("inc3", true) }));
 
-		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1&_include=inc2", capt.getValue().getURI().toString());
+		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1&_include%3Arecurse=inc2&_include%3Arecurse=inc3", capt.getValue().getURI().toString());
 
 	}
 
+	@Test
+	public void testSearchWithGlobalSummary() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
+		client.setSummary(SummaryEnum.DATA);
+		client.findPatientByMrn(new TokenParam("sysm", "val"));
+
+		assertEquals("http://foo/Patient?identifier=sysm%7Cval&_summary=data", capt.getValue().getURI().toString());
+
+	}
+
+	
 	@Test
 	public void testSearchWithOptionalParam() throws Exception {
 
@@ -1016,6 +1145,31 @@ public class ClientDstu1Test {
 
 	}
 
+	@Test
+	public void testSearchWithEscapedValues() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
+		StringAndListParam andListParam = new StringAndListParam();
+		StringOrListParam orListParam1 = new StringOrListParam().addOr(new StringParam("NE,NE", false)).addOr(new StringParam("NE,NE", false));
+		StringOrListParam orListParam2 = new StringOrListParam().addOr(new StringParam("E$E", true));
+		StringOrListParam orListParam3 = new StringOrListParam().addOr(new StringParam("NE\\NE", false));
+		StringOrListParam orListParam4 = new StringOrListParam().addOr(new StringParam("E|E", true));
+		client.findPatient(andListParam.addAnd(orListParam1).addAnd(orListParam2).addAnd(orListParam3).addAnd(orListParam4));
+		
+		assertThat(capt.getValue().getURI().toString(), containsString("%3A"));
+		assertEquals("http://foo/Patient?param=NE\\,NE,NE\\,NE&param=NE\\\\NE&param:exact=E\\$E&param:exact=E\\|E", UrlUtil.unescape(capt.getValue().getURI().toString()));
+		
+	}
+
+	
 	@Test
 	public void testSearchByCompositeParam() throws Exception {
 
@@ -1204,36 +1358,6 @@ public class ClientDstu1Test {
 
 	}
 
-	@Test
-	public void testNarrativeModeParam() throws Exception {
-		final String msg = getPatientFeedWithOneResult();
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
-			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}
-		});
-
-		ITestClientWithNarrativeParam client = ourCtx.newRestfulClient(ITestClientWithNarrativeParam.class, "http://foo");
-
-		int idx = 0;
-
-		Patient response = client.getPatients(null);
-		assertEquals("http://foo/Patient", capt.getAllValues().get(idx).getURI().toString());
-		assertNotNull(response);
-		idx++;
-
-		response = client.getPatients(NarrativeModeEnum.ONLY);
-		assertEquals("http://foo/Patient?_narrative=only", capt.getAllValues().get(idx).getURI().toString());
-		assertNotNull(response);
-
-	}
-
 	private Header[] toHeaderArray(String theName, String theValue) {
 		return new Header[] { new BasicHeader(theName, theValue) };
 	}
@@ -1244,6 +1368,9 @@ public class ClientDstu1Test {
 
 	@ResourceDef(name = "Patient")
 	public static class CustomPatient extends Patient {
+
+		private static final long serialVersionUID = 1L;
+
 		// nothing
 	}
 
@@ -1262,9 +1389,22 @@ public class ClientDstu1Test {
 		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringParam theString, @IncludeParam String theInclude);
 	}
 
-	public interface ITestClientWithNarrativeParam extends IBasicClient {
+	public interface ITestClientWithSummary extends IBasicClient {
 		@Search()
-		public Patient getPatients(NarrativeModeEnum theNarrativeMode);
+		public List<Patient> getPatientWithIncludes(SummaryEnum theSummary);
+
+		@Search()
+		public List<Patient> getPatientWithIncludes(List<SummaryEnum> theSummary);
+
+	}
+
+	public interface ITestClientWithElements extends IBasicClient {
+		@Search()
+		public List<Patient> getPatientWithIncludes(@Elements String theElements);
+
+		@Search()
+		public List<Patient> getPatientWithIncludes(@Elements Set<String> theElements);
+
 	}
 
 }

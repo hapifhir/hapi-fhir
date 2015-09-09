@@ -2,7 +2,7 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
 	<properties>
-		<title>RESTful Operations - HAPI FHIR</title>
+		<title>RESTful Operations</title>
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
 	</properties>
 
@@ -1524,6 +1524,25 @@
 				</p>
 				
 			</subsection>
+			
+		</section>
+
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+
+		<section name="_summary and _elements">
+			
+			The <code>_summary</code> and <code>_elements</code> parameters are
+			automatically handled by the server, so no coding is required to make this
+			work. If you wish to add parameters to manually handle these fields however,
+			the following example shows how to access these.
+			
+			<macro name="snippet">
+				<param name="id" value="summaryAndElements" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+			
 			
 			<a name="compartments" />
 		</section>

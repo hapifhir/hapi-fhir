@@ -19,8 +19,8 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -61,9 +61,10 @@ import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
-import ca.uhn.fhir.rest.method.OtherOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -77,13 +78,13 @@ import ca.uhn.fhir.util.VersionUtil;
 
 public class RestfulServer extends HttpServlet {
 
+	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
+	private static final long serialVersionUID = 1L;
 	/**
 	 * Default setting for {@link #setETagSupport(ETagSupportEnum) ETag Support}: {@link ETagSupportEnum#ENABLED}
 	 */
 	public static final ETagSupportEnum DEFAULT_ETAG_SUPPORT = ETagSupportEnum.ENABLED;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
-
-	private static final long serialVersionUID = 1L;
 	private AddProfileTagEnum myAddProfileTag;
 	private BundleInclusionRule myBundleInclusionRule = BundleInclusionRule.BASED_ON_INCLUDES;
 	private boolean myDefaultPrettyPrint = false;
@@ -109,9 +110,8 @@ public class RestfulServer extends HttpServlet {
 	private Lock myProviderRegistrationMutex = new ReentrantLock();
 
 	/**
-	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or
-	 * through {@link #setFhirContext(FhirContext)}) the server will determine which version of FHIR to support through
-	 * classpath scanning. This is brittle, and it is highly recommended to explicitly specify a FHIR version.
+	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or through {@link #setFhirContext(FhirContext)}) the server will determine which
+	 * version of FHIR to support through classpath scanning. This is brittle, and it is highly recommended to explicitly specify a FHIR version.
 	 */
 	public RestfulServer() {
 		this(null);
@@ -127,8 +127,7 @@ public class RestfulServer extends HttpServlet {
 	/**
 	 * This method is called prior to sending a response to incoming requests. It is used to add custom headers.
 	 * <p>
-	 * Use caution if overriding this method: it is recommended to call <code>super.addHeadersToResponse</code> to avoid
-	 * inadvertantly disabling functionality.
+	 * Use caution if overriding this method: it is recommended to call <code>super.addHeadersToResponse</code> to avoid inadvertantly disabling functionality.
 	 * </p>
 	 */
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
@@ -264,14 +263,13 @@ public class RestfulServer extends HttpServlet {
 			if (foundMethodBinding == null) {
 				continue;
 			}
-			
+
 			count++;
-			
+
 			if (foundMethodBinding instanceof ConformanceMethodBinding) {
 				myServerConformanceMethod = foundMethodBinding;
 				continue;
 			}
-
 
 			if (!Modifier.isPublic(m.getModifiers())) {
 				throw new ConfigurationException("Method '" + m.getName() + "' is not public, FHIR RESTful methods must be public");
@@ -333,9 +331,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Returns the default encoding to return (XML/JSON) if an incoming request does not specify a preference (either
-	 * with the <code>_format</code> URL parameter, or with an <code>Accept</code> header in the request. The default is
-	 * {@link EncodingEnum#XML}.
+	 * Returns the default encoding to return (XML/JSON) if an incoming request does not specify a preference (either with the <code>_format</code> URL parameter, or with an <code>Accept</code> header
+	 * in the request. The default is {@link EncodingEnum#XML}. Will not return null.
 	 */
 	public EncodingEnum getDefaultResponseEncoding() {
 		return myDefaultResponseEncoding;
@@ -349,8 +346,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain
-	 * providers should generally use this context if one is needed, as opposed to creating their own.
+	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain providers should generally use this context if one is needed, as opposed to
+	 * creating their own.
 	 */
 	public FhirContext getFhirContext() {
 		if (myFhirContext == null) {
@@ -384,8 +381,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Allows users of RestfulServer to override the getRequestPath method to let them build their custom request path
-	 * implementation
+	 * Allows users of RestfulServer to override the getRequestPath method to let them build their custom request path implementation
 	 *
 	 * @param requestFullPath
 	 *           the full request path
@@ -411,8 +407,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Get the server address strategy, which is used to determine what base URL to provide clients to refer to this
-	 * server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
+	 * Get the server address strategy, which is used to determine what base URL to provide clients to refer to this server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
 	 */
 	public IServerAddressStrategy getServerAddressStrategy() {
 		return myServerAddressStrategy;
@@ -432,19 +427,17 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Returns the method bindings for this server which are not specific to any particular resource type. This method is
-	 * internal to HAPI and developers generally do not need to interact with it. Use with caution, as it may change.
+	 * Returns the method bindings for this server which are not specific to any particular resource type. This method is internal to HAPI and developers generally do not need to interact with it. Use
+	 * with caution, as it may change.
 	 */
 	public List<BaseMethodBinding<?>> getServerBindings() {
 		return myServerBinding.getMethodBindings();
 	}
 
 	/**
-	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
-	 * (metadata) statement if one has been explicitly defined.
+	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance (metadata) statement if one has been explicitly defined.
 	 * <p>
-	 * By default, the ServerConformanceProvider for the declared version of FHIR is used, but this can be changed, or
-	 * set to <code>null</code> to use the appropriate one for the given FHIR version.
+	 * By default, the ServerConformanceProvider for the declared version of FHIR is used, but this can be changed, or set to <code>null</code> to use the appropriate one for the given FHIR version.
 	 * </p>
 	 */
 	public Object getServerConformanceProvider() {
@@ -452,8 +445,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only,
-	 * but can be helpful to set with something appropriate.
+	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 *
 	 * @see RestfulServer#setServerName(String)
 	 */
@@ -466,8 +458,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational only,
-	 * but can be helpful to set with something appropriate.
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 */
 	public String getServerVersion() {
 		return myServerVersion;
@@ -503,7 +494,7 @@ public class RestfulServer extends HttpServlet {
 		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest());
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(this, theRequest);
 		boolean requestIsBrowser = requestIsBrowser(theRequest.getServletRequest());
-		NarrativeModeEnum narrativeMode = RestfulServerUtils.determineNarrativeMode(theRequest);
+		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
 		boolean respondGzip = theRequest.isRespondGzip();
 
 		IVersionSpecificBundleFactory bundleFactory = getFhirContext().newBundleFactory();
@@ -531,7 +522,7 @@ public class RestfulServer extends HttpServlet {
 					return;
 				}
 			}
-			RestfulServerUtils.streamResponseAsBundle(this, theResponse, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip, requestIsBrowser);
+			RestfulServerUtils.streamResponseAsBundle(this, theResponse, bundle, theRequest.getFhirServerBase(), summaryMode, respondGzip, requestIsBrowser, theRequest);
 		} else {
 			IBaseResource resBundle = bundleFactory.getResourceBundle();
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
@@ -542,19 +533,11 @@ public class RestfulServer extends HttpServlet {
 					return;
 				}
 			}
-			RestfulServerUtils.streamResponseAsResource(this, theResponse, resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase(), false);
+			RestfulServerUtils.streamResponseAsResource(this, theResponse, resBundle, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), false, theRequest);
 		}
 	}
 
 	protected void handleRequest(RequestTypeEnum theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
-		for (IServerInterceptor next : myInterceptors) {
-			boolean continueProcessing = next.incomingRequestPreProcessed(theRequest, theResponse);
-			if (!continueProcessing) {
-				ourLog.debug("Interceptor {} returned false, not continuing processing");
-				return;
-			}
-		}
-
 		String fhirServerBase = null;
 		boolean requestIsBrowser = requestIsBrowser(theRequest);
 		RequestDetails requestDetails = new RequestDetails();
@@ -564,6 +547,14 @@ public class RestfulServer extends HttpServlet {
 		requestDetails.setServletResponse(theResponse);
 
 		try {
+
+			for (IServerInterceptor next : myInterceptors) {
+				boolean continueProcessing = next.incomingRequestPreProcessed(theRequest, theResponse);
+				if (!continueProcessing) {
+					ourLog.debug("Interceptor {} returned false, not continuing processing");
+					return;
+				}
+			}
 
 			String resourceName = null;
 			String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
@@ -693,12 +684,11 @@ public class RestfulServer extends HttpServlet {
 
 			String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
 			if (getPagingProvider() != null && isNotBlank(pagingAction)) {
-				requestDetails.setOtherOperationType(OtherOperationTypeEnum.GET_PAGE);
+				requestDetails.setRestOperationType(RestOperationTypeEnum.GET_PAGE);
 				if (theRequestType != RequestTypeEnum.GET) {
 					/*
-					 * We reconstruct the link-self URL using the request parameters, and this would break if the parameters
-					 * came in using a POST. We could probably work around that but why bother unless someone comes up with a
-					 * reason for needing it.
+					 * We reconstruct the link-self URL using the request parameters, and this would break if the parameters came in using a POST. We could probably work around that but why bother unless
+					 * someone comes up with a reason for needing it.
 					 */
 					throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(RestfulServer.class, "getPagesNonHttpGet"));
 				}
@@ -718,11 +708,10 @@ public class RestfulServer extends HttpServlet {
 					throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "unknownMethod", theRequestType.name(), requestPath, params.keySet()));
 				}
 			}
-			
-			requestDetails.setResourceOperationType(resourceMethod.getResourceOperationType());
-			requestDetails.setSystemOperationType(resourceMethod.getSystemOperationType());
-			requestDetails.setOtherOperationType(resourceMethod.getOtherOperationType());
 
+			requestDetails.setRestOperationType(resourceMethod.getRestOperationType());
+
+			// Handle server interceptors
 			for (IServerInterceptor next : myInterceptors) {
 				boolean continueProcessing = next.incomingRequestPostProcessed(requestDetails, theRequest, theResponse);
 				if (!continueProcessing) {
@@ -731,6 +720,12 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
+			/*
+			 * Actualy invoke the server method. This call is to a HAPI method binding, which is an object that wraps a specific implementing (user-supplied) method, but handles its input and provides
+			 * its output back to the client.
+			 * 
+			 * This is basically the end of processing for a successful request, since the method binding replies to the client and closes the response.
+			 */
 			resourceMethod.invokeServer(this, requestDetails);
 
 		} catch (NotModifiedException e) {
@@ -762,6 +757,12 @@ public class RestfulServer extends HttpServlet {
 
 		} catch (Throwable e) {
 
+			/*
+			 * We have caught an exception during request processing. This might be because a handling method threw something they wanted to throw (e.g. UnprocessableEntityException because the request
+			 * had business requirement problems) or it could be due to bugs (e.g. NullPointerException).
+			 * 
+			 * First we let the interceptors have a crack at converting the exception into something HAPI can use (BaseServerResponseException)
+			 */
 			BaseServerResponseException exception = null;
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
@@ -772,12 +773,16 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
-			if (exception == null) {
-				exception = new ExceptionHandlingInterceptor().preProcessOutgoingException(requestDetails, e, theRequest);
-			}
-			
 			/*
-			 * We have caught an exception while handling an incoming server request. Start by notifying the interceptors..
+			 * If none of the interceptors converted the exception, default behaviour is to keep the exception as-is if it extends BaseServerResponseException, otherwise wrap it in an
+			 * InternalErrorException.
+			 */
+			if (exception == null) {
+				exception = DEFAULT_EXCEPTION_HANDLER.preProcessOutgoingException(requestDetails, e, theRequest);
+			}
+
+			/*
+			 * Next, interceptors get a shot at handling the exception
 			 */
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
@@ -787,16 +792,23 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
-			new ExceptionHandlingInterceptor().handleException(requestDetails, exception, theRequest, theResponse);
+			/*
+			 * If we're handling an exception, no summary mode should be applied
+			 */
+			requestDetails.getParameters().remove(Constants.PARAM_SUMMARY);
+			requestDetails.getParameters().remove(Constants.PARAM_ELEMENTS);
+			
+			/*
+			 * If nobody handles it, default behaviour is to stream back the OperationOutcome to the client.
+			 */
+			DEFAULT_EXCEPTION_HANDLER.handleException(requestDetails, exception, theRequest, theResponse);
 
 		}
 	}
 
-
 	/**
-	 * Initializes the server. Note that this method is final to avoid accidentally introducing bugs in implementations,
-	 * but subclasses may put initialization code in {@link #initialize()}, which is called immediately before beginning
-	 * initialization of the restful server's internal init.
+	 * Initializes the server. Note that this method is final to avoid accidentally introducing bugs in implementations, but subclasses may put initialization code in {@link #initialize()}, which is
+	 * called immediately before beginning initialization of the restful server's internal init.
 	 */
 	@Override
 	public final void init() throws ServletException {
@@ -858,15 +870,12 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the
-	 * server being used.
+	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the server being used.
 	 * 
 	 * @throws ServletException
-	 *            If the initialization failed. Note that you should consider throwing {@link UnavailableException}
-	 *            (which extends {@link ServletException}), as this is a flag to the servlet container that the servlet
-	 *            is not usable.
+	 *            If the initialization failed. Note that you should consider throwing {@link UnavailableException} (which extends {@link ServletException}), as this is a flag to the servlet container
+	 *            that the servlet is not usable.
 	 */
-	@SuppressWarnings("unused")
 	protected void initialize() throws ServletException {
 		// nothing by default
 	}
@@ -1069,8 +1078,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Should the server "pretty print" responses by default (requesting clients can always override this default by
-	 * supplying an <code>Accept</code> header in the request, or a <code>_pretty</code> parameter in the request URL.
+	 * Should the server "pretty print" responses by default (requesting clients can always override this default by supplying an <code>Accept</code> header in the request, or a <code>_pretty</code>
+	 * parameter in the request URL.
 	 * <p>
 	 * The default is <code>false</code>
 	 * </p>
@@ -1091,9 +1100,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Sets the profile tagging behaviour for the server. When set to a value other than {@link AddProfileTagEnum#NEVER}
-	 * (which is the default), the server will automatically add a profile tag based on the class of the resource(s)
-	 * being returned.
+	 * Sets the profile tagging behaviour for the server. When set to a value other than {@link AddProfileTagEnum#NEVER} (which is the default), the server will automatically add a profile tag based on
+	 * the class of the resource(s) being returned.
 	 *
 	 * @param theAddProfileTag
 	 *           The behaviour enum (must not be null)
@@ -1114,8 +1122,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Should the server "pretty print" responses by default (requesting clients can always override this default by
-	 * supplying an <code>Accept</code> header in the request, or a <code>_pretty</code> parameter in the request URL.
+	 * Should the server "pretty print" responses by default (requesting clients can always override this default by supplying an <code>Accept</code> header in the request, or a <code>_pretty</code>
+	 * parameter in the request URL.
 	 * <p>
 	 * The default is <code>false</code>
 	 * </p>
@@ -1128,9 +1136,11 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Sets the default encoding to return (XML/JSON) if an incoming request does not specify a preference (either with
-	 * the <code>_format</code> URL parameter, or with an <code>Accept</code> header in the request. The default is
-	 * {@link EncodingEnum#XML}.
+	 * Sets the default encoding to return (XML/JSON) if an incoming request does not specify a preference (either with the <code>_format</code> URL parameter, or with an <code>Accept</code> header in
+	 * the request. The default is {@link EncodingEnum#XML}.
+	 * <p>
+	 * Note when testing this feature: Some browsers will include "application/xml" in their Accept header, which means that the
+	 * </p>
 	 */
 	public void setDefaultResponseEncoding(EncodingEnum theDefaultResponseEncoding) {
 		Validate.notNull(theDefaultResponseEncoding, "theDefaultResponseEncoding can not be null");
@@ -1138,8 +1148,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Sets (enables/disables) the server support for ETags. Must not be <code>null</code>. Default is
-	 * {@link #DEFAULT_ETAG_SUPPORT}
+	 * Sets (enables/disables) the server support for ETags. Must not be <code>null</code>. Default is {@link #DEFAULT_ETAG_SUPPORT}
 	 * 
 	 * @param theETagSupport
 	 *           The ETag support mode
@@ -1235,8 +1244,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Provide a server address strategy, which is used to determine what base URL to provide clients to refer to this
-	 * server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
+	 * Provide a server address strategy, which is used to determine what base URL to provide clients to refer to this server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
 	 */
 	public void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy) {
 		Validate.notNull(theServerAddressStrategy, "Server address strategy can not be null");
@@ -1244,17 +1252,15 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
-	 * (metadata) statement.
+	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance (metadata) statement.
 	 * <p>
-	 * By default, the ServerConformanceProvider implementation for the declared version of FHIR is used, but this can be
-	 * changed, or set to <code>null</code> if you do not wish to export a conformance statement.
+	 * By default, the ServerConformanceProvider implementation for the declared version of FHIR is used, but this can be changed, or set to <code>null</code> if you do not wish to export a conformance
+	 * statement.
 	 * </p>
 	 * Note that this method can only be called before the server is initialized.
 	 *
 	 * @throws IllegalStateException
-	 *            Note that this method can only be called prior to {@link #init() initialization} and will throw an
-	 *            {@link IllegalStateException} if called after that.
+	 *            Note that this method can only be called prior to {@link #init() initialization} and will throw an {@link IllegalStateException} if called after that.
 	 */
 	public void setServerConformanceProvider(Object theServerConformanceProvider) {
 		if (myStarted) {
@@ -1277,24 +1283,22 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Sets the server's name, as exported in conformance profiles exported by the server. This is informational only,
-	 * but can be helpful to set with something appropriate.
+	 * Sets the server's name, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 */
 	public void setServerName(String theServerName) {
 		myServerName = theServerName;
 	}
 
 	/**
-	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational only,
-	 * but can be helpful to set with something appropriate.
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 */
 	public void setServerVersion(String theServerVersion) {
 		myServerVersion = theServerVersion;
 	}
 
 	/**
-	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of
-	 * standard FHIR ones) when it detects that the request is coming from a browser instead of a FHIR
+	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of standard FHIR ones) when it detects that the request is coming from a browser
+	 * instead of a FHIR
 	 */
 	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
 		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
@@ -1322,11 +1326,4 @@ public class RestfulServer extends HttpServlet {
 		return userAgent != null && userAgent.contains("Mozilla");
 	}
 
-	public enum NarrativeModeEnum {
-		NORMAL, ONLY, SUPPRESS;
-
-		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
-			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
-		}
-	}
 }

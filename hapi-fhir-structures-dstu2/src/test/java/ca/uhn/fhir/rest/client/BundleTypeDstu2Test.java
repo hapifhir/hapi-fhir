@@ -27,6 +27,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class BundleTypeDstu2Test {
@@ -74,4 +76,18 @@ public class BundleTypeDstu2Test {
 
 		assertThat(body, Matchers.containsString("<type value=\"" + BundleTypeEnum.TRANSACTION.getCode()));
 	}
+	
+	
+	public static void main(String[] args) {
+		
+		FhirContext ctx = FhirContext.forDstu2();
+		IGenericClient client = ctx.newRestfulGenericClient("http://54.165.58.158:8081/FHIRServer/fhir");
+		client.registerInterceptor(new BearerTokenAuthInterceptor("AN3uCTC5B"));
+		client.registerInterceptor(new LoggingInterceptor(true));
+		Bundle result = client.search().forResource(Patient.class).where(Patient.NAME.matches().value("Alice")).execute();
+		
+		System.out.println(result.getEntries().size());
+		
+	}
+	
 }

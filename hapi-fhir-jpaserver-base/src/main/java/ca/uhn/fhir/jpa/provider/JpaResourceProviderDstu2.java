@@ -52,6 +52,9 @@ import ca.uhn.fhir.validation.ValidationResult;
 
 public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResourceProvider<T> {
 
+	public static final String OPERATION_NAME_META = "$meta";
+	public static final String OPERATION_NAME_META_DELETE = "$meta-delete";
+	public static final String OPERATION_NAME_META_ADD = "$meta-add";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaResourceProviderDstu2.class);
 
 	public JpaResourceProviderDstu2() {
@@ -91,7 +94,7 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	}
 
 	//@formatter:off
-	@Operation(name="$meta", idempotent=true, returnParameters= {
+	@Operation(name=OPERATION_NAME_META, idempotent=true, returnParameters= {
 		@OperationParam(name="return", type=MetaDt.class)
 	})
 	//@formatter:on
@@ -103,7 +106,7 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	}
 
 	//@formatter:off
-	@Operation(name="$meta", idempotent=true, returnParameters= {
+	@Operation(name=OPERATION_NAME_META, idempotent=true, returnParameters= {
 		@OperationParam(name="return", type=MetaDt.class)
 	})
 	//@formatter:on
@@ -115,7 +118,7 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	}
 
 	//@formatter:off
-	@Operation(name="$meta-add", idempotent=true, returnParameters= {
+	@Operation(name=OPERATION_NAME_META_ADD, idempotent=true, returnParameters= {
 		@OperationParam(name="return", type=MetaDt.class)
 	})
 	//@formatter:on
@@ -127,7 +130,7 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	}
 
 	//@formatter:off
-	@Operation(name="$meta-delete", idempotent=true, returnParameters= {
+	@Operation(name=OPERATION_NAME_META_DELETE, idempotent=true, returnParameters= {
 		@OperationParam(name="return", type=MetaDt.class)
 	})
 	//@formatter:on

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -152,7 +152,7 @@ public class Person extends DomainResource {
         /**
          * The resource to which this actual person is associated.
          */
-        @Child(name = "target", type = {Patient.class, Practitioner.class, RelatedPerson.class, Person.class}, order=1, min=1, max=1)
+        @Child(name = "target", type = {Patient.class, Practitioner.class, RelatedPerson.class, Person.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The resource to which this actual person is associated", formalDefinition="The resource to which this actual person is associated." )
         protected Reference target;
 
@@ -164,7 +164,7 @@ public class Person extends DomainResource {
         /**
          * Level of assurance that this link is actually associated with the target resource.
          */
-        @Child(name = "assurance", type = {CodeType.class}, order=2, min=0, max=1)
+        @Child(name = "assurance", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="level1 | level2 | level3 | level4", formalDefinition="Level of assurance that this link is actually associated with the target resource." )
         protected Enumeration<IdentityAssuranceLevel> assurance;
 
@@ -317,56 +317,56 @@ public class Person extends DomainResource {
     /**
      * Identifier for a person within a particular scope.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A Human identifier for this person", formalDefinition="Identifier for a person within a particular scope." )
     protected List<Identifier> identifier;
 
     /**
      * A name associated with the person.
      */
-    @Child(name = "name", type = {HumanName.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "name", type = {HumanName.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="A name associated with the person", formalDefinition="A name associated with the person." )
     protected List<HumanName> name;
 
     /**
      * A contact detail for the person, e.g. a telephone number or an email address.
      */
-    @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="A contact detail for the person", formalDefinition="A contact detail for the person, e.g. a telephone number or an email address." )
     protected List<ContactPoint> telecom;
 
     /**
      * Administrative Gender.
      */
-    @Child(name = "gender", type = {CodeType.class}, order=3, min=0, max=1)
+    @Child(name = "gender", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender." )
     protected Enumeration<AdministrativeGender> gender;
 
     /**
      * The birth date for the person.
      */
-    @Child(name = "birthDate", type = {DateType.class}, order=4, min=0, max=1)
+    @Child(name = "birthDate", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The date on which the person was born", formalDefinition="The birth date for the person." )
     protected DateType birthDate;
 
     /**
      * One or more addresses for the person.
      */
-    @Child(name = "address", type = {Address.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "address", type = {Address.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="One or more addresses for the person", formalDefinition="One or more addresses for the person." )
     protected List<Address> address;
 
     /**
      * An image that can be displayed as a thumbnail of the person to enhance the identification of the individual.
      */
-    @Child(name = "photo", type = {Attachment.class}, order=6, min=0, max=1)
+    @Child(name = "photo", type = {Attachment.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Image of the Person", formalDefinition="An image that can be displayed as a thumbnail of the person to enhance the identification of the individual." )
     protected Attachment photo;
 
     /**
      * The Organization that is the custodian of the person record.
      */
-    @Child(name = "managingOrganization", type = {Organization.class}, order=7, min=0, max=1)
+    @Child(name = "managingOrganization", type = {Organization.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The Organization that is the custodian of the person record", formalDefinition="The Organization that is the custodian of the person record." )
     protected Reference managingOrganization;
 
@@ -378,14 +378,14 @@ public class Person extends DomainResource {
     /**
      * Whether this person's record is in active use.
      */
-    @Child(name = "active", type = {BooleanType.class}, order=8, min=0, max=1)
+    @Child(name = "active", type = {BooleanType.class}, order=8, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="This person's record is in active use", formalDefinition="Whether this person's record is in active use." )
     protected BooleanType active;
 
     /**
      * Link to a resource that concerns the same actual person.
      */
-    @Child(name = "link", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "link", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Link to a resource that concerns the same actual person", formalDefinition="Link to a resource that concerns the same actual person." )
     protected List<PersonLinkComponent> link;
 
@@ -919,8 +919,10 @@ public class Person extends DomainResource {
   public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
   @SearchParamDefinition(name="address-country", path="Person.address.country", description="A country specified in an address", type="string" )
   public static final String SP_ADDRESSCOUNTRY = "address-country";
-  @SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
+  @SearchParamDefinition(name="phonetic", path="Person.name", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
+  @SearchParamDefinition(name="phone", path="Person.telecom(system=phone)", description="A value in a phone contact", type="token" )
+  public static final String SP_PHONE = "phone";
   @SearchParamDefinition(name="patient", path="Person.link.target", description="The Person links to this Patient", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="organization", path="Person.managingOrganization", description="The organization at which this person record is being managed", type="reference" )
@@ -933,6 +935,8 @@ public class Person extends DomainResource {
   public static final String SP_TELECOM = "telecom";
   @SearchParamDefinition(name="address-city", path="Person.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESSCITY = "address-city";
+  @SearchParamDefinition(name="email", path="Person.telecom(system=email)", description="A value in an email contact", type="token" )
+  public static final String SP_EMAIL = "email";
 
 }
 

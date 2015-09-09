@@ -23,59 +23,126 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 
 /**
- * Represents a FHIR resource path specification, e.g.
- * <code>Patient.gender.coding</code>
+ * Represents a FHIR resource path specification, e.g. <code>Patient:name</code>
  * <p>
- * Note on equality: This class uses the {@link Include#setValue(String) value} 
- * as the single item used to provide {@link #hashCode()} and {@link #equals(Object)}.
+ * Note on equality: This class uses {@link #getValue() value} and the {@link #isRecurse() recurse} properties to test
+ * equality. Prior to HAPI 1.2 (and FHIR DSTU2) the recurse property did not exist, so this may merit consideration when
+ * upgrading servers.
  * </p>
  */
 public class Include {
 
+	private boolean myRecurse;
 	private String myValue;
+	private boolean myImmutable;
 
+	/**
+	 * Constructor for <b>non-recursive</b> include
+	 * 
+	 * @param theValue
+	 *           The <code>_include</code> value, e.g. "Patient:name"
+	 */
 	public Include(String theValue) {
 		myValue = theValue;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if ((obj instanceof Include)==false)
-			return false;
-		Include other = (Include) obj;
-		if (myValue == null) {
-			if (other.myValue != null)
-				return false;
-		} else if (!myValue.equals(other.myValue))
-			return false;
-		return true;
+	/**
+	 * Constructor for <b>non-recursive</b> include
+	 * 
+	 * @param theValue
+	 *           The <code>_include</code> value, e.g. "Patient:name"
+	 * @param theRecurse
+	 *           Should the include recurse
+	 */
+	public Include(String theValue, boolean theRecurse) {
+		myValue = theValue;
+		myRecurse = theRecurse;
+	}
+
+	/**
+	 * Creates a copy of this include with non-recurse behaviour
+	 */
+	public Include asNonRecursive() {
+		return new Include(myValue, false);
+	}
+
+	/**
+	 * Creates a copy of this include with recurse behaviour
+	 */
+	public Include asRecursive() {
+		return new Include(myValue, true);
 	}
 
 	public String getValue() {
 		return myValue;
 	}
 
+	/**
+	 * See the note on equality on the {@link Include class documentation}
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + (myRecurse ? 1231 : 1237);
 		result = prime * result + ((myValue == null) ? 0 : myValue.hashCode());
 		return result;
 	}
 
+	/**
+	 * See the note on equality on the {@link Include class documentation}
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Include other = (Include) obj;
+		if (myRecurse != other.myRecurse) {
+			return false;
+		}
+		if (myValue == null) {
+			if (other.myValue != null) {
+				return false;
+			}
+		} else if (!myValue.equals(other.myValue)) {
+			return false;
+		}
+		return true;
+	}
+
+	public boolean isRecurse() {
+		return myRecurse;
+	}
+
+	public void setRecurse(boolean theRecurse) {
+		myRecurse = theRecurse;
+	}
+
 	public void setValue(String theValue) {
+		if (myImmutable) {
+			throw new IllegalStateException("Can not change the value of this include");
+		}
 		myValue = theValue;
 	}
 
+	public Include toLocked() {
+		Include retVal = new Include(myValue, myRecurse);
+		retVal.myImmutable = true;
+		return retVal;
+	}
+	
 	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this);
-		builder.append("myValue", myValue);
+		builder.append("value", myValue);
+		builder.append("recurse", myRecurse);
 		return builder.toString();
 	}
-	
 }

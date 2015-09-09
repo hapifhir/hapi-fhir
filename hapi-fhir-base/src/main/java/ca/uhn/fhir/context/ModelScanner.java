@@ -19,8 +19,7 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,7 +52,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
-import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -328,7 +326,8 @@ class ModelScanner {
 				Class<? extends IPrimitiveType<?>> resClass = (Class<? extends IPrimitiveType<?>>) theClass;
 				scanPrimitiveDatatype(resClass, datatypeDefinition);
 			} else {
-				throw new ConfigurationException("Resource type contains a @" + DatatypeDef.class.getSimpleName() + " annotation but does not implement " + IDatatype.class.getCanonicalName() + ": " + theClass.getCanonicalName());
+				return;
+//				throw new ConfigurationException("Resource type contains a @" + DatatypeDef.class.getSimpleName() + " annotation but does not implement " + IDatatype.class.getCanonicalName() + ": " + theClass.getCanonicalName());
 			}
 		}
 
@@ -627,12 +626,6 @@ class ModelScanner {
 					} else if (IBaseEnumeration.class.isAssignableFrom(nextElementType)) {
 						Class<?> binderType = ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(next);
 						def = new RuntimeChildPrimitiveEnumerationDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binderType);
-					} else if (childAnnotation.enumFactory().getSimpleName().equals("NoEnumFactory") == false) {
-						Class<? extends IBaseEnumFactory<?>> enumFactory = childAnnotation.enumFactory();
-						def = new RuntimeChildEnumerationDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, enumFactory);
-						// } else if ("id".equals(elementName) && IIdType.class.isAssignableFrom(nextDatatype)) {
-						// def = new RuntimeChildIdDatatypeDefinition(next, elementName, descriptionAnnotation,
-						// childAnnotation, nextDatatype);
 					} else {
 						def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
 					}
@@ -813,6 +806,8 @@ class ModelScanner {
 						try {
 							// Datatypes
 
+							ourLog.warn("NEXT: {}", nextValue);
+							
 							@SuppressWarnings("unchecked")
 							Class<? extends IBase> dtType = (Class<? extends IBase>) Class.forName(nextValue);
 							retVal.add(dtType);

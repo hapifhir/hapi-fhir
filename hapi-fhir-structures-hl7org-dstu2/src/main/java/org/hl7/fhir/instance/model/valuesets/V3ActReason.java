@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 public enum V3ActReason {
@@ -1957,7 +1957,7 @@ public enum V3ActReason {
             case RELIG: return "Definition:The patient or their guardian objects to receiving the vaccine on religious grounds.";
             case VACEFF: return "Definition:The intended vaccine has expired or is otherwise believed to no longer be effective.\r\n\n                        \n                           Example:Due to temperature exposure.";
             case VACSAF: return "Definition:The patient or their guardian objects to receiving the vaccine because of concerns over its safety.";
-            case _ACTSUPPLYFULFILLMENTREFUSALREASON: return "Indicates why a fulfiller refused to fulfill a supply order, and considered it important to notify other providers of their decision.  E.g. 'Suspect fraud', 'Possible abuse', 'Contraindicated'.\r\n\n                        (used when capturing 'refusal to fill' annotations)";
+            case _ACTSUPPLYFULFILLMENTREFUSALREASON: return "Indicates why a fulfiller refused to fulfill a supply order, and considered it important to notify other providers of their decision.  E.g. \"Suspect fraud\", \"Possible abuse\", \"Contraindicated\".\r\n\n                        (used when capturing 'refusal to fill' annotations)";
             case FRR01: return "Definition:The order has been stopped by the prescriber but this fact has not necessarily captured electronically.\r\n\n                        \n                           Example:A verbal stop, a fax, etc.";
             case FRR02: return "Definition:Order has not been fulfilled within a reasonable amount of time, and may not be current.";
             case FRR03: return "Definition:Data needed to safely act on the order which was expected to become available independent of the order is not yet available\r\n\n                        \n                           Example:Lab results, diagnostic imaging, etc.";
@@ -2027,7 +2027,7 @@ public enum V3ActReason {
             case NOPICK: return "Definition:Patient did not come to get medication";
             case PATDEC: return "Definition:Patient changed their mind regarding obtaining medication";
             case QUANTCHG: return "Definition:Patient requested a revised quantity of medication";
-            case _PHARMACYSUPPLYEVENTSTOCKREASONCODE: return "Definition:A collection of concepts that indicates the reason for a 'bulk supply' of medication.";
+            case _PHARMACYSUPPLYEVENTSTOCKREASONCODE: return "Definition:A collection of concepts that indicates the reason for a \"bulk supply\" of medication.";
             case FLRSTCK: return "Definition:The bulk supply is issued to replenish a ward for local dispensing.  (Includes both mobile and fixed-location ward stocks.)";
             case LTC: return "Definition:The bulk supply will be administered within a long term care facility.";
             case OFFICE: return "Definition:The bulk supply is intended for general clinician office use.";

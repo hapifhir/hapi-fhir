@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -50,14 +50,14 @@ public class Order extends DomainResource {
         /**
          * Code specifies when request should be done. The code may simply be a priority code.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Code specifies when request should be done. The code may simply be a priority code", formalDefinition="Code specifies when request should be done. The code may simply be a priority code." )
         protected CodeableConcept code;
 
         /**
          * A formal schedule.
          */
-        @Child(name = "schedule", type = {Timing.class}, order=2, min=0, max=1)
+        @Child(name = "schedule", type = {Timing.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="A formal schedule", formalDefinition="A formal schedule." )
         protected Timing schedule;
 
@@ -162,21 +162,21 @@ public class Order extends DomainResource {
     /**
      * Identifiers assigned to this order by the orderer or by the receiver.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Identifiers assigned to this order by the orderer or by the receiver", formalDefinition="Identifiers assigned to this order by the orderer or by the receiver." )
     protected List<Identifier> identifier;
 
     /**
      * When the order was made.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=1, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the order was made", formalDefinition="When the order was made." )
     protected DateTimeType date;
 
     /**
      * Patient this order is about.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Substance.class}, order=2, min=0, max=1)
+    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Substance.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Patient this order is about", formalDefinition="Patient this order is about." )
     protected Reference subject;
 
@@ -188,7 +188,7 @@ public class Order extends DomainResource {
     /**
      * Who initiated the order.
      */
-    @Child(name = "source", type = {Practitioner.class, Organization.class}, order=3, min=0, max=1)
+    @Child(name = "source", type = {Practitioner.class, Organization.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who initiated the order", formalDefinition="Who initiated the order." )
     protected Reference source;
 
@@ -200,7 +200,7 @@ public class Order extends DomainResource {
     /**
      * Who is intended to fulfill the order.
      */
-    @Child(name = "target", type = {Organization.class, Device.class, Practitioner.class}, order=4, min=0, max=1)
+    @Child(name = "target", type = {Organization.class, Device.class, Practitioner.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who is intended to fulfill the order", formalDefinition="Who is intended to fulfill the order." )
     protected Reference target;
 
@@ -212,21 +212,21 @@ public class Order extends DomainResource {
     /**
      * Text - why the order was made.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=5, min=0, max=1)
+    @Child(name = "reason", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Text - why the order was made", formalDefinition="Text - why the order was made." )
     protected Type reason;
 
     /**
      * When order should be fulfilled.
      */
-    @Child(name = "when", type = {}, order=6, min=0, max=1)
+    @Child(name = "when", type = {}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When order should be fulfilled", formalDefinition="When order should be fulfilled." )
     protected OrderWhenComponent when;
 
     /**
      * What action is being ordered.
      */
-    @Child(name = "detail", type = {}, order=7, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "detail", type = {}, order=7, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="What action is being ordered", formalDefinition="What action is being ordered." )
     protected List<Reference> detail;
     /**

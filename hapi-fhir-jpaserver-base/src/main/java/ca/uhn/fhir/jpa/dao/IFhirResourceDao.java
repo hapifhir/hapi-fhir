@@ -90,6 +90,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	MetaDt metaGetOperation(IIdType theId);
 
+	Set<Long> processMatchUrl(String theMatchUrl);
+
 	/**
 	 * 
 	 * @param theId

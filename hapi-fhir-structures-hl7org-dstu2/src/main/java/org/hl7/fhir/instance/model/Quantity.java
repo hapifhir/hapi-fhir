@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -149,39 +149,39 @@ public class Quantity extends Type implements ICompositeType {
     /**
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value.
      */
-    @Child(name = "value", type = {DecimalType.class}, order=0, min=0, max=1)
+    @Child(name = "value", type = {DecimalType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Numerical value (with implicit precision)", formalDefinition="The value of the measured amount. The value includes an implicit precision in the presentation of the value." )
     protected DecimalType value;
 
     /**
      * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value.
      */
-    @Child(name = "comparator", type = {CodeType.class}, order=1, min=0, max=1)
-    @Description(shortDefinition="< | <= | >= | > - how to understand the value", formalDefinition="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is '<' , then the real value is < stated value." )
+    @Child(name = "comparator", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="< | <= | >= | > - how to understand the value", formalDefinition="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value." )
     protected Enumeration<QuantityComparator> comparator;
 
     /**
      * A human-readable form of the units.
      */
-    @Child(name = "units", type = {StringType.class}, order=2, min=0, max=1)
+    @Child(name = "unit", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Unit representation", formalDefinition="A human-readable form of the units." )
-    protected StringType units;
+    protected StringType unit;
 
     /**
      * The identification of the system that provides the coded form of the unit.
      */
-    @Child(name = "system", type = {UriType.class}, order=3, min=0, max=1)
+    @Child(name = "system", type = {UriType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="System that defines coded unit form", formalDefinition="The identification of the system that provides the coded form of the unit." )
     protected UriType system;
 
     /**
      * A computer processable form of the units in some unit representation system.
      */
-    @Child(name = "code", type = {CodeType.class}, order=4, min=0, max=1)
+    @Child(name = "code", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Coded form of the unit", formalDefinition="A computer processable form of the units in some unit representation system." )
     protected CodeType code;
 
-    private static final long serialVersionUID = -483422721L;
+    private static final long serialVersionUID = 1069574054L;
 
   /*
    * Constructor
@@ -289,50 +289,50 @@ public class Quantity extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #units} (A human-readable form of the units.). This is the underlying object with id, value and extensions. The accessor "getUnits" gives direct access to the value
+     * @return {@link #unit} (A human-readable form of the units.). This is the underlying object with id, value and extensions. The accessor "getUnit" gives direct access to the value
      */
-    public StringType getUnitsElement() { 
-      if (this.units == null)
+    public StringType getUnitElement() { 
+      if (this.unit == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Quantity.units");
+          throw new Error("Attempt to auto-create Quantity.unit");
         else if (Configuration.doAutoCreate())
-          this.units = new StringType(); // bb
-      return this.units;
+          this.unit = new StringType(); // bb
+      return this.unit;
     }
 
-    public boolean hasUnitsElement() { 
-      return this.units != null && !this.units.isEmpty();
+    public boolean hasUnitElement() { 
+      return this.unit != null && !this.unit.isEmpty();
     }
 
-    public boolean hasUnits() { 
-      return this.units != null && !this.units.isEmpty();
+    public boolean hasUnit() { 
+      return this.unit != null && !this.unit.isEmpty();
     }
 
     /**
-     * @param value {@link #units} (A human-readable form of the units.). This is the underlying object with id, value and extensions. The accessor "getUnits" gives direct access to the value
+     * @param value {@link #unit} (A human-readable form of the units.). This is the underlying object with id, value and extensions. The accessor "getUnit" gives direct access to the value
      */
-    public Quantity setUnitsElement(StringType value) { 
-      this.units = value;
+    public Quantity setUnitElement(StringType value) { 
+      this.unit = value;
       return this;
     }
 
     /**
      * @return A human-readable form of the units.
      */
-    public String getUnits() { 
-      return this.units == null ? null : this.units.getValue();
+    public String getUnit() { 
+      return this.unit == null ? null : this.unit.getValue();
     }
 
     /**
      * @param value A human-readable form of the units.
      */
-    public Quantity setUnits(String value) { 
+    public Quantity setUnit(String value) { 
       if (Utilities.noString(value))
-        this.units = null;
+        this.unit = null;
       else {
-        if (this.units == null)
-          this.units = new StringType();
-        this.units.setValue(value);
+        if (this.unit == null)
+          this.unit = new StringType();
+        this.unit.setValue(value);
       }
       return this;
     }
@@ -438,8 +438,8 @@ public class Quantity extends Type implements ICompositeType {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("value", "decimal", "The value of the measured amount. The value includes an implicit precision in the presentation of the value.", 0, java.lang.Integer.MAX_VALUE, value));
-        childrenList.add(new Property("comparator", "code", "How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is '<' , then the real value is < stated value.", 0, java.lang.Integer.MAX_VALUE, comparator));
-        childrenList.add(new Property("units", "string", "A human-readable form of the units.", 0, java.lang.Integer.MAX_VALUE, units));
+        childrenList.add(new Property("comparator", "code", "How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value.", 0, java.lang.Integer.MAX_VALUE, comparator));
+        childrenList.add(new Property("unit", "string", "A human-readable form of the units.", 0, java.lang.Integer.MAX_VALUE, unit));
         childrenList.add(new Property("system", "uri", "The identification of the system that provides the coded form of the unit.", 0, java.lang.Integer.MAX_VALUE, system));
         childrenList.add(new Property("code", "code", "A computer processable form of the units in some unit representation system.", 0, java.lang.Integer.MAX_VALUE, code));
       }
@@ -449,7 +449,7 @@ public class Quantity extends Type implements ICompositeType {
         copyValues(dst);
         dst.value = value == null ? null : value.copy();
         dst.comparator = comparator == null ? null : comparator.copy();
-        dst.units = units == null ? null : units.copy();
+        dst.unit = unit == null ? null : unit.copy();
         dst.system = system == null ? null : system.copy();
         dst.code = code == null ? null : code.copy();
         return dst;
@@ -466,7 +466,7 @@ public class Quantity extends Type implements ICompositeType {
         if (!(other instanceof Quantity))
           return false;
         Quantity o = (Quantity) other;
-        return compareDeep(value, o.value, true) && compareDeep(comparator, o.comparator, true) && compareDeep(units, o.units, true)
+        return compareDeep(value, o.value, true) && compareDeep(comparator, o.comparator, true) && compareDeep(unit, o.unit, true)
            && compareDeep(system, o.system, true) && compareDeep(code, o.code, true);
       }
 
@@ -477,13 +477,13 @@ public class Quantity extends Type implements ICompositeType {
         if (!(other instanceof Quantity))
           return false;
         Quantity o = (Quantity) other;
-        return compareValues(value, o.value, true) && compareValues(comparator, o.comparator, true) && compareValues(units, o.units, true)
+        return compareValues(value, o.value, true) && compareValues(comparator, o.comparator, true) && compareValues(unit, o.unit, true)
            && compareValues(system, o.system, true) && compareValues(code, o.code, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (value == null || value.isEmpty()) && (comparator == null || comparator.isEmpty())
-           && (units == null || units.isEmpty()) && (system == null || system.isEmpty()) && (code == null || code.isEmpty())
+           && (unit == null || unit.isEmpty()) && (system == null || system.isEmpty()) && (code == null || code.isEmpty())
           ;
       }
 

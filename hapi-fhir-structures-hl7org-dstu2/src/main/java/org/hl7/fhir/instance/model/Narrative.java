@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -48,11 +48,11 @@ public class Narrative extends BaseNarrative implements INarrative {
 
     public enum NarrativeStatus {
         /**
-         * The contents of the narrative are entirely generated from the structured data in the resource.
+         * The contents of the narrative are entirely generated from the structured data in the content.
          */
         GENERATED, 
         /**
-         * The contents of the narrative are entirely generated from the structured data in the resource and some of the content is generated from extensions
+         * The contents of the narrative are entirely generated from the structured data in the content and some of the content is generated from extensions
          */
         EXTENSIONS, 
         /**
@@ -60,7 +60,7 @@ public class Narrative extends BaseNarrative implements INarrative {
          */
         ADDITIONAL, 
         /**
-         * the contents of the narrative are some equivalent of "No human-readable text provided for this resource"
+         * The contents of the narrative are some equivalent of "No human-readable text provided in this case"
          */
         EMPTY, 
         /**
@@ -100,10 +100,10 @@ public class Narrative extends BaseNarrative implements INarrative {
         }
         public String getDefinition() {
           switch (this) {
-            case GENERATED: return "The contents of the narrative are entirely generated from the structured data in the resource.";
-            case EXTENSIONS: return "The contents of the narrative are entirely generated from the structured data in the resource and some of the content is generated from extensions";
+            case GENERATED: return "The contents of the narrative are entirely generated from the structured data in the content.";
+            case EXTENSIONS: return "The contents of the narrative are entirely generated from the structured data in the content and some of the content is generated from extensions";
             case ADDITIONAL: return "The contents of the narrative contain additional information not found in the structured data";
-            case EMPTY: return "the contents of the narrative are some equivalent of 'No human-readable text provided for this resource'";
+            case EMPTY: return "The contents of the narrative are some equivalent of \"No human-readable text provided in this case\"";
             default: return "?";
           }
         }
@@ -149,14 +149,14 @@ public class Narrative extends BaseNarrative implements INarrative {
     /**
      * The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data.
      */
-    @Child(name = "status", type = {CodeType.class}, order=0, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="generated | extensions | additional | empty", formalDefinition="The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data." )
     protected Enumeration<NarrativeStatus> status;
 
     /**
      * The actual narrative content, a stripped down version of XHTML.
      */
-    @Child(name = "div", type = {}, order=1, min=1, max=1)
+    @Child(name = "div", type = {}, order=1, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Limited xhtml content", formalDefinition="The actual narrative content, a stripped down version of XHTML." )
     protected XhtmlNode div;
 

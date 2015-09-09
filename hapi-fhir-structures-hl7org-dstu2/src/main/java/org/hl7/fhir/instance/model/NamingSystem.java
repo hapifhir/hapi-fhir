@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -234,32 +234,191 @@ public class NamingSystem extends DomainResource {
     }
 
     @Block()
+    public static class NamingSystemContactComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The name of an individual to contact regarding the naming system.
+         */
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Name of a individual to contact", formalDefinition="The name of an individual to contact regarding the naming system." )
+        protected StringType name;
+
+        /**
+         * Contact details for individual (if a name was provided) or the publisher.
+         */
+        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
+        protected List<ContactPoint> telecom;
+
+        private static final long serialVersionUID = -1179697803L;
+
+    /*
+     * Constructor
+     */
+      public NamingSystemContactComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #name} (The name of an individual to contact regarding the naming system.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public StringType getNameElement() { 
+          if (this.name == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create NamingSystemContactComponent.name");
+            else if (Configuration.doAutoCreate())
+              this.name = new StringType(); // bb
+          return this.name;
+        }
+
+        public boolean hasNameElement() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        public boolean hasName() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        /**
+         * @param value {@link #name} (The name of an individual to contact regarding the naming system.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public NamingSystemContactComponent setNameElement(StringType value) { 
+          this.name = value;
+          return this;
+        }
+
+        /**
+         * @return The name of an individual to contact regarding the naming system.
+         */
+        public String getName() { 
+          return this.name == null ? null : this.name.getValue();
+        }
+
+        /**
+         * @param value The name of an individual to contact regarding the naming system.
+         */
+        public NamingSystemContactComponent setName(String value) { 
+          if (Utilities.noString(value))
+            this.name = null;
+          else {
+            if (this.name == null)
+              this.name = new StringType();
+            this.name.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
+         */
+        public List<ContactPoint> getTelecom() { 
+          if (this.telecom == null)
+            this.telecom = new ArrayList<ContactPoint>();
+          return this.telecom;
+        }
+
+        public boolean hasTelecom() { 
+          if (this.telecom == null)
+            return false;
+          for (ContactPoint item : this.telecom)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
+         */
+    // syntactic sugar
+        public ContactPoint addTelecom() { //3
+          ContactPoint t = new ContactPoint();
+          if (this.telecom == null)
+            this.telecom = new ArrayList<ContactPoint>();
+          this.telecom.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public NamingSystemContactComponent addTelecom(ContactPoint t) { //3
+          if (t == null)
+            return this;
+          if (this.telecom == null)
+            this.telecom = new ArrayList<ContactPoint>();
+          this.telecom.add(t);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("name", "string", "The name of an individual to contact regarding the naming system.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
+        }
+
+      public NamingSystemContactComponent copy() {
+        NamingSystemContactComponent dst = new NamingSystemContactComponent();
+        copyValues(dst);
+        dst.name = name == null ? null : name.copy();
+        if (telecom != null) {
+          dst.telecom = new ArrayList<ContactPoint>();
+          for (ContactPoint i : telecom)
+            dst.telecom.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof NamingSystemContactComponent))
+          return false;
+        NamingSystemContactComponent o = (NamingSystemContactComponent) other;
+        return compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof NamingSystemContactComponent))
+          return false;
+        NamingSystemContactComponent o = (NamingSystemContactComponent) other;
+        return compareValues(name, o.name, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
+          ;
+      }
+
+  }
+
+    @Block()
     public static class NamingSystemUniqueIdComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifies the unique identifier scheme used for this particular identifier.
          */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="oid | uuid | uri | other", formalDefinition="Identifies the unique identifier scheme used for this particular identifier." )
         protected Enumeration<NamingSystemIdentifierType> type;
 
         /**
          * The string that should be sent over the wire to identify the code system or identifier system.
          */
-        @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1)
+        @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The unique identifier", formalDefinition="The string that should be sent over the wire to identify the code system or identifier system." )
         protected StringType value;
 
         /**
          * Indicates whether this identifier is the "preferred" identifier of this type.
          */
-        @Child(name = "preferred", type = {BooleanType.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="Is this the id that should be used for this type", formalDefinition="Indicates whether this identifier is the 'preferred' identifier of this type." )
+        @Child(name = "preferred", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Is this the id that should be used for this type", formalDefinition="Indicates whether this identifier is the \"preferred\" identifier of this type." )
         protected BooleanType preferred;
 
         /**
          * Identifies the period of time over which this identifier is considered appropriate to refer to the namingsystem.  Outside of this window, the identifier might be non-deterministic.
          */
-        @Child(name = "period", type = {Period.class}, order=4, min=0, max=1)
+        @Child(name = "period", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="When is identifier valid?", formalDefinition="Identifies the period of time over which this identifier is considered appropriate to refer to the namingsystem.  Outside of this window, the identifier might be non-deterministic." )
         protected Period period;
 
@@ -444,7 +603,7 @@ public class NamingSystem extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "code", "Identifies the unique identifier scheme used for this particular identifier.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("value", "string", "The string that should be sent over the wire to identify the code system or identifier system.", 0, java.lang.Integer.MAX_VALUE, value));
-          childrenList.add(new Property("preferred", "boolean", "Indicates whether this identifier is the 'preferred' identifier of this type.", 0, java.lang.Integer.MAX_VALUE, preferred));
+          childrenList.add(new Property("preferred", "boolean", "Indicates whether this identifier is the \"preferred\" identifier of this type.", 0, java.lang.Integer.MAX_VALUE, preferred));
           childrenList.add(new Property("period", "Period", "Identifies the period of time over which this identifier is considered appropriate to refer to the namingsystem.  Outside of this window, the identifier might be non-deterministic.", 0, java.lang.Integer.MAX_VALUE, period));
         }
 
@@ -487,253 +646,94 @@ public class NamingSystem extends DomainResource {
 
   }
 
-    @Block()
-    public static class NamingSystemContactComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The name of an individual to contact regarding the naming system.
-         */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="Name of a individual to contact", formalDefinition="The name of an individual to contact regarding the naming system." )
-        protected StringType name;
-
-        /**
-         * Contact details for individual (if a name was provided) or the publisher.
-         */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
-        protected List<ContactPoint> telecom;
-
-        private static final long serialVersionUID = -1179697803L;
-
-    /*
-     * Constructor
-     */
-      public NamingSystemContactComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #name} (The name of an individual to contact regarding the naming system.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create NamingSystemContactComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (The name of an individual to contact regarding the naming system.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public NamingSystemContactComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return The name of an individual to contact regarding the naming system.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value The name of an individual to contact regarding the naming system.
-         */
-        public NamingSystemContactComponent setName(String value) { 
-          if (Utilities.noString(value))
-            this.name = null;
-          else {
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
-         */
-        public List<ContactPoint> getTelecom() { 
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          return this.telecom;
-        }
-
-        public boolean hasTelecom() { 
-          if (this.telecom == null)
-            return false;
-          for (ContactPoint item : this.telecom)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        /**
-         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
-         */
-    // syntactic sugar
-        public ContactPoint addTelecom() { //3
-          ContactPoint t = new ContactPoint();
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return t;
-        }
-
-    // syntactic sugar
-        public NamingSystemContactComponent addTelecom(ContactPoint t) { //3
-          if (t == null)
-            return this;
-          if (this.telecom == null)
-            this.telecom = new ArrayList<ContactPoint>();
-          this.telecom.add(t);
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of an individual to contact regarding the naming system.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        }
-
-      public NamingSystemContactComponent copy() {
-        NamingSystemContactComponent dst = new NamingSystemContactComponent();
-        copyValues(dst);
-        dst.name = name == null ? null : name.copy();
-        if (telecom != null) {
-          dst.telecom = new ArrayList<ContactPoint>();
-          for (ContactPoint i : telecom)
-            dst.telecom.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof NamingSystemContactComponent))
-          return false;
-        NamingSystemContactComponent o = (NamingSystemContactComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof NamingSystemContactComponent))
-          return false;
-        NamingSystemContactComponent o = (NamingSystemContactComponent) other;
-        return compareValues(name, o.name, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
-          ;
-      }
-
-  }
-
-    /**
-     * Indicates the purpose for the namingsystem - what kinds of things does it make unique?
-     */
-    @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1)
-    @Description(shortDefinition="codesystem | identifier | root", formalDefinition="Indicates the purpose for the namingsystem - what kinds of things does it make unique?" )
-    protected Enumeration<NamingSystemType> type;
-
     /**
      * The descriptive name of this particular identifier type or code system.
      */
-    @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1)
+    @Child(name = "name", type = {StringType.class}, order=0, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Human-readable label", formalDefinition="The descriptive name of this particular identifier type or code system." )
     protected StringType name;
 
     /**
-     * The date  (and optionally time) when the system was registered or published.
-     */
-    @Child(name = "date", type = {DateTimeType.class}, order=2, min=1, max=1)
-    @Description(shortDefinition="Publication Date(/time)", formalDefinition="The date  (and optionally time) when the system was registered or published." )
-    protected DateTimeType date;
-
-    /**
      * Indicates whether the namingsystem is "ready for use" or not.
      */
-    @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1)
-    @Description(shortDefinition="draft | active | retired", formalDefinition="Indicates whether the namingsystem is 'ready for use' or not." )
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=false)
+    @Description(shortDefinition="draft | active | retired", formalDefinition="Indicates whether the namingsystem is \"ready for use\" or not." )
     protected Enumeration<ConformanceResourceStatus> status;
 
     /**
-     * If present, indicates that the identifier or code system is principally intended for use or applies to entities within the specified country.  For example, the country associated with a national code system.
+     * Indicates the purpose for the namingsystem - what kinds of things does it make unique?
      */
-    @Child(name = "country", type = {CodeType.class}, order=4, min=0, max=1)
-    @Description(shortDefinition="ISO 3-char country code", formalDefinition="If present, indicates that the identifier or code system is principally intended for use or applies to entities within the specified country.  For example, the country associated with a national code system." )
-    protected CodeType country;
-
-    /**
-     * Categorizes a namingsystem for easier search by grouping related namingsystems.
-     */
-    @Child(name = "category", type = {CodeableConcept.class}, order=5, min=0, max=1)
-    @Description(shortDefinition="e.g. driver,  provider,  patient, bank etc", formalDefinition="Categorizes a namingsystem for easier search by grouping related namingsystems." )
-    protected CodeableConcept category;
-
-    /**
-     * The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.
-     */
-    @Child(name = "responsible", type = {StringType.class}, order=6, min=0, max=1)
-    @Description(shortDefinition="Who maintains system namespace?", formalDefinition="The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision." )
-    protected StringType responsible;
-
-    /**
-     * Details about what the namespace identifies including scope, granularity, version labeling, etc.
-     */
-    @Child(name = "description", type = {StringType.class}, order=7, min=0, max=1)
-    @Description(shortDefinition="What does namingsystem identify?", formalDefinition="Details about what the namespace identifies including scope, granularity, version labeling, etc." )
-    protected StringType description;
-
-    /**
-     * Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.
-     */
-    @Child(name = "usage", type = {StringType.class}, order=8, min=0, max=1)
-    @Description(shortDefinition="How/where is it used", formalDefinition="Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc." )
-    protected StringType usage;
-
-    /**
-     * Indicates how the system may be identified when referenced in electronic exchange.
-     */
-    @Child(name = "uniqueId", type = {}, order=9, min=1, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Unique identifiers used for system", formalDefinition="Indicates how the system may be identified when referenced in electronic exchange." )
-    protected List<NamingSystemUniqueIdComponent> uniqueId;
+    @Child(name = "kind", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="codesystem | identifier | root", formalDefinition="Indicates the purpose for the namingsystem - what kinds of things does it make unique?" )
+    protected Enumeration<NamingSystemType> kind;
 
     /**
      * The name of the individual or organization that published the naming system.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=10, min=0, max=1)
+    @Child(name = "publisher", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the naming system." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<NamingSystemContactComponent> contact;
 
     /**
+     * The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.
+     */
+    @Child(name = "responsible", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Who maintains system namespace?", formalDefinition="The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision." )
+    protected StringType responsible;
+
+    /**
+     * The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes.
+     */
+    @Child(name = "date", type = {DateTimeType.class}, order=6, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Publication Date(/time)", formalDefinition="The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes." )
+    protected DateTimeType date;
+
+    /**
+     * Categorizes a namingsystem for easier search by grouping related namingsystems.
+     */
+    @Child(name = "type", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="e.g. driver,  provider,  patient, bank etc", formalDefinition="Categorizes a namingsystem for easier search by grouping related namingsystems." )
+    protected CodeableConcept type;
+
+    /**
+     * Details about what the namespace identifies including scope, granularity, version labeling, etc.
+     */
+    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="What does namingsystem identify?", formalDefinition="Details about what the namespace identifies including scope, granularity, version labeling, etc." )
+    protected StringType description;
+
+    /**
+     * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of naming systems.
+     */
+    @Child(name = "useContext", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Content intends to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of naming systems." )
+    protected List<CodeableConcept> useContext;
+
+    /**
+     * Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.
+     */
+    @Child(name = "usage", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="How/where is it used", formalDefinition="Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc." )
+    protected StringType usage;
+
+    /**
+     * Indicates how the system may be identified when referenced in electronic exchange.
+     */
+    @Child(name = "uniqueId", type = {}, order=11, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Unique identifiers used for system", formalDefinition="Indicates how the system may be identified when referenced in electronic exchange." )
+    protected List<NamingSystemUniqueIdComponent> uniqueId;
+
+    /**
      * For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any).
      */
-    @Child(name = "replacedBy", type = {NamingSystem.class}, order=12, min=0, max=1)
+    @Child(name = "replacedBy", type = {NamingSystem.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use this instead", formalDefinition="For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any)." )
     protected Reference replacedBy;
 
@@ -742,7 +742,7 @@ public class NamingSystem extends DomainResource {
      */
     protected NamingSystem replacedByTarget;
 
-    private static final long serialVersionUID = -610416793L;
+    private static final long serialVersionUID = -1337110053L;
 
   /*
    * Constructor
@@ -754,57 +754,12 @@ public class NamingSystem extends DomainResource {
   /*
    * Constructor
    */
-    public NamingSystem(Enumeration<NamingSystemType> type, StringType name, DateTimeType date, Enumeration<ConformanceResourceStatus> status) {
+    public NamingSystem(StringType name, Enumeration<ConformanceResourceStatus> status, Enumeration<NamingSystemType> kind, DateTimeType date) {
       super();
-      this.type = type;
       this.name = name;
-      this.date = date;
       this.status = status;
-    }
-
-    /**
-     * @return {@link #type} (Indicates the purpose for the namingsystem - what kinds of things does it make unique?). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
-     */
-    public Enumeration<NamingSystemType> getTypeElement() { 
-      if (this.type == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create NamingSystem.type");
-        else if (Configuration.doAutoCreate())
-          this.type = new Enumeration<NamingSystemType>(new NamingSystemTypeEnumFactory()); // bb
-      return this.type;
-    }
-
-    public boolean hasTypeElement() { 
-      return this.type != null && !this.type.isEmpty();
-    }
-
-    public boolean hasType() { 
-      return this.type != null && !this.type.isEmpty();
-    }
-
-    /**
-     * @param value {@link #type} (Indicates the purpose for the namingsystem - what kinds of things does it make unique?). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
-     */
-    public NamingSystem setTypeElement(Enumeration<NamingSystemType> value) { 
-      this.type = value;
-      return this;
-    }
-
-    /**
-     * @return Indicates the purpose for the namingsystem - what kinds of things does it make unique?
-     */
-    public NamingSystemType getType() { 
-      return this.type == null ? null : this.type.getValue();
-    }
-
-    /**
-     * @param value Indicates the purpose for the namingsystem - what kinds of things does it make unique?
-     */
-    public NamingSystem setType(NamingSystemType value) { 
-        if (this.type == null)
-          this.type = new Enumeration<NamingSystemType>(new NamingSystemTypeEnumFactory());
-        this.type.setValue(value);
-      return this;
+      this.kind = kind;
+      this.date = date;
     }
 
     /**
@@ -849,51 +804,6 @@ public class NamingSystem extends DomainResource {
         if (this.name == null)
           this.name = new StringType();
         this.name.setValue(value);
-      return this;
-    }
-
-    /**
-     * @return {@link #date} (The date  (and optionally time) when the system was registered or published.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public DateTimeType getDateElement() { 
-      if (this.date == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create NamingSystem.date");
-        else if (Configuration.doAutoCreate())
-          this.date = new DateTimeType(); // bb
-      return this.date;
-    }
-
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    /**
-     * @param value {@link #date} (The date  (and optionally time) when the system was registered or published.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public NamingSystem setDateElement(DateTimeType value) { 
-      this.date = value;
-      return this;
-    }
-
-    /**
-     * @return The date  (and optionally time) when the system was registered or published.
-     */
-    public Date getDate() { 
-      return this.date == null ? null : this.date.getValue();
-    }
-
-    /**
-     * @param value The date  (and optionally time) when the system was registered or published.
-     */
-    public NamingSystem setDate(Date value) { 
-        if (this.date == null)
-          this.date = new DateTimeType();
-        this.date.setValue(value);
       return this;
     }
 
@@ -943,262 +853,47 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
-     * @return {@link #country} (If present, indicates that the identifier or code system is principally intended for use or applies to entities within the specified country.  For example, the country associated with a national code system.). This is the underlying object with id, value and extensions. The accessor "getCountry" gives direct access to the value
+     * @return {@link #kind} (Indicates the purpose for the namingsystem - what kinds of things does it make unique?). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
      */
-    public CodeType getCountryElement() { 
-      if (this.country == null)
+    public Enumeration<NamingSystemType> getKindElement() { 
+      if (this.kind == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create NamingSystem.country");
+          throw new Error("Attempt to auto-create NamingSystem.kind");
         else if (Configuration.doAutoCreate())
-          this.country = new CodeType(); // bb
-      return this.country;
+          this.kind = new Enumeration<NamingSystemType>(new NamingSystemTypeEnumFactory()); // bb
+      return this.kind;
     }
 
-    public boolean hasCountryElement() { 
-      return this.country != null && !this.country.isEmpty();
+    public boolean hasKindElement() { 
+      return this.kind != null && !this.kind.isEmpty();
     }
 
-    public boolean hasCountry() { 
-      return this.country != null && !this.country.isEmpty();
+    public boolean hasKind() { 
+      return this.kind != null && !this.kind.isEmpty();
     }
 
     /**
-     * @param value {@link #country} (If present, indicates that the identifier or code system is principally intended for use or applies to entities within the specified country.  For example, the country associated with a national code system.). This is the underlying object with id, value and extensions. The accessor "getCountry" gives direct access to the value
+     * @param value {@link #kind} (Indicates the purpose for the namingsystem - what kinds of things does it make unique?). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
      */
-    public NamingSystem setCountryElement(CodeType value) { 
-      this.country = value;
+    public NamingSystem setKindElement(Enumeration<NamingSystemType> value) { 
+      this.kind = value;
       return this;
     }
 
     /**
-     * @return If present, indicates that the identifier or code system is principally intended for use or applies to entities within the specified country.  For example, the country associated with a national code system.
+     * @return Indicates the purpose for the namingsystem - what kinds of things does it make unique?
      */
-    public String getCountry() { 
-      return this.country == null ? null : this.country.getValue();
+    public NamingSystemType getKind() { 
+      return this.kind == null ? null : this.kind.getValue();
     }
 
     /**
-     * @param value If present, indicates that the identifier or code system is principally intended for use or applies to entities within the specified country.  For example, the country associated with a national code system.
+     * @param value Indicates the purpose for the namingsystem - what kinds of things does it make unique?
      */
-    public NamingSystem setCountry(String value) { 
-      if (Utilities.noString(value))
-        this.country = null;
-      else {
-        if (this.country == null)
-          this.country = new CodeType();
-        this.country.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #category} (Categorizes a namingsystem for easier search by grouping related namingsystems.)
-     */
-    public CodeableConcept getCategory() { 
-      if (this.category == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create NamingSystem.category");
-        else if (Configuration.doAutoCreate())
-          this.category = new CodeableConcept(); // cc
-      return this.category;
-    }
-
-    public boolean hasCategory() { 
-      return this.category != null && !this.category.isEmpty();
-    }
-
-    /**
-     * @param value {@link #category} (Categorizes a namingsystem for easier search by grouping related namingsystems.)
-     */
-    public NamingSystem setCategory(CodeableConcept value) { 
-      this.category = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #responsible} (The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.). This is the underlying object with id, value and extensions. The accessor "getResponsible" gives direct access to the value
-     */
-    public StringType getResponsibleElement() { 
-      if (this.responsible == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create NamingSystem.responsible");
-        else if (Configuration.doAutoCreate())
-          this.responsible = new StringType(); // bb
-      return this.responsible;
-    }
-
-    public boolean hasResponsibleElement() { 
-      return this.responsible != null && !this.responsible.isEmpty();
-    }
-
-    public boolean hasResponsible() { 
-      return this.responsible != null && !this.responsible.isEmpty();
-    }
-
-    /**
-     * @param value {@link #responsible} (The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.). This is the underlying object with id, value and extensions. The accessor "getResponsible" gives direct access to the value
-     */
-    public NamingSystem setResponsibleElement(StringType value) { 
-      this.responsible = value;
-      return this;
-    }
-
-    /**
-     * @return The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.
-     */
-    public String getResponsible() { 
-      return this.responsible == null ? null : this.responsible.getValue();
-    }
-
-    /**
-     * @param value The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.
-     */
-    public NamingSystem setResponsible(String value) { 
-      if (Utilities.noString(value))
-        this.responsible = null;
-      else {
-        if (this.responsible == null)
-          this.responsible = new StringType();
-        this.responsible.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #description} (Details about what the namespace identifies including scope, granularity, version labeling, etc.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-     */
-    public StringType getDescriptionElement() { 
-      if (this.description == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create NamingSystem.description");
-        else if (Configuration.doAutoCreate())
-          this.description = new StringType(); // bb
-      return this.description;
-    }
-
-    public boolean hasDescriptionElement() { 
-      return this.description != null && !this.description.isEmpty();
-    }
-
-    public boolean hasDescription() { 
-      return this.description != null && !this.description.isEmpty();
-    }
-
-    /**
-     * @param value {@link #description} (Details about what the namespace identifies including scope, granularity, version labeling, etc.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-     */
-    public NamingSystem setDescriptionElement(StringType value) { 
-      this.description = value;
-      return this;
-    }
-
-    /**
-     * @return Details about what the namespace identifies including scope, granularity, version labeling, etc.
-     */
-    public String getDescription() { 
-      return this.description == null ? null : this.description.getValue();
-    }
-
-    /**
-     * @param value Details about what the namespace identifies including scope, granularity, version labeling, etc.
-     */
-    public NamingSystem setDescription(String value) { 
-      if (Utilities.noString(value))
-        this.description = null;
-      else {
-        if (this.description == null)
-          this.description = new StringType();
-        this.description.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #usage} (Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
-     */
-    public StringType getUsageElement() { 
-      if (this.usage == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create NamingSystem.usage");
-        else if (Configuration.doAutoCreate())
-          this.usage = new StringType(); // bb
-      return this.usage;
-    }
-
-    public boolean hasUsageElement() { 
-      return this.usage != null && !this.usage.isEmpty();
-    }
-
-    public boolean hasUsage() { 
-      return this.usage != null && !this.usage.isEmpty();
-    }
-
-    /**
-     * @param value {@link #usage} (Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
-     */
-    public NamingSystem setUsageElement(StringType value) { 
-      this.usage = value;
-      return this;
-    }
-
-    /**
-     * @return Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.
-     */
-    public String getUsage() { 
-      return this.usage == null ? null : this.usage.getValue();
-    }
-
-    /**
-     * @param value Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.
-     */
-    public NamingSystem setUsage(String value) { 
-      if (Utilities.noString(value))
-        this.usage = null;
-      else {
-        if (this.usage == null)
-          this.usage = new StringType();
-        this.usage.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #uniqueId} (Indicates how the system may be identified when referenced in electronic exchange.)
-     */
-    public List<NamingSystemUniqueIdComponent> getUniqueId() { 
-      if (this.uniqueId == null)
-        this.uniqueId = new ArrayList<NamingSystemUniqueIdComponent>();
-      return this.uniqueId;
-    }
-
-    public boolean hasUniqueId() { 
-      if (this.uniqueId == null)
-        return false;
-      for (NamingSystemUniqueIdComponent item : this.uniqueId)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    /**
-     * @return {@link #uniqueId} (Indicates how the system may be identified when referenced in electronic exchange.)
-     */
-    // syntactic sugar
-    public NamingSystemUniqueIdComponent addUniqueId() { //3
-      NamingSystemUniqueIdComponent t = new NamingSystemUniqueIdComponent();
-      if (this.uniqueId == null)
-        this.uniqueId = new ArrayList<NamingSystemUniqueIdComponent>();
-      this.uniqueId.add(t);
-      return t;
-    }
-
-    // syntactic sugar
-    public NamingSystem addUniqueId(NamingSystemUniqueIdComponent t) { //3
-      if (t == null)
-        return this;
-      if (this.uniqueId == null)
-        this.uniqueId = new ArrayList<NamingSystemUniqueIdComponent>();
-      this.uniqueId.add(t);
+    public NamingSystem setKind(NamingSystemType value) { 
+        if (this.kind == null)
+          this.kind = new Enumeration<NamingSystemType>(new NamingSystemTypeEnumFactory());
+        this.kind.setValue(value);
       return this;
     }
 
@@ -1292,6 +987,302 @@ public class NamingSystem extends DomainResource {
     }
 
     /**
+     * @return {@link #responsible} (The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.). This is the underlying object with id, value and extensions. The accessor "getResponsible" gives direct access to the value
+     */
+    public StringType getResponsibleElement() { 
+      if (this.responsible == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create NamingSystem.responsible");
+        else if (Configuration.doAutoCreate())
+          this.responsible = new StringType(); // bb
+      return this.responsible;
+    }
+
+    public boolean hasResponsibleElement() { 
+      return this.responsible != null && !this.responsible.isEmpty();
+    }
+
+    public boolean hasResponsible() { 
+      return this.responsible != null && !this.responsible.isEmpty();
+    }
+
+    /**
+     * @param value {@link #responsible} (The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.). This is the underlying object with id, value and extensions. The accessor "getResponsible" gives direct access to the value
+     */
+    public NamingSystem setResponsibleElement(StringType value) { 
+      this.responsible = value;
+      return this;
+    }
+
+    /**
+     * @return The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.
+     */
+    public String getResponsible() { 
+      return this.responsible == null ? null : this.responsible.getValue();
+    }
+
+    /**
+     * @param value The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.
+     */
+    public NamingSystem setResponsible(String value) { 
+      if (Utilities.noString(value))
+        this.responsible = null;
+      else {
+        if (this.responsible == null)
+          this.responsible = new StringType();
+        this.responsible.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #date} (The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create NamingSystem.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public NamingSystem setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes.
+     */
+    public NamingSystem setDate(Date value) { 
+        if (this.date == null)
+          this.date = new DateTimeType();
+        this.date.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #type} (Categorizes a namingsystem for easier search by grouping related namingsystems.)
+     */
+    public CodeableConcept getType() { 
+      if (this.type == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create NamingSystem.type");
+        else if (Configuration.doAutoCreate())
+          this.type = new CodeableConcept(); // cc
+      return this.type;
+    }
+
+    public boolean hasType() { 
+      return this.type != null && !this.type.isEmpty();
+    }
+
+    /**
+     * @param value {@link #type} (Categorizes a namingsystem for easier search by grouping related namingsystems.)
+     */
+    public NamingSystem setType(CodeableConcept value) { 
+      this.type = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #description} (Details about what the namespace identifies including scope, granularity, version labeling, etc.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     */
+    public StringType getDescriptionElement() { 
+      if (this.description == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create NamingSystem.description");
+        else if (Configuration.doAutoCreate())
+          this.description = new StringType(); // bb
+      return this.description;
+    }
+
+    public boolean hasDescriptionElement() { 
+      return this.description != null && !this.description.isEmpty();
+    }
+
+    public boolean hasDescription() { 
+      return this.description != null && !this.description.isEmpty();
+    }
+
+    /**
+     * @param value {@link #description} (Details about what the namespace identifies including scope, granularity, version labeling, etc.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     */
+    public NamingSystem setDescriptionElement(StringType value) { 
+      this.description = value;
+      return this;
+    }
+
+    /**
+     * @return Details about what the namespace identifies including scope, granularity, version labeling, etc.
+     */
+    public String getDescription() { 
+      return this.description == null ? null : this.description.getValue();
+    }
+
+    /**
+     * @param value Details about what the namespace identifies including scope, granularity, version labeling, etc.
+     */
+    public NamingSystem setDescription(String value) { 
+      if (Utilities.noString(value))
+        this.description = null;
+      else {
+        if (this.description == null)
+          this.description = new StringType();
+        this.description.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of naming systems.)
+     */
+    public List<CodeableConcept> getUseContext() { 
+      if (this.useContext == null)
+        this.useContext = new ArrayList<CodeableConcept>();
+      return this.useContext;
+    }
+
+    public boolean hasUseContext() { 
+      if (this.useContext == null)
+        return false;
+      for (CodeableConcept item : this.useContext)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of naming systems.)
+     */
+    // syntactic sugar
+    public CodeableConcept addUseContext() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.useContext == null)
+        this.useContext = new ArrayList<CodeableConcept>();
+      this.useContext.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public NamingSystem addUseContext(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.useContext == null)
+        this.useContext = new ArrayList<CodeableConcept>();
+      this.useContext.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #usage} (Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
+     */
+    public StringType getUsageElement() { 
+      if (this.usage == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create NamingSystem.usage");
+        else if (Configuration.doAutoCreate())
+          this.usage = new StringType(); // bb
+      return this.usage;
+    }
+
+    public boolean hasUsageElement() { 
+      return this.usage != null && !this.usage.isEmpty();
+    }
+
+    public boolean hasUsage() { 
+      return this.usage != null && !this.usage.isEmpty();
+    }
+
+    /**
+     * @param value {@link #usage} (Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
+     */
+    public NamingSystem setUsageElement(StringType value) { 
+      this.usage = value;
+      return this;
+    }
+
+    /**
+     * @return Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.
+     */
+    public String getUsage() { 
+      return this.usage == null ? null : this.usage.getValue();
+    }
+
+    /**
+     * @param value Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.
+     */
+    public NamingSystem setUsage(String value) { 
+      if (Utilities.noString(value))
+        this.usage = null;
+      else {
+        if (this.usage == null)
+          this.usage = new StringType();
+        this.usage.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #uniqueId} (Indicates how the system may be identified when referenced in electronic exchange.)
+     */
+    public List<NamingSystemUniqueIdComponent> getUniqueId() { 
+      if (this.uniqueId == null)
+        this.uniqueId = new ArrayList<NamingSystemUniqueIdComponent>();
+      return this.uniqueId;
+    }
+
+    public boolean hasUniqueId() { 
+      if (this.uniqueId == null)
+        return false;
+      for (NamingSystemUniqueIdComponent item : this.uniqueId)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #uniqueId} (Indicates how the system may be identified when referenced in electronic exchange.)
+     */
+    // syntactic sugar
+    public NamingSystemUniqueIdComponent addUniqueId() { //3
+      NamingSystemUniqueIdComponent t = new NamingSystemUniqueIdComponent();
+      if (this.uniqueId == null)
+        this.uniqueId = new ArrayList<NamingSystemUniqueIdComponent>();
+      this.uniqueId.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public NamingSystem addUniqueId(NamingSystemUniqueIdComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.uniqueId == null)
+        this.uniqueId = new ArrayList<NamingSystemUniqueIdComponent>();
+      this.uniqueId.add(t);
+      return this;
+    }
+
+    /**
      * @return {@link #replacedBy} (For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any).)
      */
     public Reference getReplacedBy() { 
@@ -1337,43 +1328,47 @@ public class NamingSystem extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("type", "code", "Indicates the purpose for the namingsystem - what kinds of things does it make unique?", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("name", "string", "The descriptive name of this particular identifier type or code system.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the system was registered or published.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("status", "code", "Indicates whether the namingsystem is 'ready for use' or not.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("country", "code", "If present, indicates that the identifier or code system is principally intended for use or applies to entities within the specified country.  For example, the country associated with a national code system.", 0, java.lang.Integer.MAX_VALUE, country));
-        childrenList.add(new Property("category", "CodeableConcept", "Categorizes a namingsystem for easier search by grouping related namingsystems.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("responsible", "string", "The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.", 0, java.lang.Integer.MAX_VALUE, responsible));
-        childrenList.add(new Property("description", "string", "Details about what the namespace identifies including scope, granularity, version labeling, etc.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("usage", "string", "Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.", 0, java.lang.Integer.MAX_VALUE, usage));
-        childrenList.add(new Property("uniqueId", "", "Indicates how the system may be identified when referenced in electronic exchange.", 0, java.lang.Integer.MAX_VALUE, uniqueId));
+        childrenList.add(new Property("status", "code", "Indicates whether the namingsystem is \"ready for use\" or not.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("kind", "code", "Indicates the purpose for the namingsystem - what kinds of things does it make unique?", 0, java.lang.Integer.MAX_VALUE, kind));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the naming system.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        childrenList.add(new Property("responsible", "string", "The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.", 0, java.lang.Integer.MAX_VALUE, responsible));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("type", "CodeableConcept", "Categorizes a namingsystem for easier search by grouping related namingsystems.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("description", "string", "Details about what the namespace identifies including scope, granularity, version labeling, etc.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "CodeableConcept", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of naming systems.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("usage", "string", "Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.", 0, java.lang.Integer.MAX_VALUE, usage));
+        childrenList.add(new Property("uniqueId", "", "Indicates how the system may be identified when referenced in electronic exchange.", 0, java.lang.Integer.MAX_VALUE, uniqueId));
         childrenList.add(new Property("replacedBy", "Reference(NamingSystem)", "For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any).", 0, java.lang.Integer.MAX_VALUE, replacedBy));
       }
 
       public NamingSystem copy() {
         NamingSystem dst = new NamingSystem();
         copyValues(dst);
-        dst.type = type == null ? null : type.copy();
         dst.name = name == null ? null : name.copy();
-        dst.date = date == null ? null : date.copy();
         dst.status = status == null ? null : status.copy();
-        dst.country = country == null ? null : country.copy();
-        dst.category = category == null ? null : category.copy();
-        dst.responsible = responsible == null ? null : responsible.copy();
-        dst.description = description == null ? null : description.copy();
-        dst.usage = usage == null ? null : usage.copy();
-        if (uniqueId != null) {
-          dst.uniqueId = new ArrayList<NamingSystemUniqueIdComponent>();
-          for (NamingSystemUniqueIdComponent i : uniqueId)
-            dst.uniqueId.add(i.copy());
-        };
+        dst.kind = kind == null ? null : kind.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
           dst.contact = new ArrayList<NamingSystemContactComponent>();
           for (NamingSystemContactComponent i : contact)
             dst.contact.add(i.copy());
+        };
+        dst.responsible = responsible == null ? null : responsible.copy();
+        dst.date = date == null ? null : date.copy();
+        dst.type = type == null ? null : type.copy();
+        dst.description = description == null ? null : description.copy();
+        if (useContext != null) {
+          dst.useContext = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : useContext)
+            dst.useContext.add(i.copy());
+        };
+        dst.usage = usage == null ? null : usage.copy();
+        if (uniqueId != null) {
+          dst.uniqueId = new ArrayList<NamingSystemUniqueIdComponent>();
+          for (NamingSystemUniqueIdComponent i : uniqueId)
+            dst.uniqueId.add(i.copy());
         };
         dst.replacedBy = replacedBy == null ? null : replacedBy.copy();
         return dst;
@@ -1390,11 +1385,11 @@ public class NamingSystem extends DomainResource {
         if (!(other instanceof NamingSystem))
           return false;
         NamingSystem o = (NamingSystem) other;
-        return compareDeep(type, o.type, true) && compareDeep(name, o.name, true) && compareDeep(date, o.date, true)
-           && compareDeep(status, o.status, true) && compareDeep(country, o.country, true) && compareDeep(category, o.category, true)
-           && compareDeep(responsible, o.responsible, true) && compareDeep(description, o.description, true)
-           && compareDeep(usage, o.usage, true) && compareDeep(uniqueId, o.uniqueId, true) && compareDeep(publisher, o.publisher, true)
-           && compareDeep(contact, o.contact, true) && compareDeep(replacedBy, o.replacedBy, true);
+        return compareDeep(name, o.name, true) && compareDeep(status, o.status, true) && compareDeep(kind, o.kind, true)
+           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(responsible, o.responsible, true)
+           && compareDeep(date, o.date, true) && compareDeep(type, o.type, true) && compareDeep(description, o.description, true)
+           && compareDeep(useContext, o.useContext, true) && compareDeep(usage, o.usage, true) && compareDeep(uniqueId, o.uniqueId, true)
+           && compareDeep(replacedBy, o.replacedBy, true);
       }
 
       @Override
@@ -1404,18 +1399,17 @@ public class NamingSystem extends DomainResource {
         if (!(other instanceof NamingSystem))
           return false;
         NamingSystem o = (NamingSystem) other;
-        return compareValues(type, o.type, true) && compareValues(name, o.name, true) && compareValues(date, o.date, true)
-           && compareValues(status, o.status, true) && compareValues(country, o.country, true) && compareValues(responsible, o.responsible, true)
-           && compareValues(description, o.description, true) && compareValues(usage, o.usage, true) && compareValues(publisher, o.publisher, true)
-          ;
+        return compareValues(name, o.name, true) && compareValues(status, o.status, true) && compareValues(kind, o.kind, true)
+           && compareValues(publisher, o.publisher, true) && compareValues(responsible, o.responsible, true) && compareValues(date, o.date, true)
+           && compareValues(description, o.description, true) && compareValues(usage, o.usage, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (name == null || name.isEmpty())
-           && (date == null || date.isEmpty()) && (status == null || status.isEmpty()) && (country == null || country.isEmpty())
-           && (category == null || category.isEmpty()) && (responsible == null || responsible.isEmpty())
-           && (description == null || description.isEmpty()) && (usage == null || usage.isEmpty()) && (uniqueId == null || uniqueId.isEmpty())
-           && (publisher == null || publisher.isEmpty()) && (contact == null || contact.isEmpty()) && (replacedBy == null || replacedBy.isEmpty())
+        return super.isEmpty() && (name == null || name.isEmpty()) && (status == null || status.isEmpty())
+           && (kind == null || kind.isEmpty()) && (publisher == null || publisher.isEmpty()) && (contact == null || contact.isEmpty())
+           && (responsible == null || responsible.isEmpty()) && (date == null || date.isEmpty()) && (type == null || type.isEmpty())
+           && (description == null || description.isEmpty()) && (useContext == null || useContext.isEmpty())
+           && (usage == null || usage.isEmpty()) && (uniqueId == null || uniqueId.isEmpty()) && (replacedBy == null || replacedBy.isEmpty())
           ;
       }
 
@@ -1426,30 +1420,30 @@ public class NamingSystem extends DomainResource {
 
   @SearchParamDefinition(name="date", path="NamingSystem.date", description="Publication Date(/time)", type="date" )
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="country", path="NamingSystem.country", description="ISO 3-char country code", type="token" )
-  public static final String SP_COUNTRY = "country";
   @SearchParamDefinition(name="period", path="NamingSystem.uniqueId.period", description="When is identifier valid?", type="date" )
   public static final String SP_PERIOD = "period";
-  @SearchParamDefinition(name="replacedby", path="NamingSystem.replacedBy", description="Use this instead", type="reference" )
-  public static final String SP_REPLACEDBY = "replacedby";
-  @SearchParamDefinition(name="type", path="NamingSystem.type", description="codesystem | identifier | root", type="token" )
+  @SearchParamDefinition(name="kind", path="NamingSystem.kind", description="codesystem | identifier | root", type="token" )
+  public static final String SP_KIND = "kind";
+  @SearchParamDefinition(name="type", path="NamingSystem.type", description="e.g. driver,  provider,  patient, bank etc", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="idtype", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token" )
-  public static final String SP_IDTYPE = "idtype";
+  @SearchParamDefinition(name="id-type", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token" )
+  public static final String SP_IDTYPE = "id-type";
   @SearchParamDefinition(name="responsible", path="NamingSystem.responsible", description="Who maintains system namespace?", type="string" )
   public static final String SP_RESPONSIBLE = "responsible";
   @SearchParamDefinition(name="contact", path="NamingSystem.contact.name", description="Name of a individual to contact", type="string" )
   public static final String SP_CONTACT = "contact";
   @SearchParamDefinition(name="name", path="NamingSystem.name", description="Human-readable label", type="string" )
   public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="context", path="NamingSystem.useContext", description="Content intends to support these contexts", type="token" )
+  public static final String SP_CONTEXT = "context";
   @SearchParamDefinition(name="publisher", path="NamingSystem.publisher", description="Name of the publisher (Organization or individual)", type="string" )
   public static final String SP_PUBLISHER = "publisher";
   @SearchParamDefinition(name="telecom", path="NamingSystem.contact.telecom", description="Contact details for individual or publisher", type="token" )
   public static final String SP_TELECOM = "telecom";
-  @SearchParamDefinition(name="category", path="NamingSystem.category", description="e.g. driver,  provider,  patient, bank etc", type="token" )
-  public static final String SP_CATEGORY = "category";
   @SearchParamDefinition(name="value", path="NamingSystem.uniqueId.value", description="The unique identifier", type="string" )
   public static final String SP_VALUE = "value";
+  @SearchParamDefinition(name="replaced-by", path="NamingSystem.replacedBy", description="Use this instead", type="reference" )
+  public static final String SP_REPLACEDBY = "replaced-by";
   @SearchParamDefinition(name="status", path="NamingSystem.status", description="draft | active | retired", type="token" )
   public static final String SP_STATUS = "status";
 

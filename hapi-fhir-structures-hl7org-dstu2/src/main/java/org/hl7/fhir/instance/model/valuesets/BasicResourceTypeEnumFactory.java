@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -43,8 +43,6 @@ public class BasicResourceTypeEnumFactory implements EnumFactory<BasicResourceTy
       return BasicResourceType.CONSENT;
     if ("referral".equals(codeString))
       return BasicResourceType.REFERRAL;
-    if ("slot".equals(codeString))
-      return BasicResourceType.SLOT;
     if ("advevent".equals(codeString))
       return BasicResourceType.ADVEVENT;
     if ("aptmtreq".equals(codeString))
@@ -65,8 +63,6 @@ public class BasicResourceTypeEnumFactory implements EnumFactory<BasicResourceTy
       return BasicResourceType.INVOICE;
     if ("adjudicat".equals(codeString))
       return BasicResourceType.ADJUDICAT;
-    if ("payment".equals(codeString))
-      return BasicResourceType.PAYMENT;
     if ("predetreq".equals(codeString))
       return BasicResourceType.PREDETREQ;
     if ("predetermine".equals(codeString))
@@ -83,8 +79,6 @@ public class BasicResourceTypeEnumFactory implements EnumFactory<BasicResourceTy
       return "consent";
     if (code == BasicResourceType.REFERRAL)
       return "referral";
-    if (code == BasicResourceType.SLOT)
-      return "slot";
     if (code == BasicResourceType.ADVEVENT)
       return "advevent";
     if (code == BasicResourceType.APTMTREQ)
@@ -105,8 +99,6 @@ public class BasicResourceTypeEnumFactory implements EnumFactory<BasicResourceTy
       return "invoice";
     if (code == BasicResourceType.ADJUDICAT)
       return "adjudicat";
-    if (code == BasicResourceType.PAYMENT)
-      return "payment";
     if (code == BasicResourceType.PREDETREQ)
       return "predetreq";
     if (code == BasicResourceType.PREDETERMINE)

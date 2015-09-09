@@ -1,7 +1,5 @@
 package org.hl7.fhir.instance.terminologies;
 
-import org.hl7.fhir.instance.utils.WorkerContext;
-
 /*
 Copyright (c) 2011+, HL7, Inc
 All rights reserved.
@@ -31,14 +29,103 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.formats.IParser.OutputStyle;
+import org.hl7.fhir.instance.model.OperationOutcome;
+import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.ValueSet;
+import org.hl7.fhir.instance.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
+import org.hl7.fhir.instance.utils.EOperationOutcome;
+import org.hl7.fhir.instance.utils.IWorkerContext;
+import org.hl7.fhir.instance.utils.ToolingExtensions;
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 
 public class ValueSetExpansionCache implements ValueSetExpanderFactory {
 
-	public ValueSetExpansionCache(WorkerContext theContext, Object theObject) {
+  public class CacheAwareExpander implements ValueSetExpander {
+
+	  @Override
+	  public ValueSetExpansionOutcome expand(ValueSet source) throws Exception {
+	  	if (expansions.containsKey(source.getUrl()))
+	  		return expansions.get(source.getUrl());
+	  	ValueSetExpander vse = new ValueSetExpanderSimple(context, ValueSetExpansionCache.this);
+	  	ValueSetExpansionOutcome vso = vse.expand(source);
+	  	if (vso.getError() != null) {
+	  	  // well, we'll see if the designated server can expand it, and if it can, we'll cache it locally
+	  	  try {
+	  	    vso = context.expandVS(source);
+	  	    FileOutputStream s = new FileOutputStream(Utilities.path(cacheFolder, makeFile(source.getUrl())));
+	  	    context.newXmlParser().setOutputStyle(OutputStyle.PRETTY).compose(s, vso.getValueset());
+	  	    s.close();
+	  	  } catch (EOperationOutcome e) {
+	  	    try {
+	  	      OperationOutcome oo = e.getOutcome();
+	  	      ToolingExtensions.setStringExtension(oo, VS_ID_EXT, source.getUrl());
+	  	      FileOutputStream s = new FileOutputStream(Utilities.path(cacheFolder, makeFile(source.getUrl())));
+	  	      context.newXmlParser().setOutputStyle(OutputStyle.PRETTY).compose(s, oo);
+	  	      s.close();
+	  	      vso = new ValueSetExpansionOutcome(vso.getService(), e.getMessage());
+	  	    } catch (Exception e1) {
+	  	    }
+	  	  } catch (Exception e) {
+	  	  }
+	  	}
+	  	expansions.put(source.getUrl(), vso);
+	  	return vso;
+	  }
+
+    private String makeFile(String url) {
+      return url.replace("$", "").replace(":", "").replace("//", "/").replace("/", "_")+".xml";
+    }
+  }
+
+  private static final String VS_ID_EXT = "http://tools/cache";
+
+  private final Map<String, ValueSetExpansionOutcome> expansions = new HashMap<String, ValueSetExpansionOutcome>();
+  private final IWorkerContext context;
+  private final String cacheFolder;
+	
+	public ValueSetExpansionCache(IWorkerContext context, String cacheFolder) throws Exception {
+    super();
+    this.context = context;
+    this.cacheFolder = cacheFolder;
+    if (this.cacheFolder != null)
+      loadCache();
+  }
+  
+	private void loadCache() throws Exception {
+	  File[] files = new File(cacheFolder).listFiles();
+    for (File f : files) {
+      if (f.getName().endsWith(".xml")) {
+        final FileInputStream is = new FileInputStream(f);
+        try {	   
+        Resource r = context.newXmlParser().setOutputStyle(OutputStyle.PRETTY).parse(is);
+        if (r instanceof OperationOutcome) {
+          OperationOutcome oo = (OperationOutcome) r;
+          expansions.put(ToolingExtensions.getExtension(oo,VS_ID_EXT).getValue().toString(),
+            new ValueSetExpansionOutcome(new XhtmlComposer().setXmlOnly(true).composePlainText(oo.getText().getDiv())));
+        } else {
+          ValueSet vs = (ValueSet) r; 
+          expansions.put(vs.getUrl(), new ValueSetExpansionOutcome(vs, null));
+        }
+        } finally {
+          IOUtils.closeQuietly(is);
+        }
+      }
+    }
+  }
+
+  @Override
+	public ValueSetExpander getExpander() {
+		return new CacheAwareExpander();
+		// return new ValueSetExpander(valuesets, codesystems);
 	}
 
-	@Override
-	public ValueSetExpander getExpander() {
-		throw new UnsupportedOperationException();
-	}
 }

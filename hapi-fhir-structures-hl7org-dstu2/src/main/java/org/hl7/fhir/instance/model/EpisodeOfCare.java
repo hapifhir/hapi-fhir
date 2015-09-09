@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
 
 import java.util.*;
 
@@ -120,7 +120,7 @@ public class EpisodeOfCare extends DomainResource {
             case WAITLIST: return "This episode has been placed on a waitlist, pending the episode being made active (or cancelled)";
             case ACTIVE: return "This episode of care is current";
             case ONHOLD: return "This episode of care is on hold, the organization has limited responsibility for the patient (such as while on respite)";
-            case FINISHED: return "This episode of care is finished at the organization is not expecting to be providing care to the patient. Can also be known as 'closed', 'completed' or other similar terms";
+            case FINISHED: return "This episode of care is finished at the organization is not expecting to be providing care to the patient. Can also be known as \"closed\", \"completed\" or other similar terms";
             case CANCELLED: return "The episode of care was cancelled, or withdrawn from service, often selected during the planned stage as the patient may have gone elsewhere, or the circumstances have changed and the organization is unable to provide the care. It indicates that services terminated outside the planned/expected workflow";
             default: return "?";
           }
@@ -179,14 +179,14 @@ public class EpisodeOfCare extends DomainResource {
         /**
          * planned | waitlist | active | onhold | finished | cancelled.
          */
-        @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="planned | waitlist | active | onhold | finished | cancelled", formalDefinition="planned | waitlist | active | onhold | finished | cancelled." )
         protected Enumeration<EpisodeOfCareStatus> status;
 
         /**
          * The period during this EpisodeOfCare that the specific status applied.
          */
-        @Child(name = "period", type = {Period.class}, order=2, min=1, max=1)
+        @Child(name = "period", type = {Period.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The period during this EpisodeOfCare that the specific status applied", formalDefinition="The period during this EpisodeOfCare that the specific status applied." )
         protected Period period;
 
@@ -321,9 +321,23 @@ public class EpisodeOfCare extends DomainResource {
     @Block()
     public static class EpisodeOfCareCareTeamComponent extends BackboneElement implements IBaseBackboneElement {
         /**
+         * The role that this team member is taking within this episode of care.
+         */
+        @Child(name = "role", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="The role that this team member is taking within this episode of care", formalDefinition="The role that this team member is taking within this episode of care." )
+        protected List<CodeableConcept> role;
+
+        /**
+         * The period of time that this practitioner is performing some role within the episode of care.
+         */
+        @Child(name = "period", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="The period of time that this practitioner is performing some role within the episode of care", formalDefinition="The period of time that this practitioner is performing some role within the episode of care." )
+        protected Period period;
+
+        /**
          * The practitioner (or Organization) within the team.
          */
-        @Child(name = "member", type = {Practitioner.class, Organization.class}, order=1, min=0, max=1)
+        @Child(name = "member", type = {Practitioner.class, Organization.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The practitioner (or Organization) within the team", formalDefinition="The practitioner (or Organization) within the team." )
         protected Reference member;
 
@@ -332,21 +346,7 @@ public class EpisodeOfCare extends DomainResource {
          */
         protected Resource memberTarget;
 
-        /**
-         * The role that this team member is taking within this episode of care.
-         */
-        @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="The role that this team member is taking within this episode of care", formalDefinition="The role that this team member is taking within this episode of care." )
-        protected List<CodeableConcept> role;
-
-        /**
-         * The period of time that this practitioner is performing some role within the episode of care.
-         */
-        @Child(name = "period", type = {Period.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="The period of time that this practitioner is performing some role within the episode of care", formalDefinition="The period of time that this practitioner is performing some role within the episode of care." )
-        protected Period period;
-
-        private static final long serialVersionUID = -2134086895L;
+        private static final long serialVersionUID = -437303089L;
 
     /*
      * Constructor
@@ -354,45 +354,6 @@ public class EpisodeOfCare extends DomainResource {
       public EpisodeOfCareCareTeamComponent() {
         super();
       }
-
-        /**
-         * @return {@link #member} (The practitioner (or Organization) within the team.)
-         */
-        public Reference getMember() { 
-          if (this.member == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create EpisodeOfCareCareTeamComponent.member");
-            else if (Configuration.doAutoCreate())
-              this.member = new Reference(); // cc
-          return this.member;
-        }
-
-        public boolean hasMember() { 
-          return this.member != null && !this.member.isEmpty();
-        }
-
-        /**
-         * @param value {@link #member} (The practitioner (or Organization) within the team.)
-         */
-        public EpisodeOfCareCareTeamComponent setMember(Reference value) { 
-          this.member = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #member} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner (or Organization) within the team.)
-         */
-        public Resource getMemberTarget() { 
-          return this.memberTarget;
-        }
-
-        /**
-         * @param value {@link #member} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner (or Organization) within the team.)
-         */
-        public EpisodeOfCareCareTeamComponent setMemberTarget(Resource value) { 
-          this.memberTarget = value;
-          return this;
-        }
 
         /**
          * @return {@link #role} (The role that this team member is taking within this episode of care.)
@@ -458,23 +419,62 @@ public class EpisodeOfCare extends DomainResource {
           return this;
         }
 
+        /**
+         * @return {@link #member} (The practitioner (or Organization) within the team.)
+         */
+        public Reference getMember() { 
+          if (this.member == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create EpisodeOfCareCareTeamComponent.member");
+            else if (Configuration.doAutoCreate())
+              this.member = new Reference(); // cc
+          return this.member;
+        }
+
+        public boolean hasMember() { 
+          return this.member != null && !this.member.isEmpty();
+        }
+
+        /**
+         * @param value {@link #member} (The practitioner (or Organization) within the team.)
+         */
+        public EpisodeOfCareCareTeamComponent setMember(Reference value) { 
+          this.member = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #member} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner (or Organization) within the team.)
+         */
+        public Resource getMemberTarget() { 
+          return this.memberTarget;
+        }
+
+        /**
+         * @param value {@link #member} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner (or Organization) within the team.)
+         */
+        public EpisodeOfCareCareTeamComponent setMemberTarget(Resource value) { 
+          this.memberTarget = value;
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("member", "Reference(Practitioner|Organization)", "The practitioner (or Organization) within the team.", 0, java.lang.Integer.MAX_VALUE, member));
           childrenList.add(new Property("role", "CodeableConcept", "The role that this team member is taking within this episode of care.", 0, java.lang.Integer.MAX_VALUE, role));
           childrenList.add(new Property("period", "Period", "The period of time that this practitioner is performing some role within the episode of care.", 0, java.lang.Integer.MAX_VALUE, period));
+          childrenList.add(new Property("member", "Reference(Practitioner|Organization)", "The practitioner (or Organization) within the team.", 0, java.lang.Integer.MAX_VALUE, member));
         }
 
       public EpisodeOfCareCareTeamComponent copy() {
         EpisodeOfCareCareTeamComponent dst = new EpisodeOfCareCareTeamComponent();
         copyValues(dst);
-        dst.member = member == null ? null : member.copy();
         if (role != null) {
           dst.role = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : role)
             dst.role.add(i.copy());
         };
         dst.period = period == null ? null : period.copy();
+        dst.member = member == null ? null : member.copy();
         return dst;
       }
 
@@ -485,7 +485,7 @@ public class EpisodeOfCare extends DomainResource {
         if (!(other instanceof EpisodeOfCareCareTeamComponent))
           return false;
         EpisodeOfCareCareTeamComponent o = (EpisodeOfCareCareTeamComponent) other;
-        return compareDeep(member, o.member, true) && compareDeep(role, o.role, true) && compareDeep(period, o.period, true)
+        return compareDeep(role, o.role, true) && compareDeep(period, o.period, true) && compareDeep(member, o.member, true)
           ;
       }
 
@@ -500,8 +500,8 @@ public class EpisodeOfCare extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (member == null || member.isEmpty()) && (role == null || role.isEmpty())
-           && (period == null || period.isEmpty());
+        return super.isEmpty() && (role == null || role.isEmpty()) && (period == null || period.isEmpty())
+           && (member == null || member.isEmpty());
       }
 
   }
@@ -509,35 +509,47 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * Identifier(s) by which this EpisodeOfCare is known.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Identifier(s) by which this EpisodeOfCare is known", formalDefinition="Identifier(s) by which this EpisodeOfCare is known." )
     protected List<Identifier> identifier;
 
     /**
      * planned | waitlist | active | onhold | finished | cancelled.
      */
-    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="planned | waitlist | active | onhold | finished | cancelled", formalDefinition="planned | waitlist | active | onhold | finished | cancelled." )
     protected Enumeration<EpisodeOfCareStatus> status;
 
     /**
-     * The status history for the EpisodeOfCare.
+     * The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource).
      */
-    @Child(name = "statusHistory", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="The status history for the EpisodeOfCare", formalDefinition="The status history for the EpisodeOfCare." )
+    @Child(name = "statusHistory", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource)", formalDefinition="The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource)." )
     protected List<EpisodeOfCareStatusHistoryComponent> statusHistory;
 
     /**
      * The type can be very important in processing as this could be used in determining if the EpisodeOfCare is relevant to specific government reporting, or other types of classifications.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Specific type of EpisodeOfCare", formalDefinition="The type can be very important in processing as this could be used in determining if the EpisodeOfCare is relevant to specific government reporting, or other types of classifications." )
     protected List<CodeableConcept> type;
 
     /**
+     * A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.
+     */
+    @Child(name = "condition", type = {Condition.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for", formalDefinition="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for." )
+    protected List<Reference> condition;
+    /**
+     * The actual objects that are the target of the reference (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
+     */
+    protected List<Condition> conditionTarget;
+
+
+    /**
      * The patient that this EpisodeOfCare applies to.
      */
-    @Child(name = "patient", type = {Patient.class}, order=4, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=5, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The patient that this EpisodeOfCare applies to", formalDefinition="The patient that this EpisodeOfCare applies to." )
     protected Reference patient;
 
@@ -549,7 +561,7 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * The organization that has assumed the specific responsibilities for the specified duration.
      */
-    @Child(name = "managingOrganization", type = {Organization.class}, order=5, min=0, max=1)
+    @Child(name = "managingOrganization", type = {Organization.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The organization that has assumed the specific responsibilities for the specified duration", formalDefinition="The organization that has assumed the specific responsibilities for the specified duration." )
     protected Reference managingOrganization;
 
@@ -561,26 +573,14 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * The interval during which the managing organization assumes the defined responsibility.
      */
-    @Child(name = "period", type = {Period.class}, order=6, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The interval during which the managing organization assumes the defined responsibility", formalDefinition="The interval during which the managing organization assumes the defined responsibility." )
     protected Period period;
 
     /**
-     * A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.
-     */
-    @Child(name = "condition", type = {Condition.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for", formalDefinition="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for." )
-    protected List<Reference> condition;
-    /**
-     * The actual objects that are the target of the reference (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
-     */
-    protected List<Condition> conditionTarget;
-
-
-    /**
      * Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.
      */
-    @Child(name = "referralRequest", type = {ReferralRequest.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "referralRequest", type = {ReferralRequest.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Referral Request(s) that this EpisodeOfCare manages activities within", formalDefinition="Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals." )
     protected List<Reference> referralRequest;
     /**
@@ -592,7 +592,7 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * The practitioner that is the care manager/care co-ordinator for this patient.
      */
-    @Child(name = "careManager", type = {Practitioner.class}, order=9, min=0, max=1)
+    @Child(name = "careManager", type = {Practitioner.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The practitioner that is the care manager/care co-ordinator for this patient", formalDefinition="The practitioner that is the care manager/care co-ordinator for this patient." )
     protected Reference careManager;
 
@@ -604,11 +604,11 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * The list of practitioners that may be facilitating this episode of care for specific purposes.
      */
-    @Child(name = "careTeam", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "careTeam", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="The list of practitioners that may be facilitating this episode of care for specific purposes", formalDefinition="The list of practitioners that may be facilitating this episode of care for specific purposes." )
     protected List<EpisodeOfCareCareTeamComponent> careTeam;
 
-    private static final long serialVersionUID = -1251791864L;
+    private static final long serialVersionUID = 1652653406L;
 
   /*
    * Constructor
@@ -712,7 +712,7 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return {@link #statusHistory} (The status history for the EpisodeOfCare.)
+     * @return {@link #statusHistory} (The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource).)
      */
     public List<EpisodeOfCareStatusHistoryComponent> getStatusHistory() { 
       if (this.statusHistory == null)
@@ -730,7 +730,7 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return {@link #statusHistory} (The status history for the EpisodeOfCare.)
+     * @return {@link #statusHistory} (The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource).)
      */
     // syntactic sugar
     public EpisodeOfCareStatusHistoryComponent addStatusHistory() { //3
@@ -789,6 +789,67 @@ public class EpisodeOfCare extends DomainResource {
         this.type = new ArrayList<CodeableConcept>();
       this.type.add(t);
       return this;
+    }
+
+    /**
+     * @return {@link #condition} (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
+     */
+    public List<Reference> getCondition() { 
+      if (this.condition == null)
+        this.condition = new ArrayList<Reference>();
+      return this.condition;
+    }
+
+    public boolean hasCondition() { 
+      if (this.condition == null)
+        return false;
+      for (Reference item : this.condition)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #condition} (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
+     */
+    // syntactic sugar
+    public Reference addCondition() { //3
+      Reference t = new Reference();
+      if (this.condition == null)
+        this.condition = new ArrayList<Reference>();
+      this.condition.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public EpisodeOfCare addCondition(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.condition == null)
+        this.condition = new ArrayList<Reference>();
+      this.condition.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #condition} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
+     */
+    public List<Condition> getConditionTarget() { 
+      if (this.conditionTarget == null)
+        this.conditionTarget = new ArrayList<Condition>();
+      return this.conditionTarget;
+    }
+
+    // syntactic sugar
+    /**
+     * @return {@link #condition} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
+     */
+    public Condition addConditionTarget() { 
+      Condition r = new Condition();
+      if (this.conditionTarget == null)
+        this.conditionTarget = new ArrayList<Condition>();
+      this.conditionTarget.add(r);
+      return r;
     }
 
     /**
@@ -901,67 +962,6 @@ public class EpisodeOfCare extends DomainResource {
     public EpisodeOfCare setPeriod(Period value) { 
       this.period = value;
       return this;
-    }
-
-    /**
-     * @return {@link #condition} (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
-     */
-    public List<Reference> getCondition() { 
-      if (this.condition == null)
-        this.condition = new ArrayList<Reference>();
-      return this.condition;
-    }
-
-    public boolean hasCondition() { 
-      if (this.condition == null)
-        return false;
-      for (Reference item : this.condition)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    /**
-     * @return {@link #condition} (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
-     */
-    // syntactic sugar
-    public Reference addCondition() { //3
-      Reference t = new Reference();
-      if (this.condition == null)
-        this.condition = new ArrayList<Reference>();
-      this.condition.add(t);
-      return t;
-    }
-
-    // syntactic sugar
-    public EpisodeOfCare addCondition(Reference t) { //3
-      if (t == null)
-        return this;
-      if (this.condition == null)
-        this.condition = new ArrayList<Reference>();
-      this.condition.add(t);
-      return this;
-    }
-
-    /**
-     * @return {@link #condition} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
-     */
-    public List<Condition> getConditionTarget() { 
-      if (this.conditionTarget == null)
-        this.conditionTarget = new ArrayList<Condition>();
-      return this.conditionTarget;
-    }
-
-    // syntactic sugar
-    /**
-     * @return {@link #condition} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
-     */
-    public Condition addConditionTarget() { 
-      Condition r = new Condition();
-      if (this.conditionTarget == null)
-        this.conditionTarget = new ArrayList<Condition>();
-      this.conditionTarget.add(r);
-      return r;
     }
 
     /**
@@ -1113,12 +1113,12 @@ public class EpisodeOfCare extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Identifier(s) by which this EpisodeOfCare is known.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "planned | waitlist | active | onhold | finished | cancelled.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("statusHistory", "", "The status history for the EpisodeOfCare.", 0, java.lang.Integer.MAX_VALUE, statusHistory));
+        childrenList.add(new Property("statusHistory", "", "The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource).", 0, java.lang.Integer.MAX_VALUE, statusHistory));
         childrenList.add(new Property("type", "CodeableConcept", "The type can be very important in processing as this could be used in determining if the EpisodeOfCare is relevant to specific government reporting, or other types of classifications.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("condition", "Reference(Condition)", "A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.", 0, java.lang.Integer.MAX_VALUE, condition));
         childrenList.add(new Property("patient", "Reference(Patient)", "The patient that this EpisodeOfCare applies to.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The organization that has assumed the specific responsibilities for the specified duration.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
         childrenList.add(new Property("period", "Period", "The interval during which the managing organization assumes the defined responsibility.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("condition", "Reference(Condition)", "A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.", 0, java.lang.Integer.MAX_VALUE, condition));
         childrenList.add(new Property("referralRequest", "Reference(ReferralRequest)", "Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.", 0, java.lang.Integer.MAX_VALUE, referralRequest));
         childrenList.add(new Property("careManager", "Reference(Practitioner)", "The practitioner that is the care manager/care co-ordinator for this patient.", 0, java.lang.Integer.MAX_VALUE, careManager));
         childrenList.add(new Property("careTeam", "", "The list of practitioners that may be facilitating this episode of care for specific purposes.", 0, java.lang.Integer.MAX_VALUE, careTeam));
@@ -1143,14 +1143,14 @@ public class EpisodeOfCare extends DomainResource {
           for (CodeableConcept i : type)
             dst.type.add(i.copy());
         };
-        dst.patient = patient == null ? null : patient.copy();
-        dst.managingOrganization = managingOrganization == null ? null : managingOrganization.copy();
-        dst.period = period == null ? null : period.copy();
         if (condition != null) {
           dst.condition = new ArrayList<Reference>();
           for (Reference i : condition)
             dst.condition.add(i.copy());
         };
+        dst.patient = patient == null ? null : patient.copy();
+        dst.managingOrganization = managingOrganization == null ? null : managingOrganization.copy();
+        dst.period = period == null ? null : period.copy();
         if (referralRequest != null) {
           dst.referralRequest = new ArrayList<Reference>();
           for (Reference i : referralRequest)
@@ -1177,9 +1177,10 @@ public class EpisodeOfCare extends DomainResource {
           return false;
         EpisodeOfCare o = (EpisodeOfCare) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(statusHistory, o.statusHistory, true)
-           && compareDeep(type, o.type, true) && compareDeep(patient, o.patient, true) && compareDeep(managingOrganization, o.managingOrganization, true)
-           && compareDeep(period, o.period, true) && compareDeep(condition, o.condition, true) && compareDeep(referralRequest, o.referralRequest, true)
-           && compareDeep(careManager, o.careManager, true) && compareDeep(careTeam, o.careTeam, true);
+           && compareDeep(type, o.type, true) && compareDeep(condition, o.condition, true) && compareDeep(patient, o.patient, true)
+           && compareDeep(managingOrganization, o.managingOrganization, true) && compareDeep(period, o.period, true)
+           && compareDeep(referralRequest, o.referralRequest, true) && compareDeep(careManager, o.careManager, true)
+           && compareDeep(careTeam, o.careTeam, true);
       }
 
       @Override
@@ -1195,8 +1196,8 @@ public class EpisodeOfCare extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
            && (statusHistory == null || statusHistory.isEmpty()) && (type == null || type.isEmpty())
-           && (patient == null || patient.isEmpty()) && (managingOrganization == null || managingOrganization.isEmpty())
-           && (period == null || period.isEmpty()) && (condition == null || condition.isEmpty()) && (referralRequest == null || referralRequest.isEmpty())
+           && (condition == null || condition.isEmpty()) && (patient == null || patient.isEmpty()) && (managingOrganization == null || managingOrganization.isEmpty())
+           && (period == null || period.isEmpty()) && (referralRequest == null || referralRequest.isEmpty())
            && (careManager == null || careManager.isEmpty()) && (careTeam == null || careTeam.isEmpty())
           ;
       }

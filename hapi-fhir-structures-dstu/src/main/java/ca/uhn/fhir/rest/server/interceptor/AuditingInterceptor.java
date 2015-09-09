@@ -138,7 +138,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			participants.add(participant);
 			auditEvent.setParticipant(participants);
 
-			SecurityEventObjectLifecycleEnum lifecycle = mapResourceTypeToSecurityLifecycle(theRequestDetails.getResourceOperationType());
+			SecurityEventObjectLifecycleEnum lifecycle = mapResourceTypeToSecurityLifecycle(theRequestDetails.getRestOperationType());
 			byte[] query = getQueryFromRequestDetails(theRequestDetails);
 			List<ObjectElement> auditableObjects = new ArrayList<SecurityEvent.ObjectElement>();
 			for (BundleEntry entry : theResponseObject.getEntries()) {
@@ -193,7 +193,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			auditEvent.setParticipant(participants);
 
 			byte[] query = getQueryFromRequestDetails(theRequestDetails);
-			SecurityEventObjectLifecycleEnum lifecycle = mapResourceTypeToSecurityLifecycle(theRequestDetails.getResourceOperationType());
+			SecurityEventObjectLifecycleEnum lifecycle = mapResourceTypeToSecurityLifecycle(theRequestDetails.getRestOperationType());
 			ObjectElement auditableObject = getObjectElement((IResource) theResponseObject, lifecycle, query);
 			if (auditableObject == null) {
 				log.debug("No auditable resources to audit");
@@ -235,7 +235,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	 */
 	protected Event getEventInfo(RequestDetails theRequestDetails) {
 		Event event = new Event();
-		event.setAction(mapResourceTypeToSecurityEventAction(theRequestDetails.getResourceOperationType()));
+		event.setAction(mapResourceTypeToSecurityEventAction(theRequestDetails.getRestOperationType()));
 		event.setDateTimeWithMillisPrecision(new Date());
 		event.setOutcome(SecurityEventOutcomeEnum.SUCCESS); // we audit successful return of PHI only, otherwise an
 																				// exception is thrown and no resources are returned to be
@@ -442,14 +442,14 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	/**
 	 * Returns the SecurityEventActionEnum corresponding to the specified RestfulOperationTypeEnum
 	 * 
-	 * @param resourceOperationType
+	 * @param theRestfulOperationTypeEnum
 	 *           the type of operation (Read, Create, Delete, etc)
 	 * @return the corresponding SecurityEventActionEnum (Read/View/Print, Create, Delete, etc)
 	 */
-	protected SecurityEventActionEnum mapResourceTypeToSecurityEventAction(RestfulOperationTypeEnum resourceOperationType) {
-		if (resourceOperationType == null)
+	protected SecurityEventActionEnum mapResourceTypeToSecurityEventAction(ca.uhn.fhir.rest.api.RestOperationTypeEnum theRestfulOperationTypeEnum) {
+		if (theRestfulOperationTypeEnum == null)
 			return null;
-		switch (resourceOperationType) {
+		switch (theRestfulOperationTypeEnum) {
 		case READ:
 			return SecurityEventActionEnum.READ_VIEW_PRINT;
 		case CREATE:
@@ -476,15 +476,15 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	/**
 	 * Returns the SecurityEventObjectLifecycleEnum corresponding to the specified RestfulOperationTypeEnum
 	 * 
-	 * @param resourceOperationType
+	 * @param theRestfulOperationTypeEnum
 	 *           the type of operation (Read, Create, Delete, etc)
 	 * @return the corresponding SecurityEventObjectLifecycleEnum (Access/Use, Origination/Creation, Logical Deletion,
 	 *         etc)
 	 */
-	protected SecurityEventObjectLifecycleEnum mapResourceTypeToSecurityLifecycle(RestfulOperationTypeEnum resourceOperationType) {
-		if (resourceOperationType == null)
+	protected SecurityEventObjectLifecycleEnum mapResourceTypeToSecurityLifecycle(ca.uhn.fhir.rest.api.RestOperationTypeEnum theRestfulOperationTypeEnum) {
+		if (theRestfulOperationTypeEnum == null)
 			return null;
-		switch (resourceOperationType) {
+		switch (theRestfulOperationTypeEnum) {
 		case READ:
 			return SecurityEventObjectLifecycleEnum.ACCESS_OR_USE;
 		case CREATE:

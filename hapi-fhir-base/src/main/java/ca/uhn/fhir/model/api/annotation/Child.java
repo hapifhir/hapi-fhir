@@ -24,11 +24,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Enumeration;
-
-import net.sourceforge.cobertura.CoverageIgnore;
-
-import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 
 import ca.uhn.fhir.model.api.IElement;
 
@@ -103,31 +98,13 @@ public @interface Child {
 //	String replaces() default "";
 
 	/**
-	 * For children which accept an {@link Enumeration} as the type, this
-	 * field indicates the type to use for the enum factory
+	 * Is this element a modifier?
 	 */
-	Class<? extends IBaseEnumFactory<?>> enumFactory() default NoEnumFactory.class;
+	boolean modifier() default false;	
 
-	@CoverageIgnore
-	public static class NoEnumFactory implements IBaseEnumFactory<Enum<?>> {
-
-		@CoverageIgnore
-		private NoEnumFactory() {
-			// non instantiable
-		}
-
-		@CoverageIgnore
-		@Override
-		public Enum<?> fromCode(String theCodeString) throws IllegalArgumentException {
-			return null;
-		}
-
-		@CoverageIgnore
-		@Override
-		public String toCode(Enum<?> theCode) {
-			return null;
-		}
-
-	}
-
+	/**
+	 * Should this element be included in the summary view
+	 */
+	boolean summary() default false;
+	
 }

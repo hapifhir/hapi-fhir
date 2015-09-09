@@ -15,6 +15,8 @@
 		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamCoords</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceLink</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceTable</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceTag</class>
@@ -24,8 +26,8 @@
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.DerbyTenSevenDialect" />
 			<property name="hibernate.hbm2ddl.auto" value="update" />
-			<property name="hibernate.jdbc.batch_size" value="0" />
-			<property name="hibernate.cache.use_minimal_puts" value="false" />
+			<property name="hibernate.jdbc.batch_size" value="20" />
+			<property name="hibernate.cache.use_minimal_puts" value="true" />
 			<property name="hibernate.show_sql" value="false" />
 			<property name="hibernate.cache.use_query_cache" value="false" />
 			<property name="hibernate.cache.use_second_level_cache" value="false" />

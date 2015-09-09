@@ -1,5 +1,8 @@
 package ca.uhn.fhir.context;
 
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -24,4 +27,10 @@ public interface IRuntimeDatatypeDefinition {
 
 	boolean isSpecialization();
 	
+	public BaseRuntimeElementDefinition<?> getProfileOf();
+
+	boolean isProfileOf(Class<? extends IBaseDatatype> theType);
+	
+	public Class<? extends IBase> getImplementingClass();
+
 }

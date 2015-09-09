@@ -5,11 +5,11 @@
    <total value="1"/>
    <link>
       <relation value="self"/>
-      <url value="http://10.160.2.151:28080/hapi-fhir-jpaserver/baseDstu2/MedicationPrescription?patient=13123&amp;_format=xml"/>
+      <url value="http://10.160.2.151:28080/hapi-fhir-jpaserver/baseDstu2/MedicationOrder?patient=13123&amp;_format=xml"/>
    </link>
    <entry>
       <resource>
-         <MedicationPrescription xmlns="http://hl7.org/fhir">
+         <MedicationOrder xmlns="http://hl7.org/fhir">
             <id value="20399"/>
             <meta>
                <versionId value="1"/>
@@ -36,9 +36,9 @@
             <patient>
                <reference value="Patient/13123"/>
             </patient>
-            <medication>
+            <medicationReference>
                <reference value="#med"/>
-            </medication>
+            </medicationReference>
             <dosageInstruction>
                <text value="1 daily"/>
                <doseQuantity>
@@ -63,7 +63,7 @@
                   <code value="d"/>
                </expectedSupplyDuration>
             </dispense>
-         </MedicationPrescription>
+         </MedicationOrder>
       </resource>
       <search>
          <mode value="match"/>
