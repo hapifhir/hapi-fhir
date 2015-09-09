@@ -929,6 +929,7 @@
 				<module>hapi-fhir-android</module>
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>
+				<module>hapi-fhir-osgi-core</module>
 			</modules>
 		</profile>
 		<profile>

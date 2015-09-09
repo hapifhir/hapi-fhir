@@ -1,13 +1,25 @@
-/**
- * This software has been produced by Akana, Inc. under a professional services
- * agreement with our customer. This work may contain material that is confidential 
- * and proprietary information of Akana, Inc. and is subject to copyright 
- * protection under laws of the United States of America and other countries. 
- * SOA Software grants the customer non-exclusive rights to this material without
- * any warranty expressed or implied. 
+package ca.uhn.fhir.osgi.impl;
+
+/*
+ * #%L
+ * HAPI FHIR - OSGi Bundle
+ * %%
+ * Copyright (C) 2014 - 2015 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
  */
 
-package ca.uhn.fhir.osgi.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,10 +47,10 @@ public class FhirServerManager {
 	private static Logger log = LoggerFactory.getLogger(FhirServerManager.class);
 	private static final String FIRST_SERVER = "#first";
 	
-	private Map<String,FhirServer> registeredServers = new ConcurrentHashMap<>();
-	private Map<String,Collection<Collection<Object>>> serverProviders = new ConcurrentHashMap<>();
+	private Map<String,FhirServer> registeredServers = new ConcurrentHashMap<String,FhirServer>();
+	private Map<String,Collection<Collection<Object>>> serverProviders = new ConcurrentHashMap<String,Collection<Collection<Object>>>();
 	private Collection<Collection<Object>> registeredProviders = Collections.synchronizedList(new ArrayList<Collection<Object>>());
-	private Map<String,Collection<Collection<Object>>> pendingProviders = new ConcurrentHashMap<>();
+	private Map<String,Collection<Collection<Object>>> pendingProviders = new ConcurrentHashMap<String,Collection<Collection<Object>>>();
 	private boolean haveDefaultProviders = false;
 	
 	/**
