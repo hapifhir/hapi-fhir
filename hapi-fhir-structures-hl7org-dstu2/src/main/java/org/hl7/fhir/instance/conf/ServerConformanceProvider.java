@@ -335,13 +335,15 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
   }
 
   private String getBuildDateFromManifest() {
-    InputStream inputStream = myRestfulServer.getServletContext().getResourceAsStream("/META-INF/MANIFEST.MF");
-    if (inputStream != null) {
-      try {
-        Manifest manifest = new Manifest(inputStream);
-        return manifest.getMainAttributes().getValue("Build-Time");
-      } catch (IOException e) {
-        // fall through
+    if (myRestfulServer != null && myRestfulServer.getServletContext() != null) {
+      InputStream inputStream = myRestfulServer.getServletContext().getResourceAsStream("/META-INF/MANIFEST.MF");
+      if (inputStream != null) {
+        try {
+          Manifest manifest = new Manifest(inputStream);
+          return manifest.getMainAttributes().getValue("Build-Time");
+        } catch (IOException e) {
+          // fall through
+        }
       }
     }
     return null;
