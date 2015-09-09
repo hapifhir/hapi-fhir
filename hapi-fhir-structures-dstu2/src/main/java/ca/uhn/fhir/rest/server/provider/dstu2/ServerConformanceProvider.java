@@ -22,21 +22,15 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.jar.Manifest;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.parser.DataFormatException;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -173,7 +167,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		Conformance retVal = new Conformance();
 
 		retVal.setPublisher(myPublisher);
-		retVal.setDate(DateTimeDt.withCurrentTime());
+		retVal.setDate(conformanceDate());
 		retVal.setFhirVersion("1.0.0"); // TODO: pull from model
 		retVal.setAcceptUnknown(UnknownContentCodeEnum.UNKNOWN_EXTENSIONS); // TODO: make this configurable - this is a fairly big effort since the parser
 		// needs to be modified to actually allow it
@@ -302,6 +296,31 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 		myConformance = retVal;
 		return retVal;
+	}
+
+	private DateTimeDt conformanceDate() {
+		String buildDate = getBuildDateFromManifest();
+		if (buildDate != null) {
+			try {
+				return new DateTimeDt(buildDate);
+			} catch (DataFormatException e) {
+				// fall through
+			}
+		}
+		return DateTimeDt.withCurrentTime();
+	}
+
+	private String getBuildDateFromManifest() {
+		InputStream inputStream = myRestfulServer.getServletContext().getResourceAsStream("/META-INF/MANIFEST.MF");
+		if (inputStream != null) {
+			try {
+				Manifest manifest = new Manifest(inputStream);
+				return manifest.getMainAttributes().getValue("Build-Time");
+			} catch (IOException e) {
+				// fall through
+			}
+		}
+		return null;
 	}
 
 	private void handleDynamicSearchMethodBinding(RestResource resource, RuntimeResourceDefinition def, TreeSet<String> includes, DynamicSearchMethodBinding searchMethodBinding) {
