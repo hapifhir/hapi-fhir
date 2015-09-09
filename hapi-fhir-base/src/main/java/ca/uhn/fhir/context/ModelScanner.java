@@ -806,8 +806,6 @@ class ModelScanner {
 						try {
 							// Datatypes
 
-							ourLog.warn("NEXT: {}", nextValue);
-							
 							@SuppressWarnings("unchecked")
 							Class<? extends IBase> dtType = (Class<? extends IBase>) Class.forName(nextValue);
 							retVal.add(dtType);
