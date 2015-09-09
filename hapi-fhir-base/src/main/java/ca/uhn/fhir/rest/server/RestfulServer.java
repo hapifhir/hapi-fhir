@@ -37,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
@@ -92,9 +94,10 @@ public class RestfulServer extends HttpServlet {
 	private String myImplementationDescription;
 	private final List<IServerInterceptor> myInterceptors = new ArrayList<IServerInterceptor>();
 	private IPagingProvider myPagingProvider;
-	private Collection<Object> myPlainProviders;
+	private Collection<Object> myPlainProviders = new ArrayList<Object>();
 	private Map<String, ResourceBinding> myResourceNameToBinding = new HashMap<String, ResourceBinding>();
-	private Collection<IResourceProvider> myResourceProviders;
+	private Collection<IResourceProvider> myResourceProviders = new ArrayList<IResourceProvider>();
+	private Map<String,IResourceProvider> myTypeToProvider = new HashMap<String, IResourceProvider>();
 	private IServerAddressStrategy myServerAddressStrategy = new IncomingRequestAddressStrategy();
 	private ResourceBinding myServerBinding = new ResourceBinding();
 	private BaseMethodBinding<?> myServerConformanceMethod;
@@ -104,6 +107,7 @@ public class RestfulServer extends HttpServlet {
 	private String myServerVersion = VersionUtil.getVersion();
 	private boolean myStarted;
 	private boolean myUseBrowserFriendlyContentTypes;
+	private Lock myProviderRegistrationMutex = new ReentrantLock();
 
 	/**
 	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or through {@link #setFhirContext(FhirContext)}) the server will determine which
@@ -190,6 +194,46 @@ public class RestfulServer extends HttpServlet {
 			}
 		}
 		return theServletPath.length() + delta;
+	}
+
+	/*
+	 * Remove registered RESTful methods for a Provider 
+	 * (and all superclasses) when it is being unregistered
+	 */
+	private void removeResourceMethods (Object theProvider) throws Exception {
+		ourLog.info("Removing RESTful methods for: {}", theProvider.getClass());
+		Class<?> clazz = theProvider.getClass();
+		Class<?> supertype = clazz.getSuperclass();
+		Collection<String> resourceNames = new ArrayList<String>();
+		while (!Object.class.equals(supertype)) {
+			removeResourceMethods(theProvider, supertype, resourceNames);
+			supertype = supertype.getSuperclass();
+		}
+		removeResourceMethods(theProvider, clazz, resourceNames);
+		for (String resourceName : resourceNames) {
+			myResourceNameToBinding.remove(resourceName);
+		}
+	}
+
+	/*
+	 * Collect the set of RESTful methods for a single class
+	 * when it is being unregistered
+	 */
+	private void removeResourceMethods(Object theProvider, Class<?> clazz, Collection<String> resourceNames) throws ConfigurationException {
+		for (Method m : ReflectionUtil.getDeclaredMethods(clazz)) {
+			BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, getFhirContext(), theProvider);
+			if (foundMethodBinding == null) {
+				continue; // not a bound method
+			}
+			if (foundMethodBinding instanceof ConformanceMethodBinding) {
+				myServerConformanceMethod = null;
+				continue;
+			}
+			String resourceName = foundMethodBinding.getResourceName();
+			if (!resourceNames.contains(resourceName)) {
+				resourceNames.add(resourceName);
+			}
+		}
 	}
 
 	private void findResourceMethods(Object theProvider) throws Exception {
@@ -768,79 +812,61 @@ public class RestfulServer extends HttpServlet {
 	 */
 	@Override
 	public final void init() throws ServletException {
-		initialize();
-
-		Object confProvider;
+		myProviderRegistrationMutex.lock();
 		try {
-			ourLog.info("Initializing HAPI FHIR restful server running in " + getFhirContext().getVersion().getVersion().name() + " mode");
+			initialize();
+			
+			Object confProvider;
+			try {
+				ourLog.info("Initializing HAPI FHIR restful server running in " + getFhirContext().getVersion().getVersion().name() + " mode");
 
-			ProvidedResourceScanner providedResourceScanner = new ProvidedResourceScanner(getFhirContext());
-			providedResourceScanner.scanForProvidedResources(this);
+				ProvidedResourceScanner providedResourceScanner = new ProvidedResourceScanner(getFhirContext());
+				providedResourceScanner.scanForProvidedResources(this);
 
-			Collection<IResourceProvider> resourceProvider = getResourceProviders();
-			if (resourceProvider != null) {
-				Map<String, IResourceProvider> typeToProvider = new HashMap<String, IResourceProvider>();
-				for (IResourceProvider nextProvider : resourceProvider) {
+				Collection<IResourceProvider> resourceProvider = getResourceProviders();
+				// 'true' tells registerProviders() that 
+				// this call is part of initialization
+				registerProviders(resourceProvider, true); 
 
-					Class<? extends IBaseResource> resourceType = nextProvider.getResourceType();
-					if (resourceType == null) {
-						throw new NullPointerException("getResourceType() on class '" + nextProvider.getClass().getCanonicalName() + "' returned null");
-					}
+				Collection<Object> providers = getPlainProviders();
+				// 'true' tells registerProviders() that 
+				// this call is part of initialization
+				registerProviders(providers, true);
 
-					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
-					if (typeToProvider.containsKey(resourceName)) {
-						throw new ServletException("Multiple resource providers return resource type[" + resourceName + "]: First[" + typeToProvider.get(resourceName).getClass().getCanonicalName()
-								+ "] and Second[" + nextProvider.getClass().getCanonicalName() + "]");
-					}
-					typeToProvider.put(resourceName, nextProvider);
-					providedResourceScanner.scanForProvidedResources(nextProvider);
+				findResourceMethods(getServerProfilesProvider());
+
+				confProvider = getServerConformanceProvider();
+				if (confProvider == null) {
+					confProvider = getFhirContext().getVersion().createServerConformanceProvider(this);
 				}
-				ourLog.info("Got {} resource providers", typeToProvider.size());
-				for (IResourceProvider provider : typeToProvider.values()) {
-					assertProviderIsValid(provider);
-					findResourceMethods(provider);
+//				findSystemMethods(confProvider);
+				findResourceMethods(confProvider);
+
+			} catch (Exception ex) {
+				ourLog.error("An error occurred while loading request handlers!", ex);
+				throw new ServletException("Failed to initialize FHIR Restful server", ex);
+			}
+
+			ourLog.trace("Invoking provider initialize methods");
+			if (getResourceProviders() != null) {
+				for (IResourceProvider iResourceProvider : getResourceProviders()) {
+					invokeInitialize(iResourceProvider);
 				}
 			}
-
-			Collection<Object> providers = getPlainProviders();
-			if (providers != null) {
-				for (Object next : providers) {
-					assertProviderIsValid(next);
-					findResourceMethods(next);
+			if (confProvider != null) {
+				invokeInitialize(confProvider);
+			}
+			if (getPlainProviders() != null) {
+				for (Object next : getPlainProviders()) {
+					invokeInitialize(next);
 				}
 			}
-
-			findResourceMethods(getServerProfilesProvider());
-
-			confProvider = getServerConformanceProvider();
-			if (confProvider == null) {
-				confProvider = getFhirContext().getVersion().createServerConformanceProvider(this);
-			}
-			// findSystemMethods(confProvider);
-			findResourceMethods(confProvider);
-
-		} catch (Exception ex) {
-			ourLog.error("An error occurred while loading request handlers!", ex);
-			throw new ServletException("Failed to initialize FHIR Restful server", ex);
+			
+			myStarted = true;
+			ourLog.info("A FHIR has been lit on this server");
+		} finally {
+			myProviderRegistrationMutex.unlock();
 		}
-
-		ourLog.trace("Invoking provider initialize methods");
-		if (getResourceProviders() != null) {
-			for (IResourceProvider iResourceProvider : getResourceProviders()) {
-				invokeInitialize(iResourceProvider);
-			}
-		}
-		if (confProvider != null) {
-			invokeInitialize(confProvider);
-		}
-		if (getPlainProviders() != null) {
-			for (Object next : getPlainProviders()) {
-				invokeInitialize(next);
-			}
-		}
-
-		myStarted = true;
-		ourLog.info("A FHIR has been lit on this server");
 	}
 
 	/**
@@ -852,6 +878,153 @@ public class RestfulServer extends HttpServlet {
 	 */
 	protected void initialize() throws ServletException {
 		// nothing by default
+	}
+
+	/**
+	 * Register a single provider. This could be a Resource Provider 
+	 * or a "plain" provider not associated with any resource.
+	 * 
+	 * @param provider
+	 * @throws Exception
+	 */
+	public void registerProvider (Object provider) throws Exception {
+		if (provider != null) {
+			Collection<Object> providerList = new ArrayList<Object>(1);
+			providerList.add(provider);
+			registerProviders(providerList);
+		}
+	}
+	
+	/**
+	 * Register a group of providers. These could be Resource Providers,
+	 * "plain" providers or a mixture of the two.
+	 * 
+	 * @param providers a {@code Collection} of providers. The parameter
+	 * could be null or an empty {@code Collection} 
+	 * @throws Exception
+	 */
+	public void registerProviders (Collection<? extends Object> providers) throws Exception {
+		myProviderRegistrationMutex.lock();
+		try {
+			if (!myStarted) {
+				for (Object provider : providers) {
+					ourLog.info("Registration of provider ["+provider.getClass().getName()+"] will be delayed until FHIR server startup");
+					if (provider instanceof IResourceProvider) {
+						myResourceProviders.add((IResourceProvider)provider);
+					} else {
+						myPlainProviders.add(provider);
+					}
+				}
+				return;
+			}
+		} finally {
+			myProviderRegistrationMutex.unlock();
+		}
+		registerProviders(providers, false);
+	}
+	
+	/*
+	 * Inner method to actually register providers 
+	 */
+	protected void registerProviders (Collection<? extends Object> providers, boolean inInit) throws Exception {
+		List<IResourceProvider> newResourceProviders = new ArrayList<IResourceProvider>();
+		List<Object> newPlainProviders = new ArrayList<Object>();
+		ProvidedResourceScanner providedResourceScanner = new ProvidedResourceScanner(getFhirContext());
+
+		if (providers != null) {
+			for (Object provider : providers) {
+				if (provider instanceof IResourceProvider) {
+					IResourceProvider rsrcProvider = (IResourceProvider)provider;
+					Class<? extends IBaseResource> resourceType = rsrcProvider.getResourceType();
+					if (resourceType == null) {
+						throw new NullPointerException("getResourceType() on class '" + rsrcProvider.getClass().getCanonicalName() + "' returned null");
+					}
+					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
+					if (myTypeToProvider.containsKey(resourceName)) {
+						throw new ServletException("Multiple resource providers return resource type[" + resourceName + "]: First[" + myTypeToProvider.get(resourceName).getClass().getCanonicalName() + "] and Second[" + rsrcProvider.getClass().getCanonicalName() + "]");
+					}
+					if (!inInit) {
+						myResourceProviders.add(rsrcProvider);
+					}
+					myTypeToProvider.put(resourceName, rsrcProvider);
+					providedResourceScanner.scanForProvidedResources(rsrcProvider);
+					newResourceProviders.add(rsrcProvider);
+				} else {
+					if (!inInit) {
+						myPlainProviders.add(provider);
+					}
+					newPlainProviders.add(provider);
+				}
+				
+			}
+			if (!newResourceProviders.isEmpty()) {
+				ourLog.info("Added {} resource provider(s). Total {}", newResourceProviders.size(), myTypeToProvider.size());
+				for (IResourceProvider provider : newResourceProviders) {
+					assertProviderIsValid(provider);
+					findResourceMethods(provider);
+				}
+			}
+			if (!newPlainProviders.isEmpty()) {
+				ourLog.info("Added {} plain provider(s). Total {}", newPlainProviders.size());
+				for (Object provider : newPlainProviders) {
+					assertProviderIsValid(provider);
+					findResourceMethods(provider);
+				}
+			}
+			if (!inInit) {
+				ourLog.trace("Invoking provider initialize methods");
+				if (!newResourceProviders.isEmpty()) {
+					for (IResourceProvider provider : newResourceProviders) {
+						invokeInitialize(provider);
+					}
+				}
+				if (!newPlainProviders.isEmpty()) {
+					for (Object provider : newPlainProviders) {
+						invokeInitialize(provider);
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Unregister one provider (either a Resource provider or a plain provider)
+	 * 
+	 * @param provider
+	 * @throws Exception
+	 */
+	public void unregisterProvider (Object provider) throws Exception {
+		if (provider != null) {
+			Collection<Object> providerList = new ArrayList<Object>(1);
+			providerList.add(provider);
+			unregisterProviders(providerList);
+		}
+	}
+	
+	/**
+	 * Unregister a {@code Collection} of providers
+	 * 
+	 * @param providers
+	 * @throws Exception
+	 */
+	public void unregisterProviders (Collection<? extends Object> providers) throws Exception {
+		ProvidedResourceScanner providedResourceScanner = new ProvidedResourceScanner(getFhirContext());
+		if (providers != null) {
+			for (Object provider : providers) {
+				removeResourceMethods(provider);
+				if (provider instanceof IResourceProvider) {
+					myResourceProviders.remove(provider);
+					IResourceProvider rsrcProvider = (IResourceProvider)provider;
+					Class<? extends IBaseResource> resourceType = rsrcProvider.getResourceType();
+					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
+					myTypeToProvider.remove(resourceName);
+					providedResourceScanner.removeProvidedResources(rsrcProvider);
+				} else {
+					myPlainProviders.remove(provider);
+				}
+				invokeDestroy(provider);
+			}
+		}
 	}
 
 	private void invokeDestroy(Object theProvider) {
@@ -1093,6 +1266,19 @@ public class RestfulServer extends HttpServlet {
 		if (myStarted) {
 			throw new IllegalStateException("Server is already started");
 		}
+
+		// call the setRestfulServer() method to point the Conformance
+		// Provider to this server instance. This is done to avoid
+		// passing the server into the constructor. Having that sort
+		// of cross linkage causes reference cycles in Spring wiring 
+		try {
+			Method setRestfulServer = theServerConformanceProvider.getClass().getMethod("setRestfulServer", new Class[]{RestfulServer.class});
+			if (setRestfulServer != null) {
+				setRestfulServer.invoke(theServerConformanceProvider, new Object[]{this});
+			}
+		} catch (Exception e) {
+			ourLog.warn("Error calling IServerConformanceProvider.setRestfulServer", e);
+		} 
 		myServerConformanceProvider = theServerConformanceProvider;
 	}
 

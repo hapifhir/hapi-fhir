@@ -75,4 +75,26 @@ public class ProvidedResourceScanner {
 			}
 		}
 	}
+
+	/**
+	 * Remove any metadata that was added by any {@code ProvidesResources} annotation
+	 * present in {@code theProvider}. This method is callled from {@code RestfulService}
+	 * when it is unregistering a Resource Provider.
+	 *  
+	 * @param theProvider
+	 *           - Normally a {@link ca.uhn.fhir.rest.server.IResourceProvider} that might 
+	 *           be annotated with {@link ca.uhn.fhir.model.api.annotation.ProvidesResources}
+	 */
+	public void removeProvidedResources(Object theProvider) {
+		ProvidesResources annotation = theProvider.getClass().getAnnotation(ProvidesResources.class);
+		if (annotation == null)
+			return;
+		for (Class<?> clazz : annotation.resources()) {
+			if (IBaseResource.class.isAssignableFrom(clazz)) {
+				// TODO -- not currently used but should be finished for completeness
+			} else {
+				ourLog.warn(clazz.getSimpleName() + "is not assignable from IResource");
+			}
+		}
+	}
 }

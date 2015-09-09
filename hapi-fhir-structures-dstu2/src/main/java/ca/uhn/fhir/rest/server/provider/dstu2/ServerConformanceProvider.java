@@ -94,9 +94,23 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
 	private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
 	private String myPublisher = "Not provided";
-	private final RestfulServer myRestfulServer;
+	private RestfulServer myRestfulServer;
 
 	public ServerConformanceProvider(RestfulServer theRestfulServer) {
+		myRestfulServer = theRestfulServer;
+	}
+	
+	/*
+	 * Add a no-arg constructor and seetter so that the
+	 * ServerConfirmanceProvider can be Spring-wired with
+	 * the RestfulService avoiding the potential reference
+	 * cycle that would happen.
+	 */
+	public ServerConformanceProvider () {
+		super();
+	}
+	
+	public void setRestfulServer (RestfulServer theRestfulServer) {
 		myRestfulServer = theRestfulServer;
 	}
 

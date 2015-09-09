@@ -89,16 +89,30 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
  */
 public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
 
-  private boolean myCache = true;
-  private volatile Conformance myConformance;
-  private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
-  private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
-  private String myPublisher = "Not provided";
-  private final RestfulServer myRestfulServer;
+	private boolean myCache = true;
+	private volatile Conformance myConformance;
+	private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
+	private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
+	private String myPublisher = "Not provided";
+	private RestfulServer myRestfulServer;
 
-  public ServerConformanceProvider(RestfulServer theRestfulServer) {
-    myRestfulServer = theRestfulServer;
-  }
+	public ServerConformanceProvider(RestfulServer theRestfulServer) {
+		myRestfulServer = theRestfulServer;
+	}
+	
+	/*
+	 * Add a no-arg constructor and seetter so that the
+	 * ServerConfirmanceProvider can be Spring-wired with
+	 * the RestfulService avoiding the potential reference
+	 * cycle that would happen.
+	 */
+	public ServerConformanceProvider () {
+		super();
+	}
+	
+	public void setRestfulServer (RestfulServer theRestfulServer) {
+		myRestfulServer = theRestfulServer;
+	}
 
   private void checkBindingForSystemOps(ConformanceRestComponent rest, Set<SystemRestfulInteraction> systemOps,
       BaseMethodBinding<?> nextMethodBinding) {
