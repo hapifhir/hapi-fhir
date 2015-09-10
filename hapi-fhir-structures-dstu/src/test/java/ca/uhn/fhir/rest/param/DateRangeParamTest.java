@@ -15,6 +15,36 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DateRangeParamTest {
 
+	@Test
+	public void testAndList() {
+		assertNotNull(new DateAndListParam().newInstance());
+		assertNotNull(new NumberAndListParam().newInstance());
+		assertNotNull(new ReferenceAndListParam().newInstance());
+		assertNotNull(new QuantityAndListParam().newInstance());
+		assertNotNull(new UriAndListParam().newInstance());
+		assertNotNull(new StringAndListParam().newInstance());
+	}
+
+	@Test
+	public void testAddAnd() {
+		assertEquals(1, new DateAndListParam().addAnd(new DateOrListParam()).getValuesAsQueryTokens().size());
+		assertEquals(1, new NumberAndListParam().addAnd(new NumberOrListParam()).getValuesAsQueryTokens().size());
+		assertEquals(1, new ReferenceAndListParam().addAnd(new ReferenceOrListParam()).getValuesAsQueryTokens().size());
+		assertEquals(1, new QuantityAndListParam().addAnd(new QuantityOrListParam()).getValuesAsQueryTokens().size());
+		assertEquals(1, new UriAndListParam().addAnd(new UriOrListParam()).getValuesAsQueryTokens().size());
+		assertEquals(1, new StringAndListParam().addAnd(new StringOrListParam()).getValuesAsQueryTokens().size());
+	}
+
+	@Test
+	public void testOrList() {
+		assertNotNull(new DateOrListParam().newInstance());
+		assertNotNull(new NumberOrListParam().newInstance());
+		assertNotNull(new ReferenceOrListParam().newInstance());
+		assertNotNull(new QuantityOrListParam().newInstance());
+		assertNotNull(new UriOrListParam().newInstance());
+		assertNotNull(new StringOrListParam().newInstance());
+	}
+
 	private static DateRangeParam create(String theLower, String theUpper) throws InvalidRequestException {
 		DateRangeParam p = new DateRangeParam();
 		List<QualifiedParamList> tokens = new ArrayList<QualifiedParamList>();

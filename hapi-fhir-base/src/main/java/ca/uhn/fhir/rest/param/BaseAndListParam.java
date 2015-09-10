@@ -50,8 +50,6 @@ public abstract class BaseAndListParam<T extends IQueryParameterOr<?>> implement
 		}
 	}
 
-	public abstract RestSearchParameterTypeEnum getSearchParamType();
-	
 	abstract T newInstance();
 
 	@Override

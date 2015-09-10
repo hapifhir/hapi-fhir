@@ -75,16 +75,19 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 /**
- * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
+ * Server FHIR Provider which serves the conformance statement for a RESTful
+ * server implementation
  * 
  * <p>
- * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is always returned unless
- * {@link #setCache(boolean)} is called with a value of <code>false</code>. This means that if you are adding anything to the returned conformance instance on
- * each call you should call <code>setCache(false)</code> in your provider constructor.
+ * Note: This class is safe to extend, but it is important to note that the same
+ * instance of {@link Conformance} is always returned unless
+ * {@link #setCache(boolean)} is called with a value of <code>false</code>. This
+ * means that if you are adding anything to the returned conformance instance on
+ * each call you should call <code>setCache(false)</code> in your provider
+ * constructor.
  * </p>
  */
 public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
@@ -94,9 +97,22 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
   private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
   private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
   private String myPublisher = "Not provided";
-  private final RestfulServer myRestfulServer;
+  private RestfulServer myRestfulServer;
 
   public ServerConformanceProvider(RestfulServer theRestfulServer) {
+    myRestfulServer = theRestfulServer;
+  }
+
+  /*
+   * Add a no-arg constructor and seetter so that the ServerConfirmanceProvider
+   * can be Spring-wired with the RestfulService avoiding the potential
+   * reference cycle that would happen.
+   */
+  public ServerConformanceProvider() {
+    super();
+  }
+
+  public void setRestfulServer(RestfulServer theRestfulServer) {
     myRestfulServer = theRestfulServer;
   }
 
@@ -148,8 +164,11 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
   }
 
   /**
-   * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null
-   * (although this is not enforced). The value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
+   * Gets the value of the "publisher" that will be placed in the generated
+   * conformance statement. As this is a mandatory element, the value should not
+   * be null (although this is not enforced). The value defaults to
+   * "Not provided" but may be set to null, which will cause this element to be
+   * omitted.
    */
   public String getPublisher() {
     return myPublisher;
@@ -167,7 +186,11 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
     retVal.setPublisher(myPublisher);
     retVal.setDate(new Date());
     retVal.setFhirVersion("1.0.0"); // TODO: pull from model
-    retVal.setAcceptUnknown(UnknownContentCode.EXTENSIONS); // TODO: make this configurable - this is a fairly big effort since the parser
+    retVal.setAcceptUnknown(UnknownContentCode.EXTENSIONS); // TODO: make this
+                                                            // configurable -
+                                                            // this is a fairly
+                                                            // big effort since
+                                                            // the parser
     // needs to be modified to actually allow it
 
     retVal.getImplementation().setDescription(myRestfulServer.getImplementationDescription());
@@ -197,7 +220,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
         TreeSet<String> includes = new TreeSet<String>();
 
-        // Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
+        // Map<String, Conformance.RestResourceSearchParam> nameToSearchParam =
+        // new HashMap<String,
         // Conformance.RestResourceSearchParam>();
         for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
           if (nextMethodBinding.getRestOperationType() != null) {
@@ -325,7 +349,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
         String nextParamDescription = nextParameter.getDescription();
 
         /*
-         * If the parameter has no description, default to the one from the resource
+         * If the parameter has no description, default to the one from the
+         * resource
          */
         if (StringUtils.isBlank(nextParamDescription)) {
           RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
@@ -368,9 +393,11 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
       // query = new OperationDefinition();
       // operation.setDefinition(new ResourceReferenceDt(query));
       // query.getDescriptionElement().setValue(searchMethodBinding.getDescription());
-      // query.addUndeclaredExtension(false, ExtensionConstants.QUERY_RETURN_TYPE, new CodeDt(resourceName));
+      // query.addUndeclaredExtension(false,
+      // ExtensionConstants.QUERY_RETURN_TYPE, new CodeDt(resourceName));
       // for (String nextInclude : searchMethodBinding.getIncludes()) {
-      // query.addUndeclaredExtension(false, ExtensionConstants.QUERY_ALLOWED_INCLUDE, new StringDt(nextInclude));
+      // query.addUndeclaredExtension(false,
+      // ExtensionConstants.QUERY_ALLOWED_INCLUDE, new StringDt(nextInclude));
       // }
       // }
 
@@ -388,7 +415,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
         String nextParamDescription = nextParameter.getDescription();
 
         /*
-         * If the parameter has no description, default to the one from the resource
+         * If the parameter has no description, default to the one from the
+         * resource
          */
         if (StringUtils.isBlank(nextParamDescription)) {
           RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
@@ -521,9 +549,11 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
   }
 
   /**
-   * Sets the cache property (default is true). If set to true, the same response will be returned for each invocation.
+   * Sets the cache property (default is true). If set to true, the same
+   * response will be returned for each invocation.
    * <p>
-   * See the class documentation for an important note if you are extending this class
+   * See the class documentation for an important note if you are extending this
+   * class
    * </p>
    */
   public void setCache(boolean theCache) {
@@ -531,8 +561,11 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
   }
 
   /**
-   * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null
-   * (although this is not enforced). The value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
+   * Sets the value of the "publisher" that will be placed in the generated
+   * conformance statement. As this is a mandatory element, the value should not
+   * be null (although this is not enforced). The value defaults to
+   * "Not provided" but may be set to null, which will cause this element to be
+   * omitted.
    */
   public void setPublisher(String thePublisher) {
     myPublisher = thePublisher;

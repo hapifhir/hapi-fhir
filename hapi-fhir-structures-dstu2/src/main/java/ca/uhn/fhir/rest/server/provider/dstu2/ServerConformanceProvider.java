@@ -19,8 +19,7 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,7 +75,6 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 /**
@@ -94,9 +92,23 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
 	private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
 	private String myPublisher = "Not provided";
-	private final RestfulServer myRestfulServer;
+	private RestfulServer myRestfulServer;
 
 	public ServerConformanceProvider(RestfulServer theRestfulServer) {
+		myRestfulServer = theRestfulServer;
+	}
+	
+	/*
+	 * Add a no-arg constructor and seetter so that the
+	 * ServerConfirmanceProvider can be Spring-wired with
+	 * the RestfulService avoiding the potential reference
+	 * cycle that would happen.
+	 */
+	public ServerConformanceProvider () {
+		super();
+	}
+	
+	public void setRestfulServer (RestfulServer theRestfulServer) {
 		myRestfulServer = theRestfulServer;
 	}
 

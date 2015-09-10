@@ -136,7 +136,7 @@ public class SearchParameter extends BaseQueryParameter {
 	private List<Class<? extends IResource>> myDeclaredTypes;
 	private String myDescription;
 	private String myName;
-	private IParamBinder myParamBinder;
+	private IParamBinder<?> myParamBinder;
 	private RestSearchParameterTypeEnum myParamType;
 	private Set<String> myQualifierBlacklist;
 	private Set<String> myQualifierWhitelist;
@@ -271,7 +271,7 @@ public class SearchParameter extends BaseQueryParameter {
 		this.myRequired = required;
 	}
 
-	@SuppressWarnings({ "unchecked" })
+	@SuppressWarnings({ "unchecked", "unused" })
 	public void setType(final Class<?> type, Class<? extends Collection<?>> theInnerCollectionType, Class<? extends Collection<?>> theOuterCollectionType) {
 		this.myType = type;
 		if (IQueryParameterType.class.isAssignableFrom(type)) {

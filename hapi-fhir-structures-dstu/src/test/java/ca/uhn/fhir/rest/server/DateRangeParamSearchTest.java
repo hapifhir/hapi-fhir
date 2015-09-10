@@ -123,6 +123,7 @@ public class DateRangeParamSearchTest {
 			return retVal;
 		}
 
+		
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
