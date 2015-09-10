@@ -21,6 +21,11 @@ package org.hl7.fhir.instance.conf;
  */
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,6 +39,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.jar.Manifest;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -75,6 +81,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 /**
@@ -92,29 +99,30 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
  */
 public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
 
-  private boolean myCache = true;
-  private volatile Conformance myConformance;
-  private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
-  private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
-  private String myPublisher = "Not provided";
-  private RestfulServer myRestfulServer;
+	private boolean myCache = true;
+	private volatile Conformance myConformance;
+	private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
+	private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
+	private String myPublisher = "Not provided";
+	private RestfulServer myRestfulServer;
 
-  public ServerConformanceProvider(RestfulServer theRestfulServer) {
-    myRestfulServer = theRestfulServer;
-  }
-
-  /*
-   * Add a no-arg constructor and seetter so that the ServerConfirmanceProvider
-   * can be Spring-wired with the RestfulService avoiding the potential
-   * reference cycle that would happen.
-   */
-  public ServerConformanceProvider() {
-    super();
-  }
-
-  public void setRestfulServer(RestfulServer theRestfulServer) {
-    myRestfulServer = theRestfulServer;
-  }
+	public ServerConformanceProvider(RestfulServer theRestfulServer) {
+		myRestfulServer = theRestfulServer;
+	}
+	
+	/*
+	 * Add a no-arg constructor and seetter so that the
+	 * ServerConfirmanceProvider can be Spring-wired with
+	 * the RestfulService avoiding the potential reference
+	 * cycle that would happen.
+	 */
+	public ServerConformanceProvider () {
+		super();
+	}
+	
+	public void setRestfulServer (RestfulServer theRestfulServer) {
+		myRestfulServer = theRestfulServer;
+	}
 
   private void checkBindingForSystemOps(ConformanceRestComponent rest, Set<SystemRestfulInteraction> systemOps,
       BaseMethodBinding<?> nextMethodBinding) {
@@ -184,13 +192,9 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
     Conformance retVal = new Conformance();
 
     retVal.setPublisher(myPublisher);
-    retVal.setDate(new Date());
+    retVal.setDate(conformanceDate());
     retVal.setFhirVersion("1.0.0"); // TODO: pull from model
-    retVal.setAcceptUnknown(UnknownContentCode.EXTENSIONS); // TODO: make this
-                                                            // configurable -
-                                                            // this is a fairly
-                                                            // big effort since
-                                                            // the parser
+    retVal.setAcceptUnknown(UnknownContentCode.EXTENSIONS); // TODO: make this configurable - this is a fairly big effort since the parser
     // needs to be modified to actually allow it
 
     retVal.getImplementation().setDescription(myRestfulServer.getImplementationDescription());
@@ -323,6 +327,34 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
     myConformance = retVal;
     return retVal;
+  }
+
+  private Date conformanceDate() {
+    String buildDate = getBuildDateFromManifest();
+    if (buildDate != null) {
+      DateFormat dateFormat = new SimpleDateFormat();
+      try {
+        return dateFormat.parse(buildDate);
+      } catch (ParseException e) {
+        // fall through
+      }
+    }
+    return new Date();
+  }
+
+  private String getBuildDateFromManifest() {
+    if (myRestfulServer != null && myRestfulServer.getServletContext() != null) {
+      InputStream inputStream = myRestfulServer.getServletContext().getResourceAsStream("/META-INF/MANIFEST.MF");
+      if (inputStream != null) {
+        try {
+          Manifest manifest = new Manifest(inputStream);
+          return manifest.getMainAttributes().getValue("Build-Time");
+        } catch (IOException e) {
+          // fall through
+        }
+      }
+    }
+    return null;
   }
 
   private void handleDynamicSearchMethodBinding(ConformanceRestResourceComponent resource,

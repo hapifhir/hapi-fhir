@@ -94,9 +94,9 @@ public class RestfulServer extends HttpServlet {
 	private String myImplementationDescription;
 	private final List<IServerInterceptor> myInterceptors = new ArrayList<IServerInterceptor>();
 	private IPagingProvider myPagingProvider;
-	private Collection<Object> myPlainProviders = new ArrayList<Object>();
+	private final List<Object> myPlainProviders = new ArrayList<Object>();
 	private Map<String, ResourceBinding> myResourceNameToBinding = new HashMap<String, ResourceBinding>();
-	private Collection<IResourceProvider> myResourceProviders = new ArrayList<IResourceProvider>();
+	private final List<IResourceProvider> myResourceProviders = new ArrayList<IResourceProvider>();
 	private Map<String,IResourceProvider> myTypeToProvider = new HashMap<String, IResourceProvider>();
 	private IServerAddressStrategy myServerAddressStrategy = new IncomingRequestAddressStrategy();
 	private ResourceBinding myServerBinding = new ResourceBinding();
@@ -1208,7 +1208,10 @@ public class RestfulServer extends HttpServlet {
 	 * @see #setResourceProviders(Collection)
 	 */
 	public void setPlainProviders(Collection<Object> theProviders) {
-		myPlainProviders = theProviders;
+		myPlainProviders.clear();
+		if (theProviders != null) {
+			myPlainProviders.addAll(theProviders);
+		}
 	}
 
 	/**
@@ -1226,21 +1229,30 @@ public class RestfulServer extends HttpServlet {
 	 * @see #setResourceProviders(Collection)
 	 */
 	public void setProviders(Object... theProviders) {
-		myPlainProviders = Arrays.asList(theProviders);
+		myPlainProviders.clear();
+		if (theProviders != null) {
+			myPlainProviders.addAll(Arrays.asList(theProviders));
+		}
 	}
 
 	/**
 	 * Sets the resource providers for this server
 	 */
 	public void setResourceProviders(Collection<IResourceProvider> theResourceProviders) {
-		myResourceProviders = theResourceProviders;
+		myResourceProviders.clear();
+		if (theResourceProviders != null) {
+			myResourceProviders.addAll(theResourceProviders);
+		}
 	}
 
 	/**
 	 * Sets the resource providers for this server
 	 */
 	public void setResourceProviders(IResourceProvider... theResourceProviders) {
-		myResourceProviders = Arrays.asList(theResourceProviders);
+		myResourceProviders.clear();
+		if (theResourceProviders != null) {
+			myResourceProviders.addAll(Arrays.asList(theResourceProviders));
+		}
 	}
 
 	/**
