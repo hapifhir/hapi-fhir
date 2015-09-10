@@ -201,7 +201,6 @@ public class GenericClientTest {
 		count++;
 
 	}
-
 	@Test
 	public void testCreateWithTag() throws Exception {
 
@@ -628,6 +627,32 @@ public class GenericClientTest {
 	}
 
 	@Test
+	public void testLoadPageAndReturnDstu1Bundle() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://foo");
+		//@formatter:off
+		client
+			.loadPage()
+			.byUrl("http://example.com/page1")
+			.andReturnDstu1Bundle()
+			.execute();
+		//@formatter:on
+
+		assertEquals("http://example.com/page1", capt.getValue().getURI().toString());
+	}
+	
+	
+	@Test
 	public void testSearchByCompartment() throws Exception {
 
 		String msg = getPatientFeedWithOneResult();
@@ -720,41 +745,12 @@ public class GenericClientTest {
 				.include(Patient.INCLUDE_MANAGINGORGANIZATION)
 				.sort().ascending(Patient.BIRTHDATE)
 				.sort().descending(Patient.NAME)
+				.sort().defaultOrder(Patient.ADDRESS)
 				.limitTo(123)
 				.execute();
 		//@formatter:on
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_count=123&_format=json", capt.getValue().getURI().toString());
-
-	}
-
-	@SuppressWarnings("unused")
-	@Test
-	public void testSearchIncludeRecursive() throws Exception {
-
-		String msg = getPatientFeedWithOneResult();
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-
-		//@formatter:off
-		Bundle response = client.search()
-				.forResource(Patient.class)
-				.include(Patient.INCLUDE_MANAGINGORGANIZATION)
-				.include(Patient.INCLUDE_LINK_OTHER.asRecursive())
-				.include(Patient.INCLUDE_ALL.asNonRecursive())
-				.execute();
-		//@formatter:on
-
-		assertThat(capt.getValue().getURI().toString(), containsString("http://example.com/fhir/Patient?"));
-		assertThat(capt.getValue().getURI().toString(), containsString("_include=" + Patient.INCLUDE_MANAGINGORGANIZATION.getValue()));
-		assertThat(capt.getValue().getURI().toString(), containsString("_include%3Arecurse=" + Patient.INCLUDE_LINK_OTHER.getValue()));
-		assertThat(capt.getValue().getURI().toString(), containsString("_include=*"));
+		assertEquals("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_sort=address&_count=123&_format=json", capt.getValue().getURI().toString());
 
 	}
 
@@ -912,35 +908,6 @@ public class GenericClientTest {
 
 	@SuppressWarnings("unused")
 	@Test
-	public void testSearchWithEscapedParameters() throws Exception {
-
-		String msg = getPatientFeedWithOneResult();
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-
-		//@formatter:off
-		Bundle response = client.search()
-				.forResource("Patient")
-				.where(Patient.NAME.matches().values("NE,NE", "NE,NE"))
-				.where(Patient.NAME.matchesExactly().values("E$E"))
-				.where(Patient.NAME.matches().values("NE\\NE"))
-				.where(Patient.NAME.matchesExactly().values("E|E"))
-				.execute();
-		//@formatter:on
-
-		assertThat(capt.getValue().getURI().toString(), containsString("%3A"));
-		assertEquals("http://example.com/fhir/Patient?name=NE\\,NE,NE\\,NE&name=NE\\\\NE&name:exact=E\\$E&name:exact=E\\|E", UrlUtil.unescape(capt.getValue().getURI().toString()));
-	}
-	
-	
-	@SuppressWarnings("unused")
-	@Test
 	public void testSearchByString() throws Exception {
 
 		String msg = getPatientFeedWithOneResult();
@@ -1024,7 +991,8 @@ public class GenericClientTest {
 		assertEquals("http://example.com/fhir/Patient?_tag=urn%3Afoo%7C123&_tag=urn%3Abar%7C456", capt.getValue().getURI().toString());
 
 	}
-
+	
+	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchByToken() throws Exception {
@@ -1118,6 +1086,36 @@ public class GenericClientTest {
 		assertEquals(UrlUtil.escape(wantValue), url.substring(wantPrefix.length()));
 		index++;
 		//@formatter:on
+
+	}
+
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchIncludeRecursive() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+		Bundle response = client.search()
+				.forResource(Patient.class)
+				.include(Patient.INCLUDE_MANAGINGORGANIZATION)
+				.include(Patient.INCLUDE_LINK_OTHER.asRecursive())
+				.include(Patient.INCLUDE_ALL.asNonRecursive())
+				.execute();
+		//@formatter:on
+
+		assertThat(capt.getValue().getURI().toString(), containsString("http://example.com/fhir/Patient?"));
+		assertThat(capt.getValue().getURI().toString(), containsString("_include=" + Patient.INCLUDE_MANAGINGORGANIZATION.getValue()));
+		assertThat(capt.getValue().getURI().toString(), containsString("_include%3Arecurse=" + Patient.INCLUDE_LINK_OTHER.getValue()));
+		assertThat(capt.getValue().getURI().toString(), containsString("_include=*"));
 
 	}
 
@@ -1241,6 +1239,34 @@ public class GenericClientTest {
 
 		assertEquals("http://example.com/fhir/Patient?_format=json&_pretty=true", capt.getValue().getURI().toString());
 
+	}
+
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchWithEscapedParameters() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+		Bundle response = client.search()
+				.forResource("Patient")
+				.where(Patient.NAME.matches().values("NE,NE", "NE,NE"))
+				.where(Patient.NAME.matchesExactly().values("E$E"))
+				.where(Patient.NAME.matches().values("NE\\NE"))
+				.where(Patient.NAME.matchesExactly().values("E|E"))
+				.execute();
+		//@formatter:on
+
+		assertThat(capt.getValue().getURI().toString(), containsString("%3A"));
+		assertEquals("http://example.com/fhir/Patient?name=NE\\,NE,NE\\,NE&name=NE\\\\NE&name:exact=E\\$E&name:exact=E\\|E", UrlUtil.unescape(capt.getValue().getURI().toString()));
 	}
 
 	@SuppressWarnings("unused")
@@ -1513,6 +1539,32 @@ public class GenericClientTest {
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("value=\"John\""));
 		count++;
+	}
+
+	@Test
+	public void testValidateNonFluent() throws Exception {
+
+		OperationOutcome oo = new OperationOutcome();
+		oo.addIssue().setDetails("OOOK");
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { });
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(ourCtx.newXmlParser().encodeResourceToString(oo)), Charset.forName("UTF-8")));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Patient p1 = new Patient();
+		p1.addIdentifier("foo:bar", "12345");
+		p1.addName().addFamily("Smith").addGiven("John");
+		
+		MethodOutcome resp = client.validate(p1);
+		assertEquals("http://example.com/fhir/Patient/_validate", capt.getValue().getURI().toString());
+		oo = (OperationOutcome) resp.getOperationOutcome();
+		assertEquals("OOOK", oo.getIssueFirstRep().getDetails().getValue());
+
 	}
 
 	@Test
