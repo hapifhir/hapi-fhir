@@ -187,6 +187,11 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
+					<archive>
+						<manifestEntries>
+							<Build-Time>${maven.build.timestamp}</Build-Time>
+						</manifestEntries>
+					</archive>
 					<overlays>
 						<overlay>
 							<groupId>ca.uhn.hapi.fhir</groupId>

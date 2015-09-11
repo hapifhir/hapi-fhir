@@ -30,11 +30,6 @@ public class StringAndListParam  extends BaseAndListParam<StringOrListParam> {
 	StringOrListParam newInstance() {
 		return new StringOrListParam();
 	}
-	
-	@Override
-	public RestSearchParameterTypeEnum getSearchParamType() {
-		return RestSearchParameterTypeEnum.STRING;
-	}
 
 	@CoverageIgnore
 	@Override

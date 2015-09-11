@@ -178,6 +178,10 @@
 				words, if this parameter is found, the response won't be returned as
 				HTML even if the request is detected as coming from a browser.
 			</action>
+			<action type="add">
+				RestfulServer now supports dynamically adding and removing resource providers
+				at runtime. Thanks to Bill Denton for adding this.
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

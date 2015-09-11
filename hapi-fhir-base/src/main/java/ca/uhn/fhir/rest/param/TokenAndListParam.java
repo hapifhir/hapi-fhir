@@ -31,11 +31,6 @@ public class TokenAndListParam extends BaseAndListParam<TokenOrListParam> {
 		return new TokenOrListParam();
 	}
 	
-	@Override
-	public RestSearchParameterTypeEnum getSearchParamType() {
-		return RestSearchParameterTypeEnum.TOKEN;
-	}
-
 	@CoverageIgnore
 	@Override
 	public TokenAndListParam addAnd(TokenOrListParam theValue) {

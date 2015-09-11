@@ -61,23 +61,10 @@ public interface IGenericClient extends IRestfulClient {
 	BaseConformance conformance();
 
 	/**
-	 * Retrieves the server's conformance statement
-	 */
-	IFetchConformanceUntyped fetchConformance();
-	
-	/**
 	 * Fluent method for the "create" operation, which creates a new resource instance on the server
 	 */
 	ICreate create();
-
-	/**
-	 * Fluent method for the "meta" operations, which can be used to get, add and remove tags and other
-	 * Meta elements from a resource or across the server.
-	 * 
-	 * @since 1.1
-	 */
-	IMeta meta();
-
+	
 	/**
 	 * Implementation of the "type create" method.
 	 * 
@@ -120,6 +107,11 @@ public interface IGenericClient extends IRestfulClient {
 	 */
 	@Deprecated
 	MethodOutcome delete(Class<? extends IResource> theType, String theId);
+
+	/**
+	 * Retrieves the server's conformance statement
+	 */
+	IFetchConformanceUntyped fetchConformance();
 
 	/**
 	 * Force the client to fetch the server's conformance statement and validate that it is appropriate for this client.
@@ -179,6 +171,13 @@ public interface IGenericClient extends IRestfulClient {
 	@Deprecated
 	<T extends IResource> Bundle history(Class<T> theType, String theId, DateTimeDt theSince, Integer theLimit);
 
+	/**
+	 * Loads the previous/next bundle of resources from a paged set, using the link specified in the "link type=next" tag within the atom bundle.
+	 * 
+	 * @see Bundle#getLinkNext()
+	 */
+	IGetPage loadPage();
+
 	// /**
 	// * Implementation of the "instance read" method. This method will only ever do a "read" for the latest version of a
 	// * given resource instance, even if the ID passed in contains a version. If you wish to request a specific version
@@ -198,11 +197,12 @@ public interface IGenericClient extends IRestfulClient {
 	// <T extends IBaseResource> T read(Class<T> theType, IdDt theId);
 
 	/**
-	 * Loads the previous/next bundle of resources from a paged set, using the link specified in the "link type=next" tag within the atom bundle.
+	 * Fluent method for the "meta" operations, which can be used to get, add and remove tags and other
+	 * Meta elements from a resource or across the server.
 	 * 
-	 * @see Bundle#getLinkNext()
+	 * @since 1.1
 	 */
-	IGetPage loadPage();
+	IMeta meta();
 
 	/**
 	 * Implementation of the FHIR "extended operations" action
@@ -296,11 +296,6 @@ public interface IGenericClient extends IRestfulClient {
 	ITransaction transaction();
 
 	/**
-	 * Validate a resource
-	 */
-	IValidate validate();
-
-	/**
 	 * Implementation of the "transaction" method.
 	 * 
 	 * @param theResources
@@ -344,6 +339,11 @@ public interface IGenericClient extends IRestfulClient {
 	 * @return An outcome containing the results and possibly the new version ID
 	 */
 	MethodOutcome update(String theId, IResource theResource);
+
+	/**
+	 * Validate a resource
+	 */
+	IValidate validate();
 
 	/**
 	 * Implementation of the "type validate" method.

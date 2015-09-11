@@ -421,16 +421,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	public static class QualifierDetails {
 
 		private String myColonQualifier;
-
 		private String myDotQualifier;
-
-		public String getColonQualifier() {
-			return myColonQualifier;
-		}
-
-		public String getDotQualifier() {
-			return myDotQualifier;
-		}
 
 		public boolean passes(Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
 			if (theQualifierWhitelist != null) {
@@ -445,7 +436,9 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 						}
 					}
 				}
-				if (!theQualifierWhitelist.contains(":*")) {
+				/*
+				 * This was removed Sep 9 2015, as I don't see any way it could possibly be triggered.
+				if (!theQualifierWhitelist.contains(SearchParameter.QUALIFIER_ANY_TYPE)) {
 					if (myColonQualifier != null) {
 						if (!theQualifierWhitelist.contains(myColonQualifier)) {
 							return false;
@@ -456,6 +449,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 						}
 					}
 				}
+				*/
 			}
 			if (theQualifierBlacklist != null) {
 				if (myDotQualifier != null) {
