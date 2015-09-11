@@ -71,7 +71,7 @@ public class ExampleServerIT {
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		ourClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/base");
+		ourClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/baseDstu2");
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 	}
