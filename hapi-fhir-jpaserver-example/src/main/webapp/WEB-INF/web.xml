@@ -49,7 +49,7 @@
 
 	<servlet-mapping>
 		<servlet-name>fhirServlet</servlet-name>
-		<url-pattern>/base/*</url-pattern>
+		<url-pattern>/baseDstu2/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>

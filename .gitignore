@@ -19,7 +19,7 @@ tmp.txt
 .vagrant
 /vagrant/build
 /vagrant/chef/tmp
-
+jpaserver_derby_files
 
 
 # Created by https://www.gitignore.io

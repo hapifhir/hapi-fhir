@@ -10,7 +10,6 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>ca.uhn.hapi.example</groupId>
 	<artifactId>hapi-fhir-jpaserver-example</artifactId>
 	<packaging>war</packaging>
 
