@@ -100,6 +100,7 @@ import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -940,6 +941,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return toResource(type.getImplementingClass(), theEntity);
 	}
 
+	@SuppressWarnings("unchecked")
 	protected <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity) {
 		String resourceText = null;
 		switch (theEntity.getEncoding()) {
@@ -975,7 +977,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			ourLog.error(msg, e);
 			throw new DataFormatException(msg, e);
 		}
+		
 		IResource res = (IResource) retVal;
+		if (theEntity.getDeleted() != null) {
+			res = (IResource) myContext.getResourceDefinition(theResourceType).newInstance();
+			retVal = (R) res;
+			ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt(theEntity.getDeleted()));
+			ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.DELETE);
+		} 
+		
 		res.setId(theEntity.getIdDt());
 
 		ResourceMetadataKeyEnum.VERSION.put(res, Long.toString(theEntity.getVersion()));
@@ -984,10 +994,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		if (theEntity.getTitle() != null) {
 			ResourceMetadataKeyEnum.TITLE.put(res, theEntity.getTitle());
-		}
-
-		if (theEntity.getDeleted() != null) {
-			ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt(theEntity.getDeleted()));
 		}
 
 		Collection<? extends BaseTag> tags = theEntity.getTags();

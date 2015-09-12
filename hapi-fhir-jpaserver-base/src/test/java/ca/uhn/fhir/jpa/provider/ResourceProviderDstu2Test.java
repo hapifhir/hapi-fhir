@@ -101,6 +101,7 @@ import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -424,7 +425,8 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		}
 
 		/*
-		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to make sure that works too..
+		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to
+		 * make sure that works too..
 		 */
 		Socket sock = new Socket();
 		sock.setSoTimeout(3000);
@@ -685,6 +687,30 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		}
 	}
 
+	@Test
+	public void testHistoryWithDeletedResource() {
+		String methodName = "testHistoryWithDeletedResource";
+
+		Patient patient = new Patient();
+		patient.addName().addFamily(methodName);
+		IIdType id = ourClient.create().resource(patient).execute().getId().toVersionless();
+		ourClient.delete().resourceById(id).execute();
+		patient.setId(id);
+		ourClient.update().resource(patient).execute();
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle history = ourClient.history().onInstance(id).andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class).prettyPrint().summaryMode(SummaryEnum.DATA).execute();
+		assertEquals(3, history.getEntry().size());
+		assertEquals(id.withVersion("3"), history.getEntry().get(0).getResource().getId());
+		assertEquals(1, ((Patient) history.getEntry().get(0).getResource()).getName().size());
+
+		assertEquals(id.withVersion("2"), history.getEntry().get(1).getResource().getId());
+		assertEquals(HTTPVerbEnum.DELETE, history.getEntry().get(1).getRequest().getMethodElement().getValueAsEnum());
+		assertEquals(0, ((Patient) history.getEntry().get(1).getResource()).getName().size());
+
+		assertEquals(id.withVersion("1"), history.getEntry().get(2).getResource().getId());
+		assertEquals(1, ((Patient) history.getEntry().get(2).getResource()).getName().size());
+	}
+
 	/**
 	 * See issue #52
 	 */
@@ -701,6 +727,21 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		assertEquals(1, newSize - initialSize);
 
+	}
+
+	@Test
+	public void testMetadata() throws Exception {
+		HttpGet get = new HttpGet(ourServerBase + "/metadata");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(resp, stringContainsInOrder("THIS IS THE DESC"));
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
 	}
 
 	@Test
@@ -838,7 +879,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 				.execute();
 		//@formatter:on
-		
+
 		assertEquals(1, actual.getEntry().size());
 		assertEquals(ourServerBase + "/Patient/" + p1Id.getIdPart(), actual.getEntry().get(0).getFullUrl());
 		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
@@ -853,8 +894,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
 		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
-				.execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
@@ -989,6 +1029,19 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		}
 	}
 
+	private void testSearchReturnsResults(String search) throws IOException, ClientProtocolException {
+		int matches;
+		HttpGet get = new HttpGet(ourServerBase + search);
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		String resp = IOUtils.toString(response.getEntity().getContent());
+		IOUtils.closeQuietly(response.getEntity().getContent());
+		ourLog.info(resp);
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp);
+		matches = bundle.getTotal();
+
+		assertThat(matches, greaterThan(0));
+	}
+
 	@Test
 	public void testSearchReturnsSearchDate() throws Exception {
 		Date before = new Date();
@@ -1045,33 +1098,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		assertEquals(Organization.class, found.getEntries().get(1).getResource().getClass());
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getSearchMode().getValueAsEnum());
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
-	}
-
-	@Test
-	public void testSearchWithTextInexactMatch() throws Exception {
-		Observation obs = new Observation();
-		obs.getCode().setText("THIS_IS_THE_TEXT");
-		obs.getCode().addCoding().setSystem("SYSTEM").setCode("CODE").setDisplay("THIS_IS_THE_DISPLAY");
-		ourClient.create().resource(obs).execute();
-
-		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_TEXT");
-		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_");
-		testSearchReturnsResults("/Observation?code%3Atext=this_is_the_");
-		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_DISPLAY");
-		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_disp");
-	}
-
-	private void testSearchReturnsResults(String search) throws IOException, ClientProtocolException {
-		int matches;
-		HttpGet get = new HttpGet(ourServerBase + search);
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		String resp = IOUtils.toString(response.getEntity().getContent());
-		IOUtils.closeQuietly(response.getEntity().getContent());
-		ourLog.info(resp);
-		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp);
-		matches = bundle.getTotal();
-
-		assertThat(matches, greaterThan(0));
 	}
 
 	@Test
@@ -1151,6 +1177,20 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		checkParamMissing(Observation.SP_VALUE_STRING);
 		checkParamMissing(Observation.SP_ENCOUNTER);
 		checkParamMissing(Observation.SP_DATE);
+	}
+
+	@Test
+	public void testSearchWithTextInexactMatch() throws Exception {
+		Observation obs = new Observation();
+		obs.getCode().setText("THIS_IS_THE_TEXT");
+		obs.getCode().addCoding().setSystem("SYSTEM").setCode("CODE").setDisplay("THIS_IS_THE_DISPLAY");
+		ourClient.create().resource(obs).execute();
+
+		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_TEXT");
+		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_");
+		testSearchReturnsResults("/Observation?code%3Atext=this_is_the_");
+		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_DISPLAY");
+		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_disp");
 	}
 
 	/**
@@ -1281,7 +1321,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		//@formatter:om
 			
 	}
-	
+
 	/**
 	 * Test for issue #60
 	 */
@@ -1635,21 +1675,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		ourServer.stop();
 		ourAppCtx.stop();
 		ourHttpClient.close();
-	}
-
-	@Test
-	public void testMetadata() throws Exception {
-		HttpGet get = new HttpGet(ourServerBase + "/metadata");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent());
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp, stringContainsInOrder("THIS IS THE DESC"));
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
 	}
 
 	@SuppressWarnings("unchecked")

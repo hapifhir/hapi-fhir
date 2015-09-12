@@ -1,13 +1,12 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -22,9 +21,9 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -32,12 +31,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -45,10 +42,9 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -62,15 +58,12 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Device;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
-import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
-import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu2.valueset.QuantityComparatorEnum;
@@ -85,17 +78,12 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -110,26 +98,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2Test.class);
 
-	@Before
-	public void before() {
-		deleteAll(myPatientDao);
-		deleteAll(myObservationDao);
-		deleteAll(myOrganizationDao);
-		deleteAll(myDiagnosticReportDao);
-		deleteAll(myEncounterDao);
-
-		FhirSystemDaoDstu2Test.doDeleteEverything(mySystemDao);
-		reset(myInterceptor);
-	}
-
-	private void deleteAll(IFhirResourceDao<?> dao) {
-		IBundleProvider find = dao.search(new SearchParameterMap());
-		List<IBaseResource> res = find.getResources(0, find.size());
-		for (IBaseResource next : res) {
-			dao.delete(next.getIdElement());
-		}
-	}
-
 	private List<String> extractNames(IBundleProvider theSearch) {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
@@ -139,6 +107,46 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		return retVal;
 	}
 
+	@Test
+	public void testReadWithDeletedResource() {
+		String methodName = "testReadWithDeletedResource";
+
+		Patient patient = new Patient();
+		patient.addName().addFamily(methodName);
+		IIdType id = myPatientDao.create(patient).getId().toVersionless();
+		myPatientDao.delete(id);
+
+		try {
+			myPatientDao.read(id);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+		
+		patient.setId(id);
+		patient.addAddress().addLine("AAA");
+		myPatientDao.update(patient);
+		
+		Patient p;
+
+		p = myPatientDao.read(id);
+		assertEquals(1, (p).getName().size());
+
+		p = myPatientDao.read(id.withVersion("1"));
+		assertEquals(1, (p).getName().size());
+
+		try {
+			myPatientDao.read(id.withVersion("2"));
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		p = myPatientDao.read(id.withVersion("3"));
+		assertEquals(1, (p).getName().size());
+	}
+
+	
 	@Test
 	public void testChoiceParamConcept() {
 		Observation o1 = new Observation();
@@ -230,8 +238,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testCreateOperationOutcome() {
 		/*
-		 * If any of this ever fails, it means that one of the OperationOutcome issue severity codes has changed code value across versions. We store the string as a constant, so something will need to
-		 * be fixed.
+		 * If any of this ever fails, it means that one of the OperationOutcome issue severity codes has changed code
+		 * value across versions. We store the string as a constant, so something will need to be fixed.
 		 */
 		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_ERROR);
 		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.ERROR.getCode(), BaseHapiFhirResourceDao.OO_SEVERITY_ERROR);
@@ -710,6 +718,108 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	public void testHistoryWithDeletedResource() throws Exception {
+		String methodName = "testHistoryWithDeletedResource";
+
+		Patient patient = new Patient();
+		patient.addName().addFamily(methodName);
+		IIdType id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		myPatientDao.delete(id);
+		patient.setId(id);
+		myPatientDao.update(patient);
+
+		IBundleProvider history = myPatientDao.history(id, null);
+		assertEquals(3, history.size());
+		List<IBaseResource> entries = history.getResources(0, 3);
+		ourLog.info("" + ResourceMetadataKeyEnum.UPDATED.get((IResource) entries.get(0)));
+		ourLog.info("" + ResourceMetadataKeyEnum.UPDATED.get((IResource) entries.get(1)));
+		ourLog.info("" + ResourceMetadataKeyEnum.UPDATED.get((IResource) entries.get(2)));
+
+		assertEquals(id.withVersion("3"), entries.get(0).getIdElement());
+		assertEquals(id.withVersion("2"), entries.get(1).getIdElement());
+		assertEquals(id.withVersion("1"), entries.get(2).getIdElement());
+
+		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) entries.get(0)));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) entries.get(1)));
+		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) entries.get(2)));
+	}
+
+	@Test
+	public void testHistoryOverMultiplePages() throws Exception {
+		String methodName = "testHistoryOverMultiplePages";
+
+		Patient patient = new Patient();
+		patient.addName().addFamily(methodName);
+		IIdType id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		Date middleDate = null;
+		for (int i = 0; i < 100; i++) {
+			if (i == 50) {
+				Thread.sleep(100);
+				middleDate = new Date();
+				Thread.sleep(100);
+			}
+			patient.setId(id);
+			patient.getName().get(0).getFamily().get(0).setValue(methodName + "_i");
+			myPatientDao.update(patient);
+		}
+
+		// By instance
+		IBundleProvider history = myPatientDao.history(id, null);
+		for (int i = 0; i < 100; i++) {
+			String expected = id.withVersion(Integer.toString(101 - i)).getValue();
+			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
+			assertEquals(expected, actual);
+		}
+
+		// By type
+		history = myPatientDao.history(null);
+		for (int i = 0; i < 100; i++) {
+			String expected = id.withVersion(Integer.toString(101 - i)).getValue();
+			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
+			assertEquals(expected, actual);
+		}
+
+		// By server
+		history = mySystemDao.history(null);
+		for (int i = 0; i < 100; i++) {
+			String expected = id.withVersion(Integer.toString(101 - i)).getValue();
+			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
+			assertEquals(expected, actual);
+		}
+
+		/*
+		 * With since date
+		 */
+
+		// By instance
+		history = myPatientDao.history(id, middleDate);
+		for (int i = 0; i < 50; i++) {
+			String expected = id.withVersion(Integer.toString(101 - i)).getValue();
+			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
+			assertEquals(expected, actual);
+		}
+
+		// By type
+		history = myPatientDao.history(middleDate);
+		for (int i = 0; i < 50; i++) {
+			String expected = id.withVersion(Integer.toString(101 - i)).getValue();
+			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
+			assertEquals(expected, actual);
+		}
+
+		// By server
+		history = mySystemDao.history(middleDate);
+		for (int i = 0; i < 50; i++) {
+			String expected = id.withVersion(Integer.toString(101 - i)).getValue();
+			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
+			assertEquals(expected, actual);
+		}
+
+	}
+
+	@Test
 	public void testIdParam() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
@@ -1130,21 +1240,21 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 			id = myPatientDao.create(patient).getId();
 		}
-		
+
 		assertTrue(id.hasVersionIdPart());
-		
+
 		/*
 		 * Create a second version
 		 */
-		
+
 		Patient pt = myPatientDao.read(id);
 		pt.addName().addFamily("anotherName");
 		myPatientDao.update(pt);
-		
+
 		/*
 		 * Meta-Delete on previous version
 		 */
-		
+
 		MetaDt meta = new MetaDt();
 		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
 		meta.addProfile("http://profile/1");
@@ -1156,11 +1266,11 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals("tag_code2", newMeta.getTag().get(0).getCode());
 		assertEquals("http://profile/2", newMeta.getProfile().get(0).getValue());
 		assertEquals("seclabel_code2", newMeta.getSecurity().get(0).getCode());
-		
+
 		/*
 		 * Meta Read on Version
 		 */
-		
+
 		meta = myPatientDao.metaGetOperation(id.withVersion("1"));
 		assertEquals(1, meta.getProfile().size());
 		assertEquals(1, meta.getSecurity().size());
@@ -1168,7 +1278,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals("tag_code2", meta.getTag().get(0).getCode());
 		assertEquals("http://profile/2", meta.getProfile().get(0).getValue());
 		assertEquals("seclabel_code2", meta.getSecurity().get(0).getCode());
-		
+
 		/*
 		 * Meta-read on Version 2
 		 */
@@ -1189,7 +1299,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		/*
 		 * Meta-Add on previous version
 		 */
-		
+
 		meta = new MetaDt();
 		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
 		meta.addProfile("http://profile/1");
@@ -1198,11 +1308,11 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals(2, newMeta.getProfile().size());
 		assertEquals(2, newMeta.getSecurity().size());
 		assertEquals(2, newMeta.getTag().size());
-		
+
 		/*
 		 * Meta Read on Version
 		 */
-		
+
 		meta = myPatientDao.metaGetOperation(id.withVersion("1"));
 		assertEquals(2, meta.getProfile().size());
 		assertEquals(2, meta.getSecurity().size());
@@ -1228,7 +1338,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		/*
 		 * Meta-Add on latest version
 		 */
-		
+
 		meta = new MetaDt();
 		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
 		meta.addProfile("http://profile/1");
@@ -1238,7 +1348,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals(2, newMeta.getSecurity().size());
 		assertEquals(2, newMeta.getTag().size());
 		assertEquals("2", newMeta.getVersionId());
-		
+
 	}
 
 	@Test
@@ -1859,7 +1969,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		securityLabels.add(new CodingDt().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2"));
 		ResourceMetadataKeyEnum.SECURITY_LABELS.put(patient, securityLabels);
 
-		ArrayList<IdDt> profiles = new ArrayList<IdDt>();
+		List<IdDt> profiles = new ArrayList<IdDt>();
 		profiles.add(new IdDt("http://profile/1"));
 		profiles.add(new IdDt("http://profile/2"));
 		ResourceMetadataKeyEnum.PROFILES.put(patient, profiles);
@@ -1871,6 +1981,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		Patient retrieved = myPatientDao.read(patientId);
 		TagList published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+		sort(published);
 		assertEquals(2, published.size());
 		assertEquals("Dog", published.get(0).getTerm());
 		assertEquals("Puppies", published.get(0).getLabel());
@@ -1878,14 +1989,18 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals("Cat", published.get(1).getTerm());
 		assertEquals("Kittens", published.get(1).getLabel());
 		assertEquals("http://foo", published.get(1).getScheme());
-		assertEquals(2, ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).size());
-		assertEquals("seclabel:sys:1", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(0).getSystemElement().getValue());
-		assertEquals("seclabel:code:1", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(0).getCodeElement().getValue());
-		assertEquals("seclabel:dis:1", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(0).getDisplayElement().getValue());
-		assertEquals("seclabel:sys:2", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(1).getSystemElement().getValue());
-		assertEquals("seclabel:code:2", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(1).getCodeElement().getValue());
-		assertEquals("seclabel:dis:2", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(1).getDisplayElement().getValue());
-		assertEquals(2, ResourceMetadataKeyEnum.PROFILES.get(retrieved).size());
+		List<BaseCodingDt> secLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved);
+		sortCodings(secLabels);
+		assertEquals(2, secLabels.size());
+		assertEquals("seclabel:sys:1", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:1", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:1", secLabels.get(0).getDisplayElement().getValue());
+		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
+		profiles = ResourceMetadataKeyEnum.PROFILES.get(retrieved);
+		profiles = sortIds(profiles);
+		assertEquals(2, profiles.size());
 		assertEquals("http://profile/1", ResourceMetadataKeyEnum.PROFILES.get(retrieved).get(0).getValue());
 		assertEquals("http://profile/2", ResourceMetadataKeyEnum.PROFILES.get(retrieved).get(1).getValue());
 
@@ -1899,13 +2014,13 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals("Cat", published.get(1).getTerm());
 		assertEquals("Kittens", published.get(1).getLabel());
 		assertEquals("http://foo", published.get(1).getScheme());
-		assertEquals(2, ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).size());
-		assertEquals("seclabel:sys:1", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(0).getSystemElement().getValue());
-		assertEquals("seclabel:code:1", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(0).getCodeElement().getValue());
-		assertEquals("seclabel:dis:1", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(0).getDisplayElement().getValue());
-		assertEquals("seclabel:sys:2", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(1).getSystemElement().getValue());
-		assertEquals("seclabel:code:2", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(1).getCodeElement().getValue());
-		assertEquals("seclabel:dis:2", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(1).getDisplayElement().getValue());
+		assertEquals(2, secLabels.size());
+		assertEquals("seclabel:sys:1", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:1", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:1", secLabels.get(0).getDisplayElement().getValue());
+		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
 		assertEquals(2, ResourceMetadataKeyEnum.PROFILES.get(retrieved).size());
 		assertEquals("http://profile/1", ResourceMetadataKeyEnum.PROFILES.get(retrieved).get(0).getValue());
 		assertEquals("http://profile/2", ResourceMetadataKeyEnum.PROFILES.get(retrieved).get(1).getValue());
@@ -1925,17 +2040,48 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals("Cow", published.get(2).getTerm());
 		assertEquals("Calves", published.get(2).getLabel());
 		assertEquals("http://foo", published.get(2).getScheme());
-		assertEquals(2, ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).size());
-		assertEquals("seclabel:sys:1", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(0).getSystemElement().getValue());
-		assertEquals("seclabel:code:1", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(0).getCodeElement().getValue());
-		assertEquals("seclabel:dis:1", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(0).getDisplayElement().getValue());
-		assertEquals("seclabel:sys:2", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(1).getSystemElement().getValue());
-		assertEquals("seclabel:code:2", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(1).getCodeElement().getValue());
-		assertEquals("seclabel:dis:2", ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved).get(1).getDisplayElement().getValue());
+		assertEquals(2, secLabels.size());
+		assertEquals("seclabel:sys:1", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:1", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:1", secLabels.get(0).getDisplayElement().getValue());
+		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
 		assertEquals(2, ResourceMetadataKeyEnum.PROFILES.get(retrieved).size());
 		assertEquals("http://profile/1", ResourceMetadataKeyEnum.PROFILES.get(retrieved).get(0).getValue());
 		assertEquals("http://profile/2", ResourceMetadataKeyEnum.PROFILES.get(retrieved).get(1).getValue());
 
+	}
+
+	private List<IdDt> sortIds(List<IdDt> theProfiles) {
+		ArrayList<IdDt> retVal = new ArrayList<IdDt>(theProfiles);
+		Collections.sort(retVal, new Comparator<IdDt>() {
+			@Override
+			public int compare(IdDt theO1, IdDt theO2) {
+				return theO1.getValue().compareTo(theO2.getValue());
+			}});
+		return retVal;
+	}
+
+	private void sortCodings(List<BaseCodingDt> theSecLabels) {
+		Collections.sort(theSecLabels, new Comparator<BaseCodingDt>() {
+			@Override
+			public int compare(BaseCodingDt theO1, BaseCodingDt theO2) {
+				return theO1.getSystemElement().getValue().compareTo(theO2.getSystemElement().getValue());
+			}});
+	}
+
+	private void sort(TagList thePublished) {
+		ArrayList<Tag> tags = new ArrayList<Tag>(thePublished);
+		Collections.sort(tags, new Comparator<Tag>() {
+			@Override
+			public int compare(Tag theO1, Tag theO2) {
+				return defaultString(theO1.getScheme()).compareTo(defaultString(theO2.getScheme()));
+			}});
+		thePublished.clear();
+		for (Tag next : tags) {
+			thePublished.add(next);
+		}
 	}
 
 	@Test

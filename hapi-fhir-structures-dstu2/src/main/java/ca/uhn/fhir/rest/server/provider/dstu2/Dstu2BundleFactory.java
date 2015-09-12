@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.dstu2.valueset.SearchEntryModeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.rest.server.BundleInclusionRule;
@@ -147,6 +148,10 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			if (next.getId().hasBaseUrl()) {
 				entry.setFullUrl(next.getId().getValue());
 			}
+			BundleEntryTransactionMethodEnum httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(next);
+			if (httpVerb != null) {
+				entry.getRequest().getMethodElement().setValueAsString(httpVerb.getCode());
+			}
 		}
 
 		/*
@@ -238,6 +243,10 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			} while (references.isEmpty() == false);
 
 			Entry entry = myBundle.addEntry().setResource(next);
+			BundleEntryTransactionMethodEnum httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(next);
+			if (httpVerb != null) {
+				entry.getRequest().getMethodElement().setValueAsString(httpVerb.getCode());
+			}
 			populateBundleEntryFullUrl(next, entry);
 			
 			BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(next);

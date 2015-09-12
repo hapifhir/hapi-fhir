@@ -498,7 +498,11 @@ public abstract class BaseParser implements IParser {
 							List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
 							if (entryResources != null && entryResources.size() > 0) {
 								IBaseResource res = (IBaseResource) entryResources.get(0);
+								String versionId = res.getIdElement().getVersionIdPart();
 								res.setId(value.getValueAsString());
+								if (isNotBlank(versionId) && res.getIdElement().hasVersionIdPart() == false) {
+									res.setId(res.getIdElement().withVersion(versionId));
+								}
 							}
 						}
 					}

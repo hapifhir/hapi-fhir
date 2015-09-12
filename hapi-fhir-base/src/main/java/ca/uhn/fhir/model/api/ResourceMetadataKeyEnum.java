@@ -19,8 +19,7 @@ package ca.uhn.fhir.model.api;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -35,7 +34,6 @@ import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -74,6 +72,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * </p>
 	 */
 	public static final ResourceMetadataKeyEnum<InstantDt> DELETED_AT = new ResourceMetadataKeyEnum<InstantDt>("DELETED_AT") {
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public InstantDt get(IResource theResource) {
 			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), DELETED_AT);
@@ -96,6 +96,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * </p>
 	 */
 	public static final ResourceMetadataKeyEnum<DecimalDt> ENTRY_SCORE = new ResourceMetadataKeyEnum<DecimalDt>("ENTRY_SCORE") {
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public DecimalDt get(IResource theResource) {
 			return getDecimalFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_SCORE);
@@ -119,6 +121,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * </p>
 	 */
 	public static final ResourceMetadataKeyEnum<BundleEntrySearchModeEnum> ENTRY_SEARCH_MODE = new ResourceMetadataKeyEnum<BundleEntrySearchModeEnum>("ENTRY_SEARCH_MODE") {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public BundleEntrySearchModeEnum get(IResource theResource) {
 			return getEnumFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_SEARCH_MODE, BundleEntrySearchModeEnum.class, BundleEntrySearchModeEnum.VALUESET_BINDER);
@@ -144,6 +147,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 */
 	public static final ResourceMetadataKeyEnum<BundleEntryTransactionMethodEnum> ENTRY_TRANSACTION_METHOD = new ResourceMetadataKeyEnum<BundleEntryTransactionMethodEnum>(
 			"ENTRY_TRANSACTION_OPERATION") {
+				private static final long serialVersionUID = 1L;
+
 		@Override
 		public BundleEntryTransactionMethodEnum get(IResource theResource) {
 			return getEnumFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_TRANSACTION_METHOD, BundleEntryTransactionMethodEnum.class,
@@ -165,6 +170,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * </p>
 	 */
 	public static final ResourceMetadataKeyEnum<String> LINK_ALTERNATE = new ResourceMetadataKeyEnum<String>("LINK_ALTERNATE") {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public String get(IResource theResource) {
 			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), LINK_ALTERNATE);
@@ -185,6 +191,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * </p>
 	 */
 	public static final ResourceMetadataKeyEnum<String> LINK_SEARCH = new ResourceMetadataKeyEnum<String>("LINK_SEARCH") {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public String get(IResource theResource) {
 			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), LINK_SEARCH);
@@ -203,6 +210,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * </p>
 	 */
 	public static final ResourceMetadataKeyEnum<IdDt> PREVIOUS_ID = new ResourceMetadataKeyEnum<IdDt>("PREVIOUS_ID") {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public IdDt get(IResource theResource) {
 			return getIdFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PREVIOUS_ID);
@@ -222,6 +230,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * </p>
 	 */
 	public static final ResourceMetadataKeyEnum<List<IdDt>> PROFILES = new ResourceMetadataKeyEnum<List<IdDt>>("PROFILES") {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public List<IdDt> get(IResource theResource) {
 			return getIdListFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PROFILES);
@@ -245,6 +254,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * @see InstantDt
 	 */
 	public static final ResourceMetadataKeyEnum<InstantDt> PUBLISHED = new ResourceMetadataKeyEnum<InstantDt>("PUBLISHED") {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public InstantDt get(IResource theResource) {
 			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PUBLISHED);
@@ -257,6 +267,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	};
 
 	public static final ResourceMetadataKeyEnum<List<BaseCodingDt>> SECURITY_LABELS = new ResourceMetadataKeyEnum<List<BaseCodingDt>>("SECURITY_LABELS") {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public List<BaseCodingDt> get(IResource resource) {
 			Object obj = resource.getResourceMetadata().get(SECURITY_LABELS);
@@ -264,6 +275,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 				return null;
 			} else {
 				try {
+					@SuppressWarnings("unchecked")
 					List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) obj;
 					if (securityLabels.isEmpty())
 						return null;
@@ -294,6 +306,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * @see TagList
 	 */
 	public static final ResourceMetadataKeyEnum<TagList> TAG_LIST = new ResourceMetadataKeyEnum<TagList>("TAG_LIST") {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public TagList get(IResource theResource) {
 			Object retValObj = theResource.getResourceMetadata().get(TAG_LIST);
@@ -323,6 +336,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * </p>
 	 */
 	public static final ResourceMetadataKeyEnum<String> TITLE = new ResourceMetadataKeyEnum<String>("TITLE") {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public String get(IResource theResource) {
 			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), TITLE);
@@ -344,6 +358,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * @see InstantDt
 	 */
 	public static final ResourceMetadataKeyEnum<InstantDt> UPDATED = new ResourceMetadataKeyEnum<InstantDt>("UPDATED") {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public InstantDt get(IResource theResource) {
 			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), UPDATED);
@@ -362,6 +377,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * </p>
 	 */
 	public static final ResourceMetadataKeyEnum<String> VERSION = new ResourceMetadataKeyEnum<String>("VERSION") {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public String get(IResource theResource) {
 			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), VERSION);
@@ -383,6 +399,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 */
 	@Deprecated
 	public static final ResourceMetadataKeyEnum<IdDt> VERSION_ID = new ResourceMetadataKeyEnum<IdDt>("VERSION_ID") {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public IdDt get(IResource theResource) {
 			return getIdFromMetadataOrNullIfNone(theResource.getResourceMetadata(), VERSION_ID);
@@ -513,26 +530,6 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 				return null;
 			} else {
 				return (InstantDt) retValObj;
-			}
-		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
-				+ InstantDt.class.getCanonicalName());
-	}
-
-	private static StringDt getStringDtFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<StringDt> theKey) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof String) {
-			if (StringUtils.isBlank((String) retValObj)) {
-				return null;
-			}
-			return new StringDt((String) retValObj);
-		} else if (retValObj instanceof StringDt) {
-			if (((StringDt) retValObj).isEmpty()) {
-				return null;
-			} else {
-				return (StringDt) retValObj;
 			}
 		}
 		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
