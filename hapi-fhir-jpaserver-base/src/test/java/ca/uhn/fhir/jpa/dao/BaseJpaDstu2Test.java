@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.dao;
 
 import static org.mockito.Mockito.mock;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -34,6 +36,7 @@ import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
+import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Device;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
@@ -46,6 +49,7 @@ import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 //@formatter:off
@@ -58,6 +62,8 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 public class BaseJpaDstu2Test extends BaseJpaTest {
 
 	@Autowired
+	protected DaoConfig myDaoConfig;
+	@Autowired
 	@Qualifier("myDeviceDaoDstu2")
 	protected IFhirResourceDao<Device> myDeviceDao;
 	@Autowired
@@ -66,6 +72,8 @@ public class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myEncounterDaoDstu2")
 	protected IFhirResourceDao<Encounter> myEncounterDao;
+	@PersistenceContext()
+	protected EntityManager myEntityManager;
 	@Autowired
 	protected FhirContext myFhirCtx;
 	protected IServerInterceptor myInterceptor;
@@ -79,9 +87,6 @@ public class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("myOrganizationDaoDstu2")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
-	@Qualifier("myValueSetDaoDstu2")
-	protected IFhirResourceDao<ValueSet> myValueSetDao;
-	@Autowired
 	@Qualifier("myPatientDaoDstu2")
 	protected IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
@@ -94,14 +99,32 @@ public class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("myQuestionnaireResponseDaoDstu2")
 	protected IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@Autowired
+	@Qualifier("myResourceProvidersDstu2")
+	protected Object myResourceProviders;
+	@Autowired
 	@Qualifier("mySystemDaoDstu2")
 	protected IFhirSystemDao<Bundle> mySystemDao;
 	@Autowired
-	protected DaoConfig myDaoConfig;
+	@Qualifier("mySystemProviderDstu2")
+	protected JpaSystemProviderDstu2 mySystemProvider;
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
-	@PersistenceContext()
-	protected EntityManager myEntityManager;
+	@Autowired
+	@Qualifier("myValueSetDaoDstu2")
+	protected IFhirResourceDao<ValueSet> myValueSetDao;
+
+	@Before
+	public void beforeCreateInterceptor() {
+		myInterceptor = mock(IServerInterceptor.class);
+		myDaoConfig.setInterceptors(myInterceptor);
+	}
+
+	@Before
+	@Transactional()
+	public void beforePurgeDatabase() {
+		final EntityManager entityManager = this.myEntityManager;
+		purgeDatabase(entityManager, myTxManager);
+	}
 
 	/**
 	 * Just so that JUnit doesn't complain about no test methods in this class
@@ -110,53 +133,44 @@ public class BaseJpaDstu2Test extends BaseJpaTest {
 	public void doNothing() {
 		// nothing
 	}
-	
-	@Before
-	@Transactional()
-	public void beforePurgeDatabase() {
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+
+	public static void purgeDatabase(final EntityManager entityManager, PlatformTransactionManager theTxManager) {
+		TransactionTemplate txTemplate = new TransactionTemplate(theTxManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
 		txTemplate.execute(new TransactionCallback<Void>() {
 			@Override
 			public Void doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.createQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
-				myEntityManager.createQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
+				entityManager.createQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
+				entityManager.createQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
 				return null;
 			}
 		});
 		txTemplate.execute(new TransactionCallback<Void>() {
 			@Override
 			public Void doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.createQuery("DELETE from " + ForcedId.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamQuantity.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamString.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamToken.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamUri.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamCoords.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceLink.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + ForcedId.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamQuantity.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamString.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamToken.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamUri.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamCoords.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + ResourceLink.class.getSimpleName() + " d").executeUpdate();
 				return null;
 			}
 		});
 		txTemplate.execute(new TransactionCallback<Void>() {
 			@Override
 			public Void doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.createQuery("DELETE from " + ResourceHistoryTag.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceTag.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + TagDefinition.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceHistoryTable.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceTable.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + ResourceHistoryTag.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + ResourceTag.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + TagDefinition.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + ResourceHistoryTable.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + ResourceTable.class.getSimpleName() + " d").executeUpdate();
 				return null;
 			}
 		});
-	}	
-
-
-	@Before
-	public void beforeCreateInterceptor() {
-		myInterceptor = mock(IServerInterceptor.class);
-		myDaoConfig.setInterceptors(myInterceptor);
 	}
 
 }

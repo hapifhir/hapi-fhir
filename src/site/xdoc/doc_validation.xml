@@ -26,7 +26,7 @@
 				<li>
 					<b>Resource Validation</b>
 					is validation of the parsed (or constructed) resource against
-					the official FHIR validation rules (e.g. Schema/Schematron).
+					the official FHIR validation rules (e.g. Schema/Schematron/Profile/StructureDefinition/ValueSet).
 				</li>
 			</ul>
 

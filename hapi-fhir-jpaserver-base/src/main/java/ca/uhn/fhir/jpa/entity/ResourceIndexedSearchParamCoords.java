@@ -46,7 +46,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	public ResourceIndexedSearchParamCoords() {
 	}
 
-	public ResourceIndexedSearchParamCoords(String theName, String theUri, double theLatitude, double theLongitude) {
+	public ResourceIndexedSearchParamCoords(String theName, double theLatitude, double theLongitude) {
 		setParamName(theName);
 		setLatitude(theLatitude);
 		setLongitude(theLongitude);

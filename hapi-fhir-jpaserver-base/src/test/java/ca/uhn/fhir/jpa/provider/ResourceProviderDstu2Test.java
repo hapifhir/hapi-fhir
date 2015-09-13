@@ -49,16 +49,12 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
@@ -105,26 +101,18 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
-public class ResourceProviderDstu2Test extends BaseJpaTest {
+public class ResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
-	private static ClassPathXmlApplicationContext ourAppCtx;
 	private static IGenericClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static DaoConfig ourDaoConfig;
 	private static CloseableHttpClient ourHttpClient;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2Test.class);
-	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	private static int ourPort;
 	private static Server ourServer;
 	private static String ourServerBase;
@@ -138,28 +126,30 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		assertEquals(200, resp.getStatusLine().getStatusCode());
 	}
 
-	private void delete(String theResourceType, String theParamName, String theParamValue) {
-		Bundle resources;
-		do {
-			IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
-			if (theParamName != null) {
-				forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
-			}
-			resources = forResource.execute();
-			for (IResource next : resources.toListOfResources()) {
-				ourLog.info("Deleting resource: {}", next.getId());
-				ourClient.delete().resource(next).execute();
-			}
-		} while (resources.size() > 0);
-	}
-
-	private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue) {
-		Bundle resources = ourClient.search().forResource(theResourceType).where(new TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
-		for (IResource next : resources.toListOfResources()) {
-			ourLog.info("Deleting resource: {}", next.getId());
-			ourClient.delete().resource(next).execute();
-		}
-	}
+	// private void delete(String theResourceType, String theParamName, String theParamValue) {
+	// Bundle resources;
+	// do {
+	// IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
+	// if (theParamName != null) {
+	// forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
+	// }
+	// resources = forResource.execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// ourClient.delete().resource(next).execute();
+	// }
+	// } while (resources.size() > 0);
+	// }
+	//
+	// private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue)
+	// {
+	// Bundle resources = ourClient.search().forResource(theResourceType).where(new
+	// TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
+	// for (IResource next : resources.toListOfResources()) {
+	// ourLog.info("Deleting resource: {}", next.getId());
+	// ourClient.delete().resource(next).execute();
+	// }
+	// }
 
 	@Test
 	public void testBundleCreate() throws Exception {
@@ -172,7 +162,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = client.read().resource(ca.uhn.fhir.model.dstu2.resource.Bundle.class).withId(id).execute();
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 	}
 
 	@Test
@@ -192,7 +182,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	@Test
 	public void testCountParam() throws Exception {
 		// NB this does not get used- The paging provider has its own limits built in
-		ourDaoConfig.setHardSearchLimit(100);
+		myDaoConfig.setHardSearchLimit(100);
 
 		List<IBaseResource> resources = new ArrayList<IBaseResource>();
 		for (int i = 0; i < 100; i++) {
@@ -250,7 +240,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
-		String resource = ourCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName);
@@ -322,10 +312,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 	@Test
 	public void testDeepChaining() {
-		delete("Location", Location.SP_NAME, "testDeepChainingL1");
-		delete("Location", Location.SP_NAME, "testDeepChainingL2");
-		deleteToken("Encounter", Encounter.SP_IDENTIFIER, "urn:foo", "testDeepChainingE1");
-
 		Location l1 = new Location();
 		l1.getNameElement().setValue("testDeepChainingL1");
 		IIdType l1id = ourClient.create().resource(l1).execute().getId();
@@ -365,7 +351,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
-		String resource = ourCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -409,7 +395,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
 		pt.addIdentifier().setSystem("http://ghh.org/patient").setValue(methodName);
-		String resource = ourCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -491,8 +477,8 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	 */
 	@Test
 	public void testDocumentManifestResources() throws Exception {
-		ourCtx.getResourceDefinition(Practitioner.class);
-		ourCtx.getResourceDefinition(ca.uhn.fhir.model.dstu.resource.DocumentManifest.class);
+		myFhirCtx.getResourceDefinition(Practitioner.class);
+		myFhirCtx.getResourceDefinition(ca.uhn.fhir.model.dstu.resource.DocumentManifest.class);
 
 		IGenericClient client = ourClient;
 
@@ -531,7 +517,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	@Test
 	public void testEverythingDoesntRepeatPatient() throws Exception {
 		ca.uhn.fhir.model.dstu2.resource.Bundle b;
-		b = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/bug147-bundle.json")));
+		b = myFhirCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/bug147-bundle.json")));
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient.transaction().withBundle(b).execute();
 		List<IdDt> ids = new ArrayList<IdDt>();
@@ -600,7 +586,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient.transaction().withBundle(b).execute();
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		IdDt patientId = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals("Patient", patientId.getResourceType());
@@ -794,17 +780,28 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	}
 
 	@Test
-	public void testSaveAndRetrieveExistingNarrative() {
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSaveAndRetrieveExistingNarrative01");
-
+	public void testSaveAndRetrieveExistingNarrativeJson() {
 		Patient p1 = new Patient();
 		p1.getText().setStatus(ca.uhn.fhir.model.dstu2.valueset.NarrativeStatusEnum.GENERATED);
 		p1.getText().getDiv().setValueAsString("<div>HELLO WORLD</div>");
 		p1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveExistingNarrative01");
 
-		IIdType newId = ourClient.create().resource(p1).execute().getId();
+		IIdType newId = ourClient.create().resource(p1).encodedJson().execute().getId();
 
-		Patient actual = ourClient.read(Patient.class, (UriDt) newId);
+		Patient actual = ourClient.read().resource(Patient.class).withId(newId).encodedJson().execute();
+		assertEquals("<div>HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
+	}
+
+	@Test
+	public void testSaveAndRetrieveExistingNarrativeXml() {
+		Patient p1 = new Patient();
+		p1.getText().setStatus(ca.uhn.fhir.model.dstu2.valueset.NarrativeStatusEnum.GENERATED);
+		p1.getText().getDiv().setValueAsString("<div>HELLO WORLD</div>");
+		p1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveExistingNarrative01");
+
+		IIdType newId = ourClient.create().resource(p1).encodedXml().execute().getId();
+
+		Patient actual = ourClient.read().resource(Patient.class).withId(newId).encodedXml().execute();
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
 	}
 
@@ -856,9 +853,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 	@Test
 	public void testSearchByIdentifier() {
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByIdentifier01");
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByIdentifier02");
-
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier01");
 		p1.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven01");
@@ -888,7 +882,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 	@Test
 	public void testSearchByIdentifierWithoutSystem() {
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "", "testSearchByIdentifierWithoutSystem01");
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
@@ -902,8 +895,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 	@Test
 	public void testSearchByResourceChain() {
-		delete("Organization", Organization.SP_NAME, "testSearchByResourceChainName01");
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByResourceChain01");
 
 		Organization o1 = new Organization();
 		o1.setName("testSearchByResourceChainName01");
@@ -1036,7 +1027,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		String resp = IOUtils.toString(response.getEntity().getContent());
 		IOUtils.closeQuietly(response.getEntity().getContent());
 		ourLog.info(resp);
-		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp);
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = myFhirCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp);
 		matches = bundle.getTotal();
 
 		assertThat(matches, greaterThan(0));
@@ -1103,8 +1094,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	@Test
 	public void testSearchWithMissing() throws Exception {
 		ourLog.info("Starting testSearchWithMissing");
-
-		delete("Organization", null, null);
 
 		String methodName = "testSearchWithMissing";
 
@@ -1334,15 +1323,15 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		// Read back directly from the DAO
 		{
-			Organization returned = ourOrganizationDao.read(orgId);
-			String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+			Organization returned = myOrganizationDao.read(orgId);
+			String val = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
 		}
 		// Read back through the HTTP API
 		{
 			Organization returned = ourClient.read(Organization.class, orgId);
-			String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+			String val = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
 		}
@@ -1350,8 +1339,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 	@Test
 	public void testTryToCreateResourceWithReferenceThatDoesntExist() {
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testTryToCreateResourceWithReferenceThatDoesntExist01");
-
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testTryToCreateResourceWithReferenceThatDoesntExist01");
 		p1.addName().addFamily("testTryToCreateResourceWithReferenceThatDoesntExistFamily01").addGiven("testTryToCreateResourceWithReferenceThatDoesntExistGiven01");
@@ -1366,9 +1353,9 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 	}
 
+
 	@Test
 	public void testUpdateRejectsInvalidTypes() throws InterruptedException {
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testUpdateRejectsInvalidTypes");
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
@@ -1399,7 +1386,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
-		String resource = ourCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient?name=" + methodName);
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -1434,7 +1421,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
-		String resource = ourCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -1461,7 +1448,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 			String responseString = IOUtils.toString(response.getEntity().getContent());
 			IOUtils.closeQuietly(response.getEntity().getContent());
 
-			Patient respPt = ourCtx.newXmlParser().parseResource(Patient.class, responseString);
+			Patient respPt = myFhirCtx.newXmlParser().parseResource(Patient.class, responseString);
 			assertEquals("2", respPt.getId().getVersionIdPart());
 
 			InstantDt updateTime = ResourceMetadataKeyEnum.UPDATED.get(respPt);
@@ -1475,8 +1462,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 	@Test
 	public void testUpdateWithClientSuppliedIdWhichDoesntExist() {
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2");
-
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2");
 		MethodOutcome outcome = ourClient.update().resource(p1).withId("testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2").execute();
@@ -1501,7 +1486,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource").setResource(patient);
 
-		String inputStr = ourCtx.newXmlParser().encodeResourceToString(input);
+		String inputStr = myFhirCtx.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
@@ -1529,7 +1514,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource").setResource(patient);
 
-		String inputStr = ourCtx.newXmlParser().encodeResourceToString(input);
+		String inputStr = myFhirCtx.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
@@ -1556,7 +1541,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource").setResource(patient);
 
-		String inputStr = ourCtx.newXmlParser().encodeResourceToString(input);
+		String inputStr = myFhirCtx.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/123/$validate");
@@ -1576,7 +1561,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	@Test
 	public void testValueSetExpandOperation() throws IOException {
 
-		ValueSet upload = ourCtx.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/extensional-case-2.xml")));
+		ValueSet upload = myFhirCtx.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/extensional-case-2.xml")));
 		IIdType vsid = ourClient.create().resource(upload).execute().getId().toUnqualifiedVersionless();
 
 		HttpGet get = new HttpGet(ourServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand");
@@ -1673,63 +1658,61 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
-		ourAppCtx.stop();
 		ourHttpClient.close();
 	}
 
-	@SuppressWarnings("unchecked")
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		ourPort = RandomServerPortProvider.findFreePort();
+	@After
+	public void after() {
+		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+	}
 
-		RestfulServer restServer = new RestfulServer(ourCtx);
-		restServer.setFhirContext(ourCtx);
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Before
+	public void before() throws Exception {
+		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 
-		ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
+		if (ourServer == null) {
+			ourPort = RandomServerPortProvider.findFreePort();
 
-		ourAppCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu2.xml", "fhir-jpabase-spring-test-config.xml");
+			RestfulServer restServer = new RestfulServer(myFhirCtx);
 
-		ourDaoConfig = (DaoConfig) ourAppCtx.getBean(DaoConfig.class);
+			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
-		ourOrganizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDaoDstu2", IFhirResourceDao.class);
+			restServer.setResourceProviders((List)myResourceProviders);
 
-		List<IResourceProvider> rpsDev = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu2", List.class);
-		restServer.setResourceProviders(rpsDev);
+			restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
-		restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+			restServer.setPlainProviders(mySystemProvider);
 
-		JpaSystemProviderDstu2 systemProv = ourAppCtx.getBean(JpaSystemProviderDstu2.class, "mySystemProviderDstu2");
-		restServer.setPlainProviders(systemProv);
+			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(restServer, mySystemDao);
+			confProvider.setImplementationDescription("THIS IS THE DESC");
+			restServer.setServerConformanceProvider(confProvider);
 
-		IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle> systemDao = ourAppCtx.getBean(IFhirSystemDao.class);
-		JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(restServer, systemDao);
-		confProvider.setImplementationDescription("THIS IS THE DESC");
-		restServer.setServerConformanceProvider(confProvider);
+			restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 
-		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
+			Server server = new Server(ourPort);
 
-		ourServer = new Server(ourPort);
+			ServletContextHandler proxyHandler = new ServletContextHandler();
+			proxyHandler.setContextPath("/");
 
-		ServletContextHandler proxyHandler = new ServletContextHandler();
-		proxyHandler.setContextPath("/");
+			ServletHolder servletHolder = new ServletHolder();
+			servletHolder.setServlet(restServer);
+			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
-		ServletHolder servletHolder = new ServletHolder();
-		servletHolder.setServlet(restServer);
-		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
+			server.setHandler(proxyHandler);
+			server.start();
 
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
+			ourClient.registerInterceptor(new LoggingInterceptor(true));
 
-		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
-		ourClient.registerInterceptor(new LoggingInterceptor(true));
+			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			HttpClientBuilder builder = HttpClientBuilder.create();
+			builder.setConnectionManager(connectionManager);
+			ourHttpClient = builder.build();
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourHttpClient = builder.build();
-
+			ourServer = server;
+		}
 	}
 
 }

@@ -90,6 +90,10 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 		getIncludes().add(theInclude);
 	}
 
+	public void addRevInclude(Include theInclude) {
+		getRevIncludes().add(theInclude);
+	}
+
 	public Integer getCount() {
 		return myCount;
 	}
@@ -106,6 +110,9 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 	}
 
 	public Set<Include> getRevIncludes() {
+		if (myRevIncludes == null) {
+			myRevIncludes = new HashSet<Include>();
+		}
 		return myRevIncludes;
 	}
 

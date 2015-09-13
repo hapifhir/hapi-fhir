@@ -2,6 +2,7 @@ package ca.uhn.fhir.cli;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -16,6 +17,8 @@ public class App {
 	static {
 		ourCommands = new ArrayList<BaseCommand>();
 		ourCommands.add(new RunServerCommand());
+		
+		Collections.sort(ourCommands);
 	}
 
 	public static void main(String[] theArgs) {

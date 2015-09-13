@@ -977,15 +977,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			ourLog.error(msg, e);
 			throw new DataFormatException(msg, e);
 		}
-		
+
 		IResource res = (IResource) retVal;
 		if (theEntity.getDeleted() != null) {
 			res = (IResource) myContext.getResourceDefinition(theResourceType).newInstance();
 			retVal = (R) res;
 			ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt(theEntity.getDeleted()));
 			ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.DELETE);
-		} 
-		
+		}
+
 		res.setId(theEntity.getIdDt());
 
 		ResourceMetadataKeyEnum.VERSION.put(res, Long.toString(theEntity.getVersion()));
@@ -1068,46 +1068,46 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion) {
+	protected ResourceTable updateEntity(final IResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion) {
 
-		if (entity.getPublished() == null) {
-			entity.setPublished(new Date());
+		if (theEntity.getPublished() == null) {
+			theEntity.setPublished(new Date());
 		}
 
 		if (theResource != null) {
 			validateResourceForStorage((T) theResource);
 			String resourceType = myContext.getResourceDefinition(theResource).getName();
-			if (isNotBlank(entity.getResourceType()) && !entity.getResourceType().equals(resourceType)) {
-				throw new UnprocessableEntityException("Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
+			if (isNotBlank(theEntity.getResourceType()) && !theEntity.getResourceType().equals(resourceType)) {
+				throw new UnprocessableEntityException("Existing resource ID[" + theEntity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + theEntity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
 			}
 		}
 
 		if (theUpdateHistory) {
-			final ResourceHistoryTable historyEntry = entity.toHistory();
+			final ResourceHistoryTable historyEntry = theEntity.toHistory();
 			myEntityManager.persist(historyEntry);
 		}
 
 		if (theUpdateVersion) {
-			entity.setVersion(entity.getVersion() + 1);
+			theEntity.setVersion(theEntity.getVersion() + 1);
 		}
 
-		boolean paramsStringPopulated = entity.isParamsStringPopulated();
-		boolean paramsTokenPopulated = entity.isParamsTokenPopulated();
-		boolean paramsNumberPopulated = entity.isParamsNumberPopulated();
-		boolean paramsQuantityPopulated = entity.isParamsQuantityPopulated();
-		boolean paramsDatePopulated = entity.isParamsDatePopulated();
-		boolean paramsCoordsPopulated = entity.isParamsCoordsPopulated();
-		boolean paramsUriPopulated = entity.isParamsUriPopulated();
-		boolean hasLinks = entity.isHasLinks();
+		boolean paramsStringPopulated = theEntity.isParamsStringPopulated();
+		boolean paramsTokenPopulated = theEntity.isParamsTokenPopulated();
+		boolean paramsNumberPopulated = theEntity.isParamsNumberPopulated();
+		boolean paramsQuantityPopulated = theEntity.isParamsQuantityPopulated();
+		boolean paramsDatePopulated = theEntity.isParamsDatePopulated();
+		boolean paramsCoordsPopulated = theEntity.isParamsCoordsPopulated();
+		boolean paramsUriPopulated = theEntity.isParamsUriPopulated();
+		boolean hasLinks = theEntity.isHasLinks();
 
-		Collection<ResourceIndexedSearchParamString> paramsString = new ArrayList<ResourceIndexedSearchParamString>(entity.getParamsString());
-		Collection<ResourceIndexedSearchParamToken> paramsToken = new ArrayList<ResourceIndexedSearchParamToken>(entity.getParamsToken());
-		Collection<ResourceIndexedSearchParamNumber> paramsNumber = new ArrayList<ResourceIndexedSearchParamNumber>(entity.getParamsNumber());
-		Collection<ResourceIndexedSearchParamQuantity> paramsQuantity = new ArrayList<ResourceIndexedSearchParamQuantity>(entity.getParamsQuantity());
-		Collection<ResourceIndexedSearchParamDate> paramsDate = new ArrayList<ResourceIndexedSearchParamDate>(entity.getParamsDate());
-		Collection<ResourceIndexedSearchParamUri> paramsUri = new ArrayList<ResourceIndexedSearchParamUri>(entity.getParamsUri());
-		Collection<ResourceIndexedSearchParamCoords> paramsCoords = new ArrayList<ResourceIndexedSearchParamCoords>(entity.getParamsCoords());
-		Collection<ResourceLink> resourceLinks = new ArrayList<ResourceLink>(entity.getResourceLinks());
+		Collection<ResourceIndexedSearchParamString> paramsString = new ArrayList<ResourceIndexedSearchParamString>(theEntity.getParamsString());
+		Collection<ResourceIndexedSearchParamToken> paramsToken = new ArrayList<ResourceIndexedSearchParamToken>(theEntity.getParamsToken());
+		Collection<ResourceIndexedSearchParamNumber> paramsNumber = new ArrayList<ResourceIndexedSearchParamNumber>(theEntity.getParamsNumber());
+		Collection<ResourceIndexedSearchParamQuantity> paramsQuantity = new ArrayList<ResourceIndexedSearchParamQuantity>(theEntity.getParamsQuantity());
+		Collection<ResourceIndexedSearchParamDate> paramsDate = new ArrayList<ResourceIndexedSearchParamDate>(theEntity.getParamsDate());
+		Collection<ResourceIndexedSearchParamUri> paramsUri = new ArrayList<ResourceIndexedSearchParamUri>(theEntity.getParamsUri());
+		Collection<ResourceIndexedSearchParamCoords> paramsCoords = new ArrayList<ResourceIndexedSearchParamCoords>(theEntity.getParamsCoords());
+		Collection<ResourceLink> resourceLinks = new ArrayList<ResourceLink>(theEntity.getResourceLinks());
 
 		List<ResourceIndexedSearchParamString> stringParams = null;
 		List<ResourceIndexedSearchParamToken> tokenParams = null;
@@ -1128,27 +1128,27 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			uriParams = Collections.emptyList();
 			coordsParams = Collections.emptyList();
 			links = Collections.emptyList();
-			entity.setDeleted(theDeletedTimestampOrNull);
-			entity.setUpdated(theDeletedTimestampOrNull);
+			theEntity.setDeleted(theDeletedTimestampOrNull);
+			theEntity.setUpdated(theDeletedTimestampOrNull);
 
 		} else {
 
-			entity.setDeleted(null);
+			theEntity.setDeleted(null);
 
 			if (thePerformIndexing) {
 
-				stringParams = extractSearchParamStrings(entity, theResource);
-				numberParams = extractSearchParamNumber(entity, theResource);
-				quantityParams = extractSearchParamQuantity(entity, theResource);
-				dateParams = extractSearchParamDates(entity, theResource);
-				uriParams = extractSearchParamUri(entity, theResource);
-				coordsParams = extractSearchParamCoords(entity, theResource);
+				stringParams = extractSearchParamStrings(theEntity, theResource);
+				numberParams = extractSearchParamNumber(theEntity, theResource);
+				quantityParams = extractSearchParamQuantity(theEntity, theResource);
+				dateParams = extractSearchParamDates(theEntity, theResource);
+				uriParams = extractSearchParamUri(theEntity, theResource);
+				coordsParams = extractSearchParamCoords(theEntity, theResource);
 
 				// ourLog.info("Indexing resource: {}", entity.getId());
 				ourLog.trace("Storing string indexes: {}", stringParams);
 
 				tokenParams = new ArrayList<ResourceIndexedSearchParamToken>();
-				for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(entity, theResource)) {
+				for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theEntity, theResource)) {
 					if (next instanceof ResourceIndexedSearchParamToken) {
 						tokenParams.add((ResourceIndexedSearchParamToken) next);
 					} else {
@@ -1156,49 +1156,49 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					}
 				}
 
-				links = extractResourceLinks(entity, theResource);
-				populateResourceIntoEntity(theResource, entity);
+				links = extractResourceLinks(theEntity, theResource);
+				populateResourceIntoEntity(theResource, theEntity);
 
-				entity.setUpdated(new Date());
-				entity.setLanguage(theResource.getLanguage().getValue());
-				entity.setParamsString(stringParams);
-				entity.setParamsStringPopulated(stringParams.isEmpty() == false);
-				entity.setParamsToken(tokenParams);
-				entity.setParamsTokenPopulated(tokenParams.isEmpty() == false);
-				entity.setParamsNumber(numberParams);
-				entity.setParamsNumberPopulated(numberParams.isEmpty() == false);
-				entity.setParamsQuantity(quantityParams);
-				entity.setParamsQuantityPopulated(quantityParams.isEmpty() == false);
-				entity.setParamsDate(dateParams);
-				entity.setParamsDatePopulated(dateParams.isEmpty() == false);
-				entity.setParamsUri(uriParams);
-				entity.setParamsUriPopulated(uriParams.isEmpty() == false);
-				entity.setParamsCoords(coordsParams);
-				entity.setParamsCoordsPopulated(coordsParams.isEmpty() == false);
-				entity.setResourceLinks(links);
-				entity.setHasLinks(links.isEmpty() == false);
-				entity.setIndexStatus(INDEX_STATUS_INDEXED);
+				theEntity.setUpdated(new Date());
+				theEntity.setLanguage(theResource.getLanguage().getValue());
+				theEntity.setParamsString(stringParams);
+				theEntity.setParamsStringPopulated(stringParams.isEmpty() == false);
+				theEntity.setParamsToken(tokenParams);
+				theEntity.setParamsTokenPopulated(tokenParams.isEmpty() == false);
+				theEntity.setParamsNumber(numberParams);
+				theEntity.setParamsNumberPopulated(numberParams.isEmpty() == false);
+				theEntity.setParamsQuantity(quantityParams);
+				theEntity.setParamsQuantityPopulated(quantityParams.isEmpty() == false);
+				theEntity.setParamsDate(dateParams);
+				theEntity.setParamsDatePopulated(dateParams.isEmpty() == false);
+				theEntity.setParamsUri(uriParams);
+				theEntity.setParamsUriPopulated(uriParams.isEmpty() == false);
+				theEntity.setParamsCoords(coordsParams);
+				theEntity.setParamsCoordsPopulated(coordsParams.isEmpty() == false);
+				theEntity.setResourceLinks(links);
+				theEntity.setHasLinks(links.isEmpty() == false);
+				theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
 
 			} else {
 
-				populateResourceIntoEntity(theResource, entity);
-				entity.setUpdated(new Date());
-				entity.setLanguage(theResource.getLanguage().getValue());
-				entity.setIndexStatus(null);
+				populateResourceIntoEntity(theResource, theEntity);
+				theEntity.setUpdated(new Date());
+				theEntity.setLanguage(theResource.getLanguage().getValue());
+				theEntity.setIndexStatus(null);
 
 			}
 
 		}
 
-		if (entity.getId() == null) {
-			myEntityManager.persist(entity);
+		if (theEntity.getId() == null) {
+			myEntityManager.persist(theEntity);
 
-			if (entity.getForcedId() != null) {
-				myEntityManager.persist(entity.getForcedId());
+			if (theEntity.getForcedId() != null) {
+				myEntityManager.persist(theEntity.getForcedId());
 			}
 
 		} else {
-			entity = myEntityManager.merge(entity);
+			theEntity = myEntityManager.merge(theEntity);
 		}
 
 		if (thePerformIndexing) {
@@ -1283,10 +1283,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		myEntityManager.flush();
 
 		if (theResource != null) {
-			theResource.setId(entity.getIdDt());
+			theResource.setId(theEntity.getIdDt());
 		}
 
-		return entity;
+		return theEntity;
 	}
 
 	/**

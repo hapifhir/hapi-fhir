@@ -141,16 +141,19 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Column(name = "RES_VER")
 	private long myVersion;
 
+	@Override
 	public ResourceTag addTag(TagDefinition theTag) {
 		ResourceTag tag = new ResourceTag(this, theTag);
 		getTags().add(tag);
 		return tag;
 	}
 
+	@Override
 	public Long getId() {
 		return myId;
 	}
 
+	@Override
 	public IdDt getIdDt() {
 		Object id = getForcedId() == null ? myId : getForcedId().getForcedId();
 		return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
@@ -224,10 +227,12 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myResourceLinks;
 	}
 
+	@Override
 	public String getResourceType() {
 		return myResourceType;
 	}
 
+	@Override
 	public Collection<ResourceTag> getTags() {
 		if (myTags == null) {
 			myTags = new HashSet<ResourceTag>();
@@ -235,6 +240,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myTags;
 	}
 
+	@Override
 	public long getVersion() {
 		return myVersion;
 	}
@@ -428,4 +434,5 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 		return retVal;
 	}
+
 }

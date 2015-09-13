@@ -533,13 +533,15 @@ public class JsonParser extends BaseParser implements IParser {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
 				if (gen != null) {
 					BaseNarrativeDt<?> narr = ((IResource) theResource).getText();
-					gen.generateNarrative(theResDef.getResourceProfile(), theResource, narr);
-					if (narr != null && !narr.isEmpty()) {
-						RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
-						String childName = nextChild.getChildNameByDatatype(child.getDatatype());
-						BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
-						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, narr, type, childName, theContainedResource, nextChildElem);
-						continue;
+					if (narr.getDiv().isEmpty()) {
+						gen.generateNarrative(theResDef.getResourceProfile(), theResource, narr);
+						if (narr != null && !narr.isEmpty()) {
+							RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
+							String childName = nextChild.getChildNameByDatatype(child.getDatatype());
+							BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
+							encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, narr, type, childName, theContainedResource, nextChildElem);
+							continue;
+						}
 					}
 				}
 			} else if (nextChild instanceof RuntimeChildContainedResources) {
@@ -1236,7 +1238,6 @@ public class JsonParser extends BaseParser implements IParser {
 	//
 	// theState.endingElement();
 	// }
-
 
 	@Override
 	public TagList parseTagList(Reader theReader) {

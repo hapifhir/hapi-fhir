@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.apache.commons.lang3.StringUtils.INDEX_NOT_FOUND;
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -287,12 +288,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
 		Predicate langPredicate = from.get("myLanguage").as(String.class).in(values);
 		Predicate masterCodePredicate = builder.and(typePredicate, langPredicate);
-
+		Predicate notDeletedPredicate = builder.isNull(from.get("myDeleted"));
+		
 		if (thePids.size() > 0) {
 			Predicate inPids = (from.get("myId").in(thePids));
-			cq.where(builder.and(masterCodePredicate, inPids));
+			cq.where(builder.and(masterCodePredicate, inPids, notDeletedPredicate));
 		} else {
-			cq.where(masterCodePredicate);
+			cq.where(builder.and(masterCodePredicate, notDeletedPredicate));
 		}
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
@@ -376,6 +378,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 				andPredicates.add(builder.or(orPredicates.toArray(new Predicate[0])));
 			}
 
+			From<ResourceTag, ResourceTable> defJoin = from.join("myResource");
+			Predicate notDeletedPredicatePrediate = builder.isNull(defJoin.get("myDeleted"));
+			andPredicates.add(notDeletedPredicatePrediate);
+			
 			Predicate masterCodePredicate = builder.and(andPredicates.toArray(new Predicate[0]));
 
 			if (pids.size() > 0) {
@@ -1261,17 +1267,36 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
 			throw new InvalidRequestException("Trying to update " + theId + " but this is not the current version");
 		}
+		
+		verifyOkToDelete(entity);
 
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, theId.getResourceType());
 		notifyInterceptors(RestOperationTypeEnum.DELETE, requestDetails);
-
+		
 		ResourceTable savedEntity = updateEntity(null, entity, true, new Date());
 
 		notifyWriteCompleted();
 
 		ourLog.info("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return toMethodOutcome(savedEntity, null);
+	}
+
+	private void verifyOkToDelete(ResourceTable theEntity) {
+		TypedQuery<ResourceLink> query = myEntityManager.createQuery("SELECT l FROM ResourceLink l WHERE l.myTargetResourcePid = :target_pid", ResourceLink.class);
+		query.setParameter("target_pid", theEntity.getId());
+		query.setMaxResults(1);
+		List<ResourceLink> resultList = query.getResultList();
+		if (resultList.isEmpty()) {
+			return;
+		}
+		
+		ResourceLink link = resultList.get(0);
+		String targetId = theEntity.getIdDt().toUnqualifiedVersionless().getValue();
+		String sourceId = link.getSourceResource().getIdDt().toUnqualifiedVersionless().getValue();
+		String sourcePath = link.getSourcePath();
+		
+		throw new PreconditionFailedException("Unable to delete " + targetId + " because at least one resource has a reference to this resource. First reference found was resource " + sourceId + " in path " + sourcePath );
 	}
 
 	@Override
@@ -1287,6 +1312,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		Long pid = resource.iterator().next();
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
+
+		verifyOkToDelete(entity);
 
 		// Notify interceptors
 		IdDt idToDelete = entity.getIdDt();
@@ -1369,6 +1396,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 	protected abstract List<Object> getIncludeValues(FhirTerser theTerser, Include theInclude, IBaseResource theResource, RuntimeResourceDefinition theResourceDef);
 
+	@Override
 	public Class<T> getResourceType() {
 		return myResourceType;
 	}
@@ -2126,18 +2154,23 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 						for (IQueryParameterType next : nextValue) {
 							String value = next.getValueAsQueryToken();
 							IIdType valueId = new IdDt(value);
+							
 							try {
-								long valueLong = translateForcedIdToPid(valueId);
-								joinPids.add(valueLong);
+								BaseHasResource entity = readEntity(valueId);
+								if (entity.getDeleted() != null) {
+									continue;
+								}
+								joinPids.add(entity.getId());
 							} catch (ResourceNotFoundException e) {
 								// This isn't an error, just means no result found
 							}
 						}
 						if (joinPids.isEmpty()) {
-							continue;
+							return new HashSet<Long>();
 						}
 					}
 
+					
 					pids = addPredicateId(pids, joinPids);
 					if (pids.isEmpty()) {
 						return new HashSet<Long>();
@@ -2250,9 +2283,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	}
 
 	private DaoMethodOutcome toMethodOutcome(final ResourceTable theEntity, IResource theResource) {
+		DaoMethodOutcome retVal = toMethodOutcome((BaseHasResource)theEntity, theResource);
+		retVal.setEntity(theEntity);
+		return retVal;
+	}
+
+	private DaoMethodOutcome toMethodOutcome(final BaseHasResource theEntity, IResource theResource) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 		outcome.setId(theEntity.getIdDt());
-		outcome.setEntity(theEntity);
 		outcome.setResource(theResource);
 		if (theResource != null) {
 			theResource.setId(theEntity.getIdDt());

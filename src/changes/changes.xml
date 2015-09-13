@@ -186,6 +186,9 @@
 				JPA server now correctly suppresses contents of deleted resources
 				in history
 			</action>
+			<action type="fix" issue="222">
+				JPA server returned deleted resources in search results when using the _tag, _id, _profile, or _security search parameters
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

@@ -7,7 +7,7 @@ import org.apache.commons.cli.ParseException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
 
-public class BaseCommand {
+public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 	public BaseCommand() {
 		super();
@@ -18,18 +18,15 @@ public class BaseCommand {
 		return fhirClient;
 	}
 
-	public Options getOptions() {
-		return null;
-	}
+	public abstract Options getOptions();
 
-	public String getCommandName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public abstract String getCommandName();
 
-	public void run(CommandLine theCommandLine) throws ParseException {
-		// TODO Auto-generated method stub
-		
+	public abstract void run(CommandLine theCommandLine) throws ParseException;
+
+	@Override
+	public int compareTo(BaseCommand theO) {
+		return getCommandName().compareTo(theO.getCommandName());
 	}
 
 }
