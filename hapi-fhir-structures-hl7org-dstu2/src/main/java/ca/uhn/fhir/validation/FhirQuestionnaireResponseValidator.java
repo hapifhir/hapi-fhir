@@ -12,7 +12,6 @@ import org.hl7.fhir.instance.model.QuestionnaireResponse;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.valuesets.IssueType;
 import org.hl7.fhir.instance.utils.WorkerContext;
 import org.hl7.fhir.instance.validation.QuestionnaireResponseValidator;
 import org.hl7.fhir.instance.validation.ValidationMessage;

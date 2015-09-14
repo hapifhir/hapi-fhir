@@ -1,12 +1,16 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,8 +52,10 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
+import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
-import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 //@formatter:off
@@ -102,6 +108,9 @@ public class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("myResourceProvidersDstu2")
 	protected Object myResourceProviders;
 	@Autowired
+	@Qualifier("myStructureDefinitionDaoDstu2")
+	protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
+	@Autowired
 	@Qualifier("mySystemDaoDstu2")
 	protected IFhirSystemDao<Bundle> mySystemDao;
 	@Autowired
@@ -132,6 +141,16 @@ public class BaseJpaDstu2Test extends BaseJpaTest {
 	@Test
 	public void doNothing() {
 		// nothing
+	}
+
+	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
+		InputStream stream = FhirResourceDaoDstu2SearchTest.class.getResourceAsStream(resourceName);
+		if (stream == null) {
+			fail("Unable to load resource: " + resourceName);
+		}
+		String string = IOUtils.toString(stream, "UTF-8");
+		IParser newJsonParser = MethodUtil.detectEncodingNoDefault(string).newParser(myFhirCtx);
+		return newJsonParser.parseResource(type, string);
 	}
 
 	public static void purgeDatabase(final EntityManager entityManager, PlatformTransactionManager theTxManager) {

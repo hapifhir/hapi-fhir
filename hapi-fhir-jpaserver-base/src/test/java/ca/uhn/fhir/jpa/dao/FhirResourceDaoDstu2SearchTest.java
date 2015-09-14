@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -1342,7 +1341,9 @@ public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 	public void testSearchWithUriParam() throws Exception {
 		String methodName = "testSearchWithUriParam";
 
-		ValueSet vs = myFhirCtx.newJsonParser().parseResource(ValueSet.class, IOUtils.toString(FhirResourceDaoDstu2SearchTest.class.getResourceAsStream("/valueset-dstu2.json")));
+		Class<ValueSet> type = ValueSet.class;
+		String resourceName = "/valueset-dstu2.json";
+		ValueSet vs = loadResourceFromClasspath(type, resourceName);
 		myValueSetDao.update(vs);
 
 		IBundleProvider result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/fhir/ValueSet/basic-resource-type"));

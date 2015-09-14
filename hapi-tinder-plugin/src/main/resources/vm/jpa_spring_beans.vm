@@ -44,4 +44,8 @@
  
 #end
 
+#if ( ${versionCapitalized} == 'Dstu2' )
+	<bean id="myJpaProfileValidationSupportDstu2" class="ca.uhn.fhir.jpa.dao.JpaProfileValidationSupport"/>
+#end
+
 </beans>
