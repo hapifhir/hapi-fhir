@@ -46,6 +46,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.validation.IValidationSupport.CodeValidationResult;
 
 public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
 
@@ -262,27 +263,13 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
   private final class HapiWorkerContext implements IWorkerContext, ValueSetExpanderFactory, ValueSetExpander {
     private final FhirContext myCtx;
 
-    // public StructureDefinition getProfile(String theId) {
-    // StructureDefinition retVal = super.getProfile(theId);
-    // if (retVal == null) {
-    // if (theId.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
-    // retVal = loadProfileOrReturnNull(null, getHl7OrgDstu2Ctx(myCtx),
-    // theId.substring("http://hl7.org/fhir/StructureDefinition/".length()));
-    // if (retVal != null) {
-    // seeProfile(theId, retVal);
-    // }
-    // }
-    // }
-    // return retVal;
-    // }
-
     private HapiWorkerContext(FhirContext theCtx) {
       myCtx = theCtx;
     }
 
     @Override
     public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc) {
-      throw new UnsupportedOperationException();
+      return myValidationSupport.expandValueSet(theInc);
     }
 
     @Override
@@ -354,7 +341,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
     @Override
     public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-      return myValidationSupport.validateCode(theSystem, theCode, theDisplay);
+      CodeValidationResult result = myValidationSupport.validateCode(theSystem, theCode, theDisplay);
+      if (result == null) {
+        return null;
+      }
+      return new ValidationResult(result.getSeverity(), result.getMessage(), result.asConceptDefinition());
     }
 
     @Override

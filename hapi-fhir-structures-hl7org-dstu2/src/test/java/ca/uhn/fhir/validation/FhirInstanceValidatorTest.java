@@ -9,7 +9,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.CodeType;
@@ -18,14 +20,16 @@ import org.hl7.fhir.instance.model.Observation.ObservationStatus;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
+import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.validation.IValidationSupport.CodeValidationResult;
 
 public class FhirInstanceValidatorTest {
 
@@ -37,6 +41,7 @@ public class FhirInstanceValidatorTest {
 
   private FhirValidator myVal;
   private ArrayList<String> myValidConcepts;
+  private Map<String, ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
 
   private void addValidConcept(String theSystem, String theCode) {
     myValidConcepts.add(theSystem + "___" + theCode);
@@ -52,39 +57,57 @@ public class FhirInstanceValidatorTest {
     myInstanceVal = new FhirInstanceValidator();
     myVal.registerValidatorModule(myInstanceVal);
 
+    mySupportedCodeSystemsForExpansion = new HashMap<String, ValueSet.ValueSetExpansionComponent>();
+
     myValidConcepts = new ArrayList<String>();
 
     myMockSupport = mock(IValidationSupport.class);
+    when(myMockSupport.expandValueSet(any(ConceptSetComponent.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
+      @Override
+      public ValueSetExpansionComponent answer(InvocationOnMock theInvocation) throws Throwable {
+        ConceptSetComponent arg = (ConceptSetComponent)theInvocation.getArguments()[0];
+        ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getSystem());
+        if (retVal == null) {
+          retVal = myDefaultValidationSupport.expandValueSet(arg);
+        }
+        ourLog.info("expandValueSet({}) : {}", new Object[] { theInvocation.getArguments()[0], retVal });
+        return retVal;
+      }
+    });
     when(myMockSupport.isCodeSystemSupported(any(String.class))).thenAnswer(new Answer<Boolean>() {
       @Override
       public Boolean answer(InvocationOnMock theInvocation) throws Throwable {
-        boolean retVal = myDefaultValidationSupport.isCodeSystemSupported((String) theInvocation.getArguments()[0]);
+        boolean retVal = mySupportedCodeSystemsForExpansion.containsKey(theInvocation.getArguments()[0]);
         ourLog.info("isCodeSystemSupported({}) : {}", new Object[] { theInvocation.getArguments()[0], retVal });
         return retVal;
       }
     });
-    when(myMockSupport.fetchResource(any(FhirContext.class), any(Class.class), any(String.class))).thenAnswer(new Answer<IBaseResource>() {
-      @Override
-      public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
-        IBaseResource retVal = myDefaultValidationSupport.fetchResource((FhirContext) theInvocation.getArguments()[0],
-            (Class<IBaseResource>) theInvocation.getArguments()[1], (String) theInvocation.getArguments()[2]);
-        ourLog.info("fetchResource({}, {}) : {}", new Object[] { theInvocation.getArguments()[1], theInvocation.getArguments()[2], retVal });
-        return retVal;
-      }
-    });
-    when(myMockSupport.validateCode(any(String.class), any(String.class), any(String.class)))
-        .thenAnswer(new Answer<org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult>() {
+    when(myMockSupport.fetchResource(any(FhirContext.class), any(Class.class), any(String.class)))
+        .thenAnswer(new Answer<IBaseResource>() {
           @Override
-          public org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult answer(InvocationOnMock theInvocation) throws Throwable {
+          public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
+            IBaseResource retVal = myDefaultValidationSupport.fetchResource(
+                (FhirContext) theInvocation.getArguments()[0], (Class<IBaseResource>) theInvocation.getArguments()[1],
+                (String) theInvocation.getArguments()[2]);
+            ourLog.info("fetchResource({}, {}) : {}",
+                new Object[] { theInvocation.getArguments()[1], theInvocation.getArguments()[2], retVal });
+            return retVal;
+          }
+        });
+    when(myMockSupport.validateCode(any(String.class), any(String.class), any(String.class)))
+        .thenAnswer(new Answer<CodeValidationResult>() {
+          @Override
+          public CodeValidationResult answer(InvocationOnMock theInvocation) throws Throwable {
             String system = (String) theInvocation.getArguments()[0];
             String code = (String) theInvocation.getArguments()[1];
-            org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult retVal;
+            CodeValidationResult retVal;
             if (myValidConcepts.contains(system + "___" + code)) {
-              retVal = new org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
+              retVal = new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
             } else {
               retVal = myDefaultValidationSupport.validateCode(system, code, (String) theInvocation.getArguments()[2]);
             }
-            ourLog.info("validateCode({}, {}, {}) : {}", new Object[] { system, code, (String) theInvocation.getArguments()[2], retVal });
+            ourLog.info("validateCode({}, {}, {}) : {}",
+                new Object[] { system, code, (String) theInvocation.getArguments()[2], retVal });
             return retVal;
           }
         });
@@ -104,12 +127,28 @@ public class FhirInstanceValidatorTest {
 
     int index = 0;
     for (SingleValidationMessage next : theOutput.getMessages()) {
-      ourLog.info("Result {}: {} - {} - {}", new Object[] { index, next.getSeverity(), next.getLocationString(), next.getMessage() });
+      ourLog.info("Result {}: {} - {} - {}",
+          new Object[] { index, next.getSeverity(), next.getLocationString(), next.getMessage() });
       index++;
 
       if (next.getSeverity() != ResultSeverityEnum.INFORMATION) {
         retVal.add(next);
       }
+    }
+
+    return retVal;
+  }
+
+  private List<SingleValidationMessage> logResultsAndReturnAll(ValidationResult theOutput) {
+    List<SingleValidationMessage> retVal = new ArrayList<SingleValidationMessage>();
+
+    int index = 0;
+    for (SingleValidationMessage next : theOutput.getMessages()) {
+      ourLog.info("Result {}: {} - {} - {}",
+          new Object[] { index, next.getSeverity(), next.getLocationString(), next.getMessage() });
+      index++;
+
+      retVal.add(next);
     }
 
     return retVal;
@@ -152,7 +191,8 @@ public class FhirInstanceValidatorTest {
   @Test
   public void testValidateRawXmlResourceBadAttributes() {
     // @formatter:off
-    String input = "<Patient xmlns=\"http://hl7.org/fhir\">" + "<id value=\"123\"/>" + "<foo value=\"222\"/>" + "</Patient>";
+    String input = "<Patient xmlns=\"http://hl7.org/fhir\">" + "<id value=\"123\"/>" + "<foo value=\"222\"/>"
+        + "</Patient>";
     // @formatter:on
 
     ValidationResult output = myVal.validateWithResult(input);
@@ -173,7 +213,8 @@ public class FhirInstanceValidatorTest {
 
     ValidationResult output = myVal.validateWithResult(input);
     assertThat(output.getMessages().size(), greaterThan(0));
-    assertEquals("Element '/f:Observation.status': minimum required = 1, but only found 0", output.getMessages().get(0).getMessage());
+    assertEquals("Element '/f:Observation.status': minimum required = 1, but only found 0",
+        output.getMessages().get(0).getMessage());
 
   }
 
@@ -181,9 +222,9 @@ public class FhirInstanceValidatorTest {
    * See #216
    */
   @Test
-  @Ignore
   public void testValidateRawXmlInvalidChoiceName() throws Exception {
-    String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/medicationstatement_invalidelement.xml"));
+    String input = IOUtils
+        .toString(FhirInstanceValidator.class.getResourceAsStream("/medicationstatement_invalidelement.xml"));
     ValidationResult output = myVal.validateWithResult(input);
 
     List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
@@ -205,7 +246,8 @@ public class FhirInstanceValidatorTest {
     ValidationResult output = myVal.validateWithResult(input);
     List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
     assertEquals(errors.toString(), 1, errors.size());
-    assertEquals("StructureDefinition reference \"http://foo/myprofile\" could not be resolved", errors.get(0).getMessage());
+    assertEquals("StructureDefinition reference \"http://foo/myprofile\" could not be resolved",
+        errors.get(0).getMessage());
   }
 
   @Test
@@ -224,9 +266,11 @@ public class FhirInstanceValidatorTest {
     ValidationResult output = myVal.validateWithResult(input);
     List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-    assertThat(errors.toString(), containsString("Element '/f:Observation.subject': minimum required = 1, but only found 0"));
+    assertThat(errors.toString(),
+        containsString("Element '/f:Observation.subject': minimum required = 1, but only found 0"));
     assertThat(errors.toString(), containsString("Element encounter @ /f:Observation: max allowed = 0, but found 1"));
-    assertThat(errors.toString(), containsString("Element '/f:Observation.device': minimum required = 1, but only found 0"));
+    assertThat(errors.toString(),
+        containsString("Element '/f:Observation.device': minimum required = 1, but only found 0"));
     assertThat(errors.toString(), containsString(""));
   }
 
@@ -245,8 +289,8 @@ public class FhirInstanceValidatorTest {
 
   @Test
   public void testValidateResourceWithDefaultValuesetBadCode() {
-    String input = "<Observation xmlns=\"http://hl7.org/fhir\">\n" + "   <status value=\"notvalidcode\"/>\n" + "   <code>\n"
-        + "      <text value=\"No code here!\"/>\n" + "   </code>\n" + "</Observation>";
+    String input = "<Observation xmlns=\"http://hl7.org/fhir\">\n" + "   <status value=\"notvalidcode\"/>\n"
+        + "   <code>\n" + "      <text value=\"No code here!\"/>\n" + "   </code>\n" + "</Observation>";
     ValidationResult output = myVal.validateWithResult(input);
     assertEquals(
         "Coded value notvalidcode is not in value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status)",
@@ -270,7 +314,7 @@ public class FhirInstanceValidatorTest {
   }
 
   @Test
-  public void testValidateResourceWithExampleBindingCodeValidationPassing() {
+  public void testValidateResourceWithExampleBindingCodeValidationPassingLoinc() {
     Observation input = new Observation();
 
     myInstanceVal.setValidationSupport(myMockSupport);
@@ -283,4 +327,39 @@ public class FhirInstanceValidatorTest {
     List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
     assertEquals(errors.toString(), 0, errors.size());
   }
+
+  @Test
+  public void testValidateResourceWithExampleBindingCodeValidationPassingLoincWithExpansion() {
+    Observation input = new Observation();
+    
+    ValueSetExpansionComponent expansionComponent = new ValueSetExpansionComponent();
+    expansionComponent.addContains().setSystem("http://loinc.org").setCode("12345").setDisplay("Some display code");
+    
+    mySupportedCodeSystemsForExpansion.put("http://loinc.org", expansionComponent);
+    myInstanceVal.setValidationSupport(myMockSupport);
+    addValidConcept("http://loinc.org", "12345");
+
+    input.setStatus(ObservationStatus.FINAL);
+    input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234");
+
+    ValidationResult output = myVal.validateWithResult(input);
+    List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+    assertEquals(errors.toString(), 0, errors.size());
+  }
+
+  @Test
+  public void testValidateResourceWithExampleBindingCodeValidationPassingNonLoinc() {
+    Observation input = new Observation();
+
+    myInstanceVal.setValidationSupport(myMockSupport);
+    addValidConcept("http://acme.org", "12345");
+
+    input.setStatus(ObservationStatus.FINAL);
+    input.getCode().addCoding().setSystem("http://acme.org").setCode("12345");
+
+    ValidationResult output = myVal.validateWithResult(input);
+    List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
+    assertEquals(errors.toString(), 0, errors.size());
+  }
+
 }

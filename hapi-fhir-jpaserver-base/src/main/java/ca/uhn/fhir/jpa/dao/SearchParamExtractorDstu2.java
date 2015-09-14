@@ -587,12 +587,10 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 						continue;
 					}
 
-					ourLog.info("Adding param: {}, {}", resourceName, nextValue.getValue());
+					ourLog.trace("Adding param: {}, {}", resourceName, nextValue.getValue());
 					
 					ResourceIndexedSearchParamUri nextEntity = new ResourceIndexedSearchParamUri(resourceName, nextValue.getValue());
 					
-					ourLog.info("Added : {}", nextEntity);
-
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				} else {

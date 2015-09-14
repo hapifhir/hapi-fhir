@@ -3,6 +3,9 @@ package ca.uhn.fhir.cli;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.hl7.fhir.instance.model.Bundle;
@@ -29,7 +32,7 @@ public class ValidationDataUploader extends BaseCommand {
 
 		FhirContext ctx = FhirContext.forDstu2Hl7Org();
 
-		IGenericClient client = newClient(ctx);
+		IGenericClient client = newClient(ctx,"");
 
 		int total;
 		int count;
@@ -102,6 +105,30 @@ public class ValidationDataUploader extends BaseCommand {
 
 		ourLog.info("Finished uploading ValueSets");
 
+	}
+
+	@Override
+	public String getCommandDescription() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getCommandName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Options getOptions() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void run(CommandLine theCommandLine) throws ParseException {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

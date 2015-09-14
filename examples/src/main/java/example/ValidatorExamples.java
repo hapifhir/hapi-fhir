@@ -9,6 +9,8 @@ import javax.servlet.ServletException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.instance.model.ValueSet;
+import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -21,6 +23,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
+import ca.uhn.fhir.validation.ValidationSupportChain;
 import ca.uhn.fhir.validation.FhirInstanceValidator;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidationSupport;
@@ -172,7 +176,7 @@ public class ValidatorExamples {
       IValidationSupport valSupport = new IValidationSupport() {
          
          @Override
-         public org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult validateCode(String theCodeSystem, String theCode, String theDisplay) {
+         public CodeValidationResult validateCode(String theCodeSystem, String theCode, String theDisplay) {
             // TODO: Implement
             return null;
          }
@@ -194,8 +198,23 @@ public class ValidatorExamples {
             // TODO: Implement
             return null;
          }
+
+         @Override
+         public ValueSetExpansionComponent expandValueSet(ConceptSetComponent theInclude) {
+            // TODO: Implement
+            return null;
+         }
       };
-      instanceValidator.setValidationSupport(valSupport);
+      
+      /*
+       * ValidationSupportChain strings multiple instances of IValidationSupport together. The
+       * code below is useful because it means that when the validator wants to load a 
+       * StructureDefinition or a ValueSet, it will first use DefaultProfileValidationSupport,
+       * which loads the default HL7 versions. Any StructureDefinitions which are not found in
+       * the built-in set are delegated to your custom implementation.
+       */
+      ValidationSupportChain support = new ValidationSupportChain(new DefaultProfileValidationSupport(), valSupport);
+      instanceValidator.setValidationSupport(support);
    
       // END SNIPPET: instanceValidatorCustom
    }

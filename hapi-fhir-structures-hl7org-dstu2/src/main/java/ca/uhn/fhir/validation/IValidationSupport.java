@@ -1,6 +1,10 @@
 package ca.uhn.fhir.validation;
 
 import org.hl7.fhir.instance.model.ValueSet;
+import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
+import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -8,15 +12,22 @@ import ca.uhn.fhir.context.FhirContext;
 public interface IValidationSupport {
 
   /**
-   * Returns <code>true</code> if codes in the given code system can be
-   * validated
+   * Expands the given portion of a ValueSet
+   * 
+   * @param theInclude
+   *          The portion to include
+   * @return The expansion
+   */
+  ValueSetExpansionComponent expandValueSet(ConceptSetComponent theInclude);
+
+  /**
+   * Fetch a code system by ID
    * 
    * @param theSystem
-   *          The URI for the code system, e.g. <code>"http://loinc.org"</code>
-   * @return Returns <code>true</code> if codes in the given code system can be
-   *         validated
+   *          The code system
+   * @return The valueset (must not be null, but can be an empty ValueSet)
    */
-  boolean isCodeSystemSupported(String theSystem);
+  ValueSet fetchCodeSystem(String theSystem);
 
   /**
    * Loads a resource needed by the validation (a StructureDefinition, or a
@@ -34,6 +45,17 @@ public interface IValidationSupport {
   <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri);
 
   /**
+   * Returns <code>true</code> if codes in the given code system can be expanded
+   * or validated
+   * 
+   * @param theSystem
+   *          The URI for the code system, e.g. <code>"http://loinc.org"</code>
+   * @return Returns <code>true</code> if codes in the given code system can be
+   *         validated
+   */
+  boolean isCodeSystemSupported(String theSystem);
+
+  /**
    * Validates that the given code exists and if possible returns a display
    * name. This method is called to check codes which are found in "example"
    * binding fields (e.g. <code>Observation.code</code> in the default profile.
@@ -46,16 +68,48 @@ public interface IValidationSupport {
    *          The display name, if it should also be validated
    * @return Returns a validation result object
    */
-  org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult validateCode(String theCodeSystem, String theCode,
-      String theDisplay);
+  CodeValidationResult validateCode(String theCodeSystem, String theCode, String theDisplay);
 
-  /**
-   * Fetch a code system by ID
-   * 
-   * @param theSystem
-   *          The code system
-   * @return The valueset (must not be null, but can be an empty ValueSet)
-   */
-  ValueSet fetchCodeSystem(String theSystem);
+  public class CodeValidationResult {
+    private ConceptDefinitionComponent definition;
+    private String message;
+    private IssueSeverity severity;
+
+    public CodeValidationResult(ConceptDefinitionComponent definition) {
+      this.definition = definition;
+    }
+
+    public CodeValidationResult(IssueSeverity severity, String message) {
+      this.severity = severity;
+      this.message = message;
+    }
+
+    public CodeValidationResult(IssueSeverity severity, String message, ConceptDefinitionComponent definition) {
+      this.severity = severity;
+      this.message = message;
+      this.definition = definition;
+    }
+
+    public ConceptDefinitionComponent asConceptDefinition() {
+      return definition;
+    }
+
+    public String getDisplay() {
+      return definition == null ? "??" : definition.getDisplay();
+    }
+
+    public String getMessage() {
+      return message;
+    }
+
+    public IssueSeverity getSeverity() {
+      return severity;
+    }
+
+    public boolean isOk() {
+      return definition != null;
+    }
+
+  }
 
 }

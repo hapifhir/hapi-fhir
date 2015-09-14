@@ -66,6 +66,7 @@ public class RunServerCommand extends BaseCommand {
 		WebAppContext root = new WebAppContext();
 		root.setAllowDuplicateFragmentNames(true);
 		root.setWar(tempWarFile.getAbsolutePath());
+		root.setParentLoaderPriority(true);
 		root.setContextPath("/");
 		
 		myServer = new Server(myPort);
@@ -97,6 +98,11 @@ public class RunServerCommand extends BaseCommand {
 		// myServer.setHandler(webAppContext);
 		// myServer.start();
 
+	}
+
+	@Override
+	public String getCommandDescription() {
+		return "Start a FHIR server which can be used for testing";
 	}
 
 }

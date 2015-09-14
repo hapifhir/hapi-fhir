@@ -275,6 +275,11 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		// TODO: process verbs in the correct order
 
 		for (int i = 0; i < theRequest.getEntry().size(); i++) {
+			
+			if (i % 100 == 0) {
+				ourLog.info("Processed {} entries out of {}", i, theRequest.getEntry().size());
+			}
+			
 			Entry nextEntry = theRequest.getEntry().get(i);
 			IResource res = nextEntry.getResource();
 			IdDt nextResourceId = null;
@@ -313,7 +318,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 			case POST: {
 				// CREATE
 				@SuppressWarnings("rawtypes")
-				IFhirResourceDao resourceDao = getDao(res.getClass());
+				IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 				res.setId((String) null);
 				DaoMethodOutcome outcome;
 				Entry newEntry = response.addEntry();
@@ -338,7 +343,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 			case PUT: {
 				// UPDATE
 				@SuppressWarnings("rawtypes")
-				IFhirResourceDao resourceDao = getDao(res.getClass());
+				IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 
 				DaoMethodOutcome outcome;
 				Entry newEntry = response.addEntry();
@@ -488,6 +493,14 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 
 		response.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
 		return response;
+	}
+
+	private IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IResource> theClass) {
+		IFhirResourceDao<? extends IResource> retVal = getDao(theClass);
+		if (retVal == null) {
+			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + getContext().getResourceDefinition(theClass).getName());
+		}
+		return retVal;
 	}
 
 	private static void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome,

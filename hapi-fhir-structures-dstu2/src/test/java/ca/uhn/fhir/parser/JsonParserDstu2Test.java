@@ -475,6 +475,17 @@ public class JsonParserDstu2Test {
 	}
 
 	@Test
+	public void testParseAndEncodeBundleResourceWithComments() throws Exception {
+		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-transaction2.json"));
+
+		ourCtx.newJsonParser().parseBundle(content);
+		
+		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
+		
+		// TODO: preserve comments
+	}
+	
+	@Test
 	public void testParseAndEncodeBundle() throws Exception {
 		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
 

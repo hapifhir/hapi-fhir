@@ -11,6 +11,8 @@ import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.ValueSet;
+import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -68,12 +70,17 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	}
 
   @Override
-  public org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult validateCode(String theCodeSystem, String theCode, String theDisplay) {
-    return new org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult(IssueSeverity.INFORMATION, "Unknown code: " + theCodeSystem + " / " + theCode);
+  public CodeValidationResult validateCode(String theCodeSystem, String theCode, String theDisplay) {
+    return new CodeValidationResult(IssueSeverity.INFORMATION, "Unknown code: " + theCodeSystem + " / " + theCode);
   }
 
   @Override
   public ValueSet fetchCodeSystem(String theSystem) {
+    return null;
+  }
+
+  @Override
+  public ValueSetExpansionComponent expandValueSet(ConceptSetComponent theInclude) {
     return null;
   }
 

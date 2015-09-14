@@ -188,6 +188,30 @@ public class QuestionnaireResponseValidatorIntegrationTest {
 		assertThat(result.getMessages().toString(), containsString("myMessage=Reference could not be found: http://some"));
 	}
 
+	 @Test
+	  public void testContainedQuestionnaireAndValueSet() {
+	    ValueSet vs = new ValueSet();
+	    vs.getCodeSystem().setSystem("urn:system").addConcept().setCode("code1");
+	    vs.setId("#VVV");
+	    
+	    Questionnaire q = new Questionnaire();
+	    q.setId("#QQQ");
+	    Reference vsRef = new Reference("#VVV");
+	    vsRef.setResource(vs);
+      q.getGroup().addQuestion().setLinkId("link0").setRequired(false).setType(AnswerFormat.CHOICE).setOptions(vsRef);
+
+	    QuestionnaireResponse qa;
+
+	    // Bad code
+
+	    qa = new QuestionnaireResponse();
+      qa.getQuestionnaire().setReference("#QQQ");
+      qa.getQuestionnaire().setResource(q);
+	    qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system").setCode("code1"));
+	    ValidationResult result = myVal.validateWithResult(qa);
+	    assertEquals(result.getMessages().toString(), 0, result.getMessages().size());
+	  }
+
 	/**
 	 * Sample provided by Eric van der Zwan
 	 */

@@ -181,6 +181,12 @@
 				definitions provided either by HL7 or by the user.
 			</p>
 
+			<p class="doc_info_bubble">
+				This style of validation is still experimental, and should be used with caution.
+				It is very powerful, but is still under active development and may continue to 
+				change over time.				
+			</p>
+
 			<subsection name="Preparation">
 
 				<p>

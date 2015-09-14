@@ -1,0 +1,46 @@
+<configuration>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<useJansi>true</useJansi>
+		<encoder>
+			<pattern>%boldGreen(%d{HH:mm:ss}) %white(%-5level) %logger{36} - %boldWhite(%msg%n)
+			</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="java.sql" additivity="false" level="warn">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="ca.uhn.fhir.jpa" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="ca.uhn.fhir.rest" additivity="false" level="warn">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="org.eclipse" additivity="false" level="warn">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="org.springframework" additivity="false" level="warn">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="org.apache" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="org.thymeleaf" additivity="false" level="warn">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="org.hibernate" additivity="false" level="warn">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<!-- 
+	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="trace">
+		<appender-ref ref="STDOUT" />
+	</logger>
+ 	-->
+ 	
+	<root level="info">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>

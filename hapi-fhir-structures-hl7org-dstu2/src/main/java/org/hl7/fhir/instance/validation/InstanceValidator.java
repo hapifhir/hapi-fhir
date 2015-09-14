@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.validation;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -282,7 +284,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     rule(errors, IssueType.CODEINVALID, element.line(), element.col(), path, isAbsolute(system), "Coding.system must be an absolute reference, not a local reference");
 
     if (system != null && code != null) {
-      if (checkCode(errors, element, path, code, system, display))
+      if (checkCode(errors, element, path, code, system, display)) {
         if (context != null && context.getBinding() != null) {
           ElementDefinitionBindingComponent binding = context.getBinding();
           if (warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, binding != null, "Binding for " + path + " missing")) {
@@ -318,6 +320,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
             }
           }
         }
+      }
     }
   }
 
@@ -1746,43 +1749,10 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     // 5. inspect each child for validity
     for (ElementInfo ei : children) {
       if (ei.definition != null) {
-        String type = null;
+        String type = determineType(ei.definition, ei.name, ei.line(), ei.col(), errors, stack, profile);
         ElementDefinition typeDefn = null;
-        if (ei.definition.getType().size() == 1 && !ei.definition.getType().get(0).getCode().equals("*") && !ei.definition.getType().get(0).getCode().equals("Element")
-            && !ei.definition.getType().get(0).getCode().equals("BackboneElement"))
-          type = ei.definition.getType().get(0).getCode();
-        else if (ei.definition.getType().size() == 1 && ei.definition.getType().get(0).getCode().equals("*")) {
-          String prefix = tail(ei.definition.getPath());
-          assert prefix.endsWith("[x]");
-          type = ei.name.substring(prefix.length() - 3);
-          if (isPrimitiveType(type))
-            type = Utilities.uncapitalize(type);
-        } else if (ei.definition.getType().size() > 1) {
-
-          String prefix = tail(ei.definition.getPath());
-          assert typesAreAllReference(ei.definition.getType()) || prefix.endsWith("[x]") : prefix;
-
-          prefix = prefix.substring(0, prefix.length() - 3);
-          for (TypeRefComponent t : ei.definition.getType())
-            if ((prefix + Utilities.capitalize(t.getCode())).equals(ei.name))
-              type = t.getCode();
-          if (type == null) {
-            TypeRefComponent trc = ei.definition.getType().get(0);
-            if (trc.getCode().equals("Reference"))
-              type = "Reference";
-            else
-              rule(errors, IssueType.STRUCTURE, ei.line(), ei.col(), stack.getLiteralPath(), false,
-                  "The element " + ei.name + " is illegal. Valid types at this point are " + describeTypes(ei.definition.getType()));
-          }
-        } else if (ei.definition.getNameReference() != null) {
+        if (isBlank(type) && ei.definition.getNameReference() != null) {
           typeDefn = resolveNameReference(profile.getSnapshot(), ei.definition.getNameReference());
-        }
-
-        if (type != null) {
-          if (type.startsWith("@")) {
-            ei.definition = findElement(profile, type.substring(1));
-            type = null;
-          }
         }
         NodeStack localStack = stack.push(ei.element, ei.count, ei.definition, type == null ? typeDefn : resolveType(type));
         String localStackLiterapPath = localStack.getLiteralPath();
@@ -1793,21 +1763,36 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
           if (isPrimitiveType(type))
             checkPrimitive(errors, ei.path, type, ei.definition, ei.element);
           else {
-            if (type.equals("Identifier"))
+            if (type.equals("Identifier")) {
               checkIdentifier(errors, ei.path, ei.element, ei.definition);
-            else if (type.equals("Coding"))
-              checkCoding(errors, ei.path, ei.element, profile, ei.definition);
-            else if (type.equals("CodeableConcept"))
+            } else if (type.equals("Coding")) {
+              /*
+               * We don't check coding children within a CodeableConcept, because
+               * checkCodeableConcept() already verifies the codings and the binding
+               * doesn't actually make it into checkCoding anyhow.
+               */
+              boolean skip = false;
+              if (localStack.getParent() != null && localStack.getParent() != null) {
+                String parentType = determineType(localStack.getParent().getDefinition(), "", -1, -1, errors, stack, profile);
+                if ("CodeableConcept".equals(parentType)) {
+                  skip = true;
+                }
+              }
+              if (!skip) {
+                checkCoding(errors, ei.path, ei.element, profile, ei.definition);
+              }
+            } else if (type.equals("CodeableConcept")) {
               checkCodeableConcept(errors, ei.path, ei.element, profile, ei.definition);
-            else if (type.equals("Reference"))
+            } else if (type.equals("Reference")) {
               checkReference(errors, ei.path, ei.element, profile, ei.definition, actualType, localStack);
-
-            if (type.equals("Extension"))
+            }
+            
+            if (type.equals("Extension")) {
               checkExtension(errors, ei.path, ei.element, ei.definition, profile, localStack);
-            else if (type.equals("Resource"))
+            } else if (type.equals("Resource")) {
               validateContains(errors, ei.path, ei.definition, definition, ei.element, localStack, !isBundleEntry(ei.path)); // if
                                                                                                                              // (str.matches(".*([.,/])work\\1$"))
-            else {
+            } else {
               StructureDefinition p = getProfileForType(type);
               if (rule(errors, IssueType.STRUCTURE, ei.line(), ei.col(), ei.path, p != null, "Unknown type " + type)) {
                 validateElement(errors, p, p.getSnapshot().getElement().get(0), profile, ei.definition, ei.element, type, localStack);
@@ -1820,6 +1805,50 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         }
       }
     }
+  }
+
+  private String determineType(ElementDefinition definition, String name, int line, int col, List<ValidationMessage> theErrors, NodeStack theStack, StructureDefinition theProfile) {
+    String retVal = null;
+    if (definition.getType().size() == 1 && !definition.getType().get(0).getCode().equals("*") && !definition.getType().get(0).getCode().equals("Element")
+        && !definition.getType().get(0).getCode().equals("BackboneElement")) {
+      retVal = definition.getType().get(0).getCode();
+    } else if (definition.getType().size() == 1 && definition.getType().get(0).getCode().equals("*")) {
+      String prefix = tail(definition.getPath());
+      assert prefix.endsWith("[x]");
+      retVal = name.substring(prefix.length() - 3);
+      if (isPrimitiveType(retVal)) {
+        retVal = Utilities.uncapitalize(retVal);
+      }
+    } else if (definition.getType().size() > 1) {
+
+      String prefix = tail(definition.getPath());
+      assert typesAreAllReference(definition.getType()) || prefix.endsWith("[x]") : prefix;
+
+      prefix = prefix.substring(0, prefix.length() - 3);
+      for (TypeRefComponent t : definition.getType()) {
+        if ((prefix + Utilities.capitalize(t.getCode())).equals(name)) {
+          retVal = t.getCode();
+        }
+      }
+      
+      if (retVal == null) {
+        TypeRefComponent trc = definition.getType().get(0);
+        if (trc.getCode().equals("Reference")) {
+          retVal = "Reference";
+        } else {
+          rule(theErrors, IssueType.STRUCTURE, line, col, theStack.getLiteralPath(), false,
+              "The element " + name + " is illegal. Valid types at this point are " + describeTypes(definition.getType()));
+        }
+      }
+    }
+
+    if (retVal != null) {
+      if (retVal.startsWith("@")) {
+        definition = findElement(theProfile, retVal.substring(1));
+        retVal = null;
+      }
+    }
+    return retVal;
   }
 
   private void validateMessage(List<ValidationMessage> errors, WrapperElement bundle) {
@@ -2376,6 +2405,10 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
     private List<String> getLogicalPaths() {
       return logicalPaths == null ? new ArrayList<String>() : logicalPaths;
+    }
+
+    public NodeStack getParent() {
+      return this.parent;
     }
 
     private ElementDefinition getType() {

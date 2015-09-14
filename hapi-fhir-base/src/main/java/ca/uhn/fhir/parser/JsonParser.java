@@ -1101,7 +1101,9 @@ public class JsonParser extends BaseParser implements IParser {
 					continue;
 				}
 				// _id is incorrect, but some early examples in the FHIR spec used it
-				elementId = theObject.getString(nextName);
+				if (theObject.get(nextName).getValueType() == ValueType.STRING) {
+					elementId = theObject.getString(nextName);
+				}
 				continue;
 			} else if ("extension".equals(nextName)) {
 				JsonArray array = theObject.getJsonArray(nextName);

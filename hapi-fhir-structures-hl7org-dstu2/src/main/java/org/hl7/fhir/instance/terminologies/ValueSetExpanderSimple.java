@@ -54,7 +54,7 @@ import org.hl7.fhir.instance.utils.ToolingExtensions;
 import org.hl7.fhir.utilities.Utilities;
 
 public class ValueSetExpanderSimple implements ValueSetExpander {
-
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetExpanderSimple.class);
   private IWorkerContext context;
   private List<ValueSetExpansionContainsComponent> codes = new ArrayList<ValueSet.ValueSetExpansionContainsComponent>();
   private Map<String, ValueSetExpansionContainsComponent> map = new HashMap<String, ValueSet.ValueSetExpansionContainsComponent>();
@@ -88,6 +88,7 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
       }
       return new ValueSetExpansionOutcome(focus, null);
     } catch (Exception e) {
+      ourLog.error("Failure during expansion", e);
       // well, we couldn't expand, so we'll return an interface to a checker that can check membership of the set
       // that might fail too, but it might not, later.
       return new ValueSetExpansionOutcome(new ValueSetCheckerSimple(source, factory, context), e.getMessage());

@@ -1,0 +1,348 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-transaction",
+  "meta": {
+    "fhir_comments": [
+      "   this example bundle is a transaction    ",
+      "   when the transaction was constructed   "
+    ],
+    "lastUpdated": "2014-08-18T01:43:30Z"
+  },
+  "type": "transaction",
+  "entry": [
+    {
+      "fhir_comments": [
+        "   now, each entry is an action to take in the transaction   "
+      ],
+      "fullUrl": "urn:uuid:61ebe359-bfdc-4613-8bf2-c5e300945f0a",
+      "resource": {
+        "resourceType": "Patient",
+        "text": {
+          "fhir_comments": [
+            "   no id for create operations   ",
+            "   and no metadata on this resource, though it would be valid   "
+          ],
+          "status": "generated",
+          "div": "<div>Some narrative</div>"
+        },
+        "active": true,
+        "name": [
+          {
+            "use": "official",
+            "family": [
+              "Chalmers"
+            ],
+            "given": [
+              "Peter",
+              "James"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1974-12-25"
+      },
+      "request": {
+        "fhir_comments": [
+          "   now, details about the action to take with the resource   "
+        ],
+        "method": "POST",
+        "_method": {
+          "fhir_comments": [
+            "   POST to [base]/Patient - that's a create   "
+          ]
+        },
+        "url": "Patient",
+        "_url": {
+          "fhir_comments": [
+            "   actually, in a transaction, you don't specify the [base], \n         so [base]/Patient becomes just 'Patient':   "
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:88f151c0-a954-468a-88bd-5ae15c08e059",
+      "resource": {
+        "resourceType": "Patient",
+        "text": {
+          "fhir_comments": [
+            "   no id for create operations   ",
+            "   and no metadata on this resource, though it would be valid   "
+          ],
+          "status": "generated",
+          "div": "<div>Some narrative</div>"
+        },
+        "active": true,
+        "name": [
+          {
+            "use": "official",
+            "family": [
+              "Chalmers"
+            ],
+            "given": [
+              "Peter",
+              "James"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1974-12-25"
+      },
+      "request": {
+        "fhir_comments": [
+          "   transaction details   "
+        ],
+        "method": "POST",
+        "_method": {
+          "fhir_comments": [
+            "   POST to [base]/Patient - that's a create   "
+          ]
+        },
+        "url": "Patient",
+        "_url": {
+          "fhir_comments": [
+            "   actually, in a transaction, you don't specify the [base], \n         so [base]/Patient becomes just 'Patient':   "
+          ]
+        },
+        "ifNoneExist": "identifier=234234",
+        "_ifNoneExist": {
+          "fhir_comments": [
+            "   the conditional header: only add this resource if \n      there isn't already one for this patient. If there is one,\n      the content of this resource will be ignored   "
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://example.org/fhir/Patient/123",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "123",
+        "_id": {
+          "fhir_comments": [
+            "   the id here and in the url have to match   "
+          ]
+        },
+        "text": {
+          "fhir_comments": [
+            "   and no metadata on this resource, though it would be valid   "
+          ],
+          "status": "generated",
+          "div": "<div>Some narrative</div>"
+        },
+        "active": true,
+        "name": [
+          {
+            "use": "official",
+            "family": [
+              "Chalmers"
+            ],
+            "given": [
+              "Peter",
+              "James"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1974-12-25"
+      },
+      "request": {
+        "fhir_comments": [
+          "   transaction details   "
+        ],
+        "method": "PUT",
+        "_method": {
+          "fhir_comments": [
+            "   PUT to [base]/Patient/[id] - that's an update   "
+          ]
+        },
+        "url": "Patient/123",
+        "_url": {
+          "fhir_comments": [
+            "   actually, in a transaction, you don't specify the [base], \n         so [base]/Patient becomes just 'Patient':   "
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:74891afc-ed52-42a2-bcd7-f13d9b60f096",
+      "resource": {
+        "resourceType": "Patient",
+        "text": {
+          "fhir_comments": [
+            "   no id for conditional update operations   ",
+            "   and no metadata on this resource, though it would be valid   "
+          ],
+          "status": "generated",
+          "div": "<div>Some narrative</div>"
+        },
+        "active": true,
+        "name": [
+          {
+            "use": "official",
+            "family": [
+              "Chalmers"
+            ],
+            "given": [
+              "Peter",
+              "James"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1974-12-25"
+      },
+      "request": {
+        "fhir_comments": [
+          "   transaction details   "
+        ],
+        "method": "PUT",
+        "_method": {
+          "fhir_comments": [
+            "   PUT to [base]/Patient?search_params - that's a conditional update   "
+          ]
+        },
+        "url": "Patient?identifier=234234",
+        "_url": {
+          "fhir_comments": [
+            "   actually, in a transaction, you don't specify the [base], \n         so [base]/Patient?params becomes just 'Patient?params':   "
+          ]
+        }
+      }
+    },
+    {
+      "fhir_comments": [
+        "  a different kind of conditional update: version dependent  "
+      ],
+      "fullUrl": "http://example.org/fhir/Patient/123a",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "123a",
+        "text": {
+          "status": "generated",
+          "div": "<div>Some narrative</div>"
+        },
+        "active": true,
+        "name": [
+          {
+            "use": "official",
+            "family": [
+              "Chalmers"
+            ],
+            "given": [
+              "Peter",
+              "James"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1974-12-25"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient/123a",
+        "ifMatch": "W/\"2\"",
+        "_ifMatch": {
+          "fhir_comments": [
+            "  this will only succeed if the source version is correct:  "
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "fhir_comments": [
+          "   a simple delete operation   ",
+          "   no resource in this case   ",
+          "   transaction details   "
+        ],
+        "method": "DELETE",
+        "_method": {
+          "fhir_comments": [
+            "   DELETE to [base]/Patient/[id]- that's a delete operation   "
+          ]
+        },
+        "url": "Patient/234",
+        "_url": {
+          "fhir_comments": [
+            "   actually, in a transaction, you don't specify the [base], \n         so [base]/Patient/234 becomes just 'Patient/234':   ",
+            "   btw, couldn't re-use Patient/123 for the delete, since \n        the transaction couldn't do two different operations on the\n        same resource   "
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "fhir_comments": [
+          "   a conditional delete operation   ",
+          "   no resource in this case   ",
+          "   transaction details   "
+        ],
+        "method": "DELETE",
+        "_method": {
+          "fhir_comments": [
+            "   DELETE to [base]/Patient?params- that's a conditional delete operation   "
+          ]
+        },
+        "url": "Patient?identifier=123456",
+        "_url": {
+          "fhir_comments": [
+            "   actually, in a transaction, you don't specify the [base], \n         so [base]/Patient?params becomes just 'Patient?params':   "
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:79378cb8-8f58-48e8-a5e8-60ac2755b674",
+      "resource": {
+        "resourceType": "Parameters",
+        "parameter": [
+          {
+            "name": "coding",
+            "valueCoding": {
+              "system": "http://loinc.org",
+              "code": "1963-8"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "_method": {
+          "fhir_comments": [
+            "   POST to [base]/ValueSet/$lookup - invoking a lookup operation (see Terminology Service)   "
+          ]
+        },
+        "url": "ValueSet/$lookup"
+      }
+    },
+    {
+      "request": {
+        "fhir_comments": [
+          "   can also do read-only operations. \n    \n    Note that these do not 'fail' - see discussion on transaction \n    atomicity for further information \n      "
+        ],
+        "method": "GET",
+        "_method": {
+          "fhir_comments": [
+            "   GET from [base]/Patient?params - searching for a patient   "
+          ]
+        },
+        "url": "Patient?name=peter"
+      }
+    },
+    {
+      "request": {
+        "fhir_comments": [
+          "   and an example conditional read:  "
+        ],
+        "method": "GET",
+        "url": "Patient/12334",
+        "ifNoneMatch": "W/\"4\"",
+        "_ifNoneMatch": {
+          "fhir_comments": [
+            "  in practice, you'd only specify one of these  "
+          ]
+        },
+        "ifModifiedSince": "2015-08-31T08:14:33+10:00"
+      }
+    }
+  ]
+}
