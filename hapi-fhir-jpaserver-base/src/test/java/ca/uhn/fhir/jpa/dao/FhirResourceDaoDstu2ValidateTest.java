@@ -14,6 +14,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
@@ -23,6 +24,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 
 public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2ValidateTest.class);
@@ -30,9 +32,9 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 	@Test
 	public void testValidateResourceContainingProfileDeclarationJson() throws Exception {
 		String methodName = "testValidateResourceContainingProfileDeclarationJson";
-		MethodOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.JSON);
+		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.JSON);
 
-		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
 		assertThat(ooString, containsString("Element '.subject': minimum required = 1, but only found 0"));
 		assertThat(ooString, containsString("Element encounter @ : max allowed = 0, but found 1"));
@@ -42,16 +44,16 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 	@Test
 	public void testValidateResourceContainingProfileDeclarationXml() throws Exception {
 		String methodName = "testValidateResourceContainingProfileDeclarationXml";
-		MethodOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.XML);
+		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.XML);
 
-		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
 		assertThat(ooString, containsString("Element '/f:Observation.subject': minimum required = 1, but only found 0"));
 		assertThat(ooString, containsString("Element encounter @ /f:Observation: max allowed = 0, but found 1"));
 		assertThat(ooString, containsString("Element '/f:Observation.device': minimum required = 1, but only found 0"));
 	}
 
-	private MethodOutcome doTestValidateResourceContainingProfileDeclaration(String methodName, EncodingEnum enc) throws IOException {
+	private OperationOutcome doTestValidateResourceContainingProfileDeclaration(String methodName, EncodingEnum enc) throws IOException {
 		Bundle vss = loadResourceFromClasspath(Bundle.class, "/org/hl7/fhir/instance/model/valueset/valuesets.xml");
 		myValueSetDao.update((ValueSet) findResourceByIdInBundle(vss, "observation-status"));
 		myValueSetDao.update((ValueSet) findResourceByIdInBundle(vss, "observation-category"));
@@ -82,14 +84,23 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		switch (enc) {
 		case JSON:
 			encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
-			outcome = myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null);
-			break;
+			try {
+			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null);
+			fail();
+			} catch (PreconditionFailedException e) {
+				return (OperationOutcome) e.getOperationOutcome();
+			}
 		case XML:
 			encoded = myFhirCtx.newXmlParser().encodeResourceToString(input);
-			outcome = myObservationDao.validate(input, null, encoded, EncodingEnum.XML, mode, null);
-			break;
+			try {
+			myObservationDao.validate(input, null, encoded, EncodingEnum.XML, mode, null);
+			fail();
+			} catch (PreconditionFailedException e) {
+				return (OperationOutcome) e.getOperationOutcome();
+			}
 		}
-		return outcome;
+		
+		throw new IllegalStateException(); // shouldn't get here
 	}
 
 	@Test
@@ -128,8 +139,15 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		pat.getManagingOrganization().setReference(orgId);
 		IIdType patId = myPatientDao.create(pat).getId().toUnqualifiedVersionless();
 		
-		MethodOutcome outcome = myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null);
-		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		OperationOutcome outcome=null;
+		try {
+		myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null);
+		fail();
+		} catch (PreconditionFailedException e) {
+			outcome= (OperationOutcome) e.getOperationOutcome();
+		}
+
+		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
 		assertThat(ooString, containsString("Unable to delete "+orgId.getValue()+" because at least one resource has a reference to this resource. First reference found was resource " + patId.getValue() + " in path Patient.managingOrganization"));
 
@@ -137,8 +155,8 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		pat.getManagingOrganization().setReference("");
 		myPatientDao.update(pat);
 
-		outcome = myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null);
-		ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		outcome = (OperationOutcome) myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null).getOperationOutcome();
+		ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
 		assertThat(ooString, containsString("Ok to delete"));
 

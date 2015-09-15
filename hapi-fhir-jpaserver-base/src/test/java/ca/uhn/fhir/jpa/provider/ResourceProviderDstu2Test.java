@@ -1496,7 +1496,7 @@ public class ResourceProviderDstu2Test extends BaseJpaDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent());
 			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(412, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
@@ -1524,7 +1524,7 @@ public class ResourceProviderDstu2Test extends BaseJpaDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent());
 			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(412, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
@@ -1551,7 +1551,7 @@ public class ResourceProviderDstu2Test extends BaseJpaDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent());
 			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(412, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();

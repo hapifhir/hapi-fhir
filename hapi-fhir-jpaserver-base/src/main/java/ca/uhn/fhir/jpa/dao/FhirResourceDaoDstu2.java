@@ -106,6 +106,7 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 				oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Ok to delete");
 			} catch (PreconditionFailedException e) {
 				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setDiagnostics(e.getMessage());
+				throw new PreconditionFailedException(e.getMessage(), oo);
 			}
 			return new MethodOutcome(new IdDt(theId.getValue()), oo);
 		}
@@ -124,9 +125,14 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 			result = validator.validateWithResult(theResource);
 		}
 		
-		MethodOutcome retVal = new MethodOutcome();
-		retVal.setOperationOutcome((OperationOutcome) result.toOperationOutcome());
-		return retVal;
+		if (result.isSuccessful()) {
+			MethodOutcome retVal = new MethodOutcome();
+			retVal.setOperationOutcome((OperationOutcome) result.toOperationOutcome());
+			return retVal;
+		} else {
+			throw new PreconditionFailedException("Validation failed", result.toOperationOutcome());
+		}
+		
 	}
 
 }
