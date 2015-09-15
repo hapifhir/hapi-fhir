@@ -1,6 +1,6 @@
 package ca.uhn.fhir.validation;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.ValueSet;
@@ -15,7 +15,12 @@ public class ValidationSupportChain implements IValidationSupport {
   private List<IValidationSupport> myChain;
 
   public ValidationSupportChain(IValidationSupport... theValidationSupportModules) {
-    myChain = Arrays.asList(theValidationSupportModules);
+    myChain = new ArrayList<IValidationSupport>();
+    for (IValidationSupport next : theValidationSupportModules) {
+      if (next != null) {
+        myChain.add(next);
+      }
+    }
   }
 
   @Override

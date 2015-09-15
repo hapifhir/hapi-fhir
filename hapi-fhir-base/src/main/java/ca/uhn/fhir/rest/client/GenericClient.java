@@ -1699,10 +1699,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			IPrimitiveType<?> divInstance = (IPrimitiveType<?>) divElement.newInstance();
 			try {
 				divInstance.setValueAsString(IOUtils.toString(theResponseReader));
-			} catch (IllegalArgumentException e) {
-				throw new InvalidResponseException(400, "Failed to process HTML response from server", e);
-			} catch (IOException e) {
-				throw new InvalidResponseException(400, "Failed to process HTML response from server", e);
+			} catch (Exception e) {
+				throw new InvalidResponseException(400, "Failed to process HTML response from server: " + e.getMessage(), e);
 			}
 			divChild.getMutator().addValue(textInstance, divInstance);
 			return (T) instance;

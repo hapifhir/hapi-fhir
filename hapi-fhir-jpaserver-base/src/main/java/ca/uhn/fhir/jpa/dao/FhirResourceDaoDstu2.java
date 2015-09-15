@@ -60,7 +60,10 @@ import ca.uhn.fhir.validation.ValidationSupportChain;
 
 public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResourceDao<T> {
 
-	@Autowired
+	/**
+	 * TODO: set this to required after the next release
+	 */
+	@Autowired(required=false)
 	@Qualifier("myJpaValidationSupportDstu2")
 	private IValidationSupport myJpaValidationSupport;
 

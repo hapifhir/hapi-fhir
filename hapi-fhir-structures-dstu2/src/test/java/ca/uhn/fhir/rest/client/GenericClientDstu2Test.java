@@ -4,9 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -62,6 +60,7 @@ import ca.uhn.fhir.parser.XmlParserDstu2Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.Constants;
@@ -1265,6 +1264,33 @@ public class GenericClientDstu2Test {
 
 	}
 
+	@Test
+	public void testReadWithSummaryInvalid() throws Exception {
+		String msg = "<>>>><<<<>";
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_HTML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+		try {
+			client.read()
+				.resource(Patient.class)
+				.withId("123")
+				.summaryMode(SummaryEnum.TEXT)
+				.execute();
+			fail();
+		} catch (InvalidResponseException e) {
+			assertThat(e.getMessage(), containsString("String does not appear to be valid"));
+		}
+		//@formatter:on
+	}
+	
+	
 	@Test
 	public void testReadWithSummaryParamHtml() throws Exception {
 		String msg = "<div>HELP IM A DIV</div>";
