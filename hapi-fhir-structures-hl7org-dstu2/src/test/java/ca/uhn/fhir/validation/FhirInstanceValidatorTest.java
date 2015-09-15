@@ -227,6 +227,8 @@ public class FhirInstanceValidatorTest {
     ValidationResult output = myVal.validateWithResult(input);
 
     List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
+    ourLog.info(res.toString());
+    
     for (SingleValidationMessage nextMessage : res) {
       if (nextMessage.getSeverity() == ResultSeverityEnum.ERROR) {
         fail(nextMessage.toString());
