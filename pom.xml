@@ -793,7 +793,7 @@
 						</dependency>
 					</dependencies>
 					<configuration>
-						<configLocation>file://${project.basedir}/src/checkstyle/checkstyle.xml</configLocation>
+						<configLocation>${project.basedir}/src/checkstyle/checkstyle.xml</configLocation>
 					</configuration>
 				</plugin>
 				<plugin>

@@ -190,7 +190,7 @@
 						</reportSets>
 						<configuration>
 							<linkXRef>false</linkXRef>
-							<configLocation>file://${project.basedir}/../src/checkstyle/checkstyle.xml</configLocation>
+							<configLocation>${project.basedir}/../src/checkstyle/checkstyle.xml</configLocation>
 							<!--<sourceDirectories> <sourceDirectory> ${project.basedir}/../hapi-fhir-base/src/main/java 
 								</sourceDirectory> </sourceDirectories> -->
 						</configuration>
