@@ -2,19 +2,19 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<!-- 
-	HAPI projects use the Sonatype OSS parent project. 
-	You do not need to use this in your own projects.
+	HAPI projects use the HAPI-FHIR base POM as their base. You don't need this
+	for your own projects. One thing to note though:  
 	-->
 	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-fhir</artifactId>
+		<version>1.2-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
-
 	
-	<groupId>ca.uhn.hapi.example</groupId>
+	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>restful-server-example</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.2-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>HAPI FHIR Sample RESTful Server</name>
@@ -143,6 +143,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
+				<version>2.6</version>
 				<configuration>
 					<overlays>
 						<overlay>
@@ -160,6 +161,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.8.2</version>
 				<configuration>
 					<skip>false</skip>
 				</configuration>
