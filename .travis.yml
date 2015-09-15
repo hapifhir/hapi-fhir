@@ -19,6 +19,6 @@ before_script:
   - export MAVEN_SKIP_RC=true
 
 script:
-  - mvn -B clean install && cd hapi-fhir-cobertura && mvn -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID -P COBERTURA clean test jacoco:report coveralls:report 
+  - mvn -B clean install && cd hapi-fhir-cobertura && mvn -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID -P COBERTURA clean cobertura:cobertura coveralls:report 
 
 
