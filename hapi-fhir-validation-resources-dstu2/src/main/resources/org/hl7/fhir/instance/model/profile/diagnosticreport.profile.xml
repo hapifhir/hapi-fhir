@@ -8,6 +8,7 @@
  </extension>
  <url value="http://hl7.org/fhir/StructureDefinition/DiagnosticReport"/>
  <name value="DiagnosticReport"/>
+ <status value="draft"/>
  <publisher value="Health Level Seven International (Orders and Observations)"/>
  <contact>
   <telecom>
@@ -21,10 +22,9 @@
    <value value="http://www.hl7.org/Special/committees/orders/index.cfm"/>
   </telecom>
  </contact>
+ <date value="2015-09-01T19:08:30-04:00"/>
  <description value="Base StructureDefinition for DiagnosticReport Resource"/>
  <requirements value="To support reporting for any diagnostic report into a clinical data repository."/>
- <status value="draft"/>
- <date value="2015-09-01T19:08:30-04:00"/>
  <mapping>
   <identity value="rim"/>
   <uri value="http://hl7.org/v3"/>
@@ -40,6 +40,7 @@
   <uri value="http://hl7.org/v2"/>
   <name value="HL7 v2"/>
  </mapping>
+ <kind value="resource"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
  <snapshot>

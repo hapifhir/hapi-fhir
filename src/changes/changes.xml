@@ -192,6 +192,10 @@
 			<action type="fix" issue="223">
 				Fix issue with build on Windows. Thanks to Bryce van Dyk for the pull request!
 			</action>
+			<action type="add">
+				JPA server now supports $validate operation completely, including delete mode
+				and profile validation using the RI InstanceValidator
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

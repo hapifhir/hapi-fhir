@@ -1,0 +1,766 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="familymemberhistory-genetic"/>
+ <url value="http://hl7.org/fhir/StructureDefinition/familymemberhistory-genetic"/>
+ <name value="Family member history for genetics analysis"/>
+ <status value="draft"/>
+ <publisher value="Health Level Seven International (Clinical Genomics)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://www.hl7.org/Special/committees/clingenomics"/>
+  </telecom>
+ </contact>
+ <date value="2013-10-02"/>
+ <description value="Adds additional information to a family member history supporting both the capture of mother/father relationships as well as additional observations necessary to enable genetics-based risk analysis for patients"/>
+ <kind value="resource"/>
+ <constrainedType value="FamilyMemberHistory"/>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/FamilyMemberHistory"/>
+ <snapshot>
+  <element>
+   <path value="FamilyMemberHistory"/>
+   <name value="FamilyMemberHistory-Genetic"/>
+   <short value="Information about patient's relatives, relevant for patient"/>
+   <definition value="Significant health events and conditions for a person related to the patient relevant in the context of care for the patient."/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="FamilyMemberHistory"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="FamilyMemberHistory"/>
+   </type>
+   <constraint>
+    <key value="fhs-1"/>
+    <severity value="error"/>
+    <human value="Can have age[x] or birth[x], but not both"/>
+    <xpath value="not (*[starts-with(local-name(.), 'age')] and *[starts-with(local-name(.), 'birth')])"/>
+   </constraint>
+   <mapping>
+    <identity value="v2"/>
+    <map value="Not in scope for v2"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Observation[classCode=OBS, moodCode=EVN]"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="clinical.general"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.id"/>
+   <short value="Logical id of this artifact"/>
+   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.meta"/>
+   <short value="Metadata about the resource"/>
+   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.meta"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.implicitRules"/>
+   <short value="A set of rules under which this content was created"/>
+   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.implicitRules"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.language"/>
+   <short value="Language of the resource content"/>
+   <definition value="The base language in which the resource is written."/>
+   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.language"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="code"/>
+   </type>
+   <binding>
+    <strength value="required"/>
+    <description value="A human language"/>
+    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+   </binding>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.text"/>
+   <short value="Text summary of the resource, for human interpretation"/>
+   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+   <alias value="narrative"/>
+   <alias value="html"/>
+   <alias value="xhtml"/>
+   <alias value="display"/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.text"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="Narrative"/>
+   </type>
+   <condition value="dom-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Act.text?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.contained"/>
+   <short value="Contained, inline Resources"/>
+   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+   <alias value="inline resources"/>
+   <alias value="anonymous resources"/>
+   <alias value="contained resources"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="FamilyMemberHistory.contained"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Resource"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.extension"/>
+   <slicing>
+    <discriminator value="url"/>
+    <ordered value="false"/>
+    <rules value="open"/>
+   </slicing>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="FamilyMemberHistory.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.extension"/>
+   <name value="Parent"/>
+   <short value="Extension"/>
+   <definition value="An Extension"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="FamilyMemberHistory.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/family-member-history-genetics-parent"/>
+   </type>
+   <mustSupport value="true"/>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.extension"/>
+   <name value="Observation"/>
+   <short value="Extension"/>
+   <definition value="An Extension"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="FamilyMemberHistory.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/family-member-history-genetics-observation"/>
+   </type>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="FamilyMemberHistory.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.identifier"/>
+   <short value="External Id(s) for this record"/>
+   <definition value="This records identifiers associated with this family member history record that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
+   <requirements value="Need to allow connection to a wider workflow."/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="FamilyMemberHistory.identifier"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="id"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="id"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.patient"/>
+   <short value="Patient history is about"/>
+   <definition value="The person who this history concerns."/>
+   <alias value="Proband"/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.patient"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="participation[typeCode=SBJ].role"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="who.focus"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.date"/>
+   <short value="When history was captured/updated"/>
+   <definition value="The date (and possibly time) when the family member history was taken."/>
+   <comments value="This should be captured even if the same as the date on the List aggregating the full family history."/>
+   <requirements value="Allows determination of how current the summary is."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.date"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="participation[typeCode=AUT].time"/>
+   </mapping>
+   <mapping>
+    <identity value="w5"/>
+    <map value="when.recorded"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.status"/>
+   <short value="partial | completed | entered-in-error | health-unknown"/>
+   <definition value="A code specifying a state of a Family Member History record."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.status"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="code"/>
+   </type>
+   <isModifier value="true"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="A code that identifies the status of the family history record"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/history-status"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="w5"/>
+    <map value="status"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.name"/>
+   <short value="The family member described"/>
+   <definition value="This will either be a name or a description.  E.g. &quot;Aunt Susan&quot;, &quot;my cousin with the red hair&quot;."/>
+   <requirements value="Allows greater ease in ensuring the same person is being talked about."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.name"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="name"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.relationship"/>
+   <short value="Relationship to the subject"/>
+   <definition value="The type of relationship this person has to the patient (father, mother, brother etc.)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.relationship"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="example"/>
+    <description value="The nature of the relationship between the patient and the related person being described in the family member history"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/v3-FamilyMember"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="code"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.gender"/>
+   <short value="male | female | other | unknown"/>
+   <definition value="Administrative Gender - the gender that the relative is considered to have for administration and record keeping purposes."/>
+   <requirements value="Not all relationship codes imply gender and the relative's gender can be relevant for risk assessments."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.gender"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The gender of a person used for administrative purposes"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/administrative-gender"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.born[x]"/>
+   <short value="(approximate) date of birth"/>
+   <definition value="The actual or approximate date of birth of the relative."/>
+   <requirements value="Allows calculation of the relative's age."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.born[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="Period"/>
+   </type>
+   <type>
+    <code value="date"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="fhs-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="player[classCode=LIV, determinerCode=INSTANCE]. birthDate (could be URG)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.age[x]"/>
+   <short value="(approximate) age"/>
+   <definition value="The actual or approximate age of the relative at the time the family member history is recorded."/>
+   <requirements value="While age can be calculated from date of birth, sometimes recording age directly is more natureal for clinicians."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.age[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Age"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="fhs-1"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="participation[typeCode=SBJ].act[classCode=OBS,moodCode=EVN, code=&quot;age&quot;].value"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.deceased[x]"/>
+   <short value="Dead? How old/when?"/>
+   <definition value="Deceased flag or the actual or approximate age of the relative at the time of death for the family member history record."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.deceased[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Age"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="date"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="player[classCode=LIV, determinerCode=INSTANCE].deceasedInd, deceasedDate (could be URG)  For age, you'd hang an observation off the role"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.note"/>
+   <short value="General note about related person"/>
+   <definition value="This property allows a non condition-specific note to the made about the related person. Ideally, the note would be in the condition property, but this is not always possible."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.note"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="Annotation"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=ActCode#ANNGEN].value"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.condition"/>
+   <short value="Condition that the related person had"/>
+   <definition value="The significant Conditions (or condition) that the family member had. This is a repeating section to allow a system to represent more than one condition per resource, though there is nothing stopping multiple resources - one per condition."/>
+   <comments value="If none of the conditions listed have an outcome of &quot;death&quot; specified, that indicates that none of the specified conditions are known to have been the primary cause of death."/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="FamilyMemberHistory.condition"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="BackboneElement"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=ActCode#ASSERTION, value&lt;Diagnosis]"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.condition.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.condition.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.condition.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="FamilyMemberHistory.condition.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.condition.modifierExtension"/>
+   <short value="Extensions that cannot be ignored"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <alias value="modifiers"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="FamilyMemberHistory.condition.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <isModifier value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.condition.code"/>
+   <short value="Condition suffered by relation"/>
+   <definition value="The actual condition specified. Could be a coded condition (like MI or Diabetes) or a less specific string like 'cancer' depending on how much is known about the condition and the capabilities of the creating system."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.condition.code"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="Identification of the Condition or diagnosis."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/condition-code"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value=".value"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.condition.outcome"/>
+   <short value="deceased | permanent disability | etc."/>
+   <definition value="Indicates what happened as a result of this condition.  If the condition resulted in death, deceased date is captured on the relation."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.condition.outcome"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <binding>
+    <strength value="example"/>
+    <description value="The result of the condition for the patient.  E.g. death, permanent disability, temporary disability, etc."/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/condition-outcome"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="outboundRelationship[typeCode=OUTC)].target[classCode=OBS, moodCode=EVN, code=ActCode#ASSERTION].value"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.condition.onset[x]"/>
+   <short value="When condition first manifested"/>
+   <definition value="Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence."/>
+   <requirements value="Age of onset of a condition in relatives is predictive of risk for the patient."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.condition.onset[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="Quantity"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/Age"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="Period"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=&quot;Subject Age at measurement&quot;, value&lt;Diagnosis].value[@xsi:typeCode='TS' or 'IVL_TS']  Use originalText for string"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.condition.note"/>
+   <short value="Extra information about condition"/>
+   <definition value="An area where general notes can be placed about this specific condition."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="FamilyMemberHistory.condition.note"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="Annotation"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=ActCode#ANNGEN].value"/>
+   </mapping>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="FamilyMemberHistory"/>
+   <name value="FamilyMemberHistory-Genetic"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="FamilyMemberHistory"/>
+   </type>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.extension"/>
+   <name value="Parent"/>
+   <slicing>
+    <discriminator value="url"/>
+    <ordered value="false"/>
+    <rules value="open"/>
+   </slicing>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/family-member-history-genetics-parent"/>
+   </type>
+   <mustSupport value="true"/>
+  </element>
+  <element>
+   <path value="FamilyMemberHistory.extension"/>
+   <name value="Observation"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/family-member-history-genetics-observation"/>
+   </type>
+  </element>
+ </differential>
+</StructureDefinition>

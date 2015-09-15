@@ -2,6 +2,7 @@
  <id value="xdsdocumentreference"/>
  <url value="http://hl7.org/fhir/StructureDefinition/xdsdocumentreference"/>
  <name value="XDS profile for Document Reference"/>
+ <status value="draft"/>
  <publisher value="HL7"/>
  <contact>
   <telecom>
@@ -9,9 +10,10 @@
    <value value="http://www.hl7.org"/>
   </telecom>
  </contact>
- <description value="XDSDocumentEntry"/>
- <status value="draft"/>
  <date value="2012-06-24"/>
+ <description value="XDSDocumentEntry"/>
+ <kind value="resource"/>
+ <constrainedType value="DocumentReference"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
  <snapshot>
@@ -23,6 +25,11 @@
    <comments value="Usually, this is used for documents other than those defined by FHIR."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="DocumentReference"/>
    </type>
@@ -43,6 +50,11 @@
    <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -54,6 +66,11 @@
    <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.meta"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Meta"/>
    </type>
@@ -66,6 +83,11 @@
    <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.implicitRules"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="uri"/>
    </type>
@@ -79,6 +101,11 @@
    <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.language"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -99,6 +126,11 @@
    <alias value="display"/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.text"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Narrative"/>
    </type>
@@ -118,6 +150,11 @@
    <alias value="contained resources"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.contained"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Resource"/>
    </type>
@@ -135,6 +172,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -152,6 +194,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -169,6 +216,11 @@
    <requirements value="The structure and format of this Id shall be consistent with the specification corresponding to the formatCode attribute. (e.g., for a DICOM standard document a 64 character numeric UID, for an HL7 CDA format a serialization of the CDA Document Id extension and root in the form oid^extension, where OID is a 64 digits max, and the Id is a 16 UTF-8 char max. If the OID is coded without the extension then the '^' character shall not be included.)."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.masterIdentifier"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Identifier"/>
    </type>
@@ -196,6 +248,11 @@
    <definition value="Other identifiers for the document."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.identifier"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Identifier"/>
    </type>
@@ -224,6 +281,11 @@
    <comments value="In the context of XDS, the patientId shall be the one with use = official. The Clinical XDS Affinity Domain policies may require more or less specific information and format. This patient information is not intended to be updated once the Document is registered (just as the Document content and metadata itself will not be updated without replacing the previous document). As sourcePatientInfo may have been updated by the source actor, it may no longer be in use within the Document Source (EHR-CR). It is only intended as an audit/checking mechanism and has occasional use for Document Consumer actors."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.subject"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
@@ -253,6 +315,11 @@
    <comments value="Key metadata element describing the document, used in searching/filtering."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.type"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -290,6 +357,11 @@
    <alias value="kind"/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.class"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -325,6 +397,11 @@
    <comments value="Not necessarily who did the actual data entry (i.e. typist) it in or who was the source (informant)."/>
    <min value="1"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.author"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
@@ -358,6 +435,11 @@
    <comments value="Identifies the logical organization to go to find the current version, where to report issues, etc. This is different from the physical location of the document, which is the technical location of the document, which host may be delegated to the management of some other organization."/>
    <min value="0"/>
    <max value="0"/>
+   <base>
+    <path value="DocumentReference.custodian"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
@@ -375,6 +457,11 @@
    <comments value="Represents a participant within the author institution who has legally authenticated or attested the document. Legal authentication implies that a document has been signed manually or electronically by the legal Authenticator."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.authenticator"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
@@ -404,6 +491,11 @@
    <comments value="Creation time is used for tracking, organizing versions and searching. This is the creation time of the document, not the source material on which it is based."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.created"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="dateTime"/>
    </type>
@@ -432,6 +524,11 @@
    <comments value="Referencing/indexing time is used for tracking, organizing versions and searching."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.indexed"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="instant"/>
    </type>
@@ -456,6 +553,11 @@
    <comments value="This is the status of the DocumentReference object, which might be independent from the docStatus."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.status"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -492,6 +594,11 @@
    <comments value="The document that is pointed to might be in various lifecycle states."/>
    <min value="0"/>
    <max value="0"/>
+   <base>
+    <path value="DocumentReference.docStatus"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -522,6 +629,11 @@
    <definition value="Relationships to other documents."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.relatesTo"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="BackboneElement"/>
    </type>
@@ -539,6 +651,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.relatesTo.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -556,6 +673,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.relatesTo.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -574,6 +696,11 @@
    <alias value="modifiers"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.relatesTo.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -590,6 +717,11 @@
    <comments value="If this document appends another document, then the document cannot be fully understood without also accessing the referenced document."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.relatesTo.code"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -616,6 +748,11 @@
    <definition value="Target of the relationship."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.relatesTo.target"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
@@ -638,6 +775,11 @@
    <requirements value="Helps humans to assess whether the document is of interest."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.description"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="string"/>
    </type>
@@ -663,6 +805,11 @@
    <requirements value="Use of the Health Care Privacy/Security Classification (HCS) system of security-tag use is recommended."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.securityLabel"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -693,6 +840,11 @@
    <definition value="The document and format referenced. May be multiple content each with a different format."/>
    <min value="1"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.content"/>
+    <min value="1"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="BackboneElement"/>
    </type>
@@ -709,6 +861,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.content.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -726,6 +883,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.content.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -744,6 +906,11 @@
    <alias value="modifiers"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.content.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -759,6 +926,11 @@
    <definition value="The document or url to the document along with critical metadata to prove content has integrity."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.content.attachment"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Attachment"/>
    </type>
@@ -779,6 +951,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Attachment.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -796,6 +973,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Attachment.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -811,6 +993,11 @@
    <requirements value="Processors of the data need to be able to know how to interpret the data."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="Attachment.contentType"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -838,6 +1025,11 @@
    <requirements value="Users need to be able to choose between the languages in a set of attachments."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Attachment.language"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -861,6 +1053,11 @@
    <requirements value="The data needs to able to be transmitted inline."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Attachment.data"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="base64Binary"/>
    </type>
@@ -882,6 +1079,11 @@
    <requirements value="The data needs to be transmitted by reference."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Attachment.url"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="uri"/>
    </type>
@@ -904,6 +1106,11 @@
    <requirements value="Representing the size allows applications to determine whether they should fetch the content automatically in advance, or refuse to fetch it at all."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Attachment.size"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="unsignedInt"/>
    </type>
@@ -921,6 +1128,11 @@
    <requirements value="Included so that applications can verify that the contents of a location have not changed and so that a signature of the content can implicitly sign the content of an image without having to include the data in the instance or reference the url in the signature."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Attachment.hash"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="base64Binary"/>
    </type>
@@ -937,6 +1149,11 @@
    <requirements value="Applications need a label to display to a human user in place of the actual data if the data cannot be rendered or perceived by the viewer."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Attachment.title"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="string"/>
    </type>
@@ -954,6 +1171,11 @@
    <requirements value="This is often tracked as an integrity issue for use of the attachment."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Attachment.creation"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="dateTime"/>
    </type>
@@ -970,6 +1192,11 @@
    <comments value="Format codes may be specified by multiple organizations. Format codes defined by ITI shall have names with the prefix urn:ihe:iti:. Format codes defined by other IHE domains shall have names with the prefix urn:ihe:???domain initials???: Format codes defined by the Affinity Domain shall have names with the prefix urn:ad:???name of affinity domain???: Affinity Domains shall be unique. The prefixes described here are not assumed to be exhaustive."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.content.format"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Coding"/>
    </type>
@@ -997,6 +1224,11 @@
    <comments value="These values are primarily added to help with searching for interesting/relevant documents."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.context"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="BackboneElement"/>
    </type>
@@ -1013,6 +1245,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.context.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -1030,6 +1267,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.context.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -1048,6 +1290,11 @@
    <alias value="modifiers"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.context.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -1063,6 +1310,11 @@
    <definition value="Describes the clinical encounter or type of care that the document content is associated with."/>
    <min value="0"/>
    <max value="0"/>
+   <base>
+    <path value="DocumentReference.context.encounter"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Encounter"/>
@@ -1084,6 +1336,11 @@
    <comments value="An event can further specialize the act inherent in the typeCode, such as where it is simply &quot;Procedure Report&quot; and the procedure was a &quot;colonoscopy&quot;. If one or more eventCodes are included, they shall not conflict with the values inherent in the classCode, practiceSettingCode or typeCode, as such a conflict would create an ambiguous situation. This short list of codes is provided to be used as ???key words??? for certain types of queries."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.context.event"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -1111,6 +1368,11 @@
    <comments value="At least a start date SHALL be provided."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.context.period"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Period"/>
    </type>
@@ -1131,6 +1393,11 @@
    <comments value="In some cases, the setting of the encounter is inherent in the typeCode, such as &quot;Diabetes Clinic Progress Note&quot;. healthcareFacilityTypeCode shall be equivalent to or further specialize the value inherent in the typeCode; for example, where the typeCode is simply &quot;Clinic Progress Note&quot; and the value of healthcareFacilityTypeCode is &quot;private clinic&quot;. The value shall not conflict with the value inherent in the typeCode, as such a conflict would create an ambiguous situation."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.context.facilityType"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -1159,6 +1426,11 @@
    <requirements value="This is an important piece of metadata that providers often rely upon to quickly sort and/or filter out to find specific content."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.context.practiceSetting"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -1185,6 +1457,11 @@
    <definition value="The Patient Information as known when the document was published. May be a reference to a version specific, or contained."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.context.sourcePatientInfo"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
@@ -1206,6 +1483,11 @@
    <comments value="May be identifiers or resources that caused the DocumentReference or referenced Document to be created."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.context.related"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="BackboneElement"/>
    </type>
@@ -1226,6 +1508,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.context.related.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -1243,6 +1530,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.context.related.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -1261,6 +1553,11 @@
    <alias value="modifiers"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentReference.context.related.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -1277,6 +1574,11 @@
    <comments value="Order numbers, accession numbers, XDW workflow numbers."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.context.related.identifier"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Identifier"/>
    </type>
@@ -1293,6 +1595,11 @@
    <comments value="Order, DiagnosticOrder,  Procedure, EligibilityRequest, etc."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentReference.context.related.ref"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>

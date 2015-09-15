@@ -8,6 +8,7 @@
  </extension>
  <url value="http://hl7.org/fhir/StructureDefinition/StructureDefinition"/>
  <name value="StructureDefinition"/>
+ <status value="draft"/>
  <publisher value="Health Level Seven International (FHIR Infrastructure)"/>
  <contact>
   <telecom>
@@ -21,9 +22,8 @@
    <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
   </telecom>
  </contact>
- <description value="Base StructureDefinition for StructureDefinition Resource"/>
- <status value="draft"/>
  <date value="2015-09-01T19:08:30-04:00"/>
+ <description value="Base StructureDefinition for StructureDefinition Resource"/>
  <mapping>
   <identity value="rim"/>
   <uri value="http://hl7.org/v3"/>
@@ -39,6 +39,7 @@
   <uri value="http://metadata-standards.org/11179/"/>
   <name value="ISO 11179"/>
  </mapping>
+ <kind value="resource"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
  <snapshot>
@@ -55,6 +56,7 @@
    </type>
    <constraint>
     <key value="sdf-9"/>
+    <requirements value="Because these 3 fields seem to be have overlapping meaning with the ones in the root of StructureDefinition"/>
     <severity value="error"/>
     <human value="In any snapshot or differential, no label, code or requirements on the an element without a &quot;.&quot; in the path (e.g. the first element)"/>
     <xpath value="not(exists(f:snapshot/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)])) and not(exists(f:differential/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)]))"/>
@@ -67,24 +69,28 @@
    </constraint>
    <constraint>
     <key value="sdf-12"/>
+    <requirements value="Ensure that element.base appears with base or not"/>
     <severity value="error"/>
     <human value="element.base cannot appear if theres's no base on the structure definition"/>
     <xpath value="f:base or not(exists(f:snapshot/f:element/f:base) or exists(f:differential/f:element/f:base))"/>
    </constraint>
    <constraint>
     <key value="sdf-11"/>
+    <requirements value="Ensure that the constrainedType is not inconsistent with the other information in the structure"/>
     <severity value="error"/>
     <human value="If there's a constrained type, its content must match the path name in the first element of a snapshot"/>
     <xpath value="not(exists(f:constrainedType)) or not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value)"/>
    </constraint>
    <constraint>
     <key value="sdf-13"/>
+    <requirements value="Ensure that element.base appears if there's a constrained type on the structure definition"/>
     <severity value="error"/>
     <human value="element.base must appear if theres's a base on the structure definition"/>
     <xpath value="not(f:constrainedType) or not(f:snapshot/f:element[not(f:base)])"/>
    </constraint>
    <constraint>
     <key value="sdf-10"/>
+    <requirements value="Ensure that there's a base unless the type is abstract and there's no constrainedType"/>
     <severity value="error"/>
     <human value="If the structure is not abstract, or there's a constrained type, then there SHALL be a base"/>
     <xpath value="(f:abstract/@value='true') or not(exists(f:constrainedType)) or exists(f:base)"/>
@@ -986,6 +992,7 @@
    </type>
    <constraint>
     <key value="sdf-9"/>
+    <requirements value="Because these 3 fields seem to be have overlapping meaning with the ones in the root of StructureDefinition"/>
     <severity value="error"/>
     <human value="In any snapshot or differential, no label, code or requirements on the an element without a &quot;.&quot; in the path (e.g. the first element)"/>
     <xpath value="not(exists(f:snapshot/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)])) and not(exists(f:differential/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)]))"/>
@@ -998,24 +1005,28 @@
    </constraint>
    <constraint>
     <key value="sdf-12"/>
+    <requirements value="Ensure that element.base appears with base or not"/>
     <severity value="error"/>
     <human value="element.base cannot appear if theres's no base on the structure definition"/>
     <xpath value="f:base or not(exists(f:snapshot/f:element/f:base) or exists(f:differential/f:element/f:base))"/>
    </constraint>
    <constraint>
     <key value="sdf-11"/>
+    <requirements value="Ensure that the constrainedType is not inconsistent with the other information in the structure"/>
     <severity value="error"/>
     <human value="If there's a constrained type, its content must match the path name in the first element of a snapshot"/>
     <xpath value="not(exists(f:constrainedType)) or not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value)"/>
    </constraint>
    <constraint>
     <key value="sdf-13"/>
+    <requirements value="Ensure that element.base appears if there's a constrained type on the structure definition"/>
     <severity value="error"/>
     <human value="element.base must appear if theres's a base on the structure definition"/>
     <xpath value="not(f:constrainedType) or not(f:snapshot/f:element[not(f:base)])"/>
    </constraint>
    <constraint>
     <key value="sdf-10"/>
+    <requirements value="Ensure that there's a base unless the type is abstract and there's no constrainedType"/>
     <severity value="error"/>
     <human value="If the structure is not abstract, or there's a constrained type, then there SHALL be a base"/>
     <xpath value="(f:abstract/@value='true') or not(exists(f:constrainedType)) or exists(f:base)"/>

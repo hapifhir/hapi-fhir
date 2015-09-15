@@ -2,6 +2,7 @@
  <id value="geneticsmockup"/>
  <url value="http://hl7.org/fhir/StructureDefinition/geneticsmockup"/>
  <name value="EHgenetics-mockup-spreadsheet"/>
+ <status value="draft"/>
  <publisher value="EH"/>
  <contact>
   <telecom>
@@ -9,9 +10,8 @@
    <value value="http://www.healthedatainc.com"/>
   </telecom>
  </contact>
- <description value="Describes how the observation resource is used to report structured genetic test results"/>
- <status value="draft"/>
  <date value="2015-07-01"/>
+ <description value="Describes how the observation resource is used to report structured genetic test results"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/Observation"/>
  <snapshot>

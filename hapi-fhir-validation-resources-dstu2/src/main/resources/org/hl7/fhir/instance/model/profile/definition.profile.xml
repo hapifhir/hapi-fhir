@@ -2,10 +2,10 @@
  <id value="definition"/>
  <url value="http://hl7.org/fhir/StructureDefinition/definition"/>
  <name value="Shareable ValueSet"/>
- <publisher value="HL7"/>
- <description value="Enforces the minimum information set for the value set metadata required by HL7 and other organisations that share and publish value sets"/>
  <status value="draft"/>
+ <publisher value="HL7"/>
  <date value="2015-08-27T19:45:13-04:00"/>
+ <description value="Enforces the minimum information set for the value set metadata required by HL7 and other organisations that share and publish value sets"/>
  <mapping>
   <identity value="rim"/>
   <uri value="http://hl7.org/v3"/>

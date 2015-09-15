@@ -2,6 +2,7 @@
  <id value="dateTime"/>
  <url value="http://hl7.org/fhir/StructureDefinition/dateTime"/>
  <name value="dateTime"/>
+ <status value="draft"/>
  <publisher value="HL7 FHIR Standard"/>
  <contact>
   <telecom>
@@ -9,9 +10,9 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <description value="Base StructureDefinition for dateTime Type: A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.                 Dates SHALL be valid dates."/>
- <status value="draft"/>
  <date value="2015-09-01T19:08:30-04:00"/>
+ <description value="Base StructureDefinition for dateTime Type: A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.                 Dates SHALL be valid dates."/>
+ <kind value="datatype"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
  <snapshot>
@@ -45,6 +46,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="dateTime.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>

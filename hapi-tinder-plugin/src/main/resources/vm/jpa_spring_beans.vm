@@ -20,6 +20,10 @@
 		<property name="dao" ref="mySystemDao${versionCapitalized}"/>
 	</bean>
 
+#if ( ${versionCapitalized} == 'Dstu2' )
+	<bean id="myJpaValidationSupport${versionCapitalized}" class="ca.uhn.fhir.jpa.dao.JpaValidationSupport${versionCapitalized}"/>
+#end
+
  	<util:list id="myResourceProviders${versionCapitalized}">
 #foreach ( $res in $resources )
 		<ref bean="my${res.name}Rp${versionCapitalized}"/>
@@ -42,10 +46,6 @@
 		<property name="context" ref="myFhirContext${versionCapitalized}"/>
 	</bean>
  
-#end
-
-#if ( ${versionCapitalized} == 'Dstu2' )
-	<bean id="myJpaProfileValidationSupportDstu2" class="ca.uhn.fhir.jpa.dao.JpaProfileValidationSupport"/>
 #end
 
 </beans>

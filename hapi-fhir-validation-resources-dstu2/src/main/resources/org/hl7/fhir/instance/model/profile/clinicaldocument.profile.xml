@@ -2,6 +2,7 @@
  <id value="clinicaldocument"/>
  <url value="http://hl7.org/fhir/StructureDefinition/clinicaldocument"/>
  <name value="Clinical Document Profile for Composition"/>
+ <status value="draft"/>
  <publisher value="Health Level Seven, Inc. - Structured Documents WG"/>
  <contact>
   <telecom>
@@ -9,9 +10,10 @@
    <value value="http://hl7.org/special/committees/structure"/>
   </telecom>
  </contact>
- <description value="The base Composition is a general resource for compositions or documents about any kind of subject that might be encountered in healthcare including such things as guidelines, medicines, etc. A clinical document is focused on documents related to the provision of care process, where the subject is a patient, a group of patients, or a closely related concept. A clinical document has additional reqiurements around confidentiality that do not apply in the same way to other kinds of documents"/>
- <status value="draft"/>
  <date value="2015-03-17"/>
+ <description value="The base Composition is a general resource for compositions or documents about any kind of subject that might be encountered in healthcare including such things as guidelines, medicines, etc. A clinical document is focused on documents related to the provision of care process, where the subject is a patient, a group of patients, or a closely related concept. A clinical document has additional reqiurements around confidentiality that do not apply in the same way to other kinds of documents"/>
+ <kind value="resource"/>
+ <constrainedType value="Composition"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/Composition"/>
  <snapshot>
@@ -23,6 +25,11 @@
    <comments value="While the focus of this specification is on patient-specific clinical statements, this resource can also apply to other healthcare-related statements such as study protocol designs, healthcare invoices and other activities that are not necessarily patient-specific or clinical."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Composition"/>
    </type>
@@ -46,6 +53,11 @@
    <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -57,6 +69,11 @@
    <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.meta"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Meta"/>
    </type>
@@ -69,6 +86,11 @@
    <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.implicitRules"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="uri"/>
    </type>
@@ -82,6 +104,11 @@
    <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.language"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -102,6 +129,11 @@
    <alias value="display"/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.text"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Narrative"/>
    </type>
@@ -121,6 +153,11 @@
    <alias value="contained resources"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.contained"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Resource"/>
    </type>
@@ -138,6 +175,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -155,6 +197,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -171,6 +218,11 @@
    <comments value="See discussion in resource definition for how these relate."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.identifier"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Identifier"/>
    </type>
@@ -196,6 +248,11 @@
    <requirements value="dateTime is used for tracking, organizing versions and searching."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.date"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="dateTime"/>
    </type>
@@ -221,6 +278,11 @@
    <requirements value="Key metadata element describing the composition, used in searching/filtering."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.type"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -253,6 +315,11 @@
    <requirements value="Helps humans to assess whether the composition is of interest when viewing an index of compositions or documents."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.class"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -284,6 +351,11 @@
    <comments value="For many compositions, the title is the same as the text or a display name of Composition.type (e.g. a &quot;consultation&quot; or &quot;progress note&quot;). Note that CDA does not make title mandatory, but there are no known cases where it is useful for title to be omitted, so it is mandatory here. Feedback on this requirement is welcome during the trial use period."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.title"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="string"/>
    </type>
@@ -305,6 +377,11 @@
    <requirements value="Need to be able to mark interim, amended, or withdrawn compositions or documents."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.status"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -337,6 +414,11 @@
    <comments value="The exact use of this element, and enforcement and issues related to highly sensitive documents are out of scope for the base specification, and delegated to implementation profiles (see security section)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.confidentiality"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -366,6 +448,11 @@
    <requirements value="Essential metadata for searching for the composition. Identifies who and/or what the composition/document is about."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.subject"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
@@ -407,6 +494,11 @@
    <requirements value="Identifies who is responsible for the content."/>
    <min value="1"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.author"/>
+    <min value="1"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
@@ -445,6 +537,11 @@
    <requirements value="Identifies responsibility for the accuracy of the composition content."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.attester"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="BackboneElement"/>
    </type>
@@ -465,6 +562,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.attester.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -482,6 +584,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.attester.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -500,6 +607,11 @@
    <alias value="modifiers"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.attester.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -517,6 +629,11 @@
    <requirements value="Indicates the level of officialness of the attestation."/>
    <min value="1"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.attester.mode"/>
+    <min value="1"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -544,6 +661,11 @@
    <requirements value="Identifies when the information in the composition was deemed accurate.  (Things may have changed since then.)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.attester.time"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="dateTime"/>
    </type>
@@ -564,6 +686,11 @@
    <requirements value="Identifies who has taken on the responsibility for accuracy of the composition content."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.attester.party"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
@@ -598,6 +725,11 @@
    <requirements value="Identifies where to go to find the current version, where to report issues, etc."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.custodian"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
@@ -620,6 +752,11 @@
    <requirements value="Provides context for the composition and creates a linkage between a resource describing an event and the composition created describing the event."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.event"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="BackboneElement"/>
    </type>
@@ -640,6 +777,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.event.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -657,6 +799,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.event.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -675,6 +822,11 @@
    <alias value="modifiers"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.event.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -691,6 +843,11 @@
    <comments value="An event can further specialize the act inherent in the typeCode, such as where it is simply &quot;Procedure Report&quot; and the procedure was a &quot;colonoscopy&quot;. If one or more eventCodes are included, they SHALL NOT conflict with the values inherent in the classCode, practiceSettingCode or typeCode, as such a conflict would create an ambiguous situation. This short list of codes is provided to be used as ???key words??? for certain types of queries."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.event.code"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -717,6 +874,11 @@
    <definition value="The period of time covered by the documentation. There is no assertion that the documentation is a complete representation for this period, only that it documents events during this time."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.event.period"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Period"/>
    </type>
@@ -736,6 +898,11 @@
    <definition value="The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.event.detail"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
@@ -757,6 +924,11 @@
    <requirements value="Provides context for the composition and supports searching."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.encounter"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Encounter"/>
@@ -785,6 +957,11 @@
    <definition value="The root of the sections that make up the composition."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.section"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="BackboneElement"/>
    </type>
@@ -816,6 +993,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.section.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -833,6 +1015,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.section.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -851,6 +1038,11 @@
    <alias value="modifiers"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.section.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -871,6 +1063,11 @@
    <alias value="caption"/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.section.title"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="string"/>
    </type>
@@ -891,6 +1088,11 @@
    <requirements value="Provides computable standardized labels to topics within the document."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.section.code"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -917,6 +1119,11 @@
    <comments value="Document profiles may define what content should be represented in the narrative to ensure clinical safety."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.section.text"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Narrative"/>
    </type>
@@ -937,6 +1144,11 @@
    <requirements value="Sections are used in various ways, and it must be known in what way it is safe to use the entries in them."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.section.mode"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -970,6 +1182,11 @@
    <requirements value="Important for presentation and rendering.  Lists may be sorted to place more important information first or to group related entries."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.section.orderedBy"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -996,6 +1213,11 @@
    <comments value="If there are no entries in the list, an emptyReason SHOULD be provided."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.section.entry"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
@@ -1018,6 +1240,11 @@
    <requirements value="Allows capturing things like &quot;none exist&quot; or &quot;not asked&quot; which can be important for most lists."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Composition.section.emptyReason"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -1045,6 +1272,11 @@
    <comments value="Nested sections are primarily used to help human readers navigate to particular portions of the document."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Composition.section.section"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <nameReference value="section"/>
    <condition value="cmp-1"/>
    <mapping>

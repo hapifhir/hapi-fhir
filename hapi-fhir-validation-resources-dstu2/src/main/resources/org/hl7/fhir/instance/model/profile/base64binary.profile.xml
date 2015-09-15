@@ -1,0 +1,89 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="base64Binary"/>
+ <url value="http://hl7.org/fhir/StructureDefinition/base64Binary"/>
+ <name value="base64Binary"/>
+ <status value="draft"/>
+ <publisher value="HL7 FHIR Standard"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/fhir"/>
+  </telecom>
+ </contact>
+ <date value="2015-09-01T19:08:30-04:00"/>
+ <description value="Base StructureDefinition for base64Binary Type: A stream of bytes"/>
+ <kind value="datatype"/>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
+ <snapshot>
+  <element>
+   <path value="base64Binary"/>
+   <short value="Primitive Type base64Binary"/>
+   <definition value="A stream of bytes"/>
+   <comments value="A stream of bytes, base64 encoded"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Element"/>
+   </type>
+  </element>
+  <element>
+   <path value="base64Binary.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="id"/>
+   </type>
+  </element>
+  <element>
+   <path value="base64Binary.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="base64Binary.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+   </type>
+  </element>
+  <element>
+   <path value="base64Binary.value"/>
+   <representation value="xmlAttr"/>
+   <short value="Primitive value for base64Binary"/>
+   <definition value="The actual value"/>
+   <min value="0"/>
+   <max value="1"/>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="base64Binary"/>
+   <short value="Primitive Type base64Binary"/>
+   <definition value="A stream of bytes"/>
+   <comments value="A stream of bytes, base64 encoded"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Element"/>
+   </type>
+  </element>
+  <element>
+   <path value="base64Binary.value"/>
+   <representation value="xmlAttr"/>
+   <short value="Primitive value for base64Binary"/>
+   <definition value="Primitive value for base64Binary"/>
+   <min value="0"/>
+   <max value="1"/>
+  </element>
+ </differential>
+</StructureDefinition>

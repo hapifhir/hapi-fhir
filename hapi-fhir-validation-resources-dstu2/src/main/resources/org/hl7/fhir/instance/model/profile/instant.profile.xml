@@ -2,6 +2,7 @@
  <id value="instant"/>
  <url value="http://hl7.org/fhir/StructureDefinition/instant"/>
  <name value="instant"/>
+ <status value="draft"/>
  <publisher value="HL7 FHIR Standard"/>
  <contact>
   <telecom>
@@ -9,9 +10,9 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <description value="Base StructureDefinition for instant Type: An instant in time - known at least to the second"/>
- <status value="draft"/>
  <date value="2015-09-01T19:08:30-04:00"/>
+ <description value="Base StructureDefinition for instant Type: An instant in time - known at least to the second"/>
+ <kind value="datatype"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
  <snapshot>
@@ -46,6 +47,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="instant.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>

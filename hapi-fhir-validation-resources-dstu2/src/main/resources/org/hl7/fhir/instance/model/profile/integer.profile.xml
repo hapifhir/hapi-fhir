@@ -2,6 +2,7 @@
  <id value="integer"/>
  <url value="http://hl7.org/fhir/StructureDefinition/integer"/>
  <name value="integer"/>
+ <status value="draft"/>
  <publisher value="HL7 FHIR Standard"/>
  <contact>
   <telecom>
@@ -9,9 +10,9 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <description value="Base StructureDefinition for integer Type: A whole number"/>
- <status value="draft"/>
  <date value="2015-09-01T19:08:30-04:00"/>
+ <description value="Base StructureDefinition for integer Type: A whole number"/>
+ <kind value="datatype"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
  <snapshot>
@@ -46,6 +47,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="integer.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -57,6 +63,8 @@
    <definition value="The actual value"/>
    <min value="0"/>
    <max value="1"/>
+   <minValueInteger value="-2147483648"/>
+   <maxValueInteger value="2147483647"/>
   </element>
  </snapshot>
  <differential>
@@ -78,6 +86,8 @@
    <definition value="Primitive value for integer"/>
    <min value="0"/>
    <max value="1"/>
+   <minValueInteger value="-2147483648"/>
+   <maxValueInteger value="2147483647"/>
   </element>
  </differential>
 </StructureDefinition>

@@ -2,6 +2,7 @@
  <id value="Address"/>
  <url value="http://hl7.org/fhir/StructureDefinition/Address"/>
  <name value="Address"/>
+ <status value="draft"/>
  <publisher value="HL7 FHIR Standard"/>
  <contact>
   <telecom>
@@ -9,10 +10,9 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
+ <date value="2015-09-01T19:08:30-04:00"/>
  <description value="Base StructureDefinition for Address Type"/>
  <requirements value="Need to be able to record postal addresses, along with notes about their use."/>
- <status value="draft"/>
- <date value="2015-09-01T19:08:30-04:00"/>
  <mapping>
   <identity value="v2"/>
   <uri value="http://hl7.org/v2"/>
@@ -33,6 +33,7 @@
   <uri value="http://w3.org/vcard"/>
   <name value="vCard"/>
  </mapping>
+ <kind value="datatype"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
  <snapshot>

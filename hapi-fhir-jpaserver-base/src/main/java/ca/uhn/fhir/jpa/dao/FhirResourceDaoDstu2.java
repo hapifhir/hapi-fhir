@@ -29,21 +29,26 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.validation.IResourceValidator.BestPracticeWarningLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
@@ -56,8 +61,8 @@ import ca.uhn.fhir.validation.ValidationSupportChain;
 public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResourceDao<T> {
 
 	@Autowired
-	@Qualifier("myJpaProfileValidationSupportDstu2")
-	private IValidationSupport myJpaProfilealidationSupport;
+	@Qualifier("myJpaValidationSupportDstu2")
+	private IValidationSupport myJpaValidationSupport;
 
 	@Override
 	protected List<Object> getIncludeValues(FhirTerser theTerser, Include theInclude, IBaseResource theResource, RuntimeResourceDefinition theResourceDef) {
@@ -86,15 +91,30 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 	}
 
 	@Override
-	public MethodOutcome validate(T theResource, IdDt theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile) {
+	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile) {
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, null, theResource);
 		notifyInterceptors(RestOperationTypeEnum.VALIDATE, requestDetails);
 
+		if (theMode == ValidationModeEnum.DELETE) {
+			if (theId == null || theId.hasIdPart() == false) {
+				throw new InvalidRequestException("No ID supplied. ID is required when validating with mode=DELETE");
+			}
+			final ResourceTable entity = readEntityLatestVersion(theId);
+			OperationOutcome oo = new OperationOutcome();
+			try {
+				validateOkToDeleteOrThrowPreconditionFailedException(entity);
+				oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Ok to delete");
+			} catch (PreconditionFailedException e) {
+				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setDiagnostics(e.getMessage());
+			}
+			return new MethodOutcome(new IdDt(theId.getValue()), oo);
+		}
+		
 		FhirValidator validator = getContext().newValidator();
 
 		FhirInstanceValidator val = new FhirInstanceValidator();
 		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
-		val.setValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), myJpaProfilealidationSupport));
+		val.setValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), myJpaValidationSupport));
 		validator.registerValidatorModule(val);
 		
 		ValidationResult result;

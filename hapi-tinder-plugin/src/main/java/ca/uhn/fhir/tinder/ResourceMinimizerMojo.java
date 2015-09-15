@@ -51,7 +51,9 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		ourLog.info("Starting resource minimizer");
 
-		if ("DSTU".equals(fhirVersion)) {
+		if (myCtx != null) {
+			// nothing
+		} else if ("DSTU".equals(fhirVersion)) {
 			myCtx = FhirContext.forDstu1();
 		} else if ("DSTU2".equals(fhirVersion)) {
 			myCtx = FhirContext.forDstu2();
@@ -149,6 +151,8 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 	}
 
 	public static void main(String[] args) throws Exception {
+		FhirContext ctx = FhirContext.forDstu2();
+		
 		LoggerContext loggerContext = ((ch.qos.logback.classic.Logger) ourLog).getLoggerContext();
 		URL mainURL = ConfigurationWatchListUtil.getMainWatchURL(loggerContext);
 		System.out.println(mainURL);
@@ -159,6 +163,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		long byteCount = 0;
 		
 		ResourceMinimizerMojo m = new ResourceMinimizerMojo();
+		m.myCtx = ctx;
 		m.targetDirectory = new File("../hapi-tinder-plugin/src/main/resources/vs/dstu2");
 		m.fhirVersion = "DSTU2";
 		m.execute();
@@ -166,6 +171,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		fileCount += m.getFileCount();
 
 		m = new ResourceMinimizerMojo();
+		m.myCtx = ctx;
 		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2/src/main/resources/org/hl7/fhir/instance/model/valueset");
 		m.fhirVersion = "DSTU2";
 		m.execute();
@@ -173,6 +179,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		fileCount += m.getFileCount();
 
 		m = new ResourceMinimizerMojo();
+		m.myCtx = ctx;
 		m.targetDirectory = new File("../hapi-fhir-validation-resources-dstu2/src/main/resources/org/hl7/fhir/instance/model/profile");
 		m.fhirVersion = "DSTU2";
 		m.execute();

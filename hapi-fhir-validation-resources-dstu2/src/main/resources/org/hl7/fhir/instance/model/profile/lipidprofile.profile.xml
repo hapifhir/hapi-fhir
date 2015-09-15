@@ -2,6 +2,7 @@
  <id value="lipidprofile"/>
  <url value="http://hl7.org/fhir/StructureDefinition/lipidprofile"/>
  <name value="Example Lipid Profile"/>
+ <status value="draft"/>
  <publisher value="Grahame Grieve"/>
  <contact>
   <telecom>
@@ -9,9 +10,10 @@
    <value value="grahame@healthintersections.com.au"/>
   </telecom>
  </contact>
- <description value="Lipid Lab Report"/>
- <status value="draft"/>
  <date value="2012-05-12"/>
+ <description value="Lipid Lab Report"/>
+ <kind value="resource"/>
+ <constrainedType value="DiagnosticReport"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/DiagnosticReport"/>
  <snapshot>
@@ -29,6 +31,11 @@
    <alias value="Laboratory"/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="DiagnosticReport"/>
    </type>
@@ -48,6 +55,11 @@
    <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -59,6 +71,11 @@
    <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.meta"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Meta"/>
    </type>
@@ -71,6 +88,11 @@
    <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.implicitRules"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="uri"/>
    </type>
@@ -84,6 +106,11 @@
    <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.language"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -104,6 +131,11 @@
    <alias value="display"/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.text"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Narrative"/>
    </type>
@@ -123,6 +155,11 @@
    <alias value="contained resources"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DiagnosticReport.contained"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Resource"/>
    </type>
@@ -140,6 +177,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DiagnosticReport.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -157,6 +199,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DiagnosticReport.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -174,6 +221,11 @@
    <alias value="ReportID"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DiagnosticReport.identifier"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Identifier"/>
    </type>
@@ -199,6 +251,11 @@
    <requirements value="Diagnostic services routinely issue provisional/incomplete reports, and sometimes withdraw previously released reports."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.status"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -235,6 +292,11 @@
    <alias value="discipline"/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.category"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -266,6 +328,11 @@
    <comments value="LOINC code includes &quot;direct&quot; LDL - does this mean LDL derived by measuring VLDL by ultracentrifugation? This panel includes both measured and calculated LDL."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.code"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -305,6 +372,11 @@
    <alias value="Patient"/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.subject"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
@@ -341,6 +413,11 @@
    <definition value="The link to the health care event (encounter) when the order was made."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.encounter"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Encounter"/>
@@ -365,6 +442,11 @@
    <alias value="Effective Time"/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.effective[x]"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="dateTime"/>
    </type>
@@ -396,6 +478,11 @@
    <alias value="Date Issued"/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.issued"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="instant"/>
    </type>
@@ -426,6 +513,11 @@
    <alias value="Company"/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.performer"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
@@ -456,6 +548,11 @@
    <requirements value="Need to be able to track completion of requests based on reports issued and also to report what diagnostic tests were requested (not always the same as what is delivered)."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DiagnosticReport.request"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/DiagnosticOrder"/>
@@ -481,6 +578,11 @@
    <requirements value="Need to be able to report information about the collected specimens on which the report is based."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DiagnosticReport.specimen"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Specimen"/>
@@ -515,6 +617,11 @@
    <alias value="Organiser"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DiagnosticReport.result"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Observation"/>
@@ -541,6 +648,11 @@
    <alias value="Organiser"/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.result"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/cholesterol"/>
@@ -568,6 +680,11 @@
    <alias value="Organiser"/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.result"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/triglyceride"/>
@@ -595,6 +712,11 @@
    <alias value="Organiser"/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.result"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/hdlcholesterol"/>
@@ -622,6 +744,11 @@
    <alias value="Organiser"/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.result"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/ldlcholesterol"/>
@@ -639,6 +766,11 @@
    <comments value="dImagingStudy and ImageObjectStudy and the image element are somewhat overlapping - typically, the list of image references in the image element will also be found in one of the imaging study resources. However each caters to different types of displays for different types of purposes. Neither, either, or both may be provided."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DiagnosticReport.imagingStudy"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/ImagingStudy"/>
@@ -662,6 +794,11 @@
    <alias value="Scans"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DiagnosticReport.image"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="BackboneElement"/>
    </type>
@@ -682,6 +819,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.image.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -699,6 +841,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DiagnosticReport.image.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -717,6 +864,11 @@
    <alias value="modifiers"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DiagnosticReport.image.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -734,6 +886,11 @@
    <requirements value="The provider of the report should make a comment about each image included in the report."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.image.comment"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="string"/>
    </type>
@@ -748,6 +905,11 @@
    <definition value="Reference to the image source."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.image.link"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Media"/>
@@ -767,6 +929,11 @@
    <alias value="Report"/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DiagnosticReport.conclusion"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="string"/>
    </type>
@@ -787,6 +954,11 @@
    <comments value="Not used in this context."/>
    <min value="0"/>
    <max value="0"/>
+   <base>
+    <path value="DiagnosticReport.codedDiagnosis"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -814,6 +986,11 @@
    <requirements value="Gives Laboratory the ability to provide its own fully formatted report for clinical fidelity."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DiagnosticReport.presentedForm"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Attachment"/>
    </type>

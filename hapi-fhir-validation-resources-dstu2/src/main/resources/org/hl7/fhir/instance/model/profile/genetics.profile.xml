@@ -2,6 +2,7 @@
  <id value="genetics"/>
  <url value="http://hl7.org/fhir/StructureDefinition/genetics"/>
  <name value="Standard Profile for Genetics"/>
+ <status value="draft"/>
  <publisher value="Health Level Seven International (Clinical Genomics)"/>
  <contact>
   <telecom>
@@ -9,9 +10,10 @@
    <value value="http://www.hl7.org/Special/committees/clingenomics"/>
   </telecom>
  </contact>
- <description value="Describes how the observation resource is used to report structured genetic test results"/>
- <status value="draft"/>
  <date value="2015-03-18"/>
+ <description value="Describes how the observation resource is used to report structured genetic test results"/>
+ <kind value="resource"/>
+ <constrainedType value="Observation"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/Observation"/>
  <snapshot>
@@ -27,6 +29,11 @@
    <alias value="Tests"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Observation"/>
    </type>
@@ -62,6 +69,11 @@
    <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -73,6 +85,11 @@
    <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.meta"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Meta"/>
    </type>
@@ -85,6 +102,11 @@
    <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.implicitRules"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="uri"/>
    </type>
@@ -98,6 +120,11 @@
    <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.language"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -118,6 +145,11 @@
    <alias value="display"/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.text"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Narrative"/>
    </type>
@@ -137,6 +169,11 @@
    <alias value="contained resources"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.contained"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Resource"/>
    </type>
@@ -159,6 +196,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -174,6 +216,11 @@
    <definition value="The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsGenomeBuild"/>
@@ -186,6 +233,11 @@
    <definition value="The chromosome containing the genetic finding. The value set binds to Gene code system."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsChromosome"/>
@@ -198,6 +250,11 @@
    <definition value="Inclusive 0-based nucleotide position for start of genomic finding on the positive (+) genomics strand."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsGenomicStart"/>
@@ -210,6 +267,11 @@
    <definition value="Exclusive 0-based nucleotide position for end of genomic finding on the positive (+) genomic strand."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsGenomicStop"/>
@@ -222,6 +284,11 @@
    <definition value="Nucleotide(s) from genomic start to genomic stop on the positive (+) strand of the genomic reference sequence."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsReferenceAllele"/>
@@ -234,6 +301,11 @@
    <definition value="Oserved nucleotides from genomic start to genomic stop on the positive (+) genomic strand."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsObservedAllele"/>
@@ -246,6 +318,11 @@
    <definition value="Reference identifier for cDNA transcript, with version, from NCBI's RefSeq or ENSEMBL."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsTranscriptReferenceSequenceId"/>
@@ -258,6 +335,11 @@
    <definition value="Reference identifier for protein transcript, with version, from NCBI's RefSeq or ENSEMBL."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsProteinReferenceSequenceId"/>
@@ -270,6 +352,11 @@
    <definition value="Extended CIGAR string for aligning the sequence with reference bases. See detailed documentation [here](http://support.illumina.com/help/SequencingAnalysisWorkflow/Content/Vault/Informatics/Sequencing_Analysis/CASAVA/swSEQ_mCA_ExtendedCIGARFormat.htm)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsCIGAR"/>
@@ -282,6 +369,11 @@
    <definition value="cDNA variant following HGVS nomenclature on the given TranscriptReferenceSequenceId."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsDNASequenceVariation"/>
@@ -294,6 +386,11 @@
    <definition value="Identifier for variant.  If a germline variant, ClinVar or dbSNP identifier should be used.  If a somatic variant, COSMIC identifier should be used, unless in ClinVar then either maybe used. Need to provide the code system used (ClinVar, dbSNP, COSMIC)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsVariationId"/>
@@ -306,6 +403,11 @@
    <definition value="Codified type for associated DNA Sequence Variation.  DNA Sequence Variations use the HGVS notation which implies the DNA Sequence Variation Type, but the concurrent use of this code will allow a standard and explicit type for technical and display convenience. LOINC Answer List values 48019-4 or Sequence Ontology vaues."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsDNASequenceVariationType"/>
@@ -318,6 +420,11 @@
    <definition value="Protein variant following HGVS nomenclature on the given ProteinReferenceSequenceId."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsAminoAcidChange"/>
@@ -330,6 +437,11 @@
    <definition value="Type of variation expressed using Sequence Ontology or LOINC answer list 48006-1."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsAminoAcidChangeType"/>
@@ -342,6 +454,11 @@
    <definition value="Gene region in which the sequence is found. Currently values from HGNC are supported. Other systems or genes not defined in HGNC (e.g. BCR-ABL fusion gene) can be added by using local extension."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsGene"/>
@@ -354,6 +471,11 @@
    <definition value="Details of exonic location of variant (e.g. Exon 1)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsDNARegionName"/>
@@ -366,6 +488,11 @@
    <definition value="Common name for variant or gene allele."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsAlleleName"/>
@@ -378,6 +505,11 @@
    <definition value="Genomic source class means category of source of tissue sample used to determine the sequence. Here is the loinc answer List for Allelic state:1. Germline LA6683-2; 2. Somatic LA6684-0; 3. Prenatal LA6685-7; 4. Likely Germline LA18194-3; 5. Likely Somatic LA18195-0;  6. Likely Prenatal LA18196-8; 7. Unknown Genomic Origin LA18197-6."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsGenomicSourceClass"/>
@@ -390,6 +522,11 @@
    <definition value="supports testing of human, viruses, and bacteria."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsSpecies"/>
@@ -402,6 +539,11 @@
    <definition value="Results from genetic profile (e.g. One gene mutation with one type variation observed in a patient). It makes genetic profile support various genetic test(e.g. A genetic test reporting a list of gene mutations)."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsResult"/>
@@ -414,6 +556,11 @@
    <definition value="Used to denote condition context for genetic testing, which may influence reported variants and interpretation for large genomic testing panels e.g. lung cancer or familial breast cancer."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsAssessedCondition"/>
@@ -426,6 +573,11 @@
    <definition value="The level of occurrence of a single DNA Sequence Variation within a set of chromosomes. Heterozygous indicates the DNA Sequence Variation is only present in one of the two genes contained in homologous chromosomes. Homozygous indicates the DNA Sequence Variation is present in both genes contained in homologous chromosomes. Hemizygous indicates the DNA Sequence Variation exists in the only single copy of a gene in a non- homologous chromosome (the male X and Y chromosome are non-homologous). Hemiplasmic indicates that the DNA Sequence Variation is present in some but not all of the copies of mitochondrial DNA. Homoplasmic indicates that the DNA Sequence Variation is present in all of the copies of mitochondrial DNA. Here is the loinc answer List for Allelic state:1. Heteroplasmic (LA6703-8); 2. Homoplasmic (LA6704-6);  3. Homozygous (LA6705-3); 4. Heterozygous (LA6706-1); 5. Hemizygous (LA6707-9)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsAllelicState"/>
@@ -438,6 +590,11 @@
    <definition value="Allele frequencies."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsAllelicFrequency"/>
@@ -450,6 +607,11 @@
    <definition value="Values: amplificaiton/deletion/LOH."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsCopyNumberEvent"/>
@@ -462,6 +624,11 @@
    <definition value="Coverage (read depth or depth) is the average number of reads representing a given nucleotide in the reconstructed sequence."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/geneticsReadCoverage"/>
@@ -476,6 +643,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -492,6 +664,11 @@
    <requirements value="Allows observations to be distinguished and referenced."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.identifier"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Identifier"/>
    </type>
@@ -518,6 +695,11 @@
    <requirements value="Need to track the status of individual results - some results are finalised before the whole report is finalised."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.status"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -550,6 +732,11 @@
    <comments value="The level of granularity is defined by the category concepts in the value set.   More fine-grained filtering can be performed using the metadata and/or terminology hierarchy in Observation.code."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.category"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -576,6 +763,11 @@
    <requirements value="Knowing what kind of observation is being made is essential to understanding the observation."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.code"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -608,6 +800,11 @@
    <requirements value="Observations have no value if you don't know who or what they're about."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.subject"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
@@ -645,6 +842,11 @@
    <requirements value="For some observations it may be important to know the link between an observation and a particular encounter."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.encounter"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Encounter"/>
@@ -670,6 +872,11 @@
    <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.effective[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="dateTime"/>
    </type>
@@ -697,6 +904,11 @@
    <comments value="Updated when the result is updated."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.issued"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="instant"/>
    </type>
@@ -721,6 +933,11 @@
    <requirements value="May give a degree of confidence in the observation and also indicates where follow-up questions should be directed."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.performer"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
@@ -759,6 +976,11 @@
    <requirements value="An observation exists to have a value, though it may not if it is in error, or it represents a group of observations."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.value[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Quantity"/>
    </type>
@@ -807,6 +1029,11 @@
    <requirements value="For many results it is necessary to handle exceptional values in measurements."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.dataAbsentReason"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -835,6 +1062,11 @@
    <alias value="Abnormal Flag"/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.interpretation"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -861,6 +1093,11 @@
    <requirements value="Need to be able to provide free text additional information."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.comments"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="string"/>
    </type>
@@ -881,6 +1118,11 @@
    <requirements value="Knowing where the observation is made is important for tracking if multiple sites are possible."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.bodySite"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -908,6 +1150,11 @@
    <requirements value="In some cases, method can impact results and is thus for determining whether results can be compared or determining significance of results."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.method"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -934,6 +1181,11 @@
    <comments value="Observations are not made on specimens themselves; they are made on a subject, but usually by the means of a specimen. Note that although specimens are often involved, they are not always tracked and reported explicitly. Also note that observation resources may be used in contexts that track the specimen explicitly (e.g. Diagnostic Report)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.specimen"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Specimen"/>
@@ -954,6 +1206,11 @@
    <comments value="An extension should be used if further typing of the device is needed.  Devices used to support obtaining an observation can be represented using either extension or through the Observation.related element."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.device"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
@@ -980,6 +1237,11 @@
    <requirements value="Knowing what values are considered &quot;normal&quot; can help evaluate the significance of a particular result. Need to be able to provide multiple reference ranges for different contexts."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.referenceRange"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="BackboneElement"/>
    </type>
@@ -1005,6 +1267,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.referenceRange.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -1022,6 +1289,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.referenceRange.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -1040,6 +1312,11 @@
    <alias value="modifiers"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.referenceRange.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -1055,6 +1332,11 @@
    <definition value="The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - &lt;=9).   If the low bound is omitted,  it is assumed to be meaningless. (e.g. reference range is &lt;=2.3)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.referenceRange.low"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Quantity"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
@@ -1075,6 +1357,11 @@
    <definition value="The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - &lt;=9).   If the high bound is omitted,  it is assumed to be meaningless. (e.g. reference range is >= 2.3)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.referenceRange.high"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Quantity"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
@@ -1097,6 +1384,11 @@
    <requirements value="Need to be able to say what kind of reference range this is - normal, recommended, therapeutic, or perhaps what state this reference range applies to (i.e. age, hormonal cycles, etc.)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.referenceRange.meaning"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -1123,6 +1415,11 @@
    <requirements value="Some analytes vary greatly over age."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.referenceRange.age"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Range"/>
    </type>
@@ -1137,6 +1434,11 @@
    <definition value="Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of &quot;Negative&quot; or a list or table of 'normals'."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.referenceRange.text"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="string"/>
    </type>
@@ -1157,6 +1459,11 @@
    <requirements value="Normally, an observation will have either a value or a set of related observations. A few observations (e.g. apgar store) may have both a value and a set of related observations or sometimes QuestionnaireResponse  from which the measure is derived."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.related"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="BackboneElement"/>
    </type>
@@ -1177,6 +1484,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.related.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -1194,6 +1506,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.related.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -1212,6 +1529,11 @@
    <alias value="modifiers"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.related.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -1229,6 +1551,11 @@
    <requirements value="A relationship type SHOULD be provided."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.related.type"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -1254,6 +1581,11 @@
    <definition value="A reference to the observation or questionnaireanswer that is related to this observation."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.related.target"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Observation"/>
@@ -1275,6 +1607,11 @@
    <requirements value="Component observations share the same attributes in the Observation resource as the primary observation and are always treated a part of a single observation ( they are not seperable).   However, the reference range for the primary observation value is not inherited by the component values and is required when appropriate for each component observation."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.component"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="BackboneElement"/>
    </type>
@@ -1291,6 +1628,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.component.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -1308,6 +1650,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.component.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -1326,6 +1673,11 @@
    <alias value="modifiers"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.component.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -1342,6 +1694,11 @@
    <requirements value="Knowing what kind of observation is being made is essential to understanding the observation."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.component.code"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -1375,6 +1732,11 @@
    <requirements value="An observation exists to have a value, though it may not if it is in error, or it represents a group of observations."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.component.value[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Quantity"/>
    </type>
@@ -1423,6 +1785,11 @@
    <requirements value="For many results it is necessary to handle exceptional values in measurements."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Observation.component.dataAbsentReason"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -1451,6 +1818,11 @@
    <requirements value="Knowing what values are considered &quot;normal&quot; can help evaluate the significance of a particular result. Need to be able to provide multiple reference ranges for different contexts."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Observation.component.referenceRange"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <nameReference value="referenceRange"/>
    <mapping>
     <identity value="v2"/>

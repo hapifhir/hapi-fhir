@@ -26,13 +26,13 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -54,7 +54,7 @@ public class FhirResourceDaoDstu1<T extends IResource> extends BaseHapiFhirResou
 	}
 
 	@Override
-	public MethodOutcome validate(T theResource, IdDt theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile) {
+	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile) {
 		throw new UnsupportedOperationException();
 	}
 

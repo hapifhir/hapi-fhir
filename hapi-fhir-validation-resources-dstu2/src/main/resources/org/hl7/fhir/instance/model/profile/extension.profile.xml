@@ -2,6 +2,7 @@
  <id value="Extension"/>
  <url value="http://hl7.org/fhir/StructureDefinition/Extension"/>
  <name value="Extension"/>
+ <status value="draft"/>
  <publisher value="HL7 FHIR Standard"/>
  <contact>
   <telecom>
@@ -9,15 +10,15 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
+ <date value="2015-09-01T19:08:30-04:00"/>
  <description value="Base StructureDefinition for Extension Type"/>
  <requirements value="The ability to add extensions in a structured way is what keeps FHIR resources simple."/>
- <status value="draft"/>
- <date value="2015-09-01T19:08:30-04:00"/>
  <mapping>
   <identity value="rim"/>
   <uri value="http://hl7.org/v3"/>
   <name value="RIM"/>
  </mapping>
+ <kind value="datatype"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
  <snapshot>

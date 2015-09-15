@@ -8,6 +8,7 @@
  </extension>
  <url value="http://hl7.org/fhir/StructureDefinition/ImplementationGuide"/>
  <name value="ImplementationGuide"/>
+ <status value="draft"/>
  <publisher value="Health Level Seven International (FHIR Infrastructure)"/>
  <contact>
   <telecom>
@@ -21,10 +22,9 @@
    <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
   </telecom>
  </contact>
+ <date value="2015-09-01T19:08:30-04:00"/>
  <description value="Base StructureDefinition for ImplementationGuide Resource"/>
  <requirements value="An implementation guide is able to define default profiles that must apply to any use of a resource, so validation services may need to take one or more implementation guide resources when validating."/>
- <status value="draft"/>
- <date value="2015-09-01T19:08:30-04:00"/>
  <mapping>
   <identity value="rim"/>
   <uri value="http://hl7.org/v3"/>
@@ -35,6 +35,7 @@
   <uri value="http://hl7.org/fhir/w5"/>
   <name value="W5 Mapping"/>
  </mapping>
+ <kind value="resource"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
  <snapshot>

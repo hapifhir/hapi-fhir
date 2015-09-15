@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -138,6 +137,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Not supported in DSTU1!
 	 */
-	MethodOutcome validate(T theResource, IdDt theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile);
+	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile);
 
 }

@@ -8,6 +8,7 @@
  </extension>
  <url value="http://hl7.org/fhir/StructureDefinition/QuestionnaireAnswers"/>
  <name value="QuestionnaireAnswers"/>
+ <status value="draft"/>
  <publisher value="Health Level Seven International (Patient Care)"/>
  <contact>
   <telecom>
@@ -21,9 +22,8 @@
    <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
   </telecom>
  </contact>
- <description value="Base StructureDefinition for QuestionnaireAnswers Resource"/>
- <status value="draft"/>
  <date value="2015-07-23T16:50:38-04:00"/>
+ <description value="Base StructureDefinition for QuestionnaireAnswers Resource"/>
  <mapping>
   <identity value="rim"/>
   <uri value="http://hl7.org/v3"/>

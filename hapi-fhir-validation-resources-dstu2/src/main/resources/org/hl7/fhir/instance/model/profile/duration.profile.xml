@@ -2,6 +2,7 @@
  <id value="Duration"/>
  <url value="http://hl7.org/fhir/StructureDefinition/Duration"/>
  <name value="Duration"/>
+ <status value="draft"/>
  <publisher value="HL7 FHIR Standard"/>
  <contact>
   <telecom>
@@ -9,9 +10,10 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <description value="A length of time"/>
- <status value="draft"/>
  <date value="2015-09-01T19:08:30-04:00"/>
+ <description value="A length of time"/>
+ <kind value="datatype"/>
+ <constrainedType value="Quantity"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/Quantity"/>
  <snapshot>
@@ -23,6 +25,11 @@
    <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="Quantity"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Quantity"/>
    </type>
@@ -55,6 +62,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Quantity.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -72,6 +84,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="Quantity.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -88,6 +105,11 @@
    <requirements value="Precision is handled implicitly in almost all cases of measurement."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Quantity.value"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="decimal"/>
    </type>
@@ -109,6 +131,11 @@
    <requirements value="Need a framework for handling measures where the value is &lt;5ug/L or >400mg/L due to the limitations of measuring methodology."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Quantity.comparator"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -138,6 +165,11 @@
    <requirements value="There are many representations for units and in many contexts, particular representations are fixed and required. I.e. mcg for micrograms."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Quantity.unit"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="string"/>
    </type>
@@ -158,6 +190,11 @@
    <requirements value="Need to know the system that defines the coded form of the unit."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Quantity.system"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="uri"/>
    </type>
@@ -180,6 +217,11 @@
    <requirements value="Need a computable form of the units that is fixed across all forms. UCUM provides this for quantities, but SNOMED CT provides many units of interest."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="Quantity.code"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>

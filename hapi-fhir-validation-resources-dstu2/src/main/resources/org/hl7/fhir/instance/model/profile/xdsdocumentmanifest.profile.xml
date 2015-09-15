@@ -2,6 +2,7 @@
  <id value="xdsdocumentmanifest"/>
  <url value="http://hl7.org/fhir/StructureDefinition/xdsdocumentmanifest"/>
  <name value="XDS profile for Document Reference"/>
+ <status value="draft"/>
  <publisher value="HL7"/>
  <contact>
   <telecom>
@@ -9,9 +10,10 @@
    <value value="http://www.hl7.org"/>
   </telecom>
  </contact>
- <description value="SubmissionSet"/>
- <status value="draft"/>
  <date value="2012-06-24"/>
+ <description value="SubmissionSet"/>
+ <kind value="resource"/>
+ <constrainedType value="DocumentManifest"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/DocumentManifest"/>
  <snapshot>
@@ -22,6 +24,11 @@
    <definition value="A manifest that defines a set of documents."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentManifest"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="DocumentManifest"/>
    </type>
@@ -42,6 +49,11 @@
    <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -53,6 +65,11 @@
    <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.meta"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Meta"/>
    </type>
@@ -65,6 +82,11 @@
    <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.implicitRules"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="uri"/>
    </type>
@@ -78,6 +100,11 @@
    <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.language"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -98,6 +125,11 @@
    <alias value="display"/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.text"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Narrative"/>
    </type>
@@ -117,6 +149,11 @@
    <alias value="contained resources"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentManifest.contained"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Resource"/>
    </type>
@@ -134,6 +171,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentManifest.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -151,6 +193,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentManifest.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -166,6 +213,11 @@
    <definition value="A single identifier that uniquely identifies this manifest. Principally used to refer to the manifest in non-FHIR contexts."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.masterIdentifier"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Identifier"/>
    </type>
@@ -189,6 +241,11 @@
    <definition value="A globally unique identifier for the SubmissionSet assigned by the creating entity."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.identifier"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Identifier"/>
    </type>
@@ -216,6 +273,11 @@
    <definition value="the subject of care whose longitudinal record is being reflected in this SubmissionSet."/>
    <min value="1"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentManifest.subject"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
@@ -241,6 +303,11 @@
    <comments value="How the recipient receives the document set or is notified of it is up to the implementation. This element is just a statement of intent. If the recipient is a person, and it’s not known whether the person is a patient or a practitioner, RelatedPerson would be the default choice."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentManifest.recipient"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
@@ -273,6 +340,11 @@
    <definition value="The code specifying the type of clinical activity that resulted in placing the documents in this SubmissionSet."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.type"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="CodeableConcept"/>
    </type>
@@ -304,6 +376,11 @@
    <comments value="Not necessarily who did the actual data entry (i.e. typist) or who was the source (informant)."/>
    <min value="1"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentManifest.author"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
@@ -333,6 +410,11 @@
    <comments value="Creation time is used for tracking, organizing versions and searching. This is the creation time of the document set, not the documents on which it is based."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.created"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="dateTime"/>
    </type>
@@ -356,6 +438,11 @@
    <definition value="OID identifying the instance of the creating entity that contributed the SubmissionSet."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.source"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="uri"/>
    </type>
@@ -375,6 +462,11 @@
    <definition value="The lifecycle status of the SubmissionSet."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.status"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="code"/>
    </type>
@@ -408,6 +500,11 @@
    <requirements value="Helps humans to assess whether the document is of interest."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.description"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="string"/>
    </type>
@@ -427,6 +524,11 @@
    <definition value="The list of resources that describe the parts of this document reference. Usually, these would be document references, but direct references to binary attachments and images are also allowed."/>
    <min value="1"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentManifest.content"/>
+    <min value="1"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="BackboneElement"/>
    </type>
@@ -443,6 +545,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.content.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -460,6 +567,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentManifest.content.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -478,6 +590,11 @@
    <alias value="modifiers"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentManifest.content.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -494,6 +611,11 @@
    <comments value="The intended focus of the DocumentManifest is for the reference to target either DocumentReference or Media Resources, and most implementation guides will restrict to these resources. The reference is to any to support EN 13606 usage, where an extract is DocumentManifest that references  List and Composition resources."/>
    <min value="1"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.content.p[x]"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Attachment"/>
    </type>
@@ -518,6 +640,11 @@
    <comments value="May be identifiers or resources that caused the DocumentManifest to be created."/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentManifest.related"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="BackboneElement"/>
    </type>
@@ -534,6 +661,11 @@
    <definition value="unique id for the element within a resource (for internal references)."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.related.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="id"/>
    </type>
@@ -551,6 +683,11 @@
    <alias value="user content"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentManifest.related.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -569,6 +706,11 @@
    <alias value="modifiers"/>
    <min value="0"/>
    <max value="*"/>
+   <base>
+    <path value="DocumentManifest.related.modifierExtension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
    <type>
     <code value="Extension"/>
    </type>
@@ -585,6 +727,11 @@
    <comments value="Order numbers, accession numbers, XDW workflow numbers."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.related.identifier"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Identifier"/>
    </type>
@@ -597,6 +744,11 @@
    <comments value="Order, DiagnosticOrder,  Procedure, EligibilityRequest, etc."/>
    <min value="0"/>
    <max value="1"/>
+   <base>
+    <path value="DocumentManifest.related.ref"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
    <type>
     <code value="Reference"/>
     <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>

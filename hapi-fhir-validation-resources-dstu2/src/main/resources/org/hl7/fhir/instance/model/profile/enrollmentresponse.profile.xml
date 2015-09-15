@@ -8,6 +8,7 @@
  </extension>
  <url value="http://hl7.org/fhir/StructureDefinition/EnrollmentResponse"/>
  <name value="EnrollmentResponse"/>
+ <status value="draft"/>
  <publisher value="Health Level Seven International (Financial Management)"/>
  <contact>
   <telecom>
@@ -21,9 +22,8 @@
    <value value="http://www.hl7.org/Special/committees/fm/index.cfm"/>
   </telecom>
  </contact>
- <description value="Base StructureDefinition for EnrollmentResponse Resource"/>
- <status value="draft"/>
  <date value="2015-09-01T19:08:30-04:00"/>
+ <description value="Base StructureDefinition for EnrollmentResponse Resource"/>
  <mapping>
   <identity value="w5"/>
   <uri value="http://hl7.org/fhir/w5"/>
@@ -39,6 +39,7 @@
   <uri value="http://hl7.org/v3"/>
   <name value="RIM"/>
  </mapping>
+ <kind value="resource"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
  <snapshot>

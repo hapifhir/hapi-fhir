@@ -65,7 +65,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 	"classpath:fhir-jpabase-spring-test-config.xml"})
 @TransactionConfiguration(defaultRollback=false)
 //@formatter:on
-public class BaseJpaDstu2Test extends BaseJpaTest {
+public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 
 	@Autowired
 	protected DaoConfig myDaoConfig;
@@ -133,14 +133,6 @@ public class BaseJpaDstu2Test extends BaseJpaTest {
 	public void beforePurgeDatabase() {
 		final EntityManager entityManager = this.myEntityManager;
 		purgeDatabase(entityManager, myTxManager);
-	}
-
-	/**
-	 * Just so that JUnit doesn't complain about no test methods in this class
-	 */
-	@Test
-	public void doNothing() {
-		// nothing
 	}
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {

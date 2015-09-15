@@ -8,6 +8,7 @@
  </extension>
  <url value="http://hl7.org/fhir/StructureDefinition/Contraindication"/>
  <name value="Contraindication"/>
+ <status value="draft"/>
  <publisher value="Health Level Seven International (Clinical Decision Support)"/>
  <contact>
   <telecom>
@@ -21,9 +22,8 @@
    <value value="http://www.hl7.org/Special/committees/dss/index.cfm"/>
   </telecom>
  </contact>
- <description value="Base StructureDefinition for Contraindication Resource"/>
- <status value="draft"/>
  <date value="2015-08-27T19:45:13-04:00"/>
+ <description value="Base StructureDefinition for Contraindication Resource"/>
  <mapping>
   <identity value="v2"/>
   <uri value="http://hl7.org/v2"/>

@@ -1773,7 +1773,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
                */
               boolean skip = false;
               if (localStack.getParent() != null && localStack.getParent() != null) {
-                String parentType = determineType(localStack.getParent().getDefinition(), "", -1, -1, errors, stack, profile);
+                String parentType = determineType(localStack.getParent().getDefinition(), localStack.getParent().getElement().getName(), -1, -1, errors, stack, profile);
                 if ("CodeableConcept".equals(parentType)) {
                   skip = true;
                 }

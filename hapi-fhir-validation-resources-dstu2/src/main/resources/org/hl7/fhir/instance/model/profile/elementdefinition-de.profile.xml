@@ -1,0 +1,2633 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+ <id value="elementdefinition-de"/>
+ <url value="http://hl7.org/fhir/StructureDefinition/elementdefinition-de"/>
+ <name value="DataElement constraint on ElementDefinition data type"/>
+ <status value="draft"/>
+ <publisher value="Health Level Seven International (Orders and Observations)"/>
+ <contact>
+  <telecom>
+   <system value="other"/>
+   <value value="http://hl7.org/special/committees/FHIR"/>
+  </telecom>
+ </contact>
+ <date value="2015-02-28"/>
+ <description value="Identifies how the ElementDefinition data type is used when it appears within a data element"/>
+ <kind value="resource"/>
+ <constrainedType value="ElementDefinition"/>
+ <abstract value="false"/>
+ <base value="http://hl7.org/fhir/StructureDefinition/ElementDefinition"/>
+ <snapshot>
+  <element>
+   <path value="ElementDefinition"/>
+   <name value="elementdefinition-de"/>
+   <short value="Definition of an element in a resource or extension"/>
+   <definition value="Captures constraints on each element within the resource, profile, or extension."/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="ElementDefinition"/>
+   </type>
+   <constraint>
+    <key value="eld-2"/>
+    <severity value="error"/>
+    <human value="Min &lt;= Max"/>
+    <xpath value="not(exists(f:min)) or not(exists(f:max)) or (not(f:max/@value) and not(f:min/@value)) or (f:max/@value = '*') or (f:max/@value >= f:min/@value)"/>
+   </constraint>
+   <constraint>
+    <key value="eld-5"/>
+    <severity value="error"/>
+    <human value="Either a namereference or a fixed value (but not both) is permitted"/>
+    <xpath value="not(exists(f:nameReference) and exists(f:*[starts-with(local-name(.), 'value')]))"/>
+   </constraint>
+   <constraint>
+    <key value="eld-7"/>
+    <severity value="error"/>
+    <human value="Pattern may only be specified if there is one type"/>
+    <xpath value="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or (count(f:type)=1 )"/>
+   </constraint>
+   <constraint>
+    <key value="eld-6"/>
+    <severity value="error"/>
+    <human value="Fixed value may only be specified if there is one type"/>
+    <xpath value="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or (count(f:type)=1 )"/>
+   </constraint>
+   <constraint>
+    <key value="eld-11"/>
+    <severity value="error"/>
+    <human value="Binding can only be present for coded elements, string, and uri"/>
+    <xpath value="not(exists(f:binding)) or (count(f:type/f:code) = 0) or  f:type/f:code/@value=('code','Coding','CodeableConcept','Quantity','Extension', 'string', 'uri')"/>
+   </constraint>
+   <constraint>
+    <key value="eld-8"/>
+    <severity value="error"/>
+    <human value="Pattern and value are mutually exclusive"/>
+    <xpath value="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'value')]))"/>
+   </constraint>
+   <constraint>
+    <key value="eld-14"/>
+    <severity value="error"/>
+    <human value="Constraints must be unique by key"/>
+    <xpath value="count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))"/>
+   </constraint>
+   <constraint>
+    <key value="eld-13"/>
+    <severity value="error"/>
+    <human value="Types must be unique by the combination of code and profile"/>
+    <xpath value="not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value and f:profile/@value = $type/f:profile/@value]))"/>
+   </constraint>
+   <constraint>
+    <key value="eld-15"/>
+    <severity value="error"/>
+    <human value="default value and meaningWhenMissing are mutually exclusive"/>
+    <xpath value="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="dex"/>
+    <map value="RetrieveMetadata response"/>
+   </mapping>
+   <mapping>
+    <identity value="v2"/>
+    <map value="OM1"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Observation[classCode=OBS, moodCode=DEFN]"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Data_Element"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.extension"/>
+   <slicing>
+    <discriminator value="url"/>
+    <ordered value="false"/>
+    <rules value="open"/>
+   </slicing>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.extension"/>
+   <name value="Question"/>
+   <short value="Extension"/>
+   <definition value="An Extension"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/elementdefinition-question"/>
+   </type>
+  </element>
+  <element>
+   <path value="ElementDefinition.extension"/>
+   <name value="AllowedUnits"/>
+   <short value="Extension"/>
+   <definition value="An Extension"/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits"/>
+   </type>
+  </element>
+  <element>
+   <path value="ElementDefinition.path"/>
+   <short value="The path of the element (see the Detailed Descriptions)"/>
+   <definition value="The path identifies the element and is expressed as a &quot;.&quot;-separated list of ancestor elements, beginning with the name of the resource or extension."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.path"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Name, Identifier &amp; Context"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.representation"/>
+   <short value="How this element is represented in instances"/>
+   <definition value="Codes that define how this element is represented in instances, when the deviation varies from the normal case."/>
+   <comments value="This is rarely used except for special cases where the representation deviates from the normal, which is done only very reluctantly, and can only be done in the base standard (and profiles must reproduce what the base standard does)."/>
+   <min value="0"/>
+   <max value="0"/>
+   <base>
+    <path value="ElementDefinition.representation"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="How a property is represented on the wire"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/property-representation"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.name"/>
+   <short value="Name for this particular element definition (reference target)"/>
+   <definition value="The name of this element definition (to refer to it from other element definitions using ElementDefinition.nameReference). This is a unique name referring to a specific set of constraints applied to this element. One use of this is to provide a name to different slices of the same element."/>
+   <comments value="The name SHALL be unique within the structure within the context of the constrained resource element.  (Though to avoid confusion, uniqueness across all elements is recommended.)."/>
+   <requirements value="Allows referencing a defined element.  May also be used for code generation purposes."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.name"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.label"/>
+   <short value="Name for element to display with or prompt for element"/>
+   <definition value="The text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form."/>
+   <comments value="Question and label serve similar purposes in they both can be used to prompt for capturing a data element.  Whether the question form or label form should be used will depend on the type of instrument being used to capture the information."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.label"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./code/display"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.code"/>
+   <short value="Defining code"/>
+   <definition value="A code that provides the meaning for the element according to a particular terminology."/>
+   <comments value="The data element definition and other constraints SHALL be a proper constraint on the meaning (as defined in the code system, including relationships) of any code listed here.  Where multiple codes exist in a terminology that could correspond to the data element, the most granular code(s) should be selected, so long as they are not more restrictive than the data element itself."/>
+   <requirements value="Links the meaning of an element to an external terminology."/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.code"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="OM1.7"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./code (root or translation)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="(Data_Element).data_element_concept.identifier"/>
+   </mapping>
+   <mapping>
+    <identity value="loinc"/>
+    <map value="LOINC_NUM"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.slicing"/>
+   <short value="This element is sliced - slices follow"/>
+   <definition value="Indicates that the element is sliced into a set of alternative definitions (i.e. in a structure definition, there are multiple different constraints on a single element in the base resource). Slicing can be used in any resource that has cardinality ..* on the base resource, or any resource with a choice of types. The set of slices is any elements that come after this in the element sequence that have the same path, until a shorter path occurs (the shorter path terminates the set)."/>
+   <comments value="The first element in the sequence, the one that carries the slicing, is the unconstrained element, for reference purposes . This may include the unconstrained children."/>
+   <min value="0"/>
+   <max value="0"/>
+   <base>
+    <path value="ElementDefinition.slicing"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="Element"/>
+   </type>
+   <constraint>
+    <key value="eld-1"/>
+    <severity value="error"/>
+    <human value="If there are no discriminators, there must be a definition"/>
+    <xpath value="(f:discriminator) or (f:definition)"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.slicing.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.slicing.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.slicing.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.slicing.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.slicing.discriminator"/>
+   <short value="Element values that used to distinguish the slices"/>
+   <definition value="Designates which child elements are used to discriminate between the slices when processing an instance. If one or more discriminators are provided, the value of the child elements in the instance data SHALL completely distinguish which slice the element in the resource matches based on the allowed values for those elements in each of the slices."/>
+   <comments value="If there is no discriminator, the content is hard to process, so this should be avoided. If the base element has a cardinality of ..1, and there is a choice of types, the discriminator most be &quot;@type&quot;."/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.slicing.discriminator"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.slicing.description"/>
+   <short value="Text description of how slicing works (or not)"/>
+   <definition value="A human-readable text description of how the slicing works. If there is no discriminator, this is required to be present to provide whatever information is possible about how the slices can be differentiated."/>
+   <comments value="If it's really not possible to differentiate them, the design should be re-evaluated to make te content usable."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.slicing.description"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="eld-1"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.slicing.ordered"/>
+   <short value="If elements must be in same order as slices"/>
+   <definition value="If the matching elements have to occur in the same order as defined in the profile."/>
+   <comments value="Order should only be required when it is a pressing concern for presentation. Profile authors should consider making the order a feature of the rules about the narrative, not the rules about the data - requiring ordered data makes the profile much less re-usable."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.slicing.ordered"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.slicing.rules"/>
+   <short value="closed | open | openAtEnd"/>
+   <definition value="Whether additional slices are allowed or not. When the slices are ordered, profile authors can also say that additional slices are only allowed at the end."/>
+   <comments value="Allowing additional elements makes for a much for flexible template - it's open for use in wider contexts, but also means that the content of the resource is not closed, and applications have to decide how to handle content not described by the profile."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.slicing.rules"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="How slices are interpreted when evaluating an instance"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/resource-slicing-rules"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.short"/>
+   <short value="Concise definition for xml presentation"/>
+   <definition value="A concise description of what this element means (e.g. for use in auto-generated summaries)."/>
+   <comments value="May change the term to provide language more appropriate to the context of the profile or to reflect slicing."/>
+   <min value="0"/>
+   <max value="0"/>
+   <base>
+    <path value="ElementDefinition.short"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.definition"/>
+   <short value="Full formal definition as narrative text"/>
+   <definition value="Provides a complete explanation of the meaning of the data element for human readability.  For the case of elements derived from existing elements (e.g. constraints), the definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource."/>
+   <comments value="It is easy for a different definition to change the meaning of an element and this can have nasty downstream consequences. Please be careful when providing definitions."/>
+   <requirements value="To allow a user to state the usage of an element in a particular context."/>
+   <alias value="Description"/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.definition"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="markdown"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="OM1.6, OM1.41"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./text"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="(Designatable_Item).definition.text  acceptability=preferred in default context"/>
+   </mapping>
+   <mapping>
+    <identity value="loinc"/>
+    <map value="TERM DEFINITION/DESCRIPTION(S)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.comments"/>
+   <short value="Comments about the use of this element"/>
+   <definition value="Explanatory notes and implementation guidance about the data element, including notes about how to use the data properly, exceptions to proper use, etc."/>
+   <comments value="If it is possible to capture usage rules using constraints, that mechanism should be used in preference to this element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.comments"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="markdown"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="NTE, OM.32, OM1.33, OM1.39"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./inboundRelationship[typeCode=SUBJ]/source[classCode=LIST, moodCode=EVN]/code"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="(Administered_Item).explanatory_comment"/>
+   </mapping>
+   <mapping>
+    <identity value="loinc"/>
+    <map value="COMMENTS"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.requirements"/>
+   <short value="Why is this needed?"/>
+   <definition value="This element is for traceability of why the element was created and why the constraints exist as they do. This may be used to point to source materials or specifications that drove the structure of this element."/>
+   <comments value="This element does not describe the usage of the element (that's done in comments), rather it's for traceability of *why* the element is either needed or why the constraints exist as they do.  This may be used to point to source materials or specifications that drove the structure of this data element."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.requirements"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="markdown"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="./inboundRelationship[typeCode=META]/source[classCode=ACT, moodCode=EVN, isCriterionInd=true]/reasonCode/originalText"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="(Registered_item).document_reference[document_type=requirements].notation"/>
+   </mapping>
+   <mapping>
+    <identity value="loinc"/>
+    <map value="R/O/C"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.alias"/>
+   <short value="Other names"/>
+   <definition value="Identifies additional names by which this element might also be known."/>
+   <requirements value="Allows for better easier recognition of the element by multiple communities, including international communities."/>
+   <alias value="synonym"/>
+   <alias value="other name"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.alias"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="OM1.8, OM1.52"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="Not currently expressible"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="(Designatable_Item).designation.sign  acceptability!=preferred or context is other than default"/>
+   </mapping>
+   <mapping>
+    <identity value="loinc"/>
+    <map value="RELATED NAMES (only some of these apply)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.min"/>
+   <short value="Minimum Cardinality"/>
+   <definition value="The minimum number of times this element SHALL appear in the instance."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.min"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="integer"/>
+   </type>
+   <condition value="eld-2"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Minimum  size of  data element  values?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.max"/>
+   <short value="Maximum Cardinality (a number or *)"/>
+   <definition value="The maximum number of times this element is permitted to appear in the instance."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.max"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="eld-3"/>
+   <condition value="eld-2"/>
+   <constraint>
+    <key value="eld-3"/>
+    <severity value="error"/>
+    <human value="Max SHALL be a number or &quot;*&quot;"/>
+    <xpath value="@value='*' or (normalize-space(@value)!='' and normalize-space(translate(@value, '0123456789',''))='')"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="OMC.10"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Maximum  size of  data element  values?"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.base"/>
+   <short value="Base definition information for tools"/>
+   <definition value="Information about the base definition of the element, provided to make it unncessary for tools to trace the derviation of the element through the derived and related profiles. This information is only provided where the element definition represents a constraint on another element definition, and must be present if there is a base element definition."/>
+   <comments value="The base information does not carry any information that could not be determined from the path and related profiles, but making this determiniation requires both that the related profiles are available, and that the algorithm to determine them be available. So they are denormalised into this location for tooling convenience, and to ensure that the base information is available without dependencies."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.base"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="Element"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.base.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.base.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.base.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.base.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.base.path"/>
+   <short value="Path that identifies the base element"/>
+   <definition value="The Path that identifies the base element - this matches the ElementDefinition.path for that element. Across FHIR, there is only one base definition of any element - that is, an element definition on a [[[StructureDefinition]]] without a StructureDefinition.base."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.base.path"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.base.min"/>
+   <short value="Min cardinality of the base element"/>
+   <definition value="Minimum cardinality of the base element identified by the path."/>
+   <comments value="This is provided for consistency with max, and may affect code generation of mandatory elements of the base resource are generated differently (some reference implementations have done this)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.base.min"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="integer"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.base.max"/>
+   <short value="Max cardinality of the base element"/>
+   <definition value="Maximum cardinality of the base element identified by the path."/>
+   <comments value="This is provided to code generation, since the wire representation in JSON differs depending on whether the base element has max > 1. Also, some forms of code generation may differ."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.base.max"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+    <valueString value="TypeRef"/>
+   </extension>
+   <path value="ElementDefinition.type"/>
+   <short value="Data type and Profile for this element"/>
+   <definition value="The data type or resource that the value of this element is permitted to be."/>
+   <comments value="The Type of the element can be left blank, in which case the type is inherited from the resource. The type can only be listed in this field if it is an allowed option in the base resource."/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.type"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Element"/>
+   </type>
+   <condition value="eld-13"/>
+   <constraint>
+    <key value="eld-4"/>
+    <severity value="error"/>
+    <human value="Aggregation may only be specified if one of the allowed types for the element is a resource"/>
+    <xpath value="not(exists(f:aggregation)) or exists(f:code[@value = 'Reference'])"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="dex"/>
+    <map value="valueDomain.dataType"/>
+   </mapping>
+   <mapping>
+    <identity value="v2"/>
+    <map value="OM1.3, OMC.9"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value=".domain.data+Q14type"/>
+   </mapping>
+   <mapping>
+    <identity value="loinc"/>
+    <map value="HL7_V2_DATATYPE (translation required), HL7_V3_DATATYPE (translation required)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.type.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.type.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.type.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.type.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.type.code"/>
+   <short value="Name of Data type or Resource"/>
+   <definition value="Name of Data type or Resource that is a(or the) type used for this element."/>
+   <comments value="If the element is a reference to another resource, this element contains &quot;Reference&quot;, and the profile element refers to the profile of the allowed target of the resource, which may be a reference to the general definition of a resource (e.g. http://hl7.org/fhir/StructureDefinition/Patient). There would be one pair of type/code for each allowed target resource type."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.type.code"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Either a resource or a data type"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/defined-types"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="OM1.3"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value=".domain.data+Q14type"/>
+   </mapping>
+   <mapping>
+    <identity value="loinc"/>
+    <map value="HL7_V2_DATATYPE (translation required), HL7_V3_DATATYPE (translation required)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.type.profile"/>
+   <short value="Profile (StructureDefinition) to apply (or IG)"/>
+   <definition value="Identifies a profile structure or implementation Guide that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile. When more than one profile is specified, the content must conform to all of them. When an implementation guide is specified, the resource SHALL conform to at least one profile defined in the implementation guide."/>
+   <min value="0"/>
+   <max value="0"/>
+   <base>
+    <path value="ElementDefinition.type.profile"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="uri"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.type.aggregation"/>
+   <short value="contained | referenced | bundled - how aggregated"/>
+   <definition value="If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle."/>
+   <min value="0"/>
+   <max value="0"/>
+   <base>
+    <path value="ElementDefinition.type.aggregation"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="code"/>
+   </type>
+   <condition value="eld-4"/>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="How resource references can be aggregated"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/resource-aggregation-mode"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.nameReference"/>
+   <short value="To another element constraint (by element.name)"/>
+   <definition value="Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element."/>
+   <comments value="If child components of this element are defined, they act as constraints on the referenced slice."/>
+   <min value="0"/>
+   <max value="0"/>
+   <base>
+    <path value="ElementDefinition.nameReference"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="eld-5"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.defaultValue[x]"/>
+   <short value="Specified value it missing from instance"/>
+   <definition value="The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false')."/>
+   <comments value="Default values can only be specified on a resource, data type, or extension definition, and never in a profile that applies to one of these. Specifying a default value means that the property can never been unknown - it must always have a value. Further, the default value can never be changed. For these reasons, default values are (and should be) used extremely sparingly.   This element should only be used on child elements of complex data elements."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.defaultValue[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <type>
+    <code value="integer"/>
+   </type>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <type>
+    <code value="base64Binary"/>
+   </type>
+   <type>
+    <code value="instant"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="date"/>
+   </type>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <type>
+    <code value="time"/>
+   </type>
+   <type>
+    <code value="code"/>
+   </type>
+   <type>
+    <code value="oid"/>
+   </type>
+   <type>
+    <code value="id"/>
+   </type>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <type>
+    <code value="markdown"/>
+   </type>
+   <type>
+    <code value="Annotation"/>
+   </type>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <type>
+    <code value="Quantity"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="Period"/>
+   </type>
+   <type>
+    <code value="Ratio"/>
+   </type>
+   <type>
+    <code value="SampledData"/>
+   </type>
+   <type>
+    <code value="Signature"/>
+   </type>
+   <type>
+    <code value="HumanName"/>
+   </type>
+   <type>
+    <code value="Address"/>
+   </type>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <type>
+    <code value="Timing"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+   </type>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <condition value="eld-15"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.meaningWhenMissing"/>
+   <short value="Implicit meaning when this element is missing"/>
+   <definition value="The Implicit meaning that is to be understood when this element is missing (e.g. 'when this element is missing, the period is ongoing'."/>
+   <comments value="Implicit meanings for missing values can only be specified on a resource, data type, or extension definition, and never in a profile that applies to one of these. An implicit meaning for a missing value can never be changed, and specifying one has the consequence that constraining its use in profiles eliminates use cases as possibilities, not merely moving them out of scope.   This element should only be used on child elements of complex data elements."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.meaningWhenMissing"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="markdown"/>
+   </type>
+   <condition value="eld-15"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.fixed[x]"/>
+   <short value="Value must be exactly this"/>
+   <definition value="Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-signficant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing."/>
+   <comments value="This is not recommended for Coding and CodeableConcept since these often have highly contextual properties such as version or display."/>
+   <min value="0"/>
+   <max value="0"/>
+   <base>
+    <path value="ElementDefinition.fixed[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <type>
+    <code value="integer"/>
+   </type>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <type>
+    <code value="base64Binary"/>
+   </type>
+   <type>
+    <code value="instant"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="date"/>
+   </type>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <type>
+    <code value="time"/>
+   </type>
+   <type>
+    <code value="code"/>
+   </type>
+   <type>
+    <code value="oid"/>
+   </type>
+   <type>
+    <code value="id"/>
+   </type>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <type>
+    <code value="markdown"/>
+   </type>
+   <type>
+    <code value="Annotation"/>
+   </type>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <type>
+    <code value="Quantity"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="Period"/>
+   </type>
+   <type>
+    <code value="Ratio"/>
+   </type>
+   <type>
+    <code value="SampledData"/>
+   </type>
+   <type>
+    <code value="Signature"/>
+   </type>
+   <type>
+    <code value="HumanName"/>
+   </type>
+   <type>
+    <code value="Address"/>
+   </type>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <type>
+    <code value="Timing"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+   </type>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <condition value="eld-5"/>
+   <condition value="eld-6"/>
+   <condition value="eld-8"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="N/A (only relevant when constraining, which 11179 doesn't do)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.pattern[x]"/>
+   <short value="Value must have at least these property values"/>
+   <definition value="Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-senstive, accent-sensitive, etc.)."/>
+   <comments value="Mostly used for fixing values of CodeableConcept. At present, pattern[x] is not recommended as a basis for slicing while issues related to this are investigated during the DSTU period."/>
+   <min value="0"/>
+   <max value="0"/>
+   <base>
+    <path value="ElementDefinition.pattern[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <type>
+    <code value="integer"/>
+   </type>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <type>
+    <code value="base64Binary"/>
+   </type>
+   <type>
+    <code value="instant"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="date"/>
+   </type>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <type>
+    <code value="time"/>
+   </type>
+   <type>
+    <code value="code"/>
+   </type>
+   <type>
+    <code value="oid"/>
+   </type>
+   <type>
+    <code value="id"/>
+   </type>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <type>
+    <code value="markdown"/>
+   </type>
+   <type>
+    <code value="Annotation"/>
+   </type>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <type>
+    <code value="Quantity"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="Period"/>
+   </type>
+   <type>
+    <code value="Ratio"/>
+   </type>
+   <type>
+    <code value="SampledData"/>
+   </type>
+   <type>
+    <code value="Signature"/>
+   </type>
+   <type>
+    <code value="HumanName"/>
+   </type>
+   <type>
+    <code value="Address"/>
+   </type>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <type>
+    <code value="Timing"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+   </type>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <condition value="eld-5"/>
+   <condition value="eld-7"/>
+   <condition value="eld-8"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.example[x]"/>
+   <short value="Example value: [as defined for type]"/>
+   <definition value="A sample value for this element demonstrating the type of information that would typically be captured."/>
+   <comments value="This will most commonly be present for data where it's not implicitly obvious from either the data type or value set what the values might be.  (I.e. Example values for dates or quantities would generally be unnecessary.)  If the example value are fully populated, the publication tool can generate an instance automatically."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.example[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <type>
+    <code value="integer"/>
+   </type>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <type>
+    <code value="base64Binary"/>
+   </type>
+   <type>
+    <code value="instant"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="date"/>
+   </type>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <type>
+    <code value="time"/>
+   </type>
+   <type>
+    <code value="code"/>
+   </type>
+   <type>
+    <code value="oid"/>
+   </type>
+   <type>
+    <code value="id"/>
+   </type>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <type>
+    <code value="markdown"/>
+   </type>
+   <type>
+    <code value="Annotation"/>
+   </type>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <type>
+    <code value="Quantity"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="Period"/>
+   </type>
+   <type>
+    <code value="Ratio"/>
+   </type>
+   <type>
+    <code value="SampledData"/>
+   </type>
+   <type>
+    <code value="Signature"/>
+   </type>
+   <type>
+    <code value="HumanName"/>
+   </type>
+   <type>
+    <code value="Address"/>
+   </type>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <type>
+    <code value="Timing"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+   </type>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value=".example"/>
+   </mapping>
+   <mapping>
+    <identity value="loinc"/>
+    <map value="EXMPL_ANSWERS"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.minValue[x]"/>
+   <short value="Minimum Allowed Value (for some types)"/>
+   <definition value="The minimum allowed value for the element. The value is inclusive. This is allowed for the types date, dateTime, instant, time, decimal, integer, and Quantity."/>
+   <comments value="Except for date/date/instant, the type of the minValue[x] SHALL be the same as the specified type of the element. For the date/dateTime/instant values, the type of minValue[x] SHALL be either the same, or a a [Duration](datatypes.html#duration) which specifies a relative time limit to the curren time. The duration value is positive, and is subtracted from the current clock to determine the minimum allowable value.   A minmum value for a Quantity is interpreted as an canonnical minimum - e.g. you cannot provide 100mg if the minimum value is 10g."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.minValue[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <type>
+    <code value="integer"/>
+   </type>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <type>
+    <code value="base64Binary"/>
+   </type>
+   <type>
+    <code value="instant"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="date"/>
+   </type>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <type>
+    <code value="time"/>
+   </type>
+   <type>
+    <code value="code"/>
+   </type>
+   <type>
+    <code value="oid"/>
+   </type>
+   <type>
+    <code value="id"/>
+   </type>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <type>
+    <code value="markdown"/>
+   </type>
+   <type>
+    <code value="Annotation"/>
+   </type>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <type>
+    <code value="Quantity"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="Period"/>
+   </type>
+   <type>
+    <code value="Ratio"/>
+   </type>
+   <type>
+    <code value="SampledData"/>
+   </type>
+   <type>
+    <code value="Signature"/>
+   </type>
+   <type>
+    <code value="HumanName"/>
+   </type>
+   <type>
+    <code value="Address"/>
+   </type>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <type>
+    <code value="Timing"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+   </type>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.maxValue[x]"/>
+   <short value="Maximum Allowed Value (for some types)"/>
+   <definition value="The maximum allowed value for the element. The value is inclusive. This is allowed for the types date, dateTime, instant, time, decimal, integer, and Quantity."/>
+   <comments value="Except for date/date/instant, the type of the maxValue[x] SHALL be the same as the specified type of the element. For the date/dateTime/instant values, the type of maxValue[x] SHALL be either the same, or a a [Duration](datatypes.html#duration) which specifies a relative time limit to the curren time. The duration value is positive, and is added to the current clock to determine the maximum allowable value.   A maximum value for a Quantity is interpreted as an canonnical maximum - e.g. you cannot provide 10g if the maximum value is 50mg."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.maxValue[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <type>
+    <code value="integer"/>
+   </type>
+   <type>
+    <code value="decimal"/>
+   </type>
+   <type>
+    <code value="base64Binary"/>
+   </type>
+   <type>
+    <code value="instant"/>
+   </type>
+   <type>
+    <code value="string"/>
+   </type>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="date"/>
+   </type>
+   <type>
+    <code value="dateTime"/>
+   </type>
+   <type>
+    <code value="time"/>
+   </type>
+   <type>
+    <code value="code"/>
+   </type>
+   <type>
+    <code value="oid"/>
+   </type>
+   <type>
+    <code value="id"/>
+   </type>
+   <type>
+    <code value="unsignedInt"/>
+   </type>
+   <type>
+    <code value="positiveInt"/>
+   </type>
+   <type>
+    <code value="markdown"/>
+   </type>
+   <type>
+    <code value="Annotation"/>
+   </type>
+   <type>
+    <code value="Attachment"/>
+   </type>
+   <type>
+    <code value="Identifier"/>
+   </type>
+   <type>
+    <code value="CodeableConcept"/>
+   </type>
+   <type>
+    <code value="Coding"/>
+   </type>
+   <type>
+    <code value="Quantity"/>
+   </type>
+   <type>
+    <code value="Range"/>
+   </type>
+   <type>
+    <code value="Period"/>
+   </type>
+   <type>
+    <code value="Ratio"/>
+   </type>
+   <type>
+    <code value="SampledData"/>
+   </type>
+   <type>
+    <code value="Signature"/>
+   </type>
+   <type>
+    <code value="HumanName"/>
+   </type>
+   <type>
+    <code value="Address"/>
+   </type>
+   <type>
+    <code value="ContactPoint"/>
+   </type>
+   <type>
+    <code value="Timing"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+   </type>
+   <type>
+    <code value="Meta"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.maxLength"/>
+   <short value="Max length for strings"/>
+   <definition value="Indicates the maximum length in characters that is permitted to be present in conformant instances and which is expected to be supported by conformant consumers that support the element."/>
+   <comments value="Receivers are not required to reject instances that exceed the maximum length.  The full length could be stored.  In some cases, data might be truncated, though truncation should be undertaken with care and an understanding of the consequences of doing so. If not specified, there is no conformance expectation for length support."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.maxLength"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="integer"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="OMC.12"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value=".domain.maximum_character_quantity"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.condition"/>
+   <short value="Reference to invariant about presence"/>
+   <definition value="A reference to an invariant that may make additional statements about the cardinality or value in the instance."/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.condition"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint"/>
+   <short value="Condition that must evaluate to true"/>
+   <definition value="Formal constraints such as co-occurrence and other constraints that can be computationally evaluated within the context of the instance."/>
+   <comments value="Constraints should be declared on the &quot;context&quot; element - the lowest element in the hierarchy that is common to all nodes referenced by the constraint."/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.constraint"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Element"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="??"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.constraint.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.constraint.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint.key"/>
+   <short value="Target of 'condition' reference above"/>
+   <definition value="Allows identification of which elements have their cardinalities impacted by the constraint.  Will not be referenced for constraints that do not affect cardinality."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.constraint.key"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="id"/>
+   </type>
+   <condition value="eld-14"/>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint.requirements"/>
+   <short value="Why this constraint necessary or appropriate"/>
+   <definition value="Description of why this constraint is necessary or appropriate."/>
+   <comments value="To be used if the reason for the constraint may not be intuitive to all implementers."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.constraint.requirements"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint.severity"/>
+   <short value="error | warning"/>
+   <definition value="Identifies the impact constraint violation has on the conformance of the instance."/>
+   <comments value="This allows constraints to be asserted as &quot;shall&quot; (error) and &quot;should&quot; (warning)."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.constraint.severity"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="SHALL applications comply with this constraint?"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/constraint-severity"/>
+    </valueSetReference>
+   </binding>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint.human"/>
+   <short value="Human description of constraint"/>
+   <definition value="Text that can be used to describe the constraint in messages identifying that the constraint has been violated."/>
+   <comments value="Should be expressed in business terms as much as possible."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.constraint.human"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint.xpath"/>
+   <short value="XPath expression of constraint"/>
+   <definition value="An XPath expression of constraint that can be executed to see if this constraint is met."/>
+   <comments value="Elements SHALL use &quot;f&quot; as the namespace prefix for the FHIR namespace, and &quot;x&quot; for the xhtml namespace, and SHALL NOT use any other prefixes."/>
+   <requirements value="Used in Schematron tests of the validity of the resource."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.constraint.xpath"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.mustSupport"/>
+   <short value="If the element must supported"/>
+   <definition value="If true, implementations that produce or consume resources SHALL provide &quot;support&quot; for the element in some meaningful way.  If false, the element may be ignored and not supported."/>
+   <comments value="&quot;Something useful&quot; is context dependent and impossible to describe in the base FHIR specification. For this reason, tue mustSupport flag is never set to true by the FHIR specification itself - it is only set to true in profiles.   This is done in [Resource Profiles](profiling.html#mustsupport), where the profile labels an element as mustSupport=true. When a profile does this, it SHALL also make clear exactly what kind of &quot;support&quot; is required, as this can mean many things.  Note that an element that has the property IsModifier is not necessarily a &quot;key&quot; element (e.g. one of the important elements to make use of the resource), nor is it automatically mustSupport - however both of these things are more likely to be true for IsModifier elements than for other elements."/>
+   <requirements value="Allows a profile to set expectations for system capabilities beyond merely respecting cardinality constraints."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.mustSupport"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="??"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.isModifier"/>
+   <short value="If this modifies the meaning of other elements"/>
+   <definition value="If true, the value of this element affects the interpretation of the element or resource that contains it, and the value of the element cannot be ignored. Typically, this is used for status, negation and qualification codes. The effect of this is that the element cannot be ignored by systems: they SHALL either recognize the element and process it, and/or a pre-determination has been made that it is not relevant to their particular system."/>
+   <comments value="Only the definition of an element can set IsModifier true - either the specification itself or where an extension is originally defined. Once set to false, it cannot be set to true in derived profiles. An element/extension that has isModifier=true SHOULD also have a minimum cardinality of 1, so that there is no lack of clarity about what to do if it is missing. If it can be missing, the definition SHALL make the meaning of a missing element clear."/>
+   <requirements value="Allows elements to be introduced into a specification that can't safely be ignored by applications that don't recognize them."/>
+   <min value="0"/>
+   <max value="0"/>
+   <base>
+    <path value="ElementDefinition.isModifier"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="??"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.isSummary"/>
+   <short value="Include when _summary = true?"/>
+   <definition value="Whether the element should be included if a client requests a search with the parameter _summary=true."/>
+   <comments value="Some resources include a set of simple metadata, and some very large data. This element is used to reduce the quantity of data returned in searches. Note that servers may pre-cache summarised resources for optimal performance, so servers may not support per-profile use of the isSummary flag."/>
+   <requirements value="Allow clients to search through large resources quickly."/>
+   <min value="0"/>
+   <max value="0"/>
+   <base>
+    <path value="ElementDefinition.isSummary"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="boolean"/>
+   </type>
+   <defaultValueBoolean value="false"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="??"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.binding"/>
+   <short value="ValueSet details if this is coded"/>
+   <definition value="Binds to a value set if this element is coded (code, Coding, CodeableConcept)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.binding"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="Element"/>
+   </type>
+   <condition value="eld-11"/>
+   <constraint>
+    <key value="eld-10"/>
+    <severity value="error"/>
+    <human value="provide either a reference or a description (or both)"/>
+    <xpath value="(exists(f:valueSetUri) or exists(f:valueSetReference)) or exists(f:description)"/>
+   </constraint>
+   <constraint>
+    <key value="eld-9"/>
+    <severity value="error"/>
+    <human value="Example value sets are always extensible"/>
+    <xpath value="not(f:conformance/@value='example' and f:isExtensible/@value='false')"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="v2"/>
+    <map value="OM3, OMC.11"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value=".domain"/>
+   </mapping>
+   <mapping>
+    <identity value="loinc"/>
+    <map value="ANSWER LIST, NORMATIVE ANSWER LIST"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.binding.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.binding.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.binding.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.binding.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.binding.strength"/>
+   <short value="required | extensible | preferred | example"/>
+   <definition value="Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances."/>
+   <comments value="For further discussion, see [[[Using Terminologies]]]."/>
+   <alias value="conformance"/>
+   <alias value="extensibility"/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.binding.strength"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="Indication of the degree of conformance expectations associated with a binding"/>
+    <valueSetReference>
+     <reference value="http://hl7.org/fhir/ValueSet/binding-strength"/>
+    </valueSetReference>
+   </binding>
+   <mapping>
+    <identity value="v2"/>
+    <map value="N/A"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="loinc"/>
+    <map value="N/A"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.binding.description"/>
+   <short value="Human explanation of the value set"/>
+   <definition value="Describes the intended use of this particular set of codes."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.binding.description"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <condition value="eld-10"/>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value=".domain.description"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.binding.valueSet[x]"/>
+   <short value="Source of value set"/>
+   <definition value="Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used."/>
+   <comments value="For value sets,the referenceResource, the display can contain the value set description.  The reference may be version-specific or not."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.binding.valueSet[x]"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="uri"/>
+   </type>
+   <type>
+    <code value="Reference"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/ValueSet"/>
+   </type>
+   <condition value="eld-10"/>
+   <condition value="eld-12"/>
+   <constraint>
+    <key value="eld-12"/>
+    <severity value="error"/>
+    <human value="uri SHALL start with http:// or https://"/>
+    <xpath value="starts-with(@value, 'http:') or starts-with(@value, 'https:')"/>
+   </constraint>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="dex"/>
+    <map value="valueDomain.valueSet"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="points to explicit list or expression that evaluates to list of (Enumerated_Value_Domain).member"/>
+   </mapping>
+   <mapping>
+    <identity value="loinc"/>
+    <map value="CODE_TABLE"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.mapping"/>
+   <short value="Map element to another set of definitions"/>
+   <definition value="Identifies a concept from an external specification that roughly corresponds to this element."/>
+   <comments value="Mappings are not necessarily specific enough for safe translation."/>
+   <requirements value="Provides guidance to implementers familiar with or converting content from other specifications."/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.mapping"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Element"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="dex"/>
+    <map value="mappingSpecification"/>
+   </mapping>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="Registered_item).document_reference[document_type=mapping]  Also, .meaning linkage to Data_Element_Concept is done as a mapping to a reference model.  (Data_Element_Concepts are all defined in some sort of reference model, be that Object_Class and Property or some other mechanism)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.mapping.id"/>
+   <representation value="xmlAttr"/>
+   <short value="xml:id (or equivalent in JSON)"/>
+   <definition value="unique id for the element within a resource (for internal references)."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.mapping.id"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="id"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.mapping.extension"/>
+   <short value="Additional Content defined by implementations"/>
+   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+   <alias value="extensions"/>
+   <alias value="user content"/>
+   <min value="0"/>
+   <max value="*"/>
+   <base>
+    <path value="ElementDefinition.mapping.extension"/>
+    <min value="0"/>
+    <max value="*"/>
+   </base>
+   <type>
+    <code value="Extension"/>
+   </type>
+   <mapping>
+    <identity value="rim"/>
+    <map value="n/a"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.mapping.identity"/>
+   <short value="Reference to mapping declaration"/>
+   <definition value="An internal reference to the definition of a mapping."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.mapping.identity"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="id"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.mapping.language"/>
+   <short value="Computable language of mapping"/>
+   <definition value="Identifies the computable language in which mapping.map is expressed."/>
+   <comments value="If omitted, then there can be no expectation of computational interpretation of the mapping."/>
+   <min value="0"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.mapping.language"/>
+    <min value="0"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="code"/>
+   </type>
+   <isSummary value="true"/>
+   <binding>
+    <strength value="required"/>
+    <description value="The mime type of an attachment. Any valid mime type is allowed"/>
+    <valueSetUri value="http://www.rfc-editor.org/bcp/bcp13.txt"/>
+   </binding>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+  </element>
+  <element>
+   <path value="ElementDefinition.mapping.map"/>
+   <short value="Details of the mapping"/>
+   <definition value="Expresses what part of the target specification corresponds to this element."/>
+   <comments value="For most mappings, the syntax is undefined.  Syntax will be provided for mappings to the RIM.  Multiple mappings may be possible and may include constraints on other resource elements that identify when a particular mapping applies."/>
+   <min value="1"/>
+   <max value="1"/>
+   <base>
+    <path value="ElementDefinition.mapping.map"/>
+    <min value="1"/>
+    <max value="1"/>
+   </base>
+   <type>
+    <code value="string"/>
+   </type>
+   <isSummary value="true"/>
+   <mapping>
+    <identity value="rim"/>
+    <map value="N/A (MIF territory)"/>
+   </mapping>
+   <mapping>
+    <identity value="iso11179"/>
+    <map value="ObjectClass, Property (this is one possible data model that can be mapped to - the uri would identify the data model  mappingSpecification.mappingScript"/>
+   </mapping>
+  </element>
+ </snapshot>
+ <differential>
+  <element>
+   <path value="ElementDefinition"/>
+   <name value="elementdefinition-de"/>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="ElementDefinition"/>
+   </type>
+  </element>
+  <element>
+   <path value="ElementDefinition.extension"/>
+   <name value="Question"/>
+   <slicing>
+    <discriminator value="url"/>
+    <ordered value="false"/>
+    <rules value="open"/>
+   </slicing>
+   <min value="0"/>
+   <max value="*"/>
+   <type>
+    <code value="Extension"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/elementdefinition-question"/>
+   </type>
+  </element>
+  <element>
+   <path value="ElementDefinition.extension"/>
+   <name value="AllowedUnits"/>
+   <min value="0"/>
+   <max value="1"/>
+   <type>
+    <code value="Extension"/>
+    <profile value="http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits"/>
+   </type>
+  </element>
+  <element>
+   <path value="ElementDefinition.path"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.representation"/>
+   <min value="0"/>
+   <max value="0"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.name"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.label"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.code"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.slicing"/>
+   <min value="0"/>
+   <max value="0"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.slicing.discriminator"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.slicing.description"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.slicing.ordered"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.slicing.rules"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.short"/>
+   <min value="0"/>
+   <max value="0"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.definition"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.comments"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.requirements"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.alias"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.min"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.max"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.type"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.type.code"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.type.profile"/>
+   <min value="0"/>
+   <max value="0"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.type.aggregation"/>
+   <min value="0"/>
+   <max value="0"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.nameReference"/>
+   <min value="0"/>
+   <max value="0"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.defaultValue[x]"/>
+   <comments value="...  This element should only be used on child elements of complex data elements."/>
+  </element>
+  <element>
+   <path value="ElementDefinition.meaningWhenMissing"/>
+   <comments value="...  This element should only be used on child elements of complex data elements."/>
+  </element>
+  <element>
+   <path value="ElementDefinition.fixed[x]"/>
+   <min value="0"/>
+   <max value="0"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.pattern[x]"/>
+   <min value="0"/>
+   <max value="0"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.example[x]"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.maxLength"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.condition"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint.name"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint.key"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint.severity"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint.human"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.constraint.xpath"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.mustSupport"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.isModifier"/>
+   <min value="0"/>
+   <max value="0"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.isSummary"/>
+   <min value="0"/>
+   <max value="0"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.binding"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.binding.strength"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.binding.description"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.binding.valueSet[x]"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.mapping"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.mapping.identity"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.mapping.language"/>
+  </element>
+  <element>
+   <path value="ElementDefinition.mapping.map"/>
+  </element>
+ </differential>
+</StructureDefinition>
