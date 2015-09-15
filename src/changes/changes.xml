@@ -189,6 +189,9 @@
 			<action type="fix" issue="222">
 				JPA server returned deleted resources in search results when using the _tag, _id, _profile, or _security search parameters
 			</action>
+			<action type="fix" issue="223">
+				Fix issue with build on Windows. Thanks to Bryce van Dyk for the pull request!
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">
