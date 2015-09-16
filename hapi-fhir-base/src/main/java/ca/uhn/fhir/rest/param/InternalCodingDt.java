@@ -32,7 +32,9 @@ import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import net.sourceforge.cobertura.CoverageIgnore;
 
+@CoverageIgnore
 public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype {
 
 	/**
