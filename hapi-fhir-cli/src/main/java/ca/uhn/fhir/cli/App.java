@@ -28,10 +28,13 @@ public class App {
 	private static List<BaseCommand> ourCommands;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(App.class);
 
+	public static final String LINESEP = System.getProperty("line.separator");
+	
 	static {
 		ourCommands = new ArrayList<BaseCommand>();
 		ourCommands.add(new RunServerCommand());
 		ourCommands.add(new ExampleDataUploader());
+		ourCommands.add(new ValidateCommand());
 
 		Collections.sort(ourCommands);
 	}
@@ -79,16 +82,22 @@ public class App {
 		System.out.println("  hapi-fhir-cli {command} [options]");
 		System.out.println();
 		System.out.println("Commands:");
+
+		int longestCommandLength = 0;
 		for (BaseCommand next : ourCommands) {
-			String left = "  " + next.getCommandName() + " - ";
-			String[] rightParts = WordUtils.wrap(next.getCommandDescription(), 80 - left.length()).split("\\n");
+			longestCommandLength = Math.max(longestCommandLength, next.getCommandName().length());
+		}
+		
+		for (BaseCommand next : ourCommands) {
+			String left = "  " + StringUtils.rightPad(next.getCommandName(), longestCommandLength);
+			String[] rightParts = WordUtils.wrap(next.getCommandDescription(), 80 - (left.length() + 3)).split("\\n");
 			for (int i = 1; i < rightParts.length; i++) {
-				rightParts[i] = StringUtils.leftPad("", left.length()) + rightParts[i];
+				rightParts[i] = StringUtils.leftPad("", left.length() + 3) + rightParts[i];
 			}
-			System.out.println(left + StringUtils.join(rightParts, '\n'));
+			System.out.println(ansi().bold().fg(Color.GREEN) + left + ansi().boldOff().fg(Color.WHITE) + " - " + ansi().bold() + StringUtils.join(rightParts, LINESEP));
 		}
 		System.out.println();
-		System.out.println("See what options are available:");
+		System.out.println(ansi().boldOff().fg(Color.WHITE) + "See what options are available:");
 		System.out.println("  hapi-fhir-cli help {command}");
 		System.out.println();
 	}
@@ -143,12 +152,14 @@ public class App {
 		Options options = command.getOptions();
 		DefaultParser parser = new DefaultParser();
 		CommandLine parsedOptions;
+		
+		logAppHeader();
+		loggingConfigOn();
+		
 		try {
 			String[] args = Arrays.asList(theArgs).subList(1, theArgs.length).toArray(new String[theArgs.length - 1]);
 			parsedOptions = parser.parse(options, args, true);
 
-			logAppHeader();
-			loggingConfigOn();
 			
 			// Actually execute the command
 			command.run(parsedOptions);

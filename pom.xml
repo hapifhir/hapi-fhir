@@ -1287,6 +1287,7 @@
 				<module>hapi-fhir-testpage-overlay</module>
 				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
 				<module>hapi-fhir-android</module>
+				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>
 				<!--<module>hapi-fhir-osgi-core</module>-->

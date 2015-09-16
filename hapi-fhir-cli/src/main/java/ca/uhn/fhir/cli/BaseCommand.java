@@ -9,6 +9,8 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 
 public abstract class BaseCommand implements Comparable<BaseCommand> {
 
+	private FhirContext myFhirCtx;
+
 	public BaseCommand() {
 		super();
 	}
@@ -31,5 +33,12 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	}
 
 	public abstract void run(CommandLine theCommandLine) throws ParseException, Exception;
+
+	public FhirContext getFhirCtx() {
+		if (myFhirCtx == null) {
+			myFhirCtx = FhirContext.forDstu2();
+		}
+		return myFhirCtx;
+	}
 
 }
