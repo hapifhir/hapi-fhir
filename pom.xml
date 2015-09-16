@@ -11,7 +11,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>1.2-SNAPSHOT</version>
+	<version>1.2</version>
 	<name>HAPI-FHIR</name>
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
 
@@ -1289,7 +1289,7 @@
 				<module>hapi-fhir-android</module>
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>
-				<module>hapi-fhir-osgi-core</module>
+				<!--<module>hapi-fhir-osgi-core</module>-->
 			</modules>
 		</profile>
 		<profile>
