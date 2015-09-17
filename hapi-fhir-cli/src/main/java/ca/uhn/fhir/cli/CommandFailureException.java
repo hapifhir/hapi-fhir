@@ -1,6 +1,6 @@
 package ca.uhn.fhir.cli;
 
-public class CommandFailureException extends Exception {
+public class CommandFailureException extends Error {
 
 	public CommandFailureException(String theMessage) {
 		super(theMessage);
