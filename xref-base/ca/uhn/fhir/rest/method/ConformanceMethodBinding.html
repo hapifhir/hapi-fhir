@@ -35,11 +35,11 @@
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.ConfigurationException;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.FhirContext;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.valueset.BundleTypeEnum;
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.RequestTypeEnum;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.IBundleProvider;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.valueset.BundleTypeEnum;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.RequestTypeEnum;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.RestOperationTypeEnum;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.IBundleProvider;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.RestfulServer;
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.SimpleBundleProvider;
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.exceptions.BaseServerResponseException;
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.exceptions.InternalErrorException;
@@ -80,8 +80,8 @@
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  	}
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  	@Override
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/server/IBundleProvider.html">IBundleProvider</a> invokeServer(<a href="../../../../../ca/uhn/fhir/rest/method/RequestDetails.html">RequestDetails</a> theRequest, Object[] theMethodParams) <strong class="jxr_keyword">throws</strong> BaseServerResponseException {
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		IBaseResource conf = (IBaseResource) invokeServerMethod(theMethodParams);
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/server/IBundleProvider.html">IBundleProvider</a> invokeServer(<a href="../../../../../ca/uhn/fhir/rest/server/RestfulServer.html">RestfulServer</a> theServer, <a href="../../../../../ca/uhn/fhir/rest/method/RequestDetails.html">RequestDetails</a> theRequest, Object[] theMethodParams) <strong class="jxr_keyword">throws</strong> BaseServerResponseException {
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		IBaseResource conf = (IBaseResource) invokeServerMethod(theServer, theRequest, theMethodParams);
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/SimpleBundleProvider.html">SimpleBundleProvider</a>(conf);
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  	}
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  
@@ -99,26 +99,16 @@
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  	}
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>  	@Override
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/dstu/valueset/RestfulOperationTypeEnum.html">RestfulOperationTypeEnum</a> getResourceOperationType() {
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/RestOperationTypeEnum.html">RestOperationTypeEnum</a> getRestOperationType() {
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  		<strong class="jxr_keyword">return</strong> RestOperationTypeEnum.METADATA;
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  	}
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>  
 <a class="jxr_linenumber" name="L98" href="#L98">98</a>  	@Override
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/dstu/valueset/RestfulOperationSystemEnum.html">RestfulOperationSystemEnum</a> getSystemOperationType() {
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  	<strong class="jxr_keyword">protected</strong> <a href="../../../../../ca/uhn/fhir/model/valueset/BundleTypeEnum.html">BundleTypeEnum</a> getResponseBundleType() {
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L101" href="#L101">101</a> 	}
 <a class="jxr_linenumber" name="L102" href="#L102">102</a> 
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 	@Override
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/OtherOperationTypeEnum.html">OtherOperationTypeEnum</a> getOtherOperationType() {
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		<strong class="jxr_keyword">return</strong> OtherOperationTypeEnum.METADATA;
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 	}
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 	@Override
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 	<strong class="jxr_keyword">protected</strong> <a href="../../../../../ca/uhn/fhir/model/valueset/BundleTypeEnum.html">BundleTypeEnum</a> getResponseBundleType() {
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 	}
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> }
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

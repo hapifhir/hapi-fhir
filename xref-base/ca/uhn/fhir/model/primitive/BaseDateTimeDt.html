@@ -394,7 +394,7 @@
 <a class="jxr_linenumber" name="L386" href="#L386">386</a> 		updateStringValue();
 <a class="jxr_linenumber" name="L387" href="#L387">387</a> 	}
 <a class="jxr_linenumber" name="L388" href="#L388">388</a> 
-<a class="jxr_linenumber" name="L389" href="#L389">389</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> setTimeZone(String theValueString, <strong class="jxr_keyword">boolean</strong> hasMillis) {
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> 	<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/BaseDateTimeDt.html">BaseDateTimeDt</a> setTimeZone(String theValueString, <strong class="jxr_keyword">boolean</strong> hasMillis) {
 <a class="jxr_linenumber" name="L390" href="#L390">390</a> 		clearTimeZone();
 <a class="jxr_linenumber" name="L391" href="#L391">391</a> 		<strong class="jxr_keyword">int</strong> timeZoneStart = 19;
 <a class="jxr_linenumber" name="L392" href="#L392">392</a> 		<strong class="jxr_keyword">if</strong> (hasMillis)
@@ -406,58 +406,61 @@
 <a class="jxr_linenumber" name="L398" href="#L398">398</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theValueString.indexOf('+', timeZoneStart) != -1 || theValueString.indexOf('-', timeZoneStart) != -1) {
 <a class="jxr_linenumber" name="L399" href="#L399">399</a> 			setTimeZone(TimeZone.getTimeZone(<span class="jxr_string">"GMT"</span> + theValueString.substring(timeZoneStart)));
 <a class="jxr_linenumber" name="L400" href="#L400">400</a> 		}
-<a class="jxr_linenumber" name="L401" href="#L401">401</a> 	}
-<a class="jxr_linenumber" name="L402" href="#L402">402</a> 
-<a class="jxr_linenumber" name="L403" href="#L403">403</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setTimeZone(TimeZone theTimeZone) {
-<a class="jxr_linenumber" name="L404" href="#L404">404</a> 		myTimeZone = theTimeZone;
-<a class="jxr_linenumber" name="L405" href="#L405">405</a> 		updateStringValue();
-<a class="jxr_linenumber" name="L406" href="#L406">406</a> 	}
-<a class="jxr_linenumber" name="L407" href="#L407">407</a> 
-<a class="jxr_linenumber" name="L408" href="#L408">408</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setTimeZoneZulu(<strong class="jxr_keyword">boolean</strong> theTimeZoneZulu) {
-<a class="jxr_linenumber" name="L409" href="#L409">409</a> 		myTimeZoneZulu = theTimeZoneZulu;
-<a class="jxr_linenumber" name="L410" href="#L410">410</a> 		updateStringValue();
-<a class="jxr_linenumber" name="L411" href="#L411">411</a> 	}
-<a class="jxr_linenumber" name="L412" href="#L412">412</a> 
-<a class="jxr_linenumber" name="L413" href="#L413">413</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L414" href="#L414">414</a> <em class="jxr_javadoccomment">	 * Sets the value for this type using the given Java Date object as the time, and using the default precision for this datatype, as well as the local timezone as determined by the local operating</em>
-<a class="jxr_linenumber" name="L415" href="#L415">415</a> <em class="jxr_javadoccomment">	 * system. Both of these properties may be modified in subsequent calls if neccesary.</em>
-<a class="jxr_linenumber" name="L416" href="#L416">416</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L417" href="#L417">417</a> 	@Override
-<a class="jxr_linenumber" name="L418" href="#L418">418</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/BaseDateTimeDt.html">BaseDateTimeDt</a> setValue(Date theValue) {
-<a class="jxr_linenumber" name="L419" href="#L419">419</a> 		setValue(theValue, getDefaultPrecisionForDatatype());
-<a class="jxr_linenumber" name="L420" href="#L420">420</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L421" href="#L421">421</a> 	}
-<a class="jxr_linenumber" name="L422" href="#L422">422</a> 
-<a class="jxr_linenumber" name="L423" href="#L423">423</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L424" href="#L424">424</a> <em class="jxr_javadoccomment">	 * Sets the value for this type using the given Java Date object as the time, and using the specified precision, as well as the local timezone as determined by the local operating system. Both of</em>
-<a class="jxr_linenumber" name="L425" href="#L425">425</a> <em class="jxr_javadoccomment">	 * these properties may be modified in subsequent calls if neccesary.</em>
-<a class="jxr_linenumber" name="L426" href="#L426">426</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L427" href="#L427">427</a> <em class="jxr_javadoccomment">	 * @param theValue</em>
-<a class="jxr_linenumber" name="L428" href="#L428">428</a> <em class="jxr_javadoccomment">	 *           The date value</em>
-<a class="jxr_linenumber" name="L429" href="#L429">429</a> <em class="jxr_javadoccomment">	 * @param thePrecision</em>
-<a class="jxr_linenumber" name="L430" href="#L430">430</a> <em class="jxr_javadoccomment">	 *           The precision</em>
-<a class="jxr_linenumber" name="L431" href="#L431">431</a> <em class="jxr_javadoccomment">	 * @throws DataFormatException</em>
-<a class="jxr_linenumber" name="L432" href="#L432">432</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L433" href="#L433">433</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValue(Date theValue, <a href="../../../../../ca/uhn/fhir/model/api/TemporalPrecisionEnum.html">TemporalPrecisionEnum</a> thePrecision) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L434" href="#L434">434</a> 		setTimeZone(TimeZone.getDefault());
-<a class="jxr_linenumber" name="L435" href="#L435">435</a> 		myPrecision = thePrecision;
-<a class="jxr_linenumber" name="L436" href="#L436">436</a> 		<strong class="jxr_keyword">super</strong>.setValue(theValue);
-<a class="jxr_linenumber" name="L437" href="#L437">437</a> 	}
-<a class="jxr_linenumber" name="L438" href="#L438">438</a> 
-<a class="jxr_linenumber" name="L439" href="#L439">439</a> 	@Override
-<a class="jxr_linenumber" name="L440" href="#L440">440</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValueAsString(String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
-<a class="jxr_linenumber" name="L441" href="#L441">441</a> 		clearTimeZone();
-<a class="jxr_linenumber" name="L442" href="#L442">442</a> 		<strong class="jxr_keyword">super</strong>.setValueAsString(theValue);
-<a class="jxr_linenumber" name="L443" href="#L443">443</a> 	}
-<a class="jxr_linenumber" name="L444" href="#L444">444</a> 
-<a class="jxr_linenumber" name="L445" href="#L445">445</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L446" href="#L446">446</a> <em class="jxr_javadoccomment">	 * For unit tests only</em>
-<a class="jxr_linenumber" name="L447" href="#L447">447</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L448" href="#L448">448</a> 	<strong class="jxr_keyword">static</strong> List&lt;FastDateFormat&gt; getFormatters() {
-<a class="jxr_linenumber" name="L449" href="#L449">449</a> 		<strong class="jxr_keyword">return</strong> ourFormatters;
-<a class="jxr_linenumber" name="L450" href="#L450">450</a> 	}
-<a class="jxr_linenumber" name="L451" href="#L451">451</a> 
-<a class="jxr_linenumber" name="L452" href="#L452">452</a> }
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> 	}
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> 
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/BaseDateTimeDt.html">BaseDateTimeDt</a> setTimeZone(TimeZone theTimeZone) {
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> 		myTimeZone = theTimeZone;
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> 		updateStringValue();
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> 	}
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> 
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/BaseDateTimeDt.html">BaseDateTimeDt</a> setTimeZoneZulu(<strong class="jxr_keyword">boolean</strong> theTimeZoneZulu) {
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> 		myTimeZoneZulu = theTimeZoneZulu;
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> 		updateStringValue();
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> 	}
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> 
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> <em class="jxr_javadoccomment">	 * Sets the value for this type using the given Java Date object as the time, and using the default precision for this datatype, as well as the local timezone as determined by the local operating</em>
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> <em class="jxr_javadoccomment">	 * system. Both of these properties may be modified in subsequent calls if neccesary.</em>
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> 	@Override
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/BaseDateTimeDt.html">BaseDateTimeDt</a> setValue(Date theValue) {
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> 		setValue(theValue, getDefaultPrecisionForDatatype());
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> 	}
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> <em class="jxr_javadoccomment">	 * Sets the value for this type using the given Java Date object as the time, and using the specified precision, as well as the local timezone as determined by the local operating system. Both of</em>
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> <em class="jxr_javadoccomment">	 * these properties may be modified in subsequent calls if neccesary.</em>
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> <em class="jxr_javadoccomment">	 * @param theValue</em>
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> <em class="jxr_javadoccomment">	 *           The date value</em>
+<a class="jxr_linenumber" name="L432" href="#L432">432</a> <em class="jxr_javadoccomment">	 * @param thePrecision</em>
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> <em class="jxr_javadoccomment">	 *           The precision</em>
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> <em class="jxr_javadoccomment">	 * @throws DataFormatException</em>
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValue(Date theValue, <a href="../../../../../ca/uhn/fhir/model/api/TemporalPrecisionEnum.html">TemporalPrecisionEnum</a> thePrecision) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> 		setTimeZone(TimeZone.getDefault());
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> 		myPrecision = thePrecision;
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> 		<strong class="jxr_keyword">super</strong>.setValue(theValue);
+<a class="jxr_linenumber" name="L440" href="#L440">440</a> 	}
+<a class="jxr_linenumber" name="L441" href="#L441">441</a> 
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> 	@Override
+<a class="jxr_linenumber" name="L443" href="#L443">443</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValueAsString(String theValue) <strong class="jxr_keyword">throws</strong> DataFormatException {
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> 		clearTimeZone();
+<a class="jxr_linenumber" name="L445" href="#L445">445</a> 		<strong class="jxr_keyword">super</strong>.setValueAsString(theValue);
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> 	}
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> <em class="jxr_javadoccomment">	 * For unit tests only</em>
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> 	<strong class="jxr_keyword">static</strong> List&lt;FastDateFormat&gt; getFormatters() {
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> 		<strong class="jxr_keyword">return</strong> ourFormatters;
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> 	}
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> 
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
