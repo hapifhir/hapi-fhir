@@ -61,6 +61,26 @@
 
 		<section name="Announcements">
 			<p>
+				<b>September 18, 2015 - HAPI FHIR 1.2 and Community Survey</b> -
+				We are very pleased the release of HAPI FHIR 1.2. This release brings
+				support for the 
+				<a href="http://hl7.org/fhir/2015Sep/">FHIR DSTU2 QA</a> definitions (also
+				known as FHIR 1.0.0). See the 
+				<a href="./download.html">download page</a> for information on support
+				for different versions of FHIR within different versions of HAPI FHIR.
+			</p>
+			<p>
+				As always, the <a href="./changes-report.html">changelog</a> has the full list
+				of changes in this version.
+			</p>
+			<p>
+				We are also launching the 2015
+				<a href="http://goo.gl/forms/R8Ifg2qvOY">HAPI FHIR Community Survey</a> today.
+				This 10 question survey will only take a minute, and it helps us to understand
+				who uses HAPI and what you need. Please take a moment to fill it out!
+			</p>
+			<!--
+			<p>
 				<b>July 13, 2015 - HAPI FHIR 1.1 Released</b> - HAPI 1.1 has been released! 
 				As always, you can see the complete list of what has
 				changed by consulting the <a href="./changes-report.html">changelog</a>, and the
@@ -89,6 +109,7 @@
 				See the <a href="./doc_dstu2.html">HAPI DSTU2 documentation</a> page for
 				more information.
 			</p>
+-->
 <!-- 
 			<p>
 				<b>May 8, 2015 - HAPI FHIR 1.0 Released</b> - HAPI 1.0 has been released! As always, 1.0 brings lots of fixes and features, and also brings the DSTU2 model classes up to the May 2015 DSTU2 ballot candidate structure definitions. Upgrading is recommended.

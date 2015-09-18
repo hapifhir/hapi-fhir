@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="1.2" date="2015-07-13">
+		<release version="1.2" date="2015-09-18">
 			<action type="add">
 				JPA server now validates QuestionnaireAnswers for conformance to their respective Questionnaire
 				if one is declared.
