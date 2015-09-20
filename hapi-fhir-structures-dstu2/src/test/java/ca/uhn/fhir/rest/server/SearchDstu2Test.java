@@ -51,11 +51,13 @@ public class SearchDstu2Test {
 	private static Server ourServer;
 	private static String ourLastMethod;
 	private static DateAndListParam ourLastDateAndList;
+	private static ReferenceParam ourLastRef;
 
 	@Before
 	public void before() {
 		ourLastMethod = null;
 		ourLastDateAndList = null;
+		ourLastRef = null;
 	}
 	
 	@Test
@@ -68,6 +70,59 @@ public class SearchDstu2Test {
 		assertEquals(400, status.getStatusLine().getStatusCode());
 	}
 	
+
+	@Test
+	public void testSearchReferenceParams01() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchNoList&ref=123");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		
+		assertEquals("123", ourLastRef.getIdPart());
+		assertEquals(null, ourLastRef.getResourceType());
+	}
+ 
+	@Test
+	public void testSearchReferenceParams02() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchNoList&ref=Patient/123");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		
+		assertEquals("123", ourLastRef.getIdPart());
+		assertEquals("Patient", ourLastRef.getResourceType());
+	}
+
+	@Test
+	public void testSearchReferenceParams03() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchNoList&ref:Patient=Patient/123");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		
+		assertEquals("123", ourLastRef.getIdPart());
+		assertEquals("Patient", ourLastRef.getResourceType());
+	}
+
+	@Test
+	public void testSearchReferenceParams04() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchNoList&ref:Patient=123");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		
+		assertEquals("123", ourLastRef.getIdPart());
+		assertEquals("Patient", ourLastRef.getResourceType());
+	}
+
 	@Test
 	public void testSearchDateAndList() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchDateAndList=2001,2002&searchDateAndList=2003,2004");
@@ -220,7 +275,17 @@ public class SearchDstu2Test {
 			return Collections.emptyList();
 		}
 		//@formatter:on
-		
+
+		//@formatter:off
+		@Search(queryName="searchNoList")
+		public List<Patient> searchNoList(
+				@RequiredParam(name = "ref") ReferenceParam theParam) {
+			ourLastMethod = "searchNoList";
+			ourLastRef = theParam;
+			return Collections.emptyList();
+		}
+		//@formatter:on
+
 		//@formatter:off
 		@Search()
 		public List<Patient> searchDateAndList(

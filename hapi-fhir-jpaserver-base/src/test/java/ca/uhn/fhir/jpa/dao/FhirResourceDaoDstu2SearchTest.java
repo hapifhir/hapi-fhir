@@ -24,7 +24,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -38,14 +44,18 @@ import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.resource.ConceptMap;
 import ca.uhn.fhir.model.dstu2.resource.Device;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
+import ca.uhn.fhir.model.dstu2.resource.Immunization;
 import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
+import ca.uhn.fhir.model.dstu2.resource.Substance;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
@@ -70,6 +80,163 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchTest.class);
 	
+	@Test
+	public void testIndexNoDuplicatesString() {
+		Patient p = new Patient();
+		p.addAddress().addLine("123 Fake Street");
+		p.addAddress().addLine("123 Fake Street");
+		p.addAddress().addLine("123 Fake Street");
+		p.addAddress().addLine("456 Fake Street");
+		p.addAddress().addLine("456 Fake Street");
+		p.addAddress().addLine("456 Fake Street");
+		
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		
+		Class<ResourceIndexedSearchParamString> type = ResourceIndexedSearchParamString.class;
+		List<ResourceIndexedSearchParamString> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		ourLog.info(toStringMultiline(results));
+		assertEquals(2, results.size());
+		
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myPatientDao.search(Patient.SP_ADDRESS, new StringParam("123 Fake Street")));
+		assertThat(actual, contains(id));
+	}
+	
+	@Test
+	public void testIndexNoDuplicatesDate() {
+		DiagnosticOrder order = new DiagnosticOrder();
+		order.addItem().addEvent().setDateTime(new DateTimeDt("2011-12-11T11:12:12Z"));
+		order.addItem().addEvent().setDateTime(new DateTimeDt("2011-12-11T11:12:12Z"));
+		order.addItem().addEvent().setDateTime(new DateTimeDt("2011-12-11T11:12:12Z"));
+		order.addItem().addEvent().setDateTime(new DateTimeDt("2011-12-12T11:12:12Z"));
+		order.addItem().addEvent().setDateTime(new DateTimeDt("2011-12-12T11:12:12Z"));
+		order.addItem().addEvent().setDateTime(new DateTimeDt("2011-12-12T11:12:12Z"));
+		
+		IIdType id = myDiagnosticOrderDao.create(order).getId().toUnqualifiedVersionless();
+		
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myDiagnosticOrderDao.search(DiagnosticOrder.SP_ITEM_DATE, new DateParam("2011-12-12T11:12:12Z")));
+		assertThat(actual, contains(id));
+		
+		Class<ResourceIndexedSearchParamDate> type = ResourceIndexedSearchParamDate.class;
+		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		ourLog.info(toStringMultiline(results));
+		assertEquals(2, results.size());
+	}
+
+	@Test
+	public void testIndexNoDuplicatesNumber() {
+		Immunization res = new Immunization();
+		res.addVaccinationProtocol().setDoseSequence(1);
+		res.addVaccinationProtocol().setDoseSequence(1);
+		res.addVaccinationProtocol().setDoseSequence(1);
+		res.addVaccinationProtocol().setDoseSequence(2);
+		res.addVaccinationProtocol().setDoseSequence(2);
+		res.addVaccinationProtocol().setDoseSequence(2);
+		
+		IIdType id = myImmunizationDao.create(res).getId().toUnqualifiedVersionless();
+		
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myImmunizationDao.search(Immunization.SP_DOSE_SEQUENCE, new NumberParam("1")));
+		assertThat(actual, contains(id));
+		
+		Class<ResourceIndexedSearchParamNumber> type = ResourceIndexedSearchParamNumber.class;
+		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		ourLog.info(toStringMultiline(results));
+		assertEquals(2, results.size());
+	}
+
+	@Test
+	public void testIndexNoDuplicatesUri() {
+		ConceptMap res = new ConceptMap();
+		res.addElement().addTarget().addDependsOn().setElement("http://foo");
+		res.addElement().addTarget().addDependsOn().setElement("http://foo");
+		res.addElement().addTarget().addDependsOn().setElement("http://bar");
+		res.addElement().addTarget().addDependsOn().setElement("http://bar");
+		
+		IIdType id = myConceptMapDao.create(res).getId().toUnqualifiedVersionless();
+		
+		Class<ResourceIndexedSearchParamUri> type = ResourceIndexedSearchParamUri.class;
+		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		ourLog.info(toStringMultiline(results));
+		assertEquals(2, results.size());
+		
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(ConceptMap.SP_DEPENDSON, new UriParam("http://foo")));
+		assertThat(actual, contains(id));
+	}
+
+	@Test
+	public void testIndexNoDuplicatesQuantity() {
+		Substance res = new Substance();
+		res.addInstance().getQuantity().setSystem("http://foo").setCode("UNIT").setValue(123);
+		res.addInstance().getQuantity().setSystem("http://foo").setCode("UNIT").setValue(123);
+		res.addInstance().getQuantity().setSystem("http://foo2").setCode("UNIT2").setValue(1232);
+		res.addInstance().getQuantity().setSystem("http://foo2").setCode("UNIT2").setValue(1232);
+		
+		IIdType id = mySubstanceDao.create(res).getId().toUnqualifiedVersionless();
+		
+		Class<ResourceIndexedSearchParamQuantity> type = ResourceIndexedSearchParamQuantity.class;
+		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		ourLog.info(toStringMultiline(results));
+		assertEquals(2, results.size());
+		
+		List<IIdType> actual = toUnqualifiedVersionlessIds(mySubstanceDao.search(Substance.SP_QUANTITY, new QuantityParam(null, 123, "http://foo", "UNIT")));
+		assertThat(actual, contains(id));
+	}
+
+	@Test
+	public void testIndexNoDuplicatesToken() {
+		Patient res = new Patient();
+		res.addIdentifier().setSystem("http://foo1").setValue("123");
+		res.addIdentifier().setSystem("http://foo1").setValue("123");
+		res.addIdentifier().setSystem("http://foo2").setValue("1234");
+		res.addIdentifier().setSystem("http://foo2").setValue("1234");
+		
+		IIdType id = myPatientDao.create(res).getId().toUnqualifiedVersionless();
+		
+		Class<ResourceIndexedSearchParamToken> type = ResourceIndexedSearchParamToken.class;
+		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		ourLog.info(toStringMultiline(results));
+		assertEquals(2, results.size());
+		
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam("http://foo1", "123")));
+		assertThat(actual, contains(id));
+	}
+	
+	@Test
+	public void testIndexNoDuplicatesReference() {
+		Practitioner pract =new Practitioner();
+		pract.setId("Practitioner/somepract");
+		pract.getName().addFamily("SOME PRACT");
+		myPractitionerDao.update(pract);
+		Practitioner pract2 =new Practitioner();
+		pract2.setId("Practitioner/somepract2");
+		pract2.getName().addFamily("SOME PRACT2");
+		myPractitionerDao.update(pract2);
+		
+		DiagnosticOrder res = new DiagnosticOrder();
+		res.addEvent().setActor(new ResourceReferenceDt("Practitioner/somepract"));
+		res.addEvent().setActor(new ResourceReferenceDt("Practitioner/somepract"));
+		res.addEvent().setActor(new ResourceReferenceDt("Practitioner/somepract2"));
+		res.addEvent().setActor(new ResourceReferenceDt("Practitioner/somepract2"));
+		
+		IIdType id = myDiagnosticOrderDao.create(res).getId().toUnqualifiedVersionless();
+		
+		Class<ResourceLink> type = ResourceLink.class;
+		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+		ourLog.info(toStringMultiline(results));
+		assertEquals(2, results.size());
+		
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myDiagnosticOrderDao.search(DiagnosticOrder.SP_ACTOR, new ReferenceParam("Practitioner/somepract")));
+		assertThat(actual, contains(id));
+	}
+
+	private String toStringMultiline(List<?> theResults) {
+		StringBuilder b = new StringBuilder();
+		for (Object next : theResults) {
+			b.append('\n');
+			b.append(" * ").append(next.toString());
+		}
+		return b.toString();
+	}
+
 	@Test
 	public void testSearchAll() {
 		{

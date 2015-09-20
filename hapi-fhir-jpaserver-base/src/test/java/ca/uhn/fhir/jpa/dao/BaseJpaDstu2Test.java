@@ -12,7 +12,6 @@ import javax.persistence.PersistenceContext;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,9 +41,12 @@ import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.ConceptMap;
 import ca.uhn.fhir.model.dstu2.resource.Device;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
+import ca.uhn.fhir.model.dstu2.resource.Immunization;
 import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
@@ -53,6 +55,7 @@ import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
+import ca.uhn.fhir.model.dstu2.resource.Substance;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.MethodUtil;
@@ -68,10 +71,19 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 
 	@Autowired
+	@Qualifier("myConceptMapDaoDstu2")
+	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
+	@Autowired
+	@Qualifier("mySubstanceDaoDstu2")
+	protected IFhirResourceDao<Substance> mySubstanceDao;
+	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoDstu2")
 	protected IFhirResourceDao<Device> myDeviceDao;
+	@Autowired
+	@Qualifier("myDiagnosticOrderDaoDstu2")
+	protected IFhirResourceDao<DiagnosticOrder> myDiagnosticOrderDao;
 	@Autowired
 	@Qualifier("myDiagnosticReportDaoDstu2")
 	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
@@ -82,6 +94,9 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected EntityManager myEntityManager;
 	@Autowired
 	protected FhirContext myFhirCtx;
+	@Autowired
+	@Qualifier("myImmunizationDaoDstu2")
+	protected IFhirResourceDao<Immunization> myImmunizationDao;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
 	@Qualifier("myLocationDaoDstu2")

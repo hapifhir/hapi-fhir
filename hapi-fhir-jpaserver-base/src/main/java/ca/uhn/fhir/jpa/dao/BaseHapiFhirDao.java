@@ -166,8 +166,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return InstantDt.withCurrentTime();
 	}
 
-	protected List<ResourceLink> extractResourceLinks(ResourceTable theEntity, IResource theResource) {
-		ArrayList<ResourceLink> retVal = new ArrayList<ResourceLink>();
+	protected Set<ResourceLink> extractResourceLinks(ResourceTable theEntity, IResource theResource) {
+		Set<ResourceLink> retVal = new HashSet<ResourceLink>();
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
@@ -185,73 +185,76 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				multiType = true;
 			}
 
-			for (Object nextObject : extractValues(nextPathsUnsplit, theResource)) {
-				if (nextObject == null) {
-					continue;
-				}
-
-				ResourceLink nextEntity;
-				if (nextObject instanceof BaseResourceReferenceDt) {
-					BaseResourceReferenceDt nextValue = (BaseResourceReferenceDt) nextObject;
-					if (nextValue.isEmpty()) {
-						continue;
-					}
-					if (nextValue.getReference().isEmpty() || nextValue.getReference().getValue().startsWith("#")) {
-						// This is a blank or contained resource reference
+			String[] nextPathsSplit = nextPathsUnsplit.split("\\|");
+			for (String nextPath : nextPathsSplit) {
+				for (Object nextObject : extractValues(nextPath, theResource)) {
+					if (nextObject == null) {
 						continue;
 					}
 
-					String typeString = nextValue.getReference().getResourceType();
-					if (isBlank(typeString)) {
-						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - " + nextValue.getReference().getValue());
-					}
-					RuntimeResourceDefinition resourceDefinition;
-					try {
-						resourceDefinition = getContext().getResourceDefinition(typeString);
-					} catch (DataFormatException e) {
-						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - " + nextValue.getReference().getValue());
-					}
+					ResourceLink nextEntity;
+					if (nextObject instanceof BaseResourceReferenceDt) {
+						BaseResourceReferenceDt nextValue = (BaseResourceReferenceDt) nextObject;
+						if (nextValue.isEmpty()) {
+							continue;
+						}
+						if (nextValue.getReference().isEmpty() || nextValue.getReference().getValue().startsWith("#")) {
+							// This is a blank or contained resource reference
+							continue;
+						}
 
-					Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
-					String id = nextValue.getReference().getIdPart();
-					if (StringUtils.isBlank(id)) {
-						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource ID - " + nextValue.getReference().getValue());
-					}
+						String typeString = nextValue.getReference().getResourceType();
+						if (isBlank(typeString)) {
+							throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - " + nextValue.getReference().getValue());
+						}
+						RuntimeResourceDefinition resourceDefinition;
+						try {
+							resourceDefinition = getContext().getResourceDefinition(typeString);
+						} catch (DataFormatException e) {
+							throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - " + nextValue.getReference().getValue());
+						}
 
-					IFhirResourceDao<?> dao = getDao(type);
-					if (dao == null) {
-						StringBuilder b = new StringBuilder();
-						b.append("This server (version ");
-						b.append(myContext.getVersion().getVersion());
-						b.append(") is not able to handle resources of type[");
-						b.append(nextValue.getReference().getResourceType());
-						b.append("] - Valid resource types for this server: ");
-						b.append(myResourceTypeToDao.keySet().toString());
+						Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
+						String id = nextValue.getReference().getIdPart();
+						if (StringUtils.isBlank(id)) {
+							throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource ID - " + nextValue.getReference().getValue());
+						}
 
-						throw new InvalidRequestException(b.toString());
-					}
-					Long valueOf;
-					try {
-						valueOf = translateForcedIdToPid(nextValue.getReference());
-					} catch (ResourceNotFoundException e) {
-						String resName = getContext().getResourceDefinition(type).getName();
-						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
-					}
-					ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
-					if (target == null) {
-						String resName = getContext().getResourceDefinition(type).getName();
-						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
-					}
-					nextEntity = new ResourceLink(nextPathsUnsplit, theEntity, target);
-				} else {
-					if (!multiType) {
-						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
+						IFhirResourceDao<?> dao = getDao(type);
+						if (dao == null) {
+							StringBuilder b = new StringBuilder();
+							b.append("This server (version ");
+							b.append(myContext.getVersion().getVersion());
+							b.append(") is not able to handle resources of type[");
+							b.append(nextValue.getReference().getResourceType());
+							b.append("] - Valid resource types for this server: ");
+							b.append(myResourceTypeToDao.keySet().toString());
+
+							throw new InvalidRequestException(b.toString());
+						}
+						Long valueOf;
+						try {
+							valueOf = translateForcedIdToPid(nextValue.getReference());
+						} catch (ResourceNotFoundException e) {
+							String resName = getContext().getResourceDefinition(type).getName();
+							throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
+						}
+						ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
+						if (target == null) {
+							String resName = getContext().getResourceDefinition(type).getName();
+							throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
+						}
+						nextEntity = new ResourceLink(nextPath, theEntity, target);
 					} else {
-						continue;
+						if (!multiType) {
+							throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
+						} else {
+							continue;
+						}
 					}
-				}
-				if (nextEntity != null) {
-					retVal.add(nextEntity);
+					if (nextEntity != null) {
+						retVal.add(nextEntity);
+					}
 				}
 			}
 		}
@@ -261,46 +264,43 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return retVal;
 	}
 
-	protected List<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IResource theResource) {
+	protected Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IResource theResource) {
 		return mySearchParamExtractor.extractSearchParamDates(theEntity, theResource);
 	}
 
-	protected List<ResourceIndexedSearchParamNumber> extractSearchParamNumber(ResourceTable theEntity, IResource theResource) {
+	protected Set<ResourceIndexedSearchParamNumber> extractSearchParamNumber(ResourceTable theEntity, IResource theResource) {
 		return mySearchParamExtractor.extractSearchParamNumber(theEntity, theResource);
 	}
 
-	protected List<ResourceIndexedSearchParamUri> extractSearchParamUri(ResourceTable theEntity, IResource theResource) {
+	protected Set<ResourceIndexedSearchParamUri> extractSearchParamUri(ResourceTable theEntity, IResource theResource) {
 		return mySearchParamExtractor.extractSearchParamUri(theEntity, theResource);
 	}
 
-	protected List<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IResource theResource) {
+	protected Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IResource theResource) {
 		return mySearchParamExtractor.extractSearchParamCoords(theEntity, theResource);
 	}
 
-	protected List<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(ResourceTable theEntity, IResource theResource) {
+	protected Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(ResourceTable theEntity, IResource theResource) {
 		return mySearchParamExtractor.extractSearchParamQuantity(theEntity, theResource);
 	}
 
-	protected List<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, IResource theResource) {
+	protected Set<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, IResource theResource) {
 		return mySearchParamExtractor.extractSearchParamStrings(theEntity, theResource);
 	}
 
-	protected List<BaseResourceIndexedSearchParam> extractSearchParamTokens(ResourceTable theEntity, IResource theResource) {
+	protected Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(ResourceTable theEntity, IResource theResource) {
 		return mySearchParamExtractor.extractSearchParamTokens(theEntity, theResource);
 	}
 
-	private List<Object> extractValues(String thePaths, IResource theResource) {
+	private List<Object> extractValues(String thePath, IResource theResource) {
 		List<Object> values = new ArrayList<Object>();
-		String[] nextPathsSplit = thePaths.split("\\|");
 		FhirTerser t = getContext().newTerser();
-		for (String nextPath : nextPathsSplit) {
-			String nextPathTrimmed = nextPath.trim();
-			try {
-				values.addAll(t.getValues(theResource, nextPathTrimmed));
-			} catch (Exception e) {
-				RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-				ourLog.warn("Failed to index values from path[{}] in resource type[{}]: ", new Object[] { nextPathTrimmed, def.getName(), e.toString() });
-			}
+		String nextPathTrimmed = thePath.trim();
+		try {
+			values.addAll(t.getValues(theResource, nextPathTrimmed));
+		} catch (Exception e) {
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+			ourLog.warn("Failed to index values from path[{}] in resource type[{}]: ", new Object[] { nextPathTrimmed, def.getName(), e.toString() });
 		}
 		return values;
 	}
@@ -1109,25 +1109,25 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		Collection<ResourceIndexedSearchParamCoords> paramsCoords = new ArrayList<ResourceIndexedSearchParamCoords>(theEntity.getParamsCoords());
 		Collection<ResourceLink> resourceLinks = new ArrayList<ResourceLink>(theEntity.getResourceLinks());
 
-		List<ResourceIndexedSearchParamString> stringParams = null;
-		List<ResourceIndexedSearchParamToken> tokenParams = null;
-		List<ResourceIndexedSearchParamNumber> numberParams = null;
-		List<ResourceIndexedSearchParamQuantity> quantityParams = null;
-		List<ResourceIndexedSearchParamDate> dateParams = null;
-		List<ResourceIndexedSearchParamUri> uriParams = null;
-		List<ResourceIndexedSearchParamCoords> coordsParams = null;
-		List<ResourceLink> links = null;
+		Set<ResourceIndexedSearchParamString> stringParams = null;
+		Set<ResourceIndexedSearchParamToken> tokenParams = null;
+		Set<ResourceIndexedSearchParamNumber> numberParams = null;
+		Set<ResourceIndexedSearchParamQuantity> quantityParams = null;
+		Set<ResourceIndexedSearchParamDate> dateParams = null;
+		Set<ResourceIndexedSearchParamUri> uriParams = null;
+		Set<ResourceIndexedSearchParamCoords> coordsParams = null;
+		Set<ResourceLink> links = null;
 
 		if (theDeletedTimestampOrNull != null) {
 
-			stringParams = Collections.emptyList();
-			tokenParams = Collections.emptyList();
-			numberParams = Collections.emptyList();
-			quantityParams = Collections.emptyList();
-			dateParams = Collections.emptyList();
-			uriParams = Collections.emptyList();
-			coordsParams = Collections.emptyList();
-			links = Collections.emptyList();
+			stringParams = Collections.emptySet();
+			tokenParams = Collections.emptySet();
+			numberParams = Collections.emptySet();
+			quantityParams = Collections.emptySet();
+			dateParams = Collections.emptySet();
+			uriParams = Collections.emptySet();
+			coordsParams = Collections.emptySet();
+			links = Collections.emptySet();
 			theEntity.setDeleted(theDeletedTimestampOrNull);
 			theEntity.setUpdated(theDeletedTimestampOrNull);
 
@@ -1147,7 +1147,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				// ourLog.info("Indexing resource: {}", entity.getId());
 				ourLog.trace("Storing string indexes: {}", stringParams);
 
-				tokenParams = new ArrayList<ResourceIndexedSearchParamToken>();
+				tokenParams = new HashSet<ResourceIndexedSearchParamToken>();
 				for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theEntity, theResource)) {
 					if (next instanceof ResourceIndexedSearchParamToken) {
 						tokenParams.add((ResourceIndexedSearchParamToken) next);

@@ -19,14 +19,12 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -329,7 +327,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myParamsDatePopulated = theParamsDatePopulated;
 	}
 
-	public void setParamsNumber(List<ResourceIndexedSearchParamNumber> theNumberParams) {
+	public void setParamsNumber(Collection<ResourceIndexedSearchParamNumber> theNumberParams) {
 		if (!isParamsNumberPopulated() && theNumberParams.isEmpty()) {
 			return;
 		}
@@ -396,7 +394,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myProfile = theProfile;
 	}
 
-	public void setResourceLinks(List<ResourceLink> theLinks) {
+	public void setResourceLinks(Collection<ResourceLink> theLinks) {
 		if (!isHasLinks() && theLinks.isEmpty()) {
 			return;
 		}

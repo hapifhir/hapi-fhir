@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.apache.commons.lang3.StringUtils.INDEX_NOT_FOUND;
 /*
  * #%L
  * HAPI FHIR JPA Server

@@ -6,6 +6,17 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="1.3" date="TBD">
+			<action type="add">
+				JPA server removes duplicate resource index entries before storing them 
+				(e.g. if a patient has the same name twice, only one index entry is created
+				for that name)
+			</action>
+			<action type="fix">
+				JPA server did not correctly index search parameters of type "reference" where the
+				path had multiple entries (i.e. "Resource.path1 | Resource.path2")
+			</action>
+		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">
 				JPA server now validates QuestionnaireAnswers for conformance to their respective Questionnaire
