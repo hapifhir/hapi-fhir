@@ -287,7 +287,6 @@
 			<plugin>
 				<groupId>de.juplo</groupId>
 				<artifactId>hibernate4-maven-plugin</artifactId>
-				<version>1.0.5</version>
 				<configuration>
 					<force>true</force>
 					<target>SCRIPT</target>
@@ -417,7 +416,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jxr-plugin</artifactId>
-				<version>${maven_jxr_plugin_version}</version>
 			</plugin>
 		</plugins>
 	</reporting>

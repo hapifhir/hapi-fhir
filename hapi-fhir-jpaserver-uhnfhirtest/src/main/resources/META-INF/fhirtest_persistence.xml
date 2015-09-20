@@ -24,7 +24,7 @@
 		
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
-			<property name="hibernate.dialect" value="org.hibernate.dialect.DerbyTenSevenDialect" />
+			<property name="hibernate.dialect" value="ca.uhn.fhir.jpa.util.HapiDerbyTenSevenDialect" />
 			<property name="hibernate.hbm2ddl.auto" value="update" />
 			<property name="hibernate.jdbc.batch_size" value="20" />
 			<property name="hibernate.cache.use_minimal_puts" value="true" />

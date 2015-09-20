@@ -214,15 +214,13 @@
 		<derby_version>10.11.1.1</derby_version>
 		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this 
 			version with caution! Also note that if you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration 
-			for that plugin... <hibernate_version>4.3.7.Final</hibernate_version> -->
-		<hibernate_version>4.2.17.Final</hibernate_version>
-		<hibernate_validator_version>5.1.0.Final</hibernate_validator_version>
+			for that plugin... -->
+		<hibernate_version>5.0.1.Final</hibernate_version>
+		<hibernate_validator_version>5.2.1.Final</hibernate_validator_version>
 		<jetty_version>9.2.6.v20141205</jetty_version>
 		<maven_build_helper_plugin_version>1.9.1</maven_build_helper_plugin_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_failsafe_plugin_version>2.18.1</maven_failsafe_plugin_version>
-		<maven_gpg_plugin_version>1.6</maven_gpg_plugin_version>
-		<maven_jxr_plugin_version>2.5</maven_jxr_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<maven_project_info_plugin_version>2.8</maven_project_info_plugin_version>
 		<maven_surefire_plugin_version>2.18.1</maven_surefire_plugin_version>
@@ -231,7 +229,7 @@
 		<mitreid-connect-version>1.1.8</mitreid-connect-version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<phloc_commons_version>4.3.6</phloc_commons_version>
-		<spring_version>4.1.5.RELEASE</spring_version>
+		<spring_version>4.2.1.RELEASE</spring_version>
 		<thymeleaf-version>2.1.4.RELEASE</thymeleaf-version>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<xmlunit_version>1.6</xmlunit_version>
@@ -542,6 +540,11 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>de.juplo</groupId>
+					<artifactId>hibernate4-maven-plugin</artifactId>
+					<version>1.1.0</version>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>maven-bundle-plugin</artifactId>
 					<version>2.5.4</version>
@@ -592,8 +595,18 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.6</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>2.10.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jxr-plugin</artifactId>
+					<version>2.5</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1223,7 +1236,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>${maven_gpg_plugin_version}</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
