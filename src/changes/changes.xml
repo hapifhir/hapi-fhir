@@ -26,6 +26,10 @@
 				JPA server did not correctly index search parameters of type "reference" where the
 				path had multiple entries (i.e. "Resource.path1 | Resource.path2")
 			</action>
+			<action type="fix">
+				JPA server _history operations (server, type, instance) not correctly set the
+				Bundle.entry.request.method to POST or PUT for create and updates of the resource.
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

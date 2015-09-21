@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +37,9 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
+import ca.uhn.fhir.jpa.entity.SubscriptionCandidateResource;
+import ca.uhn.fhir.jpa.entity.SubscriptionFlaggedResource;
+import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -55,6 +57,7 @@ import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
+import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.model.dstu2.resource.Substance;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.parser.IParser;
@@ -66,16 +69,12 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 @ContextConfiguration(locations={
 	"classpath:hapi-fhir-server-resourceproviders-dstu2.xml", 
 	"classpath:fhir-jpabase-spring-test-config.xml"})
-@TransactionConfiguration(defaultRollback=false)
 //@formatter:on
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu2")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
-	@Autowired
-	@Qualifier("mySubstanceDaoDstu2")
-	protected IFhirResourceDao<Substance> mySubstanceDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
@@ -126,6 +125,12 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("myStructureDefinitionDaoDstu2")
 	protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
 	@Autowired
+	@Qualifier("mySubscriptionDaoDstu2")
+	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
+	@Autowired
+	@Qualifier("mySubstanceDaoDstu2")
+	protected IFhirResourceDao<Substance> mySubstanceDao;
+	@Autowired
 	@Qualifier("mySystemDaoDstu2")
 	protected IFhirSystemDao<Bundle> mySystemDao;
 	@Autowired
@@ -160,6 +165,13 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		return newJsonParser.parseResource(type, string);
 	}
 
+	public TransactionTemplate newTxTemplate() {
+		TransactionTemplate retVal = new TransactionTemplate(myTxManager);
+		retVal.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		retVal.afterPropertiesSet();
+		return retVal;
+	}
+
 	public static void purgeDatabase(final EntityManager entityManager, PlatformTransactionManager theTxManager) {
 		TransactionTemplate txTemplate = new TransactionTemplate(theTxManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
@@ -174,6 +186,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		txTemplate.execute(new TransactionCallback<Void>() {
 			@Override
 			public Void doInTransaction(TransactionStatus theStatus) {
+				entityManager.createQuery("DELETE from " + SubscriptionCandidateResource.class.getSimpleName() + " d").executeUpdate();
+				entityManager.createQuery("DELETE from " + SubscriptionFlaggedResource.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + ForcedId.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d").executeUpdate();
@@ -189,6 +203,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		txTemplate.execute(new TransactionCallback<Void>() {
 			@Override
 			public Void doInTransaction(TransactionStatus theStatus) {
+				entityManager.createQuery("DELETE from " + SubscriptionTable.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + ResourceHistoryTag.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + ResourceTag.class.getSimpleName() + " d").executeUpdate();
 				entityManager.createQuery("DELETE from " + TagDefinition.class.getSimpleName() + " d").executeUpdate();

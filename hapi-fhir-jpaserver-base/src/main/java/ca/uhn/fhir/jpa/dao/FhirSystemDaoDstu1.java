@@ -104,6 +104,7 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>> {
 		OperationOutcome oo = new OperationOutcome();
 		retVal.add(oo);
 
+		Date updateTime = new Date();
 		for (int resourceIdx = 0; resourceIdx < theResources.size(); resourceIdx++) {
 			IResource nextResource = theResources.get(resourceIdx);
 
@@ -160,6 +161,8 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>> {
 			if (entity == null) {
 				nextResouceOperationOut = BundleEntryTransactionMethodEnum.POST;
 				entity = toEntity(nextResource);
+				entity.setUpdated(updateTime);
+				entity.setPublished(updateTime);
 				if (nextId.isEmpty() == false && "cid:".equals(nextId.getBaseUrl())) {
 					ourLog.debug("Resource in transaction has ID[{}], will replace with server assigned ID", nextId.getIdPart());
 				} else if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.POST) {
@@ -170,7 +173,7 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>> {
 						if (candidateMatches.size() == 1) {
 							ourLog.debug("Resource with match URL [{}] already exists, will be NOOP", matchUrl);
 							BaseHasResource existingEntity = loadFirstEntityFromCandidateMatches(candidateMatches);
-							IResource existing = (IResource) toResource(existingEntity);
+							IResource existing = (IResource) toResource(existingEntity, false);
 							persistedResources.add(null);
 							retVal.add(existing);
 							continue;
@@ -262,11 +265,11 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>> {
 			InstantDt deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get(resource);
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 			if (deletedInstantOrNull == null && ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(resource) == BundleEntryTransactionMethodEnum.DELETE) {
-				deletedTimestampOrNull = new Date();
+				deletedTimestampOrNull = updateTime;
 				ResourceMetadataKeyEnum.DELETED_AT.put(resource, new InstantDt(deletedTimestampOrNull));
 			}
 
-			updateEntity(resource, table, table.getId() != null, deletedTimestampOrNull);
+			updateEntity(resource, table, table.getId() != null, deletedTimestampOrNull, updateTime);
 		}
 
 		long delay = System.currentTimeMillis() - start;

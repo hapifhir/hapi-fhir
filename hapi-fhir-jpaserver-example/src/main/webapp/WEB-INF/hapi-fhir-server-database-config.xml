@@ -21,7 +21,7 @@
 	and other properties supported by BasicDataSource.
 	-->
 	<bean id="myPersistenceDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
-		<property name="url" value="jdbc:derby:directory:jpaserver_derby_files;create=true" />
+		<property name="url" value="jdbc:derby:directory:target/jpaserver_derby_files;create=true" />
 		<property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedDriver"></property>
 		<property name="username" value=""/>
 		<property name="password" value=""/>

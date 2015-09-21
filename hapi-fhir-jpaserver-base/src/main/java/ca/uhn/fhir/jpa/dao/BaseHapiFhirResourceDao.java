@@ -142,7 +142,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	private EntityManager myEntityManager;
+	protected EntityManager myEntityManager;
 
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
@@ -1004,7 +1004,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			}
 		}
 
-		return doCreate(theResource, theIfNoneExist, thePerformIndexing);
+		return doCreate(theResource, theIfNoneExist, thePerformIndexing, new Date());
 	}
 
 	private Predicate createCompositeParamPart(CriteriaBuilder builder, Root<ResourceTable> from, RuntimeSearchParam left, IQueryParameterType leftValue) {
@@ -1268,7 +1268,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, theId.getResourceType());
 		notifyInterceptors(RestOperationTypeEnum.DELETE, requestDetails);
 
-		ResourceTable savedEntity = updateEntity(null, entity, true, new Date());
+		Date updateTime = new Date();
+		ResourceTable savedEntity = updateEntity(null, entity, true, updateTime, updateTime);
 
 		notifyWriteCompleted();
 
@@ -1298,14 +1299,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		notifyInterceptors(RestOperationTypeEnum.DELETE, requestDetails);
 
 		// Perform delete
-		ResourceTable savedEntity = updateEntity(null, entity, true, new Date());
+		Date updateTime = new Date();
+		ResourceTable savedEntity = updateEntity(null, entity, true, updateTime, updateTime);
 		notifyWriteCompleted();
 
 		ourLog.info("Processed delete on {} in {}ms", theUrl, w.getMillisAndRestart());
 		return toMethodOutcome(savedEntity, null);
 	}
 
-	private DaoMethodOutcome doCreate(T theResource, String theIfNoneExist, boolean thePerformIndexing) {
+	private DaoMethodOutcome doCreate(T theResource, String theIfNoneExist, boolean thePerformIndexing, Date theUpdateTime) {
 		StopWatch w = new StopWatch();
 
 		preProcessResourceForStorage(theResource);
@@ -1346,7 +1348,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theResource.getId(), toResourceName(theResource), theResource);
 		notifyInterceptors(RestOperationTypeEnum.CREATE, requestDetails);
 
-		updateEntity(theResource, entity, false, null, thePerformIndexing, true);
+		updateEntity(theResource, entity, false, null, thePerformIndexing, true, theUpdateTime);
 
 		DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(true);
 
@@ -1419,7 +1421,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		try {
 			BaseHasResource entity = readEntity(theId.toVersionless(), false);
 			validateResourceType(entity);
-			currentTmp = toResource(myResourceType, entity);
+			currentTmp = toResource(myResourceType, entity, true);
 			if (ResourceMetadataKeyEnum.UPDATED.get(currentTmp).after(end.getValue())) {
 				currentTmp = null;
 			}
@@ -1496,7 +1498,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 					if (retVal.size() == maxResults) {
 						break;
 					}
-					retVal.add(toResource(myResourceType, next));
+					retVal.add(toResource(myResourceType, next, true));
 				}
 
 				return retVal;
@@ -1527,7 +1529,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return retVal;
 	}
 
-	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids) {
+	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation) {
 		if (theIncludePids.isEmpty()) {
 			return;
 		}
@@ -1546,7 +1548,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		for (ResourceTable next : q.getResultList()) {
 			Class<? extends IBaseResource> resourceType = getContext().getResourceDefinition(next.getResourceType()).getImplementingClass();
-			IResource resource = (IResource) toResource(resourceType, next);
+			IResource resource = (IResource) toResource(resourceType, next, theForHistoryOperation);
 			Integer index = position.get(next.getId());
 			if (index == null) {
 				ourLog.warn("Got back unexpected resource PID {}", next.getId());
@@ -1827,7 +1829,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		BaseHasResource entity = readEntity(theId);
 		validateResourceType(entity);
 
-		T retVal = toResource(myResourceType, entity);
+		T retVal = toResource(myResourceType, entity, false);
 
 		InstantDt deleted = ResourceMetadataKeyEnum.DELETED_AT.get(retVal);
 		if (deleted != null && !deleted.isEmpty()) {
@@ -2065,7 +2067,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 						// Execute the query and make sure we return distinct results
 						List<IBaseResource> retVal = new ArrayList<IBaseResource>();
-						loadResourcesByPid(pidsSubList, retVal, revIncludedPids);
+						loadResourcesByPid(pidsSubList, retVal, revIncludedPids, false);
 
 						return retVal;
 					}
@@ -2381,7 +2383,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 				if (resourceId.isIdPartValidLong()) {
 					throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart()));
 				}
-				return doCreate(theResource, null, thePerformIndexing);
+				return doCreate(theResource, null, thePerformIndexing, new Date());
 			}
 		}
 
@@ -2398,7 +2400,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
 
 		// Perform update
-		ResourceTable savedEntity = updateEntity(theResource, entity, true, null, thePerformIndexing, true);
+		ResourceTable savedEntity = updateEntity(theResource, entity, true, null, thePerformIndexing, true, new Date());
 
 		notifyWriteCompleted();
 

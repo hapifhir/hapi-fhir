@@ -33,7 +33,7 @@
 #foreach ( $res in $resources )
 	<bean id="my${res.name}Dao${versionCapitalized}" 
 ## Some resource types have customized DAOs for resource specific functionality
-#if ( ${versionCapitalized} == 'Dstu2' && ( ${res.name} == 'Bundle' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'ValueSet'))
+#if ( ${versionCapitalized} == 'Dstu2' && ( ${res.name} == 'Bundle' || ${res.name} == 'Subscription' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'ValueSet'))
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${res.name}${versionCapitalized}">
 #else
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}">

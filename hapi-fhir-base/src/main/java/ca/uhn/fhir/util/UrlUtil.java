@@ -6,6 +6,9 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -156,6 +159,93 @@ public class UrlUtil {
 			return URLEncoder.encode(theValue, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			throw new Error("UTF-8 not supported on this platform");
+		}
+	}
+	
+	//@formatter:off
+	/** 
+	 * Parse a URL in one of the following forms:
+	 * <ul>
+	 * <li>[Resource Type]?[Search Params]
+	 * <li>[Resource Type]/[Resource ID]
+	 * <li>[Resource Type]/[Resource ID]/_history/[Version ID]
+	 * </ul>
+	 */
+	//@formatter:on
+	public static UrlParts parseUrl(String theUrl) {
+		UrlParts retVal = new UrlParts();
+
+		int nextStart = 0;
+		boolean nextIsHistory = false;
+
+		for (int idx = 0; idx < theUrl.length(); idx++) {
+			char nextChar = theUrl.charAt(idx);
+			boolean atEnd = (idx + 1) == theUrl.length();
+			if (nextChar == '?' || nextChar == '/' || atEnd) {
+				int endIdx = atEnd ? idx + 1 : idx;
+				String nextSubstring = theUrl.substring(nextStart, endIdx);
+				if (retVal.getResourceType() == null) {
+					retVal.setResourceType(nextSubstring);
+				} else if (retVal.getResourceId() == null) {
+					retVal.setResourceId(nextSubstring);
+				} else if (nextIsHistory) {
+					retVal.setVersionId(nextSubstring);
+				} else {
+					if (nextSubstring.equals(Constants.URL_TOKEN_HISTORY)) {
+						nextIsHistory = true;
+					} else {
+						throw new InvalidRequestException("Invalid FHIR resource URL: " + theUrl);
+					}
+				}
+				if (nextChar == '?') {
+					if (theUrl.length() > idx + 1) {
+						retVal.setParams(theUrl.substring(idx + 1, theUrl.length()));
+					}
+					break;
+				}
+				nextStart = idx + 1;
+			}
+		}
+
+		return retVal;
+	}
+
+	public static class UrlParts {
+		private String myParams;
+		private String myResourceId;
+		private String myResourceType;
+		private String myVersionId;
+
+		public String getParams() {
+			return myParams;
+		}
+
+		public String getResourceId() {
+			return myResourceId;
+		}
+
+		public String getResourceType() {
+			return myResourceType;
+		}
+
+		public String getVersionId() {
+			return myVersionId;
+		}
+
+		public void setParams(String theParams) {
+			myParams = theParams;
+		}
+
+		public void setResourceId(String theResourceId) {
+			myResourceId = theResourceId;
+		}
+
+		public void setResourceType(String theResourceType) {
+			myResourceType = theResourceType;
+		}
+
+		public void setVersionId(String theVersionId) {
+			myVersionId = theVersionId;
 		}
 	}
 

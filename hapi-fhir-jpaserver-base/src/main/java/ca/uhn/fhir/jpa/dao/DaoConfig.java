@@ -35,6 +35,7 @@ public class DaoConfig {
 	private int myIncludeLimit = 2000;
 	private List<IServerInterceptor> myInterceptors;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
+	private boolean mySubscriptionEnabled;
 
 	/**
 	 * See {@link #setIncludeLimit(int)}
@@ -64,6 +65,13 @@ public class DaoConfig {
 		return myResourceEncoding;
 	}
 
+	/**
+	 * See {@link #setSubscriptionEnabled(boolean)}
+	 */
+	public boolean isSubscriptionEnabled() {
+		return mySubscriptionEnabled;
+	}
+
 	public void setHardSearchLimit(int theHardSearchLimit) {
 		myHardSearchLimit = theHardSearchLimit;
 	}
@@ -90,12 +98,12 @@ public class DaoConfig {
 	 * ID).
 	 * </p>
 	 */
-	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
-		myInterceptors = theInterceptors;
-	}
-
-	public void setResourceEncoding(ResourceEncodingEnum theResourceEncoding) {
-		myResourceEncoding = theResourceEncoding;
+	public void setInterceptors(IServerInterceptor... theInterceptor) {
+		if (theInterceptor == null || theInterceptor.length==0){
+			setInterceptors(new ArrayList<IServerInterceptor>());
+		} else {
+			setInterceptors(Arrays.asList(theInterceptor));
+		}
 	}
 
 	/**
@@ -107,12 +115,23 @@ public class DaoConfig {
 	 * ID).
 	 * </p>
 	 */
-	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		if (theInterceptor == null || theInterceptor.length==0){
-			setInterceptors(new ArrayList<IServerInterceptor>());
-		} else {
-			setInterceptors(Arrays.asList(theInterceptor));
-		}
+	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
+		myInterceptors = theInterceptors;
+	}
+
+	public void setResourceEncoding(ResourceEncodingEnum theResourceEncoding) {
+		myResourceEncoding = theResourceEncoding;
+	}
+
+	/**
+	 * Does this server support subscription? If set to true, the server
+	 * will enable the subscription monitoring mode, which adds a bit of
+	 * overhead. Note that if this is enabled, you must also include
+	 * Spring task scanning to your XML config for the scheduled tasks
+	 * used by the subscription module. 
+	 */
+	public void setSubscriptionEnabled(boolean theSubscriptionEnabled) {
+		mySubscriptionEnabled = theSubscriptionEnabled;
 	}
 
 }

@@ -87,6 +87,7 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
+import ca.uhn.fhir.jpa.entity.SubscriptionCandidateResource;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.StopWatch;
@@ -520,7 +521,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 								}
 								throw e;
 							}
-							IResource resource = (IResource) toResource(type.getImplementingClass(), next);
+							IResource resource = (IResource) toResource(type.getImplementingClass(), next, true);
 							retVal.add(resource);
 						}
 						return retVal;
@@ -558,12 +559,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	protected void populateResourceIntoEntity(IResource theResource, ResourceTable theEntity) {
-
-		if (theEntity.getPublished().isEmpty()) {
-			theEntity.setPublished(new Date());
-		}
-		theEntity.setUpdated(new Date());
-
 		theEntity.setResourceType(toResourceName(theResource));
 
 		List<BaseResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, BaseResourceReferenceDt.class);
@@ -936,13 +931,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return retVal;
 	}
 
-	protected IBaseResource toResource(BaseHasResource theEntity) {
+	protected IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation) {
 		RuntimeResourceDefinition type = myContext.getResourceDefinition(theEntity.getResourceType());
-		return toResource(type.getImplementingClass(), theEntity);
+		return toResource(type.getImplementingClass(), theEntity, theForHistoryOperation);
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity) {
+	protected <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation) {
 		String resourceText = null;
 		switch (theEntity.getEncoding()) {
 		case JSON:
@@ -983,9 +978,23 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			res = (IResource) myContext.getResourceDefinition(theResourceType).newInstance();
 			retVal = (R) res;
 			ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt(theEntity.getDeleted()));
-			ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.DELETE);
+			if (theForHistoryOperation) {
+				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.DELETE);
+			}
+		} else if (theForHistoryOperation) {
+			/*
+			 * If the create and update times match, this was when the resource was created
+			 * so we should mark it as a POST. Otherwise, it's a PUT. 
+			 */
+			Date published = theEntity.getPublished().getValue();
+			Date updated = theEntity.getUpdated().getValue();
+			if (published.equals(updated)) {
+				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.POST);
+			} else {
+				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.PUT);
+			}
 		}
-
+		
 		res.setId(theEntity.getIdDt());
 
 		ResourceMetadataKeyEnum.VERSION.put(res, Long.toString(theEntity.getVersion()));
@@ -1063,25 +1072,28 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
-	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull) {
-		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true, true);
+	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, Date theUpdateTime) {
+		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true, true, theUpdateTime);
 	}
 
 	@SuppressWarnings("unchecked")
-	protected ResourceTable updateEntity(final IResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion) {
-
-		if (theEntity.getPublished() == null) {
-			theEntity.setPublished(new Date());
-		}
-
+	protected ResourceTable updateEntity(final IResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion, Date theUpdateTime) {
+		
+		/*
+		 * This should be the very first thing..
+		 */
 		if (theResource != null) {
-			validateResourceForStorage((T) theResource);
+			validateResourceForStorage((T) theResource, theEntity);
 			String resourceType = myContext.getResourceDefinition(theResource).getName();
 			if (isNotBlank(theEntity.getResourceType()) && !theEntity.getResourceType().equals(resourceType)) {
 				throw new UnprocessableEntityException("Existing resource ID[" + theEntity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + theEntity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
 			}
 		}
 
+		if (theEntity.getPublished() == null) {
+			theEntity.setPublished(theUpdateTime);
+		}
+		
 		if (theUpdateHistory) {
 			final ResourceHistoryTable historyEntry = theEntity.toHistory();
 			myEntityManager.persist(historyEntry);
@@ -1159,7 +1171,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				links = extractResourceLinks(theEntity, theResource);
 				populateResourceIntoEntity(theResource, theEntity);
 
-				theEntity.setUpdated(new Date());
+				theEntity.setUpdated(theUpdateTime);
 				theEntity.setLanguage(theResource.getLanguage().getValue());
 				theEntity.setParamsString(stringParams);
 				theEntity.setParamsStringPopulated(stringParams.isEmpty() == false);
@@ -1178,11 +1190,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setResourceLinks(links);
 				theEntity.setHasLinks(links.isEmpty() == false);
 				theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
-
+				
 			} else {
 
 				populateResourceIntoEntity(theResource, theEntity);
-				theEntity.setUpdated(new Date());
+				theEntity.setUpdated(theUpdateTime);
 				theEntity.setLanguage(theResource.getLanguage().getValue());
 				theEntity.setIndexStatus(null);
 
@@ -1197,8 +1209,24 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				myEntityManager.persist(theEntity.getForcedId());
 			}
 
+			postPersist(theEntity, (T) theResource);
+
 		} else {
 			theEntity = myEntityManager.merge(theEntity);
+			
+			postUpdate(theEntity, (T) theResource);
+		}
+
+		/*
+		 * When subscription is enabled, for each resource we store we also
+		 * store a subscription candidate. These are examined by the subscription
+		 * module and then deleted. 
+		 */
+		if (myConfig.isSubscriptionEnabled() && thePerformIndexing) {
+			SubscriptionCandidateResource candidate = new SubscriptionCandidateResource();
+			candidate.setResource(theEntity);
+			candidate.setResourceVersion(theEntity.getVersion());
+			myEntityManager.persist(candidate);
 		}
 
 		if (thePerformIndexing) {
@@ -1290,14 +1318,39 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	/**
+	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the
+	 * first time.
+	 * 
+	 * @param theEntity
+	 *           The resource
+	 * @param theResource The resource being persisted
+	 */
+	protected void postUpdate(ResourceTable theEntity, T theResource) {
+		// nothing
+	}
+
+	/**
+	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the
+	 * first time.
+	 * 
+	 * @param theEntity
+	 *           The resource
+	 * @param theResource The resource being persisted
+	 */
+	protected void postPersist(ResourceTable theEntity, T theResource) {
+		// nothing
+	}
+
+	/**
 	 * This method is invoked immediately before storing a new resource, or an update to an existing resource to allow
 	 * the DAO to ensure that it is valid for persistence. By default, checks for the "subsetted" tag and rejects
 	 * resources which have it. Subclasses should call the superclass implementation to preserve this check.
 	 * 
 	 * @param theResource
 	 *           The resource that is about to be persisted
+	 * @param theEntityToSave TODO
 	 */
-	protected void validateResourceForStorage(T theResource) {
+	protected void validateResourceForStorage(T theResource, ResourceTable theEntityToSave) {
 		IResource res = (IResource) theResource;
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(res);
 		if (tagList != null) {
