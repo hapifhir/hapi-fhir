@@ -245,9 +245,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		HashSet<Long> found = new HashSet<Long>(q.getResultList());
 		if (!theExistingPids.isEmpty()) {
 			theExistingPids.retainAll(found);
+			return theExistingPids;
+		} else {
+			return found;
 		}
-
-		return found;
 	}
 
 	// private Set<Long> addPredicateComposite(String theParamName, Set<Long> thePids, List<? extends
@@ -2127,42 +2128,41 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 				if (nextParamEntry.getValue().isEmpty()) {
 					continue;
-				} else if (nextParamEntry.getValue().size() > 1) {
-					throw new InvalidRequestException("AND queries not supported for _id (Multiple instances of this param found)");
 				} else {
-					Set<Long> joinPids = new HashSet<Long>();
-					List<? extends IQueryParameterType> nextValue = nextParamEntry.getValue().get(0);
-					if (nextValue == null || nextValue.size() == 0) {
-						continue;
-					} else {
-						for (IQueryParameterType next : nextValue) {
-							String value = next.getValueAsQueryToken();
-							IIdType valueId = new IdDt(value);
+					for (List<? extends IQueryParameterType> nextValue : nextParamEntry.getValue()) {
+						Set<Long> joinPids = new HashSet<Long>();
+						if (nextValue == null || nextValue.size() == 0) {
+							continue;
+						} else {
+							for (IQueryParameterType next : nextValue) {
+								String value = next.getValueAsQueryToken();
+								IIdType valueId = new IdDt(value);
 
-							try {
-								BaseHasResource entity = readEntity(valueId);
-								if (entity.getDeleted() != null) {
-									continue;
+								try {
+									BaseHasResource entity = readEntity(valueId);
+									if (entity.getDeleted() != null) {
+										continue;
+									}
+									joinPids.add(entity.getId());
+								} catch (ResourceNotFoundException e) {
+									// This isn't an error, just means no result found
 								}
-								joinPids.add(entity.getId());
-							} catch (ResourceNotFoundException e) {
-								// This isn't an error, just means no result found
+							}
+							if (joinPids.isEmpty()) {
+								return new HashSet<Long>();
 							}
 						}
-						if (joinPids.isEmpty()) {
+
+						pids = addPredicateId(pids, joinPids);
+						if (pids.isEmpty()) {
 							return new HashSet<Long>();
 						}
-					}
 
-					pids = addPredicateId(pids, joinPids);
-					if (pids.isEmpty()) {
-						return new HashSet<Long>();
-					}
-
-					if (pids.isEmpty()) {
-						pids.addAll(joinPids);
-					} else {
-						pids.retainAll(joinPids);
+						if (pids.isEmpty()) {
+							pids.addAll(joinPids);
+						} else {
+							pids.retainAll(joinPids);
+						}
 					}
 				}
 

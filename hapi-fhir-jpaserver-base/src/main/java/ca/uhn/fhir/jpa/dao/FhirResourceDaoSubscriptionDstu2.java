@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.SubscriptionCandidateResource;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -76,6 +77,8 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		}
 		ourLog.trace("Beginning pollForNewUndeliveredResources()");
 
+//		SubscriptionCandidateResource
+		
 		TypedQuery<SubscriptionTable> q = myEntityManager.createNamedQuery("Q_HFJ_SUBSCRIPTION_NEXT_CHECK", SubscriptionTable.class);
 		q.setParameter("next_check", new Date());
 		q.setParameter("status", SubscriptionStatusEnum.ACTIVE);

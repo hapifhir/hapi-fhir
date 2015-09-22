@@ -44,11 +44,11 @@ public class ${className}ResourceProvider extends
 	
 			@Description(shortDefinition="The resource identity")
 			@OptionalParam(name="_id")
-			StringParam theId, 
+			StringAndListParam theId, 
 
 			@Description(shortDefinition="The resource language")
 			@OptionalParam(name="_language")
-			StringParam theResourceLanguage, 
+			StringAndListParam theResourceLanguage, 
 
 			@Description(shortDefinition="Search for resources which have the given tag")
 			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_TAG)

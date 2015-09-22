@@ -30,6 +30,9 @@
 				JPA server _history operations (server, type, instance) not correctly set the
 				Bundle.entry.request.method to POST or PUT for create and updates of the resource.
 			</action>
+			<action type="add" issue="225">
+				Support AND/OR on _id search parameter in JPA
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

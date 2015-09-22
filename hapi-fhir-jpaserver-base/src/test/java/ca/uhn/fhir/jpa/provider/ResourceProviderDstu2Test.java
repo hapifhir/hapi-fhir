@@ -152,6 +152,33 @@ public class ResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	// }
 
 	@Test
+	public void testSearchByIdOr() {
+		IIdType id1;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		IIdType id2;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id2 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		//@formatter:off
+		Bundle found = ourClient
+			.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.matches().values(id1.getIdPart(), id2.getIdPart()))
+			.and(Patient.RES_ID.matches().value(id1.getIdPart()))
+			.execute();
+		//@formatter:on
+
+		assertThat(toIdListUnqualifiedVersionless(found), containsInAnyOrder(id1));
+	}
+	
+	@Test
 	public void testBundleCreate() throws Exception {
 		IGenericClient client = ourClient;
 

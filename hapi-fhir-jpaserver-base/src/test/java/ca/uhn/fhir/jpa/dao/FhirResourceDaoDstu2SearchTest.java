@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
@@ -68,6 +69,8 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -298,6 +301,104 @@ public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	public void testSearchByIdParamWrongType() {
+		IIdType id1;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		IIdType id2;
+		{
+			Organization patient = new Organization();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id2 = myOrganizationDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("_id", new StringOrListParam().addOr(new StringParam(id1.getIdPart())).addOr(new StringParam(id2.getIdPart())));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
+
+	}
+
+	@Test
+	public void testSearchByIdParamOr() {
+		IIdType id1;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		IIdType id2;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id2 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("_id", new StringOrListParam().addOr(new StringParam(id1.getIdPart())).addOr(new StringParam(id2.getIdPart())));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1, id2));
+
+		params = new SearchParameterMap();
+		params.add("_id", new StringOrListParam().addOr(new StringParam(id1.getIdPart())).addOr(new StringParam(id1.getIdPart())));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
+
+		params = new SearchParameterMap();
+		params.add("_id", new StringOrListParam().addOr(new StringParam(id1.getIdPart())).addOr(new StringParam("999999999999")));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
+
+	}
+
+	@Test
+	public void testSearchByIdParamAnd() {
+		IIdType id1;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		IIdType id2;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id2 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		SearchParameterMap params;
+		StringAndListParam param;
+		
+		params = new SearchParameterMap();
+		param = new StringAndListParam();
+		param.addAnd(new StringOrListParam().addOr(new StringParam(id1.getIdPart())).addOr(new StringParam(id2.getIdPart())));
+		param.addAnd(new StringOrListParam().addOr(new StringParam(id1.getIdPart())));
+		params.add("_id", param);
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
+
+		params = new SearchParameterMap();
+		param = new StringAndListParam();
+		param.addAnd(new StringOrListParam().addOr(new StringParam(id2.getIdPart())));
+		param.addAnd(new StringOrListParam().addOr(new StringParam(id1.getIdPart())));
+		params.add("_id", param);
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), empty());
+		
+		params = new SearchParameterMap();
+		param = new StringAndListParam();
+		param.addAnd(new StringOrListParam().addOr(new StringParam(id2.getIdPart())));
+		param.addAnd(new StringOrListParam().addOr(new StringParam("9999999999999")));
+		params.add("_id", param);
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), empty());
+		
+		params = new SearchParameterMap();
+		param = new StringAndListParam();
+		param.addAnd(new StringOrListParam().addOr(new StringParam("9999999999999")));
+		param.addAnd(new StringOrListParam().addOr(new StringParam(id2.getIdPart())));
+		params.add("_id", param);
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), empty());
+		
+	}
+	
+	@Test
 	public void testSearchCompositeParam() {
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamN01");
@@ -368,7 +469,6 @@ public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 			assertEquals(0, retrieved.size());
 		}
 	}
-
 	@Test
 	public void testSearchLanguageParam() {
 		IIdType id1;
@@ -407,7 +507,60 @@ public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 			List<Patient> patients = toList(myPatientDao.search(params));
 			assertEquals(0, patients.size());
 		}
+	}
 
+	@Test
+	public void testSearchLanguageParamAndOr() {
+		IIdType id1;
+		{
+			Patient patient = new Patient();
+			patient.getLanguage().setValue("en_CA");
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().addFamily("testSearchLanguageParam").addGiven("Joe");
+			id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		IIdType id2;
+		{
+			Patient patient = new Patient();
+			patient.getLanguage().setValue("en_US");
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			patient.addName().addFamily("testSearchLanguageParam").addGiven("John");
+			id2 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_RES_LANGUAGE, new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("en_US")));
+			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1, id2));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_RES_LANGUAGE, new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
+			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			StringAndListParam and = new StringAndListParam();
+			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
+			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")));
+			params.add(Patient.SP_RES_LANGUAGE, and);
+			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			StringAndListParam and = new StringAndListParam();
+			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
+			and.addAnd(new StringOrListParam().addOr(new StringParam("ZZZZZ")));
+			params.add(Patient.SP_RES_LANGUAGE, and);
+			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), empty());
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			StringAndListParam and = new StringAndListParam();
+			and.addAnd(new StringOrListParam().addOr(new StringParam("ZZZZZ")));
+			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
+			params.add(Patient.SP_RES_LANGUAGE, and);
+			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), empty());
+		}
 	}
 
 	@Test
