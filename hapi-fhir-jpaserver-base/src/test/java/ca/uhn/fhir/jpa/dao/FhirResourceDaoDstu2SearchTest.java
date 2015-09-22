@@ -59,6 +59,7 @@ import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.resource.Substance;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -300,6 +301,53 @@ public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 
 	}
 
+	/**
+	 * #222
+	 */
+	@Test
+	public void testSearchForDeleted() {
+
+		{
+			Patient patient = new Patient();
+			patient.setId("TEST");
+			patient.setLanguage(new CodeDt("TEST"));
+			patient.addName().addFamily("TEST");
+			patient.addIdentifier().setSystem("TEST").setValue("TEST");
+			myPatientDao.update(patient);
+		}
+
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+		params.put("_id", new StringDt("TEST"));
+		assertEquals(1, toList(myPatientDao.search(params)).size());
+
+		params.put("_language", new StringParam("TEST"));
+		assertEquals(1, toList(myPatientDao.search(params)).size());
+
+		params.put(Patient.SP_IDENTIFIER, new TokenParam("TEST", "TEST"));
+		assertEquals(1, toList(myPatientDao.search(params)).size());
+
+		params.put(Patient.SP_NAME, new StringParam("TEST"));
+		assertEquals(1, toList(myPatientDao.search(params)).size());
+
+		myPatientDao.delete(new IdDt("Patient/TEST"));
+		
+		params = new HashMap<String, IQueryParameterType>();
+		params.put("_id", new StringDt("TEST"));
+		assertEquals(0, toList(myPatientDao.search(params)).size());
+
+		params.put("_language", new StringParam("TEST"));
+		assertEquals(0, toList(myPatientDao.search(params)).size());
+
+		params.put(Patient.SP_IDENTIFIER, new TokenParam("TEST", "TEST"));
+		assertEquals(0, toList(myPatientDao.search(params)).size());
+
+		params.put(Patient.SP_NAME, new StringParam("TEST"));
+		assertEquals(0, toList(myPatientDao.search(params)).size());
+
+
+	}
+
+	
 	@Test
 	public void testSearchByIdParamWrongType() {
 		IIdType id1;
