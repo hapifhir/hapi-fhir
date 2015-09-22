@@ -24,16 +24,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome.Issue;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
-import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
-import ca.uhn.fhir.model.dstu2.valueset.IssueTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.IParserErrorHandler;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -46,16 +39,12 @@ import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ValidationResult;
 
 public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResourceProvider<T> {
 
 	public static final String OPERATION_NAME_META = "$meta";
 	public static final String OPERATION_NAME_META_DELETE = "$meta-delete";
 	public static final String OPERATION_NAME_META_ADD = "$meta-add";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaResourceProviderDstu2.class);
 
 	public JpaResourceProviderDstu2() {
 		// nothing
@@ -150,10 +139,6 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 				theResource.setId(theId);
 				return getDao().update(theResource);
 			}
-		} catch (ResourceNotFoundException e) {
-			ourLog.info("Can't update resource with ID[" + theId.getValue() + "] because it doesn't exist, going to create it instead");
-			theResource.setId(theId);
-			return getDao().create(theResource);
 		} finally {
 			endRequest(theRequest);
 		}

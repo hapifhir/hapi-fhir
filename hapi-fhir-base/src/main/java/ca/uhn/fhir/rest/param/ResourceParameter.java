@@ -46,6 +46,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.MethodUtil;
@@ -145,11 +146,14 @@ public class ResourceParameter implements IParameter {
 		return charset;
 	}
 
-	public static IBaseResource loadResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
+	@SuppressWarnings("unchecked")
+	public static <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding, Class<T> theResourceType) {
 		FhirContext ctx = theRequest.getServer().getFhirContext();
 
 		final Charset charset = determineRequestCharset(theRequest);
 		Reader requestReader = createRequestReader(theRequest.getRawRequest(), charset);
+
+		RestOperationTypeEnum restOperationType = theMethodBinding != null ? theMethodBinding.getRestOperationType() : null;
 
 		EncodingEnum encoding = RestfulServerUtils.determineRequestEncodingNoDefault(theRequest);
 		if (encoding == null) {
@@ -173,24 +177,24 @@ public class ResourceParameter implements IParameter {
 				}
 				encoding = MethodUtil.detectEncodingNoDefault(body);
 				if (encoding == null) {
-					String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", theMethodBinding.getRestOperationType());
+					String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", restOperationType);
 					throw new InvalidRequestException(msg);
 				} else {
 					requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.getRawRequest()), charset);
 				}
 			} else {
-				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getRestOperationType());
+				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, restOperationType);
 				throw new InvalidRequestException(msg);
 			}
 		}
 
 		IParser parser = encoding.newParser(ctx);
 
-		IBaseResource retVal;
+		T retVal;
 		if (theResourceType != null) {
 			retVal = parser.parseResource(theResourceType, requestReader);
 		} else {
-			retVal = parser.parseResource(requestReader);
+			retVal = (T) parser.parseResource(requestReader);
 		}
 
 		if (theRequest.getId() != null && theRequest.getId().hasIdPart()) {

@@ -99,10 +99,9 @@ public class DaoConfig {
 	 * </p>
 	 */
 	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		if (theInterceptor == null || theInterceptor.length==0){
-			setInterceptors(new ArrayList<IServerInterceptor>());
-		} else {
-			setInterceptors(Arrays.asList(theInterceptor));
+		setInterceptors(new ArrayList<IServerInterceptor>());
+		if (theInterceptor != null && theInterceptor.length != 0) {
+			getInterceptors().addAll(Arrays.asList(theInterceptor));
 		}
 	}
 

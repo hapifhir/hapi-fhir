@@ -22,15 +22,8 @@ package ca.uhn.fhir.jpa.dao;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.jpa.entity.SubscriptionTable;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
-
 public interface IFhirResourceDaoSubscription<T extends IBaseResource> extends IFhirResourceDao<T> {
 
 	void pollForNewUndeliveredResources();
-
-	void setSubscriptionStatus(Long theResourceId, SubscriptionStatusEnum theStatus);
-
-	SubscriptionTable getSubscriptionByResourceId(long theSubscriptionResourceId);
 
 }

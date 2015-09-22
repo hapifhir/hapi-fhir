@@ -35,6 +35,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 	@Test
 	public void testCreateSubscriptionInvalidCriteria() {
 		Subscription subs = new Subscription();
+		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		subs.setCriteria("Observation");
 		try {
 			mySubscriptionDao.create(subs);
@@ -44,6 +45,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		}
 
 		subs = new Subscription();
+		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		subs.setCriteria("http://foo.com/Observation?AAA=BBB");
 		try {
 			mySubscriptionDao.create(subs);
@@ -53,6 +55,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		}
 
 		subs = new Subscription();
+		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		subs.setCriteria("ObservationZZZZ?a=b");
 		try {
 			mySubscriptionDao.create(subs);
@@ -62,6 +65,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		}
 
 		subs = new Subscription();
+		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		subs.setCriteria("Observation?identifier=123");
 		try {
 			mySubscriptionDao.create(subs);
@@ -71,6 +75,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		}
 
 		subs = new Subscription();
+		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		subs.setCriteria("Observation?identifier=123");
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		assertTrue(mySubscriptionDao.create(subs).getId().hasIdPart());
@@ -117,6 +122,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		Subscription subs = new Subscription();
 		subs.setCriteria("Observation?subject=Patient/123");
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
+		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 
 		IIdType id = mySubscriptionDao.create(subs).getId().toUnqualifiedVersionless();
 
@@ -130,7 +136,8 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		assertEquals(SubscriptionStatusEnum.REQUESTED, myEntityManager.find(SubscriptionTable.class, table.getId()).getStatus());
 		assertEquals(SubscriptionStatusEnum.REQUESTED, mySubscriptionDao.read(id).getStatusElement().getValueAsEnum());
 
-		mySubscriptionDao.setSubscriptionStatus(id.getIdPartAsLong(), SubscriptionStatusEnum.ACTIVE);
+		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
+		mySubscriptionDao.update(subs);
 
 		assertEquals(SubscriptionStatusEnum.ACTIVE, myEntityManager.find(SubscriptionTable.class, table.getId()).getStatus());
 		assertEquals(SubscriptionStatusEnum.ACTIVE, mySubscriptionDao.read(id).getStatusElement().getValueAsEnum());
