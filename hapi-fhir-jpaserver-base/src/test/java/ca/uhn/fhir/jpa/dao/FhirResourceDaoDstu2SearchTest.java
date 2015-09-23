@@ -609,6 +609,33 @@ public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 			params.add(Patient.SP_RES_LANGUAGE, and);
 			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), empty());
 		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			StringAndListParam and = new StringAndListParam();
+			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
+			and.addAnd(new StringOrListParam().addOr(new StringParam("")).addOr(new StringParam(null)));
+			params.add(Patient.SP_RES_LANGUAGE, and);
+			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("_id", new StringParam(id1.getIdPart()));
+			StringAndListParam and = new StringAndListParam();
+			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
+			and.addAnd(new StringOrListParam().addOr(new StringParam("")).addOr(new StringParam(null)));
+			params.add(Patient.SP_RES_LANGUAGE, and);
+			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			StringAndListParam and = new StringAndListParam();
+			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
+			and.addAnd(new StringOrListParam().addOr(new StringParam("")).addOr(new StringParam(null)));
+			params.add(Patient.SP_RES_LANGUAGE, and);
+			params.add("_id", new StringParam(id1.getIdPart()));
+			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
+		}
+
 	}
 
 	@Test

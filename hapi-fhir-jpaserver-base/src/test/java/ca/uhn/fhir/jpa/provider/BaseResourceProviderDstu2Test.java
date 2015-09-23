@@ -65,6 +65,8 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	public static void afterClass() throws Exception {
 		ourServer.stop();
 		ourHttpClient.close();
+		ourServer = null;
+		ourHttpClient = null;
 	}
 
 	@After

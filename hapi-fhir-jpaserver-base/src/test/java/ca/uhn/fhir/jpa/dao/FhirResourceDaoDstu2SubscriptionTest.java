@@ -102,6 +102,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		subs.setCriteria("Observation?subject=Patient/123");
+		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		IIdType id = mySubscriptionDao.create(subs).getId().toUnqualifiedVersionless();
 
 		obs = new Observation();
@@ -154,6 +155,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.setCriteria("Observation?subject=Patient/123");
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		subs.setId(id);
+		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		mySubscriptionDao.update(subs);
 
 		assertEquals(SubscriptionStatusEnum.REQUESTED, myEntityManager.createQuery("SELECT t FROM SubscriptionTable t WHERE t.myResId = " + id.getIdPart(), SubscriptionTable.class).getSingleResult().getStatus());

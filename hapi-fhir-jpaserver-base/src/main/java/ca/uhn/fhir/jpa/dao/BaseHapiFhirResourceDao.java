@@ -256,49 +256,54 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	// }
 
 	private Set<Long> addPredicateLanguage(Set<Long> thePids, List<List<? extends IQueryParameterType>> theList) {
+		Set<Long> retVal = thePids;
 		if (theList == null || theList.isEmpty()) {
-			return thePids;
+			return retVal;
 		}
-		if (theList.size() > 1) {
-			throw new InvalidRequestException("Language parameter can not have more than one AND value, found " + theList.size());
-		}
+		for (List<? extends IQueryParameterType> nextList : theList) {
 
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.select(from.get("myId").as(Long.class));
+			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+			Root<ResourceTable> from = cq.from(ResourceTable.class);
+			cq.select(from.get("myId").as(Long.class));
 
-		Set<String> values = new HashSet<String>();
-		for (IQueryParameterType next : theList.get(0)) {
-			if (next instanceof StringParam) {
-				String nextValue = ((StringParam) next).getValue();
-				if (isBlank(nextValue)) {
-					continue;
+			Set<String> values = new HashSet<String>();
+			for (IQueryParameterType next : nextList) {
+				if (next instanceof StringParam) {
+					String nextValue = ((StringParam) next).getValue();
+					if (isBlank(nextValue)) {
+						continue;
+					}
+					values.add(nextValue);
+				} else {
+					throw new InternalErrorException("Lanugage parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
 				}
-				values.add(nextValue);
+			}
+
+			if (values.isEmpty()) {
+				return retVal;
+			}
+
+			Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
+			Predicate langPredicate = from.get("myLanguage").as(String.class).in(values);
+			Predicate masterCodePredicate = builder.and(typePredicate, langPredicate);
+			Predicate notDeletedPredicate = builder.isNull(from.get("myDeleted"));
+
+			if (retVal.size() > 0) {
+				Predicate inPids = (from.get("myId").in(retVal));
+				cq.where(builder.and(masterCodePredicate, inPids, notDeletedPredicate));
 			} else {
-				throw new InternalErrorException("Lanugage parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
+				cq.where(builder.and(masterCodePredicate, notDeletedPredicate));
+			}
+
+			TypedQuery<Long> q = myEntityManager.createQuery(cq);
+			retVal = new HashSet<Long>(q.getResultList());
+			if (retVal.isEmpty()) {
+				return retVal;
 			}
 		}
 
-		if (values.isEmpty()) {
-			return thePids;
-		}
-
-		Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
-		Predicate langPredicate = from.get("myLanguage").as(String.class).in(values);
-		Predicate masterCodePredicate = builder.and(typePredicate, langPredicate);
-		Predicate notDeletedPredicate = builder.isNull(from.get("myDeleted"));
-
-		if (thePids.size() > 0) {
-			Predicate inPids = (from.get("myId").in(thePids));
-			cq.where(builder.and(masterCodePredicate, inPids, notDeletedPredicate));
-		} else {
-			cq.where(builder.and(masterCodePredicate, notDeletedPredicate));
-		}
-
-		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		return new HashSet<Long>(q.getResultList());
+		return retVal;
 	}
 
 	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
