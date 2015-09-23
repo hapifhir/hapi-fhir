@@ -51,8 +51,8 @@ public class SubscriptionTable {
 	private Date myNextCheck;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "NEXT_CHECK_SINCE", nullable = false)
-	private Date myNextCheckSince;
+	@Column(name = "MOST_RECENT_MATCH", nullable = false)
+	private Date myMostRecentMatch;
 
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResId;
@@ -77,10 +77,6 @@ public class SubscriptionTable {
 		return myNextCheck;
 	}
 
-	public Date getNextCheckSince() {
-		return myNextCheckSince;
-	}
-
 	public SubscriptionStatusEnum getStatus() {
 		return myStatus;
 	}
@@ -97,16 +93,20 @@ public class SubscriptionTable {
 		myNextCheck = theNextCheck;
 	}
 
-	public void setNextCheckSince(Date theNextCheckSince) {
-		myNextCheckSince = theNextCheckSince;
-	}
-
 	public void setStatus(SubscriptionStatusEnum theStatus) {
 		myStatus = theStatus;
 	}
 
 	public void setSubscriptionResource(ResourceTable theSubscriptionResource) {
 		mySubscriptionResource = theSubscriptionResource;
+	}
+
+	public Date getMostRecentMatch() {
+		return myMostRecentMatch;
+	}
+
+	public void setMostRecentMatch(Date theMostRecentMatch) {
+		myMostRecentMatch = theMostRecentMatch;
 	}
 
 }

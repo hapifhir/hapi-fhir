@@ -214,8 +214,16 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 *            "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public void setRangeFromDatesInclusive(DateTimeDt theLowerBound, DateTimeDt theUpperBound) {
-		myLowerBound = theLowerBound != null ? new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound) : null;
-		myUpperBound = theUpperBound != null ? new DateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound) : null;
+		if (theLowerBound instanceof DateParam) {
+			myLowerBound = (DateParam) theLowerBound;
+		} else {
+			myLowerBound = theLowerBound != null ? new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound) : null;
+		} 
+		if (theUpperBound instanceof DateParam) {
+			myUpperBound = (DateParam) theUpperBound;
+		} else {
+			myUpperBound = theUpperBound != null ? new DateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound) : null;
+		}
 		validateAndThrowDataFormatExceptionIfInvalid();
 	}
 
@@ -304,8 +312,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		boolean haveLowerBound = haveLowerBound();
 		boolean haveUpperBound = haveUpperBound();
 		if (haveLowerBound && haveUpperBound) {
-			if (myLowerBound.getValue().after(myUpperBound.getValue())) {
-				throw new DataFormatException("Lower bound of " + myLowerBound.getValueAsString() + " is after upper bound of " + myUpperBound.getValueAsString());
+			if (myLowerBound.getValue().getTime() > myUpperBound.getValue().getTime()) {
+				StringBuilder b = new StringBuilder();
+				b.append("Lower bound of ");
+				b.append(myLowerBound.getValueAsString());
+				b.append(" is after upper bound of ");
+				b.append(myUpperBound.getValueAsString());
+				throw new DataFormatException(b.toString());
 			}
 		}
 

@@ -33,6 +33,10 @@
 			<action type="add" issue="225">
 				Support AND/OR on _id search parameter in JPA
 			</action>
+			<action type="fix">
+				Constructor for DateRanfeParam which dates in two DateParam instances was ignoring 
+				comparators on the DateParam.
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

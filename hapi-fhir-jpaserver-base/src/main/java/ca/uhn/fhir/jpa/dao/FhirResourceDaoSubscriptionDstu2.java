@@ -8,7 +8,6 @@ import java.util.List;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,11 +18,13 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subscription>implements IFhirResourceDaoSubscription<Subscription> {
@@ -34,7 +35,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		SubscriptionTable subscriptionEntity = new SubscriptionTable();
 		subscriptionEntity.setSubscriptionResource(theEntity);
 		subscriptionEntity.setNextCheck(theEntity.getPublished().getValue());
-		subscriptionEntity.setNextCheckSince(theEntity.getPublished().getValue());
+		subscriptionEntity.setMostRecentMatch(theEntity.getPublished().getValue());
 		subscriptionEntity.setStatus(theSubscription.getStatusElement().getValueAsEnum());
 		myEntityManager.persist(subscriptionEntity);
 	}
@@ -55,6 +56,37 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		q.setParameter("status", SubscriptionStatusEnum.ACTIVE);
 		List<SubscriptionTable> subscriptions = q.getResultList();
 
+		for (SubscriptionTable nextSubscriptionTable : subscriptions) {
+			pollForNewUndeliveredResources(nextSubscriptionTable);
+		}
+	}
+
+	private void pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable) {
+		Subscription subscription = toResource(Subscription.class, theSubscriptionTable.getSubscriptionResource(), false);
+		RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
+		SearchParameterMap criteriaUrl = translateMatchUrl(subscription.getCriteria(), resourceDef);
+		
+		criteriaUrl = new SearchParameterMap();//TODO:remove
+		long start = theSubscriptionTable.getMostRecentMatch().getTime();
+		long end = System.currentTimeMillis() - getConfig().getSubscriptionPollDelay();
+		if (end <= start) {
+			ourLog.trace("Skipping search for subscription");
+			return;
+		}
+		ourLog.info("Subscription search from {} to {}", start, end);
+		
+		DateRangeParam range = new DateRangeParam();
+		range.setLowerBound(new DateParam(QuantityCompararatorEnum.GREATERTHAN, start));
+		range.setUpperBound(new DateParam(QuantityCompararatorEnum.LESSTHAN, end));
+		criteriaUrl.setLastUpdated(range);
+		
+		IFhirResourceDao<? extends IBaseResource> dao = getDao(resourceDef.getImplementingClass());
+		IBundleProvider results = dao.search(criteriaUrl);
+		if (results.size() == 0) {
+			return;
+		}
+		
+		ourLog.info("Found {} new results for Subscription {}", results.size(), subscription.getId().getIdPart());
 		
 	}
 
@@ -92,6 +124,25 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	protected void validateResourceForStorage(Subscription theResource, ResourceTable theEntityToSave) {
 		super.validateResourceForStorage(theResource, theEntityToSave);
 
+		RuntimeResourceDefinition resDef = validateCriteriaAndReturnResourceDefinition(theResource);
+
+		IFhirResourceDao<? extends IBaseResource> dao = getDao(resDef.getImplementingClass());
+		if (dao == null) {
+			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resDef);
+		}
+
+		if (theResource.getChannel().getType() == null) {
+			throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
+		}
+
+		SubscriptionStatusEnum status = theResource.getStatusElement().getValueAsEnum();
+		if (status == null) {
+			throw new UnprocessableEntityException("Subscription.status must be populated on this server");
+		}
+
+	}
+
+	private RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
 		String query = theResource.getCriteria();
 		if (isBlank(query)) {
 			throw new UnprocessableEntityException("Subscription.criteria must be populated");
@@ -113,21 +164,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		} catch (DataFormatException e) {
 			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resType);
 		}
-
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(resDef.getImplementingClass());
-		if (dao == null) {
-			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resDef);
-		}
-
-		if (theResource.getChannel().getType() == null) {
-			throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
-		}
-
-		SubscriptionStatusEnum status = theResource.getStatusElement().getValueAsEnum();
-		if (status == null) {
-			throw new UnprocessableEntityException("Subscription.status must be populated on this server");
-		}
-
+		return resDef;
 	}
 
 }

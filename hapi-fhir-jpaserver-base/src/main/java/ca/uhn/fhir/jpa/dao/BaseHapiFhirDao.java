@@ -87,7 +87,6 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
-import ca.uhn.fhir.jpa.entity.SubscriptionCandidateResource;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.StopWatch;
@@ -1215,18 +1214,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theEntity = myEntityManager.merge(theEntity);
 			
 			postUpdate(theEntity, (T) theResource);
-		}
-
-		/*
-		 * When subscription is enabled, for each resource we store we also
-		 * store a subscription candidate. These are examined by the subscription
-		 * module and then deleted. 
-		 */
-		if (myConfig.isSubscriptionEnabled() && thePerformIndexing) {
-			SubscriptionCandidateResource candidate = new SubscriptionCandidateResource();
-			candidate.setResource(theEntity);
-			candidate.setResourceVersion(theEntity.getVersion());
-			myEntityManager.persist(candidate);
 		}
 
 		if (thePerformIndexing) {

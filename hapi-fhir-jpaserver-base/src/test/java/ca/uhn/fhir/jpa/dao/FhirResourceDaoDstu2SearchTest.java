@@ -63,6 +63,7 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -638,6 +639,72 @@ public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 
 	}
 
+	@Test
+	public void testSearchLastUpdatedParamWithComparator() throws InterruptedException {
+		String methodName = "testSearchLastUpdatedParamWithComparator";
+
+		IIdType id0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id0 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		int sleep = 100;
+		
+		long start = System.currentTimeMillis();
+		Thread.sleep(sleep);
+
+		DateTimeDt beforeAny = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
+		IIdType id1a;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id1a = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		IIdType id1b;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id1b = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		
+		ourLog.info("Res 1: {}", ResourceMetadataKeyEnum.PUBLISHED.get(myPatientDao.read(id0)).getValueAsString());
+		ourLog.info("Res 2: {}", ResourceMetadataKeyEnum.PUBLISHED.get(myPatientDao.read(id1a)).getValueAsString());
+		InstantDt id1bpublished = ResourceMetadataKeyEnum.PUBLISHED.get(myPatientDao.read(id1b));
+		ourLog.info("Res 3: {}", id1bpublished.getValueAsString());
+		
+		
+		Thread.sleep(sleep);
+		long end = System.currentTimeMillis();
+		
+		SearchParameterMap map;
+		Date startDate = new Date(start);
+		Date endDate = new Date(end);
+		DateTimeDt startDateTime = new DateTimeDt(startDate, TemporalPrecisionEnum.MILLI);
+		DateTimeDt endDateTime = new DateTimeDt(endDate, TemporalPrecisionEnum.MILLI);
+		
+		map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam(startDateTime, endDateTime));
+		ourLog.info("Searching: {}", map.getLastUpdated());
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id1a, id1b));
+		
+		map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, startDateTime), new DateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, endDateTime)));
+		ourLog.info("Searching: {}", map.getLastUpdated());
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id1a, id1b));
+		
+		map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam(new DateParam(QuantityCompararatorEnum.GREATERTHAN, startDateTime), new DateParam(QuantityCompararatorEnum.LESSTHAN, endDateTime)));
+		ourLog.info("Searching: {}", map.getLastUpdated());
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id1a, id1b));
+
+		map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam(new DateParam(QuantityCompararatorEnum.GREATERTHAN, startDateTime.getValue()), new DateParam(QuantityCompararatorEnum.LESSTHAN, id1bpublished.getValue())));
+		ourLog.info("Searching: {}", map.getLastUpdated());
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id1a));
+	}
+	
 	@Test
 	public void testSearchLastUpdatedParam() throws InterruptedException {
 		String methodName = "testSearchLastUpdatedParam";

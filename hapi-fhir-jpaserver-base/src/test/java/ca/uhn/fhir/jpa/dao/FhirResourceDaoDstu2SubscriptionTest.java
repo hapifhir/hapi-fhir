@@ -88,7 +88,9 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 	}
 	
 	@Test
-	public void testSubscriptionResourcesAppear() {
+	public void testSubscriptionResourcesAppear() throws Exception {
+		myDaoConfig.setSubscriptionPollDelay(0);
+		
 		String methodName = "testSubscriptionResourcesAppear";
 		Patient p = new Patient();
 		p.addName().addFamily(methodName);
@@ -101,10 +103,13 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
-		subs.setCriteria("Observation?subject=Patient/123");
-		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
+		subs.setCriteria("Observation?subject=Patient/" + pId.getIdPart());
+		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
 		IIdType id = mySubscriptionDao.create(subs).getId().toUnqualifiedVersionless();
 
+		Thread.sleep(100);
+		ourLog.info("Before: {}", System.currentTimeMillis());
+		
 		obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
@@ -114,6 +119,10 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
 		IIdType afterId2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+
+		Thread.sleep(100);
+
+		ourLog.info("After: {}", System.currentTimeMillis());
 
 		mySubscriptionDao.pollForNewUndeliveredResources();
 	}

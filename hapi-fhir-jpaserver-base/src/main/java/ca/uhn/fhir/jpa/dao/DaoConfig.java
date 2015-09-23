@@ -36,6 +36,7 @@ public class DaoConfig {
 	private List<IServerInterceptor> myInterceptors;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 	private boolean mySubscriptionEnabled;
+	private long mySubscriptionPollDelay = 1000;
 
 	/**
 	 * See {@link #setIncludeLimit(int)}
@@ -63,6 +64,10 @@ public class DaoConfig {
 
 	public ResourceEncodingEnum getResourceEncoding() {
 		return myResourceEncoding;
+	}
+
+	public long getSubscriptionPollDelay() {
+		return mySubscriptionPollDelay;
 	}
 
 	/**
@@ -131,6 +136,10 @@ public class DaoConfig {
 	 */
 	public void setSubscriptionEnabled(boolean theSubscriptionEnabled) {
 		mySubscriptionEnabled = theSubscriptionEnabled;
+	}
+
+	public void setSubscriptionPollDelay(long theSubscriptionPollDelay) {
+		mySubscriptionPollDelay = theSubscriptionPollDelay;
 	}
 
 }
