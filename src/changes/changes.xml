@@ -41,6 +41,14 @@
 				In JSON parsing, finding an object where an array was expected led to an unhelpful
 				error message. Thanks to Avinash Shanbhag for reporting!
 			</action>
+			<action type="add">
+				JPA server gave an unhelpful error message if $meta-add or $meta-delete were called
+				with no meta elements in the input Parameters
+			</action>
+			<action type="fix">
+				Narrative generator did not include OperationOutcome.issue.diagnostics in the
+				generated narrative.
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

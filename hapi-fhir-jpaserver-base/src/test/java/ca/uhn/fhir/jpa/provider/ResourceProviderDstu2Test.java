@@ -748,6 +748,50 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
+	public void testMetaOperationWithNoMetaParameter() throws Exception {
+		Patient p = new Patient();
+		p.addName().addFamily("testMetaAddInvalid");
+		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		
+		//@formatter:off
+		String input = "<Parameters>\n" + 
+				"  <meta>\n" + 
+				"    <tag>\n" + 
+				"      <system value=\"http://example.org/codes/tags\"/>\n" + 
+				"      <code value=\"record-lost\"/>\n" + 
+				"      <display value=\"Patient File Lost\"/>\n" + 
+				"    </tag>\n" + 
+				"  </meta>\n" + 
+				"</Parameters>";
+		//@formatter:on
+		
+		HttpPost post = new HttpPost(ourServerBase + "/Patient/" + id.getIdPart() + "/$meta-add");
+		post.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String output = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(output);
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			assertThat(output, containsString("Input contains no parameter with name 'meta'"));
+		} finally {
+			response.close();
+		}
+
+		post = new HttpPost(ourServerBase + "/Patient/" + id.getIdPart() + "/$meta-delete");
+		post.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		response = ourHttpClient.execute(post);
+		try {
+			String output = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(output);
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			assertThat(output, containsString("Input contains no parameter with name 'meta'"));
+		} finally {
+			response.close();
+		}
+
+	}
+	
+	@Test
 	public void testMetaOperations() throws Exception {
 		String methodName = "testMetaOperations";
 

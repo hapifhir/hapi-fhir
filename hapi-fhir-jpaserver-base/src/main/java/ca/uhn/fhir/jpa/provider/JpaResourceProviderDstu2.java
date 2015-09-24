@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResourceProvider<T> {
 
@@ -112,6 +113,9 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	})
 	//@formatter:on
 	public Parameters metaAdd(@IdParam IdDt theId, @OperationParam(name = "meta") MetaDt theMeta) {
+		if (theMeta == null) {
+			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
+		}
 		Parameters parameters = new Parameters();
 		MetaDt metaAddOperation = getDao().metaAddOperation(theId, theMeta);
 		parameters.addParameter().setName("return").setValue(metaAddOperation);
@@ -124,6 +128,9 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	})
 	//@formatter:on
 	public Parameters metaDelete(@IdParam IdDt theId, @OperationParam(name = "meta") MetaDt theMeta) {
+		if (theMeta == null) {
+			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
+		}
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName("return").setValue(getDao().metaDeleteOperation(theId, theMeta));
 		return parameters;
