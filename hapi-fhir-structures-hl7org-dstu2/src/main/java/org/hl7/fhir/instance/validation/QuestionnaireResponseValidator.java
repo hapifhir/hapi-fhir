@@ -72,8 +72,15 @@ public class QuestionnaireResponseValidator extends BaseValidator {
     return Collections.unmodifiableSet(retVal);
   }
 
-  private List<org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent> findAnswersByLinkId(
-      List<org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent> theQuestion, String theLinkId) {
+  private Set<Class<? extends Type>> allowedTypes(Class<? extends Type> theClass0, Class<? extends Type> theClass1) {
+    HashSet<Class<? extends Type>> retVal = new HashSet<Class<? extends Type>>();
+    retVal.add(theClass0);
+    retVal.add(theClass1);
+    return Collections.unmodifiableSet(retVal);
+  }
+
+  private List<org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent> findAnswersByLinkId(List<org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent> theQuestion,
+      String theLinkId) {
     Validate.notBlank(theLinkId, "theLinkId must not be blank");
 
     ArrayList<org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent> retVal = new ArrayList<QuestionnaireResponse.QuestionComponent>();
@@ -85,8 +92,7 @@ public class QuestionnaireResponseValidator extends BaseValidator {
     return retVal;
   }
 
-  private List<org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent> findGroupByLinkId(
-      List<org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent> theGroups, String theLinkId) {
+  private List<org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent> findGroupByLinkId(List<org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent> theGroups, String theLinkId) {
     ArrayList<org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent> retVal = new ArrayList<QuestionnaireResponse.GroupComponent>();
     for (org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent next : theGroups) {
       if (theLinkId == null) {
@@ -100,28 +106,25 @@ public class QuestionnaireResponseValidator extends BaseValidator {
     return retVal;
   }
 
-//  protected boolean fail(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String msg) {
-//    return test(errors, type, pathParts, thePass, msg, IssueSeverity.FATAL);
-//  }
+  // protected boolean fail(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String msg) {
+  // return test(errors, type, pathParts, thePass, msg, IssueSeverity.FATAL);
+  // }
 
   public void validate(List<ValidationMessage> theErrors, QuestionnaireResponse theAnswers) {
     LinkedList<String> pathStack = new LinkedList<String>();
     pathStack.add("QuestionnaireResponse");
     pathStack.add(QuestionnaireResponse.SP_QUESTIONNAIRE);
 
-    if (!super.fail(theErrors, IssueType.INVALID, pathStack, theAnswers.hasQuestionnaire(),
-        "QuestionnaireResponse does not specity which questionnaire it is providing answers to")) {
+    if (!super.fail(theErrors, IssueType.INVALID, pathStack, theAnswers.hasQuestionnaire(), "QuestionnaireResponse does not specity which questionnaire it is providing answers to")) {
       return;
     }
 
     Reference questionnaireRef = theAnswers.getQuestionnaire();
     Questionnaire questionnaire = getQuestionnaire(theAnswers, questionnaireRef);
-    if (questionnaire == null && theErrors.size() > 0
-        && theErrors.get(theErrors.size() - 1).getLevel() == IssueSeverity.FATAL) {
+    if (questionnaire == null && theErrors.size() > 0 && theErrors.get(theErrors.size() - 1).getLevel() == IssueSeverity.FATAL) {
       return;
     }
-    if (!fail(theErrors, IssueType.INVALID, pathStack, questionnaire != null,
-        "Questionnaire {0} is not found in the WorkerContext", theAnswers.getQuestionnaire().getReference())) {
+    if (!fail(theErrors, IssueType.INVALID, pathStack, questionnaire != null, "Questionnaire {0} is not found in the WorkerContext", theAnswers.getQuestionnaire().getReference())) {
       return;
     }
 
@@ -185,9 +188,8 @@ public class QuestionnaireResponseValidator extends BaseValidator {
     return retVal;
   }
 
-  private void validateGroup(List<ValidationMessage> theErrors, GroupComponent theQuestGroup,
-      org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent theAnsGroup, LinkedList<String> thePathStack,
-      QuestionnaireResponse theAnswers, boolean theValidateRequired) {
+  private void validateGroup(List<ValidationMessage> theErrors, GroupComponent theQuestGroup, org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent theAnsGroup,
+      LinkedList<String> thePathStack, QuestionnaireResponse theAnswers, boolean theValidateRequired) {
 
     for (org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent next : theAnsGroup.getQuestion()) {
       rule(theErrors, IssueType.INVALID, thePathStack, isNotBlank(next.getLinkId()), "Question found with no linkId");
@@ -205,11 +207,10 @@ public class QuestionnaireResponseValidator extends BaseValidator {
 
     // Check that there are no extra answers
     for (int i = 0; i < theAnsGroup.getQuestion().size(); i++) {
-      org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent nextQuestion = theAnsGroup.getQuestion()
-          .get(i);
+      org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent nextQuestion = theAnsGroup.getQuestion().get(i);
       thePathStack.add("question[" + i + "]");
-      rule(theErrors, IssueType.BUSINESSRULE, thePathStack, allowedQuestions.contains(nextQuestion.getLinkId()),
-          "Found answer with linkId[{0}] but this ID is not allowed at this position", nextQuestion.getLinkId());
+      rule(theErrors, IssueType.BUSINESSRULE, thePathStack, allowedQuestions.contains(nextQuestion.getLinkId()), "Found answer with linkId[{0}] but this ID is not allowed at this position",
+          nextQuestion.getLinkId());
       thePathStack.remove();
     }
 
@@ -217,21 +218,18 @@ public class QuestionnaireResponseValidator extends BaseValidator {
 
   }
 
-  private void validateQuestion(List<ValidationMessage> theErrors, QuestionComponent theQuestion,
-      org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent theAnsGroup, LinkedList<String> thePathStack,
-      QuestionnaireResponse theAnswers, boolean theValidateRequired) {
+  private void validateQuestion(List<ValidationMessage> theErrors, QuestionComponent theQuestion, org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent theAnsGroup,
+      LinkedList<String> thePathStack, QuestionnaireResponse theAnswers, boolean theValidateRequired) {
     QuestionComponent question = theQuestion;
     String linkId = question.getLinkId();
-    if (!fail(theErrors, IssueType.INVALID, thePathStack, isNotBlank(linkId),
-        "Questionnaire is invalid, question found with no link ID")) {
+    if (!fail(theErrors, IssueType.INVALID, thePathStack, isNotBlank(linkId), "Questionnaire is invalid, question found with no link ID")) {
       return;
     }
 
     AnswerFormat type = question.getType();
     if (type == null) {
       // Support old format/casing and new
-      List<Extension> extensions = question
-          .getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/questionnaire-deReference");
+      List<Extension> extensions = question.getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/questionnaire-deReference");
       if (extensions.isEmpty()) {
         extensions = question.getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/questionnaire-dereference");
       }
@@ -256,27 +254,22 @@ public class QuestionnaireResponseValidator extends BaseValidator {
         // question = toQuestion(element);
       } else {
         if (question.getGroup().isEmpty()) {
-          rule(theErrors, IssueType.INVALID, thePathStack, false,
-              "Questionnaire is invalid, no type and no groups specified for question with link ID[{0}]", linkId);
+          rule(theErrors, IssueType.INVALID, thePathStack, false, "Questionnaire is invalid, no type and no groups specified for question with link ID[{0}]", linkId);
           return;
         }
         type = AnswerFormat.NULL;
       }
     }
 
-    List<org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent> answers = findAnswersByLinkId(
-        theAnsGroup.getQuestion(), linkId);
+    List<org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent> answers = findAnswersByLinkId(theAnsGroup.getQuestion(), linkId);
     if (answers.size() > 1) {
-      rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !question.getRequired(),
-          "Multiple answers repetitions found with linkId[{0}]", linkId);
+      rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !question.getRequired(), "Multiple answers repetitions found with linkId[{0}]", linkId);
     }
     if (answers.size() == 0) {
       if (theValidateRequired) {
-        rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !question.getRequired(),
-            "Missing answer to required question with linkId[{0}]", linkId);
+        rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !question.getRequired(), "Missing answer to required question with linkId[{0}]", linkId);
       } else {
-        hint(theErrors, IssueType.BUSINESSRULE, thePathStack, !question.getRequired(),
-            "Missing answer to required question with linkId[{0}]", linkId);
+        hint(theErrors, IssueType.BUSINESSRULE, thePathStack, !question.getRequired(), "Missing answer to required question with linkId[{0}]", linkId);
       }
       return;
     }
@@ -291,24 +284,19 @@ public class QuestionnaireResponseValidator extends BaseValidator {
     }
   }
 
-  private void validateQuestionGroups(List<ValidationMessage> theErrors, QuestionComponent theQuestion,
-      org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent theAnswerQuestion,
+  private void validateQuestionGroups(List<ValidationMessage> theErrors, QuestionComponent theQuestion, org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent theAnswerQuestion,
       LinkedList<String> thePathSpec, QuestionnaireResponse theAnswers, boolean theValidateRequired) {
     for (QuestionAnswerComponent nextAnswer : theAnswerQuestion.getAnswer()) {
-      validateGroups(theErrors, theQuestion.getGroup(), nextAnswer.getGroup(), thePathSpec, theAnswers,
-          theValidateRequired);
+      validateGroups(theErrors, theQuestion.getGroup(), nextAnswer.getGroup(), thePathSpec, theAnswers, theValidateRequired);
     }
   }
 
-  private void validateGroupGroups(List<ValidationMessage> theErrors, GroupComponent theQuestGroup,
-      org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent theAnsGroup, LinkedList<String> thePathSpec,
-      QuestionnaireResponse theAnswers, boolean theValidateRequired) {
-    validateGroups(theErrors, theQuestGroup.getGroup(), theAnsGroup.getGroup(), thePathSpec, theAnswers,
-        theValidateRequired);
+  private void validateGroupGroups(List<ValidationMessage> theErrors, GroupComponent theQuestGroup, org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent theAnsGroup,
+      LinkedList<String> thePathSpec, QuestionnaireResponse theAnswers, boolean theValidateRequired) {
+    validateGroups(theErrors, theQuestGroup.getGroup(), theAnsGroup.getGroup(), thePathSpec, theAnswers, theValidateRequired);
   }
 
-  private void validateGroups(List<ValidationMessage> theErrors, List<GroupComponent> theQuestionGroups,
-      List<org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent> theAnswerGroups,
+  private void validateGroups(List<ValidationMessage> theErrors, List<GroupComponent> theQuestionGroups, List<org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent> theAnswerGroups,
       LinkedList<String> thePathStack, QuestionnaireResponse theAnswers, boolean theValidateRequired) {
     Set<String> linkIds = new HashSet<String>();
     for (GroupComponent nextQuestionGroup : theQuestionGroups) {
@@ -316,11 +304,9 @@ public class QuestionnaireResponseValidator extends BaseValidator {
       if (!linkIds.add(nextLinkId)) {
         if (isBlank(nextLinkId)) {
           fail(theErrors, IssueType.BUSINESSRULE, thePathStack, false,
-              "Questionnaire in invalid, unable to validate QuestionnaireResponse: Multiple groups found at this position with blank/missing linkId",
-              nextLinkId);
+              "Questionnaire in invalid, unable to validate QuestionnaireResponse: Multiple groups found at this position with blank/missing linkId", nextLinkId);
         } else {
-          fail(theErrors, IssueType.BUSINESSRULE, thePathStack, false,
-              "Questionnaire in invalid, unable to validate QuestionnaireResponse: Multiple groups found at this position with linkId[{0}]",
+          fail(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Questionnaire in invalid, unable to validate QuestionnaireResponse: Multiple groups found at this position with linkId[{0}]",
               nextLinkId);
         }
       }
@@ -331,16 +317,13 @@ public class QuestionnaireResponseValidator extends BaseValidator {
       String linkId = nextQuestionGroup.getLinkId();
       allowedGroups.add(linkId);
 
-      List<org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent> answerGroups = findGroupByLinkId(
-          theAnswerGroups, linkId);
+      List<org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent> answerGroups = findGroupByLinkId(theAnswerGroups, linkId);
       if (answerGroups.isEmpty()) {
         if (nextQuestionGroup.getRequired()) {
           if (theValidateRequired) {
-            rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Missing required group with linkId[{0}]",
-                linkId);
+            rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Missing required group with linkId[{0}]", linkId);
           } else {
-            hint(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Missing required group with linkId[{0}]",
-                linkId);
+            hint(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Missing required group with linkId[{0}]", linkId);
           }
         }
         continue;
@@ -349,9 +332,7 @@ public class QuestionnaireResponseValidator extends BaseValidator {
         if (nextQuestionGroup.getRepeats() == false) {
           int index = theAnswerGroups.indexOf(answerGroups.get(1));
           thePathStack.add("group[" + index + "]");
-          rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false,
-              "Multiple repetitions of group with linkId[{0}] found at this position, but this group can not repeat",
-              linkId);
+          rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Multiple repetitions of group with linkId[{0}] found at this position, but this group can not repeat", linkId);
           thePathStack.removeLast();
         }
       }
@@ -369,36 +350,27 @@ public class QuestionnaireResponseValidator extends BaseValidator {
       idx++;
       if (!allowedGroups.contains(next.getLinkId())) {
         thePathStack.add("group[" + idx + "]");
-        rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false,
-            "Group with linkId[{0}] found at this position, but this group does not exist at this position in Questionnaire",
+        rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Group with linkId[{0}] found at this position, but this group does not exist at this position in Questionnaire",
             next.getLinkId());
         thePathStack.removeLast();
       }
     }
   }
 
-  private void validateQuestionAnswers(List<ValidationMessage> theErrors, QuestionComponent theQuestion,
-      LinkedList<String> thePathStack, AnswerFormat type,
-      org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent answerQuestion,
-      QuestionnaireResponse theAnswers, boolean theValidateRequired) {
+  private void validateQuestionAnswers(List<ValidationMessage> theErrors, QuestionComponent theQuestion, LinkedList<String> thePathStack, AnswerFormat type,
+      org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionComponent answerQuestion, QuestionnaireResponse theAnswers, boolean theValidateRequired) {
 
     String linkId = theQuestion.getLinkId();
     Set<Class<? extends Type>> allowedAnswerTypes = determineAllowedAnswerTypes(type);
     if (allowedAnswerTypes.isEmpty()) {
-      rule(theErrors, IssueType.BUSINESSRULE, thePathStack, answerQuestion.isEmpty(),
-          "Question with linkId[{0}] has no answer type but an answer was provided", linkId);
+      rule(theErrors, IssueType.BUSINESSRULE, thePathStack, answerQuestion.isEmpty(), "Question with linkId[{0}] has no answer type but an answer was provided", linkId);
     } else {
-      rule(theErrors, IssueType.BUSINESSRULE, thePathStack,
-          !(answerQuestion.getAnswer().size() > 1 && !theQuestion.getRepeats()),
-          "Multiple answers to non repeating question with linkId[{0}]", linkId);
+      rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !(answerQuestion.getAnswer().size() > 1 && !theQuestion.getRepeats()), "Multiple answers to non repeating question with linkId[{0}]",
+          linkId);
       if (theValidateRequired) {
-        rule(theErrors, IssueType.BUSINESSRULE, thePathStack,
-            !(theQuestion.getRequired() && answerQuestion.getAnswer().isEmpty()),
-            "Missing answer to required question with linkId[{0}]", linkId);
+        rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !(theQuestion.getRequired() && answerQuestion.getAnswer().isEmpty()), "Missing answer to required question with linkId[{0}]", linkId);
       } else {
-        hint(theErrors, IssueType.BUSINESSRULE, thePathStack,
-            !(theQuestion.getRequired() && answerQuestion.getAnswer().isEmpty()),
-            "Missing answer to required question with linkId[{0}]", linkId);
+        hint(theErrors, IssueType.BUSINESSRULE, thePathStack, !(theQuestion.getRequired() && answerQuestion.getAnswer().isEmpty()), "Missing answer to required question with linkId[{0}]", linkId);
       }
     }
 
@@ -409,72 +381,66 @@ public class QuestionnaireResponseValidator extends BaseValidator {
         thePathStack.add("answer[" + answerIdx + "]");
         Type nextValue = nextAnswer.getValue();
         if (!allowedAnswerTypes.contains(nextValue.getClass())) {
-          rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false,
-              "Answer to question with linkId[{0}] found of type [{1}] but this is invalid for question of type [{2}]",
-              linkId, nextValue.getClass().getSimpleName(), type.toCode());
+          rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Answer to question with linkId[{0}] found of type [{1}] but this is invalid for question of type [{2}]", linkId,
+              nextValue.getClass().getSimpleName(), type.toCode());
           continue;
         }
 
         // Validate choice answers
         if (type == AnswerFormat.CHOICE || type == AnswerFormat.OPENCHOICE) {
-          Coding coding = (Coding) nextAnswer.getValue();
-          if (isBlank(coding.getCode()) && isBlank(coding.getSystem()) && isBlank(coding.getSystem())) {
-            rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false,
-                "Answer to question with linkId[{0}] is of type coding, but none of code, system, and display are populated",
-                linkId);
-            continue;
-          } else if (isBlank(coding.getCode()) && isBlank(coding.getSystem())) {
-            if (type != AnswerFormat.OPENCHOICE) {
-              rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false,
-                  "Answer to question with linkId[{0}] is of type only has a display populated (no code or system) but question does not allow {1}",
-                  linkId, AnswerFormat.OPENCHOICE.name());
+          if (nextAnswer.getValue() instanceof StringType) {
+            StringType answer = (StringType) nextAnswer.getValue();
+            if (answer == null || isBlank(answer.getValueAsString())) {
+              rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Answer to question with linkId[{0}] is required but answer does not have a value", linkId);
               continue;
             }
-          } else if (isBlank(coding.getCode()) || isBlank(coding.getSystem())) {
-            rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false,
-                "Answer to question with linkId[{0}] has a coding, but this coding does not contain a code and system (both must be present, or neither is the question allows {1})",
-                linkId, AnswerFormat.OPENCHOICE.name());
-            continue;
-          }
-
-          String optionsRef = theQuestion.getOptions().getReference();
-          if (isNotBlank(optionsRef)) {
-            ValueSet valueSet = getValueSet(theAnswers, theQuestion.getOptions());
-            if (valueSet == null) {
-              rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false,
-                  "Question with linkId[{0}] has options ValueSet[{1}] but this ValueSet can not be found", linkId,
-                  optionsRef);
+          } else {
+            Coding coding = (Coding) nextAnswer.getValue();
+            if (isBlank(coding.getCode())) {
+              rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Answer to question with linkId[{0}] is of type {1} but coding answer does not have a code", linkId, type.name());
+              continue;
+            }
+            if (isBlank(coding.getSystem())) {
+              rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Answer to question with linkId[{0}] is of type {1} but coding answer does not have a system", linkId, type.name());
               continue;
             }
 
-            boolean found = false;
-            if (coding.getSystem().equals(valueSet.getCodeSystem().getSystem())) {
-              for (ConceptDefinitionComponent next : valueSet.getCodeSystem().getConcept()) {
-                if (coding.getCode().equals(next.getCode())) {
-                  found = true;
-                  break;
-                }
+            String optionsRef = theQuestion.getOptions().getReference();
+            if (isNotBlank(optionsRef)) {
+              ValueSet valueSet = getValueSet(theAnswers, theQuestion.getOptions());
+              if (valueSet == null) {
+                rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Question with linkId[{0}] has options ValueSet[{1}] but this ValueSet can not be found", linkId, optionsRef);
+                continue;
               }
-            }
-            if (!found) {
-              for (ConceptSetComponent nextCompose : valueSet.getCompose().getInclude()) {
-                if (coding.getSystem().equals(nextCompose.getSystem())) {
-                  for (ConceptReferenceComponent next : nextCompose.getConcept()) {
-                    if (coding.getCode().equals(next.getCode())) {
-                      found = true;
-                      break;
-                    }
+
+              boolean found = false;
+              if (coding.getSystem().equals(valueSet.getCodeSystem().getSystem())) {
+                for (ConceptDefinitionComponent next : valueSet.getCodeSystem().getConcept()) {
+                  if (coding.getCode().equals(next.getCode())) {
+                    found = true;
+                    break;
                   }
                 }
-                if (found) {
-                  break;
+              }
+              if (!found) {
+                for (ConceptSetComponent nextCompose : valueSet.getCompose().getInclude()) {
+                  if (coding.getSystem().equals(nextCompose.getSystem())) {
+                    for (ConceptReferenceComponent next : nextCompose.getConcept()) {
+                      if (coding.getCode().equals(next.getCode())) {
+                        found = true;
+                        break;
+                      }
+                    }
+                  }
+                  if (found) {
+                    break;
+                  }
                 }
               }
-            }
 
-            rule(theErrors, IssueType.BUSINESSRULE, thePathStack, found,
-                "Question with linkId[{0}] has answer with system[{1}] and code[{2}] but this is not a valid answer for ValueSet[{3}]",
-                linkId, coding.getSystem(), coding.getCode(), optionsRef);
+              rule(theErrors, IssueType.BUSINESSRULE, thePathStack, found, "Question with linkId[{0}] has answer with system[{1}] and code[{2}] but this is not a valid answer for ValueSet[{3}]",
+                  linkId, coding.getSystem(), coding.getCode(), optionsRef);
+            }
           }
         }
 
@@ -513,7 +479,7 @@ public class QuestionnaireResponseValidator extends BaseValidator {
       allowedAnswerTypes = allowedTypes(IntegerType.class);
       break;
     case OPENCHOICE:
-      allowedAnswerTypes = allowedTypes(Coding.class);
+      allowedAnswerTypes = allowedTypes(Coding.class, StringType.class);
       break;
     case QUANTITY:
       allowedAnswerTypes = allowedTypes(Quantity.class);

@@ -62,7 +62,7 @@ public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 
 		HttpDelete retVal = new HttpDelete(b.toString());
-		super.addHeadersToRequest(retVal);
+		super.addHeadersToRequest(retVal, theEncoding);
 		return retVal;
 	}
 

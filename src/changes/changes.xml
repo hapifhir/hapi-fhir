@@ -49,6 +49,17 @@
 				Narrative generator did not include OperationOutcome.issue.diagnostics in the
 				generated narrative.
 			</action>
+			<action type="add">
+				Clients (generic and annotation) did not populate the Accept header on outgoing
+				requests. This is now populated to indicate that the client supports both XML and
+				JSON unless the user has explicitly requested one or the other (in which case the
+				appropriate type only will be send in the accept header). Thanks to
+				Avinash Shanbhag for reporting!
+			</action>
+			<action type="add">
+				QuestionnaireResponse validator now allows responses to questions of
+				type OPENCHOICE to be of type 'string'
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

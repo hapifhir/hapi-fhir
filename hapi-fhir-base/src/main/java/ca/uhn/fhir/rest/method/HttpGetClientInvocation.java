@@ -103,7 +103,7 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 		appendExtraParamsWithQuestionMark(theExtraParams, b, first);
 
 		HttpGet retVal = new HttpGet(b.toString());
-		super.addHeadersToRequest(retVal);
+		super.addHeadersToRequest(retVal, theEncoding);
 
 		return retVal;
 	}

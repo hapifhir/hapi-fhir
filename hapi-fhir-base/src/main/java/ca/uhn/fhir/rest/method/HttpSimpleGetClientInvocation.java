@@ -40,7 +40,7 @@ public class HttpSimpleGetClientInvocation extends BaseHttpClientInvocation {
 	@Override
 	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) {
 		HttpGet retVal = new HttpGet(myUrl);
-		super.addHeadersToRequest(retVal);
+		super.addHeadersToRequest(retVal, theEncoding);
 		return retVal;
 	}
 

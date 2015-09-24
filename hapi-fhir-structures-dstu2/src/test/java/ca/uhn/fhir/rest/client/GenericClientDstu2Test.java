@@ -77,6 +77,7 @@ public class GenericClientDstu2Test {
 		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
+		myResponseCount = 0;
 	}
 
 	private String extractBody(ArgumentCaptor<HttpUriRequest> capt, int count) throws IOException {
@@ -139,6 +140,130 @@ public class GenericClientDstu2Test {
 		idx++;
 
 	}
+
+	@Test
+	public void testAcceptHeaderFetchConformance() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Conformance conf = new Conformance();
+		conf.setCopyright("COPY");
+
+		final String respString = p.encodeResourceToString(conf);
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+
+		Conformance resp = (Conformance)client.fetchConformance().ofType(Conformance.class).execute();
+		assertEquals("http://example.com/fhir/metadata", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders("Accept").length);
+		assertThat(capt.getAllValues().get(idx).getHeaders("Accept")[0].getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_ALL));
+		idx++;
+
+		resp = (Conformance)client.fetchConformance().ofType(Conformance.class).encodedJson().execute();
+		assertEquals("http://example.com/fhir/metadata?_format=json", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders("Accept").length);
+		assertThat(capt.getAllValues().get(idx).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_JSON));
+		idx++;
+
+		resp = (Conformance)client.fetchConformance().ofType(Conformance.class).encodedXml().execute();
+		assertEquals("http://example.com/fhir/metadata?_format=xml", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders("Accept").length);
+		assertThat(capt.getAllValues().get(idx).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_XML));
+		idx++;
+	}
+
+	private int myResponseCount = 0;
+
+	@Test
+	public void testAcceptHeaderPreflightConformancePreferJson() throws Exception {
+		String methodName = "testAcceptHeaderPreflightConformancePreferJson";
+		final IParser p = ourCtx.newXmlParser();
+
+		final Conformance conf = new Conformance();
+		conf.setCopyright("COPY");
+
+		final Patient patient = new Patient();
+		patient.addName().addFamily("FAMILY");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				if (myResponseCount++ == 0) {
+					return new ReaderInputStream(new StringReader(p.encodeResourceToString(conf)), Charset.forName("UTF-8"));
+				} else {
+					return new ReaderInputStream(new StringReader(p.encodeResourceToString(patient)), Charset.forName("UTF-8"));
+				}
+			}
+		});
+
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://"+methodName+".example.com/fhir");
+		client.setEncoding(EncodingEnum.JSON);
+		
+		Patient resp = client.read(Patient.class, new IdDt("123"));
+		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
+		assertEquals("http://"+methodName+".example.com/fhir/metadata?_format=json", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(1, capt.getAllValues().get(0).getHeaders("Accept").length);
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertEquals("http://"+methodName+".example.com/fhir/Patient/123?_format=json", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertEquals(1, capt.getAllValues().get(1).getHeaders("Accept").length);
+		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_JSON));
+	}
+
+	@Test
+	public void testAcceptHeaderPreflightConformance() throws Exception {
+		String methodName = "testAcceptHeaderPreflightConformance";
+		final IParser p = ourCtx.newXmlParser();
+
+		final Conformance conf = new Conformance();
+		conf.setCopyright("COPY");
+
+		final Patient patient = new Patient();
+		patient.addName().addFamily("FAMILY");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				if (myResponseCount++ == 0) {
+					return new ReaderInputStream(new StringReader(p.encodeResourceToString(conf)), Charset.forName("UTF-8"));
+				} else {
+					return new ReaderInputStream(new StringReader(p.encodeResourceToString(patient)), Charset.forName("UTF-8"));
+				}
+			}
+		});
+
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://"+methodName+".example.com/fhir");
+
+		Patient resp = client.read(Patient.class, new IdDt("123"));
+		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
+		assertEquals("http://"+methodName+".example.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(1, capt.getAllValues().get(0).getHeaders("Accept").length);
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_ALL));
+		assertEquals("http://"+methodName+".example.com/fhir/Patient/123", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertEquals(1, capt.getAllValues().get(1).getHeaders("Accept").length);
+		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_ALL));
+	}
+
 	
 	@Test
 	public void testCreate() throws Exception {

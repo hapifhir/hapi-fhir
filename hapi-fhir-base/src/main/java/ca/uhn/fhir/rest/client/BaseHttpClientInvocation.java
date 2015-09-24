@@ -31,6 +31,7 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.message.BasicHeader;
 
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.util.VersionUtil;
 
@@ -85,7 +86,7 @@ public abstract class BaseHttpClientInvocation {
 		}
 	}
 
-	public void addHeadersToRequest(HttpRequestBase theHttpRequest) {
+	public void addHeadersToRequest(HttpRequestBase theHttpRequest, EncodingEnum theEncoding) {
 		if (myHeaders != null) {
 			for (Header next : myHeaders) {
 				theHttpRequest.addHeader(next);
@@ -96,6 +97,13 @@ public abstract class BaseHttpClientInvocation {
 		theHttpRequest.addHeader("Accept-Charset", "utf-8");
 		theHttpRequest.addHeader("Accept-Encoding", "gzip");
 		
+		if (theEncoding == null) {
+			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_ALL);
+		} else if (theEncoding == EncodingEnum.JSON) {
+			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
+		} else if (theEncoding == EncodingEnum.XML) {
+			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
+		}  
 	}
 
 }

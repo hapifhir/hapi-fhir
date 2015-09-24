@@ -280,6 +280,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	void validateServerBase(String theServerBase, HttpClient theHttpClient, BaseClient theClient) {
 
 		GenericClient client = new GenericClient(myContext, theHttpClient, theServerBase, this);
+		client.setEncoding(theClient.getEncoding());
 		for (IClientInterceptor interceptor : theClient.getInterceptors()) {
 			client.registerInterceptor(interceptor);
 		}

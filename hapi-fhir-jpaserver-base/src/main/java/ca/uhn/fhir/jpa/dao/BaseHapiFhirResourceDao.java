@@ -625,7 +625,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 						resourceId = dt.getIdPart();
 					}
 					Long targetPid = translateForcedIdToPid(new IdDt(resourceId));
-					ourLog.info("Searching for resource link with target PID: {}", targetPid);
+					ourLog.debug("Searching for resource link with target PID: {}", targetPid);
 					Predicate eq = builder.equal(from.get("myTargetResourcePid"), targetPid);
 
 					codePredicates.add(eq);

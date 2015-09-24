@@ -298,7 +298,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 
 		HttpRequestBase retVal = createRequest(url, entity);
-		super.addHeadersToRequest(retVal);
+		super.addHeadersToRequest(retVal, encoding);
 		addMatchHeaders(retVal, url);
 
 		if (contentType != null) {
