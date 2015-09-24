@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.entity;
 
+import java.util.Collection;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -67,7 +68,7 @@ public class SubscriptionTable {
 	private ResourceTable mySubscriptionResource;
 
 	@OneToMany(orphanRemoval=true, mappedBy="mySubscription")
-	private SubscriptionFlaggedResource myFlaggedResources;
+	private Collection<SubscriptionFlaggedResource> myFlaggedResources;
 
 	public long getCheckInterval() {
 		return myCheckInterval;

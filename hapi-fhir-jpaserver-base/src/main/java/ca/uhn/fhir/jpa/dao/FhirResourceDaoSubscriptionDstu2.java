@@ -98,7 +98,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		List<SubscriptionFlaggedResource> flags = new ArrayList<SubscriptionFlaggedResource>();
 		for (IBaseResource next : results.getResources(0, results.size())) {
 			SubscriptionFlaggedResource nextFlag = new SubscriptionFlaggedResource();
-			nextFlag.setResource();
+//			nextFlag.setResource();
 		}
 		
 	}

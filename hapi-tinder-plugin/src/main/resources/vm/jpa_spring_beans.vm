@@ -23,8 +23,7 @@
 	</bean>
 
 #if ( ${versionCapitalized} == 'Dstu2' )
-	<jpa:repositories />
-	<bean id="mySubscriptionFlaggedResourceDataDao" class="ca.uhn.fhir.jpa.dao.ISubscriptionFlaggedResourceDataDao" />
+	<jpa:repositories base-package="ca.uhn.fhir.jpa.dao.data" />
 
 	<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
 	<task:executor id="myExecutor" pool-size="5"/>
