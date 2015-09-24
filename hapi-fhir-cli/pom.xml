@@ -10,7 +10,7 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>ca.uhn.hapi.example</groupId>
+	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir-cli</artifactId>
 	<packaging>jar</packaging>
 
