@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.apache.commons.lang3.StringUtils.INDEX_NOT_FOUND;
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -143,7 +142,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	private EntityManager myEntityManager;
+	protected EntityManager myEntityManager;
 
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
@@ -246,9 +245,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		HashSet<Long> found = new HashSet<Long>(q.getResultList());
 		if (!theExistingPids.isEmpty()) {
 			theExistingPids.retainAll(found);
+			return theExistingPids;
+		} else {
+			return found;
 		}
-
-		return found;
 	}
 
 	// private Set<Long> addPredicateComposite(String theParamName, Set<Long> thePids, List<? extends
@@ -256,49 +256,54 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	// }
 
 	private Set<Long> addPredicateLanguage(Set<Long> thePids, List<List<? extends IQueryParameterType>> theList) {
+		Set<Long> retVal = thePids;
 		if (theList == null || theList.isEmpty()) {
-			return thePids;
+			return retVal;
 		}
-		if (theList.size() > 1) {
-			throw new InvalidRequestException("Language parameter can not have more than one AND value, found " + theList.size());
-		}
+		for (List<? extends IQueryParameterType> nextList : theList) {
 
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.select(from.get("myId").as(Long.class));
+			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+			Root<ResourceTable> from = cq.from(ResourceTable.class);
+			cq.select(from.get("myId").as(Long.class));
 
-		Set<String> values = new HashSet<String>();
-		for (IQueryParameterType next : theList.get(0)) {
-			if (next instanceof StringParam) {
-				String nextValue = ((StringParam) next).getValue();
-				if (isBlank(nextValue)) {
-					continue;
+			Set<String> values = new HashSet<String>();
+			for (IQueryParameterType next : nextList) {
+				if (next instanceof StringParam) {
+					String nextValue = ((StringParam) next).getValue();
+					if (isBlank(nextValue)) {
+						continue;
+					}
+					values.add(nextValue);
+				} else {
+					throw new InternalErrorException("Lanugage parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
 				}
-				values.add(nextValue);
+			}
+
+			if (values.isEmpty()) {
+				return retVal;
+			}
+
+			Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
+			Predicate langPredicate = from.get("myLanguage").as(String.class).in(values);
+			Predicate masterCodePredicate = builder.and(typePredicate, langPredicate);
+			Predicate notDeletedPredicate = builder.isNull(from.get("myDeleted"));
+
+			if (retVal.size() > 0) {
+				Predicate inPids = (from.get("myId").in(retVal));
+				cq.where(builder.and(masterCodePredicate, inPids, notDeletedPredicate));
 			} else {
-				throw new InternalErrorException("Lanugage parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
+				cq.where(builder.and(masterCodePredicate, notDeletedPredicate));
+			}
+
+			TypedQuery<Long> q = myEntityManager.createQuery(cq);
+			retVal = new HashSet<Long>(q.getResultList());
+			if (retVal.isEmpty()) {
+				return retVal;
 			}
 		}
 
-		if (values.isEmpty()) {
-			return thePids;
-		}
-
-		Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
-		Predicate langPredicate = from.get("myLanguage").as(String.class).in(values);
-		Predicate masterCodePredicate = builder.and(typePredicate, langPredicate);
-		Predicate notDeletedPredicate = builder.isNull(from.get("myDeleted"));
-
-		if (thePids.size() > 0) {
-			Predicate inPids = (from.get("myId").in(thePids));
-			cq.where(builder.and(masterCodePredicate, inPids, notDeletedPredicate));
-		} else {
-			cq.where(builder.and(masterCodePredicate, notDeletedPredicate));
-		}
-
-		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		return new HashSet<Long>(q.getResultList());
+		return retVal;
 	}
 
 	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
@@ -1005,7 +1010,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			}
 		}
 
-		return doCreate(theResource, theIfNoneExist, thePerformIndexing);
+		return doCreate(theResource, theIfNoneExist, thePerformIndexing, new Date());
 	}
 
 	private Predicate createCompositeParamPart(CriteriaBuilder builder, Root<ResourceTable> from, RuntimeSearchParam left, IQueryParameterType leftValue) {
@@ -1269,7 +1274,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, theId.getResourceType());
 		notifyInterceptors(RestOperationTypeEnum.DELETE, requestDetails);
 
-		ResourceTable savedEntity = updateEntity(null, entity, true, new Date());
+		Date updateTime = new Date();
+		ResourceTable savedEntity = updateEntity(null, entity, true, updateTime, updateTime);
 
 		notifyWriteCompleted();
 
@@ -1299,14 +1305,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		notifyInterceptors(RestOperationTypeEnum.DELETE, requestDetails);
 
 		// Perform delete
-		ResourceTable savedEntity = updateEntity(null, entity, true, new Date());
+		Date updateTime = new Date();
+		ResourceTable savedEntity = updateEntity(null, entity, true, updateTime, updateTime);
 		notifyWriteCompleted();
 
 		ourLog.info("Processed delete on {} in {}ms", theUrl, w.getMillisAndRestart());
 		return toMethodOutcome(savedEntity, null);
 	}
 
-	private DaoMethodOutcome doCreate(T theResource, String theIfNoneExist, boolean thePerformIndexing) {
+	private DaoMethodOutcome doCreate(T theResource, String theIfNoneExist, boolean thePerformIndexing, Date theUpdateTime) {
 		StopWatch w = new StopWatch();
 
 		preProcessResourceForStorage(theResource);
@@ -1347,7 +1354,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theResource.getId(), toResourceName(theResource), theResource);
 		notifyInterceptors(RestOperationTypeEnum.CREATE, requestDetails);
 
-		updateEntity(theResource, entity, false, null, thePerformIndexing, true);
+		updateEntity(theResource, entity, false, null, thePerformIndexing, true, theUpdateTime);
 
 		DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(true);
 
@@ -1420,7 +1427,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		try {
 			BaseHasResource entity = readEntity(theId.toVersionless(), false);
 			validateResourceType(entity);
-			currentTmp = toResource(myResourceType, entity);
+			currentTmp = toResource(myResourceType, entity, true);
 			if (ResourceMetadataKeyEnum.UPDATED.get(currentTmp).after(end.getValue())) {
 				currentTmp = null;
 			}
@@ -1497,7 +1504,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 					if (retVal.size() == maxResults) {
 						break;
 					}
-					retVal.add(toResource(myResourceType, next));
+					retVal.add(toResource(myResourceType, next, true));
 				}
 
 				return retVal;
@@ -1528,7 +1535,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return retVal;
 	}
 
-	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids) {
+	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation) {
 		if (theIncludePids.isEmpty()) {
 			return;
 		}
@@ -1547,7 +1554,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		for (ResourceTable next : q.getResultList()) {
 			Class<? extends IBaseResource> resourceType = getContext().getResourceDefinition(next.getResourceType()).getImplementingClass();
-			IResource resource = (IResource) toResource(resourceType, next);
+			IResource resource = (IResource) toResource(resourceType, next, theForHistoryOperation);
 			Integer index = position.get(next.getId());
 			if (index == null) {
 				ourLog.warn("Got back unexpected resource PID {}", next.getId());
@@ -1828,7 +1835,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		BaseHasResource entity = readEntity(theId);
 		validateResourceType(entity);
 
-		T retVal = toResource(myResourceType, entity);
+		T retVal = toResource(myResourceType, entity, false);
 
 		InstantDt deleted = ResourceMetadataKeyEnum.DELETED_AT.get(retVal);
 		if (deleted != null && !deleted.isEmpty()) {
@@ -2066,7 +2073,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 						// Execute the query and make sure we return distinct results
 						List<IBaseResource> retVal = new ArrayList<IBaseResource>();
-						loadResourcesByPid(pidsSubList, retVal, revIncludedPids);
+						loadResourcesByPid(pidsSubList, retVal, revIncludedPids, false);
 
 						return retVal;
 					}
@@ -2126,42 +2133,41 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 				if (nextParamEntry.getValue().isEmpty()) {
 					continue;
-				} else if (nextParamEntry.getValue().size() > 1) {
-					throw new InvalidRequestException("AND queries not supported for _id (Multiple instances of this param found)");
 				} else {
-					Set<Long> joinPids = new HashSet<Long>();
-					List<? extends IQueryParameterType> nextValue = nextParamEntry.getValue().get(0);
-					if (nextValue == null || nextValue.size() == 0) {
-						continue;
-					} else {
-						for (IQueryParameterType next : nextValue) {
-							String value = next.getValueAsQueryToken();
-							IIdType valueId = new IdDt(value);
+					for (List<? extends IQueryParameterType> nextValue : nextParamEntry.getValue()) {
+						Set<Long> joinPids = new HashSet<Long>();
+						if (nextValue == null || nextValue.size() == 0) {
+							continue;
+						} else {
+							for (IQueryParameterType next : nextValue) {
+								String value = next.getValueAsQueryToken();
+								IIdType valueId = new IdDt(value);
 
-							try {
-								BaseHasResource entity = readEntity(valueId);
-								if (entity.getDeleted() != null) {
-									continue;
+								try {
+									BaseHasResource entity = readEntity(valueId);
+									if (entity.getDeleted() != null) {
+										continue;
+									}
+									joinPids.add(entity.getId());
+								} catch (ResourceNotFoundException e) {
+									// This isn't an error, just means no result found
 								}
-								joinPids.add(entity.getId());
-							} catch (ResourceNotFoundException e) {
-								// This isn't an error, just means no result found
+							}
+							if (joinPids.isEmpty()) {
+								return new HashSet<Long>();
 							}
 						}
-						if (joinPids.isEmpty()) {
+
+						pids = addPredicateId(pids, joinPids);
+						if (pids.isEmpty()) {
 							return new HashSet<Long>();
 						}
-					}
 
-					pids = addPredicateId(pids, joinPids);
-					if (pids.isEmpty()) {
-						return new HashSet<Long>();
-					}
-
-					if (pids.isEmpty()) {
-						pids.addAll(joinPids);
-					} else {
-						pids.retainAll(joinPids);
+						if (pids.isEmpty()) {
+							pids.addAll(joinPids);
+						} else {
+							pids.retainAll(joinPids);
+						}
 					}
 				}
 
@@ -2382,7 +2388,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 				if (resourceId.isIdPartValidLong()) {
 					throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart()));
 				}
-				return doCreate(theResource, null, thePerformIndexing);
+				return doCreate(theResource, null, thePerformIndexing, new Date());
 			}
 		}
 
@@ -2399,7 +2405,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
 
 		// Perform update
-		ResourceTable savedEntity = updateEntity(theResource, entity, true, null, thePerformIndexing, true);
+		ResourceTable savedEntity = updateEntity(theResource, entity, true, null, thePerformIndexing, true, new Date());
 
 		notifyWriteCompleted();
 

@@ -101,7 +101,7 @@ public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao<IBaseReso
 				for (ResourceTable resourceTable : resources) {
 					final IBaseResource resource;
 					try {
-						resource = toResource(resourceTable);
+						resource = toResource(resourceTable, false);
 					} catch (DataFormatException e) {
 						ourLog.warn("Failure parsing resource: {}", e.toString());
 						throw new UnprocessableEntityException(Long.toString(resourceTable.getId()));

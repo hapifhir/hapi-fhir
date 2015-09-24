@@ -10,12 +10,16 @@ import java.util.List;
 
 import org.junit.Test;
 
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DateRangeParamTest {
 
 	private static SimpleDateFormat ourFmt;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateRangeParamTest.class);
 
 	static {
 		ourFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS");
@@ -25,6 +29,31 @@ public class DateRangeParamTest {
 		return new DateRangeParam(new DateParam(theString));
 	}
 
+	@Test
+	public void testRange() {
+		InstantDt start = new InstantDt("2015-09-23T07:43:34.811-04:00");
+		InstantDt end = new InstantDt("2015-09-23T07:43:34.899-04:00");
+		DateParam lowerBound = new DateParam(QuantityCompararatorEnum.GREATERTHAN, start.getValue());
+		DateParam upperBound = new DateParam(QuantityCompararatorEnum.LESSTHAN, end.getValue());
+		assertEquals(QuantityCompararatorEnum.GREATERTHAN, lowerBound.getComparator());
+		assertEquals(QuantityCompararatorEnum.LESSTHAN, upperBound.getComparator());
+
+		/*
+		 * When DateParam (which extends DateTimeDt) gets passed in, make sure we preserve the 
+		 * comparators..
+		 */
+		DateRangeParam param = new DateRangeParam(lowerBound, upperBound);
+		ourLog.info(param.toString());
+		assertEquals(QuantityCompararatorEnum.GREATERTHAN, param.getLowerBound().getComparator());
+		assertEquals(QuantityCompararatorEnum.LESSTHAN, param.getUpperBound().getComparator());
+
+		param = new DateRangeParam(new DateTimeDt(lowerBound.getValue()), new DateTimeDt(upperBound.getValue()));
+		ourLog.info(param.toString());
+		assertEquals(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, param.getLowerBound().getComparator());
+		assertEquals(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, param.getUpperBound().getComparator());
+
+	}
+	
 	@Test
 	public void testAddAnd() {
 		assertEquals(1, new DateAndListParam().addAnd(new DateOrListParam()).getValuesAsQueryTokens().size());

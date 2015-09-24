@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -36,7 +36,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 
-public class SearchParameterMap extends HashMap<String, List<List<? extends IQueryParameterType>>> {
+public class SearchParameterMap extends LinkedHashMap<String, List<List<? extends IQueryParameterType>>> {
 
 	private static final long serialVersionUID = 1L;
 

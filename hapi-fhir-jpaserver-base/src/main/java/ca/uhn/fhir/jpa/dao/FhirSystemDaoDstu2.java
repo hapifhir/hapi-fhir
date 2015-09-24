@@ -19,7 +19,9 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -64,6 +66,8 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.UrlUtil.UrlParts;
 
 public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu2.class);
@@ -92,10 +96,10 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		resp.addEntry().setResource(ooResp);
 
 		/*
-		 * For batch, we handle each entry as a mini-transaction in its own
-		 * database transaction so that if one fails, it doesn't prevent others
+		 * For batch, we handle each entry as a mini-transaction in its own database transaction so that if one fails, it
+		 * doesn't prevent others
 		 */
-		
+
 		for (final Entry nextRequestEntry : theRequest.getEntry()) {
 
 			TransactionCallback<Bundle> callback = new TransactionCallback<Bundle>() {
@@ -118,13 +122,13 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 				Entry subResponseEntry = nextResponseBundle.getEntry().get(0);
 				resp.addEntry(subResponseEntry);
 				/*
-				 * If the individual entry didn't have a resource in its response, bring the
-				 * sub-transaction's OperationOutcome across so the client can see it
+				 * If the individual entry didn't have a resource in its response, bring the sub-transaction's
+				 * OperationOutcome across so the client can see it
 				 */
 				if (subResponseEntry.getResource() == null) {
 					subResponseEntry.setResource(nextResponseBundle.getEntry().get(0).getResource());
 				}
-				
+
 			} catch (BaseServerResponseException e) {
 				caughtEx = e;
 			} catch (Throwable t) {
@@ -167,75 +171,6 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		return retVal;
 	}
 
-	private UrlParts parseUrl(String theAction, String theUrl) {
-		UrlParts retVal = new UrlParts();
-
-		//@formatter:off
-		/* 
-		 * We assume that the URL passed in is in one of the following forms:
-		 * [Resource Type]?[Search Params]
-		 * [Resource Type]/[Resource ID]
-		 * [Resource Type]/[Resource ID]/_history/[Version ID]
-		 */
-		//@formatter:on
-		int nextStart = 0;
-		boolean nextIsHistory = false;
-
-		for (int idx = 0; idx < theUrl.length(); idx++) {
-			char nextChar = theUrl.charAt(idx);
-			boolean atEnd = (idx + 1) == theUrl.length();
-			if (nextChar == '?' || nextChar == '/' || atEnd) {
-				int endIdx = atEnd ? idx + 1 : idx;
-				String nextSubstring = theUrl.substring(nextStart, endIdx);
-				if (retVal.getResourceType() == null) {
-					retVal.setResourceType(nextSubstring);
-				} else if (retVal.getResourceId() == null) {
-					retVal.setResourceId(nextSubstring);
-				} else if (nextIsHistory) {
-					retVal.setVersionId(nextSubstring);
-				} else {
-					if (nextSubstring.equals(Constants.URL_TOKEN_HISTORY)) {
-						nextIsHistory = true;
-					} else {
-						String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
-						throw new InvalidRequestException(msg);
-					}
-				}
-				if (nextChar == '?') {
-					if (theUrl.length() > idx + 1) {
-						retVal.setParams(theUrl.substring(idx + 1, theUrl.length()));
-					}
-					break;
-				}
-				nextStart = idx + 1;
-			}
-		}
-
-		RuntimeResourceDefinition resType;
-		try {
-			resType = getContext().getResourceDefinition(retVal.getResourceType());
-		} catch (DataFormatException e) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
-			throw new InvalidRequestException(msg);
-		}
-		IFhirResourceDao<? extends IBaseResource> dao = null;
-		if (resType != null) {
-			dao = getDao(resType.getImplementingClass());
-		}
-		if (dao == null) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
-			throw new InvalidRequestException(msg);
-		}
-		retVal.setDao(dao);
-
-		if (retVal.getResourceId() == null && retVal.getParams() == null) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
-			throw new InvalidRequestException(msg);
-		}
-
-		return retVal;
-	}
-
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Bundle transaction(Bundle theRequest) {
@@ -265,6 +200,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		ourLog.info("Beginning {} with {} resources", theActionName, theRequest.getEntry().size());
 
 		long start = System.currentTimeMillis();
+		Date updateTime = new Date();
 
 		Set<IdDt> allIds = new LinkedHashSet<IdDt>();
 		Map<IdDt, IdDt> idSubstitutions = new HashMap<IdDt, IdDt>();
@@ -275,11 +211,11 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		// TODO: process verbs in the correct order
 
 		for (int i = 0; i < theRequest.getEntry().size(); i++) {
-			
+
 			if (i % 100 == 0) {
 				ourLog.info("Processed {} entries out of {}", i, theRequest.getEntry().size());
 			}
-			
+
 			Entry nextEntry = theRequest.getEntry().get(i);
 			IResource res = nextEntry.getResource();
 			IdDt nextResourceId = null;
@@ -330,11 +266,12 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 				// DELETE
 				Entry newEntry = response.addEntry();
 				String url = extractTransactionUrlOrThrowException(nextEntry, verb);
-				UrlParts parts = parseUrl(verb.getCode(), url);
+				UrlParts parts = UrlUtil.parseUrl(url);
+				ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb.getCode(), url);
 				if (parts.getResourceId() != null) {
-					parts.getDao().delete(new IdDt(parts.getResourceType(), parts.getResourceId()));
+					dao.delete(new IdDt(parts.getResourceType(), parts.getResourceId()));
 				} else {
-					parts.getDao().deleteByUrl(parts.getResourceType() + '?' + parts.getParams());
+					dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams());
 				}
 
 				newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_204_NO_CONTENT));
@@ -350,7 +287,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 
 				String url = extractTransactionUrlOrThrowException(nextEntry, verb);
 
-				UrlParts parts = parseUrl(verb.getCode(), url);
+				UrlParts parts = UrlUtil.parseUrl(url);
 				if (isNotBlank(parts.getResourceId())) {
 					res.setId(new IdDt(parts.getResourceType(), parts.getResourceId()));
 					outcome = resourceDao.update(res, null, false);
@@ -365,10 +302,10 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 			case GET: {
 				// SEARCH/READ/VREAD
 				String url = extractTransactionUrlOrThrowException(nextEntry, verb);
-				UrlParts parts = parseUrl(verb.getCode(), url);
+				UrlParts parts = UrlUtil.parseUrl(url);
 
 				@SuppressWarnings("rawtypes")
-				IFhirResourceDao resourceDao = parts.getDao();
+				IFhirResourceDao dao = toDao(parts, verb.getCode(), url);
 
 				String ifNoneMatch = nextEntry.getRequest().getIfNoneMatch();
 				if (isNotBlank(ifNoneMatch)) {
@@ -382,9 +319,9 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 						if (isNotBlank(ifNoneMatch)) {
 							throw new InvalidRequestException("Unable to perform vread on '" + url + "' with ifNoneMatch also set. Do not include a version in the URL to perform a conditional read.");
 						}
-						found = (IResource) resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId(), parts.getVersionId()));
+						found = (IResource) dao.read(new IdDt(parts.getResourceType(), parts.getResourceId(), parts.getVersionId()));
 					} else {
-						found = (IResource) resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId()));
+						found = (IResource) dao.read(new IdDt(parts.getResourceType(), parts.getResourceId()));
 						if (isNotBlank(ifNoneMatch) && ifNoneMatch.equals(found.getId().getVersionIdPart())) {
 							notChanged = true;
 						}
@@ -402,9 +339,9 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 						resp.setStatus(toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
 					}
 				} else if (parts.getParams() != null) {
-					RuntimeResourceDefinition def = getContext().getResourceDefinition(parts.getDao().getResourceType());
+					RuntimeResourceDefinition def = getContext().getResourceDefinition(dao.getResourceType());
 					SearchParameterMap params = translateMatchUrl(url, def);
-					IBundleProvider bundle = parts.getDao().search(params);
+					IBundleProvider bundle = dao.search(params);
 
 					Bundle searchBundle = new Bundle();
 					searchBundle.setTotal(bundle.size());
@@ -453,7 +390,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 
 			InstantDt deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get(nextResource);
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
-			updateEntity(nextResource, nextOutcome.getEntity(), false, deletedTimestampOrNull, true, false);
+			updateEntity(nextResource, nextOutcome.getEntity(), false, deletedTimestampOrNull, true, false, updateTime);
 		}
 
 		myEntityManager.flush();
@@ -468,8 +405,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 					IFhirResourceDao<?> resourceDao = getDao(nextEntry.getResource().getClass());
 					Set<Long> val = resourceDao.processMatchUrl(matchUrl);
 					if (val.size() > 1) {
-						throw new InvalidRequestException(
-								"Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");
+						throw new InvalidRequestException("Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");
 					}
 				}
 			}
@@ -488,11 +424,36 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info(theActionName + " completed in {}ms", new Object[] { delay });
-		
+
 		notifyWriteCompleted();
 
 		response.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
 		return response;
+	}
+
+	private ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> toDao(UrlParts theParts, String theVerb, String theUrl) {
+		RuntimeResourceDefinition resType;
+		try {
+			resType = getContext().getResourceDefinition(theParts.getResourceType());
+		} catch (DataFormatException e) {
+			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
+			throw new InvalidRequestException(msg);
+		}
+		IFhirResourceDao<? extends IBaseResource> dao = null;
+		if (resType != null) {
+			dao = getDao(resType.getImplementingClass());
+		}
+		if (dao == null) {
+			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
+			throw new InvalidRequestException(msg);
+		}
+
+		if (theParts.getResourceId() == null && theParts.getParams() == null) {
+			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
+			throw new InvalidRequestException(msg);
+		}
+
+		return dao;
 	}
 
 	private IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IResource> theClass) {
@@ -503,15 +464,15 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		return retVal;
 	}
 
-	private static void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome,
-			Entry newEntry, String theResourceType, IResource theRes) {
+	private static void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome, Entry newEntry, String theResourceType, IResource theRes) {
 		IdDt newId = (IdDt) outcome.getId().toUnqualifiedVersionless();
 		IdDt resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
 			idSubstitutions.put(resourceId, newId);
 			if (isPlaceholder(resourceId)) {
 				/*
-				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified kind too just to be lenient.
+				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified
+				 * kind too just to be lenient.
 				 */
 				idSubstitutions.put(new IdDt(theResourceType + '/' + resourceId.getValue()), newId);
 			}
@@ -536,54 +497,6 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 
 	private static String toStatusString(int theStatusCode) {
 		return Integer.toString(theStatusCode) + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
-	}
-
-	private static class UrlParts {
-		private IFhirResourceDao<? extends IBaseResource> myDao;
-		private String myParams;
-		private String myResourceId;
-		private String myResourceType;
-		private String myVersionId;
-
-		public IFhirResourceDao<? extends IBaseResource> getDao() {
-			return myDao;
-		}
-
-		public String getParams() {
-			return myParams;
-		}
-
-		public String getResourceId() {
-			return myResourceId;
-		}
-
-		public String getResourceType() {
-			return myResourceType;
-		}
-
-		public String getVersionId() {
-			return myVersionId;
-		}
-
-		public void setDao(IFhirResourceDao<? extends IBaseResource> theDao) {
-			myDao = theDao;
-		}
-
-		public void setParams(String theParams) {
-			myParams = theParams;
-		}
-
-		public void setResourceId(String theResourceId) {
-			myResourceId = theResourceId;
-		}
-
-		public void setResourceType(String theResourceType) {
-			myResourceType = theResourceType;
-		}
-
-		public void setVersionId(String theVersionId) {
-			myVersionId = theVersionId;
-		}
 	}
 
 }

@@ -11,7 +11,7 @@
 			<tr th:each="issue : ${resource.issue}">
 				<td th:text="${issue.severityElement.value}" style="font-weight: bold;"></td>
 				<td th:text="${issue.location}"></td>
-				<td><pre th:text="${issue.details}"/></td>
+				<td><pre th:text="${issue.diagnostics}"/></td>
 			</tr>
 		</table>
 	</div>

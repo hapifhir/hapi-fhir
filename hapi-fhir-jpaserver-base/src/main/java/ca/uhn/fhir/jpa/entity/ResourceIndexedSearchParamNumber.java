@@ -26,6 +26,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 //@formatter:off
 @Entity
 @Table(name = "HFJ_SPIDX_NUMBER" /*, indexes= {@Index(name="IDX_SP_NUMBER", columnList="SP_VALUE")}*/ )
@@ -39,21 +44,57 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 
 	@Column(name = "SP_VALUE", nullable = true)
 	public BigDecimal myValue;
-	
+
 	public ResourceIndexedSearchParamNumber() {
 	}
-	
+
 	public ResourceIndexedSearchParamNumber(String theParamName, BigDecimal theValue) {
 		setParamName(theParamName);
 		setValue(theValue);
+	}
+
+	@Override
+	public boolean equals(Object theObj) {
+		if (this == theObj) {
+			return true;
+		}
+		if (theObj == null) {
+			return false;
+		}
+		if (!(theObj instanceof ResourceIndexedSearchParamNumber)) {
+			return false;
+		}
+		ResourceIndexedSearchParamNumber obj = (ResourceIndexedSearchParamNumber) theObj;
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(getParamName(), obj.getParamName());
+		b.append(getResource(), obj.getResource());
+		b.append(getValue(), obj.getValue());
+		return b.isEquals();
 	}
 
 	public BigDecimal getValue() {
 		return myValue;
 	}
 
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getParamName());
+		b.append(getResource());
+		b.append(getValue());
+		return b.toHashCode();
+	}
+
 	public void setValue(BigDecimal theValue) {
 		myValue = theValue;
 	}
 
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("paramName", getParamName());
+		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
+		b.append("value", getValue());
+		return b.build();
+	}
 }

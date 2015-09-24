@@ -106,10 +106,11 @@ public interface IServerInterceptor {
 	 *           The incoming servlet request as provided by the servlet container
 	 * @param theOperation
 	 *           The type of operation that the FHIR server has determined that the client is trying to invoke
-	 * @param theRequestDetails
-	 *           An object which will be populated with any relevant details about the incoming request (this includes the HttpServletRequest)
+	 * @param theProcessedRequest
+	 *           An object which will be populated with the details which were extracted from the raw request by the server,
+	 *           e.g. the FHIR operation type and the parsed resource body (if any).
 	 */
-	void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theRequestDetails);
+	void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theProcessedRequest);
 
 	/**
 	 * This method is called before any other processing takes place for each incoming request. It may be used to provide alternate handling for some requests, or to screen requests before they are

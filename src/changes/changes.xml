@@ -6,6 +6,50 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="1.3" date="TBD">
+			<action type="add">
+            Bump the version of a few dependencies to the
+            latest versions (dependent HAPI modules listed in brackets):
+            <![CDATA[
+               <ul>
+                  <li>Springframework (JPA, Web Tester): 4.1.5 -> 4.2.1</li>
+                  <li>Hibernate (JPA, Web Tester): 4.2.17 -> 5.0.1</li>
+               </ul>
+            ]]>
+         </action>
+			<action type="add">
+				JPA server removes duplicate resource index entries before storing them 
+				(e.g. if a patient has the same name twice, only one index entry is created
+				for that name)
+			</action>
+			<action type="fix">
+				JPA server did not correctly index search parameters of type "reference" where the
+				path had multiple entries (i.e. "Resource.path1 | Resource.path2")
+			</action>
+			<action type="fix">
+				JPA server _history operations (server, type, instance) not correctly set the
+				Bundle.entry.request.method to POST or PUT for create and updates of the resource.
+			</action>
+			<action type="add" issue="225">
+				Support AND/OR on _id search parameter in JPA
+			</action>
+			<action type="fix">
+				Constructor for DateRanfeParam which dates in two DateParam instances was ignoring 
+				comparators on the DateParam.
+			</action>
+			<action type="fix">
+				In JSON parsing, finding an object where an array was expected led to an unhelpful
+				error message. Thanks to Avinash Shanbhag for reporting!
+			</action>
+			<action type="add">
+				JPA server gave an unhelpful error message if $meta-add or $meta-delete were called
+				with no meta elements in the input Parameters
+			</action>
+			<action type="fix">
+				Narrative generator did not include OperationOutcome.issue.diagnostics in the
+				generated narrative.
+			</action>
+		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">
 				JPA server now validates QuestionnaireAnswers for conformance to their respective Questionnaire

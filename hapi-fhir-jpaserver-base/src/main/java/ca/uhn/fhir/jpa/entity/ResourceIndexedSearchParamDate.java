@@ -28,6 +28,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 //@formatter:off
 @Entity
 @Table(name = "HFJ_SPIDX_DATE" /*, indexes= {@Index(name="IDX_SP_DATE", columnList= "SP_VALUE_LOW,SP_VALUE_HIGH")}*/)
@@ -47,18 +52,34 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Temporal(TemporalType.TIMESTAMP)
 	public Date myValueLow;
 
-	
-	
 	public ResourceIndexedSearchParamDate() {
 	}
-	
+
 	public ResourceIndexedSearchParamDate(String theName, Date theLow, Date theHigh) {
 		setParamName(theName);
 		setValueLow(theLow);
 		setValueHigh(theHigh);
 	}
 
-	
+	@Override
+	public boolean equals(Object theObj) {
+		if (this == theObj) {
+			return true;
+		}
+		if (theObj == null) {
+			return false;
+		}
+		if (!(theObj instanceof ResourceIndexedSearchParamDate)) {
+			return false;
+		}
+		ResourceIndexedSearchParamDate obj = (ResourceIndexedSearchParamDate) theObj;
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(getParamName(), obj.getParamName());
+		b.append(getResource(), obj.getResource());
+		b.append(getValueHigh(), obj.getValueHigh());
+		b.append(getValueLow(), obj.getValueLow());
+		return b.isEquals();
+	}
 
 	public Date getValueHigh() {
 		return myValueHigh;
@@ -66,6 +87,16 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 
 	public Date getValueLow() {
 		return myValueLow;
+	}
+
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getParamName());
+		b.append(getResource());
+		b.append(getValueHigh());
+		b.append(getValueLow());
+		return b.toHashCode();
 	}
 
 	public void setValueHigh(Date theValueHigh) {
@@ -76,6 +107,13 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		myValueLow = theValueLow;
 	}
 
-	
-
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("paramName", getParamName());
+		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
+		b.append("valueLow", getValueLow());
+		b.append("valueHigh", getValueHigh());
+		return b.build();
+	}
 }

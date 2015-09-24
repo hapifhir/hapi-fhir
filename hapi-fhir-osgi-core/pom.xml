@@ -1,31 +1,76 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>1.2-SNAPSHOT</version>
+		<version>1.3-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-osgi-core</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
 
 	<name>HAPI FHIR - OSGi Bundle</name>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>1.2-SNAPSHOT</version>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu</artifactId>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu2</artifactId>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
+			<version>1.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
+			<version>1.3-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
 	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Export-Package>ca.uhn.fhir</Export-Package>
+						<Export-Package>org.hl7.fhir</Export-Package>
+						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+						<Embed-Dependency>*;scope=!provided|test</Embed-Dependency>
+						<Embed-Directory>lib</Embed-Directory>
+						<Embed-Transitive>true</Embed-Transitive>
+						<_removeheaders>Built-By</_removeheaders>
+						<!-- <Private-Package>org.foo.myproject.*</Private-Package> <Bundle-Activator>org.foo.myproject.impl1.Activator</Bundle-Activator> -->
+					</instructions>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>bundle</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>

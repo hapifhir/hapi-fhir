@@ -25,25 +25,26 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Entity
-@Table(name = "HFJ_SPIDX_STRING"/*, indexes= {@Index(name="IDX_SP_STRING", columnList="SP_VALUE_NORMALIZED")}*/)
-@org.hibernate.annotations.Table(appliesTo="HFJ_SPIDX_STRING",indexes= {
-		@org.hibernate.annotations.Index(name="IDX_SP_STRING", columnNames= {"RES_TYPE", "SP_NAME", "SP_VALUE_NORMALIZED"})})
+@Table(name = "HFJ_SPIDX_STRING"/* , indexes= {@Index(name="IDX_SP_STRING", columnList="SP_VALUE_NORMALIZED")} */)
+@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_STRING", indexes = { @org.hibernate.annotations.Index(name = "IDX_SP_STRING", columnNames = { "RES_TYPE", "SP_NAME", "SP_VALUE_NORMALIZED" }) })
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 100;
 
 	private static final long serialVersionUID = 1L;
 
+	@Column(name = "SP_VALUE_EXACT", length = 100, nullable = true)
+	public String myValueExact;
+
 	@Column(name = "SP_VALUE_NORMALIZED", length = MAX_LENGTH, nullable = true)
 	public String myValueNormalized;
 
-	@Column(name="SP_VALUE_EXACT",length=100,nullable=true)
-	public String myValueExact;
-	
 	public ResourceIndexedSearchParamString() {
 	}
 
@@ -53,19 +54,40 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		setValueExact(theValueExact);
 	}
 
-	public String getValueNormalized() {
-		return myValueNormalized;
-	}
-
-	public void setValueNormalized(String theValueNormalized) {
-		if (StringUtils.defaultString(theValueNormalized).length() > MAX_LENGTH) {
-			throw new IllegalArgumentException("Value is too long: " + theValueNormalized.length());
+	@Override
+	public boolean equals(Object theObj) {
+		if (this == theObj) {
+			return true;
 		}
-		myValueNormalized = theValueNormalized;
+		if (theObj == null) {
+			return false;
+		}
+		if (!(theObj instanceof ResourceIndexedSearchParamString)) {
+			return false;
+		}
+		ResourceIndexedSearchParamString obj = (ResourceIndexedSearchParamString) theObj;
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(getParamName(), obj.getParamName());
+		b.append(getResource(), obj.getResource());
+		b.append(getValueExact(), obj.getValueExact());
+		return b.isEquals();
 	}
 
 	public String getValueExact() {
 		return myValueExact;
+	}
+
+	public String getValueNormalized() {
+		return myValueNormalized;
+	}
+
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getParamName());
+		b.append(getResource());
+		b.append(getValueExact());
+		return b.toHashCode();
 	}
 
 	public void setValueExact(String theValueExact) {
@@ -73,6 +95,13 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			throw new IllegalArgumentException("Value is too long: " + theValueExact.length());
 		}
 		myValueExact = theValueExact;
+	}
+
+	public void setValueNormalized(String theValueNormalized) {
+		if (StringUtils.defaultString(theValueNormalized).length() > MAX_LENGTH) {
+			throw new IllegalArgumentException("Value is too long: " + theValueNormalized.length());
+		}
+		myValueNormalized = theValueNormalized;
 	}
 
 	@Override
@@ -83,5 +112,4 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append("value", getValueNormalized());
 		return b.build();
 	}
-
 }

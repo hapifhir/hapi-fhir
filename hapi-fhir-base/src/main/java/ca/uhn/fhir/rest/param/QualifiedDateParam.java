@@ -23,11 +23,13 @@ package ca.uhn.fhir.rest.param;
 import java.util.Date;
 
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import net.sourceforge.cobertura.CoverageIgnore;
 
 /**
  * @deprecated Use {@link DateParam} instead (this class is identical, but was renamed to be less confusing)
  */
 @Deprecated
+@CoverageIgnore
 public class QualifiedDateParam extends DateParam {
 	/**
 	 * Constructor

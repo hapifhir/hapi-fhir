@@ -98,7 +98,11 @@ public abstract class BaseHasResource {
 	public abstract IdDt getIdDt();
 
 	public InstantDt getPublished() {
-		return new InstantDt(myPublished);
+		if (myPublished != null) {
+			return new InstantDt(myPublished);
+		} else {
+			return null;
+		}
 	}
 
 	public byte[] getResource() {

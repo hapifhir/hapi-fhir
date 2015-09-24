@@ -24,8 +24,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -35,8 +38,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DateParam extends DateTimeDt implements IQueryParameterType, IQueryParameterOr<DateParam> {
 
-	private QuantityCompararatorEnum myComparator;
 	private BaseParam myBase=new BaseParam.ComposableBaseParam();
+	private QuantityCompararatorEnum myComparator;
 
 	/**
 	 * Constructor
@@ -55,17 +58,26 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 	/**
 	 * Constructor
 	 */
-	public DateParam(QuantityCompararatorEnum theComparator, String theDate) {
+	public DateParam(QuantityCompararatorEnum theComparator, DateTimeDt theDate) {
 		myComparator = theComparator;
-		setValueAsString(theDate);
+		setValueAsString(theDate != null ? theDate.getValueAsString() : null);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public DateParam(QuantityCompararatorEnum theComparator, DateTimeDt theDate) {
+	public DateParam(QuantityCompararatorEnum theComparator, long theDate) {
+		Validate.inclusiveBetween(1, Long.MAX_VALUE, theDate, "theDate must not be 0 or negative");
 		myComparator = theComparator;
-		setValueAsString(theDate != null ? theDate.getValueAsString() : null);
+		setValue(new Date(theDate));
+	}
+
+	/**
+	 * Constructor
+	 */
+	public DateParam(QuantityCompararatorEnum theComparator, String theDate) {
+		myComparator = theComparator;
+		setValueAsString(theDate);
 	}
 
 	/**
@@ -86,11 +98,24 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 	}
 
 	@Override
+	public Boolean getMissing() {
+		return myBase.getMissing();
+	}
+
+	@Override
 	public String getQueryParameterQualifier() {
 		if (myBase.getMissing()!=null) {
 			return myBase.getQueryParameterQualifier();
 		}
 		return null;
+	}
+
+	public DateTimeDt getValueAsDateTimeDt() {
+		return new DateTimeDt(getValueAsString());
+	}
+
+	public InstantDt getValueAsInstantDt() {
+		return new InstantDt(getValue());
 	}
 
 	@Override
@@ -123,6 +148,17 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 
 	public void setComparator(QuantityCompararatorEnum theComparator) {
 		myComparator = theComparator;
+	}
+
+	@Override
+	public void setMissing(Boolean theMissing) {
+		myBase.setMissing(theMissing);
+	}
+
+	@Override
+	public DateParam setValue(Date theValue) {
+		super.setValue(theValue, TemporalPrecisionEnum.MILLI);
+		return this;
 	}
 
 	@Override
@@ -189,24 +225,6 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 		}
 		b.append("]");
 		return b.toString();
-	}
-
-	public InstantDt getValueAsInstantDt() {
-		return new InstantDt(getValue());
-	}
-
-	public DateTimeDt getValueAsDateTimeDt() {
-		return new DateTimeDt(getValueAsString());
-	}
-
-	@Override
-	public Boolean getMissing() {
-		return myBase.getMissing();
-	}
-
-	@Override
-	public void setMissing(Boolean theMissing) {
-		myBase.setMissing(theMissing);
 	}
 
 }

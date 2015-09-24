@@ -24,6 +24,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 //@formatter:off
 @Entity
 @Table(name = "HFJ_SPIDX_COORDS" /* , indexes = { @Index(name = "IDX_SP_TOKEN", columnList = "SP_SYSTEM,SP_VALUE") } */)
@@ -52,20 +57,59 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		setLongitude(theLongitude);
 	}
 
-	public double getLatitude() {
-		return myLatitude;
+	@Override
+	public boolean equals(Object theObj) {
+		if (this == theObj) {
+			return true;
+		}
+		if (theObj == null) {
+			return false;
+		}
+		if (!(theObj instanceof ResourceIndexedSearchParamCoords)) {
+			return false;
+		}
+		ResourceIndexedSearchParamCoords obj = (ResourceIndexedSearchParamCoords) theObj;
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(getParamName(), obj.getParamName());
+		b.append(getResource(), obj.getResource());
+		b.append(getLatitude(), obj.getLatitude());
+		b.append(getLongitude(), obj.getLongitude());
+		return b.isEquals();
 	}
 
-	public void setLatitude(double theLatitude) {
-		myLatitude = theLatitude;
+	public double getLatitude() {
+		return myLatitude;
 	}
 
 	public double getLongitude() {
 		return myLongitude;
 	}
 
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getParamName());
+		b.append(getResource());
+		b.append(getLatitude());
+		b.append(getLongitude());
+		return b.toHashCode();
+	}
+
+	public void setLatitude(double theLatitude) {
+		myLatitude = theLatitude;
+	}
+
 	public void setLongitude(double theLongitude) {
 		myLongitude = theLongitude;
 	}
-
+	
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("paramName", getParamName());
+		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
+		b.append("lat", getLatitude());
+		b.append("lon", getLongitude());
+		return b.build();
+	}
 }

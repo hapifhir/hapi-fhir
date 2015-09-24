@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
@@ -475,17 +476,6 @@ public class JsonParserDstu2Test {
 	}
 
 	@Test
-	public void testParseAndEncodeBundleResourceWithComments() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-transaction2.json"));
-
-		ourCtx.newJsonParser().parseBundle(content);
-		
-		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
-		
-		// TODO: preserve comments
-	}
-	
-	@Test
 	public void testParseAndEncodeBundle() throws Exception {
 		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
 
@@ -527,7 +517,7 @@ public class JsonParserDstu2Test {
 		assertEquals(exp, act);
 
 	}
-
+	
 	/**
 	 * Test for #146
 	 */
@@ -639,6 +629,17 @@ public class JsonParserDstu2Test {
 
 		assertEquals(exp, act);
 
+	}
+
+	@Test
+	public void testParseAndEncodeBundleResourceWithComments() throws Exception {
+		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-transaction2.json"));
+
+		ourCtx.newJsonParser().parseBundle(content);
+		
+		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
+		
+		// TODO: preserve comments
 	}
 
 	@Test
@@ -856,7 +857,7 @@ public class JsonParserDstu2Test {
 		assertEquals(exp, act);
 
 	}
-
+	
 	@Test
 	public void testParsePatientInBundle() {
 
@@ -914,6 +915,17 @@ public class JsonParserDstu2Test {
 			fail();
 		} catch (DataFormatException e) {
 			assertEquals("Missing required element 'resourceType' from JSON resource object, unable to parse", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testParseWithWrongTypeObjectShouldBeArray() throws Exception {
+		String input = IOUtils.toString(getClass().getResourceAsStream("/invalid_metadata.json"));
+		try {
+			ourCtx.newJsonParser().parseResource(Conformance.class, input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Syntax error parsing JSON FHIR structure: Expected ARRAY at element 'modifierExtension', found 'OBJECT'", e.getMessage());
 		}
 	}
 

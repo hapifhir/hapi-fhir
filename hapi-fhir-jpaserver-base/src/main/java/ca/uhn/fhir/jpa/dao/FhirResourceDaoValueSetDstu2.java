@@ -60,7 +60,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		if (sourceEntity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
-		ValueSet source = (ValueSet) toResource(sourceEntity);
+		ValueSet source = (ValueSet) toResource(sourceEntity, false);
 
 		/*
 		 * Add composed concepts

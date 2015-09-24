@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:task="http://www.springframework.org/schema/task" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
 	default-autowire="no" default-lazy-init="false"
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
@@ -8,6 +9,7 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
 		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
 	"
 	>
 
@@ -21,6 +23,12 @@
 	</bean>
 
 #if ( ${versionCapitalized} == 'Dstu2' )
+	<jpa:repositories base-package="ca.uhn.fhir.jpa.dao.data" />
+
+	<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
+	<task:executor id="myExecutor" pool-size="5"/>
+	<task:scheduler id="myScheduler" pool-size="10"/>
+
 	<bean id="myJpaValidationSupport${versionCapitalized}" class="ca.uhn.fhir.jpa.dao.JpaValidationSupport${versionCapitalized}"/>
 #end
 
@@ -33,7 +41,7 @@
 #foreach ( $res in $resources )
 	<bean id="my${res.name}Dao${versionCapitalized}" 
 ## Some resource types have customized DAOs for resource specific functionality
-#if ( ${versionCapitalized} == 'Dstu2' && ( ${res.name} == 'Bundle' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'ValueSet'))
+#if ( ${versionCapitalized} == 'Dstu2' && ( ${res.name} == 'Bundle' || ${res.name} == 'Subscription' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'ValueSet'))
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${res.name}${versionCapitalized}">
 #else
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}">

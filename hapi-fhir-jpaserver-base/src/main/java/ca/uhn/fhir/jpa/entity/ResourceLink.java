@@ -32,11 +32,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
-@Table(name = "HFJ_RES_LINK"/*, indexes= {@Index(name="IDX_RL_TPATHRES", columnList= "SRC_PATH,TARGET_RESOURCE_ID")}*/)
-@org.hibernate.annotations.Table(appliesTo="HFJ_RES_LINK",indexes= {
-		@org.hibernate.annotations.Index(name="IDX_RL_TPATHRES", columnNames= {"SRC_PATH", "TARGET_RESOURCE_ID"})})
+@Table(name = "HFJ_RES_LINK"/* , indexes= {@Index(name="IDX_RL_TPATHRES", columnList= "SRC_PATH,TARGET_RESOURCE_ID")} */)
+@org.hibernate.annotations.Table(appliesTo = "HFJ_RES_LINK", indexes = { @org.hibernate.annotations.Index(name = "IDX_RL_TPATHRES", columnNames = { "SRC_PATH", "TARGET_RESOURCE_ID" }) })
 public class ResourceLink implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -50,33 +51,21 @@ public class ResourceLink implements Serializable {
 	private String mySourcePath;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName="RES_ID", nullable=false)
+	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false)
 	private ResourceTable mySourceResource;
 
-	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false, nullable=false)
+	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
 	private Long mySourceResourcePid;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName="RES_ID", nullable=false)
+	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false)
 	private ResourceTable myTargetResource;
 
-	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false,nullable=false)
+	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
 	private Long myTargetResourcePid;
 
 	public ResourceLink() {
-		//nothing
-	}
-	
-	@Override
-	public String toString() {
-		StringBuilder b = new StringBuilder();
-		b.append("ResourceLink[");
-		b.append("path=").append(mySourcePath);
-		b.append(", src=").append(mySourceResource.getId());
-		b.append(", target=").append(myTargetResource.getId());
-		
-		b.append("]");
-		return b.toString();
+		// nothing
 	}
 
 	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, ResourceTable theTargetResource) {
@@ -84,6 +73,25 @@ public class ResourceLink implements Serializable {
 		mySourcePath = theSourcePath;
 		mySourceResource = theSourceResource;
 		myTargetResource = theTargetResource;
+	}
+
+	@Override
+	public boolean equals(Object theObj) {
+		if (this == theObj) {
+			return true;
+		}
+		if (theObj == null) {
+			return false;
+		}
+		if (!(theObj instanceof ResourceLink)) {
+			return false;
+		}
+		ResourceLink obj = (ResourceLink) theObj;
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(mySourcePath, obj.mySourcePath);
+		b.append(mySourceResource, obj.mySourceResource);
+		b.append(myTargetResource, obj.myTargetResource);
+		return b.isEquals();
 	}
 
 	public String getSourcePath() {
@@ -106,6 +114,15 @@ public class ResourceLink implements Serializable {
 		return myTargetResourcePid;
 	}
 
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(mySourcePath);
+		b.append(mySourceResource);
+		b.append(myTargetResource);
+		return b.toHashCode();
+	}
+
 	public void setSourcePath(String theSourcePath) {
 		mySourcePath = theSourcePath;
 	}
@@ -114,17 +131,21 @@ public class ResourceLink implements Serializable {
 		mySourceResource = theSourceResource;
 	}
 
-	public void setSourceResourcePid(Long theSourceResourcePid) {
-		mySourceResourcePid = theSourceResourcePid;
-	}
-
 	public void setTargetResource(ResourceTable theTargetResource) {
 		Validate.notNull(theTargetResource);
 		myTargetResource = theTargetResource;
 	}
 
-	public void setTargetResourcePid(Long theTargetResourcePid) {
-		myTargetResourcePid = theTargetResourcePid;
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		b.append("ResourceLink[");
+		b.append("path=").append(mySourcePath);
+		b.append(", src=").append(mySourceResource.getId());
+		b.append(", target=").append(myTargetResource.getId());
+
+		b.append("]");
+		return b.toString();
 	}
 
 }

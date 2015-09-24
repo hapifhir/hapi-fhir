@@ -26,6 +26,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 //@formatter:off
 @Entity
 @Table(name = "HFJ_SPIDX_QUANTITY" /*, indexes= {@Index(name="IDX_SP_NUMBER", columnList="SP_VALUE")}*/ )
@@ -47,14 +52,35 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	public BigDecimal myValue;
 
 	public ResourceIndexedSearchParamQuantity() {
-		//nothing
+		// nothing
 	}
-	
+
 	public ResourceIndexedSearchParamQuantity(String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
 		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
 		setUnits(theUnits);
+	}
+
+	@Override
+	public boolean equals(Object theObj) {
+		if (this == theObj) {
+			return true;
+		}
+		if (theObj == null) {
+			return false;
+		}
+		if (!(theObj instanceof ResourceIndexedSearchParamQuantity)) {
+			return false;
+		}
+		ResourceIndexedSearchParamQuantity obj = (ResourceIndexedSearchParamQuantity) theObj;
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(getParamName(), obj.getParamName());
+		b.append(getResource(), obj.getResource());
+		b.append(getSystem(), obj.getSystem());
+		b.append(getUnits(), obj.getUnits());
+		b.append(getValue(), obj.getValue());
+		return b.isEquals();
 	}
 
 	public String getSystem() {
@@ -69,6 +95,16 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		return myValue;
 	}
 
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getParamName());
+		b.append(getResource());
+		b.append(getSystem());
+		b.append(getUnits());
+		b.append(getValue());
+		return b.toHashCode();
+	}
 
 	public void setSystem(String theSystem) {
 		mySystem = theSystem;
@@ -80,6 +116,17 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 
 	public void setValue(BigDecimal theValue) {
 		myValue = theValue;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("paramName", getParamName());
+		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
+		b.append("system", getSystem());
+		b.append("units", getUnits());
+		b.append("value", getValue());
+		return b.build();
 	}
 
 }

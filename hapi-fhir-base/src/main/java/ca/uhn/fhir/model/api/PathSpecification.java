@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.api;
 
+import net.sourceforge.cobertura.CoverageIgnore;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -31,6 +33,7 @@ package ca.uhn.fhir.model.api;
  * 
  * @deprecated {@link Include} should be used instead
  */
+@CoverageIgnore
 @Deprecated
 public class PathSpecification extends Include {
 

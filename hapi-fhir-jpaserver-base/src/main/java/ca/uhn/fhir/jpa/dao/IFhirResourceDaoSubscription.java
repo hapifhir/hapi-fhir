@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -23,23 +20,10 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
  * #L%
  */
 
-public interface IDao {
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-	public static final ResourceMetadataKeyEnum<Long> RESOURCE_PID = new ResourceMetadataKeyEnum<Long>("RESOURCE_PID") {
+public interface IFhirResourceDaoSubscription<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-		private static final long serialVersionUID = 1L;
+	void pollForNewUndeliveredResources();
 
-		@Override
-		public Long get(IResource theResource) {
-			return (Long) theResource.getResourceMetadata().get(RESOURCE_PID);
-		}
-
-		@Override
-		public void put(IResource theResource, Long theObject) {
-			theResource.getResourceMetadata().put(RESOURCE_PID, theObject);
-		}
-	};
-
-	void registerDaoListener(IDaoListener theListener);
-	
 }

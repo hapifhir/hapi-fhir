@@ -25,6 +25,8 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 //@formatter:off
@@ -51,8 +53,36 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		setUri(theUri);
 	}
 
+	@Override
+	public boolean equals(Object theObj) {
+		if (this == theObj) {
+			return true;
+		}
+		if (theObj == null) {
+			return false;
+		}
+		if (!(theObj instanceof ResourceIndexedSearchParamUri)) {
+			return false;
+		}
+		ResourceIndexedSearchParamUri obj = (ResourceIndexedSearchParamUri) theObj;
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(getParamName(), obj.getParamName());
+		b.append(getResource(), obj.getResource());
+		b.append(getUri(), obj.getUri());
+		return b.isEquals();
+	}
+
 	public String getUri() {
 		return myUri;
+	}
+
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getParamName());
+		b.append(getResource());
+		b.append(getUri());
+		return b.toHashCode();
 	}
 
 	public void setUri(String theUri) {

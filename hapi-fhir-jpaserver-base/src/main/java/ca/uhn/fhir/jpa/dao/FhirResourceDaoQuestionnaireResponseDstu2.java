@@ -27,6 +27,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
@@ -58,8 +59,8 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 	}
 	
 	@Override
-	protected void validateResourceForStorage(QuestionnaireResponse theResource) {
-		super.validateResourceForStorage(theResource);
+	protected void validateResourceForStorage(QuestionnaireResponse theResource, ResourceTable theEntityToSave) {
+		super.validateResourceForStorage(theResource, theEntityToSave);
 		if (!myValidateResponses) {
 			return;
 		}
