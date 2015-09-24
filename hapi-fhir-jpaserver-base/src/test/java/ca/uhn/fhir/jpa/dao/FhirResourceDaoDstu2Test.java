@@ -164,6 +164,71 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	public void testCreateWithInvalid() {
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
+		o1.setValue(new CodeableConceptDt("testChoiceParam01CCS", "testChoiceParam01CCV"));
+		IIdType id1 = myObservationDao.create(o1).getId();
+
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_CONCEPT, new TokenParam("testChoiceParam01CCS", "testChoiceParam01CCV"));
+			assertEquals(1, found.size());
+			assertEquals(id1, found.getResources(0, 1).get(0).getIdElement());
+		}
+	}
+
+	@Test
+	public void testCreateWithIllegalReference() {
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
+		IIdType id1 = myObservationDao.create(o1).getId().toUnqualifiedVersionless();
+
+		try {
+			Patient p = new Patient();
+			p.getManagingOrganization().setReference(id1);
+			myPatientDao.create(p);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
+		}
+
+		try {
+			Patient p = new Patient();
+			p.getManagingOrganization().setReference(new IdDt("Organization", id1.getIdPart()));
+			myPatientDao.create(p);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Resource contains reference to Organization/1 but resource with ID 1 is actually of type Observation", e.getMessage());
+		}
+
+		// Now with a forced ID
+		
+		o1 = new Observation();
+		o1.setId("testCreateWithIllegalReference");
+		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
+		id1 = myObservationDao.update(o1).getId().toUnqualifiedVersionless();
+
+		try {
+			Patient p = new Patient();
+			p.getManagingOrganization().setReference(id1);
+			myPatientDao.create(p);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
+		}
+
+		try {
+			Patient p = new Patient();
+			p.getManagingOrganization().setReference(new IdDt("Organization", id1.getIdPart()));
+			myPatientDao.create(p);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Resource contains reference to Organization/testCreateWithIllegalReference but resource with ID testCreateWithIllegalReference is actually of type Observation", e.getMessage());
+		}
+
+	}
+	
+	@Test
 	public void testChoiceParamDate() {
 		Observation o2 = new Observation();
 		o2.getCode().addCoding().setSystem("foo").setCode("testChoiceParam02");

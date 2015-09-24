@@ -60,6 +60,12 @@
 				QuestionnaireResponse validator now allows responses to questions of
 				type OPENCHOICE to be of type 'string'
 			</action>
+			<action type="fix" issue="227">
+				JPA server should reject resources with a reference that points to an incorrectly typed
+				resource (e.g. points to Patient/123 but resource 123 is actually an Observation) or points
+				to a resource that is not valid in the location it is found in (e.g. points to Patient/123 but
+				the field supposed to reference an Organization). Thanks to Bill de Beaubien for reporting!
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">
