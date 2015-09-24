@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -10,12 +11,15 @@ import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.dao.data.ISubscriptionFlaggedResourceDataDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.SubscriptionFlaggedResource;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
@@ -31,6 +35,9 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoSubscriptionDstu2.class);
 
+	@Autowired
+	private ISubscriptionFlaggedResourceDataDao mySubscriptionFlaggedResourceDataDao;
+	
 	private void createSubscriptionTable(ResourceTable theEntity, Subscription theSubscription) {
 		SubscriptionTable subscriptionEntity = new SubscriptionTable();
 		subscriptionEntity.setSubscriptionResource(theEntity);
@@ -87,6 +94,12 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		}
 		
 		ourLog.info("Found {} new results for Subscription {}", results.size(), subscription.getId().getIdPart());
+		
+		List<SubscriptionFlaggedResource> flags = new ArrayList<SubscriptionFlaggedResource>();
+		for (IBaseResource next : results.getResources(0, results.size())) {
+			SubscriptionFlaggedResource nextFlag = new SubscriptionFlaggedResource();
+			nextFlag.setResource();
+		}
 		
 	}
 

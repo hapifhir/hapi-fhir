@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -64,6 +65,9 @@ public class SubscriptionTable {
 	@OneToOne()
 	@JoinColumn(name = "RES_ID", insertable = true, updatable = false, referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_SUBSCRIPTION_RESOURCE_ID") )
 	private ResourceTable mySubscriptionResource;
+
+	@OneToMany(orphanRemoval=true, mappedBy="mySubscription")
+	private SubscriptionFlaggedResource myFlaggedResources;
 
 	public long getCheckInterval() {
 		return myCheckInterval;

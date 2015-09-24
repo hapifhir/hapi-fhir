@@ -999,6 +999,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		ResourceMetadataKeyEnum.VERSION.put(res, Long.toString(theEntity.getVersion()));
 		ResourceMetadataKeyEnum.PUBLISHED.put(res, theEntity.getPublished());
 		ResourceMetadataKeyEnum.UPDATED.put(res, theEntity.getUpdated());
+		IDao.RESOURCE_PID.put(res, theEntity.getId());
 
 		if (theEntity.getTitle() != null) {
 			ResourceMetadataKeyEnum.TITLE.put(res, theEntity.getTitle());
