@@ -214,7 +214,11 @@ public class RestfulServerUtils {
 		return retVal;
 	}
 
-	public static EncodingEnum determineResponseEncodingNoDefault(HttpServletRequest theReq) {
+	/**
+	 * Returns null if the request doesn't express that it wants FHIR. If it expresses that it wants
+	 * XML and JSON equally, returns thePrefer.
+	 */
+	public static EncodingEnum determineResponseEncodingNoDefault(HttpServletRequest theReq, EncodingEnum thePrefer) {
 		String[] format = theReq.getParameterValues(Constants.PARAM_FORMAT);
 		if (format != null) {
 			for (String nextFormat : format) {
@@ -257,9 +261,11 @@ public class RestfulServerUtils {
 						}
 					}
 
-					if (q > bestQ && encoding != null) {
-						retVal = encoding;
-						bestQ = q;
+					if (encoding != null) {
+						if (q > bestQ || (q == bestQ && encoding == thePrefer)) {
+							retVal = encoding;
+							bestQ = q;
+						}
 					}
 
 					if (!",".equals(m.group(5))) {
@@ -278,7 +284,7 @@ public class RestfulServerUtils {
 	 * Determine whether a response should be given in JSON or XML format based on the incoming HttpServletRequest's <code>"_format"</code> parameter and <code>"Accept:"</code> HTTP header.
 	 */
 	public static EncodingEnum determineResponseEncodingWithDefault(RestfulServer theServer, HttpServletRequest theReq) {
-		EncodingEnum retVal = determineResponseEncodingNoDefault(theReq);
+		EncodingEnum retVal = determineResponseEncodingNoDefault(theReq, theServer.getDefaultResponseEncoding());
 		if (retVal == null) {
 			retVal = theServer.getDefaultResponseEncoding();
 		}
@@ -328,10 +334,7 @@ public class RestfulServerUtils {
 	public static IParser getNewParser(FhirContext theContext, RequestDetails theRequestDetails) {
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails.getServletRequest());
-		if (responseEncoding == null) {
-			responseEncoding = theRequestDetails.getServer().getDefaultResponseEncoding();
-		}
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails.getServer(), theRequestDetails.getServletRequest());
 		IParser parser;
 		switch (responseEncoding) {
 		case JSON:
@@ -472,8 +475,7 @@ public class RestfulServerUtils {
 		theHttpResponse.setStatus(200);
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails.getServletRequest());
-		responseEncoding = responseEncoding != null ? responseEncoding : theServer.getDefaultResponseEncoding();
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequestDetails.getServletRequest());
 
 		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
 			theHttpResponse.setContentType(responseEncoding.getBrowserFriendlyBundleContentType());
@@ -502,7 +504,7 @@ public class RestfulServerUtils {
 		theHttpResponse.setStatus(stausCode);
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails.getServletRequest());
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails.getServletRequest(), theServer.getDefaultResponseEncoding());
 
 		String serverBase = theRequestDetails.getFhirServerBase();
 		if (theAddContentLocationHeader && theResource.getIdElement() != null && theResource.getIdElement().hasIdPart() && isNotBlank(serverBase)) {

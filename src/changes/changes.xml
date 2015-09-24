@@ -66,6 +66,10 @@
 				to a resource that is not valid in the location it is found in (e.g. points to Patient/123 but
 				the field supposed to reference an Organization). Thanks to Bill de Beaubien for reporting!
 			</action>
+			<action type="fix">
+				In server, if a client request is received and it has an Accept header indicating
+			       	that it supports both XML and JSON with equal weight, the server's default is used instead of the first entry in the list.
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

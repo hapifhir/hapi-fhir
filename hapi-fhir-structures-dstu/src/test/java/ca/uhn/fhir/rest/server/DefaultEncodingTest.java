@@ -36,9 +36,6 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class DefaultEncodingTest {
 
 	private static CloseableHttpClient ourClient;
@@ -47,6 +44,59 @@ public class DefaultEncodingTest {
 	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static RestfulServer ourRestfulServer;
 
+	@Test
+	public void testHonoursAcceptHeader() throws Exception {
+		ourRestfulServer.setDefaultPrettyPrint(false);
+		ourRestfulServer.setDefaultResponseEncoding(EncodingEnum.JSON);
+		
+		HttpGet httpGet;
+		HttpResponse status;
+		String responseContent;
+		
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", "application/json");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertThat(responseContent, containsString("\"identifier\":"));
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", "application/json+fhir");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertThat(responseContent, containsString("\"identifier\":"));
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", "application/json+fhir, application/xml+fhir");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertThat(responseContent, containsString("\"identifier\":"));
+		
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", "application/xml+fhir, application/json+fhir");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertThat(responseContent, containsString("\"identifier\":"));
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", "application/xml+fhir; q=0.9, application/json+fhir; q=1.0");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertThat(responseContent, containsString("\"identifier\":"));
+		
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", "application/xml+fhir; q=1.0, application/json+fhir; q=0.9");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertThat(responseContent, not(containsString("\"identifier\":")));
+
+	}
+	
 	@Test
 	public void testReadWithDefaultJsonPretty() throws Exception {
 		ourRestfulServer.setDefaultPrettyPrint(true);

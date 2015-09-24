@@ -1,7 +1,5 @@
 package ca.uhn.fhirtest;
 
-import java.sql.DriverManager;
-
 import org.apache.derby.drda.NetworkServerControl;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
