@@ -191,6 +191,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 			String[] nextPathsSplit = nextPathsUnsplit.split("\\|");
 			for (String nextPath : nextPathsSplit) {
+				nextPath = nextPath.trim();
+				
 				List<Class<? extends IBaseResource>> allowedTypesInField = null;
 				for (Object nextObject : extractValues(nextPath, theResource)) {
 					if (nextObject == null) {

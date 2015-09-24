@@ -198,7 +198,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			myPatientDao.create(p);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Resource contains reference to Organization/1 but resource with ID 1 is actually of type Observation", e.getMessage());
+			assertEquals("Resource contains reference to Organization/" + id1.getIdPart() + " but resource with ID "+ id1.getIdPart()+" is actually of type Observation", e.getMessage());
 		}
 
 		// Now with a forced ID
