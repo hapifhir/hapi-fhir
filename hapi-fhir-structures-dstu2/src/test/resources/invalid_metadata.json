@@ -1,0 +1,65 @@
+{
+  "resourceType": "Conformance",
+  "meta": {
+    "versionId": "0.0.1"
+  },
+  "status": "draft",
+  "experimental": true,
+  "date": "2015-09-23T12:00:00Z",
+  "fhirVersion": "DSTU 2 0.5.0",
+  "acceptUnknown": false,
+  "format": [
+    "json"
+  ],
+  "rest": [
+    {
+      "mode": "server",
+      "documentation": "Information about the system's restful capabilities that apply across all applications, such as security",
+      "security": {
+        "cors": false,
+        "service": [
+          {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/restful-security-service",
+                "code": "OAuth"
+              }
+            ]
+          }
+        ],
+        "description": "General description of how security works",
+        "certificate": [
+          {
+            "type": "json"
+          }
+        ],
+        "modifierExtension": {
+          "url": "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris"
+        },
+        "extension": {
+          "url": "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris"
+        }
+      },
+      "resource": [
+        {
+          "type": "Patient",
+          "profile": {
+            "reference": "http://hl7.org/fhir/StructureDefinition/patient-daf-dafpatient"
+          },
+          "interaction": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "versioning": "no-version"
+        }
+      ]
+    }
+  ]
+}

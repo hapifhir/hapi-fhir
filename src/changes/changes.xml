@@ -37,6 +37,10 @@
 				Constructor for DateRanfeParam which dates in two DateParam instances was ignoring 
 				comparators on the DateParam.
 			</action>
+			<action type="fix">
+				In JSON parsing, finding an object where an array was expected led to an unhelpful
+				error message. Thanks to Avinash Shanbhag for reporting!
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

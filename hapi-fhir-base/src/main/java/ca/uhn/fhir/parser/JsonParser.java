@@ -1014,7 +1014,7 @@ public class JsonParser extends BaseParser implements IParser {
 			if ("resourceType".equals(nextName)) {
 				continue;
 			} else if ("entry".equals(nextName)) {
-				JsonArray entries = theObject.getJsonArray(nextName);
+				JsonArray entries = grabJsonArray(theObject, nextName, "entry");
 				for (JsonValue jsonValue : entries) {
 					theState.enteringNewElement(null, "entry");
 					parseBundleChildren((JsonObject) jsonValue, theState);
@@ -1023,7 +1023,7 @@ public class JsonParser extends BaseParser implements IParser {
 				continue;
 			} else if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 				if ("link".equals(nextName)) {
-					JsonArray entries = theObject.getJsonArray(nextName);
+					JsonArray entries = grabJsonArray(theObject, nextName, "link");
 					for (JsonValue jsonValue : entries) {
 						theState.enteringNewElement(null, "link");
 						JsonObject linkObj = (JsonObject) jsonValue;
@@ -1042,7 +1042,7 @@ public class JsonParser extends BaseParser implements IParser {
 				}
 			} else {
 				if ("link".equals(nextName)) {
-					JsonArray entries = theObject.getJsonArray(nextName);
+					JsonArray entries = grabJsonArray(theObject, nextName, "link");
 					for (JsonValue jsonValue : entries) {
 						theState.enteringNewElement(null, "link");
 						JsonObject linkObj = (JsonObject) jsonValue;
@@ -1106,11 +1106,11 @@ public class JsonParser extends BaseParser implements IParser {
 				}
 				continue;
 			} else if ("extension".equals(nextName)) {
-				JsonArray array = theObject.getJsonArray(nextName);
+				JsonArray array = grabJsonArray(theObject, nextName, "extension");
 				parseExtension(theState, array, false);
 				continue;
 			} else if ("modifierExtension".equals(nextName)) {
-				JsonArray array = theObject.getJsonArray(nextName);
+				JsonArray array = grabJsonArray(theObject, nextName, "modifierExtension");
 				parseExtension(theState, array, true);
 				continue;
 			} else if (nextName.charAt(0) == '_') {
@@ -1133,6 +1133,17 @@ public class JsonParser extends BaseParser implements IParser {
 				((IBaseResource) object).getIdElement().setValue(elementId);
 			}
 		}
+	}
+
+	private JsonArray grabJsonArray(JsonObject theObject, String nextName, String thePosition) {
+		JsonValue object = theObject.get(nextName);
+		if (object == null) {
+			return null;
+		}
+		if (object.getValueType() != ValueType.ARRAY) {
+			throw new DataFormatException("Syntax error parsing JSON FHIR structure: Expected ARRAY at element '" + thePosition + "', found '" + object.getValueType().name() + "'");
+		}
+		return (JsonArray) object;
 	}
 
 	private void parseChildren(ParserState<?> theState, String theName, JsonValue theJsonVal, JsonValue theAlternateVal, String theAlternateName) {
