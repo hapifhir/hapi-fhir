@@ -240,22 +240,55 @@ public class RestfulServerUtils {
 			EncodingEnum retVal = null;
 			while (acceptValues.hasMoreElements()) {
 				String nextAcceptHeaderValue = acceptValues.nextElement();
-				Matcher m = ACCEPT_HEADER_PATTERN.matcher(nextAcceptHeaderValue);
-				float q = 1.0f;
-				while (m.find()) {
-					String contentTypeGroup = m.group(1);
-					EncodingEnum encoding = Constants.FORMAT_VAL_TO_ENCODING.get(contentTypeGroup);
-					if (encoding != null) {
-
-						String name = m.group(3);
-						String value = m.group(4);
-						if (name != null && value != null) {
-							if ("q".equals(name)) {
-								try {
-									q = Float.parseFloat(value);
-									q = Math.max(q, 0.0f);
-								} catch (NumberFormatException e) {
-									ourLog.debug("Invalid Accept header q value: {}", value);
+				StringTokenizer tok = new StringTokenizer(nextAcceptHeaderValue, ",");
+				while (tok.hasMoreTokens()) {
+					String nextToken = tok.nextToken();
+					int startSpaceIndex = -1;
+					for (int i = 0; i < nextToken.length(); i++) {
+						if (nextToken.charAt(i) != ' ') {
+							startSpaceIndex = i;
+							break;
+						}
+					}
+					
+					if (startSpaceIndex == -1) {
+						continue;
+					}
+					
+					int endSpaceIndex = -1;
+					for (int i = startSpaceIndex; i < nextToken.length(); i++) {
+						if (nextToken.charAt(i) == ' ' || nextToken.charAt(i) == ';') {
+							endSpaceIndex = i;
+							break;
+						}
+					}
+					
+					float q = 1.0f;
+					EncodingEnum encoding;
+					boolean pretty = false;
+					if (endSpaceIndex == -1) {
+						if (startSpaceIndex == 0) {
+							encoding = Constants.FORMAT_VAL_TO_ENCODING.get(nextToken);
+						} else {
+							encoding = Constants.FORMAT_VAL_TO_ENCODING.get(nextToken.substring(startSpaceIndex));
+						}
+					} else {
+						encoding = Constants.FORMAT_VAL_TO_ENCODING.get(nextToken.substring(startSpaceIndex, endSpaceIndex));
+						String remaining = nextToken.substring(endSpaceIndex + 1);
+						StringTokenizer qualifierTok = new StringTokenizer(remaining, ";");
+						while (qualifierTok.hasMoreTokens()) {
+							String nextQualifier = qualifierTok.nextToken();
+							int equalsIndex = nextQualifier.indexOf('=');
+							if (equalsIndex != -1) {
+								String nextQualifierKey = nextQualifier.substring(0, equalsIndex).trim();
+								String nextQualifierValue = nextQualifier.substring(equalsIndex+1, nextQualifier.length()).trim();
+								if (nextQualifierKey.equals("q")) {
+									try {
+										q = Float.parseFloat(nextQualifierValue);
+										q = Math.max(q, 0.0f);
+									} catch (NumberFormatException e) {
+										ourLog.debug("Invalid Accept header q value: {}", nextQualifierValue);
+									}
 								}
 							}
 						}
@@ -267,12 +300,46 @@ public class RestfulServerUtils {
 							bestQ = q;
 						}
 					}
-
-					if (!",".equals(m.group(5))) {
-						break;
-					}
+					
 				}
-
+				
+//				
+//				
+//				
+//				
+//				Matcher m = ACCEPT_HEADER_PATTERN.matcher(nextAcceptHeaderValue);
+//				float q = 1.0f;
+//				while (m.find()) {
+//					String contentTypeGroup = m.group(1);
+//					EncodingEnum encoding = Constants.FORMAT_VAL_TO_ENCODING.get(contentTypeGroup);
+//					if (encoding != null) {
+//						
+//						String name = m.group(3);
+//						String value = m.group(4);
+//						if (name != null && value != null) {
+//							if ("q".equals(name)) {
+//								try {
+//									q = Float.parseFloat(value);
+//									q = Math.max(q, 0.0f);
+//								} catch (NumberFormatException e) {
+//									ourLog.debug("Invalid Accept header q value: {}", value);
+//								}
+//							}
+//						}
+//					}
+//
+//					if (encoding != null) {
+//						if (q > bestQ || (q == bestQ && encoding == thePrefer)) {
+//							retVal = encoding;
+//							bestQ = q;
+//						}
+//					}
+//
+//					if (!",".equals(m.group(5))) {
+//						break;
+//					}
+//				}
+//
 			}
 
 			return retVal;

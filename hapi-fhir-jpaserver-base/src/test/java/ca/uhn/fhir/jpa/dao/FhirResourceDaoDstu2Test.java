@@ -57,6 +57,7 @@ import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.ConceptMap;
 import ca.uhn.fhir.model.dstu2.resource.Device;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
@@ -87,6 +88,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -150,6 +152,38 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	public void testCantSearchForDeletedResourceByLanguageOrTag() {
+		String methodName = "testCantSearchForDeletedResourceByLanguageOrTag";
+		Organization org = new Organization();
+		org.setLanguage(new CodeDt("EN_ca"));
+		org.setName(methodName);
+
+		TagList tl = new TagList();
+		tl.add(new Tag(methodName, methodName));
+		ResourceMetadataKeyEnum.TAG_LIST.put(org, tl);
+
+		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("_language", new StringParam("EN_ca"));
+		assertEquals(1, myOrganizationDao.search(map).size());
+
+		map = new SearchParameterMap();
+		map.add("_tag", new TokenParam(methodName, methodName));
+		assertEquals(1, myOrganizationDao.search(map).size());
+
+		myOrganizationDao.delete(orgId);
+
+		map = new SearchParameterMap();
+		map.add("_language", new StringParam("EN_ca"));
+		assertEquals(0, myOrganizationDao.search(map).size());
+
+		map = new SearchParameterMap();
+		map.add("_tag", new TokenParam(methodName, methodName));
+		assertEquals(0, myOrganizationDao.search(map).size());
+	}
+
+	@Test
 	public void testChoiceParamConcept() {
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
@@ -163,71 +197,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
-	@Test
-	public void testCreateWithInvalid() {
-		Observation o1 = new Observation();
-		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		o1.setValue(new CodeableConceptDt("testChoiceParam01CCS", "testChoiceParam01CCV"));
-		IIdType id1 = myObservationDao.create(o1).getId();
-
-		{
-			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_CONCEPT, new TokenParam("testChoiceParam01CCS", "testChoiceParam01CCV"));
-			assertEquals(1, found.size());
-			assertEquals(id1, found.getResources(0, 1).get(0).getIdElement());
-		}
-	}
-
-	@Test
-	public void testCreateWithIllegalReference() {
-		Observation o1 = new Observation();
-		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		IIdType id1 = myObservationDao.create(o1).getId().toUnqualifiedVersionless();
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReference(id1);
-			myPatientDao.create(p);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
-		}
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReference(new IdDt("Organization", id1.getIdPart()));
-			myPatientDao.create(p);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("Resource contains reference to Organization/" + id1.getIdPart() + " but resource with ID "+ id1.getIdPart()+" is actually of type Observation", e.getMessage());
-		}
-
-		// Now with a forced ID
-		
-		o1 = new Observation();
-		o1.setId("testCreateWithIllegalReference");
-		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
-		id1 = myObservationDao.update(o1).getId().toUnqualifiedVersionless();
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReference(id1);
-			myPatientDao.create(p);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
-		}
-
-		try {
-			Patient p = new Patient();
-			p.getManagingOrganization().setReference(new IdDt("Organization", id1.getIdPart()));
-			myPatientDao.create(p);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals("Resource contains reference to Organization/testCreateWithIllegalReference but resource with ID testCreateWithIllegalReference is actually of type Observation", e.getMessage());
-		}
-
-	}
-	
 	@Test
 	public void testChoiceParamDate() {
 		Observation o2 = new Observation();
@@ -305,8 +274,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testCreateOperationOutcome() {
 		/*
-		 * If any of this ever fails, it means that one of the OperationOutcome issue severity codes has changed code
-		 * value across versions. We store the string as a constant, so something will need to be fixed.
+		 * If any of this ever fails, it means that one of the OperationOutcome issue severity codes has changed code value across versions. We store the string as a constant, so something will need to
+		 * be fixed.
 		 */
 		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_ERROR);
 		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.ERROR.getCode(), BaseHapiFhirResourceDao.OO_SEVERITY_ERROR);
@@ -431,6 +400,71 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			assertThat(e.getMessage(), containsString("Failed to CREATE"));
 		}
 
+	}
+
+	@Test
+	public void testCreateWithIllegalReference() {
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
+		IIdType id1 = myObservationDao.create(o1).getId().toUnqualifiedVersionless();
+
+		try {
+			Patient p = new Patient();
+			p.getManagingOrganization().setReference(id1);
+			myPatientDao.create(p);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
+		}
+
+		try {
+			Patient p = new Patient();
+			p.getManagingOrganization().setReference(new IdDt("Organization", id1.getIdPart()));
+			myPatientDao.create(p);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Resource contains reference to Organization/" + id1.getIdPart() + " but resource with ID " + id1.getIdPart() + " is actually of type Observation", e.getMessage());
+		}
+
+		// Now with a forced ID
+
+		o1 = new Observation();
+		o1.setId("testCreateWithIllegalReference");
+		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
+		id1 = myObservationDao.update(o1).getId().toUnqualifiedVersionless();
+
+		try {
+			Patient p = new Patient();
+			p.getManagingOrganization().setReference(id1);
+			myPatientDao.create(p);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
+		}
+
+		try {
+			Patient p = new Patient();
+			p.getManagingOrganization().setReference(new IdDt("Organization", id1.getIdPart()));
+			myPatientDao.create(p);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Resource contains reference to Organization/testCreateWithIllegalReference but resource with ID testCreateWithIllegalReference is actually of type Observation", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void testCreateWithInvalid() {
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
+		o1.setValue(new CodeableConceptDt("testChoiceParam01CCS", "testChoiceParam01CCV"));
+		IIdType id1 = myObservationDao.create(o1).getId();
+
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_CONCEPT, new TokenParam("testChoiceParam01CCS", "testChoiceParam01CCV"));
+			assertEquals(1, found.size());
+			assertEquals(id1, found.getResources(0, 1).get(0).getIdElement());
+		}
 	}
 
 	@Test
@@ -628,6 +662,50 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	public void testDeleteFailsIfIncomingLinks() {
+		String methodName = "testDeleteFailsIfIncomingLinks";
+		Organization org = new Organization();
+		org.setName(methodName);
+		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+		Patient patient = new Patient();
+		patient.addName().addFamily(methodName);
+		patient.getManagingOrganization().setReference(orgId);
+		IIdType patId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("_id", new StringParam(orgId.getIdPart()));
+		map.addRevInclude(new Include("*"));
+		List<IIdType> found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
+		assertThat(found, contains(orgId, patId));
+
+		try {
+			myOrganizationDao.delete(orgId);
+			fail();
+		} catch (PreconditionFailedException e) {
+			assertThat(e.getMessage(), containsString("Unable to delete Organization/" + orgId.getIdPart()
+					+ " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patId.getIdPart() + " in path Patient.managingOrganization"));
+		}
+
+		myPatientDao.delete(patId);
+
+		map = new SearchParameterMap();
+		map.add("_id", new StringParam(orgId.getIdPart()));
+		map.addRevInclude(new Include("*"));
+		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
+		assertThat(found, contains(orgId));
+
+		myOrganizationDao.delete(orgId);
+
+		map = new SearchParameterMap();
+		map.add("_id", new StringParam(orgId.getIdPart()));
+		map.addRevInclude(new Include("*"));
+		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
+		assertThat(found, empty());
+
+	}
+
+	@Test
 	public void testDeleteResource() {
 		int initialHistory = myPatientDao.history(null).size();
 
@@ -687,81 +765,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		patients = toList(myPatientDao.search(params));
 		assertEquals(0, patients.size());
-
-	}
-
-	@Test
-	public void testCantSearchForDeletedResourceByLanguageOrTag() {
-		String methodName = "testCantSearchForDeletedResourceByLanguageOrTag";
-		Organization org = new Organization();
-		org.setLanguage(new CodeDt("EN_ca"));
-		org.setName(methodName);
-
-		TagList tl = new TagList();
-		tl.add(new Tag(methodName, methodName));
-		ResourceMetadataKeyEnum.TAG_LIST.put(org, tl);
-
-		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap map = new SearchParameterMap();
-		map.add("_language", new StringParam("EN_ca"));
-		assertEquals(1, myOrganizationDao.search(map).size());
-
-		map = new SearchParameterMap();
-		map.add("_tag", new TokenParam(methodName, methodName));
-		assertEquals(1, myOrganizationDao.search(map).size());
-
-		myOrganizationDao.delete(orgId);
-
-		map = new SearchParameterMap();
-		map.add("_language", new StringParam("EN_ca"));
-		assertEquals(0, myOrganizationDao.search(map).size());
-
-		map = new SearchParameterMap();
-		map.add("_tag", new TokenParam(methodName, methodName));
-		assertEquals(0, myOrganizationDao.search(map).size());
-	}
-
-	@Test
-	public void testDeleteFailsIfIncomingLinks() {
-		String methodName = "testDeleteFailsIfIncomingLinks";
-		Organization org = new Organization();
-		org.setName(methodName);
-		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
-
-		Patient patient = new Patient();
-		patient.addName().addFamily(methodName);
-		patient.getManagingOrganization().setReference(orgId);
-		IIdType patId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap map = new SearchParameterMap();
-		map.add("_id", new StringParam(orgId.getIdPart()));
-		map.addRevInclude(new Include("*"));
-		List<IIdType> found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
-		assertThat(found, contains(orgId, patId));
-
-		try {
-			myOrganizationDao.delete(orgId);
-			fail();
-		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("Unable to delete Organization/" + orgId.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patId.getIdPart() + " in path Patient.managingOrganization"));
-		}
-
-		myPatientDao.delete(patId);
-
-		map = new SearchParameterMap();
-		map.add("_id", new StringParam(orgId.getIdPart()));
-		map.addRevInclude(new Include("*"));
-		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
-		assertThat(found, contains(orgId));
-
-		myOrganizationDao.delete(orgId);
-
-		map = new SearchParameterMap();
-		map.add("_id", new StringParam(orgId.getIdPart()));
-		map.addRevInclude(new Include("*"));
-		found = toUnqualifiedVersionlessIds(myOrganizationDao.search(map));
-		assertThat(found, empty());
 
 	}
 
@@ -1033,7 +1036,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) entries.get(0)));
 		assertEquals(BundleEntryTransactionMethodEnum.PUT, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IResource) entries.get(0)));
-		
+
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) entries.get(1)));
 		assertEquals(BundleEntryTransactionMethodEnum.DELETE, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IResource) entries.get(1)));
 
@@ -1874,6 +1877,18 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get((IResource) results.get(1)));
 	}
 
+	@Test()
+	public void testSortByComposite() {
+		SearchParameterMap pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(Observation.SP_CODE_VALUE_CONCEPT));
+		try {
+			myObservationDao.search(pm);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("This server does not support _sort specifications of type COMPOSITE - Can't serve _sort=code-value-concept", e.getMessage());
+		}
+	}
+
 	@Test
 	public void testSortByDate() {
 		Patient p = new Patient();
@@ -1974,6 +1989,78 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
 		assertThat(actual, contains(id4, id3, id2, id1, idMethodName));
+	}
+
+	@Test
+	public void testSortByNumber() {
+		String methodName = "testSortByNumber";
+
+		Encounter e1 = new Encounter();
+		e1.addIdentifier().setSystem("foo").setValue(methodName);
+		e1.getLength().setSystem(BaseHapiFhirDao.UCUM_NS).setCode("min").setValue(4.0 * 24 * 60);
+		IIdType id1 = myEncounterDao.create(e1).getId().toUnqualifiedVersionless();
+
+		Encounter e3 = new Encounter();
+		e3.addIdentifier().setSystem("foo").setValue(methodName);
+		e3.getLength().setSystem(BaseHapiFhirDao.UCUM_NS).setCode("year").setValue(3.0);
+		IIdType id3 = myEncounterDao.create(e3).getId().toUnqualifiedVersionless();
+
+		Encounter e2 = new Encounter();
+		e2.addIdentifier().setSystem("foo").setValue(methodName);
+		e2.getLength().setSystem(BaseHapiFhirDao.UCUM_NS).setCode("year").setValue(2.0);
+		IIdType id2 = myEncounterDao.create(e2).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap pm;
+		List<IIdType> actual;
+
+		pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(Encounter.SP_LENGTH));
+		actual = toUnqualifiedVersionlessIds(myEncounterDao.search(pm));
+		assertThat(actual, contains(id1, id2, id3));
+
+		pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(Encounter.SP_LENGTH, SortOrderEnum.DESC));
+		actual = toUnqualifiedVersionlessIds(myEncounterDao.search(pm));
+		assertThat(actual, contains(id3, id2, id1));
+	}
+
+	public void testSortByQuantity() {
+		Observation res;
+
+		res = new Observation();
+		res.setValue(new QuantityDt().setSystem("sys1").setCode("code1").setValue(2L));
+		IIdType id2 = myObservationDao.create(res).getId().toUnqualifiedVersionless();
+
+		res = new Observation();
+		res.setValue(new QuantityDt().setSystem("sys1").setCode("code1").setValue(1L));
+		IIdType id1 = myObservationDao.create(res).getId().toUnqualifiedVersionless();
+
+		res = new Observation();
+		res.setValue(new QuantityDt().setSystem("sys1").setCode("code1").setValue(3L));
+		IIdType id3 = myObservationDao.create(res).getId().toUnqualifiedVersionless();
+
+		res = new Observation();
+		res.setValue(new QuantityDt().setSystem("sys1").setCode("code1").setValue(4L));
+		IIdType id4 = myObservationDao.create(res).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(Observation.SP_VALUE_QUANTITY));
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual, contains(id1, id2, id3, id4));
+
+		pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(Observation.SP_VALUE_QUANTITY, SortOrderEnum.ASC));
+		actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual, contains(id1, id2, id3, id4));
+
+		pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(Observation.SP_VALUE_QUANTITY, SortOrderEnum.DESC));
+		actual = toUnqualifiedVersionlessIds(myObservationDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual, contains(id4, id3, id2, id1));
+
 	}
 
 	@Test
@@ -2147,6 +2234,88 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		ourLog.info("Names: {}", names);
 		assertThat(names.subList(0, 2), contains("Giv2 Fam2", "Giv1 Fam2"));
 		assertThat(names.subList(2, 4), contains("Giv2 Fam1", "Giv1 Fam1"));
+	}
+
+	@Test
+	public void testSortByToken() {
+		String methodName = "testSortByToken";
+
+		Patient p;
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system2").setValue(methodName + "1");
+		IIdType id3 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system1").setValue(methodName + "2");
+		IIdType id2 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system1").setValue(methodName + "1");
+		IIdType id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system2").setValue(methodName + "2");
+		IIdType id4 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap pm;
+		List<IIdType> actual;
+
+		pm = new SearchParameterMap();
+		TokenOrListParam sp = new TokenOrListParam();
+		sp.addOr(new TokenParam("urn:system1", methodName + "1"));
+		sp.addOr(new TokenParam("urn:system1", methodName + "2"));
+		sp.addOr(new TokenParam("urn:system2", methodName + "1"));
+		sp.addOr(new TokenParam("urn:system2", methodName + "2"));
+		pm.add(Patient.SP_IDENTIFIER, sp);
+		pm.setSort(new SortSpec(Patient.SP_IDENTIFIER));
+		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual, contains(id1, id2, id3, id4));
+
+		pm = new SearchParameterMap();
+		sp = new TokenOrListParam();
+		sp.addOr(new TokenParam("urn:system1", methodName + "1"));
+		sp.addOr(new TokenParam("urn:system1", methodName + "2"));
+		sp.addOr(new TokenParam("urn:system2", methodName + "1"));
+		sp.addOr(new TokenParam("urn:system2", methodName + "2"));
+		pm.add(Patient.SP_IDENTIFIER, sp);
+		pm.setSort(new SortSpec(Patient.SP_IDENTIFIER, SortOrderEnum.DESC));
+		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual, contains(id4, id3, id2, id1));
+
+	}
+
+	public void testSortByUri() {
+		ConceptMap res = new ConceptMap();
+		res.addElement().addTarget().addDependsOn().setElement("http://foo2");
+		IIdType id2 = myConceptMapDao.create(res).getId().toUnqualifiedVersionless();
+
+		res = new ConceptMap();
+		res.addElement().addTarget().addDependsOn().setElement("http://foo1");
+		IIdType id1 = myConceptMapDao.create(res).getId().toUnqualifiedVersionless();
+
+		res = new ConceptMap();
+		res.addElement().addTarget().addDependsOn().setElement("http://bar3");
+		IIdType id3 = myConceptMapDao.create(res).getId().toUnqualifiedVersionless();
+
+		res = new ConceptMap();
+		res.addElement().addTarget().addDependsOn().setElement("http://bar4");
+		IIdType id4 = myConceptMapDao.create(res).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(ConceptMap.SP_DEPENDSON));
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual, contains(id1, id2, id3, id4));
+
+		pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(Encounter.SP_LENGTH, SortOrderEnum.DESC));
+		actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual, contains(id4, id3, id2, id1));
+
 	}
 
 	@Test
