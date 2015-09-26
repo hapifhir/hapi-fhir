@@ -92,7 +92,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2Test.class);
-	
 
 	// private static JpaConformanceProvider ourConfProvider;
 
@@ -154,7 +153,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		assertThat(toIdListUnqualifiedVersionless(found), containsInAnyOrder(id1));
 	}
-	
+
 	@Test
 	public void testBundleCreate() throws Exception {
 		IGenericClient client = ourClient;
@@ -209,16 +208,16 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	public void testCreateWithForcedId() throws IOException {
 		String methodName = "testCreateWithForcedId";
-		
+
 		Patient p = new Patient();
 		p.addName().addFamily(methodName);
 		p.setId(methodName);
-		
+
 		IIdType optId = ourClient.update().resource(p).execute().getId();
 		assertEquals(methodName, optId.getIdPart());
 		assertEquals("1", optId.getVersionIdPart());
 	}
-	
+
 	@Test
 	public void testCreateQuestionnaireResponseWithValidation() throws IOException {
 		ValueSet options = new ValueSet();
@@ -428,8 +427,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 
 		/*
-		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to
-		 * make sure that works too..
+		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to make sure that works too..
 		 */
 		Socket sock = new Socket();
 		sock.setSoTimeout(3000);
@@ -701,7 +699,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		patient.setId(id);
 		ourClient.update().resource(patient).execute();
 
-		ca.uhn.fhir.model.dstu2.resource.Bundle history = ourClient.history().onInstance(id).andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class).prettyPrint().summaryMode(SummaryEnum.DATA).execute();
+		ca.uhn.fhir.model.dstu2.resource.Bundle history = ourClient.history().onInstance(id).andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class).prettyPrint().summaryMode(SummaryEnum.DATA)
+				.execute();
 		assertEquals(3, history.getEntry().size());
 		assertEquals(id.withVersion("3"), history.getEntry().get(0).getResource().getId());
 		assertEquals(1, ((Patient) history.getEntry().get(0).getResource()).getName().size());
@@ -752,7 +751,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("testMetaAddInvalid");
 		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
-		
+
 		//@formatter:off
 		String input = "<Parameters>\n" + 
 				"  <meta>\n" + 
@@ -764,7 +763,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				"  </meta>\n" + 
 				"</Parameters>";
 		//@formatter:on
-		
+
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/" + id.getIdPart() + "/$meta-add");
 		post.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -790,7 +789,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 
 	}
-	
+
 	@Test
 	public void testMetaOperations() throws Exception {
 		String methodName = "testMetaOperations";
@@ -948,7 +947,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
 		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
+				.execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
@@ -1150,6 +1150,18 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(Organization.class, found.getEntries().get(1).getResource().getClass());
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getSearchMode().getValueAsEnum());
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
+	}
+
+	@Test(expected = InvalidRequestException.class)
+	public void testSearchWithInvalidSort() throws Exception {
+		//@formatter:off
+		Bundle found = ourClient
+				.search()
+				.forResource(Observation.class)
+				.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
+				.prettyPrint()
+				.execute();
+		//@formatter:on
 	}
 
 	@Test

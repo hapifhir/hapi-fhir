@@ -245,7 +245,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest());
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest(), theServer.getDefaultResponseEncoding());
 
 		// Is this request coming from a browser
 		String uaHeader = theRequest.getServletRequest().getHeader("user-agent");

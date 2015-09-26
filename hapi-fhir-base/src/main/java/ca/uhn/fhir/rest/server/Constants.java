@@ -54,7 +54,7 @@ public class Constants {
 	public static final String FORMAT_XML = "xml";
 	public static final String HEADER_ACCEPT = "Accept";
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
-	public static final String HEADER_ACCEPT_VALUE_ALL = CT_FHIR_XML + ";q=1.0, " + CT_FHIR_XML + ";q=1.0";
+	public static final String HEADER_ACCEPT_VALUE_ALL = CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
 	public static final String HEADER_ALLOW = "Allow";
 	public static final String HEADER_AUTHORIZATION = "Authorization";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";

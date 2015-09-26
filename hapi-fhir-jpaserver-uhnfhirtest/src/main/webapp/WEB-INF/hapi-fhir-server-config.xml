@@ -18,7 +18,7 @@
 
 	<util:list id="myServerInterceptors">
 		<ref bean="myLoggingInterceptor"/>
-		<ref bean="mySubscriptionSecurityInterceptor"/>
+		<!-- <ref bean="mySubscriptionSecurityInterceptor"/>  -->
 	</util:list>
 	
 		<!-- 
@@ -44,7 +44,9 @@
 	<bean id="dbServer" class="ca.uhn.fhirtest.DerbyNetworkServer">
 	</bean>
 
+	<!-- 
 	<bean id="mySubscriptionSecurityInterceptor" class="ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptor"/>
+	-->
 	
 	<!-- 
 	Do some fancy logging to create a nice access log that has details

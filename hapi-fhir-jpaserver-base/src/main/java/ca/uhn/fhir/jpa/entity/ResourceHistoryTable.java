@@ -32,6 +32,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -49,6 +50,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
+	@SequenceGenerator(name = "RES_HISTORY_PID", sequenceName = "RES_HISTORY_PID")
 	@Column(name = "PID")
 	private Long myId;
 

@@ -214,7 +214,11 @@ public class RestfulServerUtils {
 		return retVal;
 	}
 
-	public static EncodingEnum determineResponseEncodingNoDefault(HttpServletRequest theReq) {
+	/**
+	 * Returns null if the request doesn't express that it wants FHIR. If it expresses that it wants
+	 * XML and JSON equally, returns thePrefer.
+	 */
+	public static EncodingEnum determineResponseEncodingNoDefault(HttpServletRequest theReq, EncodingEnum thePrefer) {
 		String[] format = theReq.getParameterValues(Constants.PARAM_FORMAT);
 		if (format != null) {
 			for (String nextFormat : format) {
@@ -236,37 +240,106 @@ public class RestfulServerUtils {
 			EncodingEnum retVal = null;
 			while (acceptValues.hasMoreElements()) {
 				String nextAcceptHeaderValue = acceptValues.nextElement();
-				Matcher m = ACCEPT_HEADER_PATTERN.matcher(nextAcceptHeaderValue);
-				float q = 1.0f;
-				while (m.find()) {
-					String contentTypeGroup = m.group(1);
-					EncodingEnum encoding = Constants.FORMAT_VAL_TO_ENCODING.get(contentTypeGroup);
-					if (encoding != null) {
-
-						String name = m.group(3);
-						String value = m.group(4);
-						if (name != null && value != null) {
-							if ("q".equals(name)) {
-								try {
-									q = Float.parseFloat(value);
-									q = Math.max(q, 0.0f);
-								} catch (NumberFormatException e) {
-									ourLog.debug("Invalid Accept header q value: {}", value);
+				StringTokenizer tok = new StringTokenizer(nextAcceptHeaderValue, ",");
+				while (tok.hasMoreTokens()) {
+					String nextToken = tok.nextToken();
+					int startSpaceIndex = -1;
+					for (int i = 0; i < nextToken.length(); i++) {
+						if (nextToken.charAt(i) != ' ') {
+							startSpaceIndex = i;
+							break;
+						}
+					}
+					
+					if (startSpaceIndex == -1) {
+						continue;
+					}
+					
+					int endSpaceIndex = -1;
+					for (int i = startSpaceIndex; i < nextToken.length(); i++) {
+						if (nextToken.charAt(i) == ' ' || nextToken.charAt(i) == ';') {
+							endSpaceIndex = i;
+							break;
+						}
+					}
+					
+					float q = 1.0f;
+					EncodingEnum encoding;
+					boolean pretty = false;
+					if (endSpaceIndex == -1) {
+						if (startSpaceIndex == 0) {
+							encoding = Constants.FORMAT_VAL_TO_ENCODING.get(nextToken);
+						} else {
+							encoding = Constants.FORMAT_VAL_TO_ENCODING.get(nextToken.substring(startSpaceIndex));
+						}
+					} else {
+						encoding = Constants.FORMAT_VAL_TO_ENCODING.get(nextToken.substring(startSpaceIndex, endSpaceIndex));
+						String remaining = nextToken.substring(endSpaceIndex + 1);
+						StringTokenizer qualifierTok = new StringTokenizer(remaining, ";");
+						while (qualifierTok.hasMoreTokens()) {
+							String nextQualifier = qualifierTok.nextToken();
+							int equalsIndex = nextQualifier.indexOf('=');
+							if (equalsIndex != -1) {
+								String nextQualifierKey = nextQualifier.substring(0, equalsIndex).trim();
+								String nextQualifierValue = nextQualifier.substring(equalsIndex+1, nextQualifier.length()).trim();
+								if (nextQualifierKey.equals("q")) {
+									try {
+										q = Float.parseFloat(nextQualifierValue);
+										q = Math.max(q, 0.0f);
+									} catch (NumberFormatException e) {
+										ourLog.debug("Invalid Accept header q value: {}", nextQualifierValue);
+									}
 								}
 							}
 						}
 					}
 
-					if (q > bestQ && encoding != null) {
-						retVal = encoding;
-						bestQ = q;
+					if (encoding != null) {
+						if (q > bestQ || (q == bestQ && encoding == thePrefer)) {
+							retVal = encoding;
+							bestQ = q;
+						}
 					}
-
-					if (!",".equals(m.group(5))) {
-						break;
-					}
+					
 				}
-
+				
+//				
+//				
+//				
+//				
+//				Matcher m = ACCEPT_HEADER_PATTERN.matcher(nextAcceptHeaderValue);
+//				float q = 1.0f;
+//				while (m.find()) {
+//					String contentTypeGroup = m.group(1);
+//					EncodingEnum encoding = Constants.FORMAT_VAL_TO_ENCODING.get(contentTypeGroup);
+//					if (encoding != null) {
+//						
+//						String name = m.group(3);
+//						String value = m.group(4);
+//						if (name != null && value != null) {
+//							if ("q".equals(name)) {
+//								try {
+//									q = Float.parseFloat(value);
+//									q = Math.max(q, 0.0f);
+//								} catch (NumberFormatException e) {
+//									ourLog.debug("Invalid Accept header q value: {}", value);
+//								}
+//							}
+//						}
+//					}
+//
+//					if (encoding != null) {
+//						if (q > bestQ || (q == bestQ && encoding == thePrefer)) {
+//							retVal = encoding;
+//							bestQ = q;
+//						}
+//					}
+//
+//					if (!",".equals(m.group(5))) {
+//						break;
+//					}
+//				}
+//
 			}
 
 			return retVal;
@@ -278,7 +351,7 @@ public class RestfulServerUtils {
 	 * Determine whether a response should be given in JSON or XML format based on the incoming HttpServletRequest's <code>"_format"</code> parameter and <code>"Accept:"</code> HTTP header.
 	 */
 	public static EncodingEnum determineResponseEncodingWithDefault(RestfulServer theServer, HttpServletRequest theReq) {
-		EncodingEnum retVal = determineResponseEncodingNoDefault(theReq);
+		EncodingEnum retVal = determineResponseEncodingNoDefault(theReq, theServer.getDefaultResponseEncoding());
 		if (retVal == null) {
 			retVal = theServer.getDefaultResponseEncoding();
 		}
@@ -328,10 +401,7 @@ public class RestfulServerUtils {
 	public static IParser getNewParser(FhirContext theContext, RequestDetails theRequestDetails) {
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails.getServletRequest());
-		if (responseEncoding == null) {
-			responseEncoding = theRequestDetails.getServer().getDefaultResponseEncoding();
-		}
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails.getServer(), theRequestDetails.getServletRequest());
 		IParser parser;
 		switch (responseEncoding) {
 		case JSON:
@@ -472,8 +542,7 @@ public class RestfulServerUtils {
 		theHttpResponse.setStatus(200);
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails.getServletRequest());
-		responseEncoding = responseEncoding != null ? responseEncoding : theServer.getDefaultResponseEncoding();
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequestDetails.getServletRequest());
 
 		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
 			theHttpResponse.setContentType(responseEncoding.getBrowserFriendlyBundleContentType());
@@ -502,7 +571,7 @@ public class RestfulServerUtils {
 		theHttpResponse.setStatus(stausCode);
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails.getServletRequest());
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails.getServletRequest(), theServer.getDefaultResponseEncoding());
 
 		String serverBase = theRequestDetails.getFhirServerBase();
 		if (theAddContentLocationHeader && theResource.getIdElement() != null && theResource.getIdElement().hasIdPart() && isNotBlank(serverBase)) {

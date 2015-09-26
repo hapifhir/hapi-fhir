@@ -1,8 +1,10 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -198,11 +199,31 @@ public class ServerFeaturesTest {
 
 	@Test
 	public void testAcceptHeaderWithPrettyPrint() throws Exception {
+		HttpGet httpGet;
+		CloseableHttpResponse status;
+		String responseContent;
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON + "; pretty=true; q=1.0, " + Constants.CT_FHIR_XML + "; pretty=true; q=0.9");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertThat(responseContent, (containsString("\"identifier\":")));
+		assertThat(responseContent, (containsString(",\n")));
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON + "; pretty=true" + ", " + Constants.CT_FHIR_XML + "; pretty=true");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertThat(responseContent, not(containsString("\"identifier\":")));
+		assertThat(responseContent, (containsString(">\n")));
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_FHIR_XML + "; pretty=true");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("<identifier>\n   "));
@@ -216,13 +237,12 @@ public class ServerFeaturesTest {
 		assertThat(responseContent, StringContains.containsString("\",\n"));
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON + "; pretty=true" + ", " + Constants.CT_FHIR_XML + "; pretty=true");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON + "; pretty=true; q=1.0" + ", " + Constants.CT_FHIR_XML + "; pretty=true; q=0.9");
 		status = ourClient.execute(httpGet);
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
-
+		assertThat(responseContent, (containsString("\"identifier\":")));
+		assertThat(responseContent, (containsString(",\n")));
 	}
 
 	@Test

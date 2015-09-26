@@ -491,7 +491,7 @@ public class RestfulServer extends HttpServlet {
 
 		int start = Math.min(offsetI, resultList.size() - 1);
 
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest());
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest(), getDefaultResponseEncoding());
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(this, theRequest);
 		boolean requestIsBrowser = requestIsBrowser(theRequest.getServletRequest());
 		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
