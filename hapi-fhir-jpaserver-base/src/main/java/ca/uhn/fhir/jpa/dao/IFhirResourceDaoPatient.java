@@ -1,4 +1,6 @@
-package ca.uhn.fhir.jpa.subscription;
+package ca.uhn.fhir.jpa.dao;
+
+import javax.servlet.http.HttpServletRequest;
 
 /*
  * #%L
@@ -20,23 +22,14 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
-import org.springframework.beans.factory.FactoryBean;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public class SubscriptionWebsocketHandlerFactory implements FactoryBean<ISubscriptionWebsocketHandler> {
-	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.UnsignedIntDt;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 
-	@Override
-	public ISubscriptionWebsocketHandler getObject() throws Exception {
-		return new SubscriptionWebsocketHandler();
-	}
+public interface IFhirResourceDaoPatient<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	@Override
-	public Class<ISubscriptionWebsocketHandler> getObjectType() {
-		return ISubscriptionWebsocketHandler.class;
-	}
+	IBundleProvider everything(HttpServletRequest theServletRequest, IdDt theId, UnsignedIntDt theCount);
 
-	@Override
-	public boolean isSingleton() {
-		return false;
-	}
 }

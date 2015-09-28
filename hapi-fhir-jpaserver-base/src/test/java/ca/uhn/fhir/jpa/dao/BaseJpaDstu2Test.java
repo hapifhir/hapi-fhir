@@ -50,6 +50,8 @@ import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.Immunization;
 import ca.uhn.fhir.model.dstu2.resource.Location;
+import ca.uhn.fhir.model.dstu2.resource.Medication;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -78,6 +80,12 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu2")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
+	@Autowired
+	@Qualifier("myMedicationDaoDstu2")
+	protected IFhirResourceDao<Medication> myMedicationDao;
+	@Autowired
+	@Qualifier("myMedicationOrderDaoDstu2")
+	protected IFhirResourceDao<MedicationOrder> myMedicationOrderDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired

@@ -61,6 +61,8 @@ import ca.uhn.fhir.model.dstu2.resource.DocumentReference;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.ImagingStudy;
 import ca.uhn.fhir.model.dstu2.resource.Location;
+import ca.uhn.fhir.model.dstu2.resource.Medication;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
@@ -635,12 +637,45 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
+	/**
+	 * Test for #226
+	 */
+	@Test
+	public void testEverythingIncludesBackReferences() throws Exception {
+		String methodName = "testEverythingIncludesBackReferences";
+		
+		Medication med = new Medication();
+		med.getCode().setText(methodName);
+		IIdType medId = myMedicationDao.create(med).getId().toUnqualifiedVersionless();
+		
+		Patient pat = new Patient();
+		pat.addAddress().addLine(methodName);
+		IIdType patId = myPatientDao.create(pat).getId().toUnqualifiedVersionless();
+
+		MedicationOrder mo = new MedicationOrder();
+		mo.getPatient().setReference(patId);
+		mo.setMedication(new ResourceReferenceDt(medId));
+		IIdType moId = myMedicationOrderDao.create(mo).getId().toUnqualifiedVersionless();
+		
+		Parameters output = ourClient.operation().onInstance(patId).named("everything").withNoParameters(Parameters.class).execute();
+		ca.uhn.fhir.model.dstu2.resource.Bundle b = (ca.uhn.fhir.model.dstu2.resource.Bundle) output.getParameterFirstRep().getResource();
+		Set<IdDt> ids = toIdList(b);
+		ourLog.info(ids.toString());
+		assertThat(ids, containsInAnyOrder(patId, medId, moId));
+	}
+	
 	@Test
 	public void testEverythingOperation() throws Exception {
 		String methodName = "testEverythingOperation";
 
+		Organization org1parent = new Organization();
+		org1parent.setId("org1parent");
+		org1parent.setName(methodName + "1parent");
+		IIdType orgId1parent = ourClient.update().resource(org1parent).execute().getId().toUnqualifiedVersionless();
+
 		Organization org1 = new Organization();
 		org1.setName(methodName + "1");
+		org1.getPartOf().setReference(orgId1parent);
 		IIdType orgId1 = ourClient.create().resource(org1).execute().getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
@@ -669,17 +704,18 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
 		ca.uhn.fhir.model.dstu2.resource.Bundle b = (ca.uhn.fhir.model.dstu2.resource.Bundle) output.getParameterFirstRep().getResource();
 
+		Set<IdDt> ids = toIdList(b);
+		assertThat(ids, containsInAnyOrder(patientId, devId, obsId, encId, orgId1, orgId2, orgId1parent));
+
+		ourLog.info(ids.toString());
+	}
+
+	private Set<IdDt> toIdList(ca.uhn.fhir.model.dstu2.resource.Bundle b) {
 		Set<IdDt> ids = new HashSet<IdDt>();
 		for (Entry next : b.getEntry()) {
 			ids.add(next.getResource().getId().toUnqualifiedVersionless());
 		}
-
-		assertThat(ids, containsInAnyOrder(patientId, devId, obsId, encId, orgId1, orgId2));
-
-		// Should include everything
-		assertEquals(6, b.getTotal().intValue());
-
-		ourLog.info(ids.toString());
+		return ids;
 	}
 
 	@Test
