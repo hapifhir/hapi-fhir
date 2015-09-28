@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;

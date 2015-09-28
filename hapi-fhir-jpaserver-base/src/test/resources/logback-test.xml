@@ -7,7 +7,15 @@
 		</encoder>
 	</appender>
 
-	<logger name="org.eclipse" additivity="false">
+	<logger name="org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator" additivity="false" info="debug">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<logger name="org.eclipse.jetty.websocket" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	
+	<logger name="org.eclipse" additivity="false" level="error">
 	</logger>
 
 	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="info">

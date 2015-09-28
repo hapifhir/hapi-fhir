@@ -38,6 +38,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.TemporalType;
@@ -98,6 +99,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
+import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
@@ -1205,7 +1207,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			return;
 		}
 
-		if ("_id".equals(theSort.getParamName())) {
+		if (BaseResource.SP_RES_ID.equals(theSort.getParamName())) {
 			From<?, ?> forcedIdJoin = theFrom.join("myForcedId", JoinType.LEFT);
 			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
 				theOrders.add(theBuilder.asc(forcedIdJoin.get("myForcedId")));
@@ -1219,6 +1221,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			return;
 		}
 
+		if (Constants.PARAM_LASTUPDATED.equals(theSort.getParamName())) {
+			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
+				theOrders.add(theBuilder.asc(theFrom.get("myUpdated")));
+			} else {
+				theOrders.add(theBuilder.desc(theFrom.get("myUpdated")));
+			}
+			
+			createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
+			return;
+		}
+		
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceType);
 		RuntimeSearchParam param = resourceDef.getSearchParam(theSort.getParamName());
 		if (param == null) {
@@ -1286,6 +1299,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 	@Override
 	public DaoMethodOutcome delete(IIdType theId) {
+		if (theId == null || !theId.hasIdPart()) {
+			throw new InvalidRequestException("Can not perform delete, no ID provided");
+		}
 		StopWatch w = new StopWatch();
 		final ResourceTable entity = readEntityLatestVersion(theId);
 		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
@@ -1886,8 +1902,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		Long pid = translateForcedIdToPid(theId);
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid);
+		
+		if (entity == null) {
+			throw new ResourceNotFoundException(theId);
+		}
+
 		if (theId.hasVersionIdPart()) {
-			if (entity.getVersion() != Long.parseLong(theId.getVersionIdPart())) {
+			if (theId.isVersionIdPartValidLong() == false) {
+				throw new ResourceNotFoundException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
+			}
+			if (entity.getVersion() != theId.getVersionIdPartAsLong().longValue()) {
 				entity = null;
 			}
 		}
@@ -1898,11 +1922,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 						.createQuery("SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
 				q.setParameter("RID", pid);
 				q.setParameter("RTYP", myResourceName);
-				q.setParameter("RVER", Long.parseLong(theId.getVersionIdPart()));
-				entity = q.getSingleResult();
-			}
-			if (entity == null) {
-				throw new ResourceNotFoundException(theId);
+				q.setParameter("RVER", theId.getVersionIdPartAsLong());
+				try {
+					entity = q.getSingleResult();
+				} catch (NoResultException e) {
+					throw new ResourceNotFoundException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
+				}
 			}
 		}
 
@@ -2019,6 +2044,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			for (Long next : query.getResultList()) {
 				loadPids.add(next);
 			}
+			
+			if (loadPids.isEmpty()) {
+				return new SimpleBundleProvider();
+			}
 		}
 
 		// Handle sorting if any was provided
@@ -2044,7 +2073,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 					loadPids.add(next.get(0, Long.class));
 				}
 
-				ourLog.info("Sort PID order is now: {}", loadPids);
+				ourLog.debug("Sort PID order is now: {}", loadPids);
 
 				pids = new ArrayList<Long>(loadPids);
 

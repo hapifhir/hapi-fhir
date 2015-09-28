@@ -1,10 +1,13 @@
 package ca.uhn.fhir.jpa.provider;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.servlet.ServletContext;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -15,6 +18,11 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import ca.uhn.fhir.jpa.dao.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
@@ -108,6 +116,22 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			servletHolder.setServlet(restServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 	
+			GenericWebApplicationContext webApplicationContext = new GenericWebApplicationContext();
+			webApplicationContext.setParent(myAppCtx);
+			webApplicationContext.refresh();
+//			ContextLoaderListener loaderListener = new ContextLoaderListener(webApplicationContext);
+//			loaderListener.initWebApplicationContext(mock(ServletContext.class));
+//	
+			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, webApplicationContext); 
+			
+			DispatcherServlet dispatcherServlet = new DispatcherServlet();
+//			dispatcherServlet.setApplicationContext(webApplicationContext);
+			dispatcherServlet.setContextConfigLocation("classpath:/fhir-spring-subscription-config-dstu2.xml");
+			ServletHolder subsServletHolder = new ServletHolder();
+			subsServletHolder.setServlet(dispatcherServlet);
+			proxyHandler.addServlet(subsServletHolder, "/*");
+
+			
 			server.setHandler(proxyHandler);
 			server.start();
 	

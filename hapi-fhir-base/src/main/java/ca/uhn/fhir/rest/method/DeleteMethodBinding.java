@@ -49,8 +49,7 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 	private Integer myIdParameterIndex;
 
 	public DeleteMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
-		super(theMethod, theContext, Delete.class, 
-				theProvider);
+		super(theMethod, theContext, Delete.class, theProvider);
 
 		Delete deleteAnnotation = theMethod.getAnnotation(Delete.class);
 		Class<? extends IResource> resourceType = deleteAnnotation.type();
@@ -62,8 +61,8 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 				RuntimeResourceDefinition def = theContext.getResourceDefinition(((IResourceProvider) theProvider).getResourceType());
 				myResourceName = def.getName();
 			} else {
-				throw new ConfigurationException("Can not determine resource type for method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getCanonicalName() + " - Did you forget to include the resourceType() value on the @"
-						+ Delete.class.getSimpleName() + " method annotation?");
+				throw new ConfigurationException(
+						"Can not determine resource type for method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getCanonicalName() + " - Did you forget to include the resourceType() value on the @" + Delete.class.getSimpleName() + " method annotation?");
 			}
 		}
 
@@ -74,8 +73,7 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 
 		Integer versionIdParameterIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 		if (versionIdParameterIndex != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has a parameter annotated with the @" + VersionIdParam.class.getSimpleName()
-					+ " annotation but delete methods may not have this annotation");
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has a parameter annotated with the @" + VersionIdParam.class.getSimpleName() + " annotation but delete methods may not have this annotation");
 		}
 
 	}
@@ -114,13 +112,13 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 		if (idDt == null) {
 			throw new NullPointerException("ID can not be null");
 		}
-		
-		if (idDt.hasResourceType()==false) {
+
+		if (idDt.hasResourceType() == false) {
 			idDt = idDt.withResourceType(getResourceName());
-		}else if (getResourceName().equals(idDt.getResourceType())==false) {
+		} else if (getResourceName().equals(idDt.getResourceType()) == false) {
 			throw new InvalidRequestException("ID parameter has the wrong resource type, expected '" + getResourceName() + "', found: " + idDt.getResourceType());
 		}
-		
+
 		HttpDeleteClientInvocation retVal = createDeleteInvocation(idDt);
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
@@ -141,7 +139,6 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 		theParams[myIdParameterIndex] = theRequest.getId();
 	}
 
-
 	@Override
 	protected String getMatchingOperation() {
 		return null;
@@ -156,5 +153,4 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 		return new HttpDeleteClientInvocation(theResourceType, theParams);
 	}
 
-	
 }

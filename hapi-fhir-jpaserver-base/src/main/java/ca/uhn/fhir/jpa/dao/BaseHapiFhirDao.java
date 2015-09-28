@@ -581,6 +581,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	protected boolean isValidPid(IIdType theId) {
+		if (theId == null || theId.getIdPart() == null) {
+			return false;
+		}
 		String idPart = theId.getIdPart();
 		for (int i = 0; i < idPart.length(); i++) {
 			char nextChar = idPart.charAt(i);

@@ -34,7 +34,7 @@ public class UhnFhirTestApp {
 		WebAppContext root = new WebAppContext();
 
 		root.setContextPath("/");
-		root.setDescriptor("target/hapi-fhir-jpaserver/WEB-INF/web.xml");
+		root.setDescriptor("src/main/webapp/WEB-INF/web.xml");
 		root.setResourceBase("target/hapi-fhir-jpaserver");
 
 		root.setParentLoaderPriority(true);

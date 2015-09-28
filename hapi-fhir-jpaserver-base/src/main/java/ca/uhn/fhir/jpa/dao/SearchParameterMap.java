@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.Constants;
 
 public class SearchParameterMap extends LinkedHashMap<String, List<List<? extends IQueryParameterType>>> {
 
@@ -75,6 +76,8 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	}
 
 	public void add(String theName, IQueryParameterType theParam) {
+		assert !Constants.PARAM_LASTUPDATED.equals(theName); // this has it's own field in the map
+		
 		if (theParam == null) {
 			return;
 		}

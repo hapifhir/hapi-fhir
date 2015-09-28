@@ -439,21 +439,9 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 		return true;
 	}
 
-	/**
-	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other words, it consists only of digits)
-	 */
 	@Override
 	public boolean isIdPartValidLong() {
-		String id = getIdPart();
-		if (StringUtils.isBlank(id)) {
-			return false;
-		}
-		for (int i = 0; i < id.length(); i++) {
-			if (Character.isDigit(id.charAt(i)) == false) {
-				return false;
-			}
-		}
-		return true;
+		return isValidLong(getIdPart());
 	}
 
 	/**
@@ -462,6 +450,11 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 	@Override
 	public boolean isLocal() {
 		return "#".equals(myBaseUrl);
+	}
+
+	@Override
+	public boolean isVersionIdPartValidLong() {
+		return isValidLong(getVersionIdPart());
 	}
 	
 	/**
@@ -628,6 +621,18 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 		}
 
 		return new IdDt(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
+	}
+
+	private static boolean isValidLong(String id) {
+		if (StringUtils.isBlank(id)) {
+			return false;
+		}
+		for (int i = 0; i < id.length(); i++) {
+			if (Character.isDigit(id.charAt(i)) == false) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**

@@ -56,6 +56,7 @@ import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.ConceptMap;
 import ca.uhn.fhir.model.dstu2.resource.Device;
@@ -1577,6 +1578,45 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	public void testReadInvalidVersion() throws Exception {
+		String methodName = "testReadInvalidVersion";
+		
+		Patient pat = new Patient();
+		pat.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(pat).getId();
+
+		assertEquals(methodName, myPatientDao.read(id).getIdentifier().get(0).getValue());
+		
+		try {
+			myPatientDao.read(id.withVersion("0"));
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Version \"0\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
+		}
+		
+		try {
+			myPatientDao.read(id.withVersion("2"));
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Version \"2\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
+		}
+
+		try {
+			myPatientDao.read(id.withVersion("H"));
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Version \"H\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
+		}
+
+		try {
+			myPatientDao.read(new IdDt("Patient/9999999999999/_history/1"));
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Resource Patient/9999999999999/_history/1 is not known", e.getMessage());
+		}
+
+	}
+	@Test
 	public void testReadWithDeletedResource() {
 		String methodName = "testReadWithDeletedResource";
 
@@ -1940,6 +1980,79 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	}
 
+	@Test
+	public void testSortByLastUpdated() {
+		String methodName = "testSortByLastUpdated";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system1").setValue(methodName);
+		p.addName().addFamily(methodName);
+		IIdType id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system2").setValue(methodName);
+		p.addName().addFamily(methodName);
+		IIdType id2 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system3").setValue(methodName);
+		p.addName().addFamily(methodName);
+		IIdType id3 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system4").setValue(methodName);
+		p.addName().addFamily(methodName);
+		IIdType id4 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap pm;
+		List<IIdType> actual;
+
+		pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(Constants.PARAM_LASTUPDATED));
+		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
+		assertThat(actual, contains(id1, id2, id3, id4));
+
+		pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
+		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
+		assertThat(actual, contains(id1, id2, id3, id4));
+
+		pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC));
+		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
+		assertThat(actual, contains(id4, id3, id2, id1));
+
+		pm = new SearchParameterMap();
+		pm.add(Patient.SP_IDENTIFIER, new TokenParam(null, methodName));
+		pm.setSort(new SortSpec(Patient.SP_NAME).setChain(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC)));
+		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
+		assertThat(actual, contains(id4, id3, id2, id1));
+	}
+
+	@Test
+	public void testSortNoMatches() {
+		String methodName = "testSortNoMatches";
+		
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		
+		SearchParameterMap map;
+		
+		map = new SearchParameterMap();
+		map.add(BaseResource.SP_RES_ID, new StringParam(id1.getIdPart()));
+		map.setLastUpdated(new DateRangeParam("2001", "2003"));
+		map.setSort(new SortSpec(Constants.PARAM_LASTUPDATED));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), empty());
+
+		map = new SearchParameterMap();
+		map.add(BaseResource.SP_RES_ID, new StringParam(id1.getIdPart()));
+		map.setLastUpdated(new DateRangeParam("2001", "2003"));
+		map.setSort(new SortSpec(Patient.SP_NAME));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), empty());
+
+	}
+	
 	@Test
 	public void testSortById() {
 		String methodName = "testSortBTyId";

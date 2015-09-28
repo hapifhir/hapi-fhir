@@ -72,8 +72,17 @@
 			</action>
 			<action type="add">
 				JPA server now supports searching with sort by token, quantity,
-				number and URI (previously only string, date, _id and _lastUpdated 
+				number, Uri, and _lastUpdated (previously only string, date, and _id 
 				were supported)
+			</action>
+			<action type="fix">
+				Fix issue in JPA where a search with a _lastUpdated filter which matches no results
+				would crash if the search also had a _sort
+			</action>
+			<action type="fix">
+				Fix several cases where invalid requests would cause an HTTP 500 instead of
+				a more appropriate 400/404 in the JPA server (vread on invalid version,
+				delete with no ID, etc.)
 			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">

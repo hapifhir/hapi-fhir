@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.time.DateUtils;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -37,6 +40,7 @@ public class DaoConfig {
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 	private boolean mySubscriptionEnabled;
 	private long mySubscriptionPollDelay = 1000;
+	private Long mySubscriptionPurgeInactiveAfterMillis;
 
 	/**
 	 * See {@link #setIncludeLimit(int)}
@@ -128,11 +132,9 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Does this server support subscription? If set to true, the server
-	 * will enable the subscription monitoring mode, which adds a bit of
-	 * overhead. Note that if this is enabled, you must also include
-	 * Spring task scanning to your XML config for the scheduled tasks
-	 * used by the subscription module. 
+	 * Does this server support subscription? If set to true, the server will enable the subscription monitoring mode,
+	 * which adds a bit of overhead. Note that if this is enabled, you must also include Spring task scanning to your XML
+	 * config for the scheduled tasks used by the subscription module.
 	 */
 	public void setSubscriptionEnabled(boolean theSubscriptionEnabled) {
 		mySubscriptionEnabled = theSubscriptionEnabled;
@@ -140,6 +142,21 @@ public class DaoConfig {
 
 	public void setSubscriptionPollDelay(long theSubscriptionPollDelay) {
 		mySubscriptionPollDelay = theSubscriptionPollDelay;
+	}
+
+	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
+		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
+	}
+
+	public void setSubscriptionPurgeInactiveAfterMillis(Long theMillis) {
+		if (theMillis != null) {
+			Validate.exclusiveBetween(0, Long.MAX_VALUE, theMillis);
+		}
+		mySubscriptionPurgeInactiveAfterMillis = theMillis;
+	}
+
+	public Long getSubscriptionPurgeInactiveAfterMillis() {
+		return mySubscriptionPurgeInactiveAfterMillis;
 	}
 
 }

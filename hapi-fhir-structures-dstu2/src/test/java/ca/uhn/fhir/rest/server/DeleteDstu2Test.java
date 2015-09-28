@@ -28,16 +28,14 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
-public class DeleteConditionalTest {
+public class DeleteDstu2Test {
 	private static CloseableHttpClient ourClient;
 	private static String ourLastConditionalUrl;
 	private static int ourPort;
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 	private static Server ourServer;
 	private static IdDt ourLastIdParam;
+	private static boolean ourInvoked;
 	
 	
 	
@@ -45,6 +43,7 @@ public class DeleteConditionalTest {
 	public void before() {
 		ourLastConditionalUrl = null;
 		ourLastIdParam = null;
+		ourInvoked = false;
 	}
 
 	@Test
@@ -62,7 +61,6 @@ public class DeleteConditionalTest {
 		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
 	}
 
-	
 	@Test
 	public void testUpdateWithoutConditionalUrl() throws Exception {
 		Patient patient = new Patient();
@@ -115,9 +113,10 @@ public class DeleteConditionalTest {
 
 		
 		@Delete()
-		public MethodOutcome updatePatient(@ConditionalUrlParam String theConditional, @IdParam IdDt theIdParam) {
+		public MethodOutcome delete(@ConditionalUrlParam String theConditional, @IdParam IdDt theIdParam) {
 			ourLastConditionalUrl = theConditional;
 			ourLastIdParam = theIdParam;
+			ourInvoked = true;
 			return new MethodOutcome(new IdDt("Patient/001/_history/002"));
 		}
 

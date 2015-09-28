@@ -152,20 +152,25 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		addParametersForServerRequest(theRequest, params);
 
 		HttpServletResponse servletResponse = theRequest.getServletResponse();
+		
+		/*
+		 * No need to catch nd handle exceptions here, we already handle them one level up
+		 * including invoking interceptors on them
+		 */
 		MethodOutcome response;
-		try {
+//		try {
 			response = (MethodOutcome) invokeServerMethod(theServer, theRequest, params);
-		} catch (InternalErrorException e) {
-			ourLog.error("Internal error during method invocation", e);
-			EncodingEnum encodingNotNull = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
-			streamOperationOutcome(e, theServer, encodingNotNull, servletResponse, theRequest);
-			return;
-		} catch (BaseServerResponseException e) {
-			ourLog.info("Exception during method invocation: " + e.getMessage());
-			EncodingEnum encodingNotNull = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
-			streamOperationOutcome(e, theServer, encodingNotNull, servletResponse, theRequest);
-			return;
-		}
+//		} catch (InternalErrorException e) {
+//			ourLog.error("Internal error during method invocation", e);
+//			EncodingEnum encodingNotNull = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
+//			streamOperationOutcome(e, theServer, encodingNotNull, servletResponse, theRequest);
+//			return;
+//		} catch (BaseServerResponseException e) {
+//			ourLog.info("Exception during method invocation: " + e.getMessage());
+//			EncodingEnum encodingNotNull = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
+//			streamOperationOutcome(e, theServer, encodingNotNull, servletResponse, theRequest);
+//			return;
+//		}
 
 		if (response != null && response.getId() != null && response.getId().hasResourceType()) {
 			if (getContext().getResourceDefinition(response.getId().getResourceType()) == null) {

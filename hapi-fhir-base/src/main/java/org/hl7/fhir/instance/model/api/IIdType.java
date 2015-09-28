@@ -34,19 +34,13 @@ package org.hl7.fhir.instance.model.api;
  */
 public interface IIdType {
 
-	boolean isEmpty();
+	void applyTo(IBaseResource theResource);
 
 	/**
-	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character)
+	 * Returns the server base URL if this ID contains one. For example, the base URL is
+	 * the 'http://example.com/fhir' in the following ID: <code>http://example.com/fhir/Patient/123/_history/55</code>
 	 */
-	boolean isLocal();
-
-	/**
-	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.
-	 * 
-	 * @see #getIdPart()
-	 */
-	String getValue();
+	String getBaseUrl();
 
 	/**
 	 * Returns only the logical ID part of this ID. For example, given the ID
@@ -56,41 +50,50 @@ public interface IIdType {
 	String getIdPart();
 
 	/**
+	 * Returns the ID part of this ID (e.g. in the ID http://example.com/Patient/123/_history/456 this would be the
+	 * part "123") parsed as a {@link Long}.
+	 * 
+	 * @throws NumberFormatException If the value can't be parsed as a long
+	 */
+	Long getIdPartAsLong();
+
+	String getResourceType();
+
+	/**
+	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.
+	 * 
+	 * @see #getIdPart()
+	 */
+	String getValue();
+
+	String getVersionIdPart();
+
+	/**
+	 * Returns the version ID part of this ID (e.g. in the ID http://example.com/Patient/123/_history/456 this would be the
+	 * part "456") parsed as a {@link Long}.
+	 * 
+	 * @throws NumberFormatException If the value can't be parsed as a long
+	 */
+	Long getVersionIdPartAsLong();
+
+	boolean hasBaseUrl();
+
+	/**
 	 * Returns <code>true</code> if this ID contains an actual ID part. For example, the ID part is
 	 * the '123' in the following ID: <code>http://example.com/fhir/Patient/123/_history/55</code>
 	 */
 	boolean hasIdPart();
 
-	/**
-	 * Returns the server base URL if this ID contains one. For example, the base URL is
-	 * the 'http://example.com/fhir' in the following ID: <code>http://example.com/fhir/Patient/123/_history/55</code>
-	 */
-	String getBaseUrl();
-
-	IIdType toUnqualifiedVersionless();
-
-	IIdType toVersionless();
-
-	IIdType setValue(String theString);
-
-	boolean hasVersionIdPart();
-
-	String getVersionIdPart();
-
-	IIdType toUnqualified();
-
 	boolean hasResourceType();
 
-	IIdType withResourceType(String theResName);
-
-	String getResourceType();
-
-	IIdType withServerBase(String theServerBase, String theResourceName);
+	boolean hasVersionIdPart();
 
 	/**
 	 * Returns <code>true</code> if this ID contains an absolute URL (in other words, a URL starting with "http://" or "https://"
 	 */
 	boolean isAbsolute();
+
+	boolean isEmpty();
 
 	/**
 	 * Returns <code>true</code> if the {@link #getIdPart() ID part of this object} is valid according to the FHIR rules for valid IDs. 
@@ -107,12 +110,29 @@ public interface IIdType {
 	 */
 	boolean isIdPartValidLong();
 
-	Long getIdPartAsLong();
+	/**
+	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character)
+	 */
+	boolean isLocal();
 
-	boolean hasBaseUrl();
+	/**
+	 * Returns <code>true</code> if the {@link #getVersionIdPart() version ID part of this object} contains
+	 * only numbers 
+	 */
+	boolean isVersionIdPartValidLong();
+
+	IIdType setValue(String theString);
+
+	IIdType toUnqualified();
+
+	IIdType toUnqualifiedVersionless();
+
+	IIdType toVersionless();
+
+	IIdType withResourceType(String theResName);
+	
+	IIdType withServerBase(String theServerBase, String theResourceName);
 
 	IIdType withVersion(String theVersion);
-
-	void applyTo(IBaseResource theResource);
 
 }

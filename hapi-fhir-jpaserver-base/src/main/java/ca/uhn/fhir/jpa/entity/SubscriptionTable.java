@@ -53,14 +53,20 @@ import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 @NamedQueries({
 	@NamedQuery(name="Q_HFJ_SUBSCRIPTION_SET_STATUS", query="UPDATE SubscriptionTable t SET t.myStatus = :status WHERE t.myResId = :res_id"),
 	@NamedQuery(name="Q_HFJ_SUBSCRIPTION_NEXT_CHECK", query="SELECT t FROM SubscriptionTable t WHERE t.myStatus = :status AND t.myNextCheck <= :next_check"),
-	@NamedQuery(name="Q_HFJ_SUBSCRIPTION_GET_BY_RES", query="SELECT t FROM SubscriptionTable t WHERE t.myResId = :res_id"),
-	@NamedQuery(name="Q_HFJ_SUBSCRIPTION_DELETE", query="DELETE FROM SubscriptionTable t WHERE t.myResId = :res_id"),
+	@NamedQuery(name="Q_HFJ_SUBSCRIPTION_GET_BY_RES", query="SELECT t FROM SubscriptionTable t WHERE t.myResId = :res_id")
 })
 //@formatter:on
 public class SubscriptionTable {
 
 	@Column(name = "CHECK_INTERVAL", nullable = false)
 	private long myCheckInterval;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "CREATED_TIME", nullable = false, insertable = true, updatable = false)
+	private Date myCreated;
+
+	@OneToMany(mappedBy = "mySubscription")
+	private Collection<SubscriptionFlaggedResource> myFlaggedResources;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -69,12 +75,16 @@ public class SubscriptionTable {
 	private Long myId;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "NEXT_CHECK", nullable = false)
-	private Date myNextCheck;
+	@Column(name = "LAST_CLIENT_POLL", nullable = true)
+	private Date myLastClientPoll;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "MOST_RECENT_MATCH", nullable = false)
 	private Date myMostRecentMatch;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "NEXT_CHECK", nullable = false)
+	private Date myNextCheck;
 
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResId;
@@ -83,19 +93,32 @@ public class SubscriptionTable {
 	@Enumerated(EnumType.STRING)
 	private SubscriptionStatusEnum myStatus;
 
+	//@formatter:off
 	@OneToOne()
-	@JoinColumn(name = "RES_ID", insertable = true, updatable = false, referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_SUBSCRIPTION_RESOURCE_ID") )
+	@JoinColumn(name = "RES_ID", insertable = true, updatable = false, referencedColumnName = "RES_ID", 
+		foreignKey = @ForeignKey(name = "FK_SUBSCRIPTION_RESOURCE_ID") 
+	)
 	private ResourceTable mySubscriptionResource;
-
-	@OneToMany(orphanRemoval=true, mappedBy="mySubscription")
-	private Collection<SubscriptionFlaggedResource> myFlaggedResources;
+	//@formatter:on
 
 	public long getCheckInterval() {
 		return myCheckInterval;
 	}
 
+	public Date getCreated() {
+		return myCreated;
+	}
+
 	public Long getId() {
 		return myId;
+	}
+
+	public Date getLastClientPoll() {
+		return myLastClientPoll;
+	}
+
+	public Date getMostRecentMatch() {
+		return myMostRecentMatch;
 	}
 
 	public Date getNextCheck() {
@@ -114,6 +137,18 @@ public class SubscriptionTable {
 		myCheckInterval = theCheckInterval;
 	}
 
+	public void setCreated(Date theCreated) {
+		myCreated = theCreated;
+	}
+
+	public void setLastClientPoll(Date theLastClientPoll) {
+		myLastClientPoll = theLastClientPoll;
+	}
+
+	public void setMostRecentMatch(Date theMostRecentMatch) {
+		myMostRecentMatch = theMostRecentMatch;
+	}
+
 	public void setNextCheck(Date theNextCheck) {
 		myNextCheck = theNextCheck;
 	}
@@ -124,14 +159,6 @@ public class SubscriptionTable {
 
 	public void setSubscriptionResource(ResourceTable theSubscriptionResource) {
 		mySubscriptionResource = theSubscriptionResource;
-	}
-
-	public Date getMostRecentMatch() {
-		return myMostRecentMatch;
-	}
-
-	public void setMostRecentMatch(Date theMostRecentMatch) {
-		myMostRecentMatch = theMostRecentMatch;
 	}
 
 }

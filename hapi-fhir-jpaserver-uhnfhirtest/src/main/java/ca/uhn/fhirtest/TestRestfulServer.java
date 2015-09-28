@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
+import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptor;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -81,6 +82,7 @@ public class TestRestfulServer extends RestfulServer {
 			myAppCtx = new ClassPathXmlApplicationContext(new String[] {
 					"hapi-fhir-server-database-config-dstu2.xml", 
 					"hapi-fhir-server-resourceproviders-dstu2.xml", 
+					"fhir-spring-subscription-config-dstu2.xml"
 					}, parentAppCtx);
 			setFhirContext(FhirContext.forDstu2());
 			beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
@@ -91,6 +93,7 @@ public class TestRestfulServer extends RestfulServer {
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
 			baseUrlProperty = "fhir.baseurl.dstu2";
+			registerInterceptor(myAppCtx.getBean("mySubscriptionSecurityInterceptor", SubscriptionsRequireManualActivationInterceptor.class));
 			break;
 		}
 		default:

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.util;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -29,6 +31,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -69,7 +72,7 @@ public class SubscriptionsRequireManualActivationInterceptor extends Interceptor
 		case CREATE:
 		case UPDATE:
 			if (theProcessedRequest.getResourceType().equals("Subscription")) {
-				verifyStatusOk(theProcessedRequest);
+				verifyStatusOk(theOperation, theProcessedRequest);
 			}
 		default:
 			break;
@@ -80,13 +83,17 @@ public class SubscriptionsRequireManualActivationInterceptor extends Interceptor
 		myDao = theDao;
 	}
 
-	private void verifyStatusOk(ActionRequestDetails theRequestDetails) {
+	private void verifyStatusOk(RestOperationTypeEnum theOperation, ActionRequestDetails theRequestDetails) {
 		Subscription subscription = (Subscription) theRequestDetails.getResource();
-		;
 		SubscriptionStatusEnum newStatus = subscription.getStatusElement().getValueAsEnum();
 
 		if (newStatus == SubscriptionStatusEnum.REQUESTED || newStatus == SubscriptionStatusEnum.OFF) {
 			return;
+		}
+
+		if (newStatus == null) {
+			String actualCode = subscription.getStatusElement().getValueAsString();
+			throw new UnprocessableEntityException("Can not " + theOperation.getCode() + " resource: Subscription.status must be populated" + ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
 		}
 
 		IIdType requestId = theRequestDetails.getId();
@@ -96,18 +103,32 @@ public class SubscriptionsRequireManualActivationInterceptor extends Interceptor
 				existing = myDao.read(requestId);
 				SubscriptionStatusEnum existingStatus = existing.getStatusElement().getValueAsEnum();
 				if (existingStatus != newStatus) {
-					throw new UnprocessableEntityException("Subscription.status can not be changed from " + describeStatus(existingStatus) + " to " + describeStatus(newStatus));
+					verifyActiveStatus(subscription, newStatus, existingStatus);
 				}
 			} catch (ResourceNotFoundException e) {
-				if (newStatus != SubscriptionStatusEnum.REQUESTED) {
-					throw new UnprocessableEntityException("Subscription.status must be '" + SubscriptionStatusEnum.REQUESTED.getCode() + "' on a newly created subscription");
-				}
+				verifyActiveStatus(subscription, newStatus, null);
 			}
 		} else {
-			if (newStatus != SubscriptionStatusEnum.REQUESTED) {
-				throw new UnprocessableEntityException("Subscription.status must be '" + SubscriptionStatusEnum.REQUESTED.getCode() + "' on a newly created subscription");
-			}
+			verifyActiveStatus(subscription, newStatus, null);
 		}
+	}
+
+	private void verifyActiveStatus(Subscription theSubscription, SubscriptionStatusEnum newStatus, SubscriptionStatusEnum theExistingStatus) {
+		SubscriptionChannelTypeEnum channelType = theSubscription.getChannel().getTypeElement().getValueAsEnum();
+
+		if (channelType == null) {
+			throw new UnprocessableEntityException("Subscription.channel.type must be populated");
+		}
+
+		if (channelType == SubscriptionChannelTypeEnum.WEBSOCKET) {
+			return;
+		}
+
+		if (theExistingStatus != null) {
+			throw new UnprocessableEntityException("Subscription.status can not be changed from " + describeStatus(theExistingStatus) + " to " + describeStatus(newStatus));
+		}
+
+		throw new UnprocessableEntityException("Subscription.status must be '" + SubscriptionStatusEnum.OFF.getCode() + "' or '" + SubscriptionStatusEnum.REQUESTED.getCode() + "' on a newly created subscription");
 	}
 
 	private String describeStatus(SubscriptionStatusEnum existingStatus) {

@@ -32,7 +32,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Entity
 @Table(name = "HFJ_SPIDX_STRING"/* , indexes= {@Index(name="IDX_SP_STRING", columnList="SP_VALUE_NORMALIZED")} */)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_STRING", indexes = { @org.hibernate.annotations.Index(name = "IDX_SP_STRING", columnNames = { "RES_TYPE", "SP_NAME", "SP_VALUE_NORMALIZED" }) })
+@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_STRING", indexes = { 
+		@org.hibernate.annotations.Index(name = "IDX_SP_STRING", columnNames = { "RES_TYPE", "SP_NAME", "SP_VALUE_NORMALIZED" }) 
+})
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 100;

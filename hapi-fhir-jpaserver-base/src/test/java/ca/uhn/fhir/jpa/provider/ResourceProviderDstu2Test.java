@@ -362,6 +362,20 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
+	public void testDeleteInvalidReference() throws IOException {
+		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient");
+		CloseableHttpResponse response = ourHttpClient.execute(delete);
+		try {
+			String responseString = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(responseString);
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			assertThat(responseString, containsString("Can not perform delete, no ID provided"));
+		} finally {
+			response.close();
+		}
+	}
+	
+	@Test
 	public void testDeleteResourceConditional1() throws IOException {
 		String methodName = "testDeleteResourceConditional1";
 
@@ -427,7 +441,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 
 		/*
-		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to make sure that works too..
+		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to
+		 * make sure that works too..
 		 */
 		Socket sock = new Socket();
 		sock.setSoTimeout(3000);
@@ -699,8 +714,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		patient.setId(id);
 		ourClient.update().resource(patient).execute();
 
-		ca.uhn.fhir.model.dstu2.resource.Bundle history = ourClient.history().onInstance(id).andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class).prettyPrint().summaryMode(SummaryEnum.DATA)
-				.execute();
+		ca.uhn.fhir.model.dstu2.resource.Bundle history = ourClient.history().onInstance(id).andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class).prettyPrint().summaryMode(SummaryEnum.DATA).execute();
 		assertEquals(3, history.getEntry().size());
 		assertEquals(id.withVersion("3"), history.getEntry().get(0).getResource().getId());
 		assertEquals(1, ((Patient) history.getEntry().get(0).getResource()).getName().size());
@@ -947,8 +961,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
 		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
-				.execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
@@ -1488,6 +1501,28 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
+	@Test
+	public void testUpdateInvalidReference() throws IOException, Exception {
+		String methodName = "testUpdateInvalidReference";
+
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPut post = new HttpPut(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String responseString = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(responseString);
+			assertThat(responseString, containsString("<pre>Can not update a resource with no ID</pre>"));
+			assertThat(responseString, containsString("<OperationOutcome"));
+			assertEquals(400, response.getStatusLine().getStatusCode());
+		} finally {
+			response.close();
+		}
+	}
+	
 	@Test
 	public void testUpdateResourceWithPrefer() throws IOException, Exception {
 		String methodName = "testUpdateResourceWithPrefer";

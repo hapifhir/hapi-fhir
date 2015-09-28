@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -71,6 +72,9 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 //@formatter:on
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 
+	@Autowired
+	protected ApplicationContext myAppCtx;
+	
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu2")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;

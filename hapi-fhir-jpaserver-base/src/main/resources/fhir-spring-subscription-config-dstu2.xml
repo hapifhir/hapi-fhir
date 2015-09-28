@@ -1,0 +1,29 @@
+<beans 
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:websocket="http://www.springframework.org/schema/websocket"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="
+	     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+	<context:annotation-config />
+
+	<websocket:handlers>
+		<websocket:mapping path="/baseDstu2/websocket" handler="mySubscriptionWebsocketHandler" />
+	</websocket:handlers>
+
+	<!-- 
+	<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
+	-->
+
+	<bean id="mySubscriptionWebsocketHandler" class="org.springframework.web.socket.handler.PerConnectionWebSocketHandler">
+		<constructor-arg value="ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandler"/>
+	</bean>
+	
+	<bean id="mySubscriptionSecurityInterceptor" class="ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptor"/>
+
+</beans>

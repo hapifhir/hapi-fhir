@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -40,13 +41,20 @@ public class SubscriptionFlaggedResource {
 	@Column(name = "PID", insertable = false, updatable = false)
 	private Long myId;
 
-	@ManyToOne
-	@JoinColumn(name="RES_ID")
+	@ManyToOne()
+	@JoinColumn(name="RES_ID", nullable=false)
 	private ResourceTable myResource;
 	
+	//@formatter:off
 	@ManyToOne()
-	@JoinColumn(name="SUBSCRIPTION_ID")
+	@JoinColumn(name="SUBSCRIPTION_ID", 
+		foreignKey=@ForeignKey(name="FK_SUBSFLAG_SUBS")
+	)
 	private SubscriptionTable mySubscription;
+	//@formatter:om
+	
+	@Column(name="RES_VERSION", nullable=false)
+	private Long myVersion;
 
 	public ResourceTable getResource() {
 		return myResource;
@@ -56,12 +64,20 @@ public class SubscriptionFlaggedResource {
 		return mySubscription;
 	}
 
+	public Long getVersion() {
+		return myVersion;
+	}
+
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
 	}
 
 	public void setSubscription(SubscriptionTable theSubscription) {
 		mySubscription = theSubscription;
+	}
+
+	public void setVersion(Long theVersion) {
+		myVersion = theVersion;
 	}
 	
 }
