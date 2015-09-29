@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -12,6 +14,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 
@@ -22,9 +25,19 @@ import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
+
+	public class BaseSocket {
+		protected String myError;
+		protected boolean myGotBound;
+		protected int myPingCount;
+		protected String mySubsId;
+
+	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsDstu2Test.class);
 
@@ -37,7 +50,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		myDaoConfig.getInterceptors().add(interceptor);
 	}
 
-	private void sleepUntilPingCount(SimpleEchoSocket socket, int wantPingCount) throws InterruptedException {
+	private void sleepUntilPingCount(BaseSocket socket, int wantPingCount) throws InterruptedException {
 		ourLog.info("Entering loop");
 		for (long start = System.currentTimeMillis(), now = System.currentTimeMillis(); now - start <= 20000; now = System.currentTimeMillis()) {
 			ourLog.debug("Starting");
@@ -90,7 +103,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		IIdType id = ourClient.create().resource(subs).execute().getId();
 		subs.setId(id);
-		
+
 		try {
 			subs.setStatus(SubscriptionStatusEnum.ACTIVE);
 			ourClient.update().resource(subs).execute();
@@ -100,7 +113,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 
 		try {
-			subs.setStatus((SubscriptionStatusEnum)null);
+			subs.setStatus((SubscriptionStatusEnum) null);
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -111,14 +124,13 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		ourClient.update().resource(subs).execute();
 	}
 
-
 	@Test
 	public void testCreateWithPopulatedButInvalidStatue() {
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		subs.setCriteria("Observation?identifier=123");
 		subs.getStatusElement().setValue("aaaaa");
-		
+
 		try {
 			ourClient.create().resource(subs).execute();
 			fail();
@@ -149,6 +161,135 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 	}
 
+	@Test
+	public void testSubscriptionDynamic() throws Exception {
+		myDaoConfig.setSubscriptionEnabled(true);
+		myDaoConfig.setSubscriptionPollDelay(0);
+
+		String methodName = "testSubscriptionDynamic";
+		Patient p = new Patient();
+		p.addName().addFamily(methodName);
+		IIdType pId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		String criteria = "Observation?subject=Patient/" + pId.getIdPart();
+		DynamicEchoSocket socket = new DynamicEchoSocket(criteria, EncodingEnum.JSON);
+		WebSocketClient client = new WebSocketClient();
+		try {
+			client.start();
+			URI echoUri = new URI("ws://localhost:" + ourPort + "/baseDstu2/websocket");
+			client.connect(socket, echoUri, new ClientUpgradeRequest());
+			ourLog.info("Connecting to : {}", echoUri);
+
+			sleepUntilPingCount(socket, 1);
+
+			mySubscriptionDao.read(new IdDt("Subscription", socket.mySubsId));
+
+			Observation obs = new Observation();
+			obs.getSubject().setReference(pId);
+			obs.setStatus(ObservationStatusEnum.FINAL);
+			IIdType afterId1 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+
+			obs = new Observation();
+			obs.getSubject().setReference(pId);
+			obs.setStatus(ObservationStatusEnum.FINAL);
+			IIdType afterId2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+
+			Thread.sleep(100);
+
+			sleepUntilPingCount(socket, 3);
+
+			obs = (Observation) socket.myReceived.get(0);
+			assertEquals(afterId1.getValue(), obs.getIdElement().toUnqualifiedVersionless().getValue());
+
+			obs = (Observation) socket.myReceived.get(1);
+			assertEquals(afterId2.getValue(), obs.getIdElement().toUnqualifiedVersionless().getValue());
+
+			obs = new Observation();
+			obs.getSubject().setReference(pId);
+			obs.setStatus(ObservationStatusEnum.FINAL);
+			IIdType afterId3 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+
+			sleepUntilPingCount(socket, 4);
+
+			obs = (Observation) socket.myReceived.get(2);
+			assertEquals(afterId3.getValue(), obs.getIdElement().toUnqualifiedVersionless().getValue());
+
+		} finally {
+			try {
+				client.stop();
+			} catch (Exception e) {
+				ourLog.error("Failure", e);
+				fail(e.getMessage());
+			}
+		}
+
+	}
+
+	
+	@Test
+	public void testSubscriptionDynamicXml() throws Exception {
+		myDaoConfig.setSubscriptionEnabled(true);
+		myDaoConfig.setSubscriptionPollDelay(0);
+
+		String methodName = "testSubscriptionDynamic";
+		Patient p = new Patient();
+		p.addName().addFamily(methodName);
+		IIdType pId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		String criteria = "Observation?subject=Patient/" + pId.getIdPart() + "&_format=xml";
+		DynamicEchoSocket socket = new DynamicEchoSocket(criteria, EncodingEnum.XML);
+		WebSocketClient client = new WebSocketClient();
+		try {
+			client.start();
+			URI echoUri = new URI("ws://localhost:" + ourPort + "/baseDstu2/websocket");
+			client.connect(socket, echoUri, new ClientUpgradeRequest());
+			ourLog.info("Connecting to : {}", echoUri);
+
+			sleepUntilPingCount(socket, 1);
+
+			mySubscriptionDao.read(new IdDt("Subscription", socket.mySubsId));
+
+			Observation obs = new Observation();
+			obs.getSubject().setReference(pId);
+			obs.setStatus(ObservationStatusEnum.FINAL);
+			IIdType afterId1 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+
+			obs = new Observation();
+			obs.getSubject().setReference(pId);
+			obs.setStatus(ObservationStatusEnum.FINAL);
+			IIdType afterId2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+
+			Thread.sleep(100);
+
+			sleepUntilPingCount(socket, 3);
+
+			obs = (Observation) socket.myReceived.get(0);
+			assertEquals(afterId1.getValue(), obs.getIdElement().toUnqualifiedVersionless().getValue());
+
+			obs = (Observation) socket.myReceived.get(1);
+			assertEquals(afterId2.getValue(), obs.getIdElement().toUnqualifiedVersionless().getValue());
+
+			obs = new Observation();
+			obs.getSubject().setReference(pId);
+			obs.setStatus(ObservationStatusEnum.FINAL);
+			IIdType afterId3 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+
+			sleepUntilPingCount(socket, 4);
+
+			obs = (Observation) socket.myReceived.get(2);
+			assertEquals(afterId3.getValue(), obs.getIdElement().toUnqualifiedVersionless().getValue());
+
+		} finally {
+			try {
+				client.stop();
+			} catch (Exception e) {
+				ourLog.error("Failure", e);
+				fail(e.getMessage());
+			}
+		}
+
+	}
+	
 	@Test
 	public void testSubscriptionSimple() throws Exception {
 		myDaoConfig.setSubscriptionEnabled(true);
@@ -196,7 +337,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			IIdType afterId3 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 
 			sleepUntilPingCount(socket, 2);
-			
+
 		} finally {
 			try {
 				client.stop();
@@ -241,28 +382,15 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 	 * Basic Echo Client Socket
 	 */
 	@WebSocket(maxTextMessageSize = 64 * 1024)
-	public static class SimpleEchoSocket {
-
-		private String myError;
-
-		private boolean myGotBound;
-
-		private int myPingCount;
-
-		// @OnWebSocketClose
-		// public void onClose(int statusCode, String reason) {
-		// ourLog.info("Connection closed: {} - {}", statusCode, reason);
-		// this.session = null;
-		// this.closeLatch.countDown();
-		// }
-
-		private String mySubsId;
+	public class SimpleEchoSocket extends BaseSocket {
 
 		@SuppressWarnings("unused")
 		private Session session;
+
 		public SimpleEchoSocket(String theSubsId) {
 			mySubsId = theSubsId;
 		}
+
 		@OnWebSocketConnect
 		public void onConnect(Session session) {
 			ourLog.info("Got connect: {}", session);
@@ -275,13 +403,13 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 				ourLog.error("Failure", t);
 			}
 		}
-		
+
 		@OnWebSocketMessage
 		public void onMessage(String theMsg) {
 			ourLog.info("Got msg: {}", theMsg);
 			if (theMsg.equals("bound " + mySubsId)) {
 				myGotBound = true;
-			} else if (myGotBound && theMsg.startsWith("ping " + mySubsId)){
+			} else if (myGotBound && theMsg.startsWith("ping " + mySubsId)) {
 				myPingCount++;
 			} else {
 				myError = "Unexpected message: " + theMsg;
@@ -289,4 +417,51 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 	}
 
+	/**
+	 * Basic Echo Client Socket
+	 */
+	@WebSocket(maxTextMessageSize = 64 * 1024)
+	public class DynamicEchoSocket extends BaseSocket {
+
+		private List<IBaseResource> myReceived = new ArrayList<IBaseResource>();
+		@SuppressWarnings("unused")
+		private Session session;
+		private String myCriteria;
+		private EncodingEnum myEncoding;
+
+		public DynamicEchoSocket(String theCriteria, EncodingEnum theEncoding) {
+			myCriteria = theCriteria;
+			myEncoding = theEncoding;
+		}
+
+		@OnWebSocketConnect
+		public void onConnect(Session session) {
+			ourLog.info("Got connect: {}", session);
+			this.session = session;
+			try {
+				String sending = "bind " + myCriteria;
+				ourLog.info("Sending: {}", sending);
+				session.getRemote().sendString(sending);
+			} catch (Throwable t) {
+				ourLog.error("Failure", t);
+			}
+		}
+
+		@OnWebSocketMessage
+		public void onMessage(String theMsg) {
+			ourLog.info("Got msg: {}", theMsg);
+			if (theMsg.startsWith("bound ")) {
+				myGotBound = true;
+				mySubsId = (theMsg.substring("bound ".length()));
+				myPingCount++;
+			} else if (myGotBound && theMsg.startsWith("add " + mySubsId + "\n")) {
+				String text = theMsg.substring(("add " + mySubsId + "\n").length());
+				IBaseResource res = myEncoding.newParser(myFhirCtx).parseResource(text);
+				myReceived.add(res);
+				myPingCount++;
+			} else {
+				myError = "Unexpected message: " + theMsg;
+			}
+		}
+	}
 }

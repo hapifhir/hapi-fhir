@@ -2013,6 +2013,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			for (Tuple next : query.getResultList()) {
 				loadPids.add(next.get(0, Long.class));
 			}
+			if (loadPids.isEmpty()) {
+				return new SimpleBundleProvider();
+			}
 		} else {
 			loadPids = searchForIdsWithAndOr(theParams);
 			if (loadPids.isEmpty()) {
@@ -2028,7 +2031,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 			Root<ResourceTable> from = cq.from(ResourceTable.class);
 			cq.select(from.get("myId").as(Long.class));
-
+			
 			Predicate predicateIds = (from.get("myId").in(loadPids));
 			Predicate predicateLower = lu.getLowerBoundAsInstant() != null ? builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), lu.getLowerBoundAsInstant()) : null;
 			Predicate predicateUpper = lu.getUpperBoundAsInstant() != null ? builder.lessThanOrEqualTo(from.<Date> get("myUpdated"), lu.getUpperBoundAsInstant()) : null;

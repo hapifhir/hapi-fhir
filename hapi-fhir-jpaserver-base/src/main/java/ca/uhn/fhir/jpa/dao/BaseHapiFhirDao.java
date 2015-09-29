@@ -111,6 +111,7 @@ import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -715,7 +716,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return ids;
 	}
 
-	static SearchParameterMap translateMatchUrl(String theMatchUrl, RuntimeResourceDefinition resourceDef) {
+	public static SearchParameterMap translateMatchUrl(String theMatchUrl, RuntimeResourceDefinition resourceDef) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		List<NameValuePair> parameters;
 		try {
@@ -778,7 +779,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				}
 				continue;
 			}
-
+			
+			if (nextParamName.startsWith("_")) {
+				continue;
+			}
+			
 			RuntimeSearchParam paramDef = resourceDef.getSearchParam(nextParamName);
 			if (paramDef == null) {
 				throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);
