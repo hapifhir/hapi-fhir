@@ -58,8 +58,8 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 	}
 
 	@Override
-	public BaseRuntimeElementDefinition<?> getProfileOf() {
-		return myProfileOf;
+	public Class<? extends IBaseDatatype> getProfileOf() {
+		return myProfileOfType;
 	}
 
 	@Override

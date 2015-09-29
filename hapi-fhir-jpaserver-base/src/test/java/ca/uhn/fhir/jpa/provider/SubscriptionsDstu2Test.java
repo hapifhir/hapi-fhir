@@ -176,7 +176,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		WebSocketClient client = new WebSocketClient();
 		try {
 			client.start();
-			URI echoUri = new URI("ws://localhost:" + ourPort + "/baseDstu2/websocket");
+			URI echoUri = new URI("ws://localhost:" + ourPort + "/websocket/dstu2");
 			client.connect(socket, echoUri, new ClientUpgradeRequest());
 			ourLog.info("Connecting to : {}", echoUri);
 
@@ -241,7 +241,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		WebSocketClient client = new WebSocketClient();
 		try {
 			client.start();
-			URI echoUri = new URI("ws://localhost:" + ourPort + "/baseDstu2/websocket");
+			URI echoUri = new URI("ws://localhost:" + ourPort + "/websocket/dstu2");
 			client.connect(socket, echoUri, new ClientUpgradeRequest());
 			ourLog.info("Connecting to : {}", echoUri);
 

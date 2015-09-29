@@ -1293,6 +1293,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test(expected = InvalidRequestException.class)
 	public void testSearchWithInvalidSort() throws Exception {
+		Observation o = new Observation();
+		o.getCode().setText("testSearchWithInvalidSort");
+		myObservationDao.create(o);
 		//@formatter:off
 		Bundle found = ourClient
 				.search()

@@ -119,11 +119,11 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		}
 	}
 
-	private class SimpleBoundState implements IState {
+	private class BoundStaticSubscipriptionState implements IState {
 
 		private WebSocketSession mySession;
 
-		public SimpleBoundState(WebSocketSession theSession) {
+		public BoundStaticSubscipriptionState(WebSocketSession theSession) {
 			mySession = theSession;
 		}
 
@@ -157,12 +157,12 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 	@Autowired
 	private FhirContext myCtx;
 	
-	private class ResourceBoundState implements IState {
+	private class BoundDynamicSubscriptionState implements IState {
 
 		private WebSocketSession mySession;
 		private EncodingEnum myEncoding;
 
-		public ResourceBoundState(WebSocketSession theSession, EncodingEnum theEncoding) {
+		public BoundDynamicSubscriptionState(WebSocketSession theSession, EncodingEnum theEncoding) {
 			mySession = theSession;
 			myEncoding = theEncoding;
 		}
@@ -241,12 +241,12 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			subscription.setCriteria(theRemaining);
 
 			try {
-				String params = theRemaining.substring(theRemaining.indexOf('?'));
-				List<NameValuePair> paramValues = URLEncodedUtils.parse("http://example.com" + params, Constants.CHARSET_UTF8);
+				String params = theRemaining.substring(theRemaining.indexOf('?')+1);
+				List<NameValuePair> paramValues = URLEncodedUtils.parse(params, Constants.CHARSET_UTF8, '&');
 				EncodingEnum encoding = EncodingEnum.JSON;
 				for (NameValuePair nameValuePair : paramValues) {
-					if (Constants.PARAM_FORMAT.equals(nameValuePair)) {
-						EncodingEnum nextEncoding = EncodingEnum.forContentType(nameValuePair.getValue());
+					if (Constants.PARAM_FORMAT.equals(nameValuePair.getName())) {
+						EncodingEnum nextEncoding = Constants.FORMAT_VAL_TO_ENCODING.get(nameValuePair.getValue());
 						if (nextEncoding != null) {
 							encoding = nextEncoding;
 						}
@@ -257,7 +257,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 
 				mySubscriptionPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
 				mySubscriptionId = subscription.getIdElement();
-				myState = new ResourceBoundState(theSession, encoding);
+				myState = new BoundDynamicSubscriptionState(theSession, encoding);
 
 				return id;
 			} catch (UnprocessableEntityException e) {
@@ -298,7 +298,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 				Subscription subscription = mySubscriptionDao.read(id);
 				mySubscriptionPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
 				mySubscriptionId = subscription.getIdElement();
-				myState = new SimpleBoundState(theSession);
+				myState = new BoundStaticSubscipriptionState(theSession);
 			} catch (ResourceNotFoundException e) {
 				try {
 					theSession.close(new CloseStatus(CloseStatus.PROTOCOL_ERROR.getCode(), "Invalid bind request - Unknown subscription: " + id.getValue()));
