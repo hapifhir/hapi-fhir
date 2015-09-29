@@ -1,5 +1,6 @@
 package ca.uhn.fhir.narrative;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -53,7 +54,7 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 		Patient value = new Patient();
 
 		value.addIdentifier().setSystem("urn:names").setValue("123456");
-		value.addName().addFamily("blow").addGiven("joe").addGiven((String)null).addGiven("john");
+		value.addName().addFamily("blow").addGiven("joe").addGiven((String) null).addGiven("john");
 		value.getAddressFirstRep().addLine("123 Fake Street").addLine("Unit 1");
 		value.getAddressFirstRep().setCity("Toronto").setState("ON").setCountry("Canada");
 
@@ -67,12 +68,12 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 
 		String title = myGen.generateTitle(value);
 		assertEquals("joe john BLOW (123456)", title);
-//		ourLog.info(title);
+		// ourLog.info(title);
 
 		value.getIdentifierFirstRep().setValue("FOO MRN 123");
 		title = myGen.generateTitle(value);
 		assertEquals("joe john BLOW (FOO MRN 123)", title);
-//		ourLog.info(title);
+		// ourLog.info(title);
 
 	}
 
@@ -80,7 +81,7 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 	public void testGenerateEncounter() throws DataFormatException {
 		Encounter enc = new Encounter();
 
-		enc.addIdentifier().setSystem("urn:visits").setValue( "1234567");
+		enc.addIdentifier().setSystem("urn:visits").setValue("1234567");
 		enc.setClassElement(EncounterClassEnum.AMBULATORY);
 		enc.setPeriod(new PeriodDt().setStart(new DateTimeDt("2001-01-02T11:11:00")));
 		enc.setType(ca.uhn.fhir.model.dstu2.valueset.EncounterTypeEnum.ANNUAL_DIABETES_MELLITUS_SCREENING);
@@ -91,7 +92,6 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 		ourLog.info(title);
 
 	}
-
 
 	@Test
 	public void testGenerateDiagnosticReport() throws DataFormatException {
@@ -127,9 +127,9 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, parse);
 
-//		String output = gen.generateTitle(oo);
-//		ourLog.info(output);
-//		assertEquals("Operation Outcome (2 issues)", output);
+		// String output = gen.generateTitle(oo);
+		// ourLog.info(output);
+		// assertEquals("Operation Outcome (2 issues)", output);
 
 		NarrativeDt narrative = new NarrativeDt();
 		myGen.generateNarrative(null, oo, narrative);
@@ -137,11 +137,11 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 
 		ourLog.info(output);
 
-//		oo = new OperationOutcome();
-//		oo.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("AA");
-//		output = gen.generateTitle(oo);
-//		ourLog.info(output);
-//		assertEquals("Operation Outcome (fatal)", output);
+		// oo = new OperationOutcome();
+		// oo.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("AA");
+		// output = gen.generateTitle(oo);
+		// ourLog.info(output);
+		// assertEquals("Operation Outcome (fatal)", output);
 
 	}
 
@@ -193,27 +193,43 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
 
 	}
-	
+
 	@Test
-	public void testGenerateMedicationPrescription(){
+	public void testGenerateMedicationPrescription() {
 		MedicationOrder mp = new MedicationOrder();
 		mp.setId("12345");
 		Medication med = new Medication();
 		med.getCode().setText("ciproflaxin");
 		ResourceReferenceDt medRef = new ResourceReferenceDt(med);
-		mp.setMedication(medRef );
+		mp.setMedication(medRef);
 		mp.setStatus(MedicationOrderStatusEnum.ACTIVE);
 		mp.setDateWritten(new DateTimeDt("2014-09-01"));
-		
+
 		NarrativeDt narrative = new NarrativeDt();
 		myGen.generateNarrative(mp, narrative);
-		
-		assertTrue("Expected medication name of ciprofloaxin within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ciprofloaxin")>-1);
-		assertTrue("Expected string status of ACTIVE within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ACTIVE")>-1);
-		
+
+		assertTrue("Expected medication name of ciprofloaxin within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ciprofloaxin") > -1);
+		assertTrue("Expected string status of ACTIVE within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ACTIVE") > -1);
+
 		String title = myGen.generateTitle(mp);
 		assertEquals("ciprofloaxin", title);
-		
+
+	}
+
+	@Test
+	public void testGenerateMedication() {
+		Medication med = new Medication();
+		med.getCode().setText("ciproflaxin");
+
+		NarrativeDt narrative = new NarrativeDt();
+		myGen.generateNarrative(med, narrative);
+
+		String string = narrative.getDiv().toString();
+		assertThat(string, containsString("ciproflaxin"));
+
+		String title = myGen.generateTitle(med);
+		assertEquals("ciproflaxin", title);
+
 	}
 
 }

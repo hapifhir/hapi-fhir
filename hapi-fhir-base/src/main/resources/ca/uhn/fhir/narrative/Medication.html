@@ -11,7 +11,14 @@ a browser.
 <!--*/-->
 
 <div>
-	<div class="hapiHeaderText" th:if="${not resource.nameElement.empty}" th:narrative="${resource.name}"></div>	
+	<th:block th:switch="${fhirVersion}">
+		<th:block th:case="'DSTU1'">
+			<div class="hapiHeaderText" th:if="${not resource.nameElement.empty}" th:narrative="${resource.name}"></div>	
+		</th:block>
+		<th:block th:case="*">
+			<div class="hapiHeaderText" th:if="${not resource.code.empty}" th:narrative="${resource.code}"></div>	
+		</th:block>
+	</th:block>
 </div>
 
 <!--/*-->

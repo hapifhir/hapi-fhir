@@ -16,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.CodeType;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Observation.ObservationStatus;
+import org.hl7.fhir.instance.model.Patient;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
@@ -61,19 +62,19 @@ public class FhirInstanceValidatorTest {
     myValidConcepts = new ArrayList<String>();
 
     myMockSupport = mock(IValidationSupport.class);
-    when(myMockSupport.expandValueSet(any(ConceptSetComponent.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
+    when(myMockSupport.expandValueSet(any(FhirContext.class), any(ConceptSetComponent.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
       @Override
       public ValueSetExpansionComponent answer(InvocationOnMock theInvocation) throws Throwable {
         ConceptSetComponent arg = (ConceptSetComponent)theInvocation.getArguments()[0];
         ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getSystem());
         if (retVal == null) {
-          retVal = myDefaultValidationSupport.expandValueSet(arg);
+          retVal = myDefaultValidationSupport.expandValueSet(any(FhirContext.class), arg);
         }
         ourLog.info("expandValueSet({}) : {}", new Object[] { theInvocation.getArguments()[0], retVal });
         return retVal;
       }
     });
-    when(myMockSupport.isCodeSystemSupported(any(String.class))).thenAnswer(new Answer<Boolean>() {
+    when(myMockSupport.isCodeSystemSupported(any(FhirContext.class), any(String.class))).thenAnswer(new Answer<Boolean>() {
       @Override
       public Boolean answer(InvocationOnMock theInvocation) throws Throwable {
         boolean retVal = mySupportedCodeSystemsForExpansion.containsKey(theInvocation.getArguments()[0]);
@@ -93,27 +94,28 @@ public class FhirInstanceValidatorTest {
             return retVal;
           }
         });
-    when(myMockSupport.validateCode(any(String.class), any(String.class), any(String.class)))
+    when(myMockSupport.validateCode(any(FhirContext.class), any(String.class), any(String.class), any(String.class)))
         .thenAnswer(new Answer<CodeValidationResult>() {
           @Override
           public CodeValidationResult answer(InvocationOnMock theInvocation) throws Throwable {
-            String system = (String) theInvocation.getArguments()[0];
-            String code = (String) theInvocation.getArguments()[1];
+            FhirContext ctx = (FhirContext) theInvocation.getArguments()[0];
+            String system = (String) theInvocation.getArguments()[1];
+            String code = (String) theInvocation.getArguments()[2];
             CodeValidationResult retVal;
             if (myValidConcepts.contains(system + "___" + code)) {
               retVal = new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
             } else {
-              retVal = myDefaultValidationSupport.validateCode(system, code, (String) theInvocation.getArguments()[2]);
+              retVal = myDefaultValidationSupport.validateCode(ctx, system, code, (String) theInvocation.getArguments()[2]);
             }
             ourLog.info("validateCode({}, {}, {}) : {}",
                 new Object[] { system, code, (String) theInvocation.getArguments()[2], retVal });
             return retVal;
           }
         });
-    when(myMockSupport.fetchCodeSystem(any(String.class))).thenAnswer(new Answer<ValueSet>() {
+    when(myMockSupport.fetchCodeSystem(any(FhirContext.class), any(String.class))).thenAnswer(new Answer<ValueSet>() {
       @Override
       public ValueSet answer(InvocationOnMock theInvocation) throws Throwable {
-        ValueSet retVal = myDefaultValidationSupport.fetchCodeSystem((String) theInvocation.getArguments()[0]);
+        ValueSet retVal = myDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[0],(String) theInvocation.getArguments()[1]);
         ourLog.info("fetchCodeSystem({}) : {}", new Object[] { (String) theInvocation.getArguments()[0], retVal });
         return retVal;
       }
@@ -306,6 +308,29 @@ public class FhirInstanceValidatorTest {
         output.getMessages().get(0).getMessage());
   }
 
+  
+  @Test
+  public void testValidateResourceWithValuesetExpansion() {
+    
+    Patient patient = new Patient();
+    patient.addIdentifier().setSystem("http://system").setValue("12345").getType().addCoding().setSystem("foo").setCode("bar");
+
+    ValidationResult output = myVal.validateWithResult(patient);
+    List<SingleValidationMessage> all = logResultsAndReturnAll(output);
+    assertEquals(1, all.size());
+    assertEquals("/f:Patient/f:identifier/f:type", all.get(0).getLocationString());
+    assertEquals("None of the codes are in the expected value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type)", all.get(0).getMessage());
+    assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
+
+    patient = new Patient();
+    patient.addIdentifier().setSystem("http://system").setValue("12345").getType().addCoding().setSystem("http://hl7.org/fhir/v2/0203").setCode("MR");
+
+    output = myVal.validateWithResult(patient);
+    all = logResultsAndReturnAll(output);
+    assertEquals(0, all.size());
+  }
+
+  
   @Test
   public void testValidateResourceWithExampleBindingCodeValidationFailing() {
     Observation input = new Observation();

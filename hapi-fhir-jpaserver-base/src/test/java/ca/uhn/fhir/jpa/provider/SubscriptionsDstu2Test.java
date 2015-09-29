@@ -183,7 +183,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		SimpleEchoSocket socket = new SimpleEchoSocket(subsId);
 		try {
 			client.start();
-			URI echoUri = new URI("ws://localhost:" + ourPort + "/baseDstu2/websocket");
+			URI echoUri = new URI("ws://localhost:" + ourPort + "/websocket/dstu2");
 			ClientUpgradeRequest request = new ClientUpgradeRequest();
 			client.connect(socket, echoUri, request);
 			ourLog.info("Connecting to : {}", echoUri);
