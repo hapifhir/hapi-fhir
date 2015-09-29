@@ -26,10 +26,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UnsignedIntDt;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
 public interface IFhirResourceDaoPatient<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	IBundleProvider everything(HttpServletRequest theServletRequest, IdDt theId, UnsignedIntDt theCount);
+	IBundleProvider everything(HttpServletRequest theServletRequest, IdDt theId, UnsignedIntDt theCount, DateRangeParam theLastUpdate, SortSpec theSort);
 
 }

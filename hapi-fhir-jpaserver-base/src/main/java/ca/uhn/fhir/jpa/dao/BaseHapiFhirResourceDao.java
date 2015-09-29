@@ -1227,11 +1227,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			} else {
 				theOrders.add(theBuilder.desc(theFrom.get("myUpdated")));
 			}
-			
+
 			createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
 			return;
 		}
-		
+
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceType);
 		RuntimeSearchParam param = resourceDef.getSearchParam(theSort.getParamName());
 		if (param == null) {
@@ -1615,7 +1615,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	/**
 	 * THIS SHOULD RETURN HASHSET and not jsut Set because we add to it later (so it can't be Collections.emptySet())
 	 */
-	private HashSet<Long> loadReverseIncludes(List<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode) {
+	private HashSet<Long> loadReverseIncludes(Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode) {
 		if (theMatches.size() == 0) {
 			return new HashSet<Long>();
 		}
@@ -1902,7 +1902,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		Long pid = translateForcedIdToPid(theId);
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid);
-		
+
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -2020,6 +2020,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			}
 		}
 
+		// Load _include and _revinclude before filter and sort in everything mode
+		if (theParams.isEverythingMode() == true) {
+			if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty() == false) {
+				loadPids.addAll(loadReverseIncludes(loadPids, theParams.getRevIncludes(), true));
+				loadPids.addAll(loadReverseIncludes(loadPids, theParams.getIncludes(), false));
+			}
+		}
+
 		// Handle _lastUpdated
 		DateRangeParam lu = theParams.getLastUpdated();
 		if (lu != null && (lu.getLowerBoundAsInstant() != null || lu.getUpperBoundAsInstant() != null)) {
@@ -2044,59 +2052,22 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			for (Long next : query.getResultList()) {
 				loadPids.add(next);
 			}
-			
+
 			if (loadPids.isEmpty()) {
 				return new SimpleBundleProvider();
 			}
 		}
 
 		// Handle sorting if any was provided
-		final List<Long> pids;
-		if (theParams.getSort() != null && isNotBlank(theParams.getSort().getParamName())) {
-			List<Order> orders = new ArrayList<Order>();
-			List<Predicate> predicates = new ArrayList<Predicate>();
-			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
-			Root<ResourceTable> from = cq.from(ResourceTable.class);
-			predicates.add(from.get("myId").in(loadPids));
-			createSort(builder, from, theParams.getSort(), orders, predicates);
-			if (orders.size() > 0) {
-				Set<Long> originalPids = loadPids;
-				loadPids = new LinkedHashSet<Long>();
-				cq.multiselect(from.get("myId").as(Long.class));
-				cq.where(predicates.toArray(new Predicate[0]));
-				cq.orderBy(orders);
-
-				TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
-
-				for (Tuple next : query.getResultList()) {
-					loadPids.add(next.get(0, Long.class));
-				}
-
-				ourLog.debug("Sort PID order is now: {}", loadPids);
-
-				pids = new ArrayList<Long>(loadPids);
-
-				// Any ressources which weren't matched by the sort get added to the bottom
-				for (Long next : originalPids) {
-					if (loadPids.contains(next) == false) {
-						pids.add(next);
-					}
-				}
-
-			} else {
-				pids = new ArrayList<Long>(loadPids);
-			}
-		} else {
-			pids = new ArrayList<Long>(loadPids);
-		}
+		final List<Long> pids = processSort(theParams, loadPids);
 
 		// Load _revinclude resources
 		final Set<Long> revIncludedPids;
-		if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty() == false) {
-			revIncludedPids = loadReverseIncludes(pids, theParams.getRevIncludes(), true);
-			if (theParams.isEverythingMode()) {
-				revIncludedPids.addAll(loadReverseIncludes(pids, theParams.getIncludes(), false));
+		if (theParams.isEverythingMode() == false) {
+			if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty() == false) {
+				revIncludedPids = loadReverseIncludes(pids, theParams.getRevIncludes(), true);
+			} else {
+				revIncludedPids = new HashSet<Long>();
 			}
 		} else {
 			revIncludedPids = new HashSet<Long>();
@@ -2150,6 +2121,49 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		ourLog.info("Processed search for {} on {} in {}ms", new Object[] { myResourceName, theParams, w.getMillisAndRestart() });
 
 		return retVal;
+	}
+
+	private List<Long> processSort(final SearchParameterMap theParams, Set<Long> loadPids) {
+		final List<Long> pids;
+		if (theParams.getSort() != null && isNotBlank(theParams.getSort().getParamName())) {
+			List<Order> orders = new ArrayList<Order>();
+			List<Predicate> predicates = new ArrayList<Predicate>();
+			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
+			Root<ResourceTable> from = cq.from(ResourceTable.class);
+			predicates.add(from.get("myId").in(loadPids));
+			createSort(builder, from, theParams.getSort(), orders, predicates);
+			if (orders.size() > 0) {
+				Set<Long> originalPids = loadPids;
+				loadPids = new LinkedHashSet<Long>();
+				cq.multiselect(from.get("myId").as(Long.class));
+				cq.where(predicates.toArray(new Predicate[0]));
+				cq.orderBy(orders);
+
+				TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
+
+				for (Tuple next : query.getResultList()) {
+					loadPids.add(next.get(0, Long.class));
+				}
+
+				ourLog.debug("Sort PID order is now: {}", loadPids);
+
+				pids = new ArrayList<Long>(loadPids);
+
+				// Any ressources which weren't matched by the sort get added to the bottom
+				for (Long next : originalPids) {
+					if (loadPids.contains(next) == false) {
+						pids.add(next);
+					}
+				}
+
+			} else {
+				pids = new ArrayList<Long>(loadPids);
+			}
+		} else {
+			pids = new ArrayList<Long>(loadPids);
+		}
+		return pids;
 	}
 
 	@Override

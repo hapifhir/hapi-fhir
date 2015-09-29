@@ -2,7 +2,9 @@ package ca.uhn.fhir.validation;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -116,7 +118,7 @@ public class FhirInstanceValidatorTest {
       @Override
       public ValueSet answer(InvocationOnMock theInvocation) throws Throwable {
         ValueSet retVal = myDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[0],(String) theInvocation.getArguments()[1]);
-        ourLog.info("fetchCodeSystem({}) : {}", new Object[] { (String) theInvocation.getArguments()[0], retVal });
+        ourLog.info("fetchCodeSystem({}) : {}", new Object[] { (String) theInvocation.getArguments()[1], retVal });
         return retVal;
       }
     });
@@ -378,7 +380,9 @@ public class FhirInstanceValidatorTest {
 
     ValidationResult output = myVal.validateWithResult(input);
     List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-    assertEquals(errors.toString(), 0, errors.size());
+    assertEquals(errors.toString(), 1, errors.size());
+    assertEquals("Unable to validate code \"1234\" in code system \"http://loinc.org\"", errors.get(0).getMessage());
+    assertEquals(ResultSeverityEnum.WARNING, errors.get(0).getSeverity());
   }
 
   @Test
