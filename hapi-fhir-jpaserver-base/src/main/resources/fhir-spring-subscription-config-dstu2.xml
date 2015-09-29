@@ -13,7 +13,7 @@
 	<context:annotation-config />
 
 	<websocket:handlers>
-		<websocket:mapping path="/baseDstu2/websocket" handler="mySubscriptionWebsocketHandler" />
+		<websocket:mapping path="/websocket/dstu2" handler="mySubscriptionWebsocketHandler" />
 	</websocket:handlers>
 
 	<!-- 

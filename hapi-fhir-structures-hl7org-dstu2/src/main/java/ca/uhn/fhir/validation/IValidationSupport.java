@@ -18,7 +18,7 @@ public interface IValidationSupport {
    *          The portion to include
    * @return The expansion
    */
-  ValueSetExpansionComponent expandValueSet(ConceptSetComponent theInclude);
+  ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude);
 
   /**
    * Fetch a code system by ID
@@ -27,7 +27,7 @@ public interface IValidationSupport {
    *          The code system
    * @return The valueset (must not be null, but can be an empty ValueSet)
    */
-  ValueSet fetchCodeSystem(String theSystem);
+  ValueSet fetchCodeSystem(FhirContext theContext, String theSystem);
 
   /**
    * Loads a resource needed by the validation (a StructureDefinition, or a
@@ -53,7 +53,7 @@ public interface IValidationSupport {
    * @return Returns <code>true</code> if codes in the given code system can be
    *         validated
    */
-  boolean isCodeSystemSupported(String theSystem);
+  boolean isCodeSystemSupported(FhirContext theContext, String theSystem);
 
   /**
    * Validates that the given code exists and if possible returns a display
@@ -68,7 +68,7 @@ public interface IValidationSupport {
    *          The display name, if it should also be validated
    * @return Returns a validation result object
    */
-  CodeValidationResult validateCode(String theCodeSystem, String theCode, String theDisplay);
+  CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
 
   public class CodeValidationResult {
     private ConceptDefinitionComponent definition;

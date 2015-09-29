@@ -24,19 +24,19 @@ public class ValidationSupportChain implements IValidationSupport {
   }
 
   @Override
-  public ValueSetExpansionComponent expandValueSet(ConceptSetComponent theInclude) {
+  public ValueSetExpansionComponent expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
     for (IValidationSupport next : myChain) {
-      if (next.isCodeSystemSupported(theInclude.getSystem())) {
-        return next.expandValueSet(theInclude);
+      if (next.isCodeSystemSupported(theCtx, theInclude.getSystem())) {
+        return next.expandValueSet(theCtx, theInclude);
       }
     }
-    return myChain.get(0).expandValueSet(theInclude);
+    return myChain.get(0).expandValueSet(theCtx, theInclude);
   }
 
   @Override
-  public ValueSet fetchCodeSystem(String theSystem) {
+  public ValueSet fetchCodeSystem(FhirContext theCtx, String theSystem) {
     for (IValidationSupport next : myChain) {
-      ValueSet retVal = next.fetchCodeSystem(theSystem);
+      ValueSet retVal = next.fetchCodeSystem(theCtx, theSystem);
       if (retVal != null) {
         return retVal;
       }
@@ -56,9 +56,9 @@ public class ValidationSupportChain implements IValidationSupport {
   }
 
   @Override
-  public boolean isCodeSystemSupported(String theSystem) {
+  public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
     for (IValidationSupport next : myChain) {
-      if (next.isCodeSystemSupported(theSystem)) {
+      if (next.isCodeSystemSupported(theCtx, theSystem)) {
         return true;
       }
     }
@@ -66,13 +66,13 @@ public class ValidationSupportChain implements IValidationSupport {
   }
 
   @Override
-  public CodeValidationResult validateCode(String theCodeSystem, String theCode, String theDisplay) {
+  public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
     for (IValidationSupport next : myChain) {
-      if (next.isCodeSystemSupported(theCodeSystem)) {
-        return next.validateCode(theCodeSystem, theCode, theDisplay);
+      if (next.isCodeSystemSupported(theCtx, theCodeSystem)) {
+        return next.validateCode(theCtx, theCodeSystem, theCode, theDisplay);
       }
     }
-    return myChain.get(0).validateCode(theCodeSystem, theCode, theDisplay);
+    return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay);
   }
 
 }

@@ -84,6 +84,17 @@
 				a more appropriate 400/404 in the JPA server (vread on invalid version,
 				delete with no ID, etc.)
 			</action>
+			<action type="fix">
+				Fix narrative generation for DSTU2 Medication resource
+			</action>
+			<action type="fix">
+				Profile validator now works for valuesets which use
+				v2 tables
+			</action>
+			<action type="add">
+				JPA server Patient/[id]/$everything operation now supports
+				_lastUpdated filtering and _sort'ing of results.
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

@@ -269,7 +269,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
     @Override
     public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc) {
-      return myValidationSupport.expandValueSet(theInc);
+      return myValidationSupport.expandValueSet(myCtx, theInc);
     }
 
     @Override
@@ -282,7 +282,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
       if (myValidationSupport == null) {
         return null;
       } else {
-        return myValidationSupport.fetchCodeSystem(theSystem);
+        return myValidationSupport.fetchCodeSystem(myCtx, theSystem);
       }
     }
 
@@ -335,13 +335,13 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
       if (myValidationSupport == null) {
         return false;
       } else {
-        return myValidationSupport.isCodeSystemSupported(theSystem);
+        return myValidationSupport.isCodeSystemSupported(myCtx, theSystem);
       }
     }
 
     @Override
     public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-      CodeValidationResult result = myValidationSupport.validateCode(theSystem, theCode, theDisplay);
+      CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay);
       if (result == null) {
         return null;
       }
