@@ -383,6 +383,8 @@ public class FhirInstanceValidatorTest {
     assertEquals(errors.toString(), 1, errors.size());
     assertEquals("Unable to validate code \"1234\" in code system \"http://loinc.org\"", errors.get(0).getMessage());
     assertEquals(ResultSeverityEnum.WARNING, errors.get(0).getSeverity());
+    
+    
   }
 
   @Test
