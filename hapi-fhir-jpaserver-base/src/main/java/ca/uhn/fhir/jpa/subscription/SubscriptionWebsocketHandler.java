@@ -32,6 +32,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -51,6 +52,10 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 public class SubscriptionWebsocketHandler extends TextWebSocketHandler implements ISubscriptionWebsocketHandler, Runnable {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
+
+	@Autowired
+	@Qualifier("myFhirContextDstu2")
+	private FhirContext myCtx;
 
 	private ScheduledFuture<?> myScheduleFuture;
 
@@ -88,6 +93,12 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		myState.handleTextMessage(theSession, theMessage);
 	}
 
+	@Override
+	public void handleTransportError(WebSocketSession theSession, Throwable theException) throws Exception {
+		super.handleTransportError(theSession, theException);
+		ourLog.error("Transport error", theException);
+	}
+
 	@PostConstruct
 	public void postConstruct() {
 		ourLog.info("Creating scheduled task for subscription websocket connection");
@@ -119,52 +130,24 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		}
 	}
 
-	private class BoundStaticSubscipriptionState implements IState {
-
-		private WebSocketSession mySession;
-
-		public BoundStaticSubscipriptionState(WebSocketSession theSession) {
-			mySession = theSession;
-		}
-
-		@Override
-		public void deliver(List<IBaseResource> theResults) {
-			try {
-				String payload = "ping " + mySubscriptionId.getIdPart();
-				ourLog.info("Sending WebSocket message: {}", payload);
-				mySession.sendMessage(new TextMessage(payload));
-			} catch (IOException e) {
-				handleFailure(e);
-			}
-		}
-
-		@Override
-		public void handleTextMessage(WebSocketSession theSession, TextMessage theMessage) {
-			try {
-				theSession.sendMessage(new TextMessage("Unexpected client message: " + theMessage.getPayload()));
-			} catch (IOException e) {
-				handleFailure(e);
-			}
-		}
-
-		@Override
-		public void closing() {
-			// nothing
-		}
-
-	}
-
-	@Autowired
-	private FhirContext myCtx;
-	
 	private class BoundDynamicSubscriptionState implements IState {
 
-		private WebSocketSession mySession;
 		private EncodingEnum myEncoding;
+		private WebSocketSession mySession;
 
 		public BoundDynamicSubscriptionState(WebSocketSession theSession, EncodingEnum theEncoding) {
 			mySession = theSession;
 			myEncoding = theEncoding;
+		}
+
+		@Override
+		public void closing() {
+			ourLog.info("Deleting subscription {}", mySubscriptionId);
+			try {
+				mySubscriptionDao.delete(mySubscriptionId);
+			} catch (Exception e) {
+				handleFailure(e);
+			}
 		}
 
 		@Override
@@ -190,12 +173,37 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			}
 		}
 
+	}
+	
+	private class BoundStaticSubscipriptionState implements IState {
+
+		private WebSocketSession mySession;
+
+		public BoundStaticSubscipriptionState(WebSocketSession theSession) {
+			mySession = theSession;
+		}
+
 		@Override
 		public void closing() {
-			ourLog.info("Deleting subscription {}", mySubscriptionId);
+			// nothing
+		}
+
+		@Override
+		public void deliver(List<IBaseResource> theResults) {
 			try {
-				mySubscriptionDao.delete(mySubscriptionId);
-			} catch (Exception e) {
+				String payload = "ping " + mySubscriptionId.getIdPart();
+				ourLog.info("Sending WebSocket message: {}", payload);
+				mySession.sendMessage(new TextMessage(payload));
+			} catch (IOException e) {
+				handleFailure(e);
+			}
+		}
+
+		@Override
+		public void handleTextMessage(WebSocketSession theSession, TextMessage theMessage) {
+			try {
+				theSession.sendMessage(new TextMessage("Unexpected client message: " + theMessage.getPayload()));
+			} catch (IOException e) {
 				handleFailure(e);
 			}
 		}
@@ -204,34 +212,37 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 
 	private class InitialState implements IState {
 
-		@Override
-		public void deliver(List<IBaseResource> theResults) {
-			throw new IllegalStateException();
-		}
+		private IIdType bindSimple(WebSocketSession theSession, String theBindString) {
+			IdDt id = new IdDt(theBindString);
 
-		@Override
-		public void handleTextMessage(WebSocketSession theSession, TextMessage theMessage) {
-			String message = theMessage.getPayload();
-			if (message.startsWith("bind ")) {
-				String remaining = message.substring("bind ".length());
-
-				IIdType subscriptionId;
-				if (remaining.contains("?")) {
-					subscriptionId = bingSearch(theSession, remaining);
-				} else {
-					subscriptionId = bindSimple(theSession, remaining);
-					if (subscriptionId == null) {
-						return;
-					}
-				}
-
+			if (!id.hasIdPart() || !id.isIdPartValid()) {
 				try {
-					theSession.sendMessage(new TextMessage("bound " + subscriptionId.getIdPart()));
+					theSession.close(new CloseStatus(CloseStatus.PROTOCOL_ERROR.getCode(), "Invalid bind request - No ID included"));
 				} catch (IOException e) {
 					handleFailure(e);
 				}
-
+				return null;
 			}
+
+			if (id.hasResourceType() == false) {
+				id = id.withResourceType("Subscription");
+			}
+
+			try {
+				Subscription subscription = mySubscriptionDao.read(id);
+				mySubscriptionPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
+				mySubscriptionId = subscription.getIdElement();
+				myState = new BoundStaticSubscipriptionState(theSession);
+			} catch (ResourceNotFoundException e) {
+				try {
+					theSession.close(new CloseStatus(CloseStatus.PROTOCOL_ERROR.getCode(), "Invalid bind request - Unknown subscription: " + id.getValue()));
+				} catch (IOException e1) {
+					handleFailure(e);
+				}
+				return null;
+			}
+
+			return id;
 		}
 
 		private IIdType bingSearch(WebSocketSession theSession, String theRemaining) {
@@ -278,51 +289,48 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			return null;
 		}
 
-		private IIdType bindSimple(WebSocketSession theSession, String theBindString) {
-			IdDt id = new IdDt(theBindString);
-
-			if (!id.hasIdPart() || !id.isIdPartValid()) {
-				try {
-					theSession.close(new CloseStatus(CloseStatus.PROTOCOL_ERROR.getCode(), "Invalid bind request - No ID included"));
-				} catch (IOException e) {
-					handleFailure(e);
-				}
-				return null;
-			}
-
-			if (id.hasResourceType() == false) {
-				id = id.withResourceType("Subscription");
-			}
-
-			try {
-				Subscription subscription = mySubscriptionDao.read(id);
-				mySubscriptionPid = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(id);
-				mySubscriptionId = subscription.getIdElement();
-				myState = new BoundStaticSubscipriptionState(theSession);
-			} catch (ResourceNotFoundException e) {
-				try {
-					theSession.close(new CloseStatus(CloseStatus.PROTOCOL_ERROR.getCode(), "Invalid bind request - Unknown subscription: " + id.getValue()));
-				} catch (IOException e1) {
-					handleFailure(e);
-				}
-				return null;
-			}
-
-			return id;
-		}
-
 		@Override
 		public void closing() {
 			// nothing
+		}
+
+		@Override
+		public void deliver(List<IBaseResource> theResults) {
+			throw new IllegalStateException();
+		}
+
+		@Override
+		public void handleTextMessage(WebSocketSession theSession, TextMessage theMessage) {
+			String message = theMessage.getPayload();
+			if (message.startsWith("bind ")) {
+				String remaining = message.substring("bind ".length());
+
+				IIdType subscriptionId;
+				if (remaining.contains("?")) {
+					subscriptionId = bingSearch(theSession, remaining);
+				} else {
+					subscriptionId = bindSimple(theSession, remaining);
+					if (subscriptionId == null) {
+						return;
+					}
+				}
+
+				try {
+					theSession.sendMessage(new TextMessage("bound " + subscriptionId.getIdPart()));
+				} catch (IOException e) {
+					handleFailure(e);
+				}
+
+			}
 		}
 
 	}
 
 	private interface IState {
 
-		void deliver(List<IBaseResource> theResults);
-
 		void closing();
+
+		void deliver(List<IBaseResource> theResults);
 
 		void handleTextMessage(WebSocketSession theSession, TextMessage theMessage);
 

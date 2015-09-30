@@ -16,12 +16,12 @@ public class LoadingValidationSupport implements IValidationSupport {
 	private static FhirContext myCtx = FhirContext.forDstu2Hl7Org();
 
 	@Override
-	public ValueSetExpansionComponent expandValueSet(ConceptSetComponent theInclude) {
+	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
 		return null;
 	}
 
 	@Override
-	public ValueSet fetchCodeSystem(String theSystem) {
+	public ValueSet fetchCodeSystem(FhirContext theContext, String theSystem) {
 		return null;
 	}
 
@@ -46,12 +46,12 @@ public class LoadingValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(String theSystem) {
+	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
 		return false;
 	}
 
 	@Override
-	public CodeValidationResult validateCode(String theCodeSystem, String theCode, String theDisplay) {
+	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
 		return null;
 	}
 

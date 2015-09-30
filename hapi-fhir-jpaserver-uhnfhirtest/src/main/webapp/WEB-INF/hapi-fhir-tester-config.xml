@@ -34,6 +34,8 @@
 		<property name="socketTimeout" value="10000"/>
 	</bean>
 	
+	<context:component-scan base-package="ca.uhn.fhirtest.mvc" />
+	
 	<mvc:interceptors>
         <mvc:interceptor>
         	<mvc:mapping path="/**"/>

@@ -43,6 +43,13 @@
         <appender-ref ref="ACCESS" />
     </logger>  
 
+	<logger name="org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator" additivity="false" level="debug">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
+	</logger>
+	
+	
+	</appender>
 	<root level="INFO">
 		<appender-ref ref="FILE" />
 	</root>
