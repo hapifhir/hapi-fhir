@@ -84,6 +84,28 @@
 				a more appropriate 400/404 in the JPA server (vread on invalid version,
 				delete with no ID, etc.)
 			</action>
+			<action type="fix">
+				Fix narrative generation for DSTU2 Medication resource
+			</action>
+			<action type="fix">
+				Profile validator now works for valuesets which use
+				v2 tables
+			</action>
+			<action type="add">
+				JPA server Patient/[id]/$everything operation now supports
+				_lastUpdated filtering and _sort'ing of results.
+			</action>
+			<action type="fix" issue="233">
+				Fix parser issue where profiled choice element datatypes (e.g. value[x] where one allowable
+				type is Duration, which is a profile of Quantity) get incorrectly encoded using the
+				profiled datatype name instead of the base datatype name as required by the FHIR
+				spec. Thanks to Nehashri Puttu Lokesh for reporting!
+			</action>
+			<action type="fix">
+				Some generated Enum types in DSTU2 HAPI structures 
+				did not have latest valueset definitions applied. Thanks
+				to Bill de Beaubien for reporting!
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

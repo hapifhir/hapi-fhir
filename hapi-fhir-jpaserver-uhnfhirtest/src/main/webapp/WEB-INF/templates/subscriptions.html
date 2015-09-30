@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:include="tmpl-head :: head">
+<title>RESTful Tester</title>
+</head>
+
+<body>
+	<form action="" method="get" id="outerForm">
+		<input type="hidden" id="serverId" name="serverId"
+			th:value="${serverId}" />
+
+		<div th:replace="tmpl-navbar-top :: top"></div>
+
+		<div class="container-fluid">
+			<div class="row">
+
+				<div th:replace="tmpl-navbar-left :: left"></div>
+
+				<div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main">
+
+					<div th:replace="tmpl-banner :: banner"></div>
+
+					<!-- ********************************************************** -->
+					<!-- ** Subscriptions Playground                             ** -->
+					<!-- ********************************************************** -->
+
+					<div class="panel panel-default" th:if="${resourceName.empty}">
+						<div class="panel-heading">
+							<h3 class="panel-title">Subscriptions Playground</h3>
+						</div>
+						<div class="panel-body">
+							<div class="container-fluid">
+								<p>
+									This page is a test playground for WebSocket Subscriptions
+								</p>
+							</div>
+						</div>
+					</div>
+
+								<!-- Nav tabs -->
+								<ul class="nav nav-tabs" role="tablist">
+									<li role="presentation" class="active"><a href="#wss"
+										aria-controls="wss" role="tab" data-toggle="tab">Static
+											Websocket</a></li>
+									<li role="presentation"><a href="#wsd" aria-controls="wsd"
+										role="tab" data-toggle="tab">Dynamic Websocket</a></li>
+								</ul>
+
+								<!-- Tab panes -->
+								<div class="tab-content">
+									<div role="tabpanel" class="tab-pane active" id="wss">...1</div>
+									
+									<!-- Dynamic WebSocket -->
+									<div role="tabpanel" class="tab-pane" id="wsd">
+										<script type="text/javascript">
+										function dwsCreate() {
+											try {
+												var socket = new WebSocket("ws://localhost:8888/websocket/dstu2");
+												alert('Socket Status: '+socket.readyState);
+	
+												socket.onopen = function() {
+													alert("Opening Socket: " + socket.readyState);
+													socket.send("bind Observation?");
+												}
+												socket.onmessage = function(msg) {
+													alert("New message: " + msg);
+												}
+												socket.onerror = function(error) {
+													alert("error: " + error);
+												}
+											} catch (exception) {
+												alert('Error'+exception);
+											}
+											return false;
+										}
+										</script>
+										
+										<div class="row">
+											<div class="col-sm-12">
+												Enter a criteria in the text box below and then click subscribe to
+												create a dynamic subscription and then display the results as they
+												arrive.
+											</div>
+										</div>
+										
+										<div class="row" style="boorder-top: 10px;">
+											<div class="col-sm-7">
+												<div class="input-group">
+													<div class="input-group-addon">
+														Criteria
+													</div>
+													<input class="form-control" placeholder="e.g: Observation?patient=123" id="dws_criteria"/>
+												</div>
+											</div>
+											<div class="col-sm-3">
+												<button type="button" class="btn btn-default btn-primary btn-block" id="dws_create" onclick="dwsCreate();"><i class="glyphicon glyphicon-cog"></i> Subscribe</button>
+											</div>
+										</div>
+										
+									</div>
+								</div>
+
+
+					<!-- Dynamic Subscription Results -->
+					<div class="panel panel-default">
+						<div class="panel-heading">Subscription Results</div>
+							<div class="panel-body">
+								<p>
+									This will be status...
+								</p>
+							</div>
+						
+							<!-- List group -->
+							<ul class="list-group">
+								<li class="list-group-item">Cras justo odio</li>
+								<li class="list-group-item">Dapibus ac facilisis in</li>
+								<li class="list-group-item">Morbi leo risus</li>
+								<li class="list-group-item">Porta ac consectetur ac</li>
+								<li class="list-group-item">Vestibulum at eros</li>
+							</ul>
+						</div>
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+
+	</form>
+
+	<div th:replace="tmpl-footer :: footer"></div>
+</body>
+</html>

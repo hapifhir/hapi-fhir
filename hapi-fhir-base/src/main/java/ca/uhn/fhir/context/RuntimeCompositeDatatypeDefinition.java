@@ -65,8 +65,8 @@ public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompos
 	}
 
 	@Override
-	public BaseRuntimeElementDefinition<?> getProfileOf() {
-		return myProfileOf;
+	public Class<? extends IBaseDatatype> getProfileOf() {
+		return myProfileOfType;
 	}
 
 	@Override

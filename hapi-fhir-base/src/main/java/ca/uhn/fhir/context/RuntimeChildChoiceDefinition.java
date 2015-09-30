@@ -30,6 +30,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -41,6 +43,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	private Map<String, BaseRuntimeElementDefinition<?>> myNameToChildDefinition;
 	private Map<Class<? extends IBase>, String> myDatatypeToElementName;
 	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myDatatypeToElementDefinition;
+	private String myReferenceSuffix;
 
 	public RuntimeChildChoiceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IBase>> theChoiceTypes) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
@@ -82,9 +85,15 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		myDatatypeToElementName = new HashMap<Class<? extends IBase>, String>();
 		myDatatypeToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 
+		if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+			myReferenceSuffix = "Resource";
+		} else {
+			myReferenceSuffix = "Reference";
+		}
+
 		for (Class<? extends IBase> next : myChoiceTypes) {
 
-			String elementName;
+			String elementName = null;
 			BaseRuntimeElementDefinition<?> nextDef;
 			boolean nonPreferred = false;
 			if (IBaseResource.class.isAssignableFrom(next)) {
@@ -109,32 +118,43 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 						 * element fooString when encoded, because markdown is a profile of string. This is according to the
 						 * FHIR spec
 						 */
-						nextDefForChoice = nextDefDatatype.getProfileOf();
+						nextDefForChoice = null;
 						nonPreferred = true;
+						Class<? extends IBaseDatatype> profileType = nextDefDatatype.getProfileOf();
+						BaseRuntimeElementDefinition<?> elementDef = theClassToElementDefinitions.get(profileType);
+						elementName = getElementName() + StringUtils.capitalize(elementDef.getName());
 					}
 				}
-				elementName = getElementName() + StringUtils.capitalize(nextDefForChoice.getName());
-			}
-
-			if (myNameToChildDefinition.containsKey(elementName) == false || !nonPreferred) {
-				myNameToChildDefinition.put(elementName, nextDef);
-			}
-
-			if (IBaseResource.class.isAssignableFrom(next)) {
-				Class<? extends IBase> refType = theContext.getVersion().getResourceReferenceType();
-				myDatatypeToElementDefinition.put(refType, nextDef);
-
-				String alternateElementName;
-				if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
-					alternateElementName = getElementName() + "Resource";
-				} else {
-					alternateElementName = getElementName() + "Reference";
+				if (nextDefForChoice != null) {
+					elementName = getElementName() + StringUtils.capitalize(nextDefForChoice.getName());
 				}
-				myDatatypeToElementName.put(refType, alternateElementName);
+			}
+
+			// I don't see how elementName could be null here, but eclipse complains..
+			if (elementName != null) {
+				if (myNameToChildDefinition.containsKey(elementName) == false || !nonPreferred) {
+					myNameToChildDefinition.put(elementName, nextDef);
+				}
+			}
+
+			/*
+			 * If this is a resource reference, the element name is "fooNameReference"
+			 */
+			if (IBaseResource.class.isAssignableFrom(next) || IBaseReference.class.isAssignableFrom(next)) {
+				next = theContext.getVersion().getResourceReferenceType();
+				elementName = getElementName() + myReferenceSuffix;
 			}
 
 			myDatatypeToElementDefinition.put(next, nextDef);
-			myDatatypeToElementName.put(next, elementName);
+
+			if (myDatatypeToElementName.containsKey(next)) {
+				String existing = myDatatypeToElementName.get(next);
+				if (!existing.equals(elementName)) {
+					throw new ConfigurationException("Already have element name " + existing + " for datatype " + next.getClass().getSimpleName() + " in " + getElementName() + ", cannot add " + elementName);
+				}
+			} else {
+				myDatatypeToElementName.put(next, elementName);
+			}
 		}
 
 		myNameToChildDefinition = Collections.unmodifiableMap(myNameToChildDefinition);
@@ -145,7 +165,8 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
-		return myDatatypeToElementName.get(theDatatype);
+		String retVal = myDatatypeToElementName.get(theDatatype);
+		return retVal;
 	}
 
 	@Override

@@ -228,7 +228,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 		String dtOutputDir = "target/generated-sources/tinder/ca/uhn/fhir/model/dev/composite";
 
 		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet("dstu2", ".");
-		rp.setBaseResourceNames(Arrays.asList( "bundle"  
+		rp.setBaseResourceNames(Arrays.asList( "careplan"   
 //				//, "contract" 
 //				"valueset", "organization", "location" 
 //				, "observation", "conformance"
@@ -252,11 +252,12 @@ public class TinderStructuresMojo extends AbstractMojo {
 		rp.getLocalImports().putAll(datatypeLocalImports);
 		datatypeLocalImports.putAll(rp.getLocalImports());
 		
+		String vsOutputDir = "target/generated-sources/tinder/ca/uhn/fhir/model/dev/valueset";
+		vsp.writeMarkedValueSets(new File(vsOutputDir), "ca.uhn.fhir.model.dev");
+		
 		dtp.writeAll(new File(dtOutputDir), null, "ca.uhn.fhir.model.dev");
 		rp.writeAll(new File(rpOutputDir), new File(rpSOutputDir), "ca.uhn.fhir.model.dev");
 		
-		 String vsOutputDir = "target/generated-sources/tinder/ca/uhn/fhir/model/dev/valueset";
-		 vsp.writeMarkedValueSets(new File(vsOutputDir), "ca.uhn.fhir.model.dev");
 	}
 
 	public static class ProfileFileDefinition {

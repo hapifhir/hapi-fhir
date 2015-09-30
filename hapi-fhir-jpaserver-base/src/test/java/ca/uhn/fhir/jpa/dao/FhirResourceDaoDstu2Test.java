@@ -1919,6 +1919,10 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test()
 	public void testSortByComposite() {
+		Observation o = new Observation();
+		o.getCode().setText("testSortByComposite");
+		myObservationDao.create(o);
+		
 		SearchParameterMap pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_CODE_VALUE_CONCEPT));
 		try {

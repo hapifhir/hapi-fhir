@@ -176,13 +176,13 @@ public class ValidatorExamples {
       IValidationSupport valSupport = new IValidationSupport() {
          
          @Override
-         public CodeValidationResult validateCode(String theCodeSystem, String theCode, String theDisplay) {
+         public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
             // TODO: Implement
             return null;
          }
          
          @Override
-         public boolean isCodeSystemSupported(String theSystem) {
+         public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
             // TODO: Implement
             return false;
          }
@@ -194,13 +194,13 @@ public class ValidatorExamples {
          }
          
          @Override
-         public ValueSet fetchCodeSystem(String theSystem) {
+         public ValueSet fetchCodeSystem(FhirContext theContext, String theSystem) {
             // TODO: Implement
             return null;
          }
 
          @Override
-         public ValueSetExpansionComponent expandValueSet(ConceptSetComponent theInclude) {
+         public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
             // TODO: Implement
             return null;
          }

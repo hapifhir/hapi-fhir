@@ -51,12 +51,12 @@ public class JpaValidationSupportDstu2 implements IValidationSupport {
 	private FhirContext myDstu2Ctx;
 
 	@Override
-	public ValueSetExpansionComponent expandValueSet(ConceptSetComponent theInclude) {
+	public ValueSetExpansionComponent expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
 		return null;
 	}
 
 	@Override
-	public ValueSet fetchCodeSystem(String theSystem) {
+	public ValueSet fetchCodeSystem(FhirContext theCtx, String theSystem) {
 		return null;
 	}
 
@@ -85,20 +85,19 @@ public class JpaValidationSupportDstu2 implements IValidationSupport {
 		/*
 		 * Validator wants RI structures and not HAPI ones, so convert
 		 * 
-		 * TODO: we really need a more efficient way of converting.. Or maybe this will
-		 * just go away when we move to RI structures 
+		 * TODO: we really need a more efficient way of converting.. Or maybe this will just go away when we move to RI structures
 		 */
 		String encoded = myDstu2Ctx.newJsonParser().encodeResourceToString(res);
 		return myRiCtx.newJsonParser().parseResource(theClass, encoded);
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(String theSystem) {
+	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
 		return false;
 	}
 
 	@Override
-	public CodeValidationResult validateCode(String theCodeSystem, String theCode, String theDisplay) {
+	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
 		return null;
 	}
 

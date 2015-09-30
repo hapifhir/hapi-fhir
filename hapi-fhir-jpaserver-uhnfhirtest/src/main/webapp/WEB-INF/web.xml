@@ -12,6 +12,11 @@
 			/WEB-INF/hapi-fhir-server-config.xml
 			/WEB-INF/hapi-fhir-tester-application-context.xml
 			/WEB-INF/hapi-fhir-tester-config.xml
+			classpath:/hapi-fhir-server-database-config-dstu1.xml 
+			classpath:/hapi-fhir-server-database-config-dstu2.xml 
+			classpath:hapi-fhir-server-resourceproviders-dstu1.xml
+			classpath:hapi-fhir-server-resourceproviders-dstu2.xml
+			classpath:fhir-spring-subscription-config-dstu2.xml
 		</param-value>
 	</context-param>
 
@@ -25,6 +30,7 @@
 			<param-value>
 				/WEB-INF/hapi-fhir-tester-application-context.xml
 				/WEB-INF/hapi-fhir-tester-config.xml
+				classpath:fhir-spring-subscription-config-dstu2.xml
 			</param-value>
 		</init-param>
 		<load-on-startup>2</load-on-startup>

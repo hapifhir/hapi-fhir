@@ -1,5 +1,9 @@
 package ca.uhn.fhirtest;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+
 import org.apache.derby.drda.NetworkServerControl;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -22,7 +26,30 @@ public class DerbyNetworkServer implements InitializingBean, DisposableBean {
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		server = new NetworkServerControl();
-		server.start (null);
+		Writer w = new Writer() {
+
+			@Override
+			public void write(char[] theCbuf, int theOff, int theLen) throws IOException {
+				ourLog.info("[DERBY] " + new String(theCbuf, theOff, theLen));
+			}
+
+			@Override
+			public void flush() throws IOException {
+				// nothing
+			}
+
+			@Override
+			public void close() throws IOException {
+				// nothing
+			}};
+		server.start (new PrintWriter(w));
 	}
 
+	
+	public static void main(String[] args) throws Exception {
+		DerbyNetworkServer s = new DerbyNetworkServer();
+		s.afterPropertiesSet();
+		s.destroy();
+	}
+	
 }

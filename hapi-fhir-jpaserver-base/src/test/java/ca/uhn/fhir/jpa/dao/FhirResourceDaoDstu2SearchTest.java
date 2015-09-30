@@ -65,6 +65,8 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -78,12 +80,26 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 @SuppressWarnings("unchecked")
 public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchTest.class);
+	
+	@Test
+	public void testSearchWithEmptySort() {
+		SearchParameterMap criteriaUrl = new SearchParameterMap();
+		DateRangeParam range = new DateRangeParam();
+		range.setLowerBound(new DateParam(QuantityCompararatorEnum.GREATERTHAN, 1000000));
+		range.setUpperBound(new DateParam(QuantityCompararatorEnum.LESSTHAN, 2000000));
+		criteriaUrl.setLastUpdated(range);
+		criteriaUrl.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
+		IBundleProvider results = myObservationDao.search(criteriaUrl);
+		assertEquals(0, results.size());
+	}
+	
 	
 	@Test
 	public void testIndexNoDuplicatesString() {

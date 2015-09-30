@@ -27,7 +27,7 @@ public interface IRuntimeDatatypeDefinition {
 
 	boolean isSpecialization();
 	
-	public BaseRuntimeElementDefinition<?> getProfileOf();
+	public Class<? extends IBaseDatatype> getProfileOf();
 
 	boolean isProfileOf(Class<? extends IBaseDatatype> theType);
 	

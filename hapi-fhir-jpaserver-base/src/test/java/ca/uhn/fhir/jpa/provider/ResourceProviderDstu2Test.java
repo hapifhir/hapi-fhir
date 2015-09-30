@@ -602,6 +602,96 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 	}
 
+	@Test
+	public void testEverythingWithLastUpdatedAndSort() throws Exception {
+		String methodName = "testEverythingWithLastUpdatedAndSort";
+
+		long time0 = System.currentTimeMillis();
+		Thread.sleep(10);
+		
+		Organization org = new Organization();
+		org.setName(methodName);
+		IIdType oId = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		
+		long time1 = System.currentTimeMillis();
+		Thread.sleep(10);
+		
+		Patient p = new Patient();
+		p.addName().addFamily(methodName);
+		p.getManagingOrganization().setReference(oId);
+		IIdType pId = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+	
+		long time2 = System.currentTimeMillis();
+		Thread.sleep(10);
+		
+		Condition c = new Condition();
+		c.getCode().setText(methodName);
+		c.getPatient().setReference(pId);
+		IIdType cId = ourClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
+
+		Thread.sleep(10);
+		long time3 = System.currentTimeMillis();
+		
+		// %3E=>   %3C=<
+
+		HttpGet get = new HttpGet(ourServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantDt(new Date(time1)).getValueAsString());
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent());
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseBundle(output));
+			ourLog.info(ids.toString());
+			assertThat(ids, containsInAnyOrder(pId, cId));
+		} finally {
+			response.close();
+		}
+
+		get = new HttpGet(ourServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantDt(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C" + new InstantDt(new Date(time3)).getValueAsString());
+		response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent());
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseBundle(output));
+			ourLog.info(ids.toString());
+			assertThat(ids, containsInAnyOrder(cId));
+		} finally {
+			response.close();
+		}
+
+		get = new HttpGet(ourServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantDt(new Date(time1)).getValueAsString() + "&_sort=_lastUpdated");
+		response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent());
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseBundle(output));
+			ourLog.info(ids.toString());
+			assertThat(ids, contains(pId, cId));
+		} finally {
+			response.close();
+		}
+
+		get = new HttpGet(ourServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_sort:desc=_lastUpdated");
+		response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent());
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseBundle(output));
+			ourLog.info(ids.toString());
+			assertThat(ids, contains(cId, pId, oId));
+		} finally {
+			response.close();
+		}
+		
+	}
+	
 	/**
 	 * See #148
 	 */
@@ -1203,6 +1293,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test(expected = InvalidRequestException.class)
 	public void testSearchWithInvalidSort() throws Exception {
+		Observation o = new Observation();
+		o.getCode().setText("testSearchWithInvalidSort");
+		myObservationDao.create(o);
 		//@formatter:off
 		Bundle found = ourClient
 				.search()
