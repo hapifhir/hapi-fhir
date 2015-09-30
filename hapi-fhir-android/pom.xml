@@ -207,7 +207,6 @@
 								<filter>
 									<artifact>ca.uhn.hapi.fhir:hapi-fhir-base</artifact>
 									<excludes>
-										<exclude>ca/uhn/fhir/model/dstu/valueset/**</exclude>
 										<exclude>**/*.java</exclude>
 									</excludes>
 								</filter>
