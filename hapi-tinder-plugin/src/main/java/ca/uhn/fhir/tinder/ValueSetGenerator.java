@@ -79,7 +79,11 @@ public class ValueSetGenerator {
 			version = "dstu2";
 		}
 
-		String vs = IOUtils.toString(ValueSetGenerator.class.getResourceAsStream("/vs/" + version + "/all-valuesets-bundle.xml"));
+		String name = "/vs/" + version + "/all-valuesets-bundle.xml";
+		if (version.equals("dstu2")) {
+			name = "/org/hl7/fhir/instance/model/valueset/valuesets.xml";
+		}
+		String vs = IOUtils.toString(ValueSetGenerator.class.getResourceAsStream(name));
 		if ("dstu".equals(myVersion)) {
 			Bundle bundle = newXmlParser.parseBundle(vs);
 			for (BundleEntry next : bundle.getEntries()) {

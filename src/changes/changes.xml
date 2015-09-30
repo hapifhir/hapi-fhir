@@ -101,6 +101,11 @@
 				profiled datatype name instead of the base datatype name as required by the FHIR
 				spec. Thanks to Nehashri Puttu Lokesh for reporting!
 			</action>
+			<action type="fix">
+				Some generated Enum types in DSTU2 HAPI structures 
+				did not have latest valueset definitions applied. Thanks
+				to Bill de Beaubien for reporting!
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">
