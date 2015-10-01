@@ -56,9 +56,12 @@ import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
+import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.model.dstu2.resource.Substance;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -100,6 +103,19 @@ public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 		assertEquals(0, results.size());
 	}
 	
+	@Test
+	public void testCodeSearch() {
+		Subscription subs = new Subscription();
+		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
+		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
+		subs.setCriteria("Observation?");
+		IIdType id = mySubscriptionDao.create(subs).getId().toUnqualifiedVersionless();
+		
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Subscription.SP_TYPE, new TokenParam(null, SubscriptionChannelTypeEnum.WEBSOCKET.getCode()));
+		map.add(Subscription.SP_STATUS, new TokenParam(null, SubscriptionStatusEnum.ACTIVE.getCode()));
+		assertThat(toUnqualifiedVersionlessIds(mySubscriptionDao.search(map)), contains(id));
+	}
 	
 	@Test
 	public void testIndexNoDuplicatesString() {

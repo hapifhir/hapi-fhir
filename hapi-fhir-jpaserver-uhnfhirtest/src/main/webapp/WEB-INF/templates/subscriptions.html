@@ -36,7 +36,10 @@
 							</div>
 						</div>
 					</div>
-
+					
+					<!-- Subscription Creation -->
+					<div id="subscription_creation">
+					
 								<!-- Nav tabs -->
 								<ul class="nav nav-tabs" role="tablist">
 									<li role="presentation" class="active"><a href="#wss"
@@ -48,33 +51,29 @@
 
 								<!-- Tab panes -->
 								<div class="tab-content">
-									<div role="tabpanel" class="tab-pane active" id="wss">...1</div>
+									
+									<!-- Static Websocket -->
+									<div role="tabpanel" class="tab-pane active" id="wss">
+										
+										<table class="table table-striped table-condensed">
+											<tr>
+												<td>ID</td>
+												<td>Criteria</td>
+												<td></td>
+											</tr>
+											<tr th:each="subscription : ${subscriptions}">
+												<td th:text="${subscription.id.toUnqualified()}"/>
+												<td th:text="${subscription.criteria}"/>
+												<td>
+													<button type="button" class="btn btn-default btn-primary btn-block" id="dws_create" th:onclick="'dwsCreate(\'' + ${subscription.id.getIdPart()} + '\');'"><i class="glyphicon glyphicon-cog"></i> Subscribe</button>
+												</td>
+											</tr>
+										</table>
+									
+									</div>
 									
 									<!-- Dynamic WebSocket -->
 									<div role="tabpanel" class="tab-pane" id="wsd">
-										<script type="text/javascript">
-										function dwsCreate() {
-											try {
-												var socket = new WebSocket("ws://localhost:8888/websocket/dstu2");
-												alert('Socket Status: '+socket.readyState);
-	
-												socket.onopen = function() {
-													alert("Opening Socket: " + socket.readyState);
-													socket.send("bind Observation?");
-												}
-												socket.onmessage = function(msg) {
-													alert("New message: " + msg);
-												}
-												socket.onerror = function(error) {
-													alert("error: " + error);
-												}
-											} catch (exception) {
-												alert('Error'+exception);
-											}
-											return false;
-										}
-										</script>
-										
 										<div class="row">
 											<div class="col-sm-12">
 												Enter a criteria in the text box below and then click subscribe to
@@ -93,38 +92,84 @@
 												</div>
 											</div>
 											<div class="col-sm-3">
-												<button type="button" class="btn btn-default btn-primary btn-block" id="dws_create" onclick="dwsCreate();"><i class="glyphicon glyphicon-cog"></i> Subscribe</button>
+												<button type="button" class="btn btn-default btn-primary btn-block" id="dws_create" onclick="dwsCreate(document.getElementById('dws_criteria').value, true);"><i class="glyphicon glyphicon-cog"></i> Subscribe</button>
 											</div>
 										</div>
 										
 									</div>
 								</div>
 
-
-					<!-- Dynamic Subscription Results -->
-					<div class="panel panel-default">
+					</div>
+					
+					<!-- Subscription Results -->
+					<div class="panel panel-default" style="display:none;" id="resultsDiv">
 						<div class="panel-heading">Subscription Results</div>
-							<div class="panel-body">
-								<p>
-									This will be status...
-								</p>
-							</div>
-						
-							<!-- List group -->
-							<ul class="list-group">
-								<li class="list-group-item">Cras justo odio</li>
-								<li class="list-group-item">Dapibus ac facilisis in</li>
-								<li class="list-group-item">Morbi leo risus</li>
-								<li class="list-group-item">Porta ac consectetur ac</li>
-								<li class="list-group-item">Vestibulum at eros</li>
+							<ul class="list-group" id="subscription_status_list">
 							</ul>
-						</div>
+					</div>
 					</div>
 
+					<script type="text/javascript">
+					
+					function messageStatus(message) {
+						var listItem = $('<li />', { 'class': 'list-group-item' });
+						listItem.append($('<div class="glyphicon glyphicon-info-sign" style="width: 20px;"/>'));
+						listItem.append($('<span>' + message + '</span>'));
+						$('#subscription_status_list').append(listItem);
+					}
+
+					function messageIn(message, remainder) {
+						var listItem = $('<li />', { 'class': 'list-group-item' });
+						listItem.append($('<div class="glyphicon glyphicon-download" style="width: 20px;"/>'));
+						listItem.append($('<span>' + message + '</span>'));
+						if (remainder) {
+							listItem.append($('<p>(' + remainder + ' bytes)</p>'));
+							listItem.append($('<pre style="display:none;"/>').text(remainder));
+						}
+						$('#subscription_status_list').append(listItem);
+					}
+					
+					function dwsCreate(bindArgument, dynamic) {
+						$('#resultsDiv').css("display","");
+						$('#subscription_creation').hide();
+						try {
+							var url = "ws://fhirtest.uhn.ca/websocket/dstu2";
+							messageStatus("Connecting to: " + url);
+							var socket = new WebSocket(url);
+
+							socket.onopen = function() {
+								messageStatus("Connected to: " + url);
+								$('#subscription_status_list')
+									.append(
+										$('<li />', { 'class': 'list-group-item' })
+											.append($('<div class="glyphicon glyphicon-upload" style="width: 20px;"/>'))
+											.append($('<span>bind ' + bindArgument + '</span>'))
+									);
+								socket.send("bind " + bindArgument);
+							}
+							
+							// This function is called when a new message comes from the server 
+							socket.onmessage = function(msg) {
+								var data = msg.data;
+								var remainder = null;
+								if (data.indexOf('\n') != -1) {
+									data = data.substring(0, data.indexOf('\n'));
+									remainder = data.substring(data.indexOf('\n') + 1);
+								}
+								messageIn(data, remainder);
+							}
+							socket.onerror = function(error) {
+								messageStatus("Error: " + error);
+							}
+						} catch (exception) {
+							messageStatus("Error: " + exception);
+						}
+						return false;
+					}
+					</script>
 
 				</div>
 			</div>
-		</div>
 
 	</form>
 

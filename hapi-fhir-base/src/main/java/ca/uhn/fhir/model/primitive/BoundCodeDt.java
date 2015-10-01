@@ -37,25 +37,20 @@ public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 	public BoundCodeDt() {
 		// nothing
 	}
-	
+
 	public BoundCodeDt(IValueSetEnumBinder<T> theBinder) {
 		Validate.notNull(theBinder, "theBinder must not be null");
 		myBinder = theBinder;
 	}
-
+	
 	public BoundCodeDt(IValueSetEnumBinder<T> theBinder, T theValue) {
 		Validate.notNull(theBinder, "theBinder must not be null");
 		myBinder = theBinder;
 		setValueAsEnum(theValue);
 	}
 
-	public void setValueAsEnum(T theValue) {
-		Validate.notNull(myBinder, "This object does not have a binder. Constructor BoundCodeDt() should not be called!");
-		if (theValue==null) {
-			setValue(null);
-		} else {
-			setValue(myBinder.toCodeString(theValue));
-		}
+	public IValueSetEnumBinder<T> getBinder() {
+		return myBinder;
 	}
 
 	public T getValueAsEnum() {
@@ -65,5 +60,14 @@ public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 			// TODO: throw special exception type?
 		}
 		return retVal;
+	}
+
+	public void setValueAsEnum(T theValue) {
+		Validate.notNull(myBinder, "This object does not have a binder. Constructor BoundCodeDt() should not be called!");
+		if (theValue==null) {
+			setValue(null);
+		} else {
+			setValue(myBinder.toCodeString(theValue));
+		}
 	}
 }

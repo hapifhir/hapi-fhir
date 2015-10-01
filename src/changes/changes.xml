@@ -106,6 +106,11 @@
 				did not have latest valueset definitions applied. Thanks
 				to Bill de Beaubien for reporting!
 			</action>
+			<action type="fix">
+				JPA server can now successfully search for tokens pointing at code values
+				(values with no explicit system but an implied one, such as Patient.gender)
+				even if the system is supplied in the query.
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

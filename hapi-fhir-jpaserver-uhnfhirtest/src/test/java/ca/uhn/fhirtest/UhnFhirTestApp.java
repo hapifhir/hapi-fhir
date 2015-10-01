@@ -12,6 +12,9 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -21,7 +24,7 @@ public class UhnFhirTestApp {
 	public static void main(String[] args) throws Exception {
 
 		int myPort = 8888;
-		String base = "http://localhost:" + myPort + "/base";
+		String base = "http://localhost:" + myPort + "/baseDstu2";
 		
 		//		new File("target/testdb").mkdirs();
 		System.setProperty("fhir.db.location", "./target/testdb");
@@ -47,13 +50,13 @@ public class UhnFhirTestApp {
 		// base = "http://spark.furore.com/fhir";
 
 		if (true) {
-			FhirContext ctx = new FhirContext();
+			FhirContext ctx = FhirContext.forDstu2();
 			IGenericClient client = ctx.newRestfulGenericClient(base);
 //			client.setLogRequestAndResponse(true);
 
 			Organization o1 = new Organization();
 			o1.getName().setValue("Some Org");
-			MethodOutcome create = client.create(o1);
+			MethodOutcome create = client.create().resource(o1).execute();
 			IdDt orgId = (IdDt) create.getId();
 
 			Patient p1 = new Patient();
@@ -64,11 +67,14 @@ public class UhnFhirTestApp {
 			TagList list = new TagList();
 			list.addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
 			ResourceMetadataKeyEnum.TAG_LIST.put(p1, list);
-			client.create(p1);
+			client.create().resource(p1).execute();
 
-			List<IResource> resources = ctx.newJsonParser().parseBundle(IOUtils.toString(UhnFhirTestApp.class.getResourceAsStream("/bundle.json"))).toListOfResources();
-//			client.transaction().withResources(resources).execute();
-
+			Subscription subs = new Subscription();
+			subs.setStatus(SubscriptionStatusEnum.ACTIVE);
+			subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
+			subs.setCriteria("Observation?");
+			client.create().resource(subs).execute();
+			
 //			for (int i = 0; i < 1000; i++) {
 //				
 //				Patient p = (Patient) resources.get(0);
@@ -78,22 +84,22 @@ public class UhnFhirTestApp {
 //				client.transaction(resources);
 //			}
 
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
 
-			client.create(p1);
+			client.create().resource(p1).execute();
 
 		}
 

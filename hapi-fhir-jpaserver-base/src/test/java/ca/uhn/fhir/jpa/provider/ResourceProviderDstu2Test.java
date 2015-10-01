@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
@@ -69,12 +70,15 @@ import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
+import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.AnswerFormatEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SearchEntryModeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -104,6 +108,53 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(200, resp.getStatusLine().getStatusCode());
 	}
 
+	@Test
+	public void testCodeSearch() {
+		Subscription subs = new Subscription();
+		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
+		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
+		subs.setCriteria("Observation?");
+		IIdType id = ourClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
+		
+		//@formatter:off
+		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient
+			.search()
+			.forResource(Subscription.class)
+			.where(Subscription.TYPE.exactly().code(SubscriptionChannelTypeEnum.WEBSOCKET.getCode()))
+			.and(Subscription.STATUS.exactly().code(SubscriptionStatusEnum.ACTIVE.getCode()))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:off
+
+		assertThat(toUnqualifiedVersionlessIds(resp), contains(id));
+		
+		//@formatter:off
+		resp = ourClient
+			.search()
+			.forResource(Subscription.class)
+			.where(Subscription.TYPE.exactly().systemAndCode(SubscriptionChannelTypeEnum.WEBSOCKET.getSystem(), SubscriptionChannelTypeEnum.WEBSOCKET.getCode()))
+			.and(Subscription.STATUS.exactly().systemAndCode(SubscriptionStatusEnum.ACTIVE.getSystem(), SubscriptionStatusEnum.ACTIVE.getCode()))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:off
+
+		assertThat(toUnqualifiedVersionlessIds(resp), contains(id));
+
+		//@formatter:off
+		resp = ourClient
+			.search()
+			.forResource(Subscription.class)
+			.where(Subscription.TYPE.exactly().systemAndCode(SubscriptionChannelTypeEnum.WEBSOCKET.getSystem(), SubscriptionChannelTypeEnum.WEBSOCKET.getCode()))
+			.and(Subscription.STATUS.exactly().systemAndCode("foo", SubscriptionStatusEnum.ACTIVE.getCode()))
+			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+			.execute();
+		//@formatter:off
+
+		assertThat(toUnqualifiedVersionlessIds(resp), empty());
+
+	}
+
+	
 	// private void delete(String theResourceType, String theParamName, String theParamValue) {
 	// Bundle resources;
 	// do {
