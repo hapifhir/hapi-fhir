@@ -120,6 +120,10 @@
 				if they did not contain a question mark. Thanks
 				to Bill de Beaubien for reporting!
 			</action>
+			<action type="fix" issue="234">
+				Remove invalid entries in OSGi Manifest. Thanks
+				to Alexander Kley for the fix!
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">
