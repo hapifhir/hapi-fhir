@@ -75,12 +75,16 @@
 		</dependency>
 
 		<!-- Android does not come with the Servlet API bundled, and MethodUtil 
-			requires it -->
-		<dependency>
+			requires it. 
+			
+			We provide a dummy implementation of servlet api to reduce size. 
+			and prevent from rewriting the BaseMethodBinding and friends.
+			-->
+		<!-- dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>compile</scope>
-		</dependency>
+		</dependency-->
 
 	</dependencies>
 
@@ -156,8 +160,13 @@
 								<filter>
 									<artifact>ca.uhn.hapi.fhir:hapi-fhir-base</artifact>
 									<excludes>
+										<exclude>ca/uhn/fhir/util/ITestingUiClientFactory</exclude>
+										<exclude>ca/uhn/fhir/rest/server/**</exclude>
 										<exclude>**/*.java</exclude>
 									</excludes>
+									<includes>
+										<include>ca/uhn/fhir/rest/server/exceptions/**</include>
+									</includes>
 								</filter>
 							</filters>
 						</configuration>
@@ -207,7 +216,18 @@
 								<filter>
 									<artifact>ca.uhn.hapi.fhir:hapi-fhir-base</artifact>
 									<excludes>
+										<exclude>ca/uhn/fhir/util/ITestingUiClientFactory</exclude>
+										<exclude>ca/uhn/fhir/rest/server/**</exclude>
 										<exclude>**/*.java</exclude>
+									</excludes>
+									<includes>
+										<include>ca/uhn/fhir/rest/server/exceptions/**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</artifact>
+									<excludes>
+										<exclude>ca/uhn/fhir/rest/server/**</exclude>
 									</excludes>
 								</filter>
 							</filters>
@@ -253,6 +273,25 @@
 									<shadedPattern>ca.uhn.fhir.repackage.javax.json</shadedPattern>
 								</relocation>
 							</relocations>
+							<filters>
+								<filter>
+									<artifact>ca.uhn.hapi.fhir:hapi-fhir-base</artifact>
+									<excludes>
+										<exclude>ca/uhn/fhir/util/ITestingUiClientFactory</exclude>
+										<exclude>ca/uhn/fhir/rest/server/**</exclude>
+										<exclude>**/*.java</exclude>
+									</excludes>
+									<includes>
+										<include>ca/uhn/fhir/rest/server/exceptions/**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</artifact>
+									<excludes>
+										<exclude>ca/uhn/fhir/rest/server/**</exclude>
+									</excludes>
+								</filter>
+							</filters>
 						</configuration>
 					</execution>
 				</executions>
