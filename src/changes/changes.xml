@@ -111,6 +111,10 @@
 				(values with no explicit system but an implied one, such as Patient.gender)
 				even if the system is supplied in the query.
 			</action>
+			<action type="fix" issue="235">
+				Correct issues with Android library. Thanks to 
+				Thomas Andersen for the submission!
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">
