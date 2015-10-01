@@ -15,7 +15,7 @@
 			<directory>${project.basedir}/../hapi-fhir-android/target/</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
-				<include>hapi-fhir-android-${project.version}.jar</include>
+				<include>hapi-fhir-android-${project.version}*.jar</include>
 			</includes>
 		</fileSet>
 	</fileSets>
