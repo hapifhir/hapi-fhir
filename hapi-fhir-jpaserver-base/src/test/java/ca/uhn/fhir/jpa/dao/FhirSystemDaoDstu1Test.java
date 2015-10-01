@@ -18,7 +18,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
@@ -28,7 +27,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
-import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
@@ -346,8 +344,8 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 
 	@Test
 	public void testTransactionWithCidIds2() throws Exception {
-		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/dstu1_bundle.xml");
-		String bundleStr = IOUtils.toString(bundleRes);
+		String resource = "/dstu1_bundle.xml";
+		String bundleStr = loadClasspath(resource);
 		Bundle bundle = ourFhirContext.newXmlParser().parseBundle(bundleStr);
 
 		List<IResource> res = new ArrayList<IResource>();
@@ -362,6 +360,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		
 		assertThat(encodeResourceToString, not(containsString("smsp")));
 	}
+
 
 	/**
 	 * This is the correct way to do this, not {@link #testTransactionWithCidIds()}

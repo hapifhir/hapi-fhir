@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryRequest;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryResponse;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
@@ -353,6 +354,42 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2Test {
 					"Unable to process Transaction - Request would cause multiple resources to match URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl01\". Does transaction request contain duplicates?");
 		}
 	}
+
+	@Test
+	public void testTransactionCreateWithInvalidMatchUrl() {
+		String methodName = "testTransactionCreateWithInvalidMatchUrl";
+		Bundle request = new Bundle();
+
+		Patient p;
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		EntryRequest entry = request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.POST);
+
+		try {
+			entry.setIfNoneExist("Patient?identifier   identifier" + methodName);
+			mySystemDao.transaction(request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Failed to parse match URL[Patient?identifier   identifiertestTransactionCreateWithInvalidMatchUrl] - URL is invalid (must not contain spaces)", e.getMessage());
+		}
+		
+		try {
+			entry.setIfNoneExist("Patient?identifier=");
+			mySystemDao.transaction(request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid match URL[Patient?identifier=] - URL has no search parameters", e.getMessage());
+		}
+
+		try {
+			entry.setIfNoneExist("Patient?foo=bar");
+			mySystemDao.transaction(request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Failed to parse match URL[Patient?foo=bar] - Resource type Patient does not have a parameter with name: foo", e.getMessage());
+		}
+	}
+
 
 	public void testTransactionCreateWithDuplicateMatchUrl02() {
 		String methodName = "testTransactionCreateWithDuplicateMatchUrl02";

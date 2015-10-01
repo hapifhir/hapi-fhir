@@ -115,6 +115,11 @@
 				Correct issues with Android library. Thanks to 
 				Thomas Andersen for the submission!
 			</action>
+			<action type="fix">
+				JPA server incorrectly rejected match URLs
+				if they did not contain a question mark. Thanks
+				to Bill de Beaubien for reporting!
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

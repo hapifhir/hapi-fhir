@@ -174,8 +174,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			
-			
+
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
 				continue;
 			}
@@ -193,7 +192,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			String[] nextPathsSplit = nextPathsUnsplit.split("\\|");
 			for (String nextPath : nextPathsSplit) {
 				nextPath = nextPath.trim();
-				
+
 				List<Class<? extends IBaseResource>> allowedTypesInField = null;
 				for (Object nextObject : extractValues(nextPath, theResource)) {
 					if (nextObject == null) {
@@ -219,7 +218,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 						try {
 							resourceDefinition = getContext().getResourceDefinition(typeString);
 						} catch (DataFormatException e) {
-							throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - " + nextValue.getReference().getValue());
+							throw new InvalidRequestException(
+									"Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - " + nextValue.getReference().getValue());
 						}
 
 						Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
@@ -253,15 +253,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 							String resName = targetResourceDef.getName();
 							throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
 						}
-						
+
 						if (!typeString.equals(target.getResourceType())) {
-							throw new UnprocessableEntityException("Resource contains reference to " + nextValue.getReference().getValue() + " but resource with ID " + nextValue.getReference().getIdPart() + " is actually of type " + target.getResourceType());
+							throw new UnprocessableEntityException("Resource contains reference to " + nextValue.getReference().getValue() + " but resource with ID " + nextValue.getReference().getIdPart()
+									+ " is actually of type " + target.getResourceType());
 						}
-						
+
 						/*
 						 * Is the target type an allowable type of resource for the path where it is referenced?
 						 */
-						
+
 						if (allowedTypesInField == null) {
 							BaseRuntimeChildDefinition childDef = getContext().newTerser().getDefinition(theResource.getClass(), nextPath);
 							if (childDef instanceof RuntimeChildResourceDefinition) {
@@ -272,19 +273,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 								allowedTypesInField.add(IBaseResource.class);
 							}
 						}
-						
+
 						boolean acceptableLink = false;
-						for(Class<? extends IBaseResource> next : allowedTypesInField) {
+						for (Class<? extends IBaseResource> next : allowedTypesInField) {
 							if (next.isAssignableFrom(targetResourceDef.getImplementingClass())) {
 								acceptableLink = true;
 								break;
 							}
 						}
-						
+
 						if (!acceptableLink) {
 							throw new UnprocessableEntityException("Invalid reference found at path '" + nextPath + "'. Resource type '" + targetResourceDef.getName() + "' is not valid for this path");
 						}
-						
+
 						nextEntity = new ResourceLink(nextPath, theEntity, target);
 					} else {
 						if (!multiType) {
@@ -683,11 +684,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	/**
-	 * This method is called when an update to an existing resource detects that the resource supplied for update is
-	 * missing a tag/profile/security label that the currently persisted resource holds.
+	 * This method is called when an update to an existing resource detects that the resource supplied for update is missing a tag/profile/security label that the currently persisted resource holds.
 	 * <p>
-	 * The default implementation removes any profile declarations, but leaves tags and security labels in place.
-	 * Subclasses may choose to override and change this behaviour.
+	 * The default implementation removes any profile declarations, but leaves tags and security labels in place. Subclasses may choose to override and change this behaviour.
 	 * </p>
 	 * 
 	 * @param theEntity
@@ -695,8 +694,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * @param theTag
 	 *           The tag
 	 * @return Retturns <code>true</code> if the tag should be removed
-	 * @see <a href="http://hl7.org/fhir/2015Sep/resource.html#1.11.3.7">Updates to Tags, Profiles, and Security
-	 *      Labels</a> for a description of the logic that the default behaviour folows.
+	 * @see <a href="http://hl7.org/fhir/2015Sep/resource.html#1.11.3.7">Updates to Tags, Profiles, and Security Labels</a> for a description of the logic that the default behaviour folows.
 	 */
 	protected boolean shouldDroppedTagBeRemovedOnUpdate(ResourceTable theEntity, ResourceTag theTag) {
 		if (theTag.getTag().getTagType() == TagTypeEnum.PROFILE) {
@@ -709,6 +707,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(theResourceType);
 
 		SearchParameterMap paramMap = translateMatchUrl(theMatchUrl, resourceDef);
+		
+		if (paramMap.isEmpty()) {
+			throw new InvalidRequestException("Invalid match URL[" + theMatchUrl + "] - URL has no search parameters");
+		}
 
 		IFhirResourceDao<R> dao = getDao(theResourceType);
 		Set<Long> ids = dao.searchForIdsWithAndOr(paramMap);
@@ -719,23 +721,28 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	public static SearchParameterMap translateMatchUrl(String theMatchUrl, RuntimeResourceDefinition resourceDef) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		List<NameValuePair> parameters;
-		try {
-			String matchUrl = theMatchUrl;
-			if (matchUrl.indexOf('?') == -1) {
-				throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Error was: URL does not contain any parameters ('?' not detected)");
-			}
-			matchUrl = matchUrl.replace("|", "%7C");
-			matchUrl = matchUrl.replace("=>=", "=%3E%3D");
-			matchUrl = matchUrl.replace("=<=", "=%3C%3D");
-			matchUrl = matchUrl.replace("=>", "=%3E");
-			matchUrl = matchUrl.replace("=<", "=%3C");
-			parameters = URLEncodedUtils.parse(new URI(matchUrl), "UTF-8");
-		} catch (URISyntaxException e) {
-			throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Error was: " + e.toString());
+		String matchUrl = theMatchUrl;
+		int questionMarkIndex = matchUrl.indexOf('?');
+		if (questionMarkIndex != -1) {
+			matchUrl = matchUrl.substring(questionMarkIndex + 1);
 		}
+		matchUrl = matchUrl.replace("|", "%7C");
+		matchUrl = matchUrl.replace("=>=", "=%3E%3D");
+		matchUrl = matchUrl.replace("=<=", "=%3C%3D");
+		matchUrl = matchUrl.replace("=>", "=%3E");
+		matchUrl = matchUrl.replace("=<", "=%3C");
+		if (matchUrl.contains(" ")) {
+			throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - URL is invalid (must not contain spaces)");
+		}
+
+		parameters = URLEncodedUtils.parse((matchUrl), Constants.CHARSET_UTF8, '&');
 
 		ArrayListMultimap<String, QualifiedParamList> nameToParamLists = ArrayListMultimap.create();
 		for (NameValuePair next : parameters) {
+			if (isBlank(next.getValue())) {
+				continue;
+			}
+
 			String paramName = next.getName();
 			String qualifier = null;
 			for (int i = 0; i < paramMap.size(); i++) {
@@ -779,11 +786,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				}
 				continue;
 			}
-			
+
 			if (nextParamName.startsWith("_")) {
 				continue;
 			}
-			
+
 			RuntimeSearchParam paramDef = resourceDef.getSearchParam(nextParamName);
 			if (paramDef == null) {
 				throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);
@@ -1030,8 +1037,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		} else if (theForHistoryOperation) {
 			/*
-			 * If the create and update times match, this was when the resource was created
-			 * so we should mark it as a POST. Otherwise, it's a PUT. 
+			 * If the create and update times match, this was when the resource was created so we should mark it as a POST. Otherwise, it's a PUT.
 			 */
 			Date published = theEntity.getPublished().getValue();
 			Date updated = theEntity.getUpdated().getValue();
@@ -1041,7 +1047,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.PUT);
 			}
 		}
-		
+
 		res.setId(theEntity.getIdDt());
 
 		ResourceMetadataKeyEnum.VERSION.put(res, Long.toString(theEntity.getVersion()));
@@ -1125,8 +1131,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected ResourceTable updateEntity(final IResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion, Date theUpdateTime) {
-		
+	protected ResourceTable updateEntity(final IResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
+			boolean theUpdateVersion, Date theUpdateTime) {
+
 		/*
 		 * This should be the very first thing..
 		 */
@@ -1134,14 +1141,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			validateResourceForStorage((T) theResource, theEntity);
 			String resourceType = myContext.getResourceDefinition(theResource).getName();
 			if (isNotBlank(theEntity.getResourceType()) && !theEntity.getResourceType().equals(resourceType)) {
-				throw new UnprocessableEntityException("Existing resource ID[" + theEntity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + theEntity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
+				throw new UnprocessableEntityException(
+						"Existing resource ID[" + theEntity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + theEntity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
 			}
 		}
 
 		if (theEntity.getPublished() == null) {
 			theEntity.setPublished(theUpdateTime);
 		}
-		
+
 		if (theUpdateHistory) {
 			final ResourceHistoryTable historyEntry = theEntity.toHistory();
 			myEntityManager.persist(historyEntry);
@@ -1238,7 +1246,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setResourceLinks(links);
 				theEntity.setHasLinks(links.isEmpty() == false);
 				theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
-				
+
 			} else {
 
 				populateResourceIntoEntity(theResource, theEntity);
@@ -1261,7 +1269,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		} else {
 			theEntity = myEntityManager.merge(theEntity);
-			
+
 			postUpdate(theEntity, (T) theResource);
 		}
 
@@ -1354,37 +1362,37 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	/**
-	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the
-	 * first time.
+	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the first time.
 	 * 
 	 * @param theEntity
 	 *           The resource
-	 * @param theResource The resource being persisted
+	 * @param theResource
+	 *           The resource being persisted
 	 */
 	protected void postUpdate(ResourceTable theEntity, T theResource) {
 		// nothing
 	}
 
 	/**
-	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the
-	 * first time.
+	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the first time.
 	 * 
 	 * @param theEntity
 	 *           The resource
-	 * @param theResource The resource being persisted
+	 * @param theResource
+	 *           The resource being persisted
 	 */
 	protected void postPersist(ResourceTable theEntity, T theResource) {
 		// nothing
 	}
 
 	/**
-	 * This method is invoked immediately before storing a new resource, or an update to an existing resource to allow
-	 * the DAO to ensure that it is valid for persistence. By default, checks for the "subsetted" tag and rejects
-	 * resources which have it. Subclasses should call the superclass implementation to preserve this check.
+	 * This method is invoked immediately before storing a new resource, or an update to an existing resource to allow the DAO to ensure that it is valid for persistence. By default, checks for the
+	 * "subsetted" tag and rejects resources which have it. Subclasses should call the superclass implementation to preserve this check.
 	 * 
 	 * @param theResource
 	 *           The resource that is about to be persisted
-	 * @param theEntityToSave TODO
+	 * @param theEntityToSave
+	 *           TODO
 	 */
 	protected void validateResourceForStorage(T theResource, ResourceTable theEntityToSave) {
 		IResource res = (IResource) theResource;

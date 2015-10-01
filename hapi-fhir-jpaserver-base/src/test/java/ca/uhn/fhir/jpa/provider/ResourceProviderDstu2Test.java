@@ -1619,6 +1619,20 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
+	@Test
+	public void testTransaction() throws Exception {
+		String contents = loadClasspath("/update.xml");
+		HttpPost post = new HttpPost(ourServerBase);
+		post.setEntity(new StringEntity(contents, ContentType.create("application/xml+fhir", "UTF-8")));
+		CloseableHttpResponse resp = ourHttpClient.execute(post);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			String output= IOUtils.toString(resp.getEntity().getContent());
+			ourLog.info(output);
+		} finally {
+			resp.close();
+		}
+	}
 
 	@Test
 	public void testUpdateRejectsInvalidTypes() throws InterruptedException {

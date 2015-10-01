@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bundle xmlns="http://hl7.org/fhir">
+	<id value="bundle-transaction"/>
+	<meta>
+		<lastUpdated value="2014-08-18T01:43:30Z"/>
+	</meta>
+	<type value="transaction"/>
+	<entry>
+		<fullUrl value="urn:uuid:61ebe359-bfdc-4613-8bf2-c5e300945f0b"/>
+		<resource>
+			<Medication>
+				<code>
+					<coding>
+						<system value="http://snomed.info/sct"/>
+						<code value="408036003"/>
+						<display value="Rosuvastatin 10mg tablet"/>
+					</coding>
+				</code>
+			</Medication>
+		</resource>
+		<request>
+			<method value="POST"/>
+			<url value="Medication"/>
+			<ifNoneExist value="code=408036003"/>
+		</request>o
+	</entry>
+</Bundle>
+
