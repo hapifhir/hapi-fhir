@@ -127,6 +127,12 @@
 			<action type="add">
 				JPA server now supports $everything on Patient and Encounter types (patient and encounter instance was already supported)
 			</action>
+			<action type="add">
+				Generic client operation invocations now
+				have an additional inline method for generating the input
+				Parameters using chained method calls instead
+				of by passing a Parameters resource in
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

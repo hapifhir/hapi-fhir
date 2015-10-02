@@ -103,6 +103,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@PersistenceContext()
 	protected EntityManager myEntityManager;
 	@Autowired
+	@Qualifier("myFhirContextDstu2")
 	protected FhirContext myFhirCtx;
 	@Autowired
 	@Qualifier("myImmunizationDaoDstu2")
@@ -151,7 +152,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("myValueSetDaoDstu2")
-	protected IFhirResourceDao<ValueSet> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 
 	@Before
 	public void beforeCreateInterceptor() {

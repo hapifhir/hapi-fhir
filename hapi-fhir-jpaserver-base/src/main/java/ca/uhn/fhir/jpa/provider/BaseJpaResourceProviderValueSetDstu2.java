@@ -45,17 +45,61 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 	@Operation(name = "$expand", idempotent = true)
 	public ValueSet everything(
 			HttpServletRequest theServletRequest,
-			@IdParam IdDt theId, 
-			@OperationParam(name = "filter") StringDt theFilter) {
+			
+			@IdParam IdDt theId,
+			
+			@OperationParam(name = "filter", min=0, max=1) StringDt theFilter) {
 		//@formatter:on
 		
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet> dao = (IFhirResourceDaoValueSet<ValueSet>) getDao();
-			return dao.expand(theId, theFilter);
+			return dao.expand(theId, toFilterString(theFilter));
 		} finally {
 			endRequest(theServletRequest);
 		}
+	}
+
+	//@formatter:off
+	@Operation(name = "$expand", idempotent = true)
+	public ValueSet everything(
+			HttpServletRequest theServletRequest,
+
+			@OperationParam(name="identifier", min=1, max=1) UriDt theIdentifier,
+			
+			@OperationParam(name = "filter", min=0, max=1) StringDt theFilter) {
+		//@formatter:on
+		
+		startRequest(theServletRequest);
+		try {
+			IFhirResourceDaoValueSet<ValueSet> dao = (IFhirResourceDaoValueSet<ValueSet>) getDao();
+			return dao.expandByIdentifier(theIdentifier.getValue(), toFilterString(theFilter));
+		} finally {
+			endRequest(theServletRequest);
+		}
+	}
+
+	//@formatter:off
+	@Operation(name = "$expand", idempotent = true)
+	public ValueSet everything(
+			HttpServletRequest theServletRequest,
+
+			@OperationParam(name="valueSet", min=1, max=1) ValueSet theValueSet,
+			
+			@OperationParam(name = "filter", min=0, max=1) StringDt theFilter) {
+		//@formatter:on
+		
+		startRequest(theServletRequest);
+		try {
+			IFhirResourceDaoValueSet<ValueSet> dao = (IFhirResourceDaoValueSet<ValueSet>) getDao();
+			return dao.expand(theValueSet, toFilterString(theFilter));
+		} finally {
+			endRequest(theServletRequest);
+		}
+	}
+
+	private String toFilterString(StringDt theFilter) {
+		return theFilter != null ? theFilter.getValue() : null;
 	}
 
 	//@formatter:off

@@ -32,8 +32,12 @@ import ca.uhn.fhir.model.primitive.UriDt;
 
 public interface IFhirResourceDaoValueSet<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	ValueSet expand(IIdType theId, StringDt theFilter);
+	ValueSet expand(IIdType theId, String theFilter);
 	
+	ValueSet expand(ValueSet theSource, String theFilter);
+
+	ValueSet expandByIdentifier(String theUri, String theFilter);
+
 	ValidateCodeResult validateCode(UriDt theValueSetIdentifier, IIdType theId, CodeDt theCode, UriDt theSystem, StringDt theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept);
 
 	public class ValidateCodeResult {
