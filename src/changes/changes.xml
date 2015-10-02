@@ -124,6 +124,9 @@
 				Remove invalid entries in OSGi Manifest. Thanks
 				to Alexander Kley for the fix!
 			</action>
+			<action type="add">
+				JPA server now supports $everything on Patient and Encounter types (patient and encounter instance was already supported)
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

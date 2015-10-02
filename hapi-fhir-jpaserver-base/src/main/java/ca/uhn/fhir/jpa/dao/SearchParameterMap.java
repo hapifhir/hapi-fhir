@@ -42,7 +42,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	private static final long serialVersionUID = 1L;
 
 	private Integer myCount;
-	private boolean myEverythingMode = false;
+	private EverythingModeEnum myEverythingMode = null;
 	private Set<Include> myIncludes;
 	private DateRangeParam myLastUpdated;
 	private Set<Include> myRevIncludes;
@@ -124,7 +124,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return mySort;
 	}
 
-	public boolean isEverythingMode() {
+	public EverythingModeEnum getEverythingMode() {
 		return myEverythingMode;
 	}
 
@@ -132,7 +132,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		myCount = theCount;
 	}
 
-	public void setEverythingMode(boolean theConsolidateMatches) {
+	public void setEverythingMode(EverythingModeEnum theConsolidateMatches) {
 		myEverythingMode = theConsolidateMatches;
 	}
 
@@ -164,4 +164,8 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return b.toString();
 	}
 
+	public enum EverythingModeEnum {
+		PATIENT, ENCOUNTER
+	}
+	
 }

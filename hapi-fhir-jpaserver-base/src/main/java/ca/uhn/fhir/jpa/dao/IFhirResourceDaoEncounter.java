@@ -30,10 +30,10 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
-public interface IFhirResourceDaoPatient<T extends IBaseResource> extends IFhirResourceDao<T> {
+public interface IFhirResourceDaoEncounter<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IdDt theId, UnsignedIntDt theCount, DateRangeParam theLastUpdate, SortSpec theSort);
+	IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IdDt theId, UnsignedIntDt theCount, DateRangeParam theLastUpdate, SortSpec theSort);
 
-	IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, UnsignedIntDt theCount, DateRangeParam theLastUpdated, SortSpec theSortSpec);
+	IBundleProvider encounterTypeEverything(HttpServletRequest theServletRequest, UnsignedIntDt theCount, DateRangeParam theLastUpdated, SortSpec theSortSpec);
 
 }

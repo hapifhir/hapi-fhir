@@ -33,8 +33,13 @@ import ca.uhn.fhir.rest.server.Constants;
 
 public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu2<Patient> {
 
+	
+	/**
+	 * Patient/123/$everything
+	 */
+	//@formatter:off
 	@Operation(name = "everything", idempotent = true)
-	public ca.uhn.fhir.rest.server.IBundleProvider everything(
+	public ca.uhn.fhir.rest.server.IBundleProvider patientInstanceEverything(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
 
@@ -49,17 +54,46 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 			@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1) 
 			DateRangeParam theLastUpdated,
 			
-//			@OperationParam(name = Constants.PARAM_SORT, min=0, max=1)
 			@Sort
 			SortSpec theSortSpec
 			) {
+		//@formatter:on
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>)getDao()).everything(theServletRequest, theId, theCount, theLastUpdated, theSortSpec);
+			return ((IFhirResourceDaoPatient<Patient>)getDao()).patientInstanceEverything(theServletRequest, theId, theCount, theLastUpdated, theSortSpec);
 		} finally {
 			endRequest(theServletRequest);
-		}
+		}}
+
+		/**
+		 * /Patient/$everything
+		 */
+		//@formatter:off
+		@Operation(name = "everything", idempotent = true)
+		public ca.uhn.fhir.rest.server.IBundleProvider patientTypeEverything(
+
+				javax.servlet.http.HttpServletRequest theServletRequest,
+
+				@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
+				@OperationParam(name = Constants.PARAM_COUNT) 
+				ca.uhn.fhir.model.primitive.UnsignedIntDt theCount,
+				
+				@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
+				@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1) 
+				DateRangeParam theLastUpdated,
+				
+				@Sort
+				SortSpec theSortSpec
+				) {
+			//@formatter:on
+
+			startRequest(theServletRequest);
+			try {
+				return ((IFhirResourceDaoPatient<Patient>)getDao()).patientTypeEverything(theServletRequest, theCount, theLastUpdated, theSortSpec);
+			} finally {
+				endRequest(theServletRequest);
+			}
 
 	}
 
