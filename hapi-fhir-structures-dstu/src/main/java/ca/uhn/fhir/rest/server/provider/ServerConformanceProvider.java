@@ -22,13 +22,17 @@ package ca.uhn.fhir.rest.server.provider;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.jar.Manifest;
 
-import ca.uhn.fhir.parser.DataFormatException;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -49,6 +53,7 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.DynamicSearchMethodBinding;
@@ -59,9 +64,8 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestulfulServerConfiguration;
 import ca.uhn.fhir.util.ExtensionConstants;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
@@ -78,10 +82,10 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private boolean myCache = true;
 	private volatile Conformance myConformance;
 	private String myPublisher = "Not provided";
-	private RestfulServer myRestfulServer;
+	private RestulfulServerConfiguration myRestfulServer;
 
 	public ServerConformanceProvider(RestfulServer theRestfulServer) {
-		myRestfulServer = theRestfulServer;
+		myRestfulServer = new RestulfulServerConfiguration(theRestfulServer);
 	}
 	
 	/*
@@ -95,7 +99,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 	
 	public void setRestfulServer (RestfulServer theRestfulServer) {
-		myRestfulServer = theRestfulServer;
+		myRestfulServer = new RestulfulServerConfiguration(theRestfulServer);
 	}
 
 	/**

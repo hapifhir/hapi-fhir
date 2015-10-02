@@ -41,7 +41,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -76,7 +75,7 @@ import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
 
-public class RestfulServer extends HttpServlet {
+public class RestfulServer extends HttpServlet implements IRestfulServerDefaults, IRestfulServer {
 
 	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
 	private static final long serialVersionUID = 1L;
@@ -1086,6 +1085,7 @@ public class RestfulServer extends HttpServlet {
 	 * 
 	 * @return Returns the default pretty print setting
 	 */
+	@Override
 	public boolean isDefaultPrettyPrint() {
 		return myDefaultPrettyPrint;
 	}

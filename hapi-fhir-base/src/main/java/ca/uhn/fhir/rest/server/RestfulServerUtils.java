@@ -510,7 +510,7 @@ public class RestfulServerUtils {
 		return null;
 	}
 
-	public static boolean prettyPrintResponse(RestfulServer theServer, RequestDetails theRequest) {
+	public static boolean prettyPrintResponse(IRestfulServerDefaults theServer, RequestDetails theRequest) {
 		Map<String, String[]> requestParams = theRequest.getParameters();
 		String[] pretty = requestParams.get(Constants.PARAM_PRETTY);
 		boolean prettyPrint;
