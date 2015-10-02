@@ -37,9 +37,11 @@ public class SubscriptionPlaygroundController extends BaseController {
 		Bundle resp = client
 			.search()
 			.forResource(Subscription.class)
-			.where(Subscription.TYPE.exactly().code(SubscriptionChannelTypeEnum.WEBSOCKET.getCode()))
-			.and(Subscription.STATUS.exactly().code(SubscriptionStatusEnum.ACTIVE.getCode()))
+//			.where(Subscription.TYPE.exactly().code(SubscriptionChannelTypeEnum.WEBSOCKET.getCode()))
+//			.and(Subscription.STATUS.exactly().code(SubscriptionStatusEnum.ACTIVE.getCode()))
 			.returnBundle(Bundle.class)
+			.sort().descending(Subscription.TYPE)
+			.sort().ascending(Subscription.STATUS)
 			.execute();
 		//@formatter:off
 		

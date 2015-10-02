@@ -9,6 +9,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
@@ -80,7 +81,7 @@ public class JpaServerDemo extends RestfulServer {
 			setServerConformanceProvider(confProvider);
 		} else {
 			IFhirSystemDao<Bundle> systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
-			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao);
+			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		}

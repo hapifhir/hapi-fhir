@@ -671,7 +671,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2Test {
 		try {
 			mySystemDao.transaction(request);
 			fail();
-		} catch (ResourceNotFoundException e) {
+		} catch (PreconditionFailedException e) {
 			assertThat(e.getMessage(), containsString("resource with match URL \"Patient?"));
 		}
 	}

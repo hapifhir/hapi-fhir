@@ -1,0 +1,3150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ConceptMap xmlns="http://hl7.org/fhir">
+  <id value="102"/>
+  <url value="http://hl7.org/fhir/ConceptMap/102"/>
+<!--    version: the date of the source    -->
+  <version value="20130725"/>
+  <name value="Specimen mapping from v2 table 0487 to SNOMED CT"/>
+  <status value="draft"/>
+  <experimental value="false"/>
+  <publisher value="FHIR project team (original source: LabMCoP)"/>
+  <contact>
+    <telecom>
+      <system value="other"/>
+      <value value="http://hl7.org/fhir"/>
+    </telecom>
+  </contact>
+  <contact>
+    <telecom>
+      <system value="other"/>
+      <value value="http://www.phconnect.org/group/laboratorymessagingcommunityofpractice/forum/attachment/download?id=3649725%3AUploadedFile%3A145786"/>
+    </telecom>
+  </contact>
+  <date value="2013-07-25"/>
+  <sourceReference>
+    <reference value="http://hl7.org/fhir/ValueSet/v2-0487"/>
+  </sourceReference>
+  <targetReference>
+    <reference value="http://snomed.info/id"/>
+  </targetReference>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ACNE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309068002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ACNFLD"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119323008"/>
+      <equivalence value="equivalent"/>
+      <comments value="HL7 term is a historical term. mapped to Pus"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="47002008"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="AIRS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="446302006"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ALL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119376003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="7970006"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="AMP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="408654003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="81723002"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ANGI"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ARTC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ASERU"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="pending"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ASP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119295008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="14766002"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ATTE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="AUTOC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="AUTP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="This really is not a specimen per se - it is the state of the subject from whom the specimen is collected, so it should be used as a  specimen type modifier ONLY!. Often this is indicated with a special medical record number or other notation on the patient. needs to have specimen type (SPM-4) and source site (SPM.8) and spatial orientation (SPM.9)"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BBL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119304001"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BCYST"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="submitted (PLR155) with parent of  167874004^knee joint synovial fluid (specimen), with specimen source topography 32361000^Popliteal fossa structure (body structure)"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="32361000"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BITE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="Submit for new term with parent 119365002"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BLEB"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309049000"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="339008"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BLIST"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309049000"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="339008"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BOIL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119295008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="59843005"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="14766002"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BON"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="430268003"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BOWL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="Don&#39;t use this term for human samples - use Stool instead. animal would use small intestinal contents, large intestinal contents"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BPU"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119300005"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BRN"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119367005"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BRSH"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258415003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="439336003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BRTH"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119336008"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BRUS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309176002"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="80657008"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BUB"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="302795002"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="11585000"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="14766002"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BULLA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258482009"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="339008"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="BX"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258415003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="86273004"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CALC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119350003"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CARBU"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309051001"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="41570003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CAT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119311002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CBITE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="Submit for new term with parent 119365002"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CLIPP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119327009"/>
+      <equivalence value="equivalent"/>
+      <comments value="Be more specific use either: 119326000^hair specimen or 119327009^nail specimen"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CNJT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119401005"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CNJT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="128160006"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CNJT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258498002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="COL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119329007"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CONE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="399713008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="54535009"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="71252005"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CSCR"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="submit for new term with parent 119365002^Specimen from wound (specimen)"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CSERU"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="pending"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CSITE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258507003"/>
+      <equivalence value="equivalent"/>
+      <comments value="Prefer to have aspirate of the pus oozing out from cleaned insertion site - if swab is all that can be obtained, then swab after cleaning, otherwise you may get a contaminated specimen and a falsely identified infected central line. Do not just swab the reddened area - that will just collect skin flora       "/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="386144009"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="285570007"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CSMY"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309051001"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CST"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258453008"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CSVR"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD - may use blood and SPM-6"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CTP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CVPS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258507003"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CVPT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="445085009"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CYN"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119368000"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="27925004"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CYST"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119368000"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="DBITE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="Submit for new term with parent 119365002"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="DCS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119335007"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="DEC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258505006"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="DEION"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="DIA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119360007"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="DISCHG"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258439008"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="DIV"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119376003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="31113003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="DRN"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119306004"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="DRNG"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258455001"/>
+      <equivalence value="equivalent"/>
+      <comments value="Historical term - consider what is being drained and indicate that in SPM-4 instead: not an acceptible specimen for micro - not specific enough term"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="122462000"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="DRNGP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309051001"/>
+      <equivalence value="equivalent"/>
+      <comments value="Historical term - consider what is being drained and indicate that in SPM-4 instead"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="122462000"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="EARW"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="122580007"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="EBRUSH"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309210009"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="36213007"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="32849002"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="EEYE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="EFF"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="EFFUS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258440005"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="EFOD"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119320006"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="EISO"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258536003"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ELT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119314005"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ENVIR"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119324002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="EOTH"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ESOI"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ESOS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ETA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119307008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="14766002"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="321667001"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ETTP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ETTUB"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119307008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="14766002"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="321667001"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="EWHI"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="EXG"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119336008"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="EXS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="EXUDTE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258441009"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="FAW"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="FBLOOD"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119297000"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="303112003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="FGA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="168139001"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="83670000"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="FIST"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119370009"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="FLD"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309051001"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="FLT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="FLU"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309051001"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="FLUID"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258442002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="FOLEY"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="FRS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258442002"/>
+      <equivalence value="equivalent"/>
+      <comments value="this term is not specific enough, choose from terms that more accurately describe the specimen"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="272626006"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="FSCLP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309502007"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="41695006"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="FUR"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119295008"/>
+      <equivalence value="equivalent"/>
+      <comments value="Further describe the sample as tissue or pus. or by the collection method. The term boil is not specifc to a body site - need to indicate source site (spm.8). preferred term is Aspirate_Boil"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="59843005"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GAS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119317003"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GASA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="168137004"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="14766002"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="69695003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GASAN"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119379005"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="66051006"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GASBR"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309213006"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="235157009"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="69695003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GASD"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258459007"/>
+      <equivalence value="equivalent"/>
+      <comments value="Historical term - consider what is being drained and indicate that in SPM-4 instead"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="122462000"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="69695003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GAST"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258459007"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GENV"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119394009"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GRAFT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="440493002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GRANU"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119376003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="45647009"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GROSH"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119311002"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GSOL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GSPEC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309211008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="79121003"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="69695003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="GTUBE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258459007"/>
+      <equivalence value="equivalent"/>
+      <comments value="Historical term - consider what is being drained and indicate that in SPM-4 instead"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="127490009"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="122462000"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="69695003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="HBITE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="Submit for new term with parent 119365002"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="HBLUD"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119297000"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="303113008"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="HEMAQ"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="HEMO"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="HERNI"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119376003"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="HEV"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119306004"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="HIC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="445085009"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="HYDC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309051001"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="55434001"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="IBITE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="Submit for new term with parent 119365002"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ICYST"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309075001"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="IDC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="IHG"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119337004"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ILEO"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258455001"/>
+      <equivalence value="equivalent"/>
+      <comments value="Historical term - consider what is being drained and indicate that in SPM-4 instead: stool is what is expected, should use stool sample"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="419954003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ILLEG"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="IMP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="439961009"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="INCI"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="438660002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="INFIL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="This describes a morphologic abnormality, not a sample"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="INS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258614005"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="INTRD"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="IT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119307008"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="IUD"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="pending"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="IVCAT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="255560000"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="IVFLD"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258649003"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="IVTIP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="JEJU"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258463000"/>
+      <equivalence value="equivalent"/>
+      <comments value="Historical term - consider what is being drained and indicate that in SPM-4 instead: stool is what is expected, should use stool sample"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="122462000"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="21306003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="JNTFLD"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119332005"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="JP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309051001"/>
+      <equivalence value="equivalent"/>
+      <comments value="Historical term - consider what is being drained and indicate that in SPM-4 instead"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="122462000"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="KELOI"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="440674008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="67889009"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="KIDFLD"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309051001"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="64033007"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="LAVG"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258607008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="397394009"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="LAVGG"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="168138009"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="173830003"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="69695003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="LAVGP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="440137008"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="LAVPG"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="440674008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="67889009"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="44567001"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="LENS1"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="440473005"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="LENS2"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="LESN"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309049000"/>
+      <equivalence value="equivalent"/>
+      <comments value="should be more specific what kind of lesion is observed - be more specific is it a wound, abscess, mass - specify! Ask SNOMED CT to mark it as a grouper term only (309049000)"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="LIQ"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258442002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="LIQO"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="LSAC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258450006"/>
+      <equivalence value="equivalent"/>
+      <comments value="The HL7 term is a historical term Mapped to CSF obtained by lumbar puncture"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="303949008"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="MAHUR"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="MASS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="420548004"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="4147007"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="MBLD"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119345009"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="MUCOS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119376003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="414781009"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="MUCUS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258483004"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="NASDR"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258474009"/>
+      <equivalence value="equivalent"/>
+      <comments value="Historical term - consider what is being drained and indicate that in SPM-4 instead"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="122462000"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="2095001"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="NEDL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="NEPH"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="438660002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="NGASP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="302794003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="6853008"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="69695003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="NGAST"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258459007"/>
+      <equivalence value="equivalent"/>
+      <comments value="Historical term - consider what is being drained and indicate that in SPM-4 instead"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="127492001"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="122462000"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="69695003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="NGS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="438660002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="NODUL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="pending"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="NSECR"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="168141000"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ORH"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="123038009"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="ORL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="be more precise use ulcer, tumor, vesicle"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="74262004"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="OTH"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="123038009"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PACEM"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PCFL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="122571007"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PDSIT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="438660002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PDTS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="submitted for code"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PELVA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119371008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="12921003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PENIL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="need to know what kind of lesion, so map to: UlcerTissue_penile, VesicleFluid_penile, Wound_penile, Mass tissue_penile, Necrotic tissue_penile, AbscessAspirate_penile, Anything else?"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="18911002"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PERIA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119371008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="397158004"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PILOC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119368000"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PINS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="438660002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PIS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258507003"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PLAN"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119301009"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PLAS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119361006"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PLB"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119305000"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PLEVS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119364003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="255587001"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PND"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258439008"/>
+      <equivalence value="equivalent"/>
+      <comments value="Historical term -though in this case more often used for discharge"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="122462000"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="13648007"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="POL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119376003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="41329004"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="POPGS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="440493002"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="6902008"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="POPLG"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="440493002"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="6902008"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="POPLV"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PORTA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119311002"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PPP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119362004"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PROST"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="438660002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PRP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119363009"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PSC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119368000"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PUNCT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119365002"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="129300006"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PUS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119323008"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PUSFR"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119323008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="47002008"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="PUST"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119323008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="47002008"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="QC3"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="RANDU"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="278020009"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="RBITE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="Submit for new term with parent: 119365002"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="RECT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119339001"/>
+      <equivalence value="equivalent"/>
+      <comments value="Historical term - consider what is being drained and indicate that in SPM-4 instead: stool is what is expected, should use stool sample"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="122462000"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="34402009"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="RECTA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119371008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="34402009"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="RENALC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258420003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="64033007"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="RENC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258453008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="64033007"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="RES"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258603007"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SAL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119342007"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SCAR"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119376003"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SCLV"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="9454009"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SCROA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119371008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="20233005"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SECRE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="432825001"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SER"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119364003"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SHU"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119295008"/>
+      <equivalence value="equivalent"/>
+      <comments value="Preferred is aspiration with sterile syringe from inflamed area. Specify body location of shunt site"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="257351008"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="14766002"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SHUNF"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="446861007"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="446860008"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="279107003"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SHUNT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SITE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SKBP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309066003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="240977001"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SKN"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119325001"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SMM"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="420548004"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="4147007"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SNV"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119332005"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SPRM"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119349003"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SPRP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SPRPB"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SPS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SPT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119334006"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SPTC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119335007"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SPTT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258609006"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SPUT1"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SPUTIN"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258610001"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SPUTSP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119335007"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="STER"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="STL"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119339001"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="STONE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119350003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="64033007"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SUBMA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119371008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="5713008"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SUBMX"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119371008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="4335006"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SUMP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="446562005"/>
+      <equivalence value="equivalent"/>
+      <comments value="Historical term - consider what is being drained and indicate that in SPM-4 instead"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="122462000"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SUP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="122575003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="58088002"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SUTUR"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SWGZ"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="TASP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="122877000"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="129112001"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="44567001"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="TISS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119376003"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="TISU"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="122593002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="TLC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="TRAC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="438660002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="TRANS"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258538002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="TSERU"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119364003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="255588006"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="TSTES"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119371008"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="279572002"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="TTRA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258480001"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="129112001"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="TUBES"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119310001"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="TUMOR"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258435002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="TZANC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="This is the name of a lab test. A skin sample is examined for viral inclusions."/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="UDENT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="123038009"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="UR"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="122575003"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="URC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="122880004"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="URINB"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="122575003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="78533007"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="URINC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="446846006"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="URINM"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258574006"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="225271002"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="431938005"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="URINN"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="446277003"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="225109005"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="25990002"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="URINP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="URT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="122565001"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="USCOP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="NEW specimenTERM 7"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="176178006"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="89837001"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="USPEC"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="123038009"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="VASTIP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="VENT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119312009"/>
+      <equivalence value="equivalent"/>
+      <comments value="TBD in detail"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="VITF"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258438000"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="VOM"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="122572000"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WASH"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="440674008"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WASI"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="122609004"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WAT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119318008"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WB"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="Bloodbanking term ONLY now map to blood and the respective preservative"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WEN"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309075001"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WICK"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WND"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119365002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WNDA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119366001"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WNDD"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="122566000"/>
+      <equivalence value="equivalent"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="122462000"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WNDE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="122568004"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WORM"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="258618008"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WRT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="309068002"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WWA"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <code value="119318008"/>
+      <equivalence value="equivalent"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WWO"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="WWT"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="TBD"/>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CSITE"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="Prefer to have aspirate of the pus oozing out from cleaned insertion site - if swab is all that can be obtained, then swab after cleaning, otherwise you may get a contaminated specimen and a falsely identified infected central line. Do not just swab the reddened area - that will just collect skin flora"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="119295008"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="386144009"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-8"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="14766002"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="CLIPP"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="Be more specific use either: 119326000^hair specimen, or 119327009^nail specimen"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="119326000"/>
+      </product>
+    </target>
+  </element>
+  <element>
+    <codeSystem value="http://hl7.org/fhir/v2/0487"/>
+    <code value="SHU"/>
+    <target>
+      <codeSystem value="http://snomed.info/sct"/>
+      <equivalence value="unmatched"/>
+      <comments value="assume swab from shunt site for mapping here - clean surface of skin prior to expressing the shunt site - preferred is aspiration with sterile syringe should use SPM.8 to specify body approximate match location of shunt site"/>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-5"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="438660002"/>
+      </product>
+      <product>
+        <element value="http://hl7.org/fhir/v2/element/SPM-7"/>
+        <codeSystem value="http://snomed.info/sct"/>
+        <code value="257351008"/>
+      </product>
+    </target>
+  </element>
+</ConceptMap>

@@ -28,12 +28,14 @@ import javax.servlet.http.HttpServletRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam;
+import ca.uhn.fhir.model.dstu2.valueset.ConditionalDeleteStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -48,11 +50,13 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	private IFhirSystemDao<Bundle> mySystemDao;
 	private volatile Conformance myCachedValue;
 	private RestfulServer myRestfulServer;
+	private DaoConfig myDaoConfig;
 
-	public JpaConformanceProviderDstu2(RestfulServer theRestfulServer, IFhirSystemDao<Bundle> theSystemDao) {
+	public JpaConformanceProviderDstu2(RestfulServer theRestfulServer, IFhirSystemDao<Bundle> theSystemDao, DaoConfig theDaoConfig) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
+		myDaoConfig = theDaoConfig;
 		super.setCache(false);
 	}
 
@@ -63,17 +67,23 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 		Map<String, Long> counts = mySystemDao.getResourceCounts();
 
 		FhirContext ctx = myRestfulServer.getFhirContext();
-		
+
 		retVal = super.getServerConformance(theRequest);
 		for (Rest nextRest : retVal.getRest()) {
+
 			for (RestResource nextResource : nextRest.getResource()) {
+
+				ConditionalDeleteStatusEnum conditionalDelete = nextResource.getConditionalDeleteElement().getValueAsEnum();
+				if (conditionalDelete == ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED && myDaoConfig.isAllowMultipleDelete() == false) {
+					nextResource.setConditionalDelete(ConditionalDeleteStatusEnum.SINGLE_DELETES_SUPPORTED);
+				}
 
 				// Add resource counts
 				Long count = counts.get(nextResource.getTypeElement().getValueAsString());
 				if (count != null) {
 					nextResource.addUndeclaredExtension(false, ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalDt(count));
 				}
-				
+
 				// Add chained params
 				for (RestResourceSearchParam nextParam : nextResource.getSearchParam()) {
 					if (nextParam.getTypeElement().getValueAsEnum() == SearchParamTypeEnum.REFERENCE) {
@@ -86,7 +96,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 						}
 					}
 				}
-				
+
 			}
 		}
 

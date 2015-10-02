@@ -909,6 +909,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myCriterionList.add((ICriterionInternal) theCriterion);
 			return this;
 		}
+
+		@Override
+		public IDeleteWithQuery resourceConditionalByType(Class<? extends IBaseResource> theResourceType) {
+			Validate.notNull(theResourceType, "theResourceType can not be null");
+			myCriterionList = new CriterionList();
+			myResourceType = myContext.getResourceDefinition(theResourceType).getName();
+			return this;
+		}
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

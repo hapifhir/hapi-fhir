@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public class DaoConfig {
 
+	private boolean myAllowMultipleDelete;
 	private int myHardSearchLimit = 1000;
 	private int myHardTagListLimit = 1000;
 	private int myIncludeLimit = 2000;
@@ -74,11 +75,23 @@ public class DaoConfig {
 		return mySubscriptionPollDelay;
 	}
 
+	public Long getSubscriptionPurgeInactiveAfterMillis() {
+		return mySubscriptionPurgeInactiveAfterMillis;
+	}
+
+	public boolean isAllowMultipleDelete() {
+		return myAllowMultipleDelete;
+	}
+
 	/**
 	 * See {@link #setSubscriptionEnabled(boolean)}
 	 */
 	public boolean isSubscriptionEnabled() {
 		return mySubscriptionEnabled;
+	}
+
+	public void setAllowMultipleDelete(boolean theAllowMultipleDelete) {
+		myAllowMultipleDelete = theAllowMultipleDelete;
 	}
 
 	public void setHardSearchLimit(int theHardSearchLimit) {
@@ -144,10 +157,6 @@ public class DaoConfig {
 		mySubscriptionPollDelay = theSubscriptionPollDelay;
 	}
 
-	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
-		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
-	}
-
 	public void setSubscriptionPurgeInactiveAfterMillis(Long theMillis) {
 		if (theMillis != null) {
 			Validate.exclusiveBetween(0, Long.MAX_VALUE, theMillis);
@@ -155,8 +164,8 @@ public class DaoConfig {
 		mySubscriptionPurgeInactiveAfterMillis = theMillis;
 	}
 
-	public Long getSubscriptionPurgeInactiveAfterMillis() {
-		return mySubscriptionPurgeInactiveAfterMillis;
+	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
+		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
 	}
 
 }

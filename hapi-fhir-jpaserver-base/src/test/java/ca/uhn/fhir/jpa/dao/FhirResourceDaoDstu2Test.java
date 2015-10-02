@@ -97,6 +97,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
@@ -683,7 +684,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		try {
 			myOrganizationDao.delete(orgId);
 			fail();
-		} catch (PreconditionFailedException e) {
+		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), containsString("Unable to delete Organization/" + orgId.getIdPart()
 					+ " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patId.getIdPart() + " in path Patient.managingOrganization"));
 		}
@@ -839,6 +840,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	}
 
+
+	
 	@Test
 	public void testHistoryByForcedId() {
 		IIdType idv1;
@@ -2088,21 +2091,21 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(Patient.SP_RES_ID));
+		pm.setSort(new SortSpec(BaseResource.SP_RES_ID));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
 		assertThat(actual, contains(idMethodName, id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(Patient.SP_RES_ID).setOrder(SortOrderEnum.ASC));
+		pm.setSort(new SortSpec(BaseResource.SP_RES_ID).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
 		assertThat(actual, contains(idMethodName, id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(Patient.SP_RES_ID).setOrder(SortOrderEnum.DESC));
+		pm.setSort(new SortSpec(BaseResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
 		assertThat(actual, contains(id4, id3, id2, id1, idMethodName));

@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
@@ -105,11 +106,11 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 			final ResourceTable entity = readEntityLatestVersion(theId);
 			OperationOutcome oo = new OperationOutcome();
 			try {
-				validateOkToDeleteOrThrowPreconditionFailedException(entity);
+				validateOkToDeleteOrThrowResourceVersionConflictException(entity);
 				oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Ok to delete");
-			} catch (PreconditionFailedException e) {
+			} catch (ResourceVersionConflictException e) {
 				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setDiagnostics(e.getMessage());
-				throw new PreconditionFailedException(e.getMessage(), oo);
+				throw new ResourceVersionConflictException(e.getMessage(), oo);
 			}
 			return new MethodOutcome(new IdDt(theId.getValue()), oo);
 		}

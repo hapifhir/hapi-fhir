@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 
 public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2ValidateTest.class);
@@ -141,9 +142,9 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		
 		OperationOutcome outcome=null;
 		try {
-		myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null);
-		fail();
-		} catch (PreconditionFailedException e) {
+			myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null);
+			fail();
+		} catch (ResourceVersionConflictException e) {
 			outcome= (OperationOutcome) e.getOperationOutcome();
 		}
 

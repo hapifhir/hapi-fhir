@@ -101,7 +101,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	
 			restServer.setPlainProviders(mySystemProvider);
 	
-			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(restServer, mySystemDao);
+			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(restServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			restServer.setServerConformanceProvider(confProvider);
 	

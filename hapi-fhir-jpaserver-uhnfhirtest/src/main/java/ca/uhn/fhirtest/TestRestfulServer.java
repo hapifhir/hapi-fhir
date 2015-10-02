@@ -14,6 +14,7 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
@@ -83,7 +84,7 @@ public class TestRestfulServer extends RestfulServer {
 			systemProviderDstu2 = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
 			systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.ENABLED;
-			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao);
+			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
 			baseUrlProperty = "fhir.baseurl.dstu2";
