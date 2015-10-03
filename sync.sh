@@ -8,6 +8,8 @@ for i in $(find $FHIRTRUNK/build/source -name *-spreadsheet.xml | egrep "/[a-z0-
 rm hapi-tinder-plugin/src/main/resources/dt/dstu2/*
 for i in $(find $FHIRTRUNK/build/source/datatypes | grep xml | grep -v spreadsheet | grep -v -); do cp -v $i hapi-tinder-plugin/src/main/resources/dt/dstu2/; done
 
+cp ~/workspace/fhir/trunk/build/source/compartments.xml  hapi-tinder-plugin/src/main/resources/compartment/
+
 cp $FHIRTRUNK/build/publish/valuesets.xml hapi-fhir-validation-resources/src/main/resources/org/hl7/fhir/instance/model/valueset/
 cp $FHIRTRUNK/build/publish/v3-codesystems.xml hapi-fhir-validation-resources/src/main/resources/org/hl7/fhir/instance/model/valueset/
 cp $FHIRTRUNK/build/publish/v2-codesystems.xml hapi-fhir-validation-resources/src/main/resources/org/hl7/fhir/instance/model/valueset/
