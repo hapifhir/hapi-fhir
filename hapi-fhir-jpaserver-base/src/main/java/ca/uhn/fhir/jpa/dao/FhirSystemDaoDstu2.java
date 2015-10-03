@@ -222,6 +222,12 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 			if (res != null) {
 
 				nextResourceId = res.getId();
+				if (nextResourceId.hasIdPart() == false) {
+					if (isNotBlank(nextEntry.getFullUrl())) {
+						nextResourceId = new IdDt(nextEntry.getFullUrl());
+					}
+				}
+				
 				if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType() && !isPlaceholder(nextResourceId)) {
 					nextResourceId = new IdDt(toResourceName(res.getClass()), nextResourceId.getIdPart());
 					res.setId(nextResourceId);

@@ -69,9 +69,6 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class SearchSearchServerDstu1Test {
 
 	private static CloseableHttpClient ourClient;
@@ -559,9 +556,6 @@ public class SearchSearchServerDstu1Test {
 
 	}
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		/**
