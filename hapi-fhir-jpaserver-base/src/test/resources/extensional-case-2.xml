@@ -4,6 +4,7 @@
 		<status value="generated" />
 		<div xmlns="http://www.w3.org/1999/xhtml">A selection of codes from http://loinc.org</div>
 	</text>
+	<url value="http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"/>
 	<identifier>
 		<value
 			value="http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2" />

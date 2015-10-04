@@ -57,7 +57,7 @@
 						<Embed-Dependency>*;scope=!provided|test</Embed-Dependency>
 						<Embed-Directory>lib</Embed-Directory>
 						<Embed-Transitive>true</Embed-Transitive>
-						<_removeheaders>Built-By</_removeheaders>
+						<_removeheaders>Built-By, Include-Resource, Private-Package</_removeheaders>
 						<!-- <Private-Package>org.foo.myproject.*</Private-Package> <Bundle-Activator>org.foo.myproject.impl1.Activator</Bundle-Activator> -->
 					</instructions>
 				</configuration>
@@ -70,6 +70,24 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<phase>integration-test</phase>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 		<resources>
 			<resource>

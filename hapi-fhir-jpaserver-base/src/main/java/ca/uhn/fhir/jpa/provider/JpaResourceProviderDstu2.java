@@ -69,8 +69,8 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		}
 	}
 
-	@Delete
-	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdDt theResource, @ConditionalUrlParam String theConditional) {
+	@Delete()
+	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdDt theResource, @ConditionalUrlParam(supportsMultiple=true) String theConditional) {
 		startRequest(theRequest);
 		try {
 			if (theConditional != null) {

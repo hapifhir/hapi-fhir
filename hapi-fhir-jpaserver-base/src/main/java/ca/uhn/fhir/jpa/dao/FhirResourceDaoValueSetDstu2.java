@@ -28,10 +28,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.codec.binary.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -46,32 +51,83 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
+import ca.uhn.fhir.validation.ValidationSupportChain;
 
 public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>implements IFhirResourceDaoValueSet<ValueSet> {
 
-	@Override
-	public ValueSet expand(IIdType theId, StringDt theFilter) {
-		ValueSet retVal = new ValueSet();
-		retVal.setDate(DateTimeDt.withCurrentTime());
+	@Autowired
+	private IJpaValidationSupport myJpaValidationSupport;
+	
+	private ValidationSupportChain myValidationSupport;
+	
+	@Autowired
+	@Qualifier("myFhirContextDstu2Hl7Org")
+	private FhirContext myRiCtx;
 
+	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
+
+	@Override
+	@PostConstruct
+	public void postConstruct() {
+		super.postConstruct();
+		myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
+		myValidationSupport = new ValidationSupportChain(myDefaultProfileValidationSupport, myJpaValidationSupport);
+	}
+	
+	@Override
+	public ValueSet expand(IIdType theId, String theFilter) {
 		BaseHasResource sourceEntity = readEntity(theId);
 		if (sourceEntity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
 		ValueSet source = (ValueSet) toResource(sourceEntity, false);
 
+		return expand(source, theFilter);
+
+	}
+
+	@Override
+	public ValueSet expandByIdentifier(String theUri, String theFilter) {
+		if (isBlank(theUri)) {
+			throw new InvalidRequestException("URI must not be blank or missing");
+		}
+		ValueSet source;
+		
+		org.hl7.fhir.instance.model.ValueSet defaultValueSet = myDefaultProfileValidationSupport.fetchResource(myRiCtx, org.hl7.fhir.instance.model.ValueSet.class, theUri);
+		if (defaultValueSet != null) {
+			source = getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(defaultValueSet));
+		} else {
+			IBundleProvider ids = search(ValueSet.SP_URL, new UriParam(theUri));
+			if (ids.size() == 0) {
+				throw new InvalidRequestException("Unknown ValueSet URI: " + theUri);
+			}
+			source = (ValueSet) ids.getResources(0, 1).get(0);
+		}
+
+		return expand(source, theFilter);
+
+	}
+
+	@Override
+	public ValueSet expand(ValueSet source, String theFilter) {
+		ValueSet retVal = new ValueSet();
+		retVal.setDate(DateTimeDt.withCurrentTime());
+		
 		/*
 		 * Add composed concepts
 		 */
 
 		for (ComposeInclude nextInclude : source.getCompose().getInclude()) {
 			for (ComposeIncludeConcept next : nextInclude.getConcept()) {
-				if (theFilter == null || theFilter.isEmpty()) {
+				if (isBlank(theFilter)) {
 					addCompose(retVal, nextInclude.getSystem(), next.getCode(), next.getDisplay());
 				} else {
-					String filter = theFilter.getValue().toLowerCase();
+					String filter = theFilter.toLowerCase();
 					if (next.getDisplay().toLowerCase().contains(filter) || next.getCode().toLowerCase().contains(filter)) {
 						addCompose(retVal, nextInclude.getSystem(), next.getCode(), next.getDisplay());
 					}
@@ -88,14 +144,13 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		}
 
 		return retVal;
-
 	}
 
-	private void addCompose(StringDt theFilter, ValueSet theValueSetToPopulate, ValueSet theSourceValueSet, CodeSystemConcept theConcept) {
-		if (theFilter == null || theFilter.isEmpty()) {
+	private void addCompose(String theFilter, ValueSet theValueSetToPopulate, ValueSet theSourceValueSet, CodeSystemConcept theConcept) {
+		if (isBlank(theFilter)) {
 			addCompose(theValueSetToPopulate, theSourceValueSet.getCodeSystem().getSystem(), theConcept.getCode(), theConcept.getDisplay());
 		} else {
-			String filter = theFilter.getValue().toLowerCase();
+			String filter = theFilter.toLowerCase();
 			if (theConcept.getDisplay().toLowerCase().contains(filter) || theConcept.getCode().toLowerCase().contains(filter)) {
 				addCompose(theValueSetToPopulate, theSourceValueSet.getCodeSystem().getSystem(), theConcept.getCode(), theConcept.getDisplay());
 			}
@@ -133,7 +188,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 
 		boolean haveIdentifierParam = theValueSetIdentifier != null && theValueSetIdentifier.isEmpty() == false;
 		if (theId != null) {
-			valueSetIds = Collections.singletonList((IIdType) theId);
+			valueSetIds = Collections.singletonList(theId);
 		} else if (haveIdentifierParam) {
 			Set<Long> ids = searchForIds(ValueSet.SP_IDENTIFIER, new TokenParam(null, theValueSetIdentifier.getValue()));
 			valueSetIds = new ArrayList<IIdType>();

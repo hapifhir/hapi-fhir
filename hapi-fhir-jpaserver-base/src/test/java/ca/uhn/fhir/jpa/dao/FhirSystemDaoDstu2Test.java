@@ -31,6 +31,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
@@ -44,7 +45,11 @@ import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryRequest;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryResponse;
+import ca.uhn.fhir.model.dstu2.resource.Communication;
+import ca.uhn.fhir.model.dstu2.resource.Medication;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -53,8 +58,11 @@ import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -354,6 +362,42 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
+	@Test
+	public void testTransactionCreateWithInvalidMatchUrl() {
+		String methodName = "testTransactionCreateWithInvalidMatchUrl";
+		Bundle request = new Bundle();
+
+		Patient p;
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		EntryRequest entry = request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.POST);
+
+		try {
+			entry.setIfNoneExist("Patient?identifier   identifier" + methodName);
+			mySystemDao.transaction(request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Failed to parse match URL[Patient?identifier   identifiertestTransactionCreateWithInvalidMatchUrl] - URL is invalid (must not contain spaces)", e.getMessage());
+		}
+		
+		try {
+			entry.setIfNoneExist("Patient?identifier=");
+			mySystemDao.transaction(request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid match URL[Patient?identifier=] - URL has no search parameters", e.getMessage());
+		}
+
+		try {
+			entry.setIfNoneExist("Patient?foo=bar");
+			mySystemDao.transaction(request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Failed to parse match URL[Patient?foo=bar] - Resource type Patient does not have a parameter with name: foo", e.getMessage());
+		}
+	}
+
+
 	public void testTransactionCreateWithDuplicateMatchUrl02() {
 		String methodName = "testTransactionCreateWithDuplicateMatchUrl02";
 		Bundle request = new Bundle();
@@ -634,7 +678,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2Test {
 		try {
 			mySystemDao.transaction(request);
 			fail();
-		} catch (ResourceNotFoundException e) {
+		} catch (PreconditionFailedException e) {
 			assertThat(e.getMessage(), containsString("resource with match URL \"Patient?"));
 		}
 	}
@@ -731,6 +775,68 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals("201 Created", resp.getEntry().get(1).getResponse().getStatus());
 	}
 
+	public static void main(String[] args) {
+		Communication com = new Communication();
+		com.getSender().setReference("Patient/james");
+		com.addRecipient().setReference("Group/everyone");
+		com.addMedium().setText("Skype");
+		com.addPayload().setContent(new StringDt("Welcome to Connectathon 10! Any HAPI users feel free to grab me if you want to chat or need help!"));
+		System.out.println(FhirContext.forDstu2().newJsonParser().setPrettyPrint(true).encodeResourceToString(com));
+	}
+	
+	@Test
+	public void testTransactionWithReferenceToCreateIfNoneExist() {
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleTypeEnum.TRANSACTION);
+		
+		Medication med = new Medication();
+		IdDt medId = IdDt.newRandomUuid();
+		med.setId(medId);
+		med.getCode().addCoding().setSystem("billscodes").setCode("theCode");
+		bundle.addEntry().setResource(med).setFullUrl(medId.getValue()).getRequest().setMethod(HTTPVerbEnum.POST).setIfNoneExist("Medication?code=billscodes|theCode");
+
+		MedicationOrder mo = new MedicationOrder();
+		mo.setMedication(new ResourceReferenceDt(medId));
+		bundle.addEntry().setResource(mo).setFullUrl(mo.getId().getValue()).getRequest().setMethod(HTTPVerbEnum.POST);
+		
+		ourLog.info("Request:\n"+myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		Bundle outcome = mySystemDao.transaction(bundle);
+		ourLog.info("Response:\n"+myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		
+		IdDt medId1 = new IdDt(outcome.getEntry().get(0).getResponse().getLocation());
+		IdDt medOrderId1 = new IdDt( outcome.getEntry().get(1).getResponse().getLocation());
+		
+		/*
+		 * Again!
+		 */
+		
+		bundle = new Bundle();
+		bundle.setType(BundleTypeEnum.TRANSACTION);
+		
+		med = new Medication();
+		medId = IdDt.newRandomUuid();
+		med.getCode().addCoding().setSystem("billscodes").setCode("theCode");
+		bundle.addEntry().setResource(med).setFullUrl(medId.getValue()).getRequest().setMethod(HTTPVerbEnum.POST).setIfNoneExist("Medication?code=billscodes|theCode");
+
+		mo = new MedicationOrder();
+		mo.setMedication(new ResourceReferenceDt(medId));
+		bundle.addEntry().setResource(mo).setFullUrl(mo.getId().getValue()).getRequest().setMethod(HTTPVerbEnum.POST);
+		
+		outcome = mySystemDao.transaction(bundle);
+		
+		IdDt medId2 = new IdDt(outcome.getEntry().get(0).getResponse().getLocation());
+		IdDt medOrderId2 = new IdDt(outcome.getEntry().get(1).getResponse().getLocation());
+		
+		assertTrue(medId1.isIdPartValidLong());
+		assertTrue(medId2.isIdPartValidLong());
+		assertTrue(medOrderId1.isIdPartValidLong());
+		assertTrue(medOrderId2.isIdPartValidLong());
+		
+		assertEquals(medId1, medId2);
+		assertNotEquals(medOrderId1, medOrderId2);
+	}
+	
 	@Test
 	public void testTransactionReadAndSearch() {
 		String methodName = "testTransactionReadAndSearch";

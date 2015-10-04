@@ -42,6 +42,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -100,6 +101,7 @@ import ca.uhn.fhir.rest.gclient.IOperation;
 import ca.uhn.fhir.rest.gclient.IOperationUnnamed;
 import ca.uhn.fhir.rest.gclient.IOperationUntyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.gclient.IParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IRead;
@@ -229,7 +231,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return delete(theType, new IdDt(theId));
 	}
 
-	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint, SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
+	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint,
+			SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
 		String resName = toResourceName(theType);
 		IIdType id = theId;
 		if (!id.hasBaseUrl()) {
@@ -906,6 +909,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myCriterionList.add((ICriterionInternal) theCriterion);
 			return this;
 		}
+
+		@Override
+		public IDeleteWithQuery resourceConditionalByType(Class<? extends IBaseResource> theResourceType) {
+			Validate.notNull(theResourceType, "theResourceType can not be null");
+			myCriterionList = new CriterionList();
+			myResourceType = myContext.getResourceDefinition(theResourceType).getName();
+			return this;
+		}
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1353,13 +1364,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private class OperationInternal extends BaseClientExecutable implements IOperation, IOperationUnnamed, IOperationUntyped, IOperationUntypedWithInput {
+	private class OperationInternal extends BaseClientExecutable implements IOperation, IOperationUnnamed, IOperationUntyped, IOperationUntypedWithInput, IOperationUntypedWithInputAndPartialOutput {
 
 		private IIdType myId;
 		private String myOperationName;
 		private IBaseParameters myParameters;
 		private Class<? extends IBaseResource> myType;
 		private boolean myUseHttpGet;
+		private RuntimeResourceDefinition myParametersDef;
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -1455,6 +1467,51 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withParameter(Class<T> theParameterType, String theName, IBase theValue) {
+			Validate.notNull(theParameterType, "theParameterType must not be null");
+			Validate.notEmpty(theName, "theName must not be null");
+			Validate.notNull(theValue, "theValue must not be null");
+			
+			myParametersDef = myContext.getResourceDefinition(theParameterType);
+			myParameters = (IBaseParameters) myParametersDef.newInstance();
+			
+			addParam(theName, theValue);
+			
+			return this;
+		}
+
+		@SuppressWarnings("unchecked")
+		private void addParam(String theName, IBase theValue) {
+			BaseRuntimeChildDefinition parameterChild = myParametersDef.getChildByName("parameter");
+			BaseRuntimeElementCompositeDefinition<?> parameterElem = (BaseRuntimeElementCompositeDefinition<?>) parameterChild.getChildByName("parameter");
+			
+			IBase parameter = parameterElem.newInstance();
+			parameterChild.getMutator().addValue(myParameters, parameter);
+			
+			IPrimitiveType<String> name = (IPrimitiveType<String>) myContext.getElementDefinition("string").newInstance();
+			name.setValue(theName);
+			parameterElem.getChildByName("name").getMutator().setValue(parameter, name);
+			
+			if (theValue instanceof IBaseDatatype) {
+				String childElementName = "value" + StringUtils.capitalize(myContext.getElementDefinition(theValue.getClass()).getName());
+				parameterElem.getChildByName(childElementName).getMutator().setValue(parameter, theValue);
+			} else if (theValue instanceof IBaseResource) {
+				parameterElem.getChildByName("resource").getMutator().setValue(parameter, theValue);
+			} else {
+				throw new IllegalArgumentException("Don't know how to handle parameter of type " + theValue.getClass());
+			}
+		}
+
+		@Override
+		public IOperationUntypedWithInputAndPartialOutput andParameter(String theName, IBase theValue) {
+			Validate.notEmpty(theName, "theName must not be null");
+			Validate.notNull(theValue, "theValue must not be null");
+			addParam(theName, theValue);
+			return this;
+		}
+
 	}
 
 	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<BaseOperationOutcome> {
@@ -1506,7 +1563,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private RuntimeResourceDefinition myType;
 
 		@Override
-		public Object execute() {//AAA
+		public Object execute() {// AAA
 			if (myId.hasVersionIdPart()) {
 				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements());
 			} else {
@@ -1693,7 +1750,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			BaseRuntimeElementCompositeDefinition<?> textElement = (BaseRuntimeElementCompositeDefinition<?>) textChild.getChildByName("text");
 			IBase textInstance = textElement.newInstance();
 			textChild.getMutator().addValue(instance, textInstance);
-			
+
 			BaseRuntimeChildDefinition divChild = textElement.getChildByName("div");
 			BaseRuntimeElementDefinition<?> divElement = divChild.getChildByName("div");
 			IPrimitiveType<?> divInstance = (IPrimitiveType<?>) divElement.newInstance();

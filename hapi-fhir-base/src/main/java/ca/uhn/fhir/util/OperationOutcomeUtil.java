@@ -42,22 +42,23 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  */
 public class OperationOutcomeUtil {
 
-	/**
-	 * Add an issue to an OperationOutcome
-	 * 
-	 * @param theCtx
-	 *           The fhir context
-	 * @param theOperationOutcome
-	 *           The OO resource to add to
-	 * @param theSeverity
-	 *           The severity (e.g. "error")
-	 * @param theDetails
-	 *           The details string
-	 */
-	public static void addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails) {
-		IBase issue = createIssue(theCtx, theOperationOutcome);
-		populateDetails(theCtx, issue, theSeverity, theDetails, null);
-	}
+//	/**
+//	 * Add an issue to an OperationOutcome
+//	 * 
+//	 * @param theCtx
+//	 *           The fhir context
+//	 * @param theOperationOutcome
+//	 *           The OO resource to add to
+//	 * @param theSeverity
+//	 *           The severity (e.g. "error")
+//	 * @param theDetails
+//	 *           The details string
+//	 * @param theCode 
+//	 */
+//	public static void addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails, String theCode) {
+//		IBase issue = createIssue(theCtx, theOperationOutcome);
+//		populateDetails(theCtx, issue, theSeverity, theDetails, null, theCode);
+//	}
 
 	/**
 	 * Add an issue to an OperationOutcome
@@ -70,10 +71,11 @@ public class OperationOutcomeUtil {
 	 *           The severity (e.g. "error")
 	 * @param theDetails
 	 *           The details string
+	 * @param theCode 
 	 */
-	public static void addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails, String theLocation) {
+	public static void addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails, String theLocation, String theCode) {
 		IBase issue = createIssue(theCtx, theOperationOutcome);
-		populateDetails(theCtx, issue, theSeverity, theDetails, theLocation);
+		populateDetails(theCtx, issue, theSeverity, theDetails, theLocation, theCode);
 	}
 
 	private static IBase createIssue(FhirContext theCtx, IBaseResource theOutcome) {
@@ -145,11 +147,16 @@ public class OperationOutcomeUtil {
 		}
 	}
 
-	private static void populateDetails(FhirContext theCtx, IBase theIssue, String theSeverity, String theDetails, String theLocation) {
+	private static void populateDetails(FhirContext theCtx, IBase theIssue, String theSeverity, String theDetails, String theLocation, String theCode) {
 		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(theIssue.getClass());
 		BaseRuntimeChildDefinition detailsChild;
 		if (theCtx.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 			detailsChild = issueElement.getChildByName("diagnostics");
+			
+			BaseRuntimeChildDefinition codeChild = issueElement.getChildByName("code");
+			IPrimitiveType<?> codeElem = (IPrimitiveType<?>) codeChild.getChildByName("code").newInstance(codeChild.getInstanceConstructorArguments());
+			codeElem.setValueAsString(theCode);
+			codeChild.getMutator().addValue(theIssue, codeElem);
 		} else {
 			detailsChild = issueElement.getChildByName("details");
 		}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.gclient;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.model.api.IResource;
@@ -43,8 +44,15 @@ public interface IDelete {
 	IDeleteTyped resourceConditionalByUrl(String theSearchUrl);
 
 	/**
+	 * Delete using a conditional/match URL. The query parameters will be added in the next part of the call chain.
 	 * @since HAPI 0.9 / FHIR DSTU 2
 	 */
 	IDeleteWithQuery resourceConditionalByType(String theResourceType);
+
+	/**
+	 * Delete using a conditional/match URL. The query parameters will be added in the next part of the call chain.
+	 * @since HAPI 1.3
+	 */
+	IDeleteWithQuery resourceConditionalByType(Class<? extends IBaseResource> theResourceType);
 
 }

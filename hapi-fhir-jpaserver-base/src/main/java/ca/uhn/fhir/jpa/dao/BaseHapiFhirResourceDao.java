@@ -74,6 +74,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseTag;
@@ -128,6 +129,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
@@ -148,6 +150,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
 
+	@Autowired
+	private DaoConfig myDaoConfig;
+	
 	private String myResourceName;
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
@@ -1308,7 +1313,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			throw new InvalidRequestException("Trying to delete " + theId + " but this is not the current version");
 		}
 
-		validateOkToDeleteOrThrowPreconditionFailedException(entity);
+		validateOkToDeleteOrThrowResourceVersionConflictException(entity);
 
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, theId.getResourceType());
@@ -1331,26 +1336,31 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		if (resource.isEmpty()) {
 			throw new ResourceNotFoundException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "unableToDeleteNotFound", theUrl));
 		} else if (resource.size() > 1) {
-			throw new ResourceNotFoundException(getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resource.size()));
+			if (myDaoConfig.isAllowMultipleDelete() == false) {
+				throw new PreconditionFailedException(getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resource.size()));
+			}
 		}
 
-		Long pid = resource.iterator().next();
-		ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
-
-		validateOkToDeleteOrThrowPreconditionFailedException(entity);
-
-		// Notify interceptors
-		IdDt idToDelete = entity.getIdDt();
-		ActionRequestDetails requestDetails = new ActionRequestDetails(idToDelete, idToDelete.getResourceType());
-		notifyInterceptors(RestOperationTypeEnum.DELETE, requestDetails);
-
-		// Perform delete
-		Date updateTime = new Date();
-		ResourceTable savedEntity = updateEntity(null, entity, true, updateTime, updateTime);
-		notifyWriteCompleted();
-
-		ourLog.info("Processed delete on {} in {}ms", theUrl, w.getMillisAndRestart());
-		return toMethodOutcome(savedEntity, null);
+		for (Long pid : resource) {
+			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
+	
+			validateOkToDeleteOrThrowResourceVersionConflictException(entity);
+	
+			// Notify interceptors
+			IdDt idToDelete = entity.getIdDt();
+			ActionRequestDetails requestDetails = new ActionRequestDetails(idToDelete, idToDelete.getResourceType());
+			notifyInterceptors(RestOperationTypeEnum.DELETE, requestDetails);
+	
+			// Perform delete
+			Date updateTime = new Date();
+			updateEntity(null, entity, true, updateTime, updateTime);
+			notifyWriteCompleted();
+	
+		}
+		
+		ourLog.info("Processed delete on {} (matched {} resource(s)) in {}ms", new Object[] {theUrl, resource.size(), w.getMillisAndRestart()});
+		
+		return new DaoMethodOutcome();
 	}
 
 	private DaoMethodOutcome doCreate(T theResource, String theIfNoneExist, boolean thePerformIndexing, Date theUpdateTime) {
@@ -1615,7 +1625,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	/**
 	 * THIS SHOULD RETURN HASHSET and not jsut Set because we add to it later (so it can't be Collections.emptySet())
 	 */
-	private HashSet<Long> loadReverseIncludes(Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode) {
+	private HashSet<Long> loadReverseIncludes(Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode, EverythingModeEnum theEverythingModeEnum) {
 		if (theMatches.size() == 0) {
 			return new HashSet<Long>();
 		}
@@ -1632,6 +1642,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		boolean addedSomeThisRound;
 		do {
 			HashSet<Long> pidsToInclude = new HashSet<Long>();
+			Set<Long> nextRoundOmit = new HashSet<Long>();
 
 			for (Iterator<Include> iter = includes.iterator(); iter.hasNext();) {
 				Include nextInclude = iter.next();
@@ -1648,6 +1659,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 					List<ResourceLink> results = q.getResultList();
 					for (ResourceLink resourceLink : results) {
 						if (theReverseMode) {
+							if (theEverythingModeEnum == EverythingModeEnum.ENCOUNTER) {
+								if (resourceLink.getSourcePath().equals("Encounter.subject") || resourceLink.getSourcePath().equals("Encounter.patient")) {
+									nextRoundOmit.add(resourceLink.getSourceResourcePid());
+								}
+							}
 							pidsToInclude.add(resourceLink.getSourceResourcePid());
 						} else {
 							pidsToInclude.add(resourceLink.getTargetResourcePid());
@@ -1702,6 +1718,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 					theMatches.add(next);
 				}
 			}
+			
+			pidsToInclude.removeAll(nextRoundOmit);
+			
 			addedSomeThisRound = allAdded.addAll(pidsToInclude);
 			nextRoundMatches = pidsToInclude;
 		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
@@ -2024,10 +2043,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		}
 
 		// Load _include and _revinclude before filter and sort in everything mode
-		if (theParams.isEverythingMode() == true) {
+		if (theParams.getEverythingMode() != null) {
 			if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty() == false) {
-				loadPids.addAll(loadReverseIncludes(loadPids, theParams.getRevIncludes(), true));
-				loadPids.addAll(loadReverseIncludes(loadPids, theParams.getIncludes(), false));
+				loadPids.addAll(loadReverseIncludes(loadPids, theParams.getRevIncludes(), true, theParams.getEverythingMode()));
+				loadPids.addAll(loadReverseIncludes(loadPids, theParams.getIncludes(), false, theParams.getEverythingMode()));
 			}
 		}
 
@@ -2066,9 +2085,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		// Load _revinclude resources
 		final Set<Long> revIncludedPids;
-		if (theParams.isEverythingMode() == false) {
+		if (theParams.getEverythingMode() == null) {
 			if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty() == false) {
-				revIncludedPids = loadReverseIncludes(pids, theParams.getRevIncludes(), true);
+				revIncludedPids = loadReverseIncludes(pids, theParams.getRevIncludes(), true, null);
 			} else {
 				revIncludedPids = new HashSet<Long>();
 			}
@@ -2095,9 +2114,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 						List<Long> pidsSubList = pids.subList(theFromIndex, theToIndex);
 
 						// Load includes
-						if (!theParams.isEverythingMode()) {
+						if (theParams.getEverythingMode()==null) {
 							pidsSubList = new ArrayList<Long>(pidsSubList);
-							revIncludedPids.addAll(loadReverseIncludes(pidsSubList, theParams.getIncludes(), false));
+							revIncludedPids.addAll(loadReverseIncludes(pidsSubList, theParams.getIncludes(), false, null));
 						}
 
 						// Execute the query and make sure we return distinct results
@@ -2502,7 +2521,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		}
 	}
 
-	protected void validateOkToDeleteOrThrowPreconditionFailedException(ResourceTable theEntity) {
+	protected void validateOkToDeleteOrThrowResourceVersionConflictException(ResourceTable theEntity) {
 		TypedQuery<ResourceLink> query = myEntityManager.createQuery("SELECT l FROM ResourceLink l WHERE l.myTargetResourcePid = :target_pid", ResourceLink.class);
 		query.setParameter("target_pid", theEntity.getId());
 		query.setMaxResults(1);
@@ -2516,7 +2535,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		String sourceId = link.getSourceResource().getIdDt().toUnqualifiedVersionless().getValue();
 		String sourcePath = link.getSourcePath();
 
-		throw new PreconditionFailedException(
+		throw new ResourceVersionConflictException(
 				"Unable to delete " + targetId + " because at least one resource has a reference to this resource. First reference found was resource " + sourceId + " in path " + sourcePath);
 	}
 

@@ -222,6 +222,17 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 			if (res != null) {
 
 				nextResourceId = res.getId();
+				
+				if (nextResourceId.hasIdPart() == false) {
+					if (isNotBlank(nextEntry.getFullUrl())) {
+						nextResourceId = new IdDt(nextEntry.getFullUrl());
+					}
+				}
+
+				if (nextResourceId.hasIdPart() && nextResourceId.getIdPart().matches("[a-zA-Z]+\\:.*") && !isPlaceholder(nextResourceId)) {
+					throw new InvalidRequestException("Invalid placeholder ID found: " + nextResourceId.getIdPart() + " - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
+				}
+				
 				if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType() && !isPlaceholder(nextResourceId)) {
 					nextResourceId = new IdDt(toResourceName(res.getClass()), nextResourceId.getIdPart());
 					res.setId(nextResourceId);

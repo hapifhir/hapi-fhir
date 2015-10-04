@@ -178,7 +178,12 @@ public class GenericClientTest {
 		assertThat(extractBody(capt, count), containsString("value=\"John\""));
 		count++;
 
-		client.create().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).execute();
+		String resourceAsString = ourCtx.newJsonParser().encodeResourceToString(p1);
+		client
+			.create()
+			.resource(resourceAsString)
+			.execute();
+		
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("[\"John\"]"));

@@ -73,6 +73,10 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	private String myResponseMimeType;
 	private int myStatusCode;
 
+	public static void main (String[] args) {
+		BaseServerResponseException.class.getName();
+	}
+	
 	/**
 	 * Constructor
 	 * 

@@ -98,7 +98,6 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- You may not need this if you are deploying to an application server which provides database connection pools itself. -->
@@ -148,6 +147,11 @@
 			<artifactId>jetty-webapp</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.phloc</groupId>
+			<artifactId>phloc-schematron</artifactId>
+			<version>${phloc_schematron_version}</version>
+		</dependency>
 
 	</dependencies>
 
@@ -166,6 +170,9 @@
 						<webApp>
 							<contextPath>/hapi-fhir-jpaserver-example</contextPath>
 						</webApp>
+						<webAppConfig>
+							<allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
+						</webAppConfig>
 					</configuration>
 				</plugin>
 			</plugins>

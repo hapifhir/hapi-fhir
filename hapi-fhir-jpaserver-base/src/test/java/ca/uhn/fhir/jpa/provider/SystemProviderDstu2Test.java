@@ -8,6 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,9 +27,11 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class SystemProviderDstu2Test  extends BaseJpaTest {
 
@@ -38,6 +41,36 @@ public class SystemProviderDstu2Test  extends BaseJpaTest {
 	private static FhirContext ourCtx;
 	private static IGenericClient ourClient;
 
+	
+	@Test
+	public void testTransactionFromBundle4() throws Exception {
+		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/simone_bundle.xml");
+		String bundle = IOUtils.toString(bundleRes);
+		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		ourLog.info(response);
+		Bundle bundleResp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
+		IdDt id = new IdDt(bundleResp.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Patient", id.getResourceType());
+		assertTrue(id.hasIdPart());
+		assertTrue(id.isIdPartValidLong());
+		assertTrue(id.hasVersionIdPart());
+		assertTrue(id.isVersionIdPartValidLong());
+	}
+
+	@Test
+	public void testTransactionFromBundle5() throws Exception {
+		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/simone_bundle2.xml");
+		String bundle = IOUtils.toString(bundleRes);
+		try {
+			ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
+			assertEquals("processing", oo.getIssue().get(0).getCode());
+		}
+	}
+	
 	@Test
 	public void testTransactionFromBundle() throws Exception {
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");

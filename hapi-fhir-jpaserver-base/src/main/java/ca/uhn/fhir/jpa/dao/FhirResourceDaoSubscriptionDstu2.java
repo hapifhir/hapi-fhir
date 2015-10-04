@@ -56,6 +56,7 @@ import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -129,7 +130,8 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 			ourLog.trace("Skipping search for subscription");
 			return;
 		}
-		ourLog.info("Subscription search from {} to {}", start, end);
+
+		ourLog.debug("Subscription {} search from {} to {}", new Object[] { subscription.getId().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end)) });
 
 		DateRangeParam range = new DateRangeParam();
 		range.setLowerBound(new DateParam(QuantityCompararatorEnum.GREATERTHAN, start));
@@ -176,7 +178,8 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	}
 
 	@Override
-	protected ResourceTable updateEntity(IResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion, Date theUpdateTime) {
+	protected ResourceTable updateEntity(IResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
+			Date theUpdateTime) {
 		ResourceTable retVal = super.updateEntity(theResource, theEntity, theUpdateHistory, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime);
 
 		Subscription resource = (Subscription) theResource;
@@ -278,16 +281,17 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	@Override
 	public void purgeInactiveSubscriptions() {
 		Long purgeInactiveAfterMillis = getConfig().getSubscriptionPurgeInactiveAfterMillis();
-		if (getConfig().isSubscriptionEnabled()==false || purgeInactiveAfterMillis == null) {
+		if (getConfig().isSubscriptionEnabled() == false || purgeInactiveAfterMillis == null) {
 			return;
 		}
-		
+
 		Date cutoff = new Date(System.currentTimeMillis() - purgeInactiveAfterMillis);
 		Collection<SubscriptionTable> toPurge = mySubscriptionTableDao.findInactiveBeforeCutoff(cutoff);
 		for (SubscriptionTable subscriptionTable : toPurge) {
 
 			final IdDt subscriptionId = subscriptionTable.getSubscriptionResource().getIdDt();
-			ourLog.info("Deleting inactive subscription {} - Created {}, last client poll {}", new Object[] { subscriptionId.toUnqualified(), subscriptionTable.getCreated(), subscriptionTable.getLastClientPoll() });
+			ourLog.info("Deleting inactive subscription {} - Created {}, last client poll {}",
+					new Object[] { subscriptionId.toUnqualified(), subscriptionTable.getCreated(), subscriptionTable.getLastClientPoll() });
 			TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 			txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 			txTemplate.execute(new TransactionCallback<Void>() {

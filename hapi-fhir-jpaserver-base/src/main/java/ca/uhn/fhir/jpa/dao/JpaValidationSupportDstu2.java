@@ -30,13 +30,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.validation.IValidationSupport;
 
-public class JpaValidationSupportDstu2 implements IValidationSupport {
+public class JpaValidationSupportDstu2 implements IJpaValidationSupport {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaValidationSupportDstu2.class);
 
-	private FhirContext myRiCtx = FhirContext.forDstu2Hl7Org();
+	@Autowired
+	@Qualifier("myFhirContextDstu2Hl7Org")
+	private FhirContext myRiCtx;
 
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoDstu2")

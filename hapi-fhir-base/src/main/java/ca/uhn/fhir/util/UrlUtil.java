@@ -173,17 +173,22 @@ public class UrlUtil {
 	 */
 	//@formatter:on
 	public static UrlParts parseUrl(String theUrl) {
+		String url = theUrl;
+		if (url.matches("\\/[a-zA-Z]+\\?.*")) {
+			url = url.substring(1);
+		}
+		
 		UrlParts retVal = new UrlParts();
 
 		int nextStart = 0;
 		boolean nextIsHistory = false;
 
-		for (int idx = 0; idx < theUrl.length(); idx++) {
-			char nextChar = theUrl.charAt(idx);
-			boolean atEnd = (idx + 1) == theUrl.length();
+		for (int idx = 0; idx < url.length(); idx++) {
+			char nextChar = url.charAt(idx);
+			boolean atEnd = (idx + 1) == url.length();
 			if (nextChar == '?' || nextChar == '/' || atEnd) {
 				int endIdx = atEnd ? idx + 1 : idx;
-				String nextSubstring = theUrl.substring(nextStart, endIdx);
+				String nextSubstring = url.substring(nextStart, endIdx);
 				if (retVal.getResourceType() == null) {
 					retVal.setResourceType(nextSubstring);
 				} else if (retVal.getResourceId() == null) {
@@ -194,12 +199,12 @@ public class UrlUtil {
 					if (nextSubstring.equals(Constants.URL_TOKEN_HISTORY)) {
 						nextIsHistory = true;
 					} else {
-						throw new InvalidRequestException("Invalid FHIR resource URL: " + theUrl);
+						throw new InvalidRequestException("Invalid FHIR resource URL: " + url);
 					}
 				}
 				if (nextChar == '?') {
-					if (theUrl.length() > idx + 1) {
-						retVal.setParams(theUrl.substring(idx + 1, theUrl.length()));
+					if (url.length() > idx + 1) {
+						retVal.setParams(url.substring(idx + 1, url.length()));
 					}
 					break;
 				}

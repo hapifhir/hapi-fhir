@@ -1,68 +1,42 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
-import ca.uhn.fhir.jpa.provider.ResourceProviderDstu2Test;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "/hapi-fhir-server-resourceproviders-dstu2.xml", "/fhir-jpabase-spring-test-config.xml" })
-public class FhirResourceDaoValueSetDstu2Test {
+public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoValueSetDstu2Test.class);
 
-	private static IIdType vsid;
+	private IIdType myExtensionalVsId;
 
-	@Autowired
-	private FhirContext myCtx;
-
-	@Autowired
-	@Qualifier("mySystemDaoDstu2")
-	private IFhirSystemDao<Bundle> mySystemDao;
-
-	@Autowired
-	@Qualifier("myValueSetDaoDstu2")
-	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 
 	@Before
 	@Transactional
-	public void before01() {
-		if (vsid == null) {
-			FhirSystemDaoDstu2Test.doDeleteEverything(mySystemDao);
-		}
-	}
-
-	@Before
-	@Transactional
-	public void before02() {
-		if (vsid == null) {
-			ValueSet upload = myCtx.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/extensional-case-2.xml")));
-			upload.setId("");
-			vsid = myValueSetDao.create(upload).getId().toUnqualifiedVersionless();
-		}
+	public void before02() throws IOException {
+		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
+		upload.setId("");
+		myExtensionalVsId = myValueSetDao.create(upload).getId().toUnqualifiedVersionless();
 	}
 
 	@Test
@@ -137,7 +111,7 @@ public class FhirResourceDaoValueSetDstu2Test {
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeableConcept() {
 		UriDt valueSetIdentifier = null;
-		IIdType id = vsid;
+		IIdType id = myExtensionalVsId;
 		CodeDt code = null;
 		UriDt system = null;
 		StringDt display = null;
@@ -151,7 +125,7 @@ public class FhirResourceDaoValueSetDstu2Test {
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeAndSystem() {
 		UriDt valueSetIdentifier = null;
-		IIdType id = vsid;
+		IIdType id = myExtensionalVsId;
 		CodeDt code = new CodeDt("11378-7");
 		UriDt system = new UriDt("http://loinc.org");
 		StringDt display = null;
@@ -163,11 +137,11 @@ public class FhirResourceDaoValueSetDstu2Test {
 	}
 
 	@Test
-	public void testValueSetExpandOperation() throws IOException {
+	public void testExpandById() throws IOException {
 		String resp;
 
-		ValueSet expanded = myValueSetDao.expand(vsid, null);
-		resp = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ValueSet expanded = myValueSetDao.expand(myExtensionalVsId, null);
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		// @formatter:off
 		assertThat(resp,
@@ -191,8 +165,8 @@ public class FhirResourceDaoValueSetDstu2Test {
 		 * Filter with display name
 		 */
 
-		expanded = myValueSetDao.expand(vsid, new StringDt("systolic"));
-		resp = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		expanded = myValueSetDao.expand(myExtensionalVsId, ("systolic"));
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
@@ -204,14 +178,43 @@ public class FhirResourceDaoValueSetDstu2Test {
 		 * Filter with code
 		 */
 
-		expanded = myValueSetDao.expand(vsid, new StringDt("11378"));
-		resp = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		expanded = myValueSetDao.expand(myExtensionalVsId, ("11378"));
+		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
 				"<code value=\"11378-7\"/>", 
 				"<display value=\"Systolic blood pressure at First encounter\"/>"));
 		//@formatter:on
+	}
+	
+	@Test
+	public void testExpandByIdentifier() {
+		ValueSet expanded = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "11378");
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		//@formatter:off
+		assertThat(resp, stringContainsInOrder(
+				"<code value=\"11378-7\"/>", 
+				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		//@formatter:on
+
+		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
+	}
+
+	@Test
+	public void testExpandByValueSet() throws IOException {
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
+		ValueSet expanded = myValueSetDao.expand(toExpand, "11378");
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		//@formatter:off
+		assertThat(resp, stringContainsInOrder(
+				"<code value=\"11378-7\"/>", 
+				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		//@formatter:on
+
+		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
 
 }

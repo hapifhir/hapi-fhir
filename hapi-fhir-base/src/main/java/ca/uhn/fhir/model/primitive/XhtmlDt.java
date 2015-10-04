@@ -50,11 +50,6 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 		// nothing
 	}
 
-	@Override
-	public boolean isEmpty() {
-		return super.isBaseEmpty() && (getValue() == null || getValue().isEmpty());
-	}
-
 	/**
 	 * Constructor which accepts a string code
 	 * 
@@ -65,32 +60,35 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 		setValueAsString(theTextDiv);
 	}
 
-	/**
-	 * Accepts a textual DIV and parses it into XHTML events which are stored internally.
-	 * <p>
-	 * <b>Formatting note:</b> The text will be trimmed {@link String#trim()}. If the text does not start with an HTML tag (generally this would be a div tag), a div tag will be automatically placed
-	 * surrounding the text.
-	 * </p>
-	 * <p>
-	 * Also note that if the parsed text contains any entities (&amp;foo;) which are not a part of the entities defined in core XML (e.g. &amp;sect; which
-	 * is valid in XHTML 1.0 but not in XML 1.0) they will be parsed and converted to their equivalent unicode character.
-	 * </p>
-	 */
 	@Override
-	public void setValueAsString(String theValue) throws DataFormatException {
-		if (theValue == null || theValue.isEmpty()) {
-			super.setValueAsString(null);
-		} else {
-			String value = theValue.trim();
-			if (value.charAt(0) != '<') {
-				value = "<div>" + value + "</div>";
+	protected String encode(List<XMLEvent> theValue) {
+		try {
+			StringWriter w = new StringWriter();
+			XMLEventWriter ew = XmlUtil.createXmlFragmentWriter(w);
+
+			for (XMLEvent next : getValue()) {
+				if (next.isCharacters()) {
+					ew.add(next);
+				} else {
+					ew.add(next);
+				}
 			}
-			super.setValueAsString(value);
+			ew.close();
+			return w.toString();
+		} catch (XMLStreamException e) {
+			throw new DataFormatException("Problem with the contained XML events", e);
+		} catch (FactoryConfigurationError e) {
+			throw new ConfigurationException(e);
 		}
 	}
 
 	public boolean hasContent() {
 		return getValue() != null && getValue().size() > 0;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && (getValue() == null || getValue().isEmpty());
 	}
 
 	@Override
@@ -128,24 +126,27 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 		}
 	}
 
+	/**
+	 * Accepts a textual DIV and parses it into XHTML events which are stored internally.
+	 * <p>
+	 * <b>Formatting note:</b> The text will be trimmed {@link String#trim()}. If the text does not start with an HTML tag (generally this would be a div tag), a div tag will be automatically placed
+	 * surrounding the text.
+	 * </p>
+	 * <p>
+	 * Also note that if the parsed text contains any entities (&amp;foo;) which are not a part of the entities defined in core XML (e.g. &amp;sect; which is valid in XHTML 1.0 but not in XML 1.0) they
+	 * will be parsed and converted to their equivalent unicode character.
+	 * </p>
+	 */
 	@Override
-	protected String encode(List<XMLEvent> theValue) {
-		try {
-			StringWriter w = new StringWriter();
-			XMLEventWriter ew = XmlUtil.createXmlWriter(w);
-			for (XMLEvent next : getValue()) {
-				if (next.isCharacters()) {
-					ew.add(next);
-				} else {
-					ew.add(next);
-				}
+	public void setValueAsString(String theValue) throws DataFormatException {
+		if (theValue == null || theValue.isEmpty()) {
+			super.setValueAsString(null);
+		} else {
+			String value = theValue.trim();
+			if (value.charAt(0) != '<') {
+				value = "<div>" + value + "</div>";
 			}
-			ew.close();
-			return w.toString();
-		} catch (XMLStreamException e) {
-			throw new DataFormatException("Problem with the contained XML events", e);
-		} catch (FactoryConfigurationError e) {
-			throw new ConfigurationException(e);
+			super.setValueAsString(value);
 		}
 	}
 

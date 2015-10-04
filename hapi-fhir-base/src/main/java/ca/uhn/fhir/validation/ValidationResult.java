@@ -28,6 +28,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 /**
@@ -107,7 +108,7 @@ public class ValidationResult {
 				location = null;
 			}
 			String severity = next.getSeverity() != null ? next.getSeverity().getCode() : null;
-			OperationOutcomeUtil.addIssue(myCtx, oo, severity, next.getMessage(), location);
+			OperationOutcomeUtil.addIssue(myCtx, oo, severity, next.getMessage(), location, ExceptionHandlingInterceptor.PROCESSING);
 		}
 
 		return oo;

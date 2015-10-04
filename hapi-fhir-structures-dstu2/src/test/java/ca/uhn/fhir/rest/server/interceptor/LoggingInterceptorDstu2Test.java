@@ -46,6 +46,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.PortUtil;
 
 /**
@@ -76,6 +77,30 @@ public class LoggingInterceptorDstu2Test {
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, times(1)).info(captor.capture());
 		assertThat(captor.getValue(), StringContains.containsString("read - Patient/1"));
+	}
+
+	@Test
+	public void testException() throws Exception {
+
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		interceptor.setLogExceptions(true);
+		assertTrue(interceptor.isLogExceptions());
+		interceptor.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
+		assertEquals("ERROR - ${requestVerb} ${requestUrl}", interceptor.getErrorMessageFormat());
+		
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
+
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/EX");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, times(2)).info(captor.capture());
+		assertThat(captor.getAllValues().get(0), StringContains.containsString("read - Patient/EX"));
+		assertThat(captor.getAllValues().get(1), StringContains.containsString("ERROR - GET http://localhost:"+ourPort+"/Patient/EX"));
 	}
 
 	@Test
@@ -242,6 +267,9 @@ public class LoggingInterceptorDstu2Test {
 		 */
 		@Read()
 		public Patient getResourceById(@IdParam IdDt theId) {
+			if (theId.getIdPart().equals("EX")) {
+				throw new InvalidRequestException("FOO");
+			}
 			String key = theId.getIdPart();
 			Patient retVal = getIdToPatient().get(key);
 			return retVal;

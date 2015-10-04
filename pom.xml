@@ -186,6 +186,10 @@
 			<id>SingingTree</id>
 			<name>Bryce Van Dyk</name>
 		</developer>
+		<developer>
+			<id>botunge</id>
+			<name>Thomas Andersen</name>
+		</developer>
 	</developers>
 
 	<licenses>

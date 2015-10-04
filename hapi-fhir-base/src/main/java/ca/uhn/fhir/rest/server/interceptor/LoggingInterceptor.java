@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import java.io.IOException;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -24,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map.Entry;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,6 +41,7 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 /**
  * Server interceptor which logs each request using a defined format
@@ -67,8 +71,8 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
  * </tr>
  * <tr>
  * <td>${requestHeader.XXXX}</td>
- * <td>The value of the HTTP request header named XXXX. For example, a substitution variable named
- * "${requestHeader.x-forwarded-for} will yield the value of the first header named "x-forwarded-for", or "" if none.</td>
+ * <td>The value of the HTTP request header named XXXX. For example, a substitution variable named "${requestHeader.x-forwarded-for} will yield the value of the first header named "x-forwarded-for
+ * ", or "" if none.</td>
  * </tr>
  * <tr>
  * <td>${requestParameters}</td>
@@ -82,14 +86,51 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
  * <td>${servletPath}</td>
  * <td>The part of thre requesting URL that corresponds to the particular Servlet being called (see {@link HttpServletRequest#getServletPath()})</td>
  * </tr>
+ * <tr>
+ * <td>${requestUrl}</td>
+ * <td>The complete URL of the request</td>
+ * </tr>
+ * <tr>
+ * <td>${requestVerb}</td>
+ * <td>The HTTP verb of the request</td>
+ * </tr>
+ * <tr>
+ * <td>${exceptionMessage}</td>
+ * <td>Applies only to an error message: The message from {@link Exception#getMessage()}</td>
+ * </tr>
  * </table>
  */
 public class LoggingInterceptor extends InterceptorAdapter {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoggingInterceptor.class);
 
+	private String myErrorMessageFormat = "ERROR - ${idOrResourceName}";
+	private boolean myLogExceptions;
 	private Logger myLogger = ourLog;
 	private String myMessageFormat = "${operationType} - ${idOrResourceName}";
+
+	/**
+	 * Get the log message format to be used when logging exceptions
+	 */
+	public String getErrorMessageFormat() {
+		return myErrorMessageFormat;
+	}
+	
+	@Override
+	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+			throws ServletException, IOException {
+		if (myLogExceptions) {
+			// Perform any string substitutions from the message format
+			StrLookup<?> lookup = new MyLookup(theServletRequest, theException, theRequestDetails);
+			StrSubstitutor subs = new StrSubstitutor(lookup, "${", "}", '\\');
+
+			// Actuall log the line
+			String line = subs.replace(myErrorMessageFormat);
+			myLogger.info(line);
+
+		}
+		return true;
+	}
 
 	@Override
 	public boolean incomingRequestPostProcessed(final RequestDetails theRequestDetails, final HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
@@ -103,6 +144,28 @@ public class LoggingInterceptor extends InterceptorAdapter {
 		myLogger.info(line);
 
 		return true;
+	}
+
+	/**
+	 * Should exceptions be logged by this logger
+	 */
+	public boolean isLogExceptions() {
+		return myLogExceptions;
+	}
+
+	/**
+	 * Set the log message format to be used when logging exceptions
+	 */
+	public void setErrorMessageFormat(String theErrorMessageFormat) {
+		Validate.notBlank(theErrorMessageFormat, "Message format can not be null/empty");
+		myErrorMessageFormat = theErrorMessageFormat;
+	}
+
+	/**
+	 * Should exceptions be logged by this logger
+	 */
+	public void setLogExceptions(boolean theLogExceptions) {
+		myLogExceptions = theLogExceptions;
 	}
 
 	public void setLogger(Logger theLogger) {
@@ -125,12 +188,20 @@ public class LoggingInterceptor extends InterceptorAdapter {
 	}
 
 	private static final class MyLookup extends StrLookup<String> {
+		private final Throwable myException;
 		private final HttpServletRequest myRequest;
 		private final RequestDetails myRequestDetails;
 
 		private MyLookup(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 			myRequest = theRequest;
 			myRequestDetails = theRequestDetails;
+			myException = null;
+		}
+
+		public MyLookup(HttpServletRequest theServletRequest, BaseServerResponseException theException, RequestDetails theRequestDetails) {
+			myException = theException;
+			myRequestDetails = theRequestDetails;
+			myRequest = theServletRequest;
 		}
 
 		@Override
@@ -204,6 +275,12 @@ public class LoggingInterceptor extends InterceptorAdapter {
 				} else {
 					return "";
 				}
+			} else if (theKey.equals("exceptionMessage")) {
+				return myException != null ? myException.getMessage() : null;
+			} else if (theKey.equals("requestUrl")) {
+				return myRequest.getRequestURL().toString();
+			} else if (theKey.equals("requestVerb")) {
+				return myRequest.getMethod();
 			}
 
 			return "!VAL!";

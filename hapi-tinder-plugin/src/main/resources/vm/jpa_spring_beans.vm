@@ -15,6 +15,7 @@
 
 	<bean id="myFhirContext${versionCapitalized}" class="ca.uhn.fhir.context.FhirContext" factory-method="for${versionCapitalized}"/>
 	
+	
 	<bean id="mySystemDao${versionCapitalized}" class="ca.uhn.fhir.jpa.dao.FhirSystemDao${versionCapitalized}">
 		<property name="context" ref="myFhirContext${versionCapitalized}"/>
 	</bean>
@@ -23,6 +24,7 @@
 	</bean>
 
 #if ( ${versionCapitalized} == 'Dstu2' )
+	<bean id="myFhirContextDstu2Hl7Org" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu2Hl7Org"/>
 	<jpa:repositories base-package="ca.uhn.fhir.jpa.dao.data" />
 
 	<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
@@ -41,7 +43,7 @@
 #foreach ( $res in $resources )
 	<bean id="my${res.name}Dao${versionCapitalized}" 
 ## Some resource types have customized DAOs for resource specific functionality
-#if ( ${versionCapitalized} == 'Dstu2' && ( ${res.name} == 'Bundle' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'ValueSet'))
+#if ( ${versionCapitalized} == 'Dstu2' && ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'ValueSet'))
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${res.name}${versionCapitalized}">
 #else
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}">

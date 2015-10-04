@@ -106,6 +106,39 @@
 				did not have latest valueset definitions applied. Thanks
 				to Bill de Beaubien for reporting!
 			</action>
+			<action type="fix">
+				JPA server can now successfully search for tokens pointing at code values
+				(values with no explicit system but an implied one, such as Patient.gender)
+				even if the system is supplied in the query.
+			</action>
+			<action type="fix" issue="235">
+				Correct issues with Android library. Thanks to 
+				Thomas Andersen for the submission!
+			</action>
+			<action type="fix">
+				JPA server incorrectly rejected match URLs
+				if they did not contain a question mark. Thanks
+				to Bill de Beaubien for reporting!
+			</action>
+			<action type="fix" issue="234">
+				Remove invalid entries in OSGi Manifest. Thanks
+				to Alexander Kley for the fix!
+			</action>
+			<action type="add">
+				JPA server now supports $everything on Patient and Encounter types (patient and encounter instance was already supported)
+			</action>
+			<action type="add">
+				Generic client operation invocations now
+				have an additional inline method for generating the input
+				Parameters using chained method calls instead
+				of by passing a Parameters resource in
+			</action>
+			<action type="fix">
+				Parsing an XML resource where the XHTML
+				namespace was declared before the beginning
+				of the narrative section caused an invalid
+				re-encoding when encoding to JSON.
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">
