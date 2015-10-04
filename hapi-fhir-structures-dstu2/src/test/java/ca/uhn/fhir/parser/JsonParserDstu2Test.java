@@ -55,6 +55,39 @@ public class JsonParserDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2Test.class);
 
 	@Test
+	public void testNamespacePreservationEncode() throws Exception {
+		//@formatter:off
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">" + 
+				"<text>" + 
+				"<xhtml:div>" + 
+				"<xhtml:img src=\"foo\"/>" + 
+				"@fhirabend" + 
+				"</xhtml:div>" + 
+				"</text>" + 
+				"</Patient>";
+		//@formatter:on
+		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, input);
+
+		String expected = "<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>";
+		assertEquals(expected, parsed.getText().getDiv().getValueAsString());
+
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("\"div\":\"" + expected.replace("\"", "\\\"") + "\""));
+	}
+
+	@Test
+	public void testNamespacePreservationParse() throws Exception {
+		String input = "{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\"><xhtml:img src=\\\"foo\\\"/>@fhirabend</xhtml:div>\"}}";
+		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, input);
+		
+		assertEquals("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>", parsed.getText().getDiv().getValueAsString());
+		
+		String encoded = ourCtx.newXmlParser().encodeResourceToString(parsed);
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div></text></Patient>",encoded);
+	}
+
+	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
 
 		Patient patient = new Patient();
@@ -98,8 +131,10 @@ public class JsonParserDstu2Test {
 		assertThat(enc, Matchers.stringContainsInOrder("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
 				"{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"));
 		assertThat(enc, Matchers.stringContainsInOrder("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],"));
-		assertThat(enc, containsString("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext_parent\"," + "\"extension\":[" + "{"
-				+ "\"url\":\"http://examples.com#givenext_child\"," + "\"valueString\":\"CHILD\"" + "}" + "]" + "}" + "]" + "}"));
+		assertThat(enc,
+				containsString("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{" + "\"extension\":[" + "{"
+						+ "\"url\":\"http://examples.com#givenext_parent\"," + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext_child\"," + "\"valueString\":\"CHILD\"" + "}" + "]" + "}"
+						+ "]" + "}"));
 
 		/*
 		 * Now parse this back
@@ -402,7 +437,8 @@ public class JsonParserDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\":\"foo\",", "\"code\":\"bar\"", "\"system\":\"" + Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\":\"" + Constants.TAG_SUBSETTED_CODE + "\","));
+		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\":\"foo\",", "\"code\":\"bar\"", "\"system\":\"" + Constants.TAG_SUBSETTED_SYSTEM + "\",",
+				"\"code\":\"" + Constants.TAG_SUBSETTED_CODE + "\","));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
@@ -423,7 +459,8 @@ public class JsonParserDstu2Test {
 		String enc = ourCtx.newJsonParser().encodeResourceToString(pt);
 		ourLog.info(enc);
 
-		assertEquals("{\"resourceType\":\"Patient\",\"meta\":{\"tag\":[{\"system\":\"scheme\",\"code\":\"term\",\"display\":\"display\"}]},\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}]}", enc);
+		assertEquals("{\"resourceType\":\"Patient\",\"meta\":{\"tag\":[{\"system\":\"scheme\",\"code\":\"term\",\"display\":\"display\"}]},\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}]}",
+				enc);
 
 	}
 
@@ -517,7 +554,7 @@ public class JsonParserDstu2Test {
 		assertEquals(exp, act);
 
 	}
-	
+
 	/**
 	 * Test for #146
 	 */
@@ -636,9 +673,9 @@ public class JsonParserDstu2Test {
 		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-transaction2.json"));
 
 		ourCtx.newJsonParser().parseBundle(content);
-		
+
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
-		
+
 		// TODO: preserve comments
 	}
 
@@ -857,7 +894,7 @@ public class JsonParserDstu2Test {
 		assertEquals(exp, act);
 
 	}
-	
+
 	@Test
 	public void testParsePatientInBundle() {
 

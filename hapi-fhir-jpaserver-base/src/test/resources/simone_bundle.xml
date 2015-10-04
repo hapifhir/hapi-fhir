@@ -1,0 +1,107 @@
+<Bundle xmlns="http://hl7.org/fhir">
+	<id value="20151003220331"/>
+	<type value="transaction"/>
+	<entry>
+		<fullUrl value="urn:uuid:abd7a623-699e-46b5-5f5f-8d1d79fa33e6"/>
+		<resource>
+			<Patient>
+				<identifier>
+					<use value="usual"/>
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/identifier-type"/>
+							<code value="NH"/>
+						</coding>
+					</type>
+					<system value="urn:oid:2.16.840.1.113883.2.1.4.1"/>
+					<value value="23455457476474754545"/>
+					<assigner>
+						<display value="NHS"/>
+					</assigner>
+				</identifier>
+				<identifier>
+					<use value="usual"/>
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/identifier-type"/>
+							<code value="MR"/>
+						</coding>
+					</type>
+					<system value="http://www.ghh.org/identifiers/"/>
+					<value value="4567567567"/>
+					<assigner>
+						<display value="TCPAS"/>
+					</assigner>
+				</identifier>
+				<name>
+					<use value="official"/>
+					<family value="Connectathon"/>
+					<given value="Ann"/>
+				</name>
+				<telecom>
+					<system value="phone"/>
+					<value value="277543"/>
+					<use value="home"/>
+				</telecom>
+				<gender value="female"/>
+				<birthDate value="1928-05-24"/>
+				<address>
+					<line value="22 Stable Road"/>
+					<city value="Whitstable"/>
+					<state value="Kent"/>
+					<country value="CR5 1EL"/>
+				</address>
+				<contact>
+					<relationship>
+						<coding>
+							<system value="http://hl7.org/fhir/patient-contact-relationship"/>
+							<code value="parent"/>
+						</coding>
+					</relationship>
+					<name>
+						<family value="Connectathon"/>
+						<given value="Joe"/>
+					</name>
+				</contact>
+			</Patient>
+		</resource>
+		<request>
+			<method value="PUT"/>
+			<url value="/Patient?identifier=http://www.ghh.org/identifiers/|4567567567"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:491aabbf-fcff-4697-5bb2-84e856d5786b"/>
+		<resource>
+			<Encounter>
+				<identifier>
+					<use value="usual"/>
+					<type>
+						<coding>
+							<system value="http://hl7.org/fhir/identifier-type"/>
+							<code value="MR"/>
+						</coding>
+					</type>
+					<system value="http://general-hospital.co.uk/Identifiers/"/>
+					<value value="123447878787866666"/>
+					<assigner>
+						<display value="GENHOS"/>
+					</assigner>
+				</identifier>
+				<status value="in-progress"/>
+				<class value="inpatient"/>
+				<patient>
+					<reference value="urn:uuid:abd7a623-699e-46b5-5f5f-8d1d79fa33e6"/>
+					<display value="Connectathon, Ann(*24.05.1928)"/>
+				</patient>
+				<period>
+					<start value="2015-05-02T09:00:00+01:00"/>
+				</period>
+			</Encounter>
+		</resource>
+		<request>
+			<method value="PUT"/>
+			<url value="/Encounter?identifier=http://general-hospital.co.uk/Identifiers/|123447878787866666"/>
+		</request>
+	</entry>
+</Bundle>

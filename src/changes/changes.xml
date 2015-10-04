@@ -133,6 +133,12 @@
 				Parameters using chained method calls instead
 				of by passing a Parameters resource in
 			</action>
+			<action type="fix">
+				Parsing an XML resource where the XHTML
+				namespace was declared before the beginning
+				of the narrative section caused an invalid
+				re-encoding when encoding to JSON.
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

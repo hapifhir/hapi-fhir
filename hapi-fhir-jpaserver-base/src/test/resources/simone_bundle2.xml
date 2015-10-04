@@ -1,0 +1,73 @@
+<Bundle xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+	<type value="transaction"/>
+	<entry>
+		<fullUrl value="uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d"/>
+		<resource>
+			<Patient>
+				<text>
+					<status value="generated"/>
+					<xhtml:div>
+						<xhtml:img src="http://pbs.twimg.com/profile_images/544507893991485440/r_vo3uj2_bigger.png" alt="Twitter Avatar"/>
+						@fhirabend
+					</xhtml:div>
+				</text>
+				<identifier>
+					<use value="secondary"/>
+					<system value="http://twitter.com"/>
+					<value value="2922960201"/>
+				</identifier>
+				<name>
+					<family value="fhirabend"/>
+				</name>
+				<photo>
+					<url value="http://pbs.twimg.com/profile_images/544507893991485440/r_vo3uj2_bigger.png"/>
+				</photo>
+			</Patient>
+		</resource>
+		<request>
+			<method value="PUT"/>
+			<url value="Patient?identifier=http://twitter.com|2922960201"/>
+		</request>
+	</entry>
+	<entry>
+		<resource>
+			<Communication>
+				<meta>
+					<profile value="http://foo/Profile1"/>
+					<tag>
+						<system value="http://twitter.com"/>
+						<code value="http://twitter.com/hashtag/FHIR"/>
+						<display value="#FHIR"/>
+					</tag>
+				</meta>
+				<text>
+					<status value="generated"/>
+					<xhtml:div>
+						<xhtml:b> @fhirabend:</xhtml:b>
+						RT @kainamti: Motto of the FHIR calendar 2016: the #FHIR is strong in you @HL7 http://t.co/E03Y3NIjME
+					</xhtml:div>
+				</text>
+				<identifier>
+					<system value="http://twitter.com"/>
+					<value value="650408456562823168"/>
+				</identifier>
+				<sender>
+					<reference value="uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d"/>
+				</sender>
+				<payload>
+					<contentString value="RT @kainamti: Motto of the FHIR calendar 2016: the #FHIR is strong in you @HL7 http://t.co/E03Y3NIjME"/>
+				</payload>
+				<medium>
+					<coding>
+						<code value="Twitter"/>
+					</coding>
+				</medium>
+				<sent value="2015-10-03T22:33:54+02:00"/>
+			</Communication>
+		</resource>
+		<request>
+			<method value="PUT"/>
+			<url value="Communication?identifier=http://twitter.com|650408456562823168"/>
+		</request>
+	</entry>
+</Bundle>

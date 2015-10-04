@@ -43,11 +43,13 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 
+	public static final String PROCESSING = "processing";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionHandlingInterceptor.class);
 	private Class<?>[] myReturnStackTracesForExceptionTypes;
 
 	@Override
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
+	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theRequest, HttpServletResponse theResponse)
+			throws ServletException, IOException {
 
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
@@ -116,12 +118,20 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 					ourLog.error("Failure during REST processing", theException);
 					populateDetails(ctx, theException, oo);
 				} else if (theException instanceof BaseServerResponseException) {
-					ourLog.warn("Failure during REST processing: {}", theException);
+					int statusCode = ((BaseServerResponseException) theException).getStatusCode();
+
+					// No stack traces for non-server internal errors
+					if (statusCode < 500) {
+						ourLog.warn("Failure during REST processing: {}", theException.toString());
+					} else {
+						ourLog.warn("Failure during REST processing: {}", theException);
+					}
+					
 					BaseServerResponseException baseServerResponseException = (BaseServerResponseException) theException;
 					populateDetails(ctx, theException, oo);
 					if (baseServerResponseException.getAdditionalMessages() != null) {
 						for (String next : baseServerResponseException.getAdditionalMessages()) {
-							OperationOutcomeUtil.addIssue(ctx, oo, "error", next);
+							OperationOutcomeUtil.addIssue(ctx, oo, "error", next, null, PROCESSING);
 						}
 					}
 				} else {
@@ -143,19 +153,18 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 			for (Class<?> next : myReturnStackTracesForExceptionTypes) {
 				if (next.isAssignableFrom(theException.getClass())) {
 					String detailsValue = theException.getMessage() + "\n\n" + ExceptionUtils.getStackTrace(theException);
-					OperationOutcomeUtil.addIssue(theCtx, theOo, "error", detailsValue);
+					OperationOutcomeUtil.addIssue(theCtx, theOo, "error", detailsValue, null, PROCESSING);
 					return;
 				}
 			}
 		}
 
-		OperationOutcomeUtil.addIssue(theCtx, theOo, "error", theException.getMessage());
+		OperationOutcomeUtil.addIssue(theCtx, theOo, "error", theException.getMessage(), null, PROCESSING);
 	}
 
 	/**
-	 * If any server methods throw an exception which extends any of the given exception types, the exception stack trace
-	 * will be returned to the user. This can be useful for helping to diagnose issues, but may not be desirable for
-	 * production situations.
+	 * If any server methods throw an exception which extends any of the given exception types, the exception stack trace will be returned to the user. This can be useful for helping to diagnose
+	 * issues, but may not be desirable for production situations.
 	 * 
 	 * @param theExceptionTypes
 	 *           The exception types for which to return the stack trace to the user.
