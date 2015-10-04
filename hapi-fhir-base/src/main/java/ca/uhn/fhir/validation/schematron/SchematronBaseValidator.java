@@ -1,4 +1,4 @@
-package ca.uhn.fhir.validation;
+package ca.uhn.fhir.validation.schematron;
 
 /*
  * #%L
@@ -37,6 +37,13 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.SchemaBaseValidator;
+import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationContext;
 
 import com.phloc.commons.error.IResourceError;
 import com.phloc.commons.error.IResourceErrorGroup;
@@ -44,13 +51,16 @@ import com.phloc.schematron.ISchematronResource;
 import com.phloc.schematron.SchematronHelper;
 import com.phloc.schematron.xslt.SchematronResourceSCH;
 
+/**
+ * This class is only used using reflection from {@link SchematronProvider} in order
+ * to be truly optional.
+ */
 public class SchematronBaseValidator implements IValidatorModule {
 
-	static final String RESOURCES_JAR_NOTE = "Note that as of HAPI FHIR 1.2, DSTU2 validation files are kept in a separate JAR (hapi-fhir-validation-resources-XXX.jar) which must be added to your classpath. See the HAPI FHIR download page for more information.";
 	private Map<Class<? extends IBaseResource>, ISchematronResource> myClassToSchematron = new HashMap<Class<? extends IBaseResource>, ISchematronResource>();
 	private FhirContext myCtx;
 
-	SchematronBaseValidator(FhirContext theContext) {
+	public SchematronBaseValidator(FhirContext theContext) {
 		myCtx = theContext;
 	}
 
@@ -126,7 +136,7 @@ public class SchematronBaseValidator implements IValidatorModule {
 			InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
 			try {
 				if (baseIs == null) {
-					throw new InternalErrorException("Failed to load schematron for resource '" + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName() + "'. " + RESOURCES_JAR_NOTE);
+					throw new InternalErrorException("Failed to load schematron for resource '" + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName() + "'. " + SchemaBaseValidator.RESOURCES_JAR_NOTE);
 				}
 			} finally {
 				IOUtils.closeQuietly(baseIs);

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -30,6 +32,18 @@ public class ObjectUtil {
 			return false;
 		}
 		return object1.equals(object2);
+	}
+	
+	public static <T> T requireNonNull(T obj, String message) {
+        if (obj == null)
+            throw new NullPointerException(message);
+        return obj;
+    }
+
+	public static void requireNotEmpty(String str, String message) {
+		if (StringUtils.isBlank(str)) {
+			throw new IllegalArgumentException(message);
+		}
 	}
 	
 }

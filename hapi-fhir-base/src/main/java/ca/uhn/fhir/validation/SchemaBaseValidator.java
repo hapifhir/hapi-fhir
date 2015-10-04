@@ -53,7 +53,9 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
-class SchemaBaseValidator implements IValidatorModule {
+public class SchemaBaseValidator implements IValidatorModule {
+	public static final String RESOURCES_JAR_NOTE = "Note that as of HAPI FHIR 1.2, DSTU2 validation files are kept in a separate JAR (hapi-fhir-validation-resources-XXX.jar) which must be added to your classpath. See the HAPI FHIR download page for more information.";
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaBaseValidator.class);
 	private static final Set<String> SCHEMA_NAMES;
 
@@ -129,7 +131,7 @@ class SchemaBaseValidator implements IValidatorModule {
 		ourLog.debug("Going to load resource: {}", pathToBase);
 		InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
 		if (baseIs == null) {
-			throw new InternalErrorException("Schema not found. " + SchematronBaseValidator.RESOURCES_JAR_NOTE);
+			throw new InternalErrorException("Schema not found. " + RESOURCES_JAR_NOTE);
 		}
 		baseIs = new BOMInputStream(baseIs, false);
 		InputStreamReader baseReader = new InputStreamReader(baseIs, Charset.forName("UTF-8"));
