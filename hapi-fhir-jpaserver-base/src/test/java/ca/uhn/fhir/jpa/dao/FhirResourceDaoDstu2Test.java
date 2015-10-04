@@ -804,6 +804,205 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	public void testDeleteWithMatchUrlChainedString() {
+		String methodName = "testDeleteWithMatchUrlChainedString";
+
+		Organization org = new Organization();
+		org.setName(methodName);
+		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.getManagingOrganization().setReference(orgId);
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		ourLog.info("Created patient, got it: {}", id);
+
+		myPatientDao.deleteByUrl("Patient?organization.name=" + methodName);
+
+		assertGone(id);
+	}
+
+	@Test
+	public void testDeleteWithMatchUrlChainedTag() {
+		String methodName = "testDeleteWithMatchUrlChainedString";
+
+		TagList tl = new TagList();
+		tl.addTag("http://foo", "term");
+		
+		Organization org = new Organization();
+		ResourceMetadataKeyEnum.TAG_LIST.put(org, tl);
+		org.setName(methodName);
+		
+		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.getManagingOrganization().setReference(orgId);
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		ourLog.info("Created patient, got it: {}", id);
+
+		myPatientDao.deleteByUrl("Patient?organization._tag=http://foo|term");
+		assertGone(id);
+		
+		myOrganizationDao.deleteByUrl("Organization?_tag=http://foo|term");
+		try {
+			myOrganizationDao.read(orgId);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		try {
+			myPatientDao.deleteByUrl("Patient?organization._tag.identifier=http://foo|term");
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid parameter chain: organization._tag.identifier", e.getMessage());
+		}
+
+		try {
+			myOrganizationDao.deleteByUrl("Organization?_tag.identifier=http://foo|term");
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid parameter chain: _tag.identifier", e.getMessage());
+		}
+
+	}
+
+	
+	@Test
+	public void testDeleteWithMatchUrlQualifierMissing() {
+		String methodName = "testDeleteWithMatchUrlChainedProfile";
+
+		/*
+		 * Org 2 has no name
+		 */
+
+		Organization org1 = new Organization();
+		org1.addIdentifier().setValue(methodName);
+		IIdType org1Id = myOrganizationDao.create(org1).getId().toUnqualifiedVersionless();
+
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p1.getManagingOrganization().setReference(org1Id);
+		IIdType patId1 = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+
+		/*
+		 * Org 2 has a name
+		 */
+		
+		Organization org2 = new Organization();
+		org2.setName(methodName);		
+		org2.addIdentifier().setValue(methodName);
+		IIdType org2Id = myOrganizationDao.create(org2).getId().toUnqualifiedVersionless();
+
+		Patient p2 = new Patient();
+		p2.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p2.getManagingOrganization().setReference(org2Id);
+		IIdType patId2 = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+		ourLog.info("Pat ID 1 : {}", patId1);
+		ourLog.info("Org ID 1 : {}", org1Id);
+		ourLog.info("Pat ID 2 : {}", patId2);
+		ourLog.info("Org ID 2 : {}", org2Id);
+		
+		myPatientDao.deleteByUrl("Patient?organization.name:missing=true");
+		assertGone(patId1);
+		assertNotGone(patId2);
+		assertNotGone(org1Id);
+		assertNotGone(org2Id);
+		
+		myOrganizationDao.deleteByUrl("Organization?name:missing=true");
+		assertGone(patId1);
+		assertNotGone(patId2);
+		assertGone(org1Id);
+		assertNotGone(org2Id);
+
+		myPatientDao.deleteByUrl("Patient?organization.name:missing=false");
+		assertGone(patId1);
+		assertGone(patId2);
+		assertGone(org1Id);
+		assertNotGone(org2Id);
+		
+		myOrganizationDao.deleteByUrl("Organization?name:missing=false");
+		assertGone(patId1);
+		assertGone(patId2);
+		assertGone(org1Id);
+		assertGone(org2Id);
+	}
+
+	/**
+	 * This gets called from assertGone too! Careful about exceptions...
+	 */
+	private void assertNotGone(IIdType theId) {
+		if ("Patient".equals(theId.getResourceType())) {
+			myPatientDao.read(theId);
+		} else if ("Organization".equals(theId.getResourceType())){
+			myOrganizationDao.read(theId);
+		} else {
+			fail("No type");
+		}
+	}
+	private void assertGone(IIdType theId) {
+		try {
+			assertNotGone(theId);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+	}
+
+	
+	
+	@Test
+	public void testDeleteWithMatchUrlChainedProfile() {
+		String methodName = "testDeleteWithMatchUrlChainedProfile";
+
+		List<IdDt> profileList = new ArrayList<IdDt>();
+		profileList.add(new IdDt("http://foo"));
+		
+		Organization org = new Organization();
+		ResourceMetadataKeyEnum.PROFILES.put(org, profileList);
+		org.setName(methodName);
+		
+		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.getManagingOrganization().setReference(orgId);
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		ourLog.info("Created patient, got it: {}", id);
+
+		myPatientDao.deleteByUrl("Patient?organization._profile=http://foo");
+		assertGone(id);
+		
+		myOrganizationDao.deleteByUrl("Organization?_profile=http://foo");
+		try {
+			myOrganizationDao.read(orgId);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		try {
+			myPatientDao.deleteByUrl("Patient?organization._profile.identifier=http://foo");
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid parameter chain: organization._profile.identifier", e.getMessage());
+		}
+
+		try {
+			myOrganizationDao.deleteByUrl("Organization?_profile.identifier=http://foo");
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid parameter chain: _profile.identifier", e.getMessage());
+		}
+
+	}
+
+	@Test
 	public void testDeleteWithMatchUrl() {
 		String methodName = "testDeleteWithMatchUrl";
 
@@ -840,8 +1039,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	}
 
-
-	
 	@Test
 	public void testHistoryByForcedId() {
 		IIdType idv1;
@@ -1583,20 +1780,20 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testReadInvalidVersion() throws Exception {
 		String methodName = "testReadInvalidVersion";
-		
+
 		Patient pat = new Patient();
 		pat.addIdentifier().setSystem("urn:system").setValue(methodName);
 		IIdType id = myPatientDao.create(pat).getId();
 
 		assertEquals(methodName, myPatientDao.read(id).getIdentifier().get(0).getValue());
-		
+
 		try {
 			myPatientDao.read(id.withVersion("0"));
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("Version \"0\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
 		}
-		
+
 		try {
 			myPatientDao.read(id.withVersion("2"));
 			fail();
@@ -1619,6 +1816,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 
 	}
+
 	@Test
 	public void testReadWithDeletedResource() {
 		String methodName = "testReadWithDeletedResource";
@@ -1628,12 +1826,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		IIdType id = myPatientDao.create(patient).getId().toVersionless();
 		myPatientDao.delete(id);
 
-		try {
-			myPatientDao.read(id);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
+		assertGone(id);
 
 		patient.setId(id);
 		patient.addAddress().addLine("AAA");
@@ -1925,7 +2118,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		Observation o = new Observation();
 		o.getCode().setText("testSortByComposite");
 		myObservationDao.create(o);
-		
+
 		SearchParameterMap pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_CODE_VALUE_CONCEPT));
 		try {
@@ -2039,13 +2232,13 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testSortNoMatches() {
 		String methodName = "testSortNoMatches";
-		
+
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		IIdType id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
-		
+
 		SearchParameterMap map;
-		
+
 		map = new SearchParameterMap();
 		map.add(BaseResource.SP_RES_ID, new StringParam(id1.getIdPart()));
 		map.setLastUpdated(new DateRangeParam("2001", "2003"));
@@ -2059,7 +2252,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), empty());
 
 	}
-	
+
 	@Test
 	public void testSortById() {
 		String methodName = "testSortBTyId";

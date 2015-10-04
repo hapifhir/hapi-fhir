@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
@@ -55,16 +56,19 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirInstanceValidator;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidationSupport;
+import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.ValidationSupportChain;
+import net.sourceforge.cobertura.CoverageIgnore;
 
 public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResourceDao<T> {
 
 	/**
 	 * TODO: set this to required after the next release
 	 */
-	@Autowired(required=false)
+	@Autowired(required = false)
 	@Qualifier("myJpaValidationSupportDstu2")
 	private IValidationSupport myJpaValidationSupport;
 
@@ -114,21 +118,23 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 			}
 			return new MethodOutcome(new IdDt(theId.getValue()), oo);
 		}
-		
+
 		FhirValidator validator = getContext().newValidator();
 
 		FhirInstanceValidator val = new FhirInstanceValidator();
 		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
 		val.setValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), myJpaValidationSupport));
 		validator.registerValidatorModule(val);
-		
+
+		validator.registerValidatorModule(new IdChecker(theMode));
+
 		ValidationResult result;
 		if (isNotBlank(theRawResource)) {
 			result = validator.validateWithResult(theRawResource);
 		} else {
 			result = validator.validateWithResult(theResource);
 		}
-		
+
 		if (result.isSuccessful()) {
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setOperationOutcome((OperationOutcome) result.toOperationOutcome());
@@ -136,7 +142,38 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 		} else {
 			throw new PreconditionFailedException("Validation failed", result.toOperationOutcome());
 		}
-		
+
+	}
+
+	private class IdChecker implements IValidatorModule {
+
+		private ValidationModeEnum myMode;
+
+		public IdChecker(ValidationModeEnum theMode) {
+			myMode = theMode;
+		}
+
+		@Override
+		public void validateResource(IValidationContext<IBaseResource> theCtx) {
+			boolean hasId = theCtx.getResource().getIdElement().hasIdPart();
+			if (myMode == ValidationModeEnum.CREATE) {
+				if (hasId) {
+					throw new InvalidRequestException("Resource has an ID - ID must not be populated for a FHIR create");
+				}
+			} else if (myMode == ValidationModeEnum.UPDATE) {
+				if (hasId == false) {
+					throw new InvalidRequestException("Resource has no ID - ID must be populated for a FHIR update");
+				}
+			}
+
+		}
+
+		@CoverageIgnore
+		@Override
+		public void validateBundle(IValidationContext<Bundle> theContext) {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
 }

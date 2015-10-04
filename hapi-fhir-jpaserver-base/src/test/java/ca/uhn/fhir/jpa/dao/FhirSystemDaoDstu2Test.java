@@ -60,9 +60,7 @@ import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -75,6 +73,13 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu2Test.class);
 
+	@Test
+	public void testTransactionFromBundle6() throws Exception {
+		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/simone_bundle3.xml");
+		String bundle = IOUtils.toString(bundleRes);
+		mySystemDao.transaction(myFhirCtx.newXmlParser().parseResource(Bundle.class, bundle));
+	}
+	
 	@Test
 	public void testRendexing() {
 		Patient p = new Patient();
@@ -278,6 +283,23 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testTransactionWithInvalidType() {
+		Bundle request = new Bundle();
+		request.setType(BundleTypeEnum.SEARCH_RESULTS);
+		Patient p = new Patient();
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.POST);
+
+		try {
+			mySystemDao.transaction(request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unable to process transaction where incoming Bundle.type = searchset", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void testEverythingType() {
+		
 		Bundle request = new Bundle();
 		request.setType(BundleTypeEnum.SEARCH_RESULTS);
 		Patient p = new Patient();

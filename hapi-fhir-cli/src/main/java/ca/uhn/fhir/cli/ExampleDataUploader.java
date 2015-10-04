@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cli;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,7 +29,6 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryRequest;
-import ca.uhn.fhir.model.dstu2.resource.DataElement;
 import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -61,9 +61,14 @@ public class ExampleDataUploader extends BaseCommand {
 		opt.setRequired(false);
 		options.addOption(opt);
 
-		opt = new Option("t", "target", true, "Base URL for the target server");
+		opt = new Option("t", "target", true, "Base URL for the target server (e.g. \"http://example.com/fhir\")");
 		opt.setRequired(true);
 		options.addOption(opt);
+
+		opt = new Option("l", "limit", true, "Sets a limit to the number of resources the uploader will try to upload");
+		opt.setRequired(false);
+		options.addOption(opt);
+
 		return options;
 	}
 
@@ -75,6 +80,15 @@ public class ExampleDataUploader extends BaseCommand {
 			throw new ParseException("No target server (-t) specified");
 		} else if (targetServer.startsWith("http") == false) {
 			throw new ParseException("Invalid target server specified, must begin with 'http'");
+		}
+		Integer limit = null;
+		String limitString = theCommandLine.getOptionValue('l');
+		if (isNotBlank(limitString)) {
+			try {
+			limit = Integer.parseInt(limitString);
+			} catch (NumberFormatException e) {
+				throw new ParseException("Invalid number for limit (-l) option, must be a number: " + limitString);
+			}
 		}
 
 		FhirContext ctx = FhirContext.forDstu2();
@@ -100,7 +114,13 @@ public class ExampleDataUploader extends BaseCommand {
 
 		Bundle bundle = new Bundle();
 
+		int count = 0;
 		while (true) {
+			count++;
+			if (limit != null && count > limit) {
+				break;
+			}
+			
 			ZipEntry nextEntry = zis.getNextEntry();
 			if (nextEntry == null) {
 				break;

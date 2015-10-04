@@ -366,4 +366,83 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 
 	}
 
+
+	@Test
+	public void testSubscriptionResourcesAppear2() throws Exception {
+		myDaoConfig.setSubscriptionPollDelay(0);
+
+		String methodName = "testSubscriptionResourcesAppear2";
+		Patient p = new Patient();
+		p.addName().addFamily(methodName);
+		IIdType pId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		Observation obs = new Observation();
+		obs.getSubject().setReference(pId);
+		obs.setStatus(ObservationStatusEnum.FINAL);
+		myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+
+		Subscription subs;
+
+		/*
+		 * Create 2 identical subscriptions
+		 */
+
+		subs = new Subscription();
+		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
+		subs.setCriteria("Observation?subject=Patient/" + pId.getIdPart());
+		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
+		Long subsId1 = mySubscriptionDao.getSubscriptionTablePidForSubscriptionResource(mySubscriptionDao.create(subs).getId());
+
+		assertNull(mySubscriptionTableDao.findOne(subsId1).getLastClientPoll());
+
+		Thread.sleep(100);
+		ourLog.info("Before: {}", System.currentTimeMillis());
+
+		obs = new Observation();
+		obs.getSubject().setReference(pId);
+		obs.setStatus(ObservationStatusEnum.FINAL);
+		IIdType afterId1 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+
+		obs = new Observation();
+		obs.getSubject().setReference(pId);
+		obs.setStatus(ObservationStatusEnum.FINAL);
+		IIdType afterId2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+
+		Thread.sleep(100);
+
+		ourLog.info("After: {}", System.currentTimeMillis());
+
+		List<IBaseResource> results;
+		List<IIdType> resultIds;
+
+		mySubscriptionDao.pollForNewUndeliveredResources();
+		assertEquals(2, mySubscriptionFlaggedResourceDataDao.count());
+
+		Thread.sleep(100);
+		
+		mySubscriptionDao.pollForNewUndeliveredResources();
+		assertEquals(2, mySubscriptionFlaggedResourceDataDao.count());
+		
+		Thread.sleep(100);
+		
+		mySubscriptionDao.pollForNewUndeliveredResources();
+		assertEquals(2, mySubscriptionFlaggedResourceDataDao.count());
+
+		Thread.sleep(100);
+		
+		obs = new Observation();
+		obs.getSubject().setReference(pId);
+		obs.setStatus(ObservationStatusEnum.FINAL);
+		myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+
+		mySubscriptionDao.pollForNewUndeliveredResources();
+		assertEquals(3, mySubscriptionFlaggedResourceDataDao.count());
+		
+		Thread.sleep(100);
+		
+		mySubscriptionDao.pollForNewUndeliveredResources();
+		assertEquals(3, mySubscriptionFlaggedResourceDataDao.count());
+	}
+
+
 }

@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 
@@ -126,6 +127,70 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		assertThat(ooString, containsString("StructureDefinition reference \\\"" + profileUri + "\\\" could not be resolved"));
 
 	}
+	
+	@Test
+	public void testValidateForCreate() {
+		String methodName = "testValidateForCreate";
+		
+		Patient pat = new Patient();
+		pat.setId("Patient/123");
+		pat.addName().addFamily(methodName);
+		
+		try {
+			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.CREATE, null);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("ID must not be populated"));
+		}
+
+		pat.setId("");
+		myPatientDao.validate(pat, null, null, null, ValidationModeEnum.CREATE, null);
+
+	}
+	
+	@Test
+	public void testValidateForUpdate() {
+		String methodName = "testValidateForUpdate";
+		
+		Patient pat = new Patient();
+		pat.setId("Patient/123");
+		pat.addName().addFamily(methodName);
+		myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null);
+
+		pat.setId("");
+		
+		try {
+			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("ID must be populated"));
+		}
+
+	}
+
+	@Test
+	public void testValidateForUpdateWithContained() {
+		String methodName = "testValidateForUpdate";
+		
+		Organization org = new Organization();
+		org.setId("#123");
+		
+		Patient pat = new Patient();
+		pat.setId("Patient/123");
+		pat.addName().addFamily(methodName);
+		myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null);
+
+		pat.setId("");
+		
+		try {
+			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("ID must be populated"));
+		}
+
+	}
+
 	
 	@Test
 	public void testValidateForDelete() {

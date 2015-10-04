@@ -23,8 +23,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -93,12 +91,14 @@ import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -110,8 +110,13 @@ import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriAndListParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -120,8 +125,35 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
+import net.sourceforge.cobertura.CoverageIgnore;
 
 public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
+
+	/**
+	 * These are parameters which are supported by {@link BaseHapiFhirResourceDao#searchForIds(Map)}
+	 */
+	protected static final Map<String, Class<? extends IQueryParameterType>> RESOURCE_META_PARAMS;
+	/**
+	 * These are parameters which are supported by {@link BaseHapiFhirResourceDao#searchForIds(Map)}
+	 */
+	protected static final Map<String, Class<? extends IQueryParameterAnd<?>>> RESOURCE_META_AND_PARAMS;
+
+	static {
+		Map<String, Class<? extends IQueryParameterType>> resourceMetaParams = new HashMap<String, Class<? extends IQueryParameterType>>();
+		Map<String, Class<? extends IQueryParameterAnd<?>>> resourceMetaAndParams = new HashMap<String, Class<? extends IQueryParameterAnd<?>>>();
+		resourceMetaParams.put(BaseResource.SP_RES_ID, StringParam.class);
+		resourceMetaAndParams.put(BaseResource.SP_RES_ID, StringAndListParam.class);
+		resourceMetaParams.put(BaseResource.SP_RES_LANGUAGE, StringParam.class);
+		resourceMetaAndParams.put(BaseResource.SP_RES_LANGUAGE, StringAndListParam.class);
+		resourceMetaParams.put(Constants.PARAM_TAG, TokenParam.class);
+		resourceMetaAndParams.put(Constants.PARAM_TAG, TokenAndListParam.class);
+		resourceMetaParams.put(Constants.PARAM_PROFILE, UriParam.class);
+		resourceMetaAndParams.put(Constants.PARAM_PROFILE, UriAndListParam.class);
+		resourceMetaParams.put(Constants.PARAM_SECURITY, TokenParam.class);
+		resourceMetaAndParams.put(Constants.PARAM_SECURITY, TokenAndListParam.class);
+		RESOURCE_META_PARAMS = Collections.unmodifiableMap(resourceMetaParams);
+		RESOURCE_META_AND_PARAMS = Collections.unmodifiableMap(resourceMetaAndParams);
+	}
 
 	public static final long INDEX_STATUS_INDEXED = Long.valueOf(1L);
 	public static final long INDEX_STATUS_INDEXING_FAILED = Long.valueOf(2L);
@@ -703,6 +735,30 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return false;
 	}
 
+	@CoverageIgnore
+	protected static IQueryParameterAnd<?> newInstanceAnd(String chain) {
+		IQueryParameterAnd<?> type;
+		Class<? extends IQueryParameterAnd<?>> clazz = RESOURCE_META_AND_PARAMS.get(chain);
+		try {
+			type = clazz.newInstance();
+		} catch (Exception e) {
+			throw new InternalErrorException("Failure creating instance of " + clazz, e);
+		}
+		return type;
+	}
+
+	@CoverageIgnore
+	protected static IQueryParameterType newInstanceType(String chain) {
+		IQueryParameterType type;
+		Class<? extends IQueryParameterType> clazz = RESOURCE_META_PARAMS.get(chain);
+		try {
+			type = clazz.newInstance();
+		} catch (Exception e) {
+			throw new InternalErrorException("Failure creating instance of " + clazz, e);
+		}
+		return type;
+	}
+
 	protected <R extends IResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType) {
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(theResourceType);
 
@@ -745,13 +801,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 			String paramName = next.getName();
 			String qualifier = null;
-			for (int i = 0; i < paramMap.size(); i++) {
+			for (int i = 0; i < paramName.length(); i++) {
 				switch (paramName.charAt(i)) {
 				case '.':
 				case ':':
 					qualifier = paramName.substring(i);
 					paramName = paramName.substring(0, i);
-					i = Integer.MAX_VALUE;
+					i = Integer.MAX_VALUE - 1;
 					break;
 				}
 			}
@@ -787,17 +843,24 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				continue;
 			}
 
-			if (nextParamName.startsWith("_")) {
-				continue;
+			if (RESOURCE_META_PARAMS.containsKey(nextParamName)) {
+				if (isNotBlank(paramList.get(0).getQualifier()) && paramList.get(0).getQualifier().startsWith(".")) {
+					throw new InvalidRequestException("Invalid parameter chain: " + nextParamName + paramList.get(0).getQualifier()); 
+				}
+				IQueryParameterAnd<?> type = newInstanceAnd(nextParamName);
+				type.setValuesAsQueryTokens((paramList));
+				paramMap.add(nextParamName, type);
+			} else if (nextParamName.startsWith("_")) {
+				// ignore these since they aren't search params (e.g. _sort)
+			} else {
+				RuntimeSearchParam paramDef = resourceDef.getSearchParam(nextParamName);
+				if (paramDef == null) {
+					throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);
+				}
+	
+				IQueryParameterAnd<?> param = MethodUtil.parseQueryParams(paramDef, nextParamName, paramList);
+				paramMap.add(nextParamName, param);
 			}
-
-			RuntimeSearchParam paramDef = resourceDef.getSearchParam(nextParamName);
-			if (paramDef == null) {
-				throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);
-			}
-
-			IQueryParameterAnd<?> param = MethodUtil.parseQueryParams(paramDef, nextParamName, paramList);
-			paramMap.add(nextParamName, param);
 		}
 		return paramMap;
 	}

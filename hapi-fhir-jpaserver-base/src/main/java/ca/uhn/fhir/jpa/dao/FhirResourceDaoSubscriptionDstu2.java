@@ -166,6 +166,8 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 
 		mySubscriptionFlaggedResourceDataDao.save(flags);
 
+		ourLog.debug("Updating most recent match for subcription {} to {}", subscription.getId().getIdPart(), new InstantDt(mostRecentMatch));
+		
 		theSubscriptionTable.setMostRecentMatch(mostRecentMatch);
 		myEntityManager.merge(theSubscriptionTable);
 	}

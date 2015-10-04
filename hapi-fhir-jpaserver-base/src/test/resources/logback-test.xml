@@ -1,13 +1,20 @@
 <configuration>
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
 			</pattern>
 		</encoder>
 	</appender>
 
-	<logger name="org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator" additivity="false" info="debug">
+	<logger name="org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator" additivity="false" level="debug">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<logger name="ca.uhn.fhir.jpa.dao.FhirResourceDaoSubscriptionDstu2" additivity="false" level="debug">
 		<appender-ref ref="STDOUT" />
 	</logger>
 

@@ -139,6 +139,13 @@
 				of the narrative section caused an invalid
 				re-encoding when encoding to JSON.
 			</action>
+			<action type="fix">
+				Conditional deletes in JPA did not correctly 
+				process if the condition had a chain or a 
+				qualifier, e.g. "Patient?organization.name" or
+				"Patient.identifier:missing"
+
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">
