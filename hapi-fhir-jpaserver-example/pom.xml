@@ -170,6 +170,9 @@
 						<webApp>
 							<contextPath>/hapi-fhir-jpaserver-example</contextPath>
 						</webApp>
+						<webAppConfig>
+							<allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
+						</webAppConfig>
 					</configuration>
 				</plugin>
 			</plugins>
