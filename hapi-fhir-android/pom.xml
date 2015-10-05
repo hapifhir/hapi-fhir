@@ -85,11 +85,11 @@
 			We provide a dummy implementation of servlet api to reduce size 
 			and prevent from rewriting the BaseMethodBinding and friends.
 			-->
-		<!-- dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>compile</scope>
-		</dependency-->
+		</dependency>
 
 	</dependencies>
 
@@ -147,8 +147,8 @@
 							<include>org.apache.commons:*</include>
 							<include>org.apache.httpcomponents:*</include>
 							<include>commons-codec:commons-codec</include>
-							<include>javax.servlet:javax.servlet-api</include>
 							-->
+							<include>javax.servlet:javax.servlet-api</include>
 						</includes>
 					</artifactSet>
 					<relocations>
@@ -176,7 +176,7 @@
 								<!-- Exclude test stuff which depends on httpservlet -->
 								<exclude>ca/uhn/fhir/util/ITestingUiClientFactory</exclude>
 								<!-- Exclude server side stuff. This could be made nicer if code was divided into shared, server and client -->
-								<exclude>ca/uhn/fhir/rest/server/Add*</exclude>
+								<!--exclude>ca/uhn/fhir/rest/server/Add*</exclude>
 								<exclude>ca/uhn/fhir/rest/server/Apache*</exclude>
 								<exclude>ca/uhn/fhir/rest/server/Bundle*</exclude>
 								<exclude>ca/uhn/fhir/rest/server/ETag*</exclude>
@@ -192,7 +192,7 @@
 								<exclude>ca/uhn/fhir/rest/server/Search*</exclude>
 								<exclude>ca/uhn/fhir/rest/server/Simple*</exclude>
 								<exclude>ca/uhn/fhir/rest/server/audit/**</exclude>
-								<exclude>ca/uhn/fhir/rest/server/interceptor/**</exclude>
+								<exclude>ca/uhn/fhir/rest/server/interceptor/**</exclude-->
 								<!-- Exclude Phloc validator to make android libs small -->
 								<exclude>ca/uhn/fhir/validation/schematron/SchematronBaseValidator*</exclude>
 								<!-- Exclude Thymeleaf to make android libs small -->
@@ -224,15 +224,15 @@
 									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
 								</includes>
 							</artifactSet>
-							<filters>
-								<!-- Exclude server side stuff, except exceptions which are used clientside -->
+							<!-- Exclude server side stuff, except exceptions which are used clientside -->
+							<!--filters>
 								<filter>
 									<artifact>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</artifact>
 									<excludes>
 										<exclude>ca/uhn/fhir/rest/server/**</exclude>
 									</excludes>
 								</filter>
-							</filters>
+							</filters-->
 						</configuration>
 					</execution>
 					<!-- dstu2 jar -->
@@ -249,15 +249,15 @@
 									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</include>
 								</includes>
 							</artifactSet>
-							<filters>
-								<!-- Exclude server side stuff, except exceptions which are used clientside -->
+							<!-- Exclude server side stuff, except exceptions which are used clientside -->
+							<!--filters>
 								<filter>
 									<artifact>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</artifact>
 									<excludes>
 										<exclude>ca/uhn/fhir/rest/server/**</exclude>
 									</excludes>
 								</filter>
-							</filters>
+							</filters-->
 						</configuration>
 					</execution>
 				</executions>
