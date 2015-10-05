@@ -49,6 +49,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
@@ -163,7 +164,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
-	
+
 	private Set<Long> addPredicateComposite(RuntimeSearchParam theParamDef, Set<Long> thePids, List<? extends IQueryParameterType> theNextAnd) {
 		// TODO: fail if missing is set for a composite query
 
@@ -652,7 +653,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 						throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
 					}
 					List<Class<? extends IBaseResource>> resourceTypes;
-					
+
 					String resourceId;
 					if (!ref.getValue().matches("[a-zA-Z]+\\/.*")) {
 						RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
@@ -677,20 +678,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 					for (Class<? extends IBaseResource> nextType : resourceTypes) {
 						RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(nextType);
-						
+
 						IFhirResourceDao<?> dao = getDao(nextType);
 						if (dao == null) {
 							ourLog.debug("Don't have a DAO for type {}", nextType.getSimpleName());
 							continue;
 						}
-						
+
 						int qualifierIndex = chain.indexOf(':');
 						String qualifier = null;
 						if (qualifierIndex != -1) {
 							qualifier = chain.substring(qualifierIndex);
 							chain = chain.substring(0, qualifierIndex);
 						}
-						
+
 						boolean isMeta = RESOURCE_META_PARAMS.containsKey(chain);
 						RuntimeSearchParam param = null;
 						if (!isMeta) {
@@ -755,7 +756,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
 		return new HashSet<Long>(q.getResultList());
 	}
-
 
 	private Set<Long> addPredicateString(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
 		if (theList == null || theList.isEmpty()) {
@@ -1665,7 +1665,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		search.setUuid(UUID.randomUUID().toString());
 		search.setCreated(new Date());
 		myEntityManager.persist(search);
-		
+
 		List<SearchResult> results = new ArrayList<SearchResult>();
 		if (theId != null) {
 			Long pid = translateForcedIdToPid(theId);
@@ -1682,27 +1682,70 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 				results.add(res);
 			}
 		}
-		
+
+		int totalCount = results.size();
 		mySearchResultDao.save(results);
 		mySearchResultDao.flush();
-		
+
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+
+		// Load _revincludes
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-//		cq.
-		Subquery<Long> subQ = cq.subquery(Long.class);
-		Root<ResourceLink> subQfrom = subQ.from(ResourceLink.class);
-		subQ.select(subQfrom.get("mySourceResourceId").as(Long.class));
-//		subQ.where(builder.in(subQfrom.get("myTargetResourceId"), y));
-		
-		return null;
+		Root<ResourceLink> from = cq.from(ResourceLink.class);
+		cq.select(from.get("mySourceResourcePid").as(Long.class));
+
+		Subquery<Long> pidsSubquery = cq.subquery(Long.class);
+		Root<SearchResult> pidsSubqueryFrom = pidsSubquery.from(SearchResult.class);
+		pidsSubquery.select(pidsSubqueryFrom.get("myResourcePid").as(Long.class));
+		pidsSubquery.where(pidsSubqueryFrom.get("mySearch").in(search));
+
+		cq.where(from.get("myTargetResourceId").in(pidsSubquery));
+		TypedQuery<Long> query = myEntityManager.createQuery(cq);
+
+		results = new ArrayList<SearchResult>();
+		for (Long next : query.getResultList()) {
+			SearchResult res = new SearchResult(search);
+			res.setResourcePid(next);
+			results.add(res);
+		}
+
+		// Save _revincludes
+		totalCount += results.size();
+		mySearchResultDao.save(results);
+		mySearchResultDao.flush();
+
+		final int finalTotalCount = totalCount;
+		return new IBundleProvider() {
+
+			@Override
+			public int size() {
+				return finalTotalCount;
+			}
+
+			@Override
+			public Integer preferredPageSize() {
+				return null;
+			}
+
+			@Override
+			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public InstantDt getPublished() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		};
 	}
-	
-	
-	
+
 	/**
 	 * THIS SHOULD RETURN HASHSET and not jsut Set because we add to it later (so it can't be Collections.emptySet())
+	 * @param theLastUpdated 
 	 */
-	private HashSet<Long> loadReverseIncludes(Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode, EverythingModeEnum theEverythingModeEnum) {
+	private HashSet<Long> loadReverseIncludes(Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode, EverythingModeEnum theEverythingModeEnum, DateRangeParam theLastUpdated) {
 		if (theMatches.size() == 0) {
 			return new HashSet<Long>();
 		}
@@ -1718,11 +1761,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		int roundCounts = 0;
 		StopWatch w = new StopWatch();
-		
+
 		boolean addedSomeThisRound;
 		do {
 			roundCounts++;
-			
+
 			HashSet<Long> pidsToInclude = new HashSet<Long>();
 			Set<Long> nextRoundOmit = new HashSet<Long>();
 
@@ -1795,6 +1838,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 				}
 			}
 
+			if (theLastUpdated != null && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
+				pidsToInclude = new HashSet<Long>(filterResourceIdsByLastUpdated(pidsToInclude, theLastUpdated));
+			}
 			for (Long next : pidsToInclude) {
 				if (original.contains(next) == false && allAdded.contains(next) == false) {
 					theMatches.add(next);
@@ -1807,10 +1853,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			nextRoundMatches = pidsToInclude;
 		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
 
-		ourLog.info("Loaded {} {} in {} rounds and {} ms", new Object[] {
-				allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart()
-		});
-		
+		ourLog.info("Loaded {} {} in {} rounds and {} ms", new Object[] { allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart() });
+
 		return allAdded;
 	}
 
@@ -2104,7 +2148,35 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		final InstantDt now = InstantDt.withCurrentTime();
 
 		Set<Long> loadPids;
-		if (theParams.isEmpty()) {
+		if (theParams.getEverythingMode() != null) {
+
+			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
+			Root<ResourceTable> from = cq.from(ResourceTable.class);
+			List<Predicate> predicates = new ArrayList<Predicate>();
+			if (theParams.get(BaseResource.RES_ID) != null) {
+				StringParam idParm = (StringParam) theParams.get(BaseResource.RES_ID).get(0).get(0);
+				predicates.add(builder.equal(from.get("myId"), idParm.getValue()));
+			}
+			predicates.add(builder.equal(from.get("myResourceType"), myResourceName));
+			predicates.add(builder.isNull(from.get("myDeleted")));
+			cq.where(builder.and(predicates.toArray(new Predicate[predicates.size()])));
+
+			Join<Object, Object> join = from.join("myIncomingResourceLinks", JoinType.LEFT);
+			cq.multiselect(from.get("myId").as(Long.class), join.get("mySourceResourcePid").as(Long.class));
+			
+			TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
+			loadPids = new HashSet<Long>();
+			for (Tuple next : query.getResultList()) {
+				loadPids.add(next.get(0, Long.class));
+				Long nextLong = next.get(1, Long.class);
+				if(nextLong != null) {
+					loadPids.add(nextLong);
+				}
+			}
+
+		} else if (theParams.isEmpty()) {
+
 			loadPids = new HashSet<Long>();
 			TypedQuery<Tuple> query = createSearchAllByTypeQuery();
 			for (Tuple next : query.getResultList()) {
@@ -2114,42 +2186,28 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 				return new SimpleBundleProvider();
 			}
 		} else {
+
 			loadPids = searchForIdsWithAndOr(theParams);
 			if (loadPids.isEmpty()) {
 				return new SimpleBundleProvider();
 			}
 		}
 
-		// Load _include and _revinclude before filter and sort in everything mode
-		if (theParams.getEverythingMode() != null) {
-			if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty() == false) {
-				loadPids.addAll(loadReverseIncludes(loadPids, theParams.getRevIncludes(), true, theParams.getEverythingMode()));
-				loadPids.addAll(loadReverseIncludes(loadPids, theParams.getIncludes(), false, theParams.getEverythingMode()));
-			}
-		}
+		// // Load _include and _revinclude before filter and sort in everything mode
+		// if (theParams.getEverythingMode() != null) {
+		// if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty() == false) {
+		// loadPids.addAll(loadReverseIncludes(loadPids, theParams.getRevIncludes(), true, theParams.getEverythingMode()));
+		// loadPids.addAll(loadReverseIncludes(loadPids, theParams.getIncludes(), false, theParams.getEverythingMode()));
+		// }
+		// }
 
 		// Handle _lastUpdated
-		DateRangeParam lu = theParams.getLastUpdated();
+		final DateRangeParam lu = theParams.getLastUpdated();
 		if (lu != null && (lu.getLowerBoundAsInstant() != null || lu.getUpperBoundAsInstant() != null)) {
 
-			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-			Root<ResourceTable> from = cq.from(ResourceTable.class);
-			cq.select(from.get("myId").as(Long.class));
-
-			Predicate predicateIds = (from.get("myId").in(loadPids));
-			Predicate predicateLower = lu.getLowerBoundAsInstant() != null ? builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), lu.getLowerBoundAsInstant()) : null;
-			Predicate predicateUpper = lu.getUpperBoundAsInstant() != null ? builder.lessThanOrEqualTo(from.<Date> get("myUpdated"), lu.getUpperBoundAsInstant()) : null;
-			if (predicateLower != null && predicateUpper != null) {
-				cq.where(predicateIds, predicateLower, predicateUpper);
-			} else if (predicateLower != null) {
-				cq.where(predicateIds, predicateLower);
-			} else {
-				cq.where(predicateIds, predicateUpper);
-			}
-			TypedQuery<Long> query = myEntityManager.createQuery(cq);
+			List<Long> resultList = filterResourceIdsByLastUpdated(loadPids, lu);
 			loadPids.clear();
-			for (Long next : query.getResultList()) {
+			for (Long next : resultList) {
 				loadPids.add(next);
 			}
 
@@ -2165,7 +2223,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		final Set<Long> revIncludedPids;
 		if (theParams.getEverythingMode() == null) {
 			if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty() == false) {
-				revIncludedPids = loadReverseIncludes(pids, theParams.getRevIncludes(), true, null);
+				revIncludedPids = loadReverseIncludes(pids, theParams.getRevIncludes(), true, null, lu);
 			} else {
 				revIncludedPids = new HashSet<Long>();
 			}
@@ -2192,10 +2250,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 						List<Long> pidsSubList = pids.subList(theFromIndex, theToIndex);
 
 						// Load includes
-						if (theParams.getEverythingMode() == null) {
-							pidsSubList = new ArrayList<Long>(pidsSubList);
-							revIncludedPids.addAll(loadReverseIncludes(pidsSubList, theParams.getIncludes(), false, null));
-						}
+						pidsSubList = new ArrayList<Long>(pidsSubList);
+						revIncludedPids.addAll(loadReverseIncludes(pidsSubList, theParams.getIncludes(), false, null, lu));
 
 						// Execute the query and make sure we return distinct results
 						List<IBaseResource> resources = new ArrayList<IBaseResource>();
@@ -2221,6 +2277,27 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		ourLog.info(" {} on {} in {}ms", new Object[] { myResourceName, theParams, w.getMillisAndRestart() });
 
 		return retVal;
+	}
+
+	private List<Long> filterResourceIdsByLastUpdated(Set<Long> loadPids, final DateRangeParam lu) {
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.select(from.get("myId").as(Long.class));
+
+		Predicate predicateIds = (from.get("myId").in(loadPids));
+		Predicate predicateLower = lu.getLowerBoundAsInstant() != null ? builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), lu.getLowerBoundAsInstant()) : null;
+		Predicate predicateUpper = lu.getUpperBoundAsInstant() != null ? builder.lessThanOrEqualTo(from.<Date> get("myUpdated"), lu.getUpperBoundAsInstant()) : null;
+		if (predicateLower != null && predicateUpper != null) {
+			cq.where(predicateIds, predicateLower, predicateUpper);
+		} else if (predicateLower != null) {
+			cq.where(predicateIds, predicateLower);
+		} else {
+			cq.where(predicateIds, predicateUpper);
+		}
+		TypedQuery<Long> query = myEntityManager.createQuery(cq);
+		List<Long> resultList = query.getResultList();
+		return resultList;
 	}
 
 	private TypedQuery<Tuple> createSearchAllByTypeQuery() {

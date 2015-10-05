@@ -24,10 +24,11 @@ import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UnsignedIntDt;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -37,13 +38,13 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 public class FhirResourceDaoPatientDstu2 extends FhirResourceDaoDstu2<Patient>implements IFhirResourceDaoPatient<Patient> {
 
 	@Override
-	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IdDt theId, UnsignedIntDt theCount, DateRangeParam theLastUpdated, SortSpec theSort) {
+	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, UnsignedIntDt theCount, DateRangeParam theLastUpdated, SortSpec theSort) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
 		}
 
-		paramMap.setRevIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
+//		paramMap.setRevIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 		paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 		paramMap.setEverythingMode(theId != null ? EverythingModeEnum.PATIENT_INSTANCE : EverythingModeEnum.PATIENT_TYPE);
 		paramMap.setSort(theSort);

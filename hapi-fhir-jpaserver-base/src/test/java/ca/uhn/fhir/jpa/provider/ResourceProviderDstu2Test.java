@@ -41,7 +41,6 @@ import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
-import org.thymeleaf.util.UrlUtils;
 
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
@@ -53,6 +52,7 @@ import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
@@ -1047,6 +1047,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertThat(ids, not(containsInRelativeOrder(c3Id)));
 	}
 
+	// retest
 	@Test
 	public void testEverythingPatientWithLastUpdatedAndSort() throws Exception {
 		String methodName = "testEverythingWithLastUpdatedAndSort";
@@ -1438,8 +1439,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Bundle found = ourClient
 			.search()
 			.forResource(Patient.class)
-			.where(Patient.RES_ID.matches().values(id1.getIdPart(), id2.getIdPart()))
-			.and(Patient.RES_ID.matches().value(id1.getIdPart()))
+			.where(BaseResource.RES_ID.matches().values(id1.getIdPart(), id2.getIdPart()))
+			.and(BaseResource.RES_ID.matches().value(id1.getIdPart()))
 			.execute();
 		//@formatter:on
 

@@ -28,6 +28,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -38,6 +39,8 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(name = "HFJ_SEARCH", uniqueConstraints= {
 	@UniqueConstraint(name="IDX_SEARCH_UUID", columnNames="SEARCH_UUID")
+}, indexes= {
+	@Index(name="JDX_SEARCH_CREATED", columnList="CREATED")
 })
 //@formatter:on
 public class Search implements Serializable {
@@ -54,11 +57,18 @@ public class Search implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
+	@Column(name="TOTAL_COUNT")
+	private int myTotalCount;
+	
 	@Column(name="SEARCH_UUID", length=40, nullable=false)
 	private String myUuid;
 
 	public Date getCreated() {
 		return myCreated;
+	}
+
+	public int getTotalCount() {
+		return myTotalCount;
 	}
 
 	public String getUuid() {
@@ -67,6 +77,10 @@ public class Search implements Serializable {
 
 	public void setCreated(Date theCreated) {
 		myCreated = theCreated;
+	}
+
+	public void setTotalCount(int theTotalCount) {
+		myTotalCount = theTotalCount;
 	}
 	
 	public void setUuid(String theUuid) {

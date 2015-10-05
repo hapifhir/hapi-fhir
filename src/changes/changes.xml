@@ -151,6 +151,10 @@
 				by user code. Thanks to Simone Heckmann
 				pointing out that this was needed!
 			</action>
+			<action type="add">
+				Refactor JPA $everything operations so that
+				they perform better
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

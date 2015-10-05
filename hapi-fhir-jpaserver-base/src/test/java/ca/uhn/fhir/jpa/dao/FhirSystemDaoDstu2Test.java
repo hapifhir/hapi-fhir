@@ -299,7 +299,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	public void testEverythingType() {
+	public void testTransactionSingleEmptyResource() {
 		
 		Bundle request = new Bundle();
 		request.setType(BundleTypeEnum.SEARCH_RESULTS);

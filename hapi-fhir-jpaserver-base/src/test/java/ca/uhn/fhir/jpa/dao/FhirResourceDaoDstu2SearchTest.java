@@ -60,7 +60,6 @@ import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
-import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
@@ -696,6 +695,11 @@ public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 		pat.getManagingOrganization().setReference(orgId);
 		IIdType patId = myPatientDao.create(pat).getId().toUnqualifiedVersionless();
 
+		Patient pat2 = new Patient();
+		pat2.addAddress().addLine(methodName);
+		pat2.getManagingOrganization().setReference(orgId);
+		IIdType patId2 = myPatientDao.create(pat2).getId().toUnqualifiedVersionless();
+
 		MedicationOrder mo = new MedicationOrder();
 		mo.getPatient().setReference(patId);
 		mo.setMedication(new ResourceReferenceDt(medId));
@@ -703,7 +707,11 @@ public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
 		
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null);
-		assertEquals(4, resp.size());
+		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId, patId2));
+
+		request = mock(HttpServletRequest.class);
+		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null);
+		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId));
 	}
 
 
