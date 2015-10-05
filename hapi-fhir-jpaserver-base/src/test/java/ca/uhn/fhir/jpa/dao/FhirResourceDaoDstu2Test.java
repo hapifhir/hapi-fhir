@@ -822,6 +822,34 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		assertGone(id);
 	}
+	
+	
+	@Test
+	public void testDeleteWithMatchUrlChainedIdentifier() {
+		String methodName = "testDeleteWithMatchUrlChainedIdentifer";
+
+		Organization org = new Organization();
+		org.setName(methodName);
+		org.addIdentifier().setSystem("http://example.com").setValue(methodName);
+		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.getManagingOrganization().setReference(orgId);
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		ourLog.info("Created patient, got it: {}", id);
+
+		myPatientDao.deleteByUrl("Patient?organization.identifier=http://example.com|" + methodName);
+		assertGone(id);
+		assertNotGone(orgId);
+		
+		myOrganizationDao.deleteByUrl("Organization?identifier=http://example.com|" + methodName);
+		assertGone(id);
+		assertGone(orgId);
+
+	}
+	
 
 	@Test
 	public void testDeleteWithMatchUrlChainedTag() {

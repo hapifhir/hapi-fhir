@@ -282,7 +282,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 				if (parts.getResourceId() != null) {
 					dao.delete(new IdDt(parts.getResourceType(), parts.getResourceId()));
 				} else {
-					dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams());
+					dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams(), true);
 				}
 
 				newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_204_NO_CONTENT));

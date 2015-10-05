@@ -45,7 +45,7 @@ public class FhirResourceDaoEncounterDstu2 extends FhirResourceDaoDstu2<Encounte
 
 		paramMap.setRevIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 		paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
-		paramMap.setEverythingMode(EverythingModeEnum.ENCOUNTER);
+		paramMap.setEverythingMode(theId != null ? EverythingModeEnum.ENCOUNTER_INSTANCE : EverythingModeEnum.ENCOUNTER_TYPE);
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
 		if (theId != null) {

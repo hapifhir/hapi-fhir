@@ -24,9 +24,11 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -35,9 +37,14 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.phloc.commons.annotations.ContainsSoftMigration;
+
 @Entity
-@Table(name = "HFJ_RES_LINK"/* , indexes= {@Index(name="IDX_RL_TPATHRES", columnList= "SRC_PATH,TARGET_RESOURCE_ID")} */)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_RES_LINK", indexes = { @org.hibernate.annotations.Index(name = "IDX_RL_TPATHRES", columnNames = { "SRC_PATH", "TARGET_RESOURCE_ID" }) })
+@Table(name = "HFJ_RES_LINK" , indexes= {
+	@Index(name="IDX_RL_TPATHRES", columnList= "SRC_PATH,TARGET_RESOURCE_ID"), 
+	@Index(name="IDX_RL_SRC", columnList= "SRC_RESOURCE_ID"), 
+	@Index(name="IDX_RL_DEST", columnList= "TARGET_RESOURCE_ID")
+})
 public class ResourceLink implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -50,14 +57,14 @@ public class ResourceLink implements Serializable {
 	@Column(name = "SRC_PATH", length = 100, nullable = false)
 	private String mySourcePath;
 
-	@ManyToOne(optional = false)
+	@ManyToOne(optional = false, fetch=FetchType.LAZY)
 	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false)
 	private ResourceTable mySourceResource;
 
 	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
 	private Long mySourceResourcePid;
 
-	@ManyToOne(optional = false)
+	@ManyToOne(optional = false, fetch=FetchType.LAZY)
 	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false)
 	private ResourceTable myTargetResource;
 
@@ -141,8 +148,8 @@ public class ResourceLink implements Serializable {
 		StringBuilder b = new StringBuilder();
 		b.append("ResourceLink[");
 		b.append("path=").append(mySourcePath);
-		b.append(", src=").append(mySourceResource.getId());
-		b.append(", target=").append(myTargetResource.getId());
+		b.append(", src=").append(mySourceResourcePid);
+		b.append(", target=").append(myTargetResourcePid);
 
 		b.append("]");
 		return b.toString();

@@ -175,6 +175,19 @@
 						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 				
+				<h4>Search - By plain URL</h4>
+				<p>
+					You can also perform a search using a String URL, instead
+					of using the fluent method calls to build the URL. This
+					can be useful if you have a URL you retrieved from
+					somewhere else that you want to use as a search.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchUrl" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+
 				<h4>Search - Other Query Options</h4>
 				<p>
 					The fluent search also has methods for sorting, limiting, specifying

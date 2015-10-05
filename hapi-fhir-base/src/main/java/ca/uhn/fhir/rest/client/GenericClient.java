@@ -19,7 +19,8 @@ package ca.uhn.fhir.rest.client;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -144,6 +145,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 
 /**
  * @author James Agnew
@@ -724,7 +726,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public ICreateTyped conditionalByUrl(String theSearchUrl) {
-			mySearchUrl = theSearchUrl;
+			mySearchUrl = validateAndEscapeConditionalUrl(theSearchUrl);
 			return this;
 		}
 
@@ -899,8 +901,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public IDeleteTyped resourceConditionalByUrl(String theSearchUrl) {
-			Validate.notBlank(theSearchUrl, "theSearchUrl can not be blank/null");
-			mySearchUrl = theSearchUrl;
+			mySearchUrl = validateAndEscapeConditionalUrl(theSearchUrl);
 			return this;
 		}
 
@@ -1473,12 +1474,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			Validate.notNull(theParameterType, "theParameterType must not be null");
 			Validate.notEmpty(theName, "theName must not be null");
 			Validate.notNull(theValue, "theValue must not be null");
-			
+
 			myParametersDef = myContext.getResourceDefinition(theParameterType);
 			myParameters = (IBaseParameters) myParametersDef.newInstance();
-			
+
 			addParam(theName, theValue);
-			
+
 			return this;
 		}
 
@@ -1486,14 +1487,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private void addParam(String theName, IBase theValue) {
 			BaseRuntimeChildDefinition parameterChild = myParametersDef.getChildByName("parameter");
 			BaseRuntimeElementCompositeDefinition<?> parameterElem = (BaseRuntimeElementCompositeDefinition<?>) parameterChild.getChildByName("parameter");
-			
+
 			IBase parameter = parameterElem.newInstance();
 			parameterChild.getMutator().addValue(myParameters, parameter);
-			
+
 			IPrimitiveType<String> name = (IPrimitiveType<String>) myContext.getElementDefinition("string").newInstance();
 			name.setValue(theName);
 			parameterElem.getChildByName("name").getMutator().setValue(parameter, name);
-			
+
 			if (theValue instanceof IBaseDatatype) {
 				String childElementName = "value" + StringUtils.capitalize(myContext.getElementDefinition(theValue.getClass()).getName());
 				parameterElem.getChildByName(childElementName).getMutator().setValue(parameter, theValue);
@@ -1782,10 +1783,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private List<TokenParam> mySecurity = new ArrayList<TokenParam>();
 		private List<SortInternal> mySort = new ArrayList<SortInternal>();
 		private List<TokenParam> myTags = new ArrayList<TokenParam>();
+		private String mySearchUrl;
 
 		public SearchInternal() {
 			myResourceType = null;
 			myResourceName = null;
+			mySearchUrl = null;
 		}
 
 		@Override
@@ -1857,7 +1860,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			IdDt resourceId = myResourceId != null ? new IdDt(myResourceId) : null;
 
-			BaseHttpClientInvocation invocation = SearchMethodBinding.createSearchInvocation(myContext, myResourceName, params, resourceId, myCompartmentName, mySearchStyle);
+			BaseHttpClientInvocation invocation;
+			if (mySearchUrl != null) {
+				invocation = SearchMethodBinding.createSearchInvocation(mySearchUrl, params);
+			} else {
+				invocation = SearchMethodBinding.createSearchInvocation(myContext, myResourceName, params, resourceId, myCompartmentName, mySearchStyle);
+			}
 
 			return invoke(params, binding, invocation);
 
@@ -1972,6 +1980,34 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IQuery<Object> withTag(String theSystem, String theCode) {
 			Validate.notBlank(theCode, "theCode must not be null or empty");
 			myTags.add(new TokenParam(theSystem, theCode));
+			return this;
+		}
+
+		@Override
+		public IQuery byUrl(String theSearchUrl) {
+			Validate.notBlank(theSearchUrl, "theSearchUrl must not be blank/null");
+
+			if (theSearchUrl.startsWith("http://") || theSearchUrl.startsWith("https://")) {
+				mySearchUrl = theSearchUrl;
+				int qIndex = mySearchUrl.indexOf('?');
+				if (qIndex != -1) {
+					mySearchUrl = mySearchUrl.substring(0, qIndex) + validateAndEscapeConditionalUrl(mySearchUrl.substring(qIndex));
+				}
+			} else {
+				String searchUrl = theSearchUrl;
+				if (searchUrl.startsWith("/")) {
+					searchUrl = searchUrl.substring(1);
+				}
+				if (!searchUrl.matches("[a-zA-Z]+($|\\?.*)")) {
+					throw new IllegalArgumentException("Search URL must be either a complete URL starting with http: or https:, or a relative FHIR URL in the form [ResourceType]?[Params]");
+				}
+				int qIndex = searchUrl.indexOf('?');
+				if (qIndex == -1) {
+					mySearchUrl = getUrlBase() + '/' + searchUrl;
+				} else {
+					mySearchUrl = getUrlBase() + '/' + validateAndEscapeConditionalUrl(searchUrl);
+				}
+			}
 			return this;
 		}
 
@@ -2154,7 +2190,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public IUpdateTyped conditionalByUrl(String theSearchUrl) {
-			mySearchUrl = theSearchUrl;
+			mySearchUrl = validateAndEscapeConditionalUrl(theSearchUrl);
 			return this;
 		}
 
@@ -2288,6 +2324,36 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+	}
+
+	private static String validateAndEscapeConditionalUrl(String theSearchUrl) {
+		Validate.notBlank(theSearchUrl, "Conditional URL can not be blank/null");
+		StringBuilder b = new StringBuilder();
+		boolean haveHadQuestionMark = false;
+		for (int i = 0; i < theSearchUrl.length(); i++) {
+			char nextChar = theSearchUrl.charAt(i);
+			if (!haveHadQuestionMark) {
+				if (nextChar == '?') {
+					haveHadQuestionMark = true;
+				} else if (!Character.isLetter(nextChar)) {
+					throw new IllegalArgumentException("Conditional URL must be in the format \"[ResourceType]?[Params]\" and must not have a base URL - Found: " + theSearchUrl);
+				}
+				b.append(nextChar);
+			} else {
+				switch (nextChar) {
+				case '|':
+				case '?':
+				case '$':
+				case ':':
+					b.append(UrlUtil.escape(Character.toString(nextChar)));
+					break;
+				default:
+					b.append(nextChar);
+					break;
+				}
+			}
+		}
+		return b.toString();
 	}
 
 }

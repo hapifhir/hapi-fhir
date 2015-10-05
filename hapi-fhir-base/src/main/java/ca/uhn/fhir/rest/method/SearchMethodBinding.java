@@ -477,4 +477,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	}
 
+	public static BaseHttpClientInvocation createSearchInvocation(String theSearchUrl, Map<String, List<String>> theParams) {
+		return new HttpGetClientInvocation(theParams, theSearchUrl);
+	}
+
 }

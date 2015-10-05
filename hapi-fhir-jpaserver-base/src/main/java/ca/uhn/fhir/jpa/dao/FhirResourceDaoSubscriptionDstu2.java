@@ -38,6 +38,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,7 +93,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	@Override
-	public void pollForNewUndeliveredResources() {
+	public synchronized void pollForNewUndeliveredResources() {
 		if (getConfig().isSubscriptionEnabled() == false) {
 			return;
 		}
@@ -106,7 +107,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		List<SubscriptionTable> subscriptions = q.getResultList();
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		for (final SubscriptionTable nextSubscriptionTable : subscriptions) {
 			txTemplate.execute(new TransactionCallback<Void>() {
 				@Override
@@ -253,7 +254,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	}
 
 	@Override
-	public List<IBaseResource> getUndeliveredResourcesAndPurge(Long theSubscriptionPid) {
+	public synchronized List<IBaseResource> getUndeliveredResourcesAndPurge(Long theSubscriptionPid) {
 		List<IBaseResource> retVal = new ArrayList<IBaseResource>();
 		Page<SubscriptionFlaggedResource> flaggedResources = mySubscriptionFlaggedResourceDataDao.findAllBySubscriptionId(theSubscriptionPid, new PageRequest(0, 100));
 		for (SubscriptionFlaggedResource nextFlaggedResource : flaggedResources) {
@@ -295,7 +296,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 			ourLog.info("Deleting inactive subscription {} - Created {}, last client poll {}",
 					new Object[] { subscriptionId.toUnqualified(), subscriptionTable.getCreated(), subscriptionTable.getLastClientPoll() });
 			TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-			txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 			txTemplate.execute(new TransactionCallback<Void>() {
 				@Override
 				public Void doInTransaction(TransactionStatus theStatus) {

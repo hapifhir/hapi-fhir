@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
@@ -75,6 +76,7 @@ import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseTag;
@@ -88,6 +90,8 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.StopWatch;
@@ -157,6 +161,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
 
+	@Autowired
+	private ISearchResultDao mySearchResultDao;
+	
 	private Set<Long> addPredicateComposite(RuntimeSearchParam theParamDef, Set<Long> thePids, List<? extends IQueryParameterType> theNextAnd) {
 		// TODO: fail if missing is set for a composite query
 
@@ -625,9 +632,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			if (params instanceof ReferenceParam) {
 				ReferenceParam ref = (ReferenceParam) params;
 
-				String resourceId = ref.getValueAsQueryToken();
-
 				if (isBlank(ref.getChain())) {
+					String resourceId = ref.getValueAsQueryToken();
 					if (resourceId.contains("/")) {
 						IIdType dt = new IdDt(resourceId);
 						resourceId = dt.getIdPart();
@@ -646,13 +652,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 						throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
 					}
 					List<Class<? extends IBaseResource>> resourceTypes;
-					if (isBlank(ref.getResourceType())) {
+					
+					String resourceId;
+					if (!ref.getValue().matches("[a-zA-Z]+\\/.*")) {
 						RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
 						resourceTypes = resDef.getResourceTypes();
+						resourceId = ref.getValue();
 					} else {
 						resourceTypes = new ArrayList<Class<? extends IBaseResource>>();
 						RuntimeResourceDefinition resDef = getContext().getResourceDefinition(ref.getResourceType());
 						resourceTypes.add(resDef.getImplementingClass());
+						resourceId = ref.getIdPart();
 					}
 
 					boolean foundChainMatch = false;
@@ -1348,11 +1358,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 	@Override
 	public DaoMethodOutcome deleteByUrl(String theUrl) {
+		return deleteByUrl(theUrl, false);
+	}
+
+	@Override
+	public DaoMethodOutcome deleteByUrl(String theUrl, boolean theInTransaction) {
 		StopWatch w = new StopWatch();
 
 		Set<Long> resource = processMatchUrl(theUrl, myResourceType);
 		if (resource.isEmpty()) {
-			throw new ResourceNotFoundException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "unableToDeleteNotFound", theUrl));
+			if (!theInTransaction) {
+				throw new ResourceNotFoundException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "unableToDeleteNotFound", theUrl));
+			} else {
+				return new DaoMethodOutcome();
+			}
 		} else if (resource.size() > 1) {
 			if (myDaoConfig.isAllowMultipleDelete() == false) {
 				throw new PreconditionFailedException(getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resource.size()));
@@ -1640,6 +1659,46 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		}
 	}
 
+	@Override
+	public IBundleProvider everything(IIdType theId) {
+		Search search = new Search();
+		search.setUuid(UUID.randomUUID().toString());
+		search.setCreated(new Date());
+		myEntityManager.persist(search);
+		
+		List<SearchResult> results = new ArrayList<SearchResult>();
+		if (theId != null) {
+			Long pid = translateForcedIdToPid(theId);
+			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
+			validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
+			SearchResult res = new SearchResult(search);
+			res.setResourcePid(pid);
+			results.add(res);
+		} else {
+			TypedQuery<Tuple> query = createSearchAllByTypeQuery();
+			for (Tuple next : query.getResultList()) {
+				SearchResult res = new SearchResult(search);
+				res.setResourcePid(next.get(0, Long.class));
+				results.add(res);
+			}
+		}
+		
+		mySearchResultDao.save(results);
+		mySearchResultDao.flush();
+		
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+//		cq.
+		Subquery<Long> subQ = cq.subquery(Long.class);
+		Root<ResourceLink> subQfrom = subQ.from(ResourceLink.class);
+		subQ.select(subQfrom.get("mySourceResourceId").as(Long.class));
+//		subQ.where(builder.in(subQfrom.get("myTargetResourceId"), y));
+		
+		return null;
+	}
+	
+	
+	
 	/**
 	 * THIS SHOULD RETURN HASHSET and not jsut Set because we add to it later (so it can't be Collections.emptySet())
 	 */
@@ -1650,15 +1709,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		if (theRevIncludes == null || theRevIncludes.isEmpty()) {
 			return new HashSet<Long>();
 		}
-		String fieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
+		String searchFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
 
 		Collection<Long> nextRoundMatches = theMatches;
 		HashSet<Long> allAdded = new HashSet<Long>();
 		HashSet<Long> original = new HashSet<Long>(theMatches);
 		ArrayList<Include> includes = new ArrayList<Include>(theRevIncludes);
 
+		int roundCounts = 0;
+		StopWatch w = new StopWatch();
+		
 		boolean addedSomeThisRound;
 		do {
+			roundCounts++;
+			
 			HashSet<Long> pidsToInclude = new HashSet<Long>();
 			Set<Long> nextRoundOmit = new HashSet<Long>();
 
@@ -1671,13 +1735,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 				boolean matchAll = "*".equals(nextInclude.getValue());
 				if (matchAll) {
 					String sql;
-					sql = "SELECT r FROM ResourceLink r WHERE r." + fieldName + " IN (:target_pids)";
+					sql = "SELECT r FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids)";
 					TypedQuery<ResourceLink> q = myEntityManager.createQuery(sql, ResourceLink.class);
 					q.setParameter("target_pids", nextRoundMatches);
 					List<ResourceLink> results = q.getResultList();
 					for (ResourceLink resourceLink : results) {
 						if (theReverseMode) {
-							if (theEverythingModeEnum == EverythingModeEnum.ENCOUNTER) {
+							if (theEverythingModeEnum.isEncounter()) {
 								if (resourceLink.getSourcePath().equals("Encounter.subject") || resourceLink.getSourcePath().equals("Encounter.patient")) {
 									nextRoundOmit.add(resourceLink.getSourceResourcePid());
 								}
@@ -1715,7 +1779,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 					}
 
 					for (String nextPath : paths) {
-						String sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + fieldName + " IN (:target_pids)";
+						String sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
 						TypedQuery<ResourceLink> q = myEntityManager.createQuery(sql, ResourceLink.class);
 						q.setParameter("src_path", nextPath);
 						q.setParameter("target_pids", nextRoundMatches);
@@ -1743,6 +1807,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			nextRoundMatches = pidsToInclude;
 		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
 
+		ourLog.info("Loaded {} {} in {} rounds and {} ms", new Object[] {
+				allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart()
+		});
+		
 		return allAdded;
 	}
 
@@ -2038,15 +2106,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		Set<Long> loadPids;
 		if (theParams.isEmpty()) {
 			loadPids = new HashSet<Long>();
-			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
-			Root<ResourceTable> from = cq.from(ResourceTable.class);
-			cq.multiselect(from.get("myId").as(Long.class));
-			Predicate typeEquals = builder.equal(from.get("myResourceType"), myResourceName);
-			Predicate notDeleted = builder.isNull(from.get("myDeleted"));
-			cq.where(builder.and(typeEquals, notDeleted));
-
-			TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
+			TypedQuery<Tuple> query = createSearchAllByTypeQuery();
 			for (Tuple next : query.getResultList()) {
 				loadPids.add(next.get(0, Long.class));
 			}
@@ -2161,6 +2221,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		ourLog.info(" {} on {} in {}ms", new Object[] { myResourceName, theParams, w.getMillisAndRestart() });
 
 		return retVal;
+	}
+
+	private TypedQuery<Tuple> createSearchAllByTypeQuery() {
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.multiselect(from.get("myId").as(Long.class));
+		Predicate typeEquals = builder.equal(from.get("myResourceType"), myResourceName);
+		Predicate notDeleted = builder.isNull(from.get("myDeleted"));
+		cq.where(builder.and(typeEquals, notDeleted));
+
+		TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
+		return query;
 	}
 
 	private List<Long> processSort(final SearchParameterMap theParams, Set<Long> theLoadPids) {

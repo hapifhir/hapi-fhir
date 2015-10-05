@@ -45,7 +45,7 @@ public class FhirResourceDaoPatientDstu2 extends FhirResourceDaoDstu2<Patient>im
 
 		paramMap.setRevIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 		paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
-		paramMap.setEverythingMode(EverythingModeEnum.PATIENT);
+		paramMap.setEverythingMode(theId != null ? EverythingModeEnum.PATIENT_INSTANCE : EverythingModeEnum.PATIENT_TYPE);
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
 		if (theId != null) {

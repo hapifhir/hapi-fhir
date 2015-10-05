@@ -139,4 +139,14 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile);
 
+	/**
+	 * @param theTransaction Is this being called in a bundle? If so, don't throw an exception if no matches
+	 */
+	DaoMethodOutcome deleteByUrl(String theUrl, boolean theTransaction);
+
+	/**
+	 * Invoke the everything operation
+	 */
+	IBundleProvider everything(IIdType theId);
+
 }

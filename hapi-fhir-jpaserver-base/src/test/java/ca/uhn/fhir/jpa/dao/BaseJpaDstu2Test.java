@@ -120,7 +120,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
 	@Qualifier("myPatientDaoDstu2")
-	protected IFhirResourceDao<Patient> myPatientDao;
+	protected IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
 	@Qualifier("myPractitionerDaoDstu2")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;

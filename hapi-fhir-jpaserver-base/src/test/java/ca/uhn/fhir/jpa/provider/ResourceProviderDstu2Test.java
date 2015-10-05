@@ -41,6 +41,7 @@ import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
+import org.thymeleaf.util.UrlUtils;
 
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
@@ -94,6 +95,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.UrlUtil;
 
 public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
@@ -269,7 +271,92 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			assertThat(e.getMessage(), containsString("Question with linkId[link0]"));
 		}
 	}
+	
+	@Test
+	public void testUpdateResourceConditionalComplex() throws IOException {
+		Patient pt = new Patient();
+		pt.addIdentifier().setSystem("http://general-hospital.co.uk/Identifiers").setValue("09832345234543876876");
+		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
 
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		IdDt id;
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+		
+		pt.addName().addFamily("FOO");
+		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		HttpPut put = new HttpPut(ourServerBase + "/Patient?identifier=" + ("http://general-hospital.co.uk/Identifiers|09832345234543876876".replace("|", UrlUtil.escape("|"))));
+		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		
+		IdDt id2;
+		response = ourHttpClient.execute(put);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id2 = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+		
+		assertEquals(id.getIdPart(), id2.getIdPart());
+		assertEquals("1", id.getVersionIdPart());
+		assertEquals("2", id2.getVersionIdPart());
+	}
+
+	@Test
+	public void testCreateResourceConditionalComplex() throws IOException {
+		Patient pt = new Patient();
+		pt.addIdentifier().setSystem("http://general-hospital.co.uk/Identifiers").setValue("09832345234543876876");
+		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		IdDt id;
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+		
+		IdDt id2;
+		response = ourHttpClient.execute(post);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id2 = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+		
+//		//@formatter:off
+//		IIdType id3 = ourClient
+//			.update()
+//			.resource(pt)
+//			.conditionalByUrl("Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876")
+//			.execute().getId();
+//		//@formatter:on
+		
+		assertEquals(id.getValue(), id2.getValue());
+	}
+	
 	@Test
 	public void testCreateResourceConditional() throws IOException {
 		String methodName = "testCreateResourceConditional";
@@ -2042,7 +2129,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent());
 			ourLog.info(resp);
-			assertEquals(412, response.getStatusLine().getStatusCode());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
@@ -2069,7 +2156,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent());
 			ourLog.info(resp);
-			assertEquals(412, response.getStatusLine().getStatusCode());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();

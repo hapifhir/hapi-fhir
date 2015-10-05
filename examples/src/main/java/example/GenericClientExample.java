@@ -264,6 +264,19 @@ public class GenericClientExample {
                .execute();
          // END SNIPPET: searchCompartment
 
+         // START SNIPPET: searchUrl
+         String searchUrl = "http://example.com/base/Patient?identifier=foo";
+         
+         // Search URL can also be a relative URL in which case the client's base
+         // URL will be added to it
+         searchUrl = "Patient?identifier=foo";
+         
+         response = client.search()
+               .byUrl(searchUrl)
+               .returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+               .execute();
+         // END SNIPPET: searchUrl
+
          // START SNIPPET: searchSubsetSummary
          response = client.search()
                .forResource(Patient.class)

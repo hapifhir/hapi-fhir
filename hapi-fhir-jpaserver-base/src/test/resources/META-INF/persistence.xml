@@ -21,6 +21,8 @@
 		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamCoords</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceLink</class>
 		<class>ca.uhn.fhir.jpa.entity.ResourceTag</class>
+		<class>ca.uhn.fhir.jpa.entity.Search</class>
+		<class>ca.uhn.fhir.jpa.entity.SearchResult</class>
 		<class>ca.uhn.fhir.jpa.entity.SubscriptionTable</class>
 		<class>ca.uhn.fhir.jpa.entity.SubscriptionFlaggedResource</class>
 		<class>ca.uhn.fhir.jpa.entity.TagDefinition</class>

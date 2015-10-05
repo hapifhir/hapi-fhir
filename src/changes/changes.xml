@@ -144,7 +144,12 @@
 				process if the condition had a chain or a 
 				qualifier, e.g. "Patient?organization.name" or
 				"Patient.identifier:missing"
-
+			</action>
+			<action type="add">
+				Generic/fluent client search can now be
+				performed using a complete URL supplied
+				by user code. Thanks to Simone Heckmann
+				pointing out that this was needed!
 			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">

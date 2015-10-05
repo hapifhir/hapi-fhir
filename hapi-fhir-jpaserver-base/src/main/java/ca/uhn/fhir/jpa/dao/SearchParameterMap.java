@@ -165,7 +165,36 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	}
 
 	public enum EverythingModeEnum {
-		PATIENT, ENCOUNTER
+		//@formatter:off
+		PATIENT_TYPE(true, false, false), 
+		PATIENT_INSTANCE(true, false, true), 
+		ENCOUNTER_TYPE(false, true, false), 
+		ENCOUNTER_INSTANCE(false, true, true);
+		//@formatter:on
+
+		private final boolean myPatient;
+
+		public boolean isPatient() {
+			return myPatient;
+		}
+
+		public boolean isEncounter() {
+			return myEncounter;
+		}
+
+		public boolean isInstance() {
+			return myInstance;
+		}
+
+		private final boolean myEncounter;
+		private final boolean myInstance;
+
+		private EverythingModeEnum(boolean thePatient, boolean theEncounter, boolean theInstance) {
+			assert thePatient ^ theEncounter;
+			myPatient = thePatient;
+			myEncounter = theEncounter;
+			myInstance = theInstance;
+		}
 	}
-	
+
 }

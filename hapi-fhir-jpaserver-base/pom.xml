@@ -93,11 +93,10 @@
 		</dependency>
 
 		<!-- FHIR RI is pulled in for UCUM support, but we don't want any of its dependencies. -->
-		<!-- <dependency> <groupId>me.fhir</groupId> <artifactId>fhir-dstu1</artifactId> <version>0.0.81.2489</version> <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> 
-			<groupId>net.sf.saxon</groupId> </exclusion> <exclusion> <artifactId>commons-discovery</artifactId> <groupId>commons-discovery</groupId> </exclusion> <exclusion> 
-			<artifactId>commons-codec</artifactId> <groupId>commons-codec</groupId> </exclusion> <exclusion> <artifactId>commons-logging</artifactId> <groupId>commons-logging</groupId> 
-			</exclusion> <exclusion> <artifactId>xpp3</artifactId> <groupId>xpp3</groupId> </exclusion> <exclusion> <artifactId>junit</artifactId> <groupId>junit</groupId> </exclusion> 
-			<exclusion> <artifactId>jdom</artifactId> <groupId>org.jdom</groupId> </exclusion> <exclusion> <artifactId>gson</artifactId> <groupId>com.google.code.gson</groupId> 
+		<!-- <dependency> <groupId>me.fhir</groupId> <artifactId>fhir-dstu1</artifactId> <version>0.0.81.2489</version> <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> <groupId>net.sf.saxon</groupId> 
+			</exclusion> <exclusion> <artifactId>commons-discovery</artifactId> <groupId>commons-discovery</groupId> </exclusion> <exclusion> <artifactId>commons-codec</artifactId> <groupId>commons-codec</groupId> 
+			</exclusion> <exclusion> <artifactId>commons-logging</artifactId> <groupId>commons-logging</groupId> </exclusion> <exclusion> <artifactId>xpp3</artifactId> <groupId>xpp3</groupId> </exclusion> <exclusion> 
+			<artifactId>junit</artifactId> <groupId>junit</groupId> </exclusion> <exclusion> <artifactId>jdom</artifactId> <groupId>org.jdom</groupId> </exclusion> <exclusion> <artifactId>gson</artifactId> <groupId>com.google.code.gson</groupId> 
 			</exclusion> </exclusions> </dependency> -->
 
 
@@ -230,7 +229,12 @@
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.el</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search-orm</artifactId>
+			<version>5.5.0.Final</version>
+		</dependency>
+		
 		<!-- Misc -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -400,8 +404,8 @@
 							<target>SCRIPT</target>
 							<skip>${skip-hib4}</skip>
 						</configuration>
-						<!-- This needs to be uncommented in order for this plugin to work with Hibernate 4.3+ (as of hibernate4-maven-plugin version 1.0.5) <dependencies> <dependency> 
-							<groupId>org.hibernate</groupId> <artifactId>hibernate-core</artifactId> <version>${hibernate_version}</version> </dependency> </dependencies> -->
+						<!-- This needs to be uncommented in order for this plugin to work with Hibernate 4.3+ (as of hibernate4-maven-plugin version 1.0.5) <dependencies> <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-core</artifactId> 
+							<version>${hibernate_version}</version> </dependency> </dependencies> -->
 						<executions>
 							<execution>
 								<id>o10g</id>
