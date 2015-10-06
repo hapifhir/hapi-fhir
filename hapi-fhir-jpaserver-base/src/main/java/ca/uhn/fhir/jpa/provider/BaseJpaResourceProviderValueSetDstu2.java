@@ -46,7 +46,7 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 
 	//@formatter:off
 	@Operation(name = "$expand", idempotent = true)
-	public ValueSet expant(
+	public ValueSet expand(
 			HttpServletRequest theServletRequest,
 			@IdParam(optional=true) IdDt theId,
 			@OperationParam(name="valueSet", min=0, max=1) ValueSet theValueSet,
@@ -110,13 +110,13 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 	})
 	public Parameters validateCode(
 			HttpServletRequest theServletRequest,
-			@IdParam IdDt theId, 
-			@OperationParam(name="identifier") UriDt theValueSetIdentifier, 
-			@OperationParam(name="code") CodeDt theCode, 
-			@OperationParam(name="system") UriDt theSystem,
-			@OperationParam(name="display") StringDt theDisplay,
-			@OperationParam(name="coding") CodingDt theCoding,
-			@OperationParam(name="codeableConcept") CodeableConceptDt theCodeableConcept
+			@IdParam(optional=true) IdDt theId, 
+			@OperationParam(name="identifier", min=0, max=1) UriDt theValueSetIdentifier, 
+			@OperationParam(name="code", min=0, max=1) CodeDt theCode, 
+			@OperationParam(name="system", min=0, max=1) UriDt theSystem,
+			@OperationParam(name="display", min=0, max=1) StringDt theDisplay,
+			@OperationParam(name="coding", min=0, max=1) CodingDt theCoding,
+			@OperationParam(name="codeableConcept", min=0, max=1) CodeableConceptDt theCodeableConcept
 			) {
 		//@formatter:on
 		

@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -312,7 +312,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			FhirTerser t = theContext.newTerser();
 			List<Object> parameters = t.getValues(theInput, "Parameters.parameter");
 
-			Map<String, List<String>> params = new HashMap<String, List<String>>();
+			Map<String, List<String>> params = new LinkedHashMap<String, List<String>>();
 			for (Object nextParameter : parameters) {
 				IPrimitiveType<?> nextNameDt = (IPrimitiveType<?>) t.getSingleValueOrNull((IBase) nextParameter, "name");
 				if (nextNameDt == null || nextNameDt.isEmpty()) {

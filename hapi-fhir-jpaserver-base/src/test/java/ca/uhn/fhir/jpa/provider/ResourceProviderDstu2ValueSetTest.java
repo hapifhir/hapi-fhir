@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -32,6 +34,26 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		upload.setId("");
 		myExtensionalVsId = myValueSetDao.create(upload).getId().toUnqualifiedVersionless();
 	}
+	
+	@Test
+	public void testValidateCodeOperationByCodeAndSystemBad() {
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeDt("8495-4"))
+			.andParameter("system", new UriDt("http://loinc.org"))
+			.execute();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals(new BooleanDt(true), respParam.getParameter().get(0).getValue());
+	}
+
+
 	
 	@Test
 	public void testExpandById() throws IOException {
@@ -115,7 +137,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
-			.onInstance(myExtensionalVsId)
+			.onType(ValueSet.class)
 			.named("expand")
 			.withParameter(Parameters.class, "identifier", new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.andParameter("filter", new StringDt("11378"))
@@ -141,7 +163,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
-			.onInstance(myExtensionalVsId)
+			.onType(ValueSet.class)
 			.named("expand")
 			.withParameter(Parameters.class, "valueSet", toExpand)
 			.andParameter("filter", new StringDt("11378"))

@@ -69,7 +69,7 @@ public enum ${valueSet.className} {
 	/**
 	 * Returns the enumerated value associated with this code
 	 */
-	public ${valueSet.className} forCode(String theCode) {
+	public static ${valueSet.className} forCode(String theCode) {
 		${valueSet.className} retVal = CODE_TO_ENUM.get(theCode);
 		return retVal;
 	}
