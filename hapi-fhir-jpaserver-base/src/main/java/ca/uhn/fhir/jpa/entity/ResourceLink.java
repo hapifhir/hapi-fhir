@@ -37,8 +37,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.phloc.commons.annotations.ContainsSoftMigration;
-
 @Entity
 @Table(name = "HFJ_RES_LINK" , indexes= {
 	@Index(name="IDX_RL_TPATHRES", columnList= "SRC_PATH,TARGET_RESOURCE_ID"), 
