@@ -24,6 +24,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.BooleanUtils;
+
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -38,6 +40,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDstu2<ValueSet> {
 
@@ -45,58 +48,55 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 	@Operation(name = "$expand", idempotent = true)
 	public ValueSet expant(
 			HttpServletRequest theServletRequest,
-			
-			@IdParam IdDt theId,
-			
+			@IdParam(optional=true) IdDt theId,
+			@OperationParam(name="valueSet", min=0, max=1) ValueSet theValueSet,
+			@OperationParam(name="identifier", min=0, max=1) UriDt theIdentifier,
 			@OperationParam(name = "filter", min=0, max=1) StringDt theFilter) {
 		//@formatter:on
+		
+		boolean haveId = theId != null && theId.hasIdPart();
+		boolean haveIdentifier = theIdentifier != null && isNotBlank(theIdentifier.getValue());
+		boolean haveValueSet = theValueSet != null && theValueSet.isEmpty() == false;
+		
+		if (!haveId && !haveIdentifier && !haveValueSet) {
+			throw new InvalidRequestException("$expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request");
+		}
+
+		if (moreThanOneTrue(haveId, haveIdentifier, haveValueSet)) {
+			throw new InvalidRequestException("$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
+		}
 		
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet> dao = (IFhirResourceDaoValueSet<ValueSet>) getDao();
-			return dao.expand(theId, toFilterString(theFilter));
+			if (haveId) {
+				return dao.expand(theId, toFilterString(theFilter));
+			} else if (haveIdentifier) {
+				return dao.expandByIdentifier(theIdentifier.getValue(), toFilterString(theFilter));
+			} else {
+				return dao.expand(theValueSet, toFilterString(theFilter));
+			}
+			
 		} finally {
 			endRequest(theServletRequest);
 		}
 	}
 
-	//@formatter:off
-	@Operation(name = "$expand", idempotent = true)
-	public ValueSet everything(
-			HttpServletRequest theServletRequest,
 
-			@OperationParam(name="identifier", min=1, max=1) UriDt theIdentifier,
-			
-			@OperationParam(name = "filter", min=0, max=1) StringDt theFilter) {
-		//@formatter:on
-		
-		startRequest(theServletRequest);
-		try {
-			IFhirResourceDaoValueSet<ValueSet> dao = (IFhirResourceDaoValueSet<ValueSet>) getDao();
-			return dao.expandByIdentifier(theIdentifier.getValue(), toFilterString(theFilter));
-		} finally {
-			endRequest(theServletRequest);
+	private static boolean moreThanOneTrue(boolean... theBooleans) {
+		boolean haveOne = false;
+		for (boolean next : theBooleans) {
+			if (next) {
+				if (haveOne) {
+					return true;
+				} else {
+					haveOne = true;
+				}
+			}
 		}
+		return false;
 	}
 
-	//@formatter:off
-	@Operation(name = "$expand", idempotent = true)
-	public ValueSet everything(
-			HttpServletRequest theServletRequest,
-
-			@OperationParam(name="valueSet", min=1, max=1) ValueSet theValueSet,
-			
-			@OperationParam(name = "filter", min=0, max=1) StringDt theFilter) {
-		//@formatter:on
-		
-		startRequest(theServletRequest);
-		try {
-			IFhirResourceDaoValueSet<ValueSet> dao = (IFhirResourceDaoValueSet<ValueSet>) getDao();
-			return dao.expand(theValueSet, toFilterString(theFilter));
-		} finally {
-			endRequest(theServletRequest);
-		}
-	}
 
 	private String toFilterString(StringDt theFilter) {
 		return theFilter != null ? theFilter.getValue() : null;

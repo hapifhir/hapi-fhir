@@ -3,7 +3,9 @@ package ca.uhn.fhir.jpa.provider;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
@@ -16,6 +18,7 @@ import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2Test {
 
@@ -157,5 +160,54 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
 
+	@Test
+	public void testExpandInvalidParams() throws IOException {
+		//@formatter:off
+		try {
+			ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withNoParameters(Parameters.class)
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: $expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request", e.getMessage());
+		}
+		//@formatter:on
+
+		//@formatter:off
+		try {
+			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
+			ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "valueSet", toExpand)
+				.andParameter("identifier", new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
+		}
+		//@formatter:on
+
+		//@formatter:off
+		try {
+			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
+			ourClient
+				.operation()
+				.onInstance(myExtensionalVsId)
+				.named("expand")
+				.withParameter(Parameters.class, "valueSet", toExpand)
+				.andParameter("identifier", new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
+		}
+		//@formatter:on
+
+	}
 	
 }
