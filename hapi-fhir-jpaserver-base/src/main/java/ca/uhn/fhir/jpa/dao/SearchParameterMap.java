@@ -46,7 +46,6 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	private Set<Include> myIncludes;
 	private DateRangeParam myLastUpdated;
 	private Set<Include> myRevIncludes;
-
 	private SortSpec mySort;
 
 	public void add(String theName, IQueryParameterAnd<?> theAnd) {

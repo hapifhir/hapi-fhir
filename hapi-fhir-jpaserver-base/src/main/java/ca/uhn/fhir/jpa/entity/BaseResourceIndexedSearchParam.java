@@ -30,6 +30,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
+import org.hibernate.search.annotations.Field;
+
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam implements Serializable {
 
@@ -42,6 +44,7 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	@Column(name = "SP_ID")
 	private Long myId;
 
+	@Field
 	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable=false)
 	private String myParamName;
 
@@ -49,9 +52,11 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	@JoinColumn(name = "RES_ID", referencedColumnName="RES_ID")
 	private ResourceTable myResource;
 
+	@Field
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourcePid;
 
+	@Field
 	@Column(name = "RES_TYPE", nullable=false)
 	private String myResourceType;
 

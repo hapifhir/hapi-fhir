@@ -30,8 +30,11 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
 
 //@formatter:off
+@Indexed
 @Entity
 @Table(name = "HFJ_SPIDX_QUANTITY" /*, indexes= {@Index(name="IDX_SP_NUMBER", columnList="SP_VALUE")}*/ )
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_QUANTITY", indexes= {
@@ -40,15 +43,20 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 //@formatter:on
 public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearchParam {
 
+	private static final int MAX_LENGTH = 200;
+
 	private static final long serialVersionUID = 1L;
 
-	@Column(name = "SP_SYSTEM", nullable = true, length = 100)
+	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
+	@Field
 	public String mySystem;
 
-	@Column(name = "SP_UNITS", nullable = true, length = 100)
+	@Column(name = "SP_UNITS", nullable = true, length = MAX_LENGTH)
+	@Field
 	public String myUnits;
 
 	@Column(name = "SP_VALUE", nullable = true)
+	@Field
 	public BigDecimal myValue;
 
 	public ResourceIndexedSearchParamQuantity() {

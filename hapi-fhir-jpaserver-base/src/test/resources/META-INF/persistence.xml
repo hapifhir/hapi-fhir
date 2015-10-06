@@ -35,6 +35,9 @@
 			<property name="hibernate.cache.use_query_cache" value="false" />
 			<property name="hibernate.cache.use_second_level_cache" value="false" />
 			<property name="hibernate.cache.use_structured_entries" value="false" />
+			<property name="hibernate.search.default.directory_provider" value="filesystem"/>
+			<property name="hibernate.search.default.indexBase" value="./lucene_indexes"/>
+			
 			<!-- 
 			<property name="hibernate.ejb.naming_strategy" value="ca.uhn.fhir.jpa.util.CustomNamingStrategy" />
 			 -->

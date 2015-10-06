@@ -29,7 +29,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
 
+@Indexed
 @Entity
 @Table(name = "HFJ_SPIDX_STRING"/* , indexes= {@Index(name="IDX_SP_STRING", columnList="SP_VALUE_NORMALIZED")} */)
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_STRING", indexes = { 
@@ -37,16 +40,20 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 })
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
-	public static final int MAX_LENGTH = 100;
+	public static final int MAX_LENGTH = 200;
 
 	private static final long serialVersionUID = 1L;
 
-	@Column(name = "SP_VALUE_EXACT", length = 100, nullable = true)
-	public String myValueExact;
+	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)
+	private String myValueExact;
 
 	@Column(name = "SP_VALUE_NORMALIZED", length = MAX_LENGTH, nullable = true)
-	public String myValueNormalized;
+	private String myValueNormalized;
 
+	@Column(name="SP_VALUE_EXACT", insertable=false, updatable=false)
+	@Field
+	private String myValueComplete;
+	
 	public ResourceIndexedSearchParamString() {
 	}
 
@@ -97,6 +104,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			throw new IllegalArgumentException("Value is too long: " + theValueExact.length());
 		}
 		myValueExact = theValueExact;
+		myValueComplete = theValueExact;
 	}
 
 	public void setValueNormalized(String theValueNormalized) {

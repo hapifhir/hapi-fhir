@@ -28,8 +28,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.search.annotations.Analyzer;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
 
 //@formatter:off
+@Indexed
 @Entity
 @Table(name = "HFJ_SPIDX_URI" /* , indexes = { @Index(name = "IDX_SP_TOKEN", columnList = "SP_SYSTEM,SP_VALUE") } */)
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_URI", indexes = { 
@@ -43,6 +47,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	private static final long serialVersionUID = 1L;
 
 	@Column(name = "SP_URI", nullable = true, length = MAX_LENGTH)
+	@Field()
 	public String myUri;
 
 	public ResourceIndexedSearchParamUri() {

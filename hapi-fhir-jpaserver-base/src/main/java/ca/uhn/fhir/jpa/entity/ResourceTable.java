@@ -34,12 +34,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.Index;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
@@ -47,15 +44,12 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 //@formatter:off
 @Entity
-@Table(name = "HFJ_RESOURCE", uniqueConstraints = {})
-@Inheritance(strategy = InheritanceType.JOINED)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_RESOURCE", 
-	indexes = { 
-		@Index(name = "IDX_RES_DATE", columnNames = { "RES_UPDATED" }), 
-		@Index(name = "IDX_RES_LANG", columnNames = { "RES_TYPE", "RES_LANGUAGE" }), 
-		@Index(name = "IDX_RES_PROFILE", columnNames = { "RES_PROFILE" }),
-		@Index(name = "IDX_INDEXSTATUS", columnNames = { "SP_INDEX_STATUS" }) 
-	})
+@Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes= {
+	@Index(name = "IDX_RES_DATE", columnList="RES_UPDATED"), 
+	@Index(name = "IDX_RES_LANG", columnList="RES_TYPE,RES_LANGUAGE"), 
+	@Index(name = "IDX_RES_PROFILE", columnList="RES_PROFILE"),
+	@Index(name = "IDX_INDEXSTATUS", columnList="SP_INDEX_STATUS") 
+})
 //@formatter:on
 public class ResourceTable extends BaseHasResource implements Serializable {
 	private static final int MAX_LANGUAGE_LENGTH = 20;

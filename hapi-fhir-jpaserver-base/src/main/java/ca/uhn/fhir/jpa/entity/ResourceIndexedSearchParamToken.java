@@ -29,21 +29,26 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
 
+@Indexed
 @Entity
 @Table(name = "HFJ_SPIDX_TOKEN" /* , indexes = { @Index(name = "IDX_SP_TOKEN", columnList = "SP_SYSTEM,SP_VALUE") } */)
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_TOKEN", indexes = { @org.hibernate.annotations.Index(name = "IDX_SP_TOKEN", columnNames = { "RES_TYPE", "SP_NAME", "SP_SYSTEM", "SP_VALUE" }),
 		@org.hibernate.annotations.Index(name = "IDX_SP_TOKEN_UNQUAL", columnNames = { "RES_TYPE", "SP_NAME", "SP_VALUE" }) })
 public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
-	public static final int MAX_LENGTH = 100;
+	public static final int MAX_LENGTH = 200;
 
 	private static final long serialVersionUID = 1L;
 
+	@Field()
 	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
 	public String mySystem;
 
-	@Column(name = "SP_VALUE", nullable = true, length = 100)
+	@Field()
+	@Column(name = "SP_VALUE", nullable = true, length = MAX_LENGTH)
 	public String myValue;
 
 	public ResourceIndexedSearchParamToken() {
