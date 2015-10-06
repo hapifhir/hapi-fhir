@@ -162,7 +162,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
 
-	@Autowired
+	@Autowired()
 	private ISearchResultDao mySearchResultDao;
 
 	private Set<Long> addPredicateComposite(RuntimeSearchParam theParamDef, Set<Long> thePids, List<? extends IQueryParameterType> theNextAnd) {
@@ -1784,11 +1784,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 					List<ResourceLink> results = q.getResultList();
 					for (ResourceLink resourceLink : results) {
 						if (theReverseMode) {
-							if (theEverythingModeEnum.isEncounter()) {
-								if (resourceLink.getSourcePath().equals("Encounter.subject") || resourceLink.getSourcePath().equals("Encounter.patient")) {
-									nextRoundOmit.add(resourceLink.getSourceResourcePid());
-								}
-							}
+//							if (theEverythingModeEnum.isEncounter()) {
+//								if (resourceLink.getSourcePath().equals("Encounter.subject") || resourceLink.getSourcePath().equals("Encounter.patient")) {
+//									nextRoundOmit.add(resourceLink.getSourceResourcePid());
+//								}
+//							}
 							pidsToInclude.add(resourceLink.getSourceResourcePid());
 						} else {
 							pidsToInclude.add(resourceLink.getTargetResourcePid());
@@ -2154,8 +2154,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
 			Root<ResourceTable> from = cq.from(ResourceTable.class);
 			List<Predicate> predicates = new ArrayList<Predicate>();
-			if (theParams.get(BaseResource.RES_ID) != null) {
-				StringParam idParm = (StringParam) theParams.get(BaseResource.RES_ID).get(0).get(0);
+			if (theParams.get(BaseResource.SP_RES_ID) != null) {
+				StringParam idParm = (StringParam) theParams.get(BaseResource.SP_RES_ID).get(0).get(0);
 				predicates.add(builder.equal(from.get("myId"), idParm.getValue()));
 			}
 			predicates.add(builder.equal(from.get("myResourceType"), myResourceName));

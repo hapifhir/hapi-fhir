@@ -50,11 +50,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.IRuntimeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -1496,8 +1498,16 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			parameterElem.getChildByName("name").getMutator().setValue(parameter, name);
 
 			if (theValue instanceof IBaseDatatype) {
-				String childElementName = "value" + StringUtils.capitalize(myContext.getElementDefinition(theValue.getClass()).getName());
-				parameterElem.getChildByName(childElementName).getMutator().setValue(parameter, theValue);
+				BaseRuntimeElementDefinition<?> datatypeDef = myContext.getElementDefinition(theValue.getClass());
+				if (datatypeDef instanceof IRuntimeDatatypeDefinition) {
+					Class<? extends IBaseDatatype> profileOf = ((IRuntimeDatatypeDefinition) datatypeDef).getProfileOf();
+					if (profileOf != null) {
+						datatypeDef = myContext.getElementDefinition(profileOf);
+					}
+				}
+				String childElementName = "value" + StringUtils.capitalize(datatypeDef.getName());
+				BaseRuntimeChildDefinition childByName = parameterElem.getChildByName(childElementName);
+				childByName.getMutator().setValue(parameter, theValue);
 			} else if (theValue instanceof IBaseResource) {
 				parameterElem.getChildByName("resource").getMutator().setValue(parameter, theValue);
 			} else {

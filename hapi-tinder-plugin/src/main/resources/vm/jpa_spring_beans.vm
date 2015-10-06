@@ -23,9 +23,10 @@
 		<property name="dao" ref="mySystemDao${versionCapitalized}"/>
 	</bean>
 
+	<jpa:repositories base-package="ca.uhn.fhir.jpa.dao.data" />
+	
 #if ( ${versionCapitalized} == 'Dstu2' )
 	<bean id="myFhirContextDstu2Hl7Org" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu2Hl7Org"/>
-	<jpa:repositories base-package="ca.uhn.fhir.jpa.dao.data" />
 
 	<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
 	<task:executor id="myExecutor" pool-size="5"/>

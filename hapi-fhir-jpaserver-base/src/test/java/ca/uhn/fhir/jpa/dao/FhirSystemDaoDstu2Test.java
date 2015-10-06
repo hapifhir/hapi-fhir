@@ -678,6 +678,8 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testTransactionDeleteMatchUrlWithTwoMatch() {
+		myDaoConfig.setAllowMultipleDelete(false);
+		
 		String methodName = "testTransactionDeleteMatchUrlWithTwoMatch";
 
 		Patient p = new Patient();

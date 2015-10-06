@@ -22,11 +22,12 @@ package ca.uhn.fhir.rest.method;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +44,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -67,6 +69,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private final RestOperationTypeEnum myOtherOperatiopnType;
 	private List<ReturnType> myReturnParams;
 	private final ReturnTypeEnum myReturnType;
+	private boolean myCanOperateAtTypeLevel;
 
 	protected OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider, boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType,
 			OperationParam[] theReturnParams) {
@@ -74,6 +77,16 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		myIdempotent = theIdempotent;
 		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		if (myIdParamIndex != null) {
+			for (Annotation next : theMethod.getParameterAnnotations()[myIdParamIndex]) {
+				if (next instanceof IdParam) {
+					myCanOperateAtTypeLevel = ((IdParam) next).optional() == true;
+				}
+			}
+		} else {
+			myCanOperateAtTypeLevel = true;
+		}
+		
 		Description description = theMethod.getAnnotation(Description.class);
 		if (description != null) {
 			myDescription = description.formalDefinition();
@@ -195,12 +208,22 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			return false;
 		}
 
-		boolean requestHasId = theRequest.getId() != null;
-		if (requestHasId != (myIdParamIndex != null)) {
+		if (!myName.equals(theRequest.getOperation())) {
 			return false;
 		}
+		
+		boolean requestHasId = theRequest.getId() != null;
+		if (requestHasId) {
+			if (isCanOperateAtInstanceLevel() == false) {
+				return false;
+			}
+		} else {
+			if (myCanOperateAtTypeLevel == false) {
+				return false;
+			}
+		}
 
-		return myName.equals(theRequest.getOperation());
+		return true;
 	}
 
 	@Override
@@ -289,7 +312,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			FhirTerser t = theContext.newTerser();
 			List<Object> parameters = t.getValues(theInput, "Parameters.parameter");
 
-			Map<String, List<String>> params = new HashMap<String, List<String>>();
+			Map<String, List<String>> params = new LinkedHashMap<String, List<String>>();
 			for (Object nextParameter : parameters) {
 				IPrimitiveType<?> nextNameDt = (IPrimitiveType<?>) t.getSingleValueOrNull((IBase) nextParameter, "name");
 				if (nextNameDt == null || nextNameDt.isEmpty()) {
