@@ -771,6 +771,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		obs.getEncounter().setReference(encId);
 		IIdType obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
 
+		ourLog.info("IDs: EncU:" + encUId.getIdPart() + " Enc:" + encId.getIdPart() + "  " + patientId.toUnqualifiedVersionless());
+		
 		Parameters output = ourClient.operation().onInstance(encId).named("everything").withNoParameters(Parameters.class).execute();
 		ca.uhn.fhir.model.dstu2.resource.Bundle b = (ca.uhn.fhir.model.dstu2.resource.Bundle) output.getParameterFirstRep().getResource();
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
