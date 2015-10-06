@@ -23,6 +23,8 @@
 		<class>ca.uhn.fhir.jpa.entity.SubscriptionTable</class>
 		<class>ca.uhn.fhir.jpa.entity.SubscriptionFlaggedResource</class>
 		<class>ca.uhn.fhir.jpa.entity.TagDefinition</class>
+		<class>ca.uhn.fhir.jpa.entity.Search</class>
+		<class>ca.uhn.fhir.jpa.entity.SearchResult</class>
 		
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>

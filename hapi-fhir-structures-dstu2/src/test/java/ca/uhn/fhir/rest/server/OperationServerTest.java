@@ -275,6 +275,56 @@ public class OperationServerTest {
 	}
 
 	@Test
+	public void testOperationOnInstanceAndType_Instance() throws Exception {
+		Parameters p = new Parameters();
+		p.addParameter().setName("PARAM1").setValue(new StringDt("PARAM1val"));
+		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
+		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$OP_INSTANCE_OR_TYPE");
+		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		String response = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals("PARAM1val", ourLastParam1.getValue());
+		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals("123", ourLastId.getIdPart());
+		assertEquals("$OP_INSTANCE_OR_TYPE", ourLastMethod);
+
+		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
+		assertEquals("RET1", resp.getParameter().get(0).getName());
+		
+	}
+	
+	@Test
+	public void testOperationOnInstanceAndType_Type() throws Exception {
+		Parameters p = new Parameters();
+		p.addParameter().setName("PARAM1").setValue(new StringDt("PARAM1val"));
+		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
+		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
+		
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$OP_INSTANCE_OR_TYPE");
+		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		String response = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals("PARAM1val", ourLastParam1.getValue());
+		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals(null, ourLastId);
+		assertEquals("$OP_INSTANCE_OR_TYPE", ourLastMethod);
+
+		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
+		assertEquals("RET1", resp.getParameter().get(0).getName());
+	}
+
+	
+	@Test
 	public void testOperationOnInstance() throws Exception {
 		Parameters p = new Parameters();
 		p.addParameter().setName("PARAM1").setValue(new StringDt("PARAM1val"));
@@ -296,6 +346,20 @@ public class OperationServerTest {
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
 		assertEquals("RET1", resp.getParameter().get(0).getName());
+		
+		/*
+		 * Against type should fail
+		 */
+		
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$OP_INSTANCE");
+		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		status = ourClient.execute(httpPost);
+
+		response = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(response);
+		assertEquals(400, status.getStatusLine().getStatusCode());
+
 	}
 
 	@Test
@@ -602,6 +666,25 @@ public class OperationServerTest {
 			//@formatter:on
 
 			ourLastMethod = "$OP_INSTANCE";
+			ourLastId = theId;
+			ourLastParam1 = theParam1;
+			ourLastParam2 = theParam2;
+
+			Parameters retVal = new Parameters();
+			retVal.addParameter().setName("RET1").setValue(new StringDt("RETVAL1"));
+			return retVal;
+		}
+
+		//@formatter:off
+		@Operation(name="$OP_INSTANCE_OR_TYPE")
+		public Parameters opInstanceOrType(
+				@IdParam(optional=true) IdDt theId,
+				@OperationParam(name="PARAM1") StringDt theParam1,
+				@OperationParam(name="PARAM2") Patient theParam2
+				) {
+			//@formatter:on
+
+			ourLastMethod = "$OP_INSTANCE_OR_TYPE";
 			ourLastId = theId;
 			ourLastParam1 = theParam1;
 			ourLastParam2 = theParam2;

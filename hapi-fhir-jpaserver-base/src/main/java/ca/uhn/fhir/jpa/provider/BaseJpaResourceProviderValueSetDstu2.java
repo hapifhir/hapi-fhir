@@ -43,7 +43,7 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 
 	//@formatter:off
 	@Operation(name = "$expand", idempotent = true)
-	public ValueSet everything(
+	public ValueSet expant(
 			HttpServletRequest theServletRequest,
 			
 			@IdParam IdDt theId,
@@ -108,7 +108,7 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 		@OperationParam(name="message", type=StringDt.class),
 		@OperationParam(name="display", type=StringDt.class)
 	})
-	public Parameters everything(
+	public Parameters validateCode(
 			HttpServletRequest theServletRequest,
 			@IdParam IdDt theId, 
 			@OperationParam(name="identifier") UriDt theValueSetIdentifier, 
