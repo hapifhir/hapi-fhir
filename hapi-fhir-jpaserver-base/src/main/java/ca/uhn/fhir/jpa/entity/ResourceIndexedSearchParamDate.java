@@ -36,7 +36,6 @@ import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
 
 //@formatter:off
-@Indexed
 @Entity
 @Table(name = "HFJ_SPIDX_DATE" /*, indexes= {@Index(name="IDX_SP_DATE", columnList= "SP_VALUE_LOW,SP_VALUE_HIGH")}*/)
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_DATE", indexes= {

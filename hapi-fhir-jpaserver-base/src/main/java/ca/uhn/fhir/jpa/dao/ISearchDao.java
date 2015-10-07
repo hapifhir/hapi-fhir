@@ -1,11 +1,9 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.rest.server.IBundleProvider;
+import java.util.List;
 
 public interface ISearchDao {
 
-	public static final String FULL_TEXT_PARAM_NAME = "fullTextSearch";
-	
-	IBundleProvider search(SearchParameterMap theParams);
+	List<Long> search(String theResourceName, SearchParameterMap theParams);
 	
 }

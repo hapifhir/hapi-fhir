@@ -16,6 +16,6 @@
 
 	<tx:annotation-driven transaction-manager="myTxManagerDstu2" />
 	
-	<bean id="mySearchDaoDstu2" class="ca.uhn.fhir.jpa.dao.SearchDao" />
+	<bean id="mySearchDaoDstu2" class="ca.uhn.fhir.jpa.dao.FhirSearchDao" />
 
 </beans>

@@ -147,6 +147,8 @@ public class Constants {
 	public static final String TAG_SUBSETTED_SYSTEM = "http://hl7.org/fhir/v3/ObservationValue";
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String URL_TOKEN_METADATA = "metadata";
+	public static final String PARAM_CONTENT = "_content";
+	public static final String PARAM_TEXT = "_text";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();

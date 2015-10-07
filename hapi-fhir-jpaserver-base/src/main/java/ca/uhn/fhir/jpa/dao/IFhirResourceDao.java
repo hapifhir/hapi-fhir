@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
+import java.util.Collection;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -121,7 +123,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	Set<Long> searchForIds(String theParameterName, IQueryParameterType theValue);
 
-	Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams);
+	Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams, Collection<Long> theInitialPids);
 
 	DaoMethodOutcome update(T theResource);
 

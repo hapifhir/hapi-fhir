@@ -32,7 +32,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
 
-@Indexed
 @Entity
 @Table(name = "HFJ_SPIDX_STRING"/* , indexes= {@Index(name="IDX_SP_STRING", columnList="SP_VALUE_NORMALIZED")} */)
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_STRING", indexes = { 

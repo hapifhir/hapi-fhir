@@ -168,7 +168,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	}
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
-		InputStream stream = FhirResourceDaoDstu2SearchTest.class.getResourceAsStream(resourceName);
+		InputStream stream = FhirResourceDaoDstu2SearchNoFtTest.class.getResourceAsStream(resourceName);
 		if (stream == null) {
 			fail("Unable to load resource: " + resourceName);
 		}

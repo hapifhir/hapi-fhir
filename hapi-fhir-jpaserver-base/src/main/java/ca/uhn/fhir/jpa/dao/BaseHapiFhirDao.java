@@ -45,6 +45,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -250,8 +252,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 						try {
 							resourceDefinition = getContext().getResourceDefinition(typeString);
 						} catch (DataFormatException e) {
-							throw new InvalidRequestException(
-									"Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - " + nextValue.getReference().getValue());
+							throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - " + nextValue.getReference().getValue());
 						}
 
 						Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
@@ -287,8 +288,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 						}
 
 						if (!typeString.equals(target.getResourceType())) {
-							throw new UnprocessableEntityException("Resource contains reference to " + nextValue.getReference().getValue() + " but resource with ID " + nextValue.getReference().getIdPart()
-									+ " is actually of type " + target.getResourceType());
+							throw new UnprocessableEntityException("Resource contains reference to " + nextValue.getReference().getValue() + " but resource with ID " + nextValue.getReference().getIdPart() + " is actually of type " + target.getResourceType());
 						}
 
 						/*
@@ -716,9 +716,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	/**
-	 * This method is called when an update to an existing resource detects that the resource supplied for update is missing a tag/profile/security label that the currently persisted resource holds.
+	 * This method is called when an update to an existing resource detects that the resource supplied for update is
+	 * missing a tag/profile/security label that the currently persisted resource holds.
 	 * <p>
-	 * The default implementation removes any profile declarations, but leaves tags and security labels in place. Subclasses may choose to override and change this behaviour.
+	 * The default implementation removes any profile declarations, but leaves tags and security labels in place.
+	 * Subclasses may choose to override and change this behaviour.
 	 * </p>
 	 * 
 	 * @param theEntity
@@ -726,7 +728,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * @param theTag
 	 *           The tag
 	 * @return Retturns <code>true</code> if the tag should be removed
-	 * @see <a href="http://hl7.org/fhir/2015Sep/resource.html#1.11.3.7">Updates to Tags, Profiles, and Security Labels</a> for a description of the logic that the default behaviour folows.
+	 * @see <a href="http://hl7.org/fhir/2015Sep/resource.html#1.11.3.7">Updates to Tags, Profiles, and Security
+	 *      Labels</a> for a description of the logic that the default behaviour folows.
 	 */
 	protected boolean shouldDroppedTagBeRemovedOnUpdate(ResourceTable theEntity, ResourceTag theTag) {
 		if (theTag.getTag().getTagType() == TagTypeEnum.PROFILE) {
@@ -763,13 +766,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(theResourceType);
 
 		SearchParameterMap paramMap = translateMatchUrl(theMatchUrl, resourceDef);
-		
+
 		if (paramMap.isEmpty()) {
 			throw new InvalidRequestException("Invalid match URL[" + theMatchUrl + "] - URL has no search parameters");
 		}
 
 		IFhirResourceDao<R> dao = getDao(theResourceType);
-		Set<Long> ids = dao.searchForIdsWithAndOr(paramMap);
+		Set<Long> ids = dao.searchForIdsWithAndOr(paramMap, new HashSet<Long>());
 
 		return ids;
 	}
@@ -845,7 +848,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 			if (RESOURCE_META_PARAMS.containsKey(nextParamName)) {
 				if (isNotBlank(paramList.get(0).getQualifier()) && paramList.get(0).getQualifier().startsWith(".")) {
-					throw new InvalidRequestException("Invalid parameter chain: " + nextParamName + paramList.get(0).getQualifier()); 
+					throw new InvalidRequestException("Invalid parameter chain: " + nextParamName + paramList.get(0).getQualifier());
 				}
 				IQueryParameterAnd<?> type = newInstanceAnd(nextParamName);
 				type.setValuesAsQueryTokens((paramList));
@@ -857,7 +860,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				if (paramDef == null) {
 					throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);
 				}
-	
+
 				IQueryParameterAnd<?> param = MethodUtil.parseQueryParams(paramDef, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			}
@@ -1100,7 +1103,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		} else if (theForHistoryOperation) {
 			/*
-			 * If the create and update times match, this was when the resource was created so we should mark it as a POST. Otherwise, it's a PUT.
+			 * If the create and update times match, this was when the resource was created so we should mark it as a POST.
+			 * Otherwise, it's a PUT.
 			 */
 			Date published = theEntity.getPublished().getValue();
 			Date updated = theEntity.getUpdated().getValue();
@@ -1194,8 +1198,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected ResourceTable updateEntity(final IResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-			boolean theUpdateVersion, Date theUpdateTime) {
+	protected ResourceTable updateEntity(final IResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion, Date theUpdateTime) {
 
 		/*
 		 * This should be the very first thing..
@@ -1204,8 +1207,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			validateResourceForStorage((T) theResource, theEntity);
 			String resourceType = myContext.getResourceDefinition(theResource).getName();
 			if (isNotBlank(theEntity.getResourceType()) && !theEntity.getResourceType().equals(resourceType)) {
-				throw new UnprocessableEntityException(
-						"Existing resource ID[" + theEntity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + theEntity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
+				throw new UnprocessableEntityException("Existing resource ID[" + theEntity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + theEntity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
 			}
 		}
 
@@ -1261,6 +1263,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			links = Collections.emptySet();
 			theEntity.setDeleted(theDeletedTimestampOrNull);
 			theEntity.setUpdated(theDeletedTimestampOrNull);
+			theEntity.setNarrativeTextParsedIntoWords(null);
 
 		} else {
 
@@ -1309,6 +1312,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setResourceLinks(links);
 				theEntity.setHasLinks(links.isEmpty() == false);
 				theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
+				theEntity.setNarrativeTextParsedIntoWords(parseNarrativeTextIntoWords(theResource));
 
 			} else {
 
@@ -1425,7 +1429,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	/**
-	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the first time.
+	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the
+	 * first time.
 	 * 
 	 * @param theEntity
 	 *           The resource
@@ -1437,7 +1442,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	/**
-	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the first time.
+	 * Subclasses may override to provide behaviour. Called when a resource has been inserved into the database for the
+	 * first time.
 	 * 
 	 * @param theEntity
 	 *           The resource
@@ -1449,8 +1455,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	/**
-	 * This method is invoked immediately before storing a new resource, or an update to an existing resource to allow the DAO to ensure that it is valid for persistence. By default, checks for the
-	 * "subsetted" tag and rejects resources which have it. Subclasses should call the superclass implementation to preserve this check.
+	 * This method is invoked immediately before storing a new resource, or an update to an existing resource to allow
+	 * the DAO to ensure that it is valid for persistence. By default, checks for the "subsetted" tag and rejects
+	 * resources which have it. Subclasses should call the superclass implementation to preserve this check.
 	 * 
 	 * @param theResource
 	 *           The resource that is about to be persisted
@@ -1479,6 +1486,20 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		}
 		return new String(out).toUpperCase();
+	}
+
+	private static String parseNarrativeTextIntoWords(IResource theResource) {
+		StringBuilder b = new StringBuilder();
+		List<XMLEvent> xmlEvents = theResource.getText().getDiv().getValue();
+		if (xmlEvents != null) {
+			for (XMLEvent next : xmlEvents) {
+				if (next.isCharacters()) {
+					Characters characters = next.asCharacters();
+					b.append(characters.getData()).append(" ");
+				}
+			}
+		}
+		return b.toString();
 	}
 
 }

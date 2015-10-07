@@ -31,10 +31,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.FieldBridge;
 import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.NumericField;
+
+import ca.uhn.fhir.jpa.util.BigDecimalNumericFieldBridge;
 
 //@formatter:off
-@Indexed
 @Entity
 @Table(name = "HFJ_SPIDX_QUANTITY" /*, indexes= {@Index(name="IDX_SP_NUMBER", columnList="SP_VALUE")}*/ )
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_QUANTITY", indexes= {
@@ -57,6 +60,8 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 
 	@Column(name = "SP_VALUE", nullable = true)
 	@Field
+	@NumericField
+	@FieldBridge(impl = BigDecimalNumericFieldBridge.class)
 	public BigDecimal myValue;
 
 	public ResourceIndexedSearchParamQuantity() {

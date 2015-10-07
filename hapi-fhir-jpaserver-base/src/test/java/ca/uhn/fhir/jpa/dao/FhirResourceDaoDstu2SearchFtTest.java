@@ -94,8 +94,8 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 @SuppressWarnings("unchecked")
-public class FhirResourceDaoDstu2SearchTest extends BaseJpaDstu2Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchTest.class);
+public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchFtTest.class);
 	
 	@Test
 	public void testSearchWithEmptySort() {

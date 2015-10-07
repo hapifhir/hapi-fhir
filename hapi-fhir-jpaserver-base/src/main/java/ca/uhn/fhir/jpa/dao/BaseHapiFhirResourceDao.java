@@ -158,6 +158,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	@Autowired
 	private DaoConfig myDaoConfig;
 
+	@Autowired(required=false)
+	private ISearchDao mySearchDao;
+	
 	private String myResourceName;
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
@@ -2147,7 +2150,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		StopWatch w = new StopWatch();
 		final InstantDt now = InstantDt.withCurrentTime();
 
-		Set<Long> loadPids;
+		Collection<Long> loadPids;
 		if (theParams.getEverythingMode() != null) {
 
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
@@ -2185,12 +2188,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			if (loadPids.isEmpty()) {
 				return new SimpleBundleProvider();
 			}
-		} else {
 
-			loadPids = searchForIdsWithAndOr(theParams);
+		} else {
+			
+			List<Long> searchResultPids;
+			if (mySearchDao == null) {
+				searchResultPids = null;
+			} else {
+				searchResultPids = mySearchDao.search(getResourceName(), theParams);
+			}
+			if (theParams.isEmpty()) {
+				loadPids = searchResultPids;
+			} else {
+				loadPids = searchForIdsWithAndOr(theParams, searchResultPids);
+			}
 			if (loadPids.isEmpty()) {
 				return new SimpleBundleProvider();
 			}
+
 		}
 
 		// // Load _include and _revinclude before filter and sort in everything mode
@@ -2279,15 +2294,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return retVal;
 	}
 
-	private List<Long> filterResourceIdsByLastUpdated(Set<Long> loadPids, final DateRangeParam lu) {
+	private List<Long> filterResourceIdsByLastUpdated(Collection<Long> thePids, final DateRangeParam theLastUpdated) {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
 		cq.select(from.get("myId").as(Long.class));
 
-		Predicate predicateIds = (from.get("myId").in(loadPids));
-		Predicate predicateLower = lu.getLowerBoundAsInstant() != null ? builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), lu.getLowerBoundAsInstant()) : null;
-		Predicate predicateUpper = lu.getUpperBoundAsInstant() != null ? builder.lessThanOrEqualTo(from.<Date> get("myUpdated"), lu.getUpperBoundAsInstant()) : null;
+		Predicate predicateIds = (from.get("myId").in(thePids));
+		Predicate predicateLower = theLastUpdated.getLowerBoundAsInstant() != null ? builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), theLastUpdated.getLowerBoundAsInstant()) : null;
+		Predicate predicateUpper = theLastUpdated.getUpperBoundAsInstant() != null ? builder.lessThanOrEqualTo(from.<Date> get("myUpdated"), theLastUpdated.getUpperBoundAsInstant()) : null;
 		if (predicateLower != null && predicateUpper != null) {
 			cq.where(predicateIds, predicateLower, predicateUpper);
 		} else if (predicateLower != null) {
@@ -2313,20 +2328,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return query;
 	}
 
-	private List<Long> processSort(final SearchParameterMap theParams, Set<Long> theLoadPids) {
+	private List<Long> processSort(final SearchParameterMap theParams, Collection<Long> theLoadPids) {
 		final List<Long> pids;
-		Set<Long> loadPids = theLoadPids;
+//		Set<Long> loadPids = theLoadPids;
 		if (theParams.getSort() != null && isNotBlank(theParams.getSort().getParamName())) {
 			List<Order> orders = new ArrayList<Order>();
 			List<Predicate> predicates = new ArrayList<Predicate>();
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
 			Root<ResourceTable> from = cq.from(ResourceTable.class);
-			predicates.add(from.get("myId").in(loadPids));
+			predicates.add(from.get("myId").in(theLoadPids));
 			createSort(builder, from, theParams.getSort(), orders, predicates);
 			if (orders.size() > 0) {
-				Set<Long> originalPids = loadPids;
-				loadPids = new LinkedHashSet<Long>();
+				Collection<Long> originalPids = theLoadPids;
+				LinkedHashSet<Long> loadPids = new LinkedHashSet<Long>();
 				cq.multiselect(from.get("myId").as(Long.class));
 				cq.where(predicates.toArray(new Predicate[0]));
 				cq.orderBy(orders);
@@ -2349,10 +2364,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 				}
 
 			} else {
-				pids = new ArrayList<Long>(loadPids);
+				pids = toList(theLoadPids);
 			}
 		} else {
-			pids = new ArrayList<Long>(loadPids);
+			pids = toList(theLoadPids);
+		}
+		return pids;
+	}
+
+	private List<Long> toList(Collection<Long> theLoadPids) {
+		final List<Long> pids;
+		if (theLoadPids instanceof List) {
+			pids = (List<Long>) theLoadPids;
+		} else {
+			pids = new ArrayList<Long>(theLoadPids);
 		}
 		return pids;
 	}
@@ -2368,7 +2393,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {
 			map.add(nextEntry.getKey(), (nextEntry.getValue()));
 		}
-		return searchForIdsWithAndOr(map);
+		return searchForIdsWithAndOr(map, null);
 	}
 
 	@Override
@@ -2377,7 +2402,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	}
 
 	@Override
-	public Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams) {
+	public Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams, Collection<Long> theInitialPids) {
 		SearchParameterMap params = theParams;
 		if (params == null) {
 			params = new SearchParameterMap();
@@ -2386,6 +2411,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceType);
 
 		Set<Long> pids = new HashSet<Long>();
+		if (theInitialPids != null) {
+			pids.addAll(theInitialPids);
+		}
 
 		for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : params.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
