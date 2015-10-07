@@ -52,7 +52,6 @@ import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 })
 @NamedQueries({
 	@NamedQuery(name="Q_HFJ_SUBSCRIPTION_SET_STATUS", query="UPDATE SubscriptionTable t SET t.myStatus = :status WHERE t.myResId = :res_id"),
-	@NamedQuery(name="Q_HFJ_SUBSCRIPTION_NEXT_CHECK", query="SELECT t FROM SubscriptionTable t WHERE t.myStatus = :status AND t.myNextCheck <= :next_check"),
 	@NamedQuery(name="Q_HFJ_SUBSCRIPTION_GET_BY_RES", query="SELECT t FROM SubscriptionTable t WHERE t.myResId = :res_id")
 })
 //@formatter:on

@@ -48,6 +48,8 @@ public class RunServerCommand extends BaseCommand {
 	public void run(CommandLine theCommandLine) throws ParseException {
 		myPort = parseOptionInteger(theCommandLine, OPTION_P, DEFAULT_PORT);
 
+//		((ch.qos.logback.classic.Logger)LoggerFactory.getLogger("/")).setLevel(Level.ERROR);
+
 		ourLog.info("Preparing HAPI FHIR JPA server");
 		File tempWarFile;
 		try {
@@ -81,6 +83,8 @@ public class RunServerCommand extends BaseCommand {
 		ourLog.info("Server started on port {}", myPort);
 		ourLog.info("Web Testing UI : http://localhost:{}/", myPort);
 		ourLog.info("Server Base URL: http://localhost:{}/baseDstu2/", myPort);
+		
+		
 	}
 
 	public void run(String[] theArgs) {

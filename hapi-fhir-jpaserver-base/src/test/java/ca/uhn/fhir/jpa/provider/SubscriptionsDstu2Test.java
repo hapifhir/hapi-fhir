@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -19,6 +20,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptor;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
@@ -250,6 +252,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			mySubscriptionDao.read(new IdDt("Subscription", socket.mySubsId));
 
 			Observation obs = new Observation();
+			ResourceMetadataKeyEnum.PROFILES.put(obs, Collections.singletonList(new IdDt("http://foo")));
 			obs.getSubject().setReference(pId);
 			obs.setStatus(ObservationStatusEnum.FINAL);
 			IIdType afterId1 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
@@ -301,6 +304,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		IIdType pId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		Subscription subs = new Subscription();
+		ResourceMetadataKeyEnum.PROFILES.put(subs, Collections.singletonList(new IdDt("http://foo")));
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
 		subs.setCriteria("Observation?subject=Patient/" + pId.getIdPart());
 		subs.setStatus(SubscriptionStatusEnum.ACTIVE);

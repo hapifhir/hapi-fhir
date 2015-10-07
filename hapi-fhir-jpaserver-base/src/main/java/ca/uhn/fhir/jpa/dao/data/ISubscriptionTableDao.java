@@ -29,6 +29,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 
 public interface ISubscriptionTableDao extends JpaRepository<SubscriptionTable, Long> {
 
@@ -46,4 +47,6 @@ public interface ISubscriptionTableDao extends JpaRepository<SubscriptionTable, 
 	@Query("SELECT t FROM SubscriptionTable t WHERE t.myLastClientPoll < :cutoff OR (t.myLastClientPoll IS NULL AND t.myCreated < :cutoff)")
 	public Collection<SubscriptionTable> findInactiveBeforeCutoff(@Param("cutoff") Date theCutoff);
 
+	@Query("SELECT t.myId FROM SubscriptionTable t WHERE t.myStatus = :status AND t.myNextCheck <= :next_check")
+	public Collection<Long> finsSubscriptionsWhichNeedToBeChecked(@Param("status") SubscriptionStatusEnum theStatus, @Param("next_check") Date theNextCheck);
 }
