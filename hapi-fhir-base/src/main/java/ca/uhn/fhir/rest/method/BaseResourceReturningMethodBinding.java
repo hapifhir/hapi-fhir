@@ -35,8 +35,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -55,8 +53,8 @@ import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -233,10 +231,10 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		throw new IllegalStateException("Should not get here!");
 	}
 
-	public abstract Object invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
+	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
 
 	@Override
-	public void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 
 		// Pretty print
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
@@ -245,38 +243,36 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest(), theServer.getDefaultResponseEncoding());
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
 
 		// Is this request coming from a browser
-		String uaHeader = theRequest.getServletRequest().getHeader("user-agent");
+		String uaHeader = theRequest.getHeader("user-agent");
 		boolean requestIsBrowser = false;
 		if (uaHeader != null && uaHeader.contains("Mozilla")) {
 			requestIsBrowser = true;
 		}
 
-		byte[] requestContents = loadRequestContents(theRequest);
-		
 		// Method params
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
 			IParameter param = getParameters().get(i);
 			if (param != null) {
-				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, requestContents, this);
+				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
 			}
 		}
 
 		Object resultObj = invokeServer(theServer, theRequest, params);
 
-		Integer count = RestfulServerUtils.extractCountParameter(theRequest.getServletRequest());
+		Integer count = RestfulServerUtils.extractCountParameter(theRequest);
 		boolean respondGzip = theRequest.isRespondGzip();
-		HttpServletResponse response = theRequest.getServletResponse();
+		
 		switch (getReturnType()) {
 		case BUNDLE: {
 
 			/*
 			 * Figure out the self-link for this request
 			 */
-			String serverBase = theServer.getServerBaseForRequest(theRequest.getServletRequest());
+			String serverBase = theRequest.getServerBaseForRequest();
 			String linkSelf;
 			StringBuilder b = new StringBuilder();
 			b.append(serverBase);
@@ -325,16 +321,15 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 				for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 					IServerInterceptor next = theServer.getInterceptors().get(i);
-					boolean continueProcessing = next.outgoingResponse(theRequest, resource, theRequest.getServletRequest(), theRequest.getServletResponse());
+					boolean continueProcessing = next.outgoingResponse(theRequest, resource);
 					if (!continueProcessing) {
 						ourLog.debug("Interceptor {} returned false, not continuing processing");
-						return;
+						return null;
 					}
 				}
 				
-				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, respondGzip,
-						isAddContentLocationHeader(), theRequest);
-				break;
+				return theRequest.getResponse().streamResponseAsResource(resource, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, respondGzip,
+						isAddContentLocationHeader());
 			} else {
 				Set<Include> includes = getRequestIncludesFromParams(params);
 
@@ -350,28 +345,26 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				if (bundle != null) {
 					for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 						IServerInterceptor next = theServer.getInterceptors().get(i);
-						boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(), theRequest.getServletResponse());
+						boolean continueProcessing = next.outgoingResponse(theRequest, bundle);
 						if (!continueProcessing) {
 							ourLog.debug("Interceptor {} returned false, not continuing processing");
-							return;
+							return null;
 						}
 					}
-					RestfulServerUtils.streamResponseAsBundle(theServer, response, bundle, theRequest.getFhirServerBase(), summaryMode, respondGzip, requestIsBrowser, theRequest);
+					return theRequest.getResponse().streamResponseAsBundle(bundle, summaryMode, respondGzip, requestIsBrowser);
 				} else {
 					IBaseResource resBundle = bundleFactory.getResourceBundle();
 					for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 						IServerInterceptor next = theServer.getInterceptors().get(i);
-						boolean continueProcessing = next.outgoingResponse(theRequest, resBundle, theRequest.getServletRequest(), theRequest.getServletResponse());
+						boolean continueProcessing = next.outgoingResponse(theRequest, resBundle);
 						if (!continueProcessing) {
 							ourLog.debug("Interceptor {} returned false, not continuing processing");
-							return;
+							return null;
 						}
 					}
-					RestfulServerUtils.streamResponseAsResource(theServer, response, resBundle, prettyPrint, summaryMode,
-							Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), isAddContentLocationHeader(), theRequest);
+					return theRequest.getResponse().streamResponseAsResource(resBundle, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK,
+							theRequest.isRespondGzip(), isAddContentLocationHeader());
 				}
-
-				break;
 			}
 		}
 		case RESOURCE: {
@@ -386,17 +379,16 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = theServer.getInterceptors().get(i);
-				boolean continueProcessing = next.outgoingResponse(theRequest, resource, theRequest.getServletRequest(), theRequest.getServletResponse());
+				boolean continueProcessing = next.outgoingResponse(theRequest, resource);
 				if (!continueProcessing) {
-					return;
+				    return null;
 				}
 			}
 
-			RestfulServerUtils.streamResponseAsResource(theServer, response, resource, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, respondGzip,
-					isAddContentLocationHeader(), theRequest);
-			break;
+			return theRequest.getResponse().streamResponseAsResource(resource, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, respondGzip, isAddContentLocationHeader());
 		}
 		}
+		return null;
 	}
 
 	/**

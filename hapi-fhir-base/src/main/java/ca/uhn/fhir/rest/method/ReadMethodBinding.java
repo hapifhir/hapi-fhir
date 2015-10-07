@@ -49,7 +49,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -204,7 +204,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	@Override
-	public IBundleProvider invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(IRestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		theMethodParams[myIdIndex] = MethodUtil.convertIdToType(theRequest.getId(), myIdParameterType);
 		if (myVersionIdIndex != null) {
 			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getId().getVersionIdPart());
@@ -214,7 +214,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		IBundleProvider retVal = toResourceList(response);
 
 		if (theRequest.getServer().getETagSupport() == ETagSupportEnum.ENABLED) {
-			String ifNoneMatch = theRequest.getServletRequest().getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
+			String ifNoneMatch = theRequest.getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
 			if (retVal.size() == 1 && StringUtils.isNotBlank(ifNoneMatch)) {
 				List<IBaseResource> responseResources = retVal.getResources(0, 1);
 				IBaseResource responseResource = responseResources.get(0);

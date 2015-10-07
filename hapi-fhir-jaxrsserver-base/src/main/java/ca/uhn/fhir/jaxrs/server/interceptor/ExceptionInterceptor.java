@@ -36,7 +36,7 @@ public class ExceptionInterceptor {
     @Context
     private HttpHeaders headers;    
     
-    FhirContext fhirContext = AbstractJaxRsRestServer.getFhirContext();
+    FhirContext fhirContext = AbstractJaxRsRestServer.CTX;
     
     @AroundInvoke
     public Object intercept(final InvocationContext ctx) throws Exception {

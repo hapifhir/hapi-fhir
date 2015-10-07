@@ -1,67 +1,27 @@
 package ca.uhn.fhir.rest.server;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedList;
+import java.util.Collection;
 import java.util.List;
-import java.util.jar.Manifest;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.io.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 
 public class RestulfulServerConfiguration {
     
-    private List<ResourceBinding> resourceBindings;
+    private Collection<ResourceBinding> resourceBindings;
     private List<BaseMethodBinding<?>> serverBindings;
     private String implementationDescription;
     private String serverVersion;
     private String serverName;
     private FhirContext fhirContext;
-    private ServletContext servletContext;
     private IServerAddressStrategy serverAddressStrategy;
     private String conformanceDate;
     
-    public RestulfulServerConfiguration() {
-    }
-    
-    public RestulfulServerConfiguration(RestfulServer theRestfulServer) {
-        this.resourceBindings = new LinkedList<ResourceBinding>(theRestfulServer.getResourceBindings());
-        this.serverBindings = theRestfulServer.getServerBindings();
-        this.implementationDescription = theRestfulServer.getImplementationDescription();
-        this.serverVersion = theRestfulServer.getServerVersion();
-        this.serverName = theRestfulServer.getServerName();
-        this.fhirContext = theRestfulServer.getFhirContext();
-        this.serverAddressStrategy= theRestfulServer.getServerAddressStrategy();
-        this.servletContext = theRestfulServer.getServletContext();
-        if (servletContext != null) {
-            InputStream inputStream = null;
-            try {
-                inputStream = getServletContext().getResourceAsStream("/META-INF/MANIFEST.MF");
-                if (inputStream != null) {
-                    Manifest manifest = new Manifest(inputStream);
-                    this.conformanceDate = manifest.getMainAttributes().getValue("Build-Time");
-                }
-            } catch (IOException e) {
-                // fall through
-            }
-            finally {
-                if (inputStream != null) {
-                    IOUtils.closeQuietly(inputStream);
-                }
-            }
-        }
-    }
-
     /**
      * Get the resourceBindings
      * @return the resourceBindings
      */
-    public List<ResourceBinding> getResourceBindings() {
+    public Collection<ResourceBinding> getResourceBindings() {
         return resourceBindings;
     }
 
@@ -69,7 +29,7 @@ public class RestulfulServerConfiguration {
      * Set the resourceBindings
      * @param resourceBindings the resourceBindings to set
      */
-    public RestulfulServerConfiguration setResourceBindings(List<ResourceBinding> resourceBindings) {
+    public RestulfulServerConfiguration setResourceBindings(Collection<ResourceBinding> resourceBindings) {
         this.resourceBindings = resourceBindings;
         return this;
     }
@@ -143,23 +103,6 @@ public class RestulfulServerConfiguration {
     }
 
     /**
-     * Get the servletContext
-     * @return the servletContext
-     */
-    public ServletContext getServletContext() {
-        return servletContext;
-    }
-
-    /**
-     * Set the servletContext
-     * @param servletContext the servletContext to set
-     */
-    public RestulfulServerConfiguration setServletContext(ServletContext servletContext) {
-        this.servletContext = servletContext;
-        return this;
-    }
-
-    /**
      * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain providers should generally use this context if one is needed, as opposed to
      * creating their own.
      */
@@ -209,7 +152,4 @@ public class RestulfulServerConfiguration {
         this.conformanceDate = conformanceDate;
     }
     
-    public String getServerBaseForRequest(HttpServletRequest theRequest) {
-        return getServerAddressStrategy().determineServerBase(getServletContext(), theRequest);        
-    }
 }

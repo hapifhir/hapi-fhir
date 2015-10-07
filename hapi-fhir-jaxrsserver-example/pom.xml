@@ -13,7 +13,7 @@
 	<artifactId>hapi-fhir-jaxrsserver-example</artifactId>
 	<packaging>war</packaging>
 
-	<name>HAPI FHIR JPA Server - Example</name>
+	<name>HAPI FHIR JAX-RS Server - Example</name>
 
 	<repositories>
 		<repository>

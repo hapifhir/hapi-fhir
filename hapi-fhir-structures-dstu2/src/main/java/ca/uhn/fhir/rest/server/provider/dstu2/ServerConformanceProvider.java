@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
@@ -97,7 +98,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private RestulfulServerConfiguration myServerConfiguration;
 
 	public ServerConformanceProvider(RestfulServer theRestfulServer) {
-		this.myServerConfiguration = new RestulfulServerConfiguration(theRestfulServer);
+		this.myServerConfiguration = theRestfulServer.createConfiguration();
 	}
 	
 	public ServerConformanceProvider(RestulfulServerConfiguration theServerConfiguration) {
@@ -115,7 +116,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 	
 	public void setRestfulServer (RestfulServer theRestfulServer) {
-		myServerConfiguration = new RestulfulServerConfiguration(theRestfulServer);
+		myServerConfiguration = theRestfulServer.createConfiguration();
 	}
 
 	private void checkBindingForSystemOps(Rest rest, Set<SystemRestfulInteractionEnum> systemOps, BaseMethodBinding<?> nextMethodBinding) {
@@ -204,7 +205,9 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				String resourceName = nextEntry.getKey();
 				RuntimeResourceDefinition def = myServerConfiguration.getFhirContext().getResourceDefinition(resourceName);
 				resource.getTypeElement().setValue(def.getName());
-				resource.getProfile().setReference(new IdDt(def.getResourceProfile(myServerConfiguration.getServerBaseForRequest(theRequest))));
+	            ServletContext servletContext  = theRequest == null ? null : theRequest.getServletContext();
+	            String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
+				resource.getProfile().setReference(new IdDt(def.getResourceProfile(serverBase)));
 
 				TreeSet<String> includes = new TreeSet<String>();
 

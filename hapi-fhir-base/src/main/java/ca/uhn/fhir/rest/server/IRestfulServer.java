@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import java.util.List;
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 /*
@@ -24,14 +24,12 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
  * limitations under the License.
  * #L%
  */
-public interface IRestfulServer {
+public interface IRestfulServer<T extends RequestDetails> extends IRestfulServerDefaults {
 
-    /**
-     * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain providers should generally use this context if one is needed, as opposed to
-     * creating their own.
-     */
-    public FhirContext getFhirContext();
+    List<IServerInterceptor> getInterceptors();
 
-    public List<IServerInterceptor> getInterceptors();
-
+    IPagingProvider getPagingProvider();
+    
+    BundleInclusionRule getBundleInclusionRule();
+    
 }

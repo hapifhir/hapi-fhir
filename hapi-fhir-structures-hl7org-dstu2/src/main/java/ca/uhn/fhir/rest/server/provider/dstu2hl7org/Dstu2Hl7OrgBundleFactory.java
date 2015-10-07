@@ -57,6 +57,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -297,7 +298,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
   }
 
   @Override
-  public void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult,
+  public void initializeBundleFromBundleProvider(IRestfulServer theServer, IBundleProvider theResult,
       EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint,
       int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
     myBase = theServerBase;

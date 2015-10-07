@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 /**
  * Base class for {@link IServerInterceptor} implementations. Provides a No-op implementation
@@ -66,21 +67,45 @@ public class InterceptorAdapter implements IServerInterceptor {
 	public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 		return true;
 	}
+	
+    @Override
+    public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle bundle) {
+        ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
+        return outgoingResponse(details, bundle, details.getServletRequest(), details.getServletResponse());
+    }	
 
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 		return true;
 	}
+	
+    @Override
+    public boolean outgoingResponse(RequestDetails theRequestDetails) {
+        ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
+        return outgoingResponse(theRequestDetails, details.getServletRequest(), details.getServletResponse());
+    }	
 
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 		return true;
 	}
 	
+    @Override
+    public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
+        ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
+        return outgoingResponse(details, theResponseObject, details.getServletRequest(), details.getServletResponse());
+    }	
+	
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 		return true;
 	}
+	
+    @Override
+    public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject) {
+        ServletRequestDetails details = (ServletRequestDetails) theRequestDetails;
+        return outgoingResponse(details, theResponseObject, details.getServletRequest(), details.getServletResponse());
+    }	
 
 	@Override
 	public BaseServerResponseException preProcessOutgoingException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest) throws ServletException {

@@ -23,6 +23,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -39,12 +41,14 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.jar.Manifest;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -56,14 +60,17 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
+import ca.uhn.fhir.rest.method.ParseAction;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -71,11 +78,12 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
 
-public class RestfulServer extends HttpServlet implements IRestfulServerDefaults, IRestfulServer {
+public class RestfulServer extends HttpServlet implements IRestfulServer<ServletRequestDetails> {
 
 	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
 	private static final long serialVersionUID = 1L;
@@ -316,15 +324,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServerDefaults
 		return count;
 	}
 
-	/**
-	 * Returns the setting for automatically adding profile tags
-	 *
-	 * @see #setAddProfileTag(AddProfileTagEnum)
-	 */
+	@Override
 	public AddProfileTagEnum getAddProfileTag() {
 		return myAddProfileTag;
 	}
 
+	@Override
 	public BundleInclusionRule getBundleInclusionRule() {
 		return myBundleInclusionRule;
 	}
@@ -337,9 +342,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServerDefaults
 		return myDefaultResponseEncoding;
 	}
 
-	/**
-	 * Returns the server support for ETags (will not be <code>null</code>). Default is {@link #DEFAULT_ETAG_SUPPORT}
-	 */
+	@Override
 	public ETagSupportEnum getETagSupport() {
 		return myETagSupport;
 	}
@@ -411,7 +414,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServerDefaults
 	public IServerAddressStrategy getServerAddressStrategy() {
 		return myServerAddressStrategy;
 	}
-
+	
 	/**
 	 * Returns the server base URL (with no trailing '/') for a given request
 	 */
@@ -463,7 +466,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServerDefaults
 		return myServerVersion;
 	}
 
-	private void handlePagingRequest(RequestDetails theRequest, HttpServletResponse theResponse, String thePagingAction) throws IOException {
+	private void handlePagingRequest(ServletRequestDetails theRequest, HttpServletResponse theResponse, String thePagingAction) throws IOException {
 		IBundleProvider resultList = getPagingProvider().retrieveResultList(thePagingAction);
 		if (resultList == null) {
 			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
@@ -476,21 +479,21 @@ public class RestfulServer extends HttpServlet implements IRestfulServerDefaults
 			return;
 		}
 
-		Integer count = RestfulServerUtils.extractCountParameter(theRequest.getServletRequest());
+		Integer count = RestfulServerUtils.extractCountParameter(theRequest);
 		if (count == null) {
 			count = getPagingProvider().getDefaultPageSize();
 		} else if (count > getPagingProvider().getMaximumPageSize()) {
 			count = getPagingProvider().getMaximumPageSize();
 		}
 
-		Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest.getServletRequest(), Constants.PARAM_PAGINGOFFSET);
+		Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
 		if (offsetI == null || offsetI < 0) {
 			offsetI = 0;
 		}
 
 		int start = Math.min(offsetI, resultList.size() - 1);
 
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest(), getDefaultResponseEncoding());
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, getDefaultResponseEncoding());
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(this, theRequest);
 		boolean requestIsBrowser = requestIsBrowser(theRequest.getServletRequest());
 		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
@@ -506,7 +509,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServerDefaults
 			}
 		}
 
-		String linkSelfBase = getServerAddressStrategy().determineServerBase(getServletContext(), theRequest.getServletRequest());
+		String linkSelfBase = myServerAddressStrategy.determineServerBase(getServletContext(), theRequest.getServletRequest());
 		String linkSelf = linkSelfBase + theRequest.getCompleteUrl().substring(theRequest.getCompleteUrl().indexOf('?'));
 
 		bundleFactory.initializeBundleFromBundleProvider(this, resultList, responseEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, start, count, thePagingAction, null, includes);
@@ -521,7 +524,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServerDefaults
 					return;
 				}
 			}
-			RestfulServerUtils.streamResponseAsBundle(this, theResponse, bundle, theRequest.getFhirServerBase(), summaryMode, respondGzip, requestIsBrowser, theRequest);
+			theRequest.getResponse().streamResponseAsBundle(bundle, summaryMode, respondGzip, requestIsBrowser);
 		} else {
 			IBaseResource resBundle = bundleFactory.getResourceBundle();
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
@@ -532,14 +535,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServerDefaults
 					return;
 				}
 			}
-			RestfulServerUtils.streamResponseAsResource(this, theResponse, resBundle, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), false, theRequest);
+			theRequest.getResponse().streamResponseAsResource(resBundle, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), false);
 		}
 	}
 
 	protected void handleRequest(RequestTypeEnum theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		String fhirServerBase = null;
 		boolean requestIsBrowser = requestIsBrowser(theRequest);
-		RequestDetails requestDetails = new RequestDetails();
+		ServletRequestDetails requestDetails = new ServletRequestDetails();
 		requestDetails.setServer(this);
 		requestDetails.setRequestType(theRequestType);
 		requestDetails.setServletRequest(theRequest);
@@ -1336,6 +1339,88 @@ public class RestfulServer extends HttpServlet implements IRestfulServerDefaults
 	public static boolean requestIsBrowser(HttpServletRequest theRequest) {
 		String userAgent = theRequest.getHeader("User-Agent");
 		return userAgent != null && userAgent.contains("Mozilla");
+	}
+
+	public Object returnResponse(ServletRequestDetails theRequest, ParseAction<?> outcome, int operationStatus, boolean allowPrefer, MethodOutcome response,
+            String resourceName) throws IOException {
+	    HttpServletResponse servletResponse = theRequest.getServletResponse();
+	    servletResponse.setStatus(operationStatus);
+	    servletResponse.setCharacterEncoding(Constants.CHARSET_NAME_UTF8);
+	    addHeadersToResponse(servletResponse);
+	    if(allowPrefer) {
+	        addContentLocationHeaders(theRequest, servletResponse, response, resourceName);
+	    }
+	    if (outcome != null) {
+	        EncodingEnum encoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequest);
+	        servletResponse.setContentType(encoding.getResourceContentType());
+	        Writer writer = servletResponse.getWriter();
+	        IParser parser = encoding.newParser(getFhirContext());
+	        parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(this, theRequest));
+	        try {
+	            outcome.execute(parser, writer);
+	        } finally {
+	            writer.close();
+	        }
+	    } else {
+	        servletResponse.setContentType(Constants.CT_TEXT_WITH_UTF8);
+	        Writer writer = servletResponse.getWriter();
+	        writer.close();
+	    }
+	    // getMethod().in
+	    return null;
+	}
+    
+    private void addContentLocationHeaders(RequestDetails theRequest, HttpServletResponse servletResponse, MethodOutcome response, String resourceName) {
+        if (response != null && response.getId() != null) {
+            addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_LOCATION, resourceName);
+            addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_CONTENT_LOCATION, resourceName);
+        }
+    }
+    
+    private void addLocationHeader(RequestDetails theRequest, HttpServletResponse theResponse, MethodOutcome response, String headerLocation, String resourceName) {
+        StringBuilder b = new StringBuilder();
+        b.append(theRequest.getFhirServerBase());
+        b.append('/');
+        b.append(resourceName);
+        b.append('/');
+        b.append(response.getId().getIdPart());
+        if (response.getId().hasVersionIdPart()) {
+            b.append("/" + Constants.PARAM_HISTORY + "/");
+            b.append(response.getId().getVersionIdPart());
+        } else if (response.getVersionId() != null && response.getVersionId().isEmpty() == false) {
+            b.append("/" + Constants.PARAM_HISTORY + "/");
+            b.append(response.getVersionId().getValue());
+        }
+        theResponse.addHeader(headerLocation, b.toString());
+        
+    }
+
+	public RestulfulServerConfiguration createConfiguration() {
+		RestulfulServerConfiguration result = new RestulfulServerConfiguration();
+		result.setResourceBindings(getResourceBindings());
+		result.setServerBindings(getServerBindings());
+		result.setImplementationDescription(getImplementationDescription());
+		result.setServerVersion(getServerVersion());
+		result.setServerName(getServerName());
+		result.setFhirContext(getFhirContext());
+		result.setServerAddressStrategy(myServerAddressStrategy);
+		InputStream inputStream = null;
+		try {
+			inputStream = getClass().getResourceAsStream("/META-INF/MANIFEST.MF");
+			if (inputStream != null) {
+				Manifest manifest = new Manifest(inputStream);
+				result.setConformanceDate(manifest.getMainAttributes().getValue("Build-Time"));
+			}
+		}
+		catch (IOException e) {
+			// fall through
+		}
+		finally {
+			if (inputStream != null) {
+				IOUtils.closeQuietly(inputStream);
+			}
+		}
+		return result;
 	}
 
 }

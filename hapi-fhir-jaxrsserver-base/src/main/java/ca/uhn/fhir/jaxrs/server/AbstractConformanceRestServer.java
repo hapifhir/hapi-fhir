@@ -23,6 +23,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
@@ -35,10 +37,10 @@ import ca.uhn.fhir.util.ReflectionUtil;
  * Conformance Rest Service
  * @author Peter Van Houte
  */
-@Produces(MediaType.APPLICATION_JSON)
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 public abstract class AbstractConformanceRestServer extends AbstractJaxRsRestServer implements IConformanceRestServer {
 
-    public static  final String PATH = "/";
+	public static  final String PATH = "/";
     private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(AbstractConformanceRestServer.class);
     
     private ResourceBinding myServerBinding = new ResourceBinding();
@@ -73,9 +75,8 @@ public abstract class AbstractConformanceRestServer extends AbstractJaxRsRestSer
     @GET
     @OPTIONS
     @Path("/metadata")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response conformance(String string) {
-        String conformanceString = getParser().encodeResourceToString(myConformance);
+        String conformanceString = getParser(createRequestDetails(null, RequestTypeEnum.OPTIONS, RestOperationTypeEnum.METADATA)).encodeResourceToString(myConformance);
         ResponseBuilder entity = Response.status(Constants.STATUS_HTTP_200_OK).entity(conformanceString);
         entity.header("Access-Control-Allow-Origin", "*");
         return entity.build();

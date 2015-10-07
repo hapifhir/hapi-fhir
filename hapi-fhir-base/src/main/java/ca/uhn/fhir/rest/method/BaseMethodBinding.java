@@ -69,7 +69,7 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -86,10 +86,6 @@ import ca.uhn.fhir.util.ReflectionUtil;
 public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseMethodBinding.class);
-	/**
-	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
-	 */
-	private static volatile IRequestReader ourRequestReader;
 	private FhirContext myContext;
 	private Method myMethod;
 	private List<IParameter> myParameters;
@@ -131,7 +127,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	}
 
 	protected IParser createAppropriateParserForParsingServerRequest(RequestDetails theRequest) {
-		String contentTypeHeader = theRequest.getServletRequest().getHeader("content-type");
+		String contentTypeHeader = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 		EncodingEnum encoding;
 		if (isBlank(contentTypeHeader)) {
 			encoding = EncodingEnum.XML;
@@ -151,14 +147,14 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return parser;
 	}
 
-	protected Object[] createParametersForServerRequest(RequestDetails theRequest, byte[] theRequestContents) {
+	protected Object[] createParametersForServerRequest(RequestDetails theRequest) {
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
 			IParameter param = getParameters().get(i);
 			if (param == null) {
 				continue;
 			}
-			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, theRequestContents, this);
+			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
 		}
 		return params;
 	}
@@ -251,9 +247,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 	public abstract BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;
 
-	public abstract void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException;
+	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException;
 
-	protected final Object invokeServerMethod(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) {
+	protected final Object invokeServerMethod(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) {
 		// Handle server action interceptors
 		RestOperationTypeEnum operationType = getRestOperationType(theRequest);
 		if (operationType != null) {
@@ -291,41 +287,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	 */
 	public boolean isSupportsConditionalMultiple() {
 		return mySupportsConditionalMultiple;
-	}
-
-	protected byte[] loadRequestContents(RequestDetails theRequest) throws IOException {
-		/*
-		 * This is weird, but this class is used both in clients and in servers, and we want to avoid needing to depend on servlet-api in clients since there is no point. So we dynamically load a class
-		 * that does the servlet processing in servers. Down the road it may make sense to just split the method binding classes into server and client versions, but this isn't actually a huge deal I
-		 * don't think.
-		 */
-		IRequestReader reader = ourRequestReader;
-		if (reader == null) {
-			try {
-				Class.forName("javax.servlet.ServletInputStream");
-				String className = BaseMethodBinding.class.getName() + "$" + "ActiveRequestReader";
-				try {
-					reader = (IRequestReader) Class.forName(className).newInstance();
-				} catch (Exception e1) {
-					throw new ConfigurationException("Failed to instantiate class " + className, e1);
-				}
-			} catch (ClassNotFoundException e) {
-				String className = BaseMethodBinding.class.getName() + "$" + "InactiveRequestReader";
-				try {
-					reader = (IRequestReader) Class.forName(className).newInstance();
-				} catch (Exception e1) {
-					throw new ConfigurationException("Failed to instantiate class " + className, e1);
-				}
-			}
-			ourRequestReader = reader;
-		}
-
-		InputStream inputStream = reader.getInputStream(theRequest);
-		byte[] requestContents = IOUtils.toByteArray(inputStream);
-		
-		theRequest.setRawRequest(requestContents);
-
-		return requestContents;
 	}
 
 	/**
@@ -643,17 +604,17 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	/**
 	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
 	 */
-	static class ActiveRequestReader implements IRequestReader {
+	public static class ActiveRequestReader implements IRequestReader {
 		@Override
 		public InputStream getInputStream(RequestDetails theRequestDetails) throws IOException {
-			return theRequestDetails.getServletRequest().getInputStream();
+			return theRequestDetails.getInputStream();
 		}
 	}
 
 	/**
 	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
 	 */
-	static class InactiveRequestReader implements IRequestReader {
+	public static class InactiveRequestReader implements IRequestReader {
 		@Override
 		public InputStream getInputStream(RequestDetails theRequestDetails) {
 			throw new IllegalStateException("The servlet-api JAR is not found on the classpath. Please check that this library is available.");
@@ -663,7 +624,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	/**
 	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
 	 */
-	private static interface IRequestReader {
+	public static interface IRequestReader {
 		InputStream getInputStream(RequestDetails theRequestDetails) throws IOException;
 	}
 

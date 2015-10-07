@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jaxrs.server.example;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,12 +12,15 @@ import javax.interceptor.Interceptors;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import ca.uhn.fhir.jaxrs.server.AbstractResourceRestServer;
 import ca.uhn.fhir.jaxrs.server.interceptor.ExceptionInterceptor;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -33,8 +38,16 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.AddProfileTagEnum;
+import ca.uhn.fhir.rest.server.BundleInclusionRule;
+import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.ETagSupportEnum;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 /**
  * Fhir Physician Rest Service
@@ -44,7 +57,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 @Local(IFhirPatientRestServer.class)
 @Path(FhirPatientRestServer.PATH)
 @Stateless
-@Produces(MediaType.APPLICATION_JSON)
+@Produces({MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML})
 public class FhirPatientRestServer extends AbstractResourceRestServer<Patient> implements IFhirPatientRestServer {
     
     static final String PATH = "/Patient";
@@ -57,8 +70,8 @@ public class FhirPatientRestServer extends AbstractResourceRestServer<Patient> i
     }    
     
     static {
-        patients.put(""+counter, createPatient("Agfa"));
-        patients.put(""+(counter), createPatient("Healthcare"));
+        patients.put(""+counter, createPatient("Van Houte"));
+        patients.put(""+(counter), createPatient("Agnew"));
         for(int i = 0 ; i<20 ; i++) {
             patients.put(""+(counter), createPatient("Random Patient " + counter));
         }
@@ -135,7 +148,7 @@ public class FhirPatientRestServer extends AbstractResourceRestServer<Patient> i
     }
 
     @Override
-    @Read(version = false)
+    @Read(version = true)
     public Patient findHistory(@IdParam final IdDt theId) {
         if (patients.containsKey(theId.getIdPart())) {
             final List<Patient> list = patients.get(theId.getIdPart());
@@ -174,10 +187,20 @@ public class FhirPatientRestServer extends AbstractResourceRestServer<Patient> i
     @Path("/{id}/$last")
     @Interceptors(ExceptionInterceptor.class)
     @Override
-    public Response operationLastGet(final String resource)
+    public Response operationLastGet(@PathParam("id") String id)
             throws Exception {
-        return customOperation(null, RequestTypeEnum.GET);
+        return customOperation(null, RequestTypeEnum.GET, id, "$last", RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
     }
+    
+    @Search(compartmentName="Condition")
+    @Override
+    public List<IResource> searchCompartment(@IdParam IdDt thePatientId) {
+       List<IResource> retVal=new ArrayList<IResource>();
+       Condition condition = new Condition();
+       condition.setId(new IdDt("665577"));
+       retVal.add(condition);
+       return retVal;
+    }    
     
     @POST
     @Path("/{id}/$last")
@@ -185,7 +208,7 @@ public class FhirPatientRestServer extends AbstractResourceRestServer<Patient> i
     @Override
     public Response operationLast(final String resource)
             throws Exception {
-        return customOperation(getParser().parseResource(resource), RequestTypeEnum.POST);
+        return customOperation(resource, RequestTypeEnum.POST, null, "$last", RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
     }
     
 //    @ca.uhn.fhir.rest.annotation.Validate
@@ -213,10 +236,46 @@ public class FhirPatientRestServer extends AbstractResourceRestServer<Patient> i
           .setValue(new StringDt((counter-1)+"" + "inputVariable [ " + dummyInput.getValue()+ "]"));
       return parameters;
   }    
-    
+  
+  @Override
+  public Class<Patient> getResourceType() {
+	  return Patient.class;
+  }
+  
+  /** THE DEFAULTS */
     @Override
-    public Class<Patient> getResourceType() {
-        return Patient.class;
+    public List<IServerInterceptor> getInterceptors() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public ETagSupportEnum getETagSupport() {
+        return ETagSupportEnum.DISABLED;
+    }
+
+    @Override
+    public boolean isDefaultPrettyPrint() {
+        return true;
+    }
+
+    @Override
+    public AddProfileTagEnum getAddProfileTag() {
+        return AddProfileTagEnum.NEVER;
+    }
+
+    @Override
+    public boolean isUseBrowserFriendlyContentTypes() {
+        return true;
+    }
+
+    @Override
+    public IPagingProvider getPagingProvider() {
+        return new FifoMemoryPagingProvider(10);
+    }
+
+    @Override
+    public BundleInclusionRule getBundleInclusionRule() {
+        return BundleInclusionRule.BASED_ON_INCLUDES;
     }
 
 }
