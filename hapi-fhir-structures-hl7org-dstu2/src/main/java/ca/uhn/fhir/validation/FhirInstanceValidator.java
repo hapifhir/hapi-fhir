@@ -189,6 +189,13 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
       throw new IllegalArgumentException("Unknown encoding: " + theEncoding);
     }
 
+    for (int i = 0; i < messages.size(); i++) {
+      ValidationMessage next = messages.get(i);
+      if ("Binding has no source, so can't be checked".equals(next.getMessage())) {
+        messages.remove(i);
+        i--;
+      }
+    }
     return messages;
   }
 

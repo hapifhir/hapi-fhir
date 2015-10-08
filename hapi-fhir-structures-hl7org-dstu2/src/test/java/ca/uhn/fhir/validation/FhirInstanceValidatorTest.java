@@ -230,7 +230,7 @@ public class FhirInstanceValidatorTest {
         .toString(FhirInstanceValidator.class.getResourceAsStream("/medicationstatement_invalidelement.xml"));
     ValidationResult output = myVal.validateWithResult(input);
 
-    List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
+    List<SingleValidationMessage> res = logResultsAndReturnAll(output);
     ourLog.info(res.toString());
     
     for (SingleValidationMessage nextMessage : res) {
