@@ -24,9 +24,9 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulResponse;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 
-public class JaxRsRestfulResponse extends RestfulResponse<JaxRsRequestDetails> {
+public class JaxRsResponse extends RestfulResponse<JaxRsRequestDetails> {
 
-    public JaxRsRestfulResponse(String resourceString, JaxRsRequestDetails jaxRsRequestDetails) {
+    public JaxRsResponse(String resourceString, JaxRsRequestDetails jaxRsRequestDetails) {
         super(jaxRsRequestDetails);
     }
 

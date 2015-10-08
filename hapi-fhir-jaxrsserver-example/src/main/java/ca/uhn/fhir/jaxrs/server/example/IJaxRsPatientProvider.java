@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
-import ca.uhn.fhir.jaxrs.server.IResourceRestServer;
+import ca.uhn.fhir.jaxrs.server.IJaxRsResourceProvider;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -13,7 +13,9 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.StringParam;
 
-public interface IFhirPatientRestServer extends IResourceRestServer<Patient> {
+public interface IJaxRsPatientProvider extends IJaxRsResourceProvider<Patient> {
+	
+	public static final String JNDI_NAME = "IJaxRsPatientProvider";
 
     List<Patient> search(StringParam name);
 

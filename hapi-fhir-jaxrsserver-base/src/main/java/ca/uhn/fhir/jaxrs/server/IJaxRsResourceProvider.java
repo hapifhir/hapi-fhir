@@ -9,7 +9,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
-public interface IResourceRestServer<T> extends IRestfulServer<JaxRsRequestDetails>, IResourceProvider {
+public interface IJaxRsResourceProvider<T> extends IRestfulServer<JaxRsRequestDetails>, IResourceProvider {
 
     Response search()
                     throws Exception;

@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 
-import ca.uhn.fhir.jaxrs.server.interceptor.ExceptionInterceptor;
+import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequestDetails;
 import ca.uhn.fhir.jaxrs.server.util.MethodBindings;
 import ca.uhn.fhir.model.api.IResource;
@@ -38,11 +38,11 @@ import ca.uhn.fhir.util.UrlUtil;
  */
 @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
 @Consumes({MediaType.APPLICATION_FORM_URLENCODED,MediaType.APPLICATION_JSON, "application/json+fhir", "application/xml+fhir"})
-public abstract class AbstractResourceRestServer<R extends IResource> extends AbstractJaxRsRestServer implements IResourceRestServer<R> {
+public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends AbstractJaxRsProvider implements IJaxRsResourceProvider<R> {
 	
     private static MethodBindings bindings;
 
-    public AbstractResourceRestServer(Class<?> subclass) {
+    public AbstractJaxRsResourceProvider(Class<?> subclass) {
         initBindings(subclass);
     }
 
@@ -66,14 +66,14 @@ public abstract class AbstractResourceRestServer<R extends IResource> extends Ab
 
     @POST
     @Override
-    @Interceptors(ExceptionInterceptor.class)
+    @Interceptors(JaxRsExceptionInterceptor.class)
     public Response create(final String resourceString)
             throws Exception {
         return executeMethod(resourceString, RequestTypeEnum.POST, RestOperationTypeEnum.CREATE, null);        
     }
 
     @POST
-    @Interceptors(ExceptionInterceptor.class)
+    @Interceptors(JaxRsExceptionInterceptor.class)
     @Path("/_search")
     @Override
     public Response searchWithPost() throws Exception {
@@ -82,7 +82,7 @@ public abstract class AbstractResourceRestServer<R extends IResource> extends Ab
     
     @GET
     @Override
-    @Interceptors(ExceptionInterceptor.class)    
+    @Interceptors(JaxRsExceptionInterceptor.class)    
     public Response search() throws Exception {
         return executeMethod(null, RequestTypeEnum.GET, RestOperationTypeEnum.SEARCH_TYPE, null);
     }
@@ -90,7 +90,7 @@ public abstract class AbstractResourceRestServer<R extends IResource> extends Ab
     @PUT
     @Override
     @Path("/{id}")
-    @Interceptors(ExceptionInterceptor.class)
+    @Interceptors(JaxRsExceptionInterceptor.class)
     public Response update(@PathParam("id") final String id, final String resourceString)
             throws Exception {
         return executeMethod(resourceString, RequestTypeEnum.PUT, RestOperationTypeEnum.UPDATE, id);
@@ -99,7 +99,7 @@ public abstract class AbstractResourceRestServer<R extends IResource> extends Ab
     @DELETE
     @Override
     @Path("/{id}")
-    @Interceptors(ExceptionInterceptor.class)
+    @Interceptors(JaxRsExceptionInterceptor.class)
     public Response delete(@PathParam("id") final String id) throws Exception {
         return executeMethod(null, RequestTypeEnum.DELETE, RestOperationTypeEnum.DELETE, id);
     }
@@ -108,7 +108,7 @@ public abstract class AbstractResourceRestServer<R extends IResource> extends Ab
     @GET
     @Override
     @Path("/{id}")
-    @Interceptors(ExceptionInterceptor.class)
+    @Interceptors(JaxRsExceptionInterceptor.class)
     public Response find(@PathParam("id") final String id) throws Exception {
         return executeMethod(null, RequestTypeEnum.GET, RestOperationTypeEnum.READ, id);
     }    
@@ -121,7 +121,7 @@ public abstract class AbstractResourceRestServer<R extends IResource> extends Ab
     @GET
     @Override
     @Path("/{id}/_history/{version}")
-    @Interceptors(ExceptionInterceptor.class)
+    @Interceptors(JaxRsExceptionInterceptor.class)
     public Response findHistory(@PathParam("id") final String id, @PathParam("version") final String versionString)
             throws BaseServerResponseException, IOException {
         BaseMethodBinding<?> method = bindings.getBinding(RestOperationTypeEnum.VREAD);
@@ -136,7 +136,7 @@ public abstract class AbstractResourceRestServer<R extends IResource> extends Ab
     @GET
     @Override
     @Path("/{id}/{compartment}")
-    @Interceptors(ExceptionInterceptor.class)
+    @Interceptors(JaxRsExceptionInterceptor.class)
     public Response findCompartment(@PathParam("id") final String id, @PathParam("compartment") final String compartment) throws BaseServerResponseException, IOException {
         BaseMethodBinding<?> method = bindings.getBinding(RestOperationTypeEnum.SEARCH_TYPE, compartment);
         final RequestDetails theRequest = createRequestDetails(null, RequestTypeEnum.GET, RestOperationTypeEnum.VREAD);

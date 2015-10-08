@@ -1332,6 +1332,8 @@
 				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-validation-resources-dstu2</module>
 				<module>hapi-fhir-structures-hl7org-dstu2</module>
+				<module>hapi-fhir-jaxrsserver-base</module>
+				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jpaserver-example</module>
 				<module>restful-server-example</module>

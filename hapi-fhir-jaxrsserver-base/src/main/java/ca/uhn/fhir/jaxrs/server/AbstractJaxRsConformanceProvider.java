@@ -38,10 +38,10 @@ import ca.uhn.fhir.util.ReflectionUtil;
  * @author Peter Van Houte
  */
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-public abstract class AbstractConformanceRestServer extends AbstractJaxRsRestServer implements IConformanceRestServer {
+public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProvider implements IJaxRsConformanceProvider {
 
 	public static  final String PATH = "/";
-    private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(AbstractConformanceRestServer.class);
+    private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(AbstractJaxRsConformanceProvider.class);
     
     private ResourceBinding myServerBinding = new ResourceBinding();
     private ConcurrentHashMap<String, ResourceBinding> myResourceNameToBinding = new ConcurrentHashMap<String, ResourceBinding>();
@@ -49,7 +49,7 @@ public abstract class AbstractConformanceRestServer extends AbstractJaxRsRestSer
 
     private Conformance myConformance;
     
-    protected AbstractConformanceRestServer(String implementationDescription, String serverName, String serverVersion) {
+    protected AbstractJaxRsConformanceProvider(String implementationDescription, String serverName, String serverVersion) {
         serverConfiguration.setFhirContext(getFhirContext());
         serverConfiguration.setImplementationDescription(implementationDescription);
         serverConfiguration.setServerName(serverName);

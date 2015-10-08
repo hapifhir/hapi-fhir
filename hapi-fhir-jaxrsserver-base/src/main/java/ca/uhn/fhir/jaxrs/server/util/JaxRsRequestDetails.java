@@ -8,8 +8,8 @@ import java.util.List;
 
 import javax.ws.rs.core.HttpHeaders;
 
-import ca.uhn.fhir.jaxrs.server.AbstractJaxRsRestServer;
-import ca.uhn.fhir.jaxrs.server.JaxRsRestfulResponse;
+import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
+import ca.uhn.fhir.jaxrs.server.JaxRsResponse;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.ResourceParameter;
 
@@ -17,20 +17,20 @@ public class JaxRsRequestDetails extends RequestDetails {
 
     private String theResourceString;
     private HttpHeaders headers;
-    private AbstractJaxRsRestServer myServer;
+    private AbstractJaxRsProvider myServer;
 
-    public AbstractJaxRsRestServer getServer() {
+    public AbstractJaxRsProvider getServer() {
         return myServer;
     }
 
-    public void setServer(AbstractJaxRsRestServer theServer) {
+    public void setServer(AbstractJaxRsProvider theServer) {
         this.myServer = theServer;
     }
 
     public JaxRsRequestDetails(HttpHeaders headers, String resourceString) {
         this.headers = headers;
         this.theResourceString = resourceString;
-        setResponse(new JaxRsRestfulResponse(resourceString, this));
+        setResponse(new JaxRsResponse(resourceString, this));
     }
 
     @Override

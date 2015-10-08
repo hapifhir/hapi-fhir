@@ -11,13 +11,13 @@ import javax.ws.rs.core.Response;
 
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.jaxrs.server.interceptor.ExceptionInterceptor;
+import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 
 /**
- * Conformance Rest Service
+ * Rest Service for static requests such as 
  * @author Peter Van Houte
  */
 @Local
@@ -31,7 +31,7 @@ public class StaticJaxRsServer {
 
     @POST
     @Path("/")
-    @Interceptors(ExceptionInterceptor.class)
+    @Interceptors(JaxRsExceptionInterceptor.class)
     public Response transaction(final String resource) {
         ourLog.debug("calling transaction method");
         return null;

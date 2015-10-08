@@ -17,8 +17,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import ca.uhn.fhir.jaxrs.server.AbstractResourceRestServer;
-import ca.uhn.fhir.jaxrs.server.interceptor.ExceptionInterceptor;
+import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
+import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
@@ -54,19 +54,19 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
  * @author axmpm
  *
  */
-@Local(IFhirPatientRestServer.class)
-@Path(FhirPatientRestServer.PATH)
-@Stateless
+@Local(IJaxRsPatientProvider.class)
+@Path(JaxRsPatientRestProvider.PATH)
+@Stateless(name = IJaxRsPatientProvider.JNDI_NAME, mappedName=IJaxRsPatientProvider.JNDI_NAME)
 @Produces({MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML})
-public class FhirPatientRestServer extends AbstractResourceRestServer<Patient> implements IFhirPatientRestServer {
+public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Patient> implements IJaxRsPatientProvider {
     
     static final String PATH = "/Patient";
     
     private static Long counter = 1L;
     private static final ConcurrentHashMap<String, List<Patient>> patients = new ConcurrentHashMap<String, List<Patient>>();
     
-    protected FhirPatientRestServer() throws Exception {
-        super(FhirPatientRestServer.class);
+    public JaxRsPatientRestProvider() throws Exception {
+        super(JaxRsPatientRestProvider.class);
     }    
     
     static {
@@ -185,7 +185,7 @@ public class FhirPatientRestServer extends AbstractResourceRestServer<Patient> i
     
     @GET
     @Path("/{id}/$last")
-    @Interceptors(ExceptionInterceptor.class)
+    @Interceptors(JaxRsExceptionInterceptor.class)
     @Override
     public Response operationLastGet(@PathParam("id") String id)
             throws Exception {
@@ -204,7 +204,7 @@ public class FhirPatientRestServer extends AbstractResourceRestServer<Patient> i
     
     @POST
     @Path("/{id}/$last")
-    @Interceptors(ExceptionInterceptor.class)
+    @Interceptors(JaxRsExceptionInterceptor.class)
     @Override
     public Response operationLast(final String resource)
             throws Exception {

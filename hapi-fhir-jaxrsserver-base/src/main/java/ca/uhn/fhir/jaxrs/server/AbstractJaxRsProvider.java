@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
  * @author Peter Van Houte
  *
  */
-public abstract class AbstractJaxRsRestServer implements IRestfulServerDefaults {
+public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
     public static FhirContext CTX = FhirContext.forDstu2();
 

@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jaxrs.server.AbstractResourceRestServer;
+import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
@@ -19,7 +19,7 @@ public class MethodBindings {
     /** ALL METHOD BINDINGS */
     ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String, BaseMethodBinding<?>>> allBindings = new ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String,BaseMethodBinding<?>>>();    
     
-    public <T extends AbstractResourceRestServer<?>> void findMethods(T theProvider, Class<?> subclass, FhirContext fhirContext) {
+    public <T extends AbstractJaxRsResourceProvider<?>> void findMethods(T theProvider, Class<?> subclass, FhirContext fhirContext) {
         for (final Method m : ReflectionUtil.getDeclaredMethods(subclass)) {
             final BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, fhirContext, theProvider);
             if (foundMethodBinding == null) {

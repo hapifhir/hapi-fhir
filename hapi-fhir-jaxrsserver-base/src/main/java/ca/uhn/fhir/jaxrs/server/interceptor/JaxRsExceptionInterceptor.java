@@ -20,15 +20,15 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jaxrs.server.AbstractJaxRsRestServer;
+import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 
-public class ExceptionInterceptor {
+public class JaxRsExceptionInterceptor {
 
-    private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(ExceptionInterceptor.class);
+    private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(JaxRsExceptionInterceptor.class);
     private Class<?>[] myReturnStackTracesForExceptionTypes;
     
     @Context
@@ -36,7 +36,7 @@ public class ExceptionInterceptor {
     @Context
     private HttpHeaders headers;    
     
-    FhirContext fhirContext = AbstractJaxRsRestServer.CTX;
+    FhirContext fhirContext = AbstractJaxRsProvider.CTX;
     
     @AroundInvoke
     public Object intercept(final InvocationContext ctx) throws Exception {
@@ -161,7 +161,7 @@ public class ExceptionInterceptor {
      *           The exception types for which to return the stack trace to the user.
      * @return Returns an instance of this interceptor, to allow for easy method chaining.
      */
-    public ExceptionInterceptor setReturnStackTracesForExceptionTypes(final Class<?>... theExceptionTypes) {
+    public JaxRsExceptionInterceptor setReturnStackTracesForExceptionTypes(final Class<?>... theExceptionTypes) {
         myReturnStackTracesForExceptionTypes = theExceptionTypes;
         return this;
     }
