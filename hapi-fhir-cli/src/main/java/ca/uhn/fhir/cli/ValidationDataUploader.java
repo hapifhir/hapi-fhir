@@ -133,7 +133,7 @@ public class ValidationDataUploader extends BaseCommand {
 			StructureDefinition next;
 			try {
 				next = ctx.newXmlParser().parseResource(StructureDefinition.class, IOUtils.toString(i.getInputStream(), "UTF-8"));
-			} catch (DataFormatException | IOException e) {
+			} catch (Exception e) {
 				throw new CommandFailureException(e.toString());
 			}
 			next.setId(next.getIdElement().toUnqualifiedVersionless());

@@ -237,6 +237,14 @@
 		<thymeleaf-version>2.1.4.RELEASE</thymeleaf-version>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<xmlunit_version>1.6</xmlunit_version>
+		
+		<!--
+		We are aiming to still work on a very old version of SLF4j even though
+		we depend on the newest, just to be nice to users of the API. This version
+		is tested in the hapi-fhir-cobertura. 
+		-->
+		<slf4j_target_version>1.6.0</slf4j_target_version>
+		
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 

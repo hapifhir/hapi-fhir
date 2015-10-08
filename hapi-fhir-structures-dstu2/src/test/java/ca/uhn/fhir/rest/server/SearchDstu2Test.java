@@ -17,6 +17,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -163,7 +164,20 @@ public class SearchDstu2Test {
 		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
 		assertThat(responseContent, containsString("SYSTEM"));
 	}
+
+	@Test
+	public void testSearchByPut() throws Exception {
+		HttpPut httpGet = new HttpPut("http://localhost:" + ourPort + "/Patient/_search");
+		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
+		httpGet.setEntity(entity);
 		
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(400, status.getStatusLine().getStatusCode());
+	}
+
 		@Test
 		public void testSearchByPostWithBodyAndUrlParams() throws Exception {
 		

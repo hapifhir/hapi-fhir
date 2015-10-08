@@ -1,0 +1,4 @@
+<div>
+	<th:block th:if="${not resource.valueElement.empty}" th:text="${resource.valueElement.valueAsString}"/>
+	<th:block th:if="${not resource.unitsElement.empty}" th:text="${resource.unitsElement.value}"/>
+</div>
