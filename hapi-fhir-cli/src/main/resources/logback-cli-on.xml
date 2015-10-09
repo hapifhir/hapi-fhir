@@ -8,38 +8,11 @@
 		</encoder>
 	</appender>
 
-	<logger name="java.sql" additivity="false" level="warn">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	<logger name="ca.uhn.fhir.jpa" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	<logger name="ca.uhn.fhir.rest" additivity="false" level="warn">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	<logger name="org.eclipse" additivity="false" level="warn">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	<logger name="org.springframework" additivity="false" level="warn">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	<logger name="org.apache" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	<logger name="org.thymeleaf" additivity="false" level="warn">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	<logger name="org.hibernate" additivity="false" level="warn">
+	<logger name="ca.uhn.fhir.cli" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
 
-	<!-- 
-	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="trace">
-		<appender-ref ref="STDOUT" />
-	</logger>
- 	-->
- 	
-	<root level="info">
+	<root level="warn">
 		<appender-ref ref="STDOUT" />
 	</root>
 

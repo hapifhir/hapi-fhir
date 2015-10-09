@@ -90,6 +90,7 @@ public class NarrativeDt extends BaseNarrativeDt<NarrativeStatusEnum> {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements( theType, myStatus, myDiv );
 	}
 
+	
 	/**
 	 * Gets the value(s) for <b>status</b> (generated | extensions | additional).
 	 * creating it if it does

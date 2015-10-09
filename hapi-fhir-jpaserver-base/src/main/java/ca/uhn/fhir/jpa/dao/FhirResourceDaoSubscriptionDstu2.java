@@ -106,16 +106,13 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 
 		// SubscriptionCandidateResource
 
-		TypedQuery<SubscriptionTable> q = myEntityManager.createNamedQuery("Q_HFJ_SUBSCRIPTION_NEXT_CHECK", SubscriptionTable.class);
-		q.setParameter("next_check", new Date());
-		q.setParameter("status", SubscriptionStatusEnum.ACTIVE);
-		List<SubscriptionTable> subscriptions = q.getResultList();
+		Collection<Long> subscriptions = mySubscriptionTableDao.finsSubscriptionsWhichNeedToBeChecked(SubscriptionStatusEnum.ACTIVE, new Date());
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		
 		int retVal = 0;
-		for (final SubscriptionTable nextSubscriptionTable : subscriptions) {
+		for (final Long nextSubscriptionTablePid : subscriptions) {
 			retVal += txTemplate.execute(new TransactionCallback<Integer>() {
 				@Override
 				public Integer doInTransaction(TransactionStatus theStatus) {

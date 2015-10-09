@@ -35,6 +35,7 @@ public class App {
 		ourCommands.add(new RunServerCommand());
 		ourCommands.add(new ExampleDataUploader());
 		ourCommands.add(new ValidateCommand());
+		ourCommands.add(new ValidationDataUploader());
 
 		Collections.sort(ourCommands);
 	}

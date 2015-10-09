@@ -64,7 +64,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.6.0</version>
+			<version>${slf4j_target_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>

@@ -100,6 +100,20 @@ public class NarrativeDt extends BaseNarrativeDt {
      * The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data
      * </p> 
 	 */
+	public BoundCodeDt<NarrativeStatusEnum> getStatusElement() {
+		return getStatus();
+	}
+	
+	/**
+	 * Gets the value(s) for <b>status</b> (generated | extensions | additional).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data
+     * </p> 
+	 */
 	public BoundCodeDt<NarrativeStatusEnum> getStatus() {  
 		if (myStatus == null) {
 			myStatus = new BoundCodeDt<NarrativeStatusEnum>(NarrativeStatusEnum.VALUESET_BINDER);
@@ -132,6 +146,20 @@ public class NarrativeDt extends BaseNarrativeDt {
 	}
 
   
+	/**
+	 * Gets the value(s) for <b>div</b> (Limited xhtml content).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The actual narrative content, a stripped down version of XHTML
+     * </p> 
+	 */
+	public XhtmlDt getDivElement() {
+		return getDiv();
+	}
+	
 	/**
 	 * Gets the value(s) for <b>div</b> (Limited xhtml content).
 	 * creating it if it does
