@@ -18,44 +18,30 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 
 public class BaseJpaTest {
 
-	public static String loadClasspath(String resource) throws IOException {
-		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream(resource);
-		if (bundleRes == null) {
-			throw new NullPointerException("Can not load " + resource);
-		}
-		String bundleStr = IOUtils.toString(bundleRes);
-		return bundleStr;
-	}
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
 
-	@AfterClass
-	public static void afterClassShutdownDerby() throws SQLException {
-//		try {
-//		DriverManager.getConnection("jdbc:derby:memory:myUnitTestDB;drop=true");
-//		} catch (SQLNonTransientConnectionException e) {
-//			// expected.. for some reason....
-//		}
-	}
-	
 	@SuppressWarnings({ "rawtypes" })
 	protected List toList(IBundleProvider theSearch) {
 		return theSearch.getResources(0, theSearch.size());
 	}
 
-	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
+	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
-		List<IBaseResource> resources = theFound.getResources(0, theFound.size());
-		for (IBaseResource next : resources) {
-			retVal.add((IIdType) next.getIdElement().toUnqualifiedVersionless());
+		for (Entry next : theFound.getEntry()) {
+			// if (next.getResource()!= null) {
+			retVal.add(next.getResource().getId().toUnqualifiedVersionless());
+			// }
 		}
 		return retVal;
 	}
 
-	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
+	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
-		for (Entry next : theFound.getEntry()) {
-//			if (next.getResource()!= null) {
-				retVal.add(next.getResource().getId().toUnqualifiedVersionless());
-//			}
+		int size = theFound.size();
+		ourLog.info("Found {} results", size);
+		List<IBaseResource> resources = theFound.getResources(0, size);
+		for (IBaseResource next : resources) {
+			retVal.add((IIdType) next.getIdElement().toUnqualifiedVersionless());
 		}
 		return retVal;
 	}
@@ -68,5 +54,22 @@ public class BaseJpaTest {
 		return retVal;
 	}
 
-	
+	@AfterClass
+	public static void afterClassShutdownDerby() throws SQLException {
+		// try {
+		// DriverManager.getConnection("jdbc:derby:memory:myUnitTestDB;drop=true");
+		// } catch (SQLNonTransientConnectionException e) {
+		// // expected.. for some reason....
+		// }
+	}
+
+	public static String loadClasspath(String resource) throws IOException {
+		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream(resource);
+		if (bundleRes == null) {
+			throw new NullPointerException("Can not load " + resource);
+		}
+		String bundleStr = IOUtils.toString(bundleRes);
+		return bundleStr;
+	}
+
 }

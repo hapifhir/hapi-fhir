@@ -25,16 +25,38 @@
 
 	<bean depends-on="dbServer" id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="myPersistenceDataSource" />
+		<!--
 		<property name="persistenceXmlLocation" value="classpath:META-INF/fhirtest_persistence.xml" />
-		<property name="persistenceUnitName" value="FHIR_UT" />
-		<property name="jpaVendorAdapter">
+		-->
+		<property name="persistenceUnitName" value="FHIR_DSTU2" />
+			<property name="packagesToScan">
+				<list>
+					<value>ca.uhn.fhir.jpa.entity</value>
+				</list>
+			</property>
+			<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
 				<property name="showSql" value="false" />
 				<property name="generateDdl" value="true" />
-				<property name="databasePlatform" value="ca.uhn.fhir.jpa.util.HapiDerbyTenSevenDialect" />
+				<property name="databasePlatform" value="org.hibernate.dialect.DerbyTenSevenDialect" />
+				<!-- <property name="databasePlatform" value="ca.uhn.fhir.jpa.util.HapiDerbyTenSevenDialect" />-->
 				<!-- <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect" /> -->
 				<!-- <property name="databasePlatform" value="org.hibernate.dialect.MySQL5Dialect" /> -->
 			</bean>
+		</property>
+		<property name="jpaPropertyMap">
+			<map>
+				<entry key="hibernate.dialect" value="ca.uhn.fhir.jpa.util.HapiDerbyTenSevenDialect" />
+				<entry key="hibernate.hbm2ddl.auto" value="update" />
+				<entry key="hibernate.jdbc.batch_size" value="20" />
+				<entry key="hibernate.cache.use_minimal_puts" value="true" />
+				<entry key="hibernate.show_sql" value="false" />
+				<entry key="hibernate.cache.use_query_cache" value="false" />
+				<entry key="hibernate.cache.use_second_level_cache" value="false" />
+				<entry key="hibernate.cache.use_structured_entries" value="false" />
+				<entry key="hibernate.search.default.directory_provider" value="filesystem" />
+				<entry key="hibernate.search.default.indexBase" value="#{systemProperties['fhir.lucene.location.dstu2']};" />
+			</map>
 		</property>
 	</bean>
 

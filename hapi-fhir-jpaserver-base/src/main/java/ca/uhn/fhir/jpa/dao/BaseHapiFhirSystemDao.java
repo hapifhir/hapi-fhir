@@ -92,6 +92,9 @@ public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao<IBaseReso
 
 				q.setMaxResults(maxResult);
 				List<ResourceTable> resources = q.getResultList();
+				if (resources.isEmpty()) {
+					return 0;
+				}
 
 				ourLog.info("Indexing {} resources", resources.size());
 

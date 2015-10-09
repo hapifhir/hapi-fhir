@@ -2193,6 +2193,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			
 			List<Long> searchResultPids;
 			if (mySearchDao == null) {
+				if (theParams.containsKey(Constants.PARAM_TEXT)) {
+					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+				} else if (theParams.containsKey(Constants.PARAM_CONTENT)) {
+					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+				}
 				searchResultPids = null;
 			} else {
 				searchResultPids = mySearchDao.search(getResourceName(), theParams);

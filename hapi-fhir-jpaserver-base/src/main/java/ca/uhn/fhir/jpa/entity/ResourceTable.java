@@ -86,7 +86,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 */
-	@Column(name = "SP_NARRATIVE_TEXT")
+	@Column(name = "SP_NARRATIVE_TEXT", length = Integer.MAX_VALUE - 1)
 	@Lob
 	@Field()
 	private String myNarrativeText;

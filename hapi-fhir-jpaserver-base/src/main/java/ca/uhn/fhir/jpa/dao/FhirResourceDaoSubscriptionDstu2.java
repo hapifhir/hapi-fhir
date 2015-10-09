@@ -92,10 +92,15 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 
 	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	public synchronized void pollForNewUndeliveredResourcesScheduler() {
+		pollForNewUndeliveredResources();
+	}
+	
 	@Override
-	public synchronized void pollForNewUndeliveredResources() {
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	public synchronized int pollForNewUndeliveredResources() {
 		if (getConfig().isSubscriptionEnabled() == false) {
-			return;
+			return 0;
 		}
 		ourLog.trace("Beginning pollForNewUndeliveredResources()");
 
@@ -108,18 +113,21 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		
+		int retVal = 0;
 		for (final SubscriptionTable nextSubscriptionTable : subscriptions) {
-			txTemplate.execute(new TransactionCallback<Void>() {
+			retVal += txTemplate.execute(new TransactionCallback<Integer>() {
 				@Override
-				public Void doInTransaction(TransactionStatus theStatus) {
-					pollForNewUndeliveredResources(nextSubscriptionTable);
-					return null;
+				public Integer doInTransaction(TransactionStatus theStatus) {
+					return pollForNewUndeliveredResources(nextSubscriptionTable);
 				}
 			});
 		}
+		
+		return retVal;
 	}
 
-	private void pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable) {
+	private int pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable) {
 		Subscription subscription = toResource(Subscription.class, theSubscriptionTable.getSubscriptionResource(), false);
 		RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
 		SearchParameterMap criteriaUrl = translateMatchUrl(subscription.getCriteria(), resourceDef);
@@ -129,7 +137,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		long end = System.currentTimeMillis() - getConfig().getSubscriptionPollDelay();
 		if (end <= start) {
 			ourLog.trace("Skipping search for subscription");
-			return;
+			return 0;
 		}
 
 		ourLog.debug("Subscription {} search from {} to {}", new Object[] { subscription.getId().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end)) });
@@ -142,7 +150,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(resourceDef.getImplementingClass());
 		IBundleProvider results = dao.search(criteriaUrl);
 		if (results.size() == 0) {
-			return;
+			return 0;
 		}
 
 		ourLog.info("Found {} new results for Subscription {}", results.size(), subscription.getId().getIdPart());
@@ -152,8 +160,14 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		for (IBaseResource next : results.getResources(0, results.size())) {
 
 			Date updated = ResourceMetadataKeyEnum.PUBLISHED.get((IResource) next).getValue();
-			if (mostRecentMatch == null || mostRecentMatch.getTime() < updated.getTime()) {
+			if (mostRecentMatch == null) {
 				mostRecentMatch = updated;
+			} else {
+				long mostRecentMatchTime = mostRecentMatch.getTime();
+				long updatedTime = updated.getTime();
+				if (mostRecentMatchTime < updatedTime) {
+					mostRecentMatch = updated;
+				}
 			}
 
 			SubscriptionFlaggedResource nextFlag = new SubscriptionFlaggedResource();
@@ -171,6 +185,8 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		
 		theSubscriptionTable.setMostRecentMatch(mostRecentMatch);
 		myEntityManager.merge(theSubscriptionTable);
+		
+		return results.size();
 	}
 
 	@Override
