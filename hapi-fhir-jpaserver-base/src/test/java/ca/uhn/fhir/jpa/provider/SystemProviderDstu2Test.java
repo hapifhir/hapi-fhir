@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 
 import java.io.InputStream;
@@ -36,8 +38,12 @@ import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import net.sf.saxon.lib.OutputURIResolver;
 
 public class SystemProviderDstu2Test extends BaseJpaTest {
 
@@ -48,6 +54,7 @@ public class SystemProviderDstu2Test extends BaseJpaTest {
 	private static IGenericClient ourClient;
 	private static String ourServerBase;
 	private static CloseableHttpClient ourHttpClient;
+	private static RestfulServer restServer;
 
 	@Test
 	public void testEverythingType() throws Exception {
@@ -58,6 +65,34 @@ public class SystemProviderDstu2Test extends BaseJpaTest {
 		} finally {
 			http.close();
 		}
+	}
+
+	@Test
+	public void testEverythingReturnsCorrectFormatInPagingLink() throws Exception {
+		restServer.setDefaultResponseEncoding(EncodingEnum.JSON);
+		restServer.setPagingProvider(new FifoMemoryPagingProvider(1).setDefaultPageSize(10));
+		ResponseHighlighterInterceptor interceptor = new ResponseHighlighterInterceptor();
+		restServer.registerInterceptor(interceptor);
+		
+		for (int i = 0; i < 11; i++) {
+			Patient p = new Patient();
+			p.addName().addFamily("Name" + i);
+			ourClient.create().resource(p).execute();
+		}
+		
+		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
+		get.addHeader("Accept", "application/xml, text/html");
+		CloseableHttpResponse http = ourHttpClient.execute(get);
+		try {
+			String response = IOUtils.toString(http.getEntity().getContent());
+			ourLog.info(response);
+			assertThat(response, not(containsString("_format")));
+			assertEquals(200, http.getStatusLine().getStatusCode());
+		} finally {
+			http.close();
+		}
+		
+		restServer.unregisterInterceptor(interceptor);
 	}
 
 	@Test
@@ -193,7 +228,7 @@ public class SystemProviderDstu2Test extends BaseJpaTest {
 		OrganizationResourceProvider organizationRp = new OrganizationResourceProvider();
 		organizationRp.setDao(organizationDao);
 
-		RestfulServer restServer = new RestfulServer(ourCtx);
+		restServer = new RestfulServer(ourCtx);
 		restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp);
 
 		JpaSystemProviderDstu2 systemProv = ourAppCtx.getBean(JpaSystemProviderDstu2.class, "mySystemProviderDstu2");

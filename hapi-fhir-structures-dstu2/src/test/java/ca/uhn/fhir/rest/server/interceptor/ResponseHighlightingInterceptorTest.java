@@ -279,6 +279,9 @@ public class ResponseHighlightingInterceptorTest {
 		assertThat(output, containsString("resourceType"));
 	}
 
+	
+	
+	
 	@Test
 	public void testHighlightProducesDefaultJsonWithBrowserRequest2() throws Exception {
 		ResponseHighlighterInterceptor ic = new ResponseHighlighterInterceptor();

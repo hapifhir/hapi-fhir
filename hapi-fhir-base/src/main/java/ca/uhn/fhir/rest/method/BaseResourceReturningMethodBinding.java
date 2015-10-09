@@ -344,7 +344,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				}
 
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
-				bundleFactory.initializeBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, 0, count, null, getResponseBundleType(),
+				EncodingEnum linkEncoding = theRequest.getParameters().containsKey(Constants.PARAM_FORMAT) ? responseEncoding : null;
+				bundleFactory.initializeBundleFromBundleProvider(theServer, result, linkEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, 0, count, null, getResponseBundleType(),
 						includes);
 				Bundle bundle = bundleFactory.getDstu1Bundle();
 				if (bundle != null) {
