@@ -1233,7 +1233,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		boolean paramsUriPopulated = theEntity.isParamsUriPopulated();
 		boolean hasLinks = theEntity.isHasLinks();
 
-		Collection<ResourceIndexedSearchParamString> paramsString = new ArrayList<ResourceIndexedSearchParamString>(theEntity.getParamsString());
+		Collection<ResourceIndexedSearchParamString> paramsString = new ArrayList<ResourceIndexedSearchParamString>(theEntity.getParamsString()); // TODO: use the isPopulated method to decide whether to call this
 		Collection<ResourceIndexedSearchParamToken> paramsToken = new ArrayList<ResourceIndexedSearchParamToken>(theEntity.getParamsToken());
 		Collection<ResourceIndexedSearchParamNumber> paramsNumber = new ArrayList<ResourceIndexedSearchParamNumber>(theEntity.getParamsNumber());
 		Collection<ResourceIndexedSearchParamQuantity> paramsQuantity = new ArrayList<ResourceIndexedSearchParamQuantity>(theEntity.getParamsQuantity());

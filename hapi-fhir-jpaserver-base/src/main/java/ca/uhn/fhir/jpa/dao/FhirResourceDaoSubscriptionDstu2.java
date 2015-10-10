@@ -116,6 +116,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 			retVal += txTemplate.execute(new TransactionCallback<Integer>() {
 				@Override
 				public Integer doInTransaction(TransactionStatus theStatus) {
+					SubscriptionTable nextSubscriptionTable = mySubscriptionTableDao.findOne(nextSubscriptionTablePid);
 					return pollForNewUndeliveredResources(nextSubscriptionTable);
 				}
 			});
@@ -156,7 +157,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		Date mostRecentMatch = null;
 		for (IBaseResource next : results.getResources(0, results.size())) {
 
-			Date updated = ResourceMetadataKeyEnum.PUBLISHED.get((IResource) next).getValue();
+			Date updated = ResourceMetadataKeyEnum.UPDATED.get((IResource) next).getValue();
 			if (mostRecentMatch == null) {
 				mostRecentMatch = updated;
 			} else {
@@ -169,7 +170,9 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 
 			SubscriptionFlaggedResource nextFlag = new SubscriptionFlaggedResource();
 			Long pid = IDao.RESOURCE_PID.get((IResource) next);
-
+			
+			ourLog.info("New resource for subscription: {}", pid);
+			
 			nextFlag.setResource(myEntityManager.find(ResourceTable.class, pid));
 			nextFlag.setSubscription(theSubscriptionTable);
 			nextFlag.setVersion(next.getIdElement().getVersionIdPartAsLong());
@@ -181,7 +184,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		ourLog.debug("Updating most recent match for subcription {} to {}", subscription.getId().getIdPart(), new InstantDt(mostRecentMatch));
 		
 		theSubscriptionTable.setMostRecentMatch(mostRecentMatch);
-		myEntityManager.merge(theSubscriptionTable);
+		mySubscriptionTableDao.save(theSubscriptionTable);
 		
 		return results.size();
 	}
