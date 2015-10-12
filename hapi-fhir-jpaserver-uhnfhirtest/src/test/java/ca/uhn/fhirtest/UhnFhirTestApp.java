@@ -30,8 +30,8 @@ public class UhnFhirTestApp {
 		System.setProperty("fhir.db.location", "./target/testdb");
 		System.setProperty("fhir.db.location.dstu2", "./target/testdb_dstu2");
 		System.setProperty("fhir.lucene.location.dstu2", "./target/testlucene_dstu2");
-		System.setProperty("fhir.baseurl.dstu1", base + "Dstu1");
-		System.setProperty("fhir.baseurl.dstu2", base + "Dstu1");
+		System.setProperty("fhir.baseurl.dstu1", base.replace("Dstu2", "Dstu1"));
+		System.setProperty("fhir.baseurl.dstu2", base);
 		
 		Server server = new Server(myPort);
 

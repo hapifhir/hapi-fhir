@@ -74,6 +74,7 @@
 
 		<menu name="Using HAPI" inherit="bottom" >
 			<item name="Documentation Index" href="./docindex.html"/>
+			<item name="Command Line Tool (cli)" href="./doc_cli.html" />
 		</menu>
 		
 		<menu name="Documentation" inherit="top" >
@@ -112,6 +113,7 @@
 				<item name="Model API (RI DSTU2)" href="./apidocs-hl7org-dstu2/index.html" />
 				<item name="JPA Server API" href="./apidocs-jpaserver/index.html" />
 			</item>
+			<item name="Command Line Tool (hapi-fhir-cli)" href="./doc_cli.html" />
 			<item name="Maven Plugin (hapi-tinder-plugin)" href="./doc_tinder.html" />
 		</menu>
 	

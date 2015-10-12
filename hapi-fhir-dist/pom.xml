@@ -109,6 +109,7 @@
 										<descriptor>${project.basedir}/src/assembly/hapi-fhir-android-distribution.xml</descriptor>
 										<descriptor>${project.basedir}/src/assembly/hapi-fhir-cli.xml</descriptor>
 									</descriptors>
+									<finalName>hapi-fhir-${project.version}</finalName>
 								</configuration>
 							</execution>
 						</executions>

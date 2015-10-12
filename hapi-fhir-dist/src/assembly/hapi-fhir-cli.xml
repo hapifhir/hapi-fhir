@@ -25,6 +25,7 @@
 				<include>hapi-fhir-cli</include>
 				<include>hapi-fhir-cli.cmd</include>
 			</includes>
+			<fileMode>0555</fileMode>
 		</fileSet>
 	</fileSets>
 

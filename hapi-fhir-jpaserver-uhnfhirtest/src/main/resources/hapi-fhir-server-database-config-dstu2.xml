@@ -11,7 +11,7 @@
 	<context:annotation-config />
 	<context:mbean-server />
 
-	<bean depends-on="dbServer" id="myPersistenceDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+	<bean depends-on="dbServer" id="myPersistenceDataSourceDstu2" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="org.apache.derby.jdbc.ClientDriver"></property>
 		<property name="url" value="jdbc:derby://localhost:1527/#{systemProperties['fhir.db.location.dstu2']};create=true" />
 		<property name="username" value="SA" />
@@ -24,7 +24,7 @@
 		value="sa"/> <property name="testOnBorrow" value="true"/> <property name="validationQuery" value="select 1;"/> </bean> -->
 
 	<bean depends-on="dbServer" id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-		<property name="dataSource" ref="myPersistenceDataSource" />
+		<property name="dataSource" ref="myPersistenceDataSourceDstu2" />
 		<!--
 		<property name="persistenceXmlLocation" value="classpath:META-INF/fhirtest_persistence.xml" />
 		-->
@@ -56,6 +56,7 @@
 				<entry key="hibernate.cache.use_structured_entries" value="false" />
 				<entry key="hibernate.search.default.directory_provider" value="filesystem" />
 				<entry key="hibernate.search.default.indexBase" value="#{systemProperties['fhir.lucene.location.dstu2']};" />
+				<entry key="hibernate.search.lucene_version" value="LUCENE_CURRENT" />
 			</map>
 		</property>
 	</bean>

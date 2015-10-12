@@ -12,7 +12,7 @@
 	<context:annotation-config />
 	<context:mbean-server />
 
-	<bean  depends-on="dbServer" id="myPersistenceDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+	<bean  depends-on="dbServer" id="myPersistenceDataSourceDstu1" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
 		<!-- ;create=true /opt/glassfish/glassfish4/glassfish/nodes/localhost-domain1/fhirtest/fhirdb -->
 		<!-- <property name="url" value="jdbc:hsqldb:hsql://localhost/uhnfhirdb"/>-->
 		<!-- <property name="url" value="jdbc:derby:directory:#{systemproperties['fhir.db.location']};create=true" />  -->
@@ -25,7 +25,7 @@
 	</bean>
 
 	<bean depends-on="dbServer" id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-		<property name="dataSource" ref="myPersistenceDataSource" />
+		<property name="dataSource" ref="myPersistenceDataSourceDstu1" />
 		<!--
 		<property name="persistenceXmlLocation" value="classpath:META-INF/fhirtest_persistence.xml" />
 		-->

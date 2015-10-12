@@ -8,7 +8,7 @@
 		</encoder>
 	</appender>
 
-	<logger name="ca.uhn.fhir.cli" additivity="false" level="info">
+	<logger name="ca.uhn.fhir" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
 

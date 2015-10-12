@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<!-- The parent of this project is the deployable POM. This project isn't deployable, but this keeps it before the root pom in the reactor order when building the site. I don't know why this works... 
-		Need to investigate this. -->
+	<!-- The parent of this project is the deployable POM. This project isn't deployable, but this keeps it before the root pom in the reactor order when building the 
+		site. I don't know why this works... Need to investigate this. -->
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
@@ -160,21 +160,21 @@
 			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-            <dependency>
-                        <groupId>org.eclipse.jetty.websocket</groupId>
-                        <artifactId>websocket-api</artifactId>
-                        <scope>test</scope>
-                </dependency>
-                <dependency>
-                        <groupId>org.eclipse.jetty.websocket</groupId>
-                        <artifactId>websocket-client</artifactId>
-                        <scope>test</scope>
-                </dependency>
-                <dependency>
-                        <groupId>org.eclipse.jetty.websocket</groupId>
-                        <artifactId>websocket-server</artifactId>
-                        <scope>test</scope>
-                </dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-client</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-server</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<properties>
@@ -321,10 +321,11 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>cobertura-maven-plugin</artifactId> <version>${maven_cobertura_plugin_version}</version> <configuration> <check> <branchRate>85</branchRate> 
-				<lineRate>85</lineRate> <haltOnFailure>true</haltOnFailure> <totalBranchRate>85</totalBranchRate> <totalLineRate>85</totalLineRate> <packageLineRate>85</packageLineRate> <packageBranchRate>85</packageBranchRate> 
-				<regexes> <regex> <pattern>com.example.reallyimportant.*</pattern> <branchRate>90</branchRate> <lineRate>80</lineRate> </regex> <regex> <pattern>com.example.boringcode.*</pattern> <branchRate>40</branchRate> 
-				<lineRate>30</lineRate> </regex> </regexes> </check> </configuration> <executions> <execution> <goals> <goal>clean</goal> <goal>check</goal> </goals> </execution> </executions> </plugin> -->
+			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>cobertura-maven-plugin</artifactId> <version>${maven_cobertura_plugin_version}</version> <configuration> 
+				<check> <branchRate>85</branchRate> <lineRate>85</lineRate> <haltOnFailure>true</haltOnFailure> <totalBranchRate>85</totalBranchRate> <totalLineRate>85</totalLineRate> 
+				<packageLineRate>85</packageLineRate> <packageBranchRate>85</packageBranchRate> <regexes> <regex> <pattern>com.example.reallyimportant.*</pattern> <branchRate>90</branchRate> 
+				<lineRate>80</lineRate> </regex> <regex> <pattern>com.example.boringcode.*</pattern> <branchRate>40</branchRate> <lineRate>30</lineRate> </regex> </regexes> </check> 
+				</configuration> <executions> <execution> <goals> <goal>clean</goal> <goal>check</goal> </goals> </execution> </executions> </plugin> -->
 		</plugins>
 		<resources>
 		</resources>
