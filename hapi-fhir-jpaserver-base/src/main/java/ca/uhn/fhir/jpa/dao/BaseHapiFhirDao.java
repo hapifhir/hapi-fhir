@@ -772,7 +772,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		IFhirResourceDao<R> dao = getDao(theResourceType);
-		Set<Long> ids = dao.searchForIdsWithAndOr(paramMap, new HashSet<Long>());
+		Set<Long> ids = dao.searchForIdsWithAndOr(paramMap, new HashSet<Long>(), paramMap.getLastUpdated());
 
 		return ids;
 	}

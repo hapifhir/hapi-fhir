@@ -162,6 +162,9 @@
 				meaning that the same operation can also be invoked
 				at the type level.
 			</action>
+			<action type="add">
+				Make JPA search queries with _lastUpdated parameter a bit more efficient
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

@@ -399,6 +399,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 		}
+		long betweenTime = System.currentTimeMillis();
 		IIdType id2;
 		{
 			Patient patient = new Patient();
@@ -417,6 +418,13 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		params = new SearchParameterMap();
 		params.add("_id", new StringOrListParam().addOr(new StringParam(id1.getIdPart())).addOr(new StringParam("999999999999")));
 		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
+
+		// With lastupdated
+		
+		params = new SearchParameterMap();
+		params.add("_id", new StringOrListParam().addOr(new StringParam(id1.getIdPart())).addOr(new StringParam(id2.getIdPart())));
+		params.setLastUpdated(new DateRangeParam(new Date(betweenTime), null));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id2));
 
 	}
 
@@ -610,6 +618,9 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			patient.addName().addFamily("testSearchLanguageParam").addGiven("Joe");
 			id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 		}
+		
+		Date betweenTime = new Date();
+		
 		IIdType id2;
 		{
 			Patient patient = new Patient();
@@ -622,6 +633,12 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(BaseResource.SP_RES_LANGUAGE, new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("en_US")));
 			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1, id2));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(BaseResource.SP_RES_LANGUAGE, new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("en_US")));
+			params.setLastUpdated(new DateRangeParam(betweenTime, null));
+			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id2));
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -1943,6 +1960,9 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			ResourceMetadataKeyEnum.TAG_LIST.put(org, tagList);
 			tag1id = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
 		}
+		
+		Date betweenDate = new Date();
+		
 		IIdType tag2id;
 		{
 			Organization org = new Organization();
@@ -1977,6 +1997,17 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			params.add("_tag", orListParam);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myOrganizationDao.search(params));
 			assertThat(patients, containsInAnyOrder(tag1id, tag2id));
+		}
+		{
+			// Or tags with lastupdated
+			SearchParameterMap params = new SearchParameterMap();
+			TokenOrListParam orListParam = new TokenOrListParam();
+			orListParam.add(new TokenParam("urn:taglist", methodName + "1a"));
+			orListParam.add(new TokenParam("urn:taglist", methodName + "2a"));
+			params.add("_tag", orListParam);
+			params.setLastUpdated(new DateRangeParam(betweenDate, null));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myOrganizationDao.search(params));
+			assertThat(patients, containsInAnyOrder(tag2id));
 		}
 		// TODO: get multiple/AND working
 		{
