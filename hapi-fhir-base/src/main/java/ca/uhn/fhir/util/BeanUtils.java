@@ -20,49 +20,37 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+
+import ca.uhn.fhir.util.reflection.IBeanUtils;
 
 public class BeanUtils {
 
-	public static Method findAccessor(Class<?> theClassToIntrospect, Class<?> theTargetReturnType, String thePropertyName) throws NoSuchFieldException {
-		BeanInfo info;
-		try {
-			info = Introspector.getBeanInfo(theClassToIntrospect);
-		} catch (IntrospectionException e) {
-			throw new NoSuchFieldException(e.getMessage());
-		}
-		for (PropertyDescriptor pd : info.getPropertyDescriptors()) {
-			if (thePropertyName.equals(pd.getName())) {
-				if (theTargetReturnType.isAssignableFrom(pd.getPropertyType())) {
-				return pd.getReadMethod();
-				}else {
-					throw new NoSuchFieldException(theClassToIntrospect + " has an accessor for field " + thePropertyName + " but it does not return type " + theTargetReturnType);
+	private static IBeanUtils beanUtils;
+
+	private static IBeanUtils getBeanUtils() {
+		if (beanUtils == null) {
+			try {
+				beanUtils = (IBeanUtils) Class.forName("ca.uhn.fhir.util.reflection.JavaBeansBeanUtil").newInstance();
+			} catch (ReflectiveOperationException e) {
+				try {
+					beanUtils = (IBeanUtils) Class.forName("ca.uhn.fhir.util.reflection.JavaReflectBeanUtil")
+							.newInstance();
+				} catch (ReflectiveOperationException e1) {
+					throw new RuntimeException("Could not resolve BeanUtil implementation");
 				}
 			}
 		}
-		throw new NoSuchFieldException(theClassToIntrospect + " has no accessor for field " + thePropertyName);
+		return beanUtils;
 	}
 
-	public static Method findMutator(Class<?> theClassToIntrospect, Class<?> theTargetReturnType, String thePropertyName) throws NoSuchFieldException {
-		BeanInfo info;
-		try {
-			info = Introspector.getBeanInfo(theClassToIntrospect);
-		} catch (IntrospectionException e) {
-			throw new NoSuchFieldException(e.getMessage());
-		}
-		for (PropertyDescriptor pd : info.getPropertyDescriptors()) {
-			if (thePropertyName.equals(pd.getName())) {
-				if (theTargetReturnType.isAssignableFrom(pd.getPropertyType())) {
-					return pd.getWriteMethod();
-				}else {
-					throw new NoSuchFieldException(theClassToIntrospect + " has an mutator for field " + thePropertyName + " but it does not return type " + theTargetReturnType);
-				}
-			}
-		}
-		throw new NoSuchFieldException(theClassToIntrospect + " has no mutator for field " + thePropertyName);
+	public static Method findAccessor(Class<?> theClassToIntrospect, Class<?> theTargetReturnType, String thePropertyName)
+			throws NoSuchFieldException {
+		return getBeanUtils().findAccessor(theClassToIntrospect, theTargetReturnType, thePropertyName);
 	}
+
+	public static Method findMutator(Class<?> theClassToIntrospect, Class<?> theTargetReturnType, String thePropertyName)
+			throws NoSuchFieldException {
+		return getBeanUtils().findMutator(theClassToIntrospect, theTargetReturnType, thePropertyName);
+	}	
 }

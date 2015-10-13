@@ -1,6 +1,4 @@
-package ca.uhn.fhir.util;
-
-import org.apache.commons.lang3.StringUtils;
+package ca.uhn.fhir.util.jar;
 
 /*
  * #%L
@@ -22,28 +20,8 @@ import org.apache.commons.lang3.StringUtils;
  * #L%
  */
 
-public class ObjectUtil {
+public interface IDependencyLog {
 
-	public static boolean equals(Object object1, Object object2) {
-		if (object1 == object2) {
-			return true;
-		}
-		if ((object1 == null) || (object2 == null)) {
-			return false;
-		}
-		return object1.equals(object2);
-	}
-	
-	public static <T> T requireNonNull(T obj, String message) {
-        if (obj == null)
-            throw new NullPointerException(message);
-        return obj;
-    }
+	void logStaxImplementation(Class<?> theClass);
 
-	public static void requireNotEmpty(String str, String message) {
-		if (StringUtils.isBlank(str)) {
-			throw new IllegalArgumentException(message);
-		}
-	}
-	
 }
