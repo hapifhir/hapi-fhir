@@ -165,6 +165,11 @@
 			<action type="add">
 				Make JPA search queries with _lastUpdated parameter a bit more efficient
 			</action>
+			<action type="add" issue="239">
+				Clean up Android project to make it more lightweight and remove a 
+				number of unneeded dependencies. Thanks to Thomas Andersen
+				for the pull request!
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">
