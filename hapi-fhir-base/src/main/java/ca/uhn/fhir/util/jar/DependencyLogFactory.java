@@ -1,6 +1,4 @@
-package ca.uhn.fhir.util;
-
-import org.apache.commons.lang3.StringUtils;
+package ca.uhn.fhir.util.jar;
 
 /*
  * #%L
@@ -22,28 +20,17 @@ import org.apache.commons.lang3.StringUtils;
  * #L%
  */
 
-public class ObjectUtil {
-
-	public static boolean equals(Object object1, Object object2) {
-		if (object1 == object2) {
-			return true;
-		}
-		if ((object1 == null) || (object2 == null)) {
-			return false;
-		}
-		return object1.equals(object2);
-	}
+public class DependencyLogFactory {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DependencyLogFactory.class);
 	
-	public static <T> T requireNonNull(T obj, String message) {
-        if (obj == null)
-            throw new NullPointerException(message);
-        return obj;
-    }
-
-	public static void requireNotEmpty(String str, String message) {
-		if (StringUtils.isBlank(str)) {
-			throw new IllegalArgumentException(message);
+	@SuppressWarnings("unchecked")
+	public static IDependencyLog createJarLogger() {
+		try {
+			Class<IDependencyLog> clas = (Class<IDependencyLog>) Class.forName("ca.uhn.fhir.util.jar.DependencyLogImpl");
+			return clas.newInstance();
+		} catch (ReflectiveOperationException e) {
+			ourLog.info("Could not log dependency.");
+			return null;
 		}
 	}
-	
 }

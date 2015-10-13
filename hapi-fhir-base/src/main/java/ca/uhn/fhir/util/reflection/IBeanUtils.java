@@ -1,6 +1,6 @@
-package ca.uhn.fhir.util;
+package ca.uhn.fhir.util.reflection;
 
-import org.apache.commons.lang3.StringUtils;
+import java.lang.reflect.Method;
 
 /*
  * #%L
@@ -22,28 +22,10 @@ import org.apache.commons.lang3.StringUtils;
  * #L%
  */
 
-public class ObjectUtil {
+public interface IBeanUtils {
+	Method findAccessor(Class<?> theClassToIntrospect, Class<?> theTargetReturnType, String thePropertyName)
+			throws NoSuchFieldException;
 
-	public static boolean equals(Object object1, Object object2) {
-		if (object1 == object2) {
-			return true;
-		}
-		if ((object1 == null) || (object2 == null)) {
-			return false;
-		}
-		return object1.equals(object2);
-	}
-	
-	public static <T> T requireNonNull(T obj, String message) {
-        if (obj == null)
-            throw new NullPointerException(message);
-        return obj;
-    }
-
-	public static void requireNotEmpty(String str, String message) {
-		if (StringUtils.isBlank(str)) {
-			throw new IllegalArgumentException(message);
-		}
-	}
-	
+	Method findMutator(Class<?> theClassToIntrospect, Class<?> theTargetReturnType, String thePropertyName)
+			throws NoSuchFieldException;
 }
