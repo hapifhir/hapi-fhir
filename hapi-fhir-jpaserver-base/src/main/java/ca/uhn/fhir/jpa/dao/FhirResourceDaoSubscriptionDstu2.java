@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -77,6 +76,9 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	@Autowired
 	private ISubscriptionTableDao mySubscriptionTableDao;
 
+	@Autowired
+	private PlatformTransactionManager myTxManager;
+
 	private void createSubscriptionTable(ResourceTable theEntity, Subscription theSubscription) {
 		SubscriptionTable subscriptionEntity = new SubscriptionTable();
 		subscriptionEntity.setCreated(new Date());
@@ -87,170 +89,16 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		myEntityManager.persist(subscriptionEntity);
 	}
 
-	@Autowired
-	private PlatformTransactionManager myTxManager;
-
-	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	@Override
-	public synchronized void pollForNewUndeliveredResources() {
-		if (getConfig().isSubscriptionEnabled() == false) {
-			return;
+	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId) {
+		ResourceTable entity = readEntityLatestVersion(theId);
+		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
+		if (table == null) {
+			return null;
 		}
-		ourLog.trace("Beginning pollForNewUndeliveredResources()");
-
-		// SubscriptionCandidateResource
-
-		Collection<Long> subscriptions = mySubscriptionTableDao.finsSubscriptionsWhichNeedToBeChecked(SubscriptionStatusEnum.ACTIVE, new Date());
-
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		for (final Long nextSubscriptionTablePid : subscriptions) {
-			txTemplate.execute(new TransactionCallback<Void>() {
-				@Override
-				public Void doInTransaction(TransactionStatus theStatus) {
-					SubscriptionTable nextSubscriptionTable = mySubscriptionTableDao.findOne(nextSubscriptionTablePid);
-					pollForNewUndeliveredResources(nextSubscriptionTable);
-					return null;
-				}
-			});
-		}
+		return table.getId();
 	}
-
-	private void pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable) {
-		Subscription subscription = toResource(Subscription.class, theSubscriptionTable.getSubscriptionResource(), false);
-		RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
-		SearchParameterMap criteriaUrl = translateMatchUrl(subscription.getCriteria(), resourceDef);
-
-		criteriaUrl = new SearchParameterMap();
-		long start = theSubscriptionTable.getMostRecentMatch().getTime();
-		long end = System.currentTimeMillis() - getConfig().getSubscriptionPollDelay();
-		if (end <= start) {
-			ourLog.trace("Skipping search for subscription");
-			return;
-		}
-
-		ourLog.debug("Subscription {} search from {} to {}", new Object[] { subscription.getId().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end)) });
-
-		DateRangeParam range = new DateRangeParam();
-		range.setLowerBound(new DateParam(QuantityCompararatorEnum.GREATERTHAN, start));
-		range.setUpperBound(new DateParam(QuantityCompararatorEnum.LESSTHAN, end));
-		criteriaUrl.setLastUpdated(range);
-		criteriaUrl.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(resourceDef.getImplementingClass());
-		IBundleProvider results = dao.search(criteriaUrl);
-		if (results.size() == 0) {
-			return;
-		}
-
-		ourLog.info("Found {} new results for Subscription {}", results.size(), subscription.getId().getIdPart());
-
-		List<SubscriptionFlaggedResource> flags = new ArrayList<SubscriptionFlaggedResource>();
-		Date mostRecentMatch = null;
-		for (IBaseResource next : results.getResources(0, results.size())) {
-
-			Date updated = ResourceMetadataKeyEnum.PUBLISHED.get((IResource) next).getValue();
-			if (mostRecentMatch == null || mostRecentMatch.getTime() < updated.getTime()) {
-				mostRecentMatch = updated;
-			}
-
-			SubscriptionFlaggedResource nextFlag = new SubscriptionFlaggedResource();
-			Long pid = IDao.RESOURCE_PID.get((IResource) next);
-
-			nextFlag.setResource(myEntityManager.find(ResourceTable.class, pid));
-			nextFlag.setSubscription(theSubscriptionTable);
-			nextFlag.setVersion(next.getIdElement().getVersionIdPartAsLong());
-			flags.add(nextFlag);
-		}
-
-		mySubscriptionFlaggedResourceDataDao.save(flags);
-
-		ourLog.debug("Updating most recent match for subcription {} to {}", subscription.getId().getIdPart(), new InstantDt(mostRecentMatch));
-		
-		theSubscriptionTable.setMostRecentMatch(mostRecentMatch);
-		myEntityManager.merge(theSubscriptionTable);
-	}
-
-	@Override
-	protected void postPersist(ResourceTable theEntity, Subscription theSubscription) {
-		super.postPersist(theEntity, theSubscription);
-
-		createSubscriptionTable(theEntity, theSubscription);
-	}
-
-	@Override
-	protected ResourceTable updateEntity(IResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
-			Date theUpdateTime) {
-		ResourceTable retVal = super.updateEntity(theResource, theEntity, theUpdateHistory, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime);
-
-		Subscription resource = (Subscription) theResource;
-		Long resourceId = theEntity.getId();
-		if (theDeletedTimestampOrNull != null) {
-			Long subscriptionId = getSubscriptionTablePidForSubscriptionResource(theEntity.getIdDt());
-			if (subscriptionId != null) {
-				mySubscriptionFlaggedResourceDataDao.deleteAllForSubscription(subscriptionId);
-				mySubscriptionTableDao.deleteAllForSubscription(subscriptionId);
-			}
-		} else {
-			Query q = myEntityManager.createNamedQuery("Q_HFJ_SUBSCRIPTION_SET_STATUS");
-			q.setParameter("res_id", resourceId);
-			q.setParameter("status", resource.getStatusElement().getValueAsEnum());
-			if (q.executeUpdate() > 0) {
-				ourLog.info("Updated subscription status for subscription {} to {}", resourceId, resource.getStatusElement().getValueAsEnum());
-			} else {
-				createSubscriptionTable(retVal, resource);
-			}
-		}
-		return retVal;
-	}
-
-	@Override
-	protected void validateResourceForStorage(Subscription theResource, ResourceTable theEntityToSave) {
-		super.validateResourceForStorage(theResource, theEntityToSave);
-
-		RuntimeResourceDefinition resDef = validateCriteriaAndReturnResourceDefinition(theResource);
-
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(resDef.getImplementingClass());
-		if (dao == null) {
-			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resDef);
-		}
-
-		if (theResource.getChannel().getType() == null) {
-			throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
-		}
-
-		SubscriptionStatusEnum status = theResource.getStatusElement().getValueAsEnum();
-		if (status == null) {
-			throw new UnprocessableEntityException("Subscription.status must be populated on this server");
-		}
-
-	}
-
-	private RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
-		String query = theResource.getCriteria();
-		if (isBlank(query)) {
-			throw new UnprocessableEntityException("Subscription.criteria must be populated");
-		}
-
-		int sep = query.indexOf('?');
-		if (sep <= 1) {
-			throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
-		}
-
-		String resType = query.substring(0, sep);
-		if (resType.contains("/")) {
-			throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
-		}
-
-		RuntimeResourceDefinition resDef;
-		try {
-			resDef = getContext().getResourceDefinition(resType);
-		} catch (DataFormatException e) {
-			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resType);
-		}
-		return resDef;
-	}
-
+	
 	@Override
 	public synchronized List<IBaseResource> getUndeliveredResourcesAndPurge(Long theSubscriptionPid) {
 		List<IBaseResource> retVal = new ArrayList<IBaseResource>();
@@ -268,13 +116,109 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	}
 
 	@Override
-	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId) {
-		ResourceTable entity = readEntityLatestVersion(theId);
-		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
-		if (table == null) {
-			return null;
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	public synchronized int pollForNewUndeliveredResources() {
+		if (getConfig().isSubscriptionEnabled() == false) {
+			return 0;
 		}
-		return table.getId();
+		ourLog.trace("Beginning pollForNewUndeliveredResources()");
+
+		// SubscriptionCandidateResource
+
+		Collection<Long> subscriptions = mySubscriptionTableDao.finsSubscriptionsWhichNeedToBeChecked(SubscriptionStatusEnum.ACTIVE, new Date());
+
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		
+		int retVal = 0;
+		for (final Long nextSubscriptionTablePid : subscriptions) {
+			retVal += txTemplate.execute(new TransactionCallback<Integer>() {
+				@Override
+				public Integer doInTransaction(TransactionStatus theStatus) {
+					SubscriptionTable nextSubscriptionTable = mySubscriptionTableDao.findOne(nextSubscriptionTablePid);
+					return pollForNewUndeliveredResources(nextSubscriptionTable);
+				}
+			});
+		}
+		
+		return retVal;
+	}
+
+	private int pollForNewUndeliveredResources(SubscriptionTable theSubscriptionTable) {
+		Subscription subscription = toResource(Subscription.class, theSubscriptionTable.getSubscriptionResource(), false);
+		RuntimeResourceDefinition resourceDef = validateCriteriaAndReturnResourceDefinition(subscription);
+		SearchParameterMap criteriaUrl = translateMatchUrl(subscription.getCriteria(), resourceDef);
+
+		criteriaUrl = new SearchParameterMap();
+		long start = theSubscriptionTable.getMostRecentMatch().getTime();
+		long end = System.currentTimeMillis() - getConfig().getSubscriptionPollDelay();
+		if (end <= start) {
+			ourLog.trace("Skipping search for subscription");
+			return 0;
+		}
+
+		ourLog.debug("Subscription {} search from {} to {}", new Object[] { subscription.getId().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end)) });
+
+		DateRangeParam range = new DateRangeParam();
+		range.setLowerBound(new DateParam(QuantityCompararatorEnum.GREATERTHAN, start));
+		range.setUpperBound(new DateParam(QuantityCompararatorEnum.LESSTHAN, end));
+		criteriaUrl.setLastUpdated(range);
+		criteriaUrl.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
+		IFhirResourceDao<? extends IBaseResource> dao = getDao(resourceDef.getImplementingClass());
+		IBundleProvider results = dao.search(criteriaUrl);
+		if (results.size() == 0) {
+			return 0;
+		}
+
+		ourLog.info("Found {} new results for Subscription {}", results.size(), subscription.getId().getIdPart());
+
+		List<SubscriptionFlaggedResource> flags = new ArrayList<SubscriptionFlaggedResource>();
+		Date mostRecentMatch = null;
+		for (IBaseResource next : results.getResources(0, results.size())) {
+
+			Date updated = ResourceMetadataKeyEnum.UPDATED.get((IResource) next).getValue();
+			if (mostRecentMatch == null) {
+				mostRecentMatch = updated;
+			} else {
+				long mostRecentMatchTime = mostRecentMatch.getTime();
+				long updatedTime = updated.getTime();
+				if (mostRecentMatchTime < updatedTime) {
+					mostRecentMatch = updated;
+				}
+			}
+
+			SubscriptionFlaggedResource nextFlag = new SubscriptionFlaggedResource();
+			Long pid = IDao.RESOURCE_PID.get((IResource) next);
+			
+			ourLog.info("New resource for subscription: {}", pid);
+			
+			nextFlag.setResource(myEntityManager.find(ResourceTable.class, pid));
+			nextFlag.setSubscription(theSubscriptionTable);
+			nextFlag.setVersion(next.getIdElement().getVersionIdPartAsLong());
+			flags.add(nextFlag);
+		}
+
+		mySubscriptionFlaggedResourceDataDao.save(flags);
+
+		ourLog.debug("Updating most recent match for subcription {} to {}", subscription.getId().getIdPart(), new InstantDt(mostRecentMatch));
+		
+		theSubscriptionTable.setMostRecentMatch(mostRecentMatch);
+		mySubscriptionTableDao.save(theSubscriptionTable);
+		
+		return results.size();
+	}
+
+	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	public synchronized void pollForNewUndeliveredResourcesScheduler() {
+		pollForNewUndeliveredResources();
+	}
+
+	@Override
+	protected void postPersist(ResourceTable theEntity, Subscription theSubscription) {
+		super.postPersist(theEntity, theSubscription);
+
+		createSubscriptionTable(theEntity, theSubscription);
 	}
 
 	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_MINUTE)
@@ -303,6 +247,79 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 				}
 			});
 		}
+	}
+
+	@Override
+	protected ResourceTable updateEntity(IResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
+			Date theUpdateTime) {
+		ResourceTable retVal = super.updateEntity(theResource, theEntity, theUpdateHistory, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime);
+
+		Subscription resource = (Subscription) theResource;
+		Long resourceId = theEntity.getId();
+		if (theDeletedTimestampOrNull != null) {
+			Long subscriptionId = getSubscriptionTablePidForSubscriptionResource(theEntity.getIdDt());
+			if (subscriptionId != null) {
+				mySubscriptionFlaggedResourceDataDao.deleteAllForSubscription(subscriptionId);
+				mySubscriptionTableDao.deleteAllForSubscription(subscriptionId);
+			}
+		} else {
+			Query q = myEntityManager.createNamedQuery("Q_HFJ_SUBSCRIPTION_SET_STATUS");
+			q.setParameter("res_id", resourceId);
+			q.setParameter("status", resource.getStatusElement().getValueAsEnum());
+			if (q.executeUpdate() > 0) {
+				ourLog.info("Updated subscription status for subscription {} to {}", resourceId, resource.getStatusElement().getValueAsEnum());
+			} else {
+				createSubscriptionTable(retVal, resource);
+			}
+		}
+		return retVal;
+	}
+
+	private RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
+		String query = theResource.getCriteria();
+		if (isBlank(query)) {
+			throw new UnprocessableEntityException("Subscription.criteria must be populated");
+		}
+
+		int sep = query.indexOf('?');
+		if (sep <= 1) {
+			throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
+		}
+
+		String resType = query.substring(0, sep);
+		if (resType.contains("/")) {
+			throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
+		}
+
+		RuntimeResourceDefinition resDef;
+		try {
+			resDef = getContext().getResourceDefinition(resType);
+		} catch (DataFormatException e) {
+			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resType);
+		}
+		return resDef;
+	}
+
+	@Override
+	protected void validateResourceForStorage(Subscription theResource, ResourceTable theEntityToSave) {
+		super.validateResourceForStorage(theResource, theEntityToSave);
+
+		RuntimeResourceDefinition resDef = validateCriteriaAndReturnResourceDefinition(theResource);
+
+		IFhirResourceDao<? extends IBaseResource> dao = getDao(resDef.getImplementingClass());
+		if (dao == null) {
+			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resDef);
+		}
+
+		if (theResource.getChannel().getType() == null) {
+			throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
+		}
+
+		SubscriptionStatusEnum status = theResource.getStatusElement().getValueAsEnum();
+		if (status == null) {
+			throw new UnprocessableEntityException("Subscription.status must be populated on this server");
+		}
+
 	}
 
 }

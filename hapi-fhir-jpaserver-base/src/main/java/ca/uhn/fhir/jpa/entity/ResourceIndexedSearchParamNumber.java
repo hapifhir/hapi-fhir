@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.entity;
 import java.math.BigDecimal;
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -30,8 +31,15 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.FieldBridge;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.NumericField;
+
+import ca.uhn.fhir.jpa.util.BigDecimalNumericFieldBridge;
 
 //@formatter:off
+@Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_NUMBER" /*, indexes= {@Index(name="IDX_SP_NUMBER", columnList="SP_VALUE")}*/ )
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_NUMBER", indexes= {
@@ -43,6 +51,9 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	private static final long serialVersionUID = 1L;
 
 	@Column(name = "SP_VALUE", nullable = true)
+	@Field
+	@NumericField
+	@FieldBridge(impl = BigDecimalNumericFieldBridge.class)
 	public BigDecimal myValue;
 
 	public ResourceIndexedSearchParamNumber() {

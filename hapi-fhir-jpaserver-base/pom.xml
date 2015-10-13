@@ -343,8 +343,10 @@
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>
+								<!-- 
 								<excludeResourceName>OperationDefinition</excludeResourceName>
 								<excludeResourceName>OperationOutcome</excludeResourceName>
+								-->
 							</excludeResourceNames>
 						</configuration>
 					</execution>

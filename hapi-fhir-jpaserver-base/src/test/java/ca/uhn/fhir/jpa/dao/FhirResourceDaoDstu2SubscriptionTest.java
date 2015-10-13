@@ -339,7 +339,9 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		List<IBaseResource> results;
 		List<IIdType> resultIds;
 
-		mySubscriptionDao.pollForNewUndeliveredResources();
+		assertEquals(4, mySubscriptionDao.pollForNewUndeliveredResources());
+		assertEquals(0, mySubscriptionDao.pollForNewUndeliveredResources());
+		
 		results = mySubscriptionDao.getUndeliveredResourcesAndPurge(subsId1);
 		resultIds = toUnqualifiedVersionlessIds(results);
 		assertThat(resultIds, contains(afterId1, afterId2));
@@ -364,6 +366,12 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		resultIds = toUnqualifiedVersionlessIds(results);
 		assertThat(resultIds, empty());
 
+		mySystemDao.markAllResourcesForReindexing();
+		mySystemDao.performReindexingPass(100);
+
+		assertEquals(6, mySubscriptionDao.pollForNewUndeliveredResources());
+		assertEquals(0, mySubscriptionDao.pollForNewUndeliveredResources());
+		
 	}
 
 
@@ -379,7 +387,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		Observation obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType oId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 
 		Subscription subs;
 
@@ -395,38 +403,45 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 
 		assertNull(mySubscriptionTableDao.findOne(subsId1).getLastClientPoll());
 
+		assertEquals(0, mySubscriptionDao.pollForNewUndeliveredResources());
+		
+		ourLog.info("pId: {}   - oId: {}", pId, oId);
+		
+		myObservationDao.update(myObservationDao.read(oId));
+		
+		assertEquals(1, mySubscriptionDao.pollForNewUndeliveredResources());
+		ourLog.info("Between passes");
+		assertEquals(0, mySubscriptionDao.pollForNewUndeliveredResources());
+
 		Thread.sleep(100);
 		ourLog.info("Before: {}", System.currentTimeMillis());
 
 		obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		IIdType afterId1 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 
 		obs = new Observation();
 		obs.getSubject().setReference(pId);
 		obs.setStatus(ObservationStatusEnum.FINAL);
-		IIdType afterId2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 
 		Thread.sleep(100);
 
 		ourLog.info("After: {}", System.currentTimeMillis());
 
-		List<IBaseResource> results;
-		List<IIdType> resultIds;
-
-		mySubscriptionDao.pollForNewUndeliveredResources();
-		assertEquals(2, mySubscriptionFlaggedResourceDataDao.count());
+		assertEquals(2, mySubscriptionDao.pollForNewUndeliveredResources());
+		assertEquals(3, mySubscriptionFlaggedResourceDataDao.count());
 
 		Thread.sleep(100);
 		
 		mySubscriptionDao.pollForNewUndeliveredResources();
-		assertEquals(2, mySubscriptionFlaggedResourceDataDao.count());
+		assertEquals(3, mySubscriptionFlaggedResourceDataDao.count());
 		
 		Thread.sleep(100);
 		
 		mySubscriptionDao.pollForNewUndeliveredResources();
-		assertEquals(2, mySubscriptionFlaggedResourceDataDao.count());
+		assertEquals(3, mySubscriptionFlaggedResourceDataDao.count());
 
 		Thread.sleep(100);
 		
@@ -436,12 +451,12 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 
 		mySubscriptionDao.pollForNewUndeliveredResources();
-		assertEquals(3, mySubscriptionFlaggedResourceDataDao.count());
+		assertEquals(4, mySubscriptionFlaggedResourceDataDao.count());
 		
 		Thread.sleep(100);
 		
 		mySubscriptionDao.pollForNewUndeliveredResources();
-		assertEquals(3, mySubscriptionFlaggedResourceDataDao.count());
+		assertEquals(4, mySubscriptionFlaggedResourceDataDao.count());
 	}
 
 

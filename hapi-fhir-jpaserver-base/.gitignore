@@ -1,6 +1,7 @@
 target/
 /bin
 nohup.out
+lucene_indexes/
 
 # Created by https://www.gitignore.io
 

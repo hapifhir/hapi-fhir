@@ -54,6 +54,8 @@
 				<li><a href="./doc_rest_etag.html">ETags</a></li>
 				<li><a href="./doc_jpa.html">JPA/Database Server</a></li>
 				<li><a href="./doc_tinder.html">Maven Plugin (hapi-tinder-plugin)</a></li>
+				<li><a href="./doc_cli.html">Command Line Tool (hapi-fhir-cli)</a></li>
+				
 			</ul>
 			
  			<h4>JavaDocs</h4>

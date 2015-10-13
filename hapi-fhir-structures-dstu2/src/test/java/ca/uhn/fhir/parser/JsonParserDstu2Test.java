@@ -8,9 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.dstu2.valueset.*;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -26,20 +29,7 @@ import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu2.resource.Conformance;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu2.resource.Medication;
-import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
-import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
-import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -74,6 +64,13 @@ public class JsonParserDstu2Test {
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
 		ourLog.info(encoded);
 		assertThat(encoded, containsString("\"div\":\"" + expected.replace("\"", "\\\"") + "\""));
+	}
+	
+	
+	@Test
+	public void testEncodeEmptyBinary() {
+		String output = ourCtx.newJsonParser().encodeResourceToString(new Binary());
+		assertEquals("{\"resourceType\":\"Binary\"}", output);
 	}
 
 	@Test
@@ -1012,4 +1009,19 @@ public class JsonParserDstu2Test {
 		Assert.assertThat(message, containsString("contained"));
 	}
 
+	// see #241
+	@Ignore
+	@Test
+	public void testEncodeThenParseShouldNotAddSpuriousId() throws Exception {
+		Condition condition = new Condition().setVerificationStatus(ConditionVerificationStatusEnum.CONFIRMED);
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		ca.uhn.fhir.model.dstu2.resource.Bundle.Entry entry = new ca.uhn.fhir.model.dstu2.resource.Bundle.Entry();
+		entry.setFullUrl(IdDt.newRandomUuid());
+		entry.setResource(condition);
+		bundle.getEntry().add(entry);
+		IParser parser = ourCtx.newJsonParser();
+		String json = parser.encodeResourceToString(bundle);
+		bundle = (ca.uhn.fhir.model.dstu2.resource.Bundle) parser.parseResource(json);
+		assertTrue(bundle.getEntry().get(0).getResource().getIdElement().isEmpty());
+	}
 }

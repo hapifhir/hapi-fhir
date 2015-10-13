@@ -23,9 +23,8 @@ package ca.uhn.fhir.validation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.thymeleaf.util.Validate;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.ObjectUtil;
 
 abstract class BaseValidationContext<T> implements IValidationContext<T> {
 
@@ -38,7 +37,7 @@ abstract class BaseValidationContext<T> implements IValidationContext<T> {
 
 	@Override
 	public void addValidationMessage(SingleValidationMessage theMessage) {
-		Validate.notNull(theMessage, "theMessage must not be null");
+		ObjectUtil.requireNonNull(theMessage, "theMessage must not be null");
 		myMessages.add(theMessage);
 	}
 

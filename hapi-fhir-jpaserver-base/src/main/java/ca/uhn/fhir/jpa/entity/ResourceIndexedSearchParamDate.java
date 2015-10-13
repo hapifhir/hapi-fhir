@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.entity;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -32,8 +33,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.annotations.Field;
 
 //@formatter:off
+@Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_DATE" /*, indexes= {@Index(name="IDX_SP_DATE", columnList= "SP_VALUE_LOW,SP_VALUE_HIGH")}*/)
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_DATE", indexes= {
@@ -46,15 +49,23 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 
 	@Column(name = "SP_VALUE_HIGH", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
+	@Field
 	public Date myValueHigh;
 
 	@Column(name = "SP_VALUE_LOW", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
+	@Field
 	public Date myValueLow;
 
+	/**
+	 * Constructor
+	 */
 	public ResourceIndexedSearchParamDate() {
 	}
 
+	/**
+	 * Constructor
+	 */
 	public ResourceIndexedSearchParamDate(String theName, Date theLow, Date theHigh) {
 		setParamName(theName);
 		setValueLow(theLow);

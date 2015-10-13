@@ -123,6 +123,13 @@ public class XmlParserDstu2Test {
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
 
 	}
+	
+	@Test
+	public void testEncodeEmptyBinary() {
+		String output = ourCtx.newXmlParser().encodeResourceToString(new Binary());
+		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\"/>", output);
+	}
+
 
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {

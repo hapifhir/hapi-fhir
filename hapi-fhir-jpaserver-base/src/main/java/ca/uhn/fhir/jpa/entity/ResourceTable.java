@@ -34,28 +34,29 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.Index;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Index;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.IndexedEmbedded;
 
+import ca.uhn.fhir.jpa.search.IndexNonDeletedInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 //@formatter:off
+@Indexed(/*interceptor=IndexNonDeletedInterceptor.class*/)	
 @Entity
-@Table(name = "HFJ_RESOURCE", uniqueConstraints = {})
-@Inheritance(strategy = InheritanceType.JOINED)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_RESOURCE", 
-	indexes = { 
-		@Index(name = "IDX_RES_DATE", columnNames = { "RES_UPDATED" }), 
-		@Index(name = "IDX_RES_LANG", columnNames = { "RES_TYPE", "RES_LANGUAGE" }), 
-		@Index(name = "IDX_RES_PROFILE", columnNames = { "RES_PROFILE" }),
-		@Index(name = "IDX_INDEXSTATUS", columnNames = { "SP_INDEX_STATUS" }) 
-	})
+@Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes= {
+	@Index(name = "IDX_RES_DATE", columnList="RES_UPDATED"), 
+	@Index(name = "IDX_RES_LANG", columnList="RES_TYPE,RES_LANGUAGE"), 
+	@Index(name = "IDX_RES_PROFILE", columnList="RES_PROFILE"),
+	@Index(name = "IDX_INDEXSTATUS", columnList="SP_INDEX_STATUS") 
+})
 //@formatter:on
 public class ResourceTable extends BaseHasResource implements Serializable {
 	private static final int MAX_LANGUAGE_LENGTH = 20;
@@ -81,6 +82,22 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@Column(name = "RES_LANGUAGE", length = MAX_LANGUAGE_LENGTH, nullable = true)
 	private String myLanguage;
+
+	/**
+	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
+	 */
+	@Column(name = "SP_NARRATIVE_TEXT", length = Integer.MAX_VALUE - 1, nullable=true)
+	@Lob
+	@Field()
+	private String myNarrativeText;
+
+	/**
+	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
+	 */
+	@Column(name = "SP_CONTENT_TEXT", length = Integer.MAX_VALUE - 1, nullable=true)
+	@Lob
+	@Field()
+	private String myContentText;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
@@ -131,6 +148,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	private Collection<ResourceLink> myResourceLinks;
 
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN)
+	@Field
 	private String myResourceType;
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -303,6 +321,14 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myLanguage = theLanguage;
 	}
 
+	public void setNarrativeTextParsedIntoWords(String theNarrativeText) {
+		myNarrativeText = theNarrativeText;
+	}
+
+	public void setContentTextParsedIntoWords(String theContentText) {
+		myContentText = theContentText;
+	}
+
 	public void setParamsCoords(Collection<ResourceIndexedSearchParamCoords> theParamsCoords) {
 		if (!isParamsTokenPopulated() && theParamsCoords.isEmpty()) {
 			return;
@@ -426,10 +452,12 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		retVal.setDeleted(getDeleted());
 		retVal.setForcedId(getForcedId());
 
-		for (ResourceTag next : getTags()) {
-			retVal.addTag(next);
+		if (isHasTags()) {
+			for (ResourceTag next : getTags()) {
+				retVal.addTag(next);
+			}
 		}
-
+		
 		return retVal;
 	}
 

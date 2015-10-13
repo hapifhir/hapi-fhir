@@ -1,9 +1,12 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
+import java.util.List;
 
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -22,6 +25,8 @@ import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -61,7 +66,7 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 			assertThat(e.getMessage(), containsString("Can not create entity with ID[" + methodName + "], a resource with this ID already exists"));
 		}
 	}
-
+	
 	@Test
 	public void testCreateNumericIdFails() {
 		Patient p = new Patient();

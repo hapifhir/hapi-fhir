@@ -27,7 +27,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IFhirResourceDaoSubscription<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	void pollForNewUndeliveredResources();
+	int pollForNewUndeliveredResources();
 
 	List<IBaseResource> getUndeliveredResourcesAndPurge(Long theSubscriptionPid);
 

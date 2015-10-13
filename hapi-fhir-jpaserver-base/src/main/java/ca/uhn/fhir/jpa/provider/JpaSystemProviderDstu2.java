@@ -40,7 +40,6 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
-import ca.uhn.fhir.rest.param.NumberParam;
 
 public class JpaSystemProviderDstu2 extends BaseJpaSystemProvider<Bundle> {
 
@@ -165,20 +164,6 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProvider<Bundle> {
 	//@formatter:on
 	public Parameters markAllResourcesForReindexing() {
 		int count = mySystemDao.markAllResourcesForReindexing();
-		
-		Parameters retVal = new Parameters();
-		retVal.addParameter().setName("count").setValue(new IntegerDt(count));
-		return retVal;
-	}
-
-	//@formatter:off
-	@Operation(name="$perform-reindexing-pass", idempotent=true, returnParameters= {
-		@OperationParam(name="count", type=IntegerDt.class)
-	})
-	//@formatter:on
-	public Parameters performReindexingPass(@OperationParam(min=0, max=1, name="count") IntegerDt theCount) {
-		Integer countIn = theCount != null && theCount.getValue()!= null ? theCount.getValue().intValue() : null;
-		int count = mySystemDao.performReindexingPass(countIn);
 		
 		Parameters retVal = new Parameters();
 		retVal.addParameter().setName("count").setValue(new IntegerDt(count));

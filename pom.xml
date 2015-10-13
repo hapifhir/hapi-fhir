@@ -204,7 +204,7 @@
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
 		<!-- This property is used in some of the site documentation where the version is shown, so that we can deploy the site even if the project is on a snapshot version. -->
-		<hapi_stable_version>1.1</hapi_stable_version>
+		<hapi_stable_version>1.2</hapi_stable_version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -219,7 +219,7 @@
 		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this 
 			version with caution! Also note that if you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration 
 			for that plugin... -->
-		<hibernate_version>5.0.1.Final</hibernate_version>
+		<hibernate_version>5.0.2.Final</hibernate_version>
 		<hibernate_validator_version>5.2.1.Final</hibernate_validator_version>
 		<jetty_version>9.2.6.v20141205</jetty_version>
 		<maven_build_helper_plugin_version>1.9.1</maven_build_helper_plugin_version>

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
+import java.util.Collection;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -34,6 +36,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -121,7 +124,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	Set<Long> searchForIds(String theParameterName, IQueryParameterType theValue);
 
-	Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams);
+	Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams, Collection<Long> theInitialPids, DateRangeParam theLastUpdated);
 
 	DaoMethodOutcome update(T theResource);
 
@@ -144,9 +147,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	DaoMethodOutcome deleteByUrl(String theUrl, boolean theTransaction);
 
-	/**
-	 * Invoke the everything operation
-	 */
-	IBundleProvider everything(IIdType theId);
+//	/**
+//	 * Invoke the everything operation
+//	 */
+//	IBundleProvider everything(IIdType theId);
 
 }
