@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.entity;
 import java.math.BigDecimal;
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -38,6 +39,7 @@ import org.hibernate.search.annotations.NumericField;
 import ca.uhn.fhir.jpa.util.BigDecimalNumericFieldBridge;
 
 //@formatter:off
+@Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_NUMBER" /*, indexes= {@Index(name="IDX_SP_NUMBER", columnList="SP_VALUE")}*/ )
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_NUMBER", indexes= {

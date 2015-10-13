@@ -52,8 +52,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -695,7 +697,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		}
 
-		for (ResourceTag next : new ArrayList<ResourceTag>(theEntity.getTags())) {
+		ArrayList<ResourceTag> existingTags = new ArrayList<ResourceTag>();
+		if (theEntity.isHasTags()) {
+			existingTags.addAll(theEntity.getTags());
+		}
+		for (ResourceTag next : existingTags) {
 			TagDefinition nextDef = next.getTag();
 			if (!allDefs.contains(nextDef)) {
 				if (shouldDroppedTagBeRemovedOnUpdate(theEntity, next)) {
@@ -1224,23 +1230,38 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theEntity.setVersion(theEntity.getVersion() + 1);
 		}
 
-		boolean paramsStringPopulated = theEntity.isParamsStringPopulated();
-		boolean paramsTokenPopulated = theEntity.isParamsTokenPopulated();
-		boolean paramsNumberPopulated = theEntity.isParamsNumberPopulated();
-		boolean paramsQuantityPopulated = theEntity.isParamsQuantityPopulated();
-		boolean paramsDatePopulated = theEntity.isParamsDatePopulated();
-		boolean paramsCoordsPopulated = theEntity.isParamsCoordsPopulated();
-		boolean paramsUriPopulated = theEntity.isParamsUriPopulated();
-		boolean hasLinks = theEntity.isHasLinks();
-
-		Collection<ResourceIndexedSearchParamString> paramsString = new ArrayList<ResourceIndexedSearchParamString>(theEntity.getParamsString()); // TODO: use the isPopulated method to decide whether to call this
-		Collection<ResourceIndexedSearchParamToken> paramsToken = new ArrayList<ResourceIndexedSearchParamToken>(theEntity.getParamsToken());
-		Collection<ResourceIndexedSearchParamNumber> paramsNumber = new ArrayList<ResourceIndexedSearchParamNumber>(theEntity.getParamsNumber());
-		Collection<ResourceIndexedSearchParamQuantity> paramsQuantity = new ArrayList<ResourceIndexedSearchParamQuantity>(theEntity.getParamsQuantity());
-		Collection<ResourceIndexedSearchParamDate> paramsDate = new ArrayList<ResourceIndexedSearchParamDate>(theEntity.getParamsDate());
-		Collection<ResourceIndexedSearchParamUri> paramsUri = new ArrayList<ResourceIndexedSearchParamUri>(theEntity.getParamsUri());
-		Collection<ResourceIndexedSearchParamCoords> paramsCoords = new ArrayList<ResourceIndexedSearchParamCoords>(theEntity.getParamsCoords());
-		Collection<ResourceLink> resourceLinks = new ArrayList<ResourceLink>(theEntity.getResourceLinks());
+		Collection<ResourceIndexedSearchParamString> paramsString = new ArrayList<ResourceIndexedSearchParamString>();
+		if (theEntity.isParamsStringPopulated()) {
+			paramsString.addAll(theEntity.getParamsString());
+		}
+		Collection<ResourceIndexedSearchParamToken> paramsToken = new ArrayList<ResourceIndexedSearchParamToken>();
+		if (theEntity.isParamsTokenPopulated()) {
+			paramsToken.addAll(theEntity.getParamsToken());
+		}
+		Collection<ResourceIndexedSearchParamNumber> paramsNumber = new ArrayList<ResourceIndexedSearchParamNumber>();
+		if (theEntity.isParamsNumberPopulated()) {
+			paramsNumber.addAll(theEntity.getParamsNumber());
+		}
+		Collection<ResourceIndexedSearchParamQuantity> paramsQuantity = new ArrayList<ResourceIndexedSearchParamQuantity>();
+		if (theEntity.isParamsQuantityPopulated()) {
+			paramsQuantity.addAll(theEntity.getParamsQuantity());
+		}
+		Collection<ResourceIndexedSearchParamDate> paramsDate = new ArrayList<ResourceIndexedSearchParamDate>();
+		if (theEntity.isParamsDatePopulated()) {
+			paramsDate.addAll(theEntity.getParamsDate());
+		}
+		Collection<ResourceIndexedSearchParamUri> paramsUri = new ArrayList<ResourceIndexedSearchParamUri>();
+		if (theEntity.isParamsUriPopulated()) {
+			paramsUri.addAll(theEntity.getParamsUri());
+		}
+		Collection<ResourceIndexedSearchParamCoords> paramsCoords = new ArrayList<ResourceIndexedSearchParamCoords>();
+		if (theEntity.isParamsCoordsPopulated()) {
+			paramsCoords.addAll(theEntity.getParamsCoords());
+		}
+		Collection<ResourceLink> resourceLinks = new ArrayList<ResourceLink>();
+		if (theEntity.isHasLinks()) {
+			resourceLinks.addAll(theEntity.getResourceLinks());
+		}
 
 		Set<ResourceIndexedSearchParamString> stringParams = null;
 		Set<ResourceIndexedSearchParamToken> tokenParams = null;
@@ -1264,6 +1285,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theEntity.setDeleted(theDeletedTimestampOrNull);
 			theEntity.setUpdated(theDeletedTimestampOrNull);
 			theEntity.setNarrativeTextParsedIntoWords(null);
+			theEntity.setContentTextParsedIntoWords(null);
 
 		} else {
 
@@ -1313,6 +1335,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setHasLinks(links.isEmpty() == false);
 				theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
 				theEntity.setNarrativeTextParsedIntoWords(parseNarrativeTextIntoWords(theResource));
+				theEntity.setContentTextParsedIntoWords(parseContentTextIntoWords(theResource));
 
 			} else {
 
@@ -1342,82 +1365,68 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		if (thePerformIndexing) {
 
-			if (paramsStringPopulated) {
-				for (ResourceIndexedSearchParamString next : paramsString) {
-					myEntityManager.remove(next);
-				}
+			for (ResourceIndexedSearchParamString next : paramsString) {
+				myEntityManager.remove(next);
 			}
 			for (ResourceIndexedSearchParamString next : stringParams) {
 				myEntityManager.persist(next);
 			}
 
-			if (paramsTokenPopulated) {
-				for (ResourceIndexedSearchParamToken next : paramsToken) {
-					myEntityManager.remove(next);
-				}
+			for (ResourceIndexedSearchParamToken next : paramsToken) {
+				myEntityManager.remove(next);
 			}
 			for (ResourceIndexedSearchParamToken next : tokenParams) {
 				myEntityManager.persist(next);
 			}
 
-			if (paramsNumberPopulated) {
-				for (ResourceIndexedSearchParamNumber next : paramsNumber) {
-					myEntityManager.remove(next);
-				}
+			for (ResourceIndexedSearchParamNumber next : paramsNumber) {
+				myEntityManager.remove(next);
 			}
 			for (ResourceIndexedSearchParamNumber next : numberParams) {
 				myEntityManager.persist(next);
 			}
 
-			if (paramsQuantityPopulated) {
-				for (ResourceIndexedSearchParamQuantity next : paramsQuantity) {
-					myEntityManager.remove(next);
-				}
+			for (ResourceIndexedSearchParamQuantity next : paramsQuantity) {
+				myEntityManager.remove(next);
 			}
 			for (ResourceIndexedSearchParamQuantity next : quantityParams) {
 				myEntityManager.persist(next);
 			}
 
 			// Store date SP's
-			if (paramsDatePopulated) {
-				for (ResourceIndexedSearchParamDate next : paramsDate) {
-					myEntityManager.remove(next);
-				}
+			for (ResourceIndexedSearchParamDate next : paramsDate) {
+				myEntityManager.remove(next);
 			}
 			for (ResourceIndexedSearchParamDate next : dateParams) {
 				myEntityManager.persist(next);
 			}
 
 			// Store URI SP's
-			if (paramsUriPopulated) {
-				for (ResourceIndexedSearchParamUri next : paramsUri) {
-					myEntityManager.remove(next);
-				}
+			for (ResourceIndexedSearchParamUri next : paramsUri) {
+				myEntityManager.remove(next);
 			}
 			for (ResourceIndexedSearchParamUri next : uriParams) {
 				myEntityManager.persist(next);
 			}
 
 			// Store Coords SP's
-			if (paramsCoordsPopulated) {
-				for (ResourceIndexedSearchParamCoords next : paramsCoords) {
-					myEntityManager.remove(next);
-				}
+			for (ResourceIndexedSearchParamCoords next : paramsCoords) {
+				myEntityManager.remove(next);
 			}
 			for (ResourceIndexedSearchParamCoords next : coordsParams) {
 				myEntityManager.persist(next);
 			}
 
-			if (hasLinks) {
-				for (ResourceLink next : resourceLinks) {
-					myEntityManager.remove(next);
-				}
+			for (ResourceLink next : resourceLinks) {
+				myEntityManager.remove(next);
 			}
 			for (ResourceLink next : links) {
 				myEntityManager.persist(next);
 			}
 
 		} // if thePerformIndexing
+
+		theEntity = myEntityManager.merge(theEntity);
 
 		myEntityManager.flush();
 
@@ -1497,6 +1506,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					Characters characters = next.asCharacters();
 					b.append(characters.getData()).append(" ");
 				}
+			}
+		}
+		return b.toString();
+	}
+
+	private String parseContentTextIntoWords(IResource theResource) {
+		StringBuilder b = new StringBuilder();
+		@SuppressWarnings("rawtypes")
+		List<IPrimitiveType> childElements = getContext().newTerser().getAllPopulatedChildElementsOfType(theResource, IPrimitiveType.class);
+		for (@SuppressWarnings("rawtypes") IPrimitiveType nextType : childElements) {
+			String nextValue = nextType.getValueAsString();
+			if (isNotBlank(nextValue)) {
+				if (b.length() > 0 && b.charAt(b.length() - 1) != ' ') {
+					b.append(' ');
+				}
+				b.append(nextValue);
 			}
 		}
 		return b.toString();

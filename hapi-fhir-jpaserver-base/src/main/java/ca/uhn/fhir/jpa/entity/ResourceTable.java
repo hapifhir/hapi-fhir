@@ -49,7 +49,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 //@formatter:off
-@Indexed(interceptor=IndexNonDeletedInterceptor.class)	
+@Indexed(/*interceptor=IndexNonDeletedInterceptor.class*/)	
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes= {
 	@Index(name = "IDX_RES_DATE", columnList="RES_UPDATED"), 
@@ -86,55 +86,56 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 */
-	@Column(name = "SP_NARRATIVE_TEXT", length = Integer.MAX_VALUE - 1)
+	@Column(name = "SP_NARRATIVE_TEXT", length = Integer.MAX_VALUE - 1, nullable=true)
 	@Lob
 	@Field()
 	private String myNarrativeText;
 
+	/**
+	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
+	 */
+	@Column(name = "SP_CONTENT_TEXT", length = Integer.MAX_VALUE - 1, nullable=true)
+	@Lob
+	@Field()
+	private String myContentText;
+
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@IndexedEmbedded
 	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
 
 	@Column(name = "SP_COORDS_PRESENT")
 	private boolean myParamsCoordsPopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@IndexedEmbedded
 	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
 
 	@Column(name = "SP_DATE_PRESENT")
 	private boolean myParamsDatePopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@IndexedEmbedded
 	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
 
 	@Column(name = "SP_NUMBER_PRESENT")
 	private boolean myParamsNumberPopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@IndexedEmbedded
 	private Collection<ResourceIndexedSearchParamQuantity> myParamsQuantity;
 
 	@Column(name = "SP_QUANTITY_PRESENT")
 	private boolean myParamsQuantityPopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@IndexedEmbedded
 	private Collection<ResourceIndexedSearchParamString> myParamsString;
 
 	@Column(name = "SP_STRING_PRESENT")
 	private boolean myParamsStringPopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@IndexedEmbedded
 	private Collection<ResourceIndexedSearchParamToken> myParamsToken;
 
 	@Column(name = "SP_TOKEN_PRESENT")
 	private boolean myParamsTokenPopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@IndexedEmbedded
 	private Collection<ResourceIndexedSearchParamUri> myParamsUri;
 
 	@Column(name = "SP_URI_PRESENT")
@@ -324,6 +325,10 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myNarrativeText = theNarrativeText;
 	}
 
+	public void setContentTextParsedIntoWords(String theContentText) {
+		myContentText = theContentText;
+	}
+
 	public void setParamsCoords(Collection<ResourceIndexedSearchParamCoords> theParamsCoords) {
 		if (!isParamsTokenPopulated() && theParamsCoords.isEmpty()) {
 			return;
@@ -447,10 +452,12 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		retVal.setDeleted(getDeleted());
 		retVal.setForcedId(getForcedId());
 
-		for (ResourceTag next : getTags()) {
-			retVal.addTag(next);
+		if (isHasTags()) {
+			for (ResourceTag next : getTags()) {
+				retVal.addTag(next);
+			}
 		}
-
+		
 		return retVal;
 	}
 

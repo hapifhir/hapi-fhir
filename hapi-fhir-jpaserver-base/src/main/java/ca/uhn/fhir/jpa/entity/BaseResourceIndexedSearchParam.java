@@ -30,6 +30,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
+import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 
 @MappedSuperclass
@@ -50,6 +51,7 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "RES_ID", referencedColumnName="RES_ID")
+	@ContainedIn
 	private ResourceTable myResource;
 
 	@Field

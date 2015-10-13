@@ -800,8 +800,14 @@ public class JsonParser extends BaseParser implements IParser {
 
 		if (theResource instanceof IBaseBinary) {
 			IBaseBinary bin = (IBaseBinary) theResource;
-			theEventWriter.write("contentType", bin.getContentType());
-			theEventWriter.write("content", bin.getContentAsBase64());
+			String contentType = bin.getContentType();
+			if (isNotBlank(contentType)) {
+				theEventWriter.write("contentType", contentType);
+			}
+			String contentAsBase64 = bin.getContentAsBase64();
+			if (isNotBlank(contentAsBase64)) {
+				theEventWriter.write("content", contentAsBase64);
+			}
 		} else {
 			encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, resDef, theContainedResource, new CompositeChildElement(resDef));
 		}

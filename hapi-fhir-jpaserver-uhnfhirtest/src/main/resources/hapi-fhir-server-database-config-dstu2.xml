@@ -55,7 +55,7 @@
 				<entry key="hibernate.cache.use_second_level_cache" value="false" />
 				<entry key="hibernate.cache.use_structured_entries" value="false" />
 				<entry key="hibernate.search.default.directory_provider" value="filesystem" />
-				<entry key="hibernate.search.default.indexBase" value="#{systemProperties['fhir.lucene.location.dstu2']};" />
+				<entry key="hibernate.search.default.indexBase" value="#{systemProperties['fhir.lucene.location.dstu2']}" />
 				<entry key="hibernate.search.lucene_version" value="LUCENE_CURRENT" />
 			</map>
 		</property>

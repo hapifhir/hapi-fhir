@@ -170,6 +170,10 @@
 				number of unneeded dependencies. Thanks to Thomas Andersen
 				for the pull request!
 			</action>
+			<action type="fix">
+				Fix a crash when encoding a Binary resource in JSON encoding
+				if the resource has no content-type
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

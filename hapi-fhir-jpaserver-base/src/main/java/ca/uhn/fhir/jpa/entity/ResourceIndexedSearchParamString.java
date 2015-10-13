@@ -21,7 +21,10 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,9 +32,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
 
+@Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_STRING"/* , indexes= {@Index(name="IDX_SP_STRING", columnList="SP_VALUE_NORMALIZED")} */)
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_STRING", indexes = { 
@@ -49,10 +53,12 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Column(name = "SP_VALUE_NORMALIZED", length = MAX_LENGTH, nullable = true)
 	private String myValueNormalized;
 
-	@Column(name="SP_VALUE_EXACT", insertable=false, updatable=false)
-	@Field
-	private String myValueComplete;
-	
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "RES_ID", referencedColumnName="RES_ID", insertable=false, updatable=false)
+	@ContainedIn
+	private ResourceTable myResourceTable;
+
+
 	public ResourceIndexedSearchParamString() {
 	}
 
@@ -103,7 +109,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			throw new IllegalArgumentException("Value is too long: " + theValueExact.length());
 		}
 		myValueExact = theValueExact;
-		myValueComplete = theValueExact;
 	}
 
 	public void setValueNormalized(String theValueNormalized) {

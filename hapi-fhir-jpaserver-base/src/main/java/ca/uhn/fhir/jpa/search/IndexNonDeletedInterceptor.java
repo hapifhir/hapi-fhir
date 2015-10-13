@@ -33,6 +33,6 @@ public class IndexNonDeletedInterceptor implements EntityIndexingInterceptor<Res
 
 	@Override
 	public IndexingOverride onCollectionUpdate(ResourceTable entity) {
-		return onUpdate(entity);
+		return IndexingOverride.APPLY_DEFAULT;
 	}
 }

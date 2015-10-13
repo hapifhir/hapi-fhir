@@ -65,6 +65,13 @@ public class JsonParserDstu2Test {
 		ourLog.info(encoded);
 		assertThat(encoded, containsString("\"div\":\"" + expected.replace("\"", "\\\"") + "\""));
 	}
+	
+	
+	@Test
+	public void testEncodeEmptyBinary() {
+		String output = ourCtx.newJsonParser().encodeResourceToString(new Binary());
+		assertEquals("{\"resourceType\":\"Binary\"}", output);
+	}
 
 	@Test
 	public void testNamespacePreservationParse() throws Exception {

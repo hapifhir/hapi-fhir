@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -33,6 +34,7 @@ import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
 
 //@formatter:off
+@Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_URI" /* , indexes = { @Index(name = "IDX_SP_TOKEN", columnList = "SP_SYSTEM,SP_VALUE") } */)
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_URI", indexes = { 

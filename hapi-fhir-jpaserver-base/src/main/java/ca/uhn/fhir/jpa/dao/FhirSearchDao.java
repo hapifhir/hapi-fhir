@@ -44,7 +44,7 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		BooleanJunction<?> bool = qb.bool();
 		
 		List<List<? extends IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
-		addTextSearch(qb, bool, contentAndTerms, "myParamsString.myValueComplete");
+		addTextSearch(qb, bool, contentAndTerms, "myContentText");
 		
 		List<List<? extends IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
 		addTextSearch(qb, bool, textAndTerms, "myNarrativeText");
