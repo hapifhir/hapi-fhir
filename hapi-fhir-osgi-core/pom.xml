@@ -41,14 +41,14 @@
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
 			<version>1.3-SNAPSHOT</version>
 		</dependency>
-		
+
 		<!-- Don't force OSGi users to use a newer version of SLF4j than we need -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j_target_version}</version>
 		</dependency>
-		
+
 	</dependencies>
 
 	<build>
@@ -59,14 +59,12 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Export-Package>ca.uhn.fhir</Export-Package>
-						<Export-Package>org.hl7.fhir</Export-Package>
+						<!--<Export-Package>ca.uhn.fhir</Export-Package> <Export-Package>org.hl7.fhir</Export-Package> -->
 						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-						<Embed-Dependency>*;scope=!provided|test</Embed-Dependency>
-						<Embed-Directory>lib</Embed-Directory>
-						<Embed-Transitive>true</Embed-Transitive>
+						<!--<Embed-Dependency>*;scope=!provided|test</Embed-Dependency> <Embed-Directory>lib</Embed-Directory> <Embed-Transitive>true</Embed-Transitive> -->
 						<_removeheaders>Built-By, Include-Resource, Private-Package</_removeheaders>
 						<!-- <Private-Package>org.foo.myproject.*</Private-Package> <Bundle-Activator>org.foo.myproject.impl1.Activator</Bundle-Activator> -->
+						<Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=hapi-fhir-*</Embed-Dependency>
 					</instructions>
 				</configuration>
 				<executions>

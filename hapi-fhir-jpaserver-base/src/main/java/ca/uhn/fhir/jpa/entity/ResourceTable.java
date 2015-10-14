@@ -38,6 +38,7 @@ import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
@@ -86,16 +87,18 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 */
-	@Column(name = "SP_NARRATIVE_TEXT", length = Integer.MAX_VALUE - 1, nullable=true)
-	@Lob
+//	@Column(name = "SP_NARRATIVE_TEXT", length = Integer.MAX_VALUE - 1, nullable=true)
+//	@Lob
+	@Transient
 	@Field()
 	private String myNarrativeText;
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 */
-	@Column(name = "SP_CONTENT_TEXT", length = Integer.MAX_VALUE - 1, nullable=true)
-	@Lob
+//	@Column(name = "SP_CONTENT_TEXT", length = Integer.MAX_VALUE - 1, nullable=true)
+//	@Lob
+	@Transient
 	@Field()
 	private String myContentText;
 

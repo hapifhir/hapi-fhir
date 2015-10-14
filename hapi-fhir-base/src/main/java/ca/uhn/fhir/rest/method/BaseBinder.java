@@ -47,7 +47,7 @@ class BaseBinder<T> {
 		try {
 			Class<?>[] types = new Class<?>[myCompositeTypes.size()];
 			for (int i = 0; i < myCompositeTypes.size(); i++) {
-				types[i] = myCompositeTypes.get(i).getClass();
+				types[i] = Class.class;
 			}
 			myConstructor = myType.getConstructor(types);
 		} catch (NoSuchMethodException e) {

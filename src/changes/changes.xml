@@ -12,8 +12,11 @@
             latest versions (dependent HAPI modules listed in brackets):
             <![CDATA[
                <ul>
-                  <li>Springframework (JPA, Web Tester): 4.1.5 -> 4.2.1</li>
-                  <li>Hibernate (JPA, Web Tester): 4.2.17 -> 5.0.1</li>
+                  <li>Springframework (JPA, Web Tester): 4.1.5 -&gt; 4.2.1</li>
+                  <li>Hibernate (JPA, Web Tester): 4.2.17 -&gt; 5.0.2</li>
+                  <li>Hibernate Validator (JPA, Web Tester): 5.2.1 -&gt; 5.2.2</li>
+                  <li>Derby (JPA, CLI, Public Server): 10.11.1.1 -&gt; 10.12.1.1 </li>
+                  <li>Jetty (JPA, CLI, Public Server): 9.2.6.v20141205 -&gt; 9.3.4.v20151007 </li>
                </ul>
             ]]>
          </action>

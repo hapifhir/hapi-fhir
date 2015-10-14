@@ -150,7 +150,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			if (myDatatypeToElementName.containsKey(next)) {
 				String existing = myDatatypeToElementName.get(next);
 				if (!existing.equals(elementName)) {
-					throw new ConfigurationException("Already have element name " + existing + " for datatype " + next.getClass().getSimpleName() + " in " + getElementName() + ", cannot add " + elementName);
+					throw new ConfigurationException("Already have element name " + existing + " for datatype " + next.getSimpleName() + " in " + getElementName() + ", cannot add " + elementName);
 				}
 			} else {
 				myDatatypeToElementName.put(next, elementName);
