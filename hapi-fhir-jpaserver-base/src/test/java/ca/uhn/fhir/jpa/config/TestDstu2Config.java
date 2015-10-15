@@ -2,27 +2,23 @@ package ca.uhn.fhir.jpa.config;
 
 import java.util.Properties;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.hibernate.dialect.DerbyTenSevenDialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.rp.dstu2.BaseJavaConfigDstu2;
 
 @Configuration
 @EnableTransactionManagement()
-public class TestDstu2Config extends BaseJavaConfigDstu2 implements TransactionManagementConfigurer {
+public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
 	@Bean(name="myDaoConfigDstu2")
 	public DaoConfig daoConfigDstu2() {
@@ -39,11 +35,10 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 implements TransactionM
 		return retVal;
 	}
 
-	@Bean(name="myTransactionManagerDstu2")
-	public JpaTransactionManager platformTransactionManagerDstu2() {
+	@Bean()
+	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
-		retVal.setEntityManagerFactory(entityManagerFactoryDstu2().getNativeEntityManagerFactory());
-		retVal.afterPropertiesSet();
+		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
 	}
 
@@ -67,9 +62,4 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 implements TransactionM
       return extraProperties;
   }
 
-	@Override
-	public PlatformTransactionManager annotationDrivenTransactionManager() {
-		return platformTransactionManagerDstu2();
-	}
-   
 }

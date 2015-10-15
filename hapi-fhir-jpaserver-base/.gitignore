@@ -2,6 +2,7 @@ target/
 /bin
 nohup.out
 lucene_indexes/
+ca.uhn.fhir.jpa.entity.ResourceTable/
 
 # Created by https://www.gitignore.io
 

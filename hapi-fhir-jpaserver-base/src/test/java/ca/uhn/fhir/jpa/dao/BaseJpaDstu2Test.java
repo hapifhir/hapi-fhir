@@ -99,8 +99,11 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myEncounterDaoDstu2")
 	protected IFhirResourceDao<Encounter> myEncounterDao;
-	@PersistenceContext()
+	
+//	@PersistenceContext()
+	@Autowired
 	protected EntityManager myEntityManager;
+	
 	@Autowired
 	@Qualifier("myFhirContextDstu2")
 	protected FhirContext myFhirCtx;
