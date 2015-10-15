@@ -13,9 +13,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.TestDstu2Config;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
@@ -34,7 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 @SuppressWarnings("unused")
 public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 
-	private static ClassPathXmlApplicationContext ourCtx;
+	private static AnnotationConfigApplicationContext ourCtx;
 	private static IFhirResourceDao<Device> ourDeviceDao;
 	private static IFhirResourceDao<DiagnosticReport> ourDiagnosticReportDao;
 	private static IFhirResourceDao<Encounter> ourEncounterDao;
@@ -135,7 +137,7 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() {
-		ourCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu1.xml", "fhir-jpabase-spring-test-config.xml");
+		ourCtx = new AnnotationConfigApplicationContext(TestDstu2Config.class);
 		ourPatientDao = ourCtx.getBean("myPatientDaoDstu1", IFhirResourceDao.class);
 		ourObservationDao = ourCtx.getBean("myObservationDaoDstu1", IFhirResourceDao.class);
 		ourDiagnosticReportDao = ourCtx.getBean("myDiagnosticReportDaoDstu1", IFhirResourceDao.class);

@@ -22,7 +22,6 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
 
-@ContextConfiguration(locations = { "classpath:fhir-spring-search-config-dstu2.xml" })
 public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchFtTest.class);
 

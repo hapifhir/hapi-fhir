@@ -1,20 +1,16 @@
 package ca.uhn.fhir.jpa.config;
 
-import javax.persistence.EntityManager;
+import java.util.Properties;
+
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.hibernate.dialect.DerbyTenSevenDialect;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.Database;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
@@ -24,14 +20,13 @@ import ca.uhn.fhir.jpa.rp.dstu.BaseJavaConfigDstu1;
 @EnableTransactionManagement()
 public class TestDstu1Config extends BaseJavaConfigDstu1 {
 
-	@Override
-	@Bean(name="myDaoConfigDstu1")
-	public DaoConfig daoConfigDstu1() {
+	@Bean()
+	public DaoConfig daoConfig() {
 		return new DaoConfig();
 	}
-	
-	@Bean(name="myPersistenceDataSourceDstu1")
-	public DataSource dataSourceDstu1() {
+
+	@Bean()
+	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
 		retVal.setUrl("jdbc:derby:memory:myUnitTestDB;create=true");
@@ -40,36 +35,31 @@ public class TestDstu1Config extends BaseJavaConfigDstu1 {
 		return retVal;
 	}
 
-	@Override
-	@Bean(name="myTransactionManagerDstu1")
-	public JpaTransactionManager platformTransactionManagerDstu1() {
+	@Bean()
+	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
-		retVal.setEntityManagerFactory(entityManagerFactoryDstu1());
-		retVal.afterPropertiesSet();
+		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
 	}
 
-	@Bean
-	public EntityManagerFactory entityManagerFactoryDstu1() {
+	@Bean()
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
-		retVal.setDataSource(dataSourceDstu1());
+		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu1");
+		retVal.setDataSource(dataSource());
 		retVal.setPackagesToScan("ca.uhn.fhir.jpa.entity");
-		retVal.setJpaVendorAdapter(jpaVendorAdapter());
+		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
+		retVal.setJpaProperties(jpaProperties());
 		retVal.afterPropertiesSet();
-		return retVal.getNativeEntityManagerFactory();
-	}
-	
-	@Bean
-	public JpaVendorAdapter jpaVendorAdapter() {
-		HibernateJpaVendorAdapter retVal = new HibernateJpaVendorAdapter();
-		retVal.setGenerateDdl(true);
-		retVal.setDatabasePlatform(DerbyTenSevenDialect.class.getName());
 		return retVal;
 	}
 
-	@Override
-	protected EntityManager entityManagerDstu1() {
-		return entityManagerFactoryDstu1().createEntityManager();
+	private Properties jpaProperties() {
+		Properties extraProperties = new Properties();
+		extraProperties.put("hibernate.format_sql", "true");
+		extraProperties.put("hibernate.show_sql", "false");
+		extraProperties.put("hibernate.hbm2ddl.auto", "update");
+		return extraProperties;
 	}
 
 

@@ -20,13 +20,13 @@ import ca.uhn.fhir.jpa.rp.dstu2.BaseJavaConfigDstu2;
 @EnableTransactionManagement()
 public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
-	@Bean(name="myDaoConfigDstu2")
-	public DaoConfig daoConfigDstu2() {
+	@Bean()
+	public DaoConfig daoConfig() {
 		return new DaoConfig();
 	}
-	
-	@Bean(name="myPersistenceDataSourceDstu2")
-	public DataSource dataSourceDstu2() {
+
+	@Bean()
+	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
 		retVal.setUrl("jdbc:derby:memory:myUnitTestDB;create=true");
@@ -43,23 +43,23 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	}
 
 	@Bean()
-	public LocalContainerEntityManagerFactoryBean entityManagerFactoryDstu2() {
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu2");
-		retVal.setDataSource(dataSourceDstu2());
+		retVal.setDataSource(dataSource());
 		retVal.setPackagesToScan("ca.uhn.fhir.jpa.entity");
 		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
 		retVal.setJpaProperties(jpaProperties());
 		retVal.afterPropertiesSet();
 		return retVal;
 	}
-	
-   private Properties jpaProperties() {
-      Properties extraProperties = new Properties();
-      extraProperties.put("hibernate.format_sql", "true");
-      extraProperties.put("hibernate.show_sql", "false");
-      extraProperties.put("hibernate.hbm2ddl.auto", "update");
-      return extraProperties;
-  }
+
+	private Properties jpaProperties() {
+		Properties extraProperties = new Properties();
+		extraProperties.put("hibernate.format_sql", "true");
+		extraProperties.put("hibernate.show_sql", "false");
+		extraProperties.put("hibernate.hbm2ddl.auto", "update");
+		return extraProperties;
+	}
 
 }

@@ -22,7 +22,6 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
 
-@ContextConfiguration(locations = { "classpath:fhir-spring-search-config-dstu2.xml" })
 public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 	
 	@Autowired

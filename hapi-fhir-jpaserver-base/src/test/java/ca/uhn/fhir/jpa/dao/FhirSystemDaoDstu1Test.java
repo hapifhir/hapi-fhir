@@ -23,9 +23,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.TestDstu1Config;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
@@ -45,7 +47,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 
-	private static ClassPathXmlApplicationContext ourCtx;
+	private static AnnotationConfigApplicationContext ourCtx;
 	private static FhirContext ourFhirContext;
 	private static IFhirResourceDao<Location> ourLocationDao;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu1Test.class);
@@ -466,8 +468,8 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() {
-		ourCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu1.xml", "fhir-jpabase-spring-test-config.xml");
-		ourFhirContext = ourCtx.getBean(FhirContext.class);
+		ourCtx = new AnnotationConfigApplicationContext(TestDstu1Config.class);
+		ourFhirContext = ourCtx.getBean("myFhirContextDstu1", FhirContext.class);
 		ourPatientDao = ourCtx.getBean("myPatientDaoDstu1", IFhirResourceDao.class);
 		ourObservationDao = ourCtx.getBean("myObservationDaoDstu1", IFhirResourceDao.class);
 		ourLocationDao = ourCtx.getBean("myLocationDaoDstu1", IFhirResourceDao.class);
