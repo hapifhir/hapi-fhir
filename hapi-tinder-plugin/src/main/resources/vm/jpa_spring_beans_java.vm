@@ -1,0 +1,161 @@
+package ${packageBase};
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import javax.persistence.EntityManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+
+@Configuration
+@EnableScheduling()
+#if ( ${versionCapitalized} == 'Dstu2' )
+@EnableJpaRepositories(basePackages="ca.uhn.fhir.jpa.dao.data", entityManagerFactoryRef="entityManagerFactoryDstu2", transactionManagerRef="transactionManagerDstu2")
+#end
+public abstract class BaseJavaConfig${versionCapitalized} implements SchedulingConfigurer {
+
+	private static FhirContext ourFhirContextDstu2;
+	private static FhirContext ourFhirContextDstu1;
+	private static FhirContext ourFhirContextDstu2Hl7Org;
+
+	@Bean(name="myFhirContextDstu2")
+	@Lazy
+	public FhirContext fhirContextDstu2() {
+		if (ourFhirContextDstu2 == null) {
+			ourFhirContextDstu2 = FhirContext.forDstu2();
+		}
+		return ourFhirContextDstu2;
+	}
+	
+	@Bean(name="myFhirContextDstu1")
+	@Lazy
+	public FhirContext fhirContextDstu1() {
+		if (ourFhirContextDstu1 == null) {
+			ourFhirContextDstu1 = FhirContext.forDstu1();
+		}
+		return ourFhirContextDstu1;
+	}
+	
+	@Bean(name="myFhirContextDstu2Hl7Org")
+	@Lazy
+	public FhirContext fhirContextDstu2Hl7Org() {
+		if (ourFhirContextDstu2Hl7Org == null) {
+			ourFhirContextDstu2Hl7Org = FhirContext.forDstu2Hl7Org();
+		}
+		return ourFhirContextDstu2Hl7Org;
+	}
+
+#if ( ${versionCapitalized} == 'Dstu1' )
+	@Bean(name="mySystemDaoDstu1", autowire=Autowire.BY_NAME)
+	public ca.uhn.fhir.jpa.dao.IFhirSystemDao<List<IResource>> fhirSystemDaoDstu1() {
+		ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu1 retVal = new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu1();
+		return retVal;
+	}
+	@Bean(name="mySystemProviderDstu1")
+	public ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1 systemDaoDstu1() {
+		ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1 retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1();
+		retVal.setDao(fhirSystemDaoDstu1());
+		return retVal;
+	}
+#end
+#if ( ${versionCapitalized} == 'Dstu2' )
+	@Bean(name="mySystemDaoDstu2")
+	public IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle> fhirSystemDao${versionCapitalized}() {
+		ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2 retVal = new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2();
+		applyDaoConfiguration(retVal);
+		return retVal;
+	}
+	@Bean(name="mySystemProviderDstu2")
+	public ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 systemDaoDstu2() {
+		ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2();
+		retVal.setDao(fhirSystemDaoDstu2());
+		return retVal;
+	}
+#end
+	
+	@Bean(destroyMethod="shutdown")
+	public Executor taskScheduler() {
+		return Executors.newScheduledThreadPool(5);
+	}
+	@Override
+	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+		taskRegistrar.setScheduler(taskScheduler());
+	}
+	
+
+#if ( ${versionCapitalized} == 'Dstu2' )
+	@Bean(name="myJpaValidationSupportDstu2", autowire=Autowire.BY_NAME)
+	public ca.uhn.fhir.jpa.dao.IJpaValidationSupport jpaValidationSupportDstu2() {
+		ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2 retVal = new ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2();
+		return retVal;
+	}
+#end
+	
+	@Bean(name="myResourceProviders${versionCapitalized}")
+	public List<IResourceProvider> resourceProviders${versionCapitalized}() {
+		List<IResourceProvider> retVal = new ArrayList<IResourceProvider>();
+#foreach ( $res in $resources )
+		retVal.add(rp${res.declaringClassNameComplete}${versionCapitalized}());
+#end
+		return retVal;
+	}
+
+	@Bean(name="myResourceDaos${versionCapitalized}")
+	public List<IFhirResourceDao<?>> resourceDaos${versionCapitalized}() {
+		List<IFhirResourceDao<?>> retVal = new ArrayList<IFhirResourceDao<?>>();
+#foreach ( $res in $resources )
+		retVal.add(dao${res.declaringClassNameComplete}${versionCapitalized}());
+#end
+		return retVal;
+	}
+
+#foreach ( $res in $resources )
+	@Bean(name="my${res.name}Dao${versionCapitalized}", autowire=Autowire.BY_NAME)
+	@Lazy
+	public IFhirResourceDao<ca.uhn.fhir.model.${version}.resource.${res.declaringClassNameComplete}> dao${res.declaringClassNameComplete}${versionCapitalized}() {
+		ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}<ca.uhn.fhir.model.${version}.resource.${res.declaringClassNameComplete}> retVal;
+#if ( ${versionCapitalized} == 'Dstu2' && ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter'))
+		retVal = new ca.uhn.fhir.jpa.dao.FhirResourceDao${res.name}${versionCapitalized}();
+#else
+		retVal = new ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}<ca.uhn.fhir.model.${version}.resource.${res.declaringClassNameComplete}>();
+#end
+		retVal.setResourceType(ca.uhn.fhir.model.${version}.resource.${res.declaringClassNameComplete}.class);
+		retVal.setContext(fhirContext${versionCapitalized}());
+		return retVal;
+	}
+
+	@Bean(name="my${res.declaringClassNameComplete}Rp${versionCapitalized}")
+	@Lazy
+	public ca.uhn.fhir.jpa.rp.${version}.${res.declaringClassNameComplete}ResourceProvider rp${res.declaringClassNameComplete}${versionCapitalized}() {
+		ca.uhn.fhir.jpa.rp.${version}.${res.declaringClassNameComplete}ResourceProvider retVal;
+		retVal = new ca.uhn.fhir.jpa.rp.${version}.${res.declaringClassNameComplete}ResourceProvider();
+		retVal.setContext(fhirContext${versionCapitalized}());
+		retVal.setDao(dao${res.declaringClassNameComplete}${versionCapitalized}());
+		return retVal;
+	}
+
+#end
+
+
+
+	
+	
+}

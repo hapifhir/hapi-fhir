@@ -1,5 +1,7 @@
 package ca.uhn.fhir.cli;
 
+import static org.fusesource.jansi.Ansi.ansi;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +15,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.fusesource.jansi.Ansi.Color;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.LoggerFactory;
 
@@ -20,10 +23,7 @@ import ca.uhn.fhir.util.VersionUtil;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
-import static org.fusesource.jansi.Ansi.*;
-import static org.fusesource.jansi.Ansi.Color.*;
-import static org.fusesource.jansi.Ansi.*;
-import static org.fusesource.jansi.Ansi.Color.*;
+
 public class App {
 	private static List<BaseCommand> ourCommands;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(App.class);
@@ -36,6 +36,7 @@ public class App {
 		ourCommands.add(new ExampleDataUploader());
 		ourCommands.add(new ValidateCommand());
 		ourCommands.add(new ValidationDataUploader());
+		ourCommands.add(new WebsocketSubscribeCommand());
 
 		Collections.sort(ourCommands);
 	}
@@ -43,6 +44,10 @@ public class App {
 	private static void logCommandUsage(BaseCommand theCommand) {
 		logAppHeader();
 
+		logCommandUsageNoHeader(theCommand);
+	}
+
+	private static void logCommandUsageNoHeader(BaseCommand theCommand) {
 		System.out.println("Usage:");
 		System.out.println("  hapi-fhir-cli " + theCommand.getCommandName() + " [options]");
 		System.out.println();
@@ -166,9 +171,11 @@ public class App {
 			command.run(parsedOptions);
 
 		} catch (ParseException e) {
-			ourLog.error("Invalid command options for command: " + command.getCommandName());
-			ourLog.error(e.getMessage());
-			ourLog.error("Aborting!");
+			loggingConfigOff();
+			System.err.println("Invalid command options for command: " + command.getCommandName());
+			System.err.println("  " + ansi().fg(Color.RED).bold() + e.getMessage());
+			System.err.println("" + ansi().fg(Color.WHITE).boldOff());
+			logCommandUsageNoHeader(command);
 			return;
 		} catch (CommandFailureException e) {
 			ourLog.error(e.getMessage());

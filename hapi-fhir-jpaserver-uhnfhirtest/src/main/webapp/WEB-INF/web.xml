@@ -12,15 +12,18 @@
 			/WEB-INF/hapi-fhir-server-config.xml
 			/WEB-INF/hapi-fhir-tester-application-context.xml
 			/WEB-INF/hapi-fhir-tester-config.xml
+		</param-value>
+	</context-param>
+	
+	<!-- 
 			classpath:/hapi-fhir-server-database-config-dstu1.xml 
 			classpath:/hapi-fhir-server-database-config-dstu2.xml 
 			classpath:hapi-fhir-server-resourceproviders-dstu1.xml
 			classpath:hapi-fhir-server-resourceproviders-dstu2.xml
 			classpath:fhir-spring-subscription-config-dstu2.xml
 			classpath:fhir-spring-search-config-dstu2.xml
-		</param-value>
-	</context-param>
-
+	-->
+	
   <!-- Servlets -->
 
 	<servlet>

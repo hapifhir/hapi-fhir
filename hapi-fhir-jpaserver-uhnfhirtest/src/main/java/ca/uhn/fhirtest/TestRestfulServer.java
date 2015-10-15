@@ -46,7 +46,7 @@ public class TestRestfulServer extends RestfulServer {
 
 		// Get the spring context from the web container (it's declared in web.xml)
 		WebApplicationContext parentAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
-		myAppCtx = (parentAppCtx);
+		myAppCtx = parentAppCtx;
 
 		// These two parmeters are also declared in web.xml
 		String implDesc = getInitParameter("ImplementationDescription");
@@ -67,6 +67,11 @@ public class TestRestfulServer extends RestfulServer {
 		String baseUrlProperty;
 		switch (fhirVersionParam.trim().toUpperCase()) {
 		case "DSTU1": {
+//			String[] configLocations = new String[] {
+//				"/hapi-fhir-server-database-config-dstu1.xml",
+//				"/hapi-fhir-server-resourceproviders-dstu1.xml"
+//			};
+//			myAppCtx = new ClassPathXmlApplicationContext(configLocations, parentAppCtx);
 			setFhirContext(FhirContext.forDstu1());
 			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
 			systemProviderDstu1 = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
@@ -79,6 +84,13 @@ public class TestRestfulServer extends RestfulServer {
 			break;
 		}
 		case "DSTU2": {
+//			String[] configLocations = new String[] {
+//				"/hapi-fhir-server-database-config-dstu2.xml",
+//				"/hapi-fhir-server-resourceproviders-dstu2.xml",
+//				"/fhir-spring-subscription-config-dstu2.xml",
+//				"/fhir-spring-search-config-dstu2.xml"
+//			};
+//			myAppCtx = new ClassPathXmlApplicationContext(configLocations, parentAppCtx);
 			setFhirContext(FhirContext.forDstu2());
 			beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
 			systemProviderDstu2 = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);

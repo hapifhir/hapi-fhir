@@ -205,6 +205,23 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return InstantDt.withCurrentTime();
 	}
 
+	public void setConfig(DaoConfig theConfig) {
+		myConfig = theConfig;
+	}
+
+	public void setEntityManager(EntityManager theEntityManager) {
+		myEntityManager = theEntityManager;
+	}
+
+	public void setPlatformTransactionManager(PlatformTransactionManager thePlatformTransactionManager) {
+		myPlatformTransactionManager = thePlatformTransactionManager;
+	}
+
+	public void setResourceDaos(List<IFhirResourceDao<?>> theResourceDaos) {
+		myResourceDaos = theResourceDaos;
+	}
+
+
 	protected Set<ResourceLink> extractResourceLinks(ResourceTable theEntity, IResource theResource) {
 		Set<ResourceLink> retVal = new HashSet<ResourceLink>();
 

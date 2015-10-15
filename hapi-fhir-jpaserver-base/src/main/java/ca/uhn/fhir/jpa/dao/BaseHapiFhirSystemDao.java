@@ -222,6 +222,14 @@ public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao<IBaseReso
 		}
 	}
 
+	public void setEntityManager(EntityManager theEntityManager) {
+		myEntityManager = theEntityManager;
+	}
+
+	public void setTxManager(PlatformTransactionManager theTxManager) {
+		myTxManager = theTxManager;
+	}
+
 	protected ResourceTable tryToLoadEntity(IdDt nextId) {
 		ResourceTable entity;
 		try {

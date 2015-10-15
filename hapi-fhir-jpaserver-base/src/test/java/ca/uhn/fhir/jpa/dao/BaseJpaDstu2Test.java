@@ -25,6 +25,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.TestDstu2Config;
 import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTag;
@@ -68,9 +69,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 //@formatter:off
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations={
-	"classpath:hapi-fhir-server-resourceproviders-dstu2.xml", 
-	"classpath:fhir-jpabase-spring-test-config.xml"})
+@ContextConfiguration(classes= {TestDstu2Config.class})
 //@formatter:on
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 

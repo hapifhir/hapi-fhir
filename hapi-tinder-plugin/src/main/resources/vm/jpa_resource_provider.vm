@@ -19,7 +19,7 @@ import ca.uhn.fhir.model.${version}.resource.*;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.model.dstu.resource.Binary;
+// import ca.uhn.fhir.model.dstu.resource.Binary;
 // import ca.uhn.fhir.model.dstu2.resource.Bundle;
 // import ca.uhn.fhir.model.api.Bundle;
 

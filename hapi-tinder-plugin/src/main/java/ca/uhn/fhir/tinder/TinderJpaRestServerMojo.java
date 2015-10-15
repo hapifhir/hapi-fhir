@@ -154,20 +154,33 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 			v.setProperty("runtime.references.strict", Boolean.TRUE);
 
+
+			/*
+			 * Spring XML
+			 */
 			InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/jpa_spring_beans.vm");
 			InputStreamReader templateReader = new InputStreamReader(templateIs);
-
 			targetResourceDirectory.mkdirs();
 			File f = new File(targetResourceDirectory, targetResourceSpringBeansFile);
 			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
 			v.evaluate(ctx, w, "", templateReader);
-
 			w.close();
-
+			
 			Resource resource = new Resource();
 			resource.setDirectory(targetResourceDirectory.getAbsolutePath());
 			resource.addInclude(targetResourceSpringBeansFile);
 			myProject.addResource(resource);
+
+			/*
+			 * Spring Java
+			 */
+			templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/jpa_spring_beans_java.vm");
+			templateReader = new InputStreamReader(templateIs);
+			f = new File(directoryBase, "BaseJavaConfig" + capitalize + ".java");
+			w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
+			v.evaluate(ctx, w, "", templateReader);
+			w.close();
+
 		} catch (Exception e) {
 			throw new MojoFailureException("Failed to generate server", e);
 		}
