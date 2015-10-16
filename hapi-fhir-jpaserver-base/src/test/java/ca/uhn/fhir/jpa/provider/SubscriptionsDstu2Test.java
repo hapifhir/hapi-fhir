@@ -17,6 +17,7 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptor;
@@ -42,6 +43,11 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsDstu2Test.class);
+
+	@Before
+	public void beforeEnableScheduling() {
+		myDaoConfig.setSchedulingDisabled(false);
+	}
 
 	@Override
 	public void beforeCreateInterceptor() {

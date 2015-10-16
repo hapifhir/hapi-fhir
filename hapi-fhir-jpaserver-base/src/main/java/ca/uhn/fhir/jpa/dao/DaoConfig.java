@@ -39,6 +39,7 @@ public class DaoConfig {
 	private int myIncludeLimit = 2000;
 	private List<IServerInterceptor> myInterceptors;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
+	private boolean mySchedulingDisabled;
 	private boolean mySubscriptionEnabled;
 	private long mySubscriptionPollDelay = 1000;
 	private Long mySubscriptionPurgeInactiveAfterMillis;
@@ -81,6 +82,10 @@ public class DaoConfig {
 
 	public boolean isAllowMultipleDelete() {
 		return myAllowMultipleDelete;
+	}
+
+	public boolean isSchedulingDisabled() {
+		return mySchedulingDisabled;
 	}
 
 	/**
@@ -142,6 +147,10 @@ public class DaoConfig {
 
 	public void setResourceEncoding(ResourceEncodingEnum theResourceEncoding) {
 		myResourceEncoding = theResourceEncoding;
+	}
+
+	public void setSchedulingDisabled(boolean theSchedulingDisabled) {
+		mySchedulingDisabled = theSchedulingDisabled;
 	}
 
 	/**

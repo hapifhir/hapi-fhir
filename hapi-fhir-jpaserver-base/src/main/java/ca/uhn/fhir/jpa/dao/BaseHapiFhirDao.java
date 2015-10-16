@@ -52,7 +52,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -217,9 +216,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		myPlatformTransactionManager = thePlatformTransactionManager;
 	}
 
-	public void setResourceDaos(List<IFhirResourceDao<?>> theResourceDaos) {
-		myResourceDaos = theResourceDaos;
-	}
+//	@Override
+//	public void setResourceDaos(List<IFhirResourceDao<?>> theResourceDaos) {
+//		myResourceDaos = theResourceDaos;
+//	}
 
 
 	protected Set<ResourceLink> extractResourceLinks(ResourceTable theEntity, IResource theResource) {
@@ -1051,6 +1051,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return retVal;
 	}
 
+	@Autowired
 	public void setContext(FhirContext theContext) {
 		myContext = theContext;
 		switch (myContext.getVersion().getVersion()) {

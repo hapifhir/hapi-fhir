@@ -3,7 +3,9 @@ package ca.uhn.fhir.jpa.config;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.context.annotation.Primary;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -11,6 +13,7 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.FhirSearchDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.ISearchDao;
@@ -19,19 +22,24 @@ import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandler;
 @Configuration
 @EnableTransactionManagement
 @EnableWebSocket()
-@EnableScheduling
 public class BaseDstu2Config extends BaseConfig implements WebSocketConfigurer {
 
+	@Bean
+	@Primary
+	public FhirContext defaultFhirContext() {
+		return fhirContextDstu2();
+	}
+	
 	@Bean(name = "mySystemDaoDstu2", autowire = Autowire.BY_NAME)
-	public IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle> fhirSystemDaoDstu2() {
+	public IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle> systemDaoDstu2() {
 		ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2 retVal = new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2();
 		return retVal;
 	}
 
 	@Bean(name = "mySystemProviderDstu2")
-	public ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 systemDaoDstu2() {
+	public ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 systemProviderDstu2() {
 		ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2();
-		retVal.setDao(fhirSystemDaoDstu2());
+		retVal.setDao(systemDaoDstu2());
 		return retVal;
 	}
 
@@ -42,8 +50,8 @@ public class BaseDstu2Config extends BaseConfig implements WebSocketConfigurer {
 	}
 
 	@Override
-	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-		registry.addHandler(subscriptionWebSocketHandler(), "/websocket/dstu2").withSockJS();
+	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
+		theRegistry.addHandler(subscriptionWebSocketHandler(), "/websocket/dstu2");
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
@@ -51,9 +59,17 @@ public class BaseDstu2Config extends BaseConfig implements WebSocketConfigurer {
 		return new PerConnectionWebSocketHandler(SubscriptionWebsocketHandler.class);
 	}
 
+	@Bean
+	public TaskScheduler websocketTaskScheduler() {
+		ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler();
+		retVal.setPoolSize(5);
+		return retVal;
+	}
+	
 	@Bean(autowire = Autowire.BY_TYPE)
 	public ISearchDao searchDao() {
-		return new FhirSearchDao();
+		FhirSearchDao searchDao = new FhirSearchDao();
+		return searchDao;
 	}
 
 	// <!--

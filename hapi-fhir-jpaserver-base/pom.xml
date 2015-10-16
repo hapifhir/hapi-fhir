@@ -327,6 +327,7 @@
 						</goals>
 						<configuration>
 							<version>dstu</version>
+							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu</packageBase>
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu1.xml</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
@@ -339,6 +340,7 @@
 						</goals>
 						<configuration>
 							<version>dstu2</version>
+							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu2</packageBase>
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>

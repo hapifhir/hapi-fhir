@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
@@ -1347,6 +1348,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	@Ignore
 	public void testSearchUnknownContentParam() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Constants.PARAM_CONTENT, new StringDt("fulltext"));
@@ -1359,6 +1361,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	@Ignore
 	public void testSearchUnknownTextParam() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Constants.PARAM_TEXT, new StringDt("fulltext"));

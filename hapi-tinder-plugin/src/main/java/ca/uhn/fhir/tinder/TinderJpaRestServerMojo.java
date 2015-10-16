@@ -45,6 +45,9 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 	@Parameter(required = true)
 	private String packageBase;
+	
+	@Parameter(required = true)
+	private String configPackageBase;
 
 	@Parameter(required = false)
 	private List<String> baseResourceNames;
@@ -113,8 +116,10 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		
 		ourLog.info("Including the following resources: {}", baseResourceNames);
 		
-		File directoryBase = new File(targetDirectory, packageBase.replace(".", File.separatorChar + ""));
-		directoryBase.mkdirs();
+		File configPackageDirectoryBase = new File(targetDirectory, configPackageBase.replace(".", File.separatorChar + ""));
+		configPackageDirectoryBase.mkdirs();
+		File packageDirectoryBase = new File(targetDirectory, packageBase.replace(".", File.separatorChar + ""));
+		packageDirectoryBase.mkdirs();
 
 		ResourceGeneratorUsingSpreadsheet gen = new ResourceGeneratorUsingSpreadsheet(version, baseDir);
 		gen.setBaseResourceNames(baseResourceNames);
@@ -124,7 +129,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 			gen.setFilenameSuffix("ResourceProvider");
 			gen.setTemplate("/vm/jpa_resource_provider.vm");
-			gen.writeAll(directoryBase, null,packageBase);
+			gen.writeAll(packageDirectoryBase, null,packageBase);
 
 			// gen.setFilenameSuffix("ResourceTable");
 			// gen.setTemplate("/vm/jpa_resource_table.vm");
@@ -140,6 +145,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			VelocityContext ctx = new VelocityContext();
 			ctx.put("resources", gen.getResources());
 			ctx.put("packageBase", packageBase);
+			ctx.put("configPackageBase", configPackageBase);
 			ctx.put("version", version);
 			ctx.put("esc", new EscapeTool());
 
@@ -176,7 +182,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			 */
 			templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/jpa_spring_beans_java.vm");
 			templateReader = new InputStreamReader(templateIs);
-			f = new File(directoryBase, "BaseJavaConfig" + capitalize + ".java");
+			f = new File(configPackageDirectoryBase, "BaseJavaConfig" + capitalize + ".java");
 			w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
 			v.evaluate(ctx, w, "", templateReader);
 			w.close();

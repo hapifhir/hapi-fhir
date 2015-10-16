@@ -17,6 +17,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.TestDstu1Config;
 import ca.uhn.fhir.jpa.config.TestDstu2Config;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Device;
@@ -137,7 +138,7 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() {
-		ourCtx = new AnnotationConfigApplicationContext(TestDstu2Config.class);
+		ourCtx = new AnnotationConfigApplicationContext(TestDstu1Config.class);
 		ourPatientDao = ourCtx.getBean("myPatientDaoDstu1", IFhirResourceDao.class);
 		ourObservationDao = ourCtx.getBean("myObservationDaoDstu1", IFhirResourceDao.class);
 		ourDiagnosticReportDao = ourCtx.getBean("myDiagnosticReportDaoDstu1", IFhirResourceDao.class);

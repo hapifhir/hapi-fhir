@@ -35,4 +35,6 @@ public interface IFhirResourceDaoSubscription<T extends IBaseResource> extends I
 
 	void purgeInactiveSubscriptions();
 
+	void pollForNewUndeliveredResourcesScheduler();
+
 }

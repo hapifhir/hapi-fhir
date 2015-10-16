@@ -18,9 +18,13 @@ public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<Se
 	 * immediately. If the search finds that some resources require reindexing, the system will do a bunch of
 	 * reindexing and then return.
 	 */
+	@Override
 	@Scheduled(fixedDelay=DateUtils.MILLIS_PER_MINUTE)
 	public void performReindexingPass() {
-		
+		if (getConfig().isSchedulingDisabled()) {
+			return;
+		}
+
 		int count = mySystemDao.performReindexingPass(100);
 		for (int i = 0; i < 10 && count > 0; i++) {
 			count = mySystemDao.performReindexingPass(100);			

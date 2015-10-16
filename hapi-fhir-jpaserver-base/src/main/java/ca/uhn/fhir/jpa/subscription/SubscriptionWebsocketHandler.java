@@ -68,6 +68,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 	private Long mySubscriptionPid;
 
 	@Autowired
+	@Qualifier("websocketTaskScheduler")
 	private TaskScheduler myTaskScheduler;
 
 	@Override

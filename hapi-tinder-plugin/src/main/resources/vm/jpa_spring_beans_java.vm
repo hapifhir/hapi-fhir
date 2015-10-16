@@ -1,4 +1,4 @@
-package ${packageBase};
+package ${configPackageBase};
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,22 +26,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 
 @Configuration
-@EnableScheduling()
-#if ( ${versionCapitalized} == 'Dstu2' )
-@EnableJpaRepositories(basePackages="ca.uhn.fhir.jpa.dao.data")
-#end
-public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jpa.config.Base${versionCapitalized}Config implements SchedulingConfigurer {
-
-	@Bean(destroyMethod="shutdown")
-	public Executor taskScheduler() {
-		return Executors.newScheduledThreadPool(5);
-	}
-
-	@Override
-	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-		taskRegistrar.setScheduler(taskScheduler());
-	}
-	
+public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jpa.config.Base${versionCapitalized}Config {
 
 	@Bean(name="myResourceProviders${versionCapitalized}")
 	public List<IResourceProvider> resourceProviders${versionCapitalized}() {

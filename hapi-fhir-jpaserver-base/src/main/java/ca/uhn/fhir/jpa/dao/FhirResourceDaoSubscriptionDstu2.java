@@ -210,7 +210,11 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 
 	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Override
 	public synchronized void pollForNewUndeliveredResourcesScheduler() {
+		if (getConfig().isSchedulingDisabled()) {
+			return;
+		}
 		pollForNewUndeliveredResources();
 	}
 
@@ -225,6 +229,10 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	@Override
 	public void purgeInactiveSubscriptions() {
+		if (getConfig().isSchedulingDisabled()) {
+			return;
+		}
+
 		Long purgeInactiveAfterMillis = getConfig().getSubscriptionPurgeInactiveAfterMillis();
 		if (getConfig().isSubscriptionEnabled() == false || purgeInactiveAfterMillis == null) {
 			return;

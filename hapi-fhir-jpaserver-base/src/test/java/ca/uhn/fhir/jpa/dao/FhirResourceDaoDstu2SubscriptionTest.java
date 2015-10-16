@@ -22,6 +22,7 @@ import javax.persistence.TypedQuery;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -68,6 +69,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 
 		Thread.sleep(1500);
 
+		myDaoConfig.setSchedulingDisabled(false);
 		mySubscriptionDao.purgeInactiveSubscriptions();
 		try {
 			mySubscriptionDao.read(id);
@@ -76,6 +78,12 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 			// good
 		}
 	}
+	
+	@Before
+	public void beforeDisableScheduling() {
+		myDaoConfig.setSchedulingDisabled(true);
+	}
+	
 
 	@Test
 	public void testSubscriptionGetsPurgedIfItIsInactive() throws Exception {
@@ -94,6 +102,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		
 		Thread.sleep(1500);
 
+		myDaoConfig.setSchedulingDisabled(false);
 		mySubscriptionDao.purgeInactiveSubscriptions();
 		try {
 			mySubscriptionDao.read(id);
