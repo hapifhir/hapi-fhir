@@ -27,12 +27,13 @@ public class ClientMockingTest {
 		Bundle retVal = new Bundle();
 
 		//@formatter:off
-		when((Object)client
+		Object when = client
 			 .search()
 			 .forResource(eq(Condition.class))
 			 .where(any(ICriterion.class))
 			 .returnBundle((Class<IBaseBundle>)any())
-			 .execute())
+			 .execute();
+		when((Object)when)
 			 .thenReturn(retVal);
 		//@formatter:off
 		
