@@ -4,17 +4,17 @@
 
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
-
+	</listener>	
+	<context-param>
+		<param-name>contextClass</param-name>
+		<param-value>
+			org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+		</param-value>
+	</context-param>
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			classpath:hapi-fhir-server-resourceproviders-dstu1.xml
-			classpath:hapi-fhir-server-resourceproviders-dstu2.xml
-			/WEB-INF/hapi-fhir-server-database-config.xml
-			/WEB-INF/hapi-fhir-server-config.xml
-			/WEB-INF/hapi-fhir-tester-application-context.xml
-			/WEB-INF/hapi-fhir-tester-config.xml
+			ca.uhn.fhir.jpa.demo.AppCtxConfig
 		</param-value>
 	</context-param>
 

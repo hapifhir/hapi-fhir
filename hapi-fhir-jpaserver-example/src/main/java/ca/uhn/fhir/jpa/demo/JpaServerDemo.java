@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.demo;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -123,9 +124,9 @@ public class JpaServerDemo extends RestfulServer {
 		setPagingProvider(new FifoMemoryPagingProvider(10));
 
 		/*
-		 * Load interceptors for the server from Spring (these are defined in hapi-fhir-server-config.xml
+		 * Load interceptors for the server from Spring (these are defined in AppCtxConfig.java)
 		 */
-		List<IServerInterceptor> interceptorBeans = myAppCtx.getBean("myServerInterceptors", List.class);
+		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
 		for (IServerInterceptor interceptor : interceptorBeans) {
 			this.registerInterceptor(interceptor);
 		}

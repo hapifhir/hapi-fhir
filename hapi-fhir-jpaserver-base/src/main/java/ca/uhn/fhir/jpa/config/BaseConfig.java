@@ -2,10 +2,13 @@ package ca.uhn.fhir.jpa.config;
 
 import javax.annotation.Resource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -23,6 +26,17 @@ public class BaseConfig implements SchedulingConfigurer {
 	private static FhirContext ourFhirContextDstu2;
 	private static FhirContext ourFhirContextDstu1;
 	private static FhirContext ourFhirContextDstu2Hl7Org;
+
+	@Autowired
+	protected Environment myEnv;
+
+	/**
+	 * This lets the "@Value" fields reference properties from the properties file
+	 */
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+		return new PropertySourcesPlaceholderConfigurer();
+	}
 
 	@Resource
 	private ApplicationContext myAppCtx;

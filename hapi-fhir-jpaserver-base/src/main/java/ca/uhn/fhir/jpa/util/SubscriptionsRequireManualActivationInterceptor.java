@@ -74,6 +74,7 @@ public class SubscriptionsRequireManualActivationInterceptor extends Interceptor
 			if (theProcessedRequest.getResourceType().equals("Subscription")) {
 				verifyStatusOk(theOperation, theProcessedRequest);
 			}
+			break;
 		default:
 			break;
 		}
