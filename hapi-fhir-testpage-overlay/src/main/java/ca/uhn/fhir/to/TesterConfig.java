@@ -1,8 +1,11 @@
 package ca.uhn.fhir.to;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -20,6 +23,26 @@ public class TesterConfig {
 	private LinkedHashMap<String, FhirVersionEnum> myIdToFhirVersion = new LinkedHashMap<String, FhirVersionEnum>();
 	private LinkedHashMap<String, String> myIdToServerBase = new LinkedHashMap<String, String>();
 	private LinkedHashMap<String, String> myIdToServerName = new LinkedHashMap<String, String>();
+	private List<ServerBuilder> myServerBuilders = new ArrayList<TesterConfig.ServerBuilder>();
+
+	public IServerBuilderStep1 addServer() {
+		ServerBuilder retVal = new ServerBuilder();
+		return retVal;
+	}
+
+	@PostConstruct
+	public void build() {
+		for (ServerBuilder next : myServerBuilders) {
+			Validate.notBlank(next.myId, "Found invalid server configuration - No ID supplied");
+			Validate.notNull(next.myVersion, "Found invalid server configuration - No FHIR version supplied");
+			Validate.notBlank(next.myBaseUrl, "Found invalid server configuration - No base URL supplied");
+			Validate.notBlank(next.myName, "Found invalid server configuration - No name supplied");
+			myIdToFhirVersion.put(next.myId, next.myVersion);
+			myIdToServerBase.put(next.myId, next.myBaseUrl);
+			myIdToServerName.put(next.myId, next.myName);
+		}
+		myServerBuilders.clear();
+	}
 
 	public ITestingUiClientFactory getClientFactory() {
 		return myClientFactory;
@@ -58,7 +81,7 @@ public class TesterConfig {
 
 		for (String nextRaw : servers) {
 			String[] nextSplit = nextRaw.split(",");
-			
+
 			if (nextSplit.length < 3) {
 				throw new IllegalArgumentException("Invalid serveer line '" + nextRaw + "' - Must be comma separated");
 			} else if (nextSplit.length == 3) {
@@ -78,6 +101,80 @@ public class TesterConfig {
 				myIdToFhirVersion.put(nextSplit[0].trim(), FhirVersionEnum.valueOf(nextSplit[1].trim().toUpperCase()));
 			}
 		}
+	}
+
+	public interface IServerBuilderStep1 {
+
+		IServerBuilderStep2 withId(String theId);
+
+	}
+
+	public interface IServerBuilderStep2 {
+
+		IServerBuilderStep3 withFhirVersion(FhirVersionEnum theVersion);
+
+	}
+
+	public interface IServerBuilderStep3 {
+
+		IServerBuilderStep4 withBaseUrl(String theBaseUrl);
+
+	}
+
+	public interface IServerBuilderStep4 {
+
+		IServerBuilderStep5 withName(String theName);
+
+	}
+
+	public interface IServerBuilderStep5 {
+
+		IServerBuilderStep1 addServer();
+
+	}
+
+	public class ServerBuilder implements IServerBuilderStep1, IServerBuilderStep2, IServerBuilderStep3, IServerBuilderStep4, IServerBuilderStep5 {
+
+		private String myBaseUrl;
+		private String myId;
+		private String myName;
+		private FhirVersionEnum myVersion;
+
+		@Override
+		public IServerBuilderStep1 addServer() {
+			ServerBuilder retVal = new ServerBuilder();
+			myServerBuilders.add(retVal);
+			return retVal;
+		}
+
+		@Override
+		public IServerBuilderStep4 withBaseUrl(String theBaseUrl) {
+			Validate.notBlank(theBaseUrl, "theBaseUrl can not be blank");
+			myBaseUrl = theBaseUrl;
+			return this;
+		}
+
+		@Override
+		public IServerBuilderStep3 withFhirVersion(FhirVersionEnum theVersion) {
+			Validate.notNull(theVersion);
+			myVersion = theVersion;
+			return this;
+		}
+
+		@Override
+		public IServerBuilderStep2 withId(String theId) {
+			Validate.notBlank(theId, "theId can not be blank");
+			myId = theId;
+			return this;
+		}
+
+		@Override
+		public IServerBuilderStep5 withName(String theName) {
+			Validate.notBlank(theName, "theName can not be blank");
+			myName = theName;
+			return this;
+		}
+
 	}
 
 }

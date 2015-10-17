@@ -50,7 +50,7 @@ public class ExampleServerIT {
 		/*
 		 * This runs under maven, and I'm not sure how else to figure out the target directory from code..
 		 */
-		String path = ExampleServerIT.class.getClassLoader().getResource("whereami.txt").getPath();
+		String path = ExampleServerIT.class.getClassLoader().getResource(".keep_hapi-fhir-jpaserver-example").getPath();
 		path = new File(path).getParent();
 		path = new File(path).getParent();
 		path = new File(path).getParent();

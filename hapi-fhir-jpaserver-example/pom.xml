@@ -61,6 +61,13 @@
 			<type>war</type>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-testpage-overlay</artifactId>
+			<version>1.3-SNAPSHOT</version>
+			<classifier>classes</classifier>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- HAPI-FHIR uses Logback for logging support. The logback library is included automatically by Maven as a part of the hapi-fhir-base dependency, but you also need to include a logging library. Logback 
 			is used here, but log4j would also be fine. -->
