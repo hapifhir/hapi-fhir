@@ -12,7 +12,9 @@
             latest versions (dependent HAPI modules listed in brackets):
             <![CDATA[
                <ul>
-                  <li>Springframework (JPA, Web Tester): 4.1.5 -&gt; 4.2.1</li>
+                  <li>Commons-lang3 (Core): 3.3.2 -&gt; 3.4</li>
+                  <li>Logback (Core): 1.1.2 -&gt; 1.1.3</li>
+                  <li>Springframework (JPA, Web Tester): 4.1.5 -&gt; 4.2.2</li>
                   <li>Hibernate (JPA, Web Tester): 4.2.17 -&gt; 5.0.2</li>
                   <li>Hibernate Validator (JPA, Web Tester): 5.2.1 -&gt; 5.2.2</li>
                   <li>Derby (JPA, CLI, Public Server): 10.11.1.1 -&gt; 10.12.1.1 </li>
@@ -20,6 +22,10 @@
                </ul>
             ]]>
          </action>
+			<action type="add">
+				JPA and Tester Overlay now use Spring Java config files instead
+				of the older XML config files. All example projects have been updated. 
+			</action>
 			<action type="add">
 				JPA server removes duplicate resource index entries before storing them 
 				(e.g. if a patient has the same name twice, only one index entry is created

@@ -33,12 +33,80 @@ import ca.uhn.fhir.model.primitive.UriDt;
 public interface IFhirResourceDaoValueSet<T extends IBaseResource> extends IFhirResourceDao<T> {
 
 	ValueSet expand(IIdType theId, String theFilter);
-	
+
 	ValueSet expand(ValueSet theSource, String theFilter);
 
 	ValueSet expandByIdentifier(String theUri, String theFilter);
 
+	LookupCodeResult lookupCode(CodeDt theCode, UriDt theSystem, CodingDt theCoding);
+
 	ValidateCodeResult validateCode(UriDt theValueSetIdentifier, IIdType theId, CodeDt theCode, UriDt theSystem, StringDt theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept);
+
+	public class LookupCodeResult {
+		private String myCodeDisplay;
+		private boolean myCodeIsAbstract;
+		private String myCodeSystemDisplayName;
+		private String myCodeSystemVersion;
+		private boolean myFound;
+		private String mySearchedForCode;
+		private String mySearchedForSystem;
+
+		public String getCodeDisplay() {
+			return myCodeDisplay;
+		}
+
+		public String getCodeSystemDisplayName() {
+			return myCodeSystemDisplayName;
+		}
+
+		public String getCodeSystemVersion() {
+			return myCodeSystemVersion;
+		}
+
+		public String getSearchedForCode() {
+			return mySearchedForCode;
+		}
+
+		public String getSearchedForSystem() {
+			return mySearchedForSystem;
+		}
+
+		public boolean isCodeIsAbstract() {
+			return myCodeIsAbstract;
+		}
+
+		public boolean isFound() {
+			return myFound;
+		}
+
+		public void setCodeDisplay(String theCodeDisplay) {
+			myCodeDisplay = theCodeDisplay;
+		}
+
+		public void setCodeIsAbstract(boolean theCodeIsAbstract) {
+			myCodeIsAbstract = theCodeIsAbstract;
+		}
+
+		public void setCodeSystemDisplayName(String theCodeSystemDisplayName) {
+			myCodeSystemDisplayName = theCodeSystemDisplayName;
+		}
+
+		public void setCodeSystemVersion(String theCodeSystemVersion) {
+			myCodeSystemVersion = theCodeSystemVersion;
+		}
+
+		public void setFound(boolean theFound) {
+			myFound = theFound;
+		}
+
+		public void setSearchedForCode(String theSearchedForCode) {
+			mySearchedForCode = theSearchedForCode;
+		}
+
+		public void setSearchedForSystem(String theSearchedForSystem) {
+			mySearchedForSystem = theSearchedForSystem;
+		}
+	}
 
 	public class ValidateCodeResult {
 		private String myDisplay;

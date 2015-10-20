@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.demo;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +27,7 @@ public class ExampleServerIT {
 	private static int ourPort;
 
 	private static Server ourServer;
+	private static String ourServerBase;
 
 	@Test
 	public void testCreateAndRead() throws IOException {
@@ -50,7 +51,7 @@ public class ExampleServerIT {
 		/*
 		 * This runs under maven, and I'm not sure how else to figure out the target directory from code..
 		 */
-		String path = ExampleServerIT.class.getClassLoader().getResource("whereami.txt").getPath();
+		String path = ExampleServerIT.class.getClassLoader().getResource(".keep_hapi-fhir-jpaserver-example").getPath();
 		path = new File(path).getParent();
 		path = new File(path).getParent();
 		path = new File(path).getParent();
@@ -71,7 +72,8 @@ public class ExampleServerIT {
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		ourClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/baseDstu2");
+		ourServerBase = "http://localhost:" + ourPort + "/baseDstu2";
+		ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 	}

@@ -20,10 +20,13 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 
+import ca.uhn.fhir.jpa.config.DispatcherServletConfig;
+import ca.uhn.fhir.jpa.config.TestDstu2Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
@@ -126,7 +129,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			
 			DispatcherServlet dispatcherServlet = new DispatcherServlet();
 //			dispatcherServlet.setApplicationContext(webApplicationContext);
-			dispatcherServlet.setContextConfigLocation("classpath:/fhir-spring-subscription-config-dstu2.xml");
+			dispatcherServlet.setContextClass(AnnotationConfigWebApplicationContext.class);
 			ServletHolder subsServletHolder = new ServletHolder();
 			subsServletHolder.setServlet(dispatcherServlet);
 			proxyHandler.addServlet(subsServletHolder, "/*");

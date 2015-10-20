@@ -48,6 +48,13 @@
 		<type>war</type>
 		<scope>provided</scope>		
 	</dependency>
+	<dependency>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-fhir-testpage-overlay</artifactId>
+		<version>${project.version}</version>
+		<classifier>classes</classifier>
+		<scope>provided</scope>		
+	</dependency>
 </dependencies>]]></source>
 				</p>
 			
@@ -75,18 +82,12 @@
 				</p>
 
 				<p>
-					Next, create the following directory in your project
-					if it doesn't already exist:<br/>
-					<code>src/main/webapp/WEB-INF</code>
-				</p>
-				
-				<p>
-					Then, create a file in that directory 
-					called <code>hapi-fhir-tester-config.xml</code>
+					Then, create a Java source file 
+					called <code>FhirTesterConfig.java</code>
 					and copy in the following contents:
 				</p>
 				<macro name="snippet">
-					<param name="file" value="restful-server-example/src/main/webapp/WEB-INF/hapi-fhir-tester-config.xml" />
+					<param name="file" value="restful-server-example/src/main/java/ca/uhn/example/config/FhirTesterConfig.java" />
 				</macro>
 
 				<p>
@@ -98,37 +99,39 @@
 				</p>
 				
 				<p>
-					Finally, in the same directory you should open you web.xml file. This file is 
-					required in order to deploy to a servlet container and you should create it if
-					it does not already exist. Place the following contents in that file.
+					Next, create the following directory in your project
+					if it doesn't already exist:<br/>
+					<code>src/main/webapp/WEB-INF</code>
 				</p>
 				
-				<source><![CDATA[<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>
-			/WEB-INF/hapi-fhir-tester-application-context.xml
-			/WEB-INF/hapi-fhir-tester-config.xml
-		</param-value>
-	</context-param>
-	<servlet>
+				<p>
+					In this directory you should open your <code>web.xml</code> file, or create
+					it if it doesn't exist.
+					This file is 
+					required in order to deploy to a servlet container and you should create it if
+					it does not already exist. Place the following contents in that file, adjusting
+					the package on the <code>FhirTesterConfig</code> to match the
+					actual package in which you placed this file.
+				</p>
+				
+				<source><![CDATA[<servlet>
 		<servlet-name>spring</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<init-param>
+			<param-name>contextClass</param-name>
+			<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+		</init-param>
+		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>
-				/WEB-INF/hapi-fhir-tester-application-context.xml
-				/WEB-INF/hapi-fhir-tester-config.xml
-			</param-value>
+			<param-value>ca.uhn.example.config.FhirTesterConfig</param-value>
 		</init-param>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>spring</servlet-name>
 		<url-pattern>/tester/*</url-pattern>
-	</servlet-mapping>]]></source>
+	</servlet-mapping>
+]]></source>
 				
 			</subsection>
 			
@@ -191,19 +194,6 @@
 				This is done by providing your own implementation of the <code>ITestingUiClientFactory</code>
 				interface. This interface takes in some details about the incoming request and produces
 				a client.
-			</p>
-
-			<p>
-				The following example shows an implementation of the client factory which registers
-				an authorization interceptor with hardcoded credentials.
-			</p>
-			<macro name="snippet">
-				<param name="file" value="restful-server-example/src/main/webapp/WEB-INF/hapi-fhir-tester-config.xml" />
-			</macro>
-			
-			<p>
-				This client factory is then registered with the TesterConfig in the <code>hapi-fhir-tester-config.xml</code>
-				file, as shown above.
 			</p>
 
 		</section>

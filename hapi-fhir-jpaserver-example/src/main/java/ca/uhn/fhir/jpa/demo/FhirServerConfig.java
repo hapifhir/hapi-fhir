@@ -23,7 +23,7 @@ import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 
 @Configuration
 @EnableTransactionManagement()
-public class AppCtxConfig extends BaseJavaConfigDstu2 {
+public class FhirServerConfig extends BaseJavaConfigDstu2 {
 
 	/**
 	 * Configure FHIR properties around the the JPA server via this bean

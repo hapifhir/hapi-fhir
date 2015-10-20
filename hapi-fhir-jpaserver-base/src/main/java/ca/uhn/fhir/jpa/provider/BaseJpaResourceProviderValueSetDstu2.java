@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.BooleanUtils;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.LookupCodeResult;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -41,6 +42,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDstu2<ValueSet> {
 
@@ -103,6 +105,42 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 	}
 
 	//@formatter:off
+	@Operation(name = "$lookup", idempotent = true, returnParameters= {
+		@OperationParam(name="name", type=StringDt.class, min=1),
+		@OperationParam(name="version", type=StringDt.class, min=0),
+		@OperationParam(name="display", type=StringDt.class, min=1),
+		@OperationParam(name="abstract", type=BooleanDt.class, min=1),
+	})
+	public Parameters lookup(
+			HttpServletRequest theServletRequest,
+			@OperationParam(name="code", min=0, max=1) CodeDt theCode, 
+			@OperationParam(name="system", min=0, max=1) UriDt theSystem,
+			@OperationParam(name="coding", min=0, max=1) CodingDt theCoding 
+			) {
+		//@formatter:on
+		
+		startRequest(theServletRequest);
+		try {
+			IFhirResourceDaoValueSet<ValueSet> dao = (IFhirResourceDaoValueSet<ValueSet>) getDao();
+			LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding);
+			if (result.isFound()==false) {
+				throw new ResourceNotFoundException("Unable to find code[" + result.getSearchedForCode() + "] in system[" + result.getSearchedForSystem() + "]");
+			}
+			Parameters retVal = new Parameters();
+			retVal.addParameter().setName("name").setValue(new StringDt(result.getCodeSystemDisplayName()));
+			if (isNotBlank(result.getCodeSystemVersion())) {
+				retVal.addParameter().setName("version").setValue(new StringDt(result.getCodeSystemVersion()));
+			}
+			retVal.addParameter().setName("display").setValue(new StringDt(result.getCodeDisplay()));
+			retVal.addParameter().setName("abstract").setValue(new BooleanDt(result.isCodeIsAbstract()));			
+			return retVal;
+		} finally {
+			endRequest(theServletRequest);
+		}
+	}
+	
+	
+	//@formatter:off
 	@Operation(name = "$validate-code", idempotent = true, returnParameters= {
 		@OperationParam(name="result", type=BooleanDt.class, min=1),
 		@OperationParam(name="message", type=StringDt.class),
@@ -137,4 +175,6 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 			endRequest(theServletRequest);
 		}
 	}
+
+	
 }
