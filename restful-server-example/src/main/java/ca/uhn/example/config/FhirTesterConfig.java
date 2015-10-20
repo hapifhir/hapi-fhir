@@ -49,6 +49,13 @@ public class FhirTesterConfig {
 				.withFhirVersion(FhirVersionEnum.DSTU2)
 				.withBaseUrl("http://fhirtest.uhn.ca/baseDstu2")
 				.withName("Public HAPI Test Server");
+		
+		/*
+		 * Use the method below to supply a client "factory" which can be used 
+		 * if your server requires authentication
+		 */
+		// retVal.setClientFactory(clientFactory);
+		
 		return retVal;
 	}
 	

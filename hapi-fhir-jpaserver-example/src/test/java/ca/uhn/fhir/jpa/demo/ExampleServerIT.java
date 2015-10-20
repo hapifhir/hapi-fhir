@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.demo;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +27,7 @@ public class ExampleServerIT {
 	private static int ourPort;
 
 	private static Server ourServer;
+	private static String ourServerBase;
 
 	@Test
 	public void testCreateAndRead() throws IOException {
@@ -71,7 +72,8 @@ public class ExampleServerIT {
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		ourClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/baseDstu2");
+		ourServerBase = "http://localhost:" + ourPort + "/baseDstu2";
+		ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 	}
