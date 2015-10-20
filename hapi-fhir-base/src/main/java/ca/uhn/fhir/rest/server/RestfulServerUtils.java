@@ -394,8 +394,9 @@ public class RestfulServerUtils {
 		return retVal;
 	}
 
-	public static Integer extractCountParameter(HttpServletRequest theRequest) {
-		return RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_COUNT);
+	public static Integer extractCountParameter(RequestDetails theRequest) {
+		String paramName = Constants.PARAM_COUNT;
+		return tryToExtractNamedParameter(theRequest, paramName);
 	}
 
 	public static IParser getNewParser(FhirContext theContext, RequestDetails theRequestDetails) {
@@ -674,18 +675,18 @@ public class RestfulServerUtils {
 		}
 	}
 
-	static Integer tryToExtractNamedParameter(HttpServletRequest theRequest, String name) {
-		String countString = theRequest.getParameter(name);
-		Integer count = null;
-		if (isNotBlank(countString)) {
-			try {
-				count = Integer.parseInt(countString);
-			} catch (NumberFormatException e) {
-				ourLog.debug("Failed to parse _count value '{}': {}", countString, e);
-			}
-		}
-		return count;
-	}
+//	static Integer tryToExtractNamedParameter(HttpServletRequest theRequest, String name) {
+//		String countString = theRequest.getParameter(name);
+//		Integer count = null;
+//		if (isNotBlank(countString)) {
+//			try {
+//				count = Integer.parseInt(countString);
+//			} catch (NumberFormatException e) {
+//				ourLog.debug("Failed to parse _count value '{}': {}", countString, e);
+//			}
+//		}
+//		return count;
+//	}
 
 	public static void validateResourceListNotNull(List<? extends IBaseResource> theResourceList) {
 		if (theResourceList == null) {
@@ -698,6 +699,19 @@ public class RestfulServerUtils {
 
 		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
 			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
+		}
+	}
+
+	public static Integer tryToExtractNamedParameter(RequestDetails theRequest, String theParamName) {
+		String[] retVal = theRequest.getParameters().get(theParamName);
+		if (retVal == null) {
+			return null;
+		}
+		try {
+			return Integer.parseInt(retVal[0]);
+		} catch (NumberFormatException e) {
+			ourLog.debug("Failed to parse {} value '{}': {}", new Object[] {theParamName, retVal[0], e});
+			return null;
 		}
 	}
 

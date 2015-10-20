@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -477,14 +478,14 @@ public class RestfulServer extends HttpServlet {
 			return;
 		}
 
-		Integer count = RestfulServerUtils.extractCountParameter(theRequest.getServletRequest());
+		Integer count = RestfulServerUtils.extractCountParameter(theRequest);
 		if (count == null) {
 			count = getPagingProvider().getDefaultPageSize();
 		} else if (count > getPagingProvider().getMaximumPageSize()) {
 			count = getPagingProvider().getMaximumPageSize();
 		}
 
-		Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest.getServletRequest(), Constants.PARAM_PAGINGOFFSET);
+		Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
 		if (offsetI == null || offsetI < 0) {
 			offsetI = 0;
 		}
@@ -545,6 +546,12 @@ public class RestfulServer extends HttpServlet {
 		requestDetails.setRequestType(theRequestType);
 		requestDetails.setServletRequest(theRequest);
 		requestDetails.setServletResponse(theResponse);
+		for (Enumeration<String> iter = theRequest.getHeaderNames(); iter.hasMoreElements(); ) {
+			String nextName = iter.nextElement();
+			for (Enumeration<String> valueIter = theRequest.getHeaders(nextName); valueIter.hasMoreElements();) {
+				requestDetails.addHeader(nextName, valueIter.nextElement());
+			}
+		}
 
 		try {
 
@@ -556,7 +563,6 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
-			String resourceName = null;
 			String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
 			String servletPath = StringUtils.defaultString(theRequest.getServletPath());
 			StringBuffer requestUrl = theRequest.getRequestURL();
@@ -572,11 +578,9 @@ public class RestfulServer extends HttpServlet {
 				ourLog.trace("Context Path: {}", servletContextPath);
 			}
 
-			IdDt id = null;
-			String operation = null;
-			String compartment = null;
-
+			
 			String requestPath = getRequestPath(requestFullPath, servletContextPath, servletPath);
+
 			if (requestPath.length() > 0 && requestPath.charAt(0) == '/') {
 				requestPath = requestPath.substring(1);
 			}
@@ -588,84 +592,16 @@ public class RestfulServer extends HttpServlet {
 			Map<String, String[]> params = new HashMap<String, String[]>(theRequest.getParameterMap());
 			requestDetails.setParameters(params);
 
-			StringTokenizer tok = new StringTokenizer(requestPath, "/");
-			if (tok.hasMoreTokens()) {
-				resourceName = tok.nextToken();
-				if (partIsOperation(resourceName)) {
-					operation = resourceName;
-					resourceName = null;
-				}
-			}
-			requestDetails.setResourceName(resourceName);
-
-			ResourceBinding resourceBinding = null;
-			BaseMethodBinding<?> resourceMethod = null;
-			if (Constants.URL_TOKEN_METADATA.equals(resourceName) || theRequestType == RequestTypeEnum.OPTIONS) {
-				resourceMethod = myServerConformanceMethod;
-			} else if (resourceName == null) {
-				resourceBinding = myServerBinding;
-			} else {
-				resourceBinding = myResourceNameToBinding.get(resourceName);
-				if (resourceBinding == null) {
-					throw new InvalidRequestException("Unknown resource type '" + resourceName + "' - Server knows how to handle: " + myResourceNameToBinding.keySet());
-				}
-			}
-
-			if (tok.hasMoreTokens()) {
-				String nextString = tok.nextToken();
-				if (partIsOperation(nextString)) {
-					operation = nextString;
-				} else {
-					id = new IdDt(resourceName, UrlUtil.unescape(nextString));
-				}
-			}
-
-			if (tok.hasMoreTokens()) {
-				String nextString = tok.nextToken();
-				if (nextString.equals(Constants.PARAM_HISTORY)) {
-					if (tok.hasMoreTokens()) {
-						String versionString = tok.nextToken();
-						if (id == null) {
-							throw new InvalidRequestException("Don't know how to handle request path: " + requestPath);
-						}
-						id = new IdDt(resourceName, id.getIdPart(), UrlUtil.unescape(versionString));
-					} else {
-						operation = Constants.PARAM_HISTORY;
-					}
-				} else if (partIsOperation(nextString)) {
-					if (operation != null) {
-						throw new InvalidRequestException("URL Path contains two operations: " + requestPath);
-					}
-					operation = nextString;
-				} else {
-					compartment = nextString;
-				}
-			}
-
-			// Secondary is for things like ..../_tags/_delete
-			String secondaryOperation = null;
-
-			while (tok.hasMoreTokens()) {
-				String nextString = tok.nextToken();
-				if (operation == null) {
-					operation = nextString;
-				} else if (secondaryOperation == null) {
-					secondaryOperation = nextString;
-				} else {
-					throw new InvalidRequestException("URL path has unexpected token '" + nextString + "' at the end: " + requestPath);
-				}
-			}
+			IdDt id;
+			populateRequestDetailsFromRequestPath(requestDetails, requestPath);
 
 			if (theRequestType == RequestTypeEnum.PUT) {
 				String contentLocation = theRequest.getHeader(Constants.HEADER_CONTENT_LOCATION);
 				if (contentLocation != null) {
 					id = new IdDt(contentLocation);
+					requestDetails.setId(id);
 				}
 			}
-			requestDetails.setId(id);
-			requestDetails.setOperation(operation);
-			requestDetails.setSecondaryOperation(secondaryOperation);
-			requestDetails.setCompartmentName(compartment);
 
 			String acceptEncoding = theRequest.getHeader(Constants.HEADER_ACCEPT_ENCODING);
 			boolean respondGzip = false;
@@ -696,18 +632,7 @@ public class RestfulServer extends HttpServlet {
 				return;
 			}
 
-			if (resourceMethod == null) {
-				if (resourceBinding != null) {
-					resourceMethod = resourceBinding.getMethod(requestDetails);
-				}
-			}
-			if (resourceMethod == null) {
-				if (isBlank(requestPath)) {
-					throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "rootRequest"));
-				} else {
-					throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "unknownMethod", theRequestType.name(), requestPath, params.keySet()));
-				}
-			}
+			BaseMethodBinding<?> resourceMethod = determineResourceMethod(requestDetails, requestPath);
 
 			requestDetails.setRestOperationType(resourceMethod.getRestOperationType());
 
@@ -804,6 +729,105 @@ public class RestfulServer extends HttpServlet {
 			DEFAULT_EXCEPTION_HANDLER.handleException(requestDetails, exception, theRequest, theResponse);
 
 		}
+	}
+
+	public BaseMethodBinding<?> determineResourceMethod(RequestDetails requestDetails, String requestPath) {
+		RequestTypeEnum requestType = requestDetails.getRequestType();
+		
+		ResourceBinding resourceBinding = null;
+		BaseMethodBinding<?> resourceMethod = null;
+		String resourceName = requestDetails.getResourceName();
+		if (Constants.URL_TOKEN_METADATA.equals(resourceName) || requestType == RequestTypeEnum.OPTIONS) {
+			resourceMethod = myServerConformanceMethod;
+		} else if (resourceName == null) {
+			resourceBinding = myServerBinding;
+		} else {
+			resourceBinding = myResourceNameToBinding.get(resourceName);
+			if (resourceBinding == null) {
+				throw new InvalidRequestException("Unknown resource type '" + resourceName + "' - Server knows how to handle: " + myResourceNameToBinding.keySet());
+			}
+		}
+
+		if (resourceMethod == null) {
+			if (resourceBinding != null) {
+				resourceMethod = resourceBinding.getMethod(requestDetails);
+			}
+		}
+		if (resourceMethod == null) {
+			if (isBlank(requestPath)) {
+				throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "rootRequest"));
+			} else {
+				throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "unknownMethod", requestType.name(), requestPath, requestDetails.getParameters().keySet()));
+			}
+		}
+		return resourceMethod;
+	}
+
+	public void populateRequestDetailsFromRequestPath(RequestDetails theRequestDetails, String theRequestPath) {
+		StringTokenizer tok = new StringTokenizer(theRequestPath, "/");
+		String resourceName = null;
+		
+		IdDt id = null;
+		String operation = null;
+		String compartment = null;
+		if (tok.hasMoreTokens()) {
+			resourceName = tok.nextToken();
+			if (partIsOperation(resourceName)) {
+				operation = resourceName;
+				resourceName = null;
+			}
+		}
+		theRequestDetails.setResourceName(resourceName);
+
+		if (tok.hasMoreTokens()) {
+			String nextString = tok.nextToken();
+			if (partIsOperation(nextString)) {
+				operation = nextString;
+			} else {
+				id = new IdDt(resourceName, UrlUtil.unescape(nextString));
+			}
+		}
+
+		if (tok.hasMoreTokens()) {
+			String nextString = tok.nextToken();
+			if (nextString.equals(Constants.PARAM_HISTORY)) {
+				if (tok.hasMoreTokens()) {
+					String versionString = tok.nextToken();
+					if (id == null) {
+						throw new InvalidRequestException("Don't know how to handle request path: " + theRequestPath);
+					}
+					id = new IdDt(resourceName, id.getIdPart(), UrlUtil.unescape(versionString));
+				} else {
+					operation = Constants.PARAM_HISTORY;
+				}
+			} else if (partIsOperation(nextString)) {
+				if (operation != null) {
+					throw new InvalidRequestException("URL Path contains two operations: " + theRequestPath);
+				}
+				operation = nextString;
+			} else {
+				compartment = nextString;
+			}
+		}
+
+		// Secondary is for things like ..../_tags/_delete
+		String secondaryOperation = null;
+
+		while (tok.hasMoreTokens()) {
+			String nextString = tok.nextToken();
+			if (operation == null) {
+				operation = nextString;
+			} else if (secondaryOperation == null) {
+				secondaryOperation = nextString;
+			} else {
+				throw new InvalidRequestException("URL path has unexpected token '" + nextString + "' at the end: " + theRequestPath);
+			}
+		}
+
+		theRequestDetails.setId(id);
+		theRequestDetails.setOperation(operation);
+		theRequestDetails.setSecondaryOperation(secondaryOperation);
+		theRequestDetails.setCompartmentName(compartment);
 	}
 
 	/**

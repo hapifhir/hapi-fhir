@@ -22,7 +22,13 @@ import static org.mockito.Mockito.when;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -37,6 +43,7 @@ import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
+import ca.uhn.fhir.jpa.rp.dstu2.PatientResourceProvider;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
@@ -63,6 +70,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -74,6 +82,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu2Test.class);
 	private RequestDetails myRequestDetails;
+	private RestfulServer myServer;
 
 	@Test
 	public void testTransactionFromBundle6() throws Exception {
@@ -310,10 +319,25 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2Test {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Before
-	public void before() {
+	public void before() throws ServletException {
 		myRequestDetails = mock(RequestDetails.class);
-		when(myRequestDetails.getServer()).thenReturn(new RestfulServer());
+		
+		if (myServer == null) {
+			myServer = new RestfulServer(myFhirCtx);
+	
+			PatientResourceProvider patientRp = new PatientResourceProvider();
+			patientRp.setDao(myPatientDao);
+			myServer.setResourceProviders(patientRp);
+			myServer.init(mock(ServletConfig.class));
+		}
+		
+		when(myRequestDetails.getServer()).thenReturn(myServer);
+		HttpServletRequest servletRequest = mock(HttpServletRequest.class);
+		when(myRequestDetails.getServletRequest()).thenReturn(servletRequest);
+		when(servletRequest.getHeaderNames()).thenReturn(mock(Enumeration.class));
+		when(servletRequest.getRequestURL()).thenReturn(new StringBuffer("/Patient"));
 	}
 
 	@Test
@@ -1029,8 +1053,8 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals("200 OK", nextEntry.getResponse().getStatus());
 
 		nextEntry = resp.getEntry().get(2);
-		assertNull(nextEntry.getResource());
 		assertEquals("304 Not Modified", nextEntry.getResponse().getStatus());
+		assertNull(nextEntry.getResource());
 	}
 
 	@Test

@@ -60,7 +60,7 @@ public class BaseJpaProvider {
 
 		Enumeration<String> forwardedFors = theRequest.getHeaders("x-forwarded-for");
 		StringBuilder b = new StringBuilder();
-		for (Enumeration<String> enums = forwardedFors; enums.hasMoreElements();) {
+		for (Enumeration<String> enums = forwardedFors; enums != null && enums.hasMoreElements();) {
 			if (b.length() > 0) {
 				b.append(" / ");
 			}
