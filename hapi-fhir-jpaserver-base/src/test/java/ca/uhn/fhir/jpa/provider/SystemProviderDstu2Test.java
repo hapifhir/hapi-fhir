@@ -20,9 +20,11 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.TestDstu2Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.rp.dstu2.ObservationResourceProvider;
@@ -49,7 +51,7 @@ public class SystemProviderDstu2Test extends BaseJpaTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderDstu2Test.class);
 	private static Server ourServer;
-	private static ClassPathXmlApplicationContext ourAppCtx;
+	private static AnnotationConfigApplicationContext ourAppCtx;
 	private static FhirContext ourCtx;
 	private static IGenericClient ourClient;
 	private static String ourServerBase;
@@ -210,7 +212,7 @@ public class SystemProviderDstu2Test extends BaseJpaTest {
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourAppCtx = new ClassPathXmlApplicationContext("fhir-jpabase-spring-test-config.xml", "hapi-fhir-server-resourceproviders-dstu2.xml");
+		ourAppCtx = new AnnotationConfigApplicationContext(TestDstu2Config.class);
 
 		IFhirResourceDao<Patient> patientDao = (IFhirResourceDao<Patient>) ourAppCtx.getBean("myPatientDaoDstu2", IFhirResourceDao.class);
 		PatientResourceProvider patientRp = new PatientResourceProvider();

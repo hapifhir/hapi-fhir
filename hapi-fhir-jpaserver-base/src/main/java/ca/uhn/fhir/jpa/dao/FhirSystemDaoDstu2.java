@@ -22,9 +22,11 @@ package ca.uhn.fhir.jpa.dao;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hamcrest.Matchers.emptyCollectionOf;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ import javax.persistence.TypedQuery;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +47,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
@@ -59,8 +63,11 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.MethodUtil;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -83,12 +90,12 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		return url;
 	}
 
-	private Bundle batch(Bundle theRequest) {
+	private Bundle batch(final RequestDetails theRequestDetails, Bundle theRequest) {
 		ourLog.info("Beginning batch with {} resources", theRequest.getEntry().size());
 		long start = System.currentTimeMillis();
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
 		Bundle resp = new Bundle();
 		resp.setType(BundleTypeEnum.BATCH_RESPONSE);
@@ -109,7 +116,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 					subRequestBundle.setType(BundleTypeEnum.TRANSACTION);
 					subRequestBundle.addEntry(nextRequestEntry);
 
-					Bundle subResponseBundle = transaction(subRequestBundle, "Batch sub-request");
+					Bundle subResponseBundle = transaction(theRequestDetails, subRequestBundle, "Batch sub-request");
 					return subResponseBundle;
 				}
 			};
@@ -173,19 +180,19 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
-	public Bundle transaction(Bundle theRequest) {
+	public Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest) {
 		ActionRequestDetails requestDetails = new ActionRequestDetails(null, "Bundle", theRequest);
 		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 
-		String theActionName = "Transaction";
-		return transaction(theRequest, theActionName);
+		String actionName = "Transaction";
+		return transaction(theRequestDetails, theRequest, actionName);
 	}
 
 	@SuppressWarnings("unchecked")
-	private Bundle transaction(Bundle theRequest, String theActionName) {
+	private Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest, String theActionName) {
 		BundleTypeEnum transactionType = theRequest.getTypeElement().getValueAsEnum();
 		if (transactionType == BundleTypeEnum.BATCH) {
-			return batch(theRequest);
+			return batch(theRequestDetails, theRequest);
 		}
 
 		if (transactionType == null) {
@@ -324,6 +331,9 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 				}
 
 				if (parts.getResourceId() != null && parts.getParams() == null) {
+					/*
+					 * GET is a read
+					 */
 					IResource found;
 					boolean notChanged = false;
 					if (parts.getVersionId() != null) {
@@ -350,24 +360,26 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 						resp.setStatus(toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
 					}
 				} else if (parts.getParams() != null) {
+					/*
+					 * GET is a search
+					 */
 					RuntimeResourceDefinition def = getContext().getResourceDefinition(dao.getResourceType());
 					SearchParameterMap params = translateMatchUrl(url, def);
 					IBundleProvider bundle = dao.search(params);
 
-					Bundle searchBundle = new Bundle();
-					searchBundle.setTotal(bundle.size());
+					Integer count = params.getCount();
+					if (count == null) {
+						count = bundle.preferredPageSize();
+					}
 
-					int configuredMax = 200; // this should probably be configurable or something
-					if (bundle.size() > configuredMax) {
-						throw new InvalidRequestException("Search nested within transaction found more than " + configuredMax + " matches, but paging is not supported in nested transactions");
-					}
-					List<IBaseResource> resourcesToAdd = bundle.getResources(0, Math.min(bundle.size(), configuredMax));
-					for (IBaseResource next : resourcesToAdd) {
-						searchBundle.addEntry().setResource((IResource) next);
-					}
+					IVersionSpecificBundleFactory bundleFactory = getContext().newBundleFactory();
+					
+					Set<Include> includes = new HashSet<Include>();
+					EncodingEnum linkEncoding = null;
+					bundleFactory.initializeBundleFromBundleProvider(theRequestDetails.getServer(), bundle, linkEncoding, theRequestDetails.getFhirServerBase(), url, false, 0, count, null, ca.uhn.fhir.model.valueset.BundleTypeEnum.SEARCHSET,							includes);
 
 					Entry newEntry = response.addEntry();
-					newEntry.setResource(searchBundle);
+					newEntry.setResource((IResource) bundleFactory.getResourceBundle());
 					newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
 				}
 			}

@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
@@ -59,7 +60,7 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>> {
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
-	public List<IResource> transaction(List<IResource> theResources) {
+	public List<IResource> transaction(RequestDetails theRequestDetails, List<IResource> theResources) {
 		ourLog.info("Beginning transaction with {} resources", theResources.size());
 
 		// Notify interceptors
