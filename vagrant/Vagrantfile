@@ -86,7 +86,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 				proxy_port: 80,
 				# ssl_port: 443,
 				authbind: 'yes',
-				java_options: '-Dfhir.logdir=/var/log/fhir -Dfhir.db.location=/var/fhirdb'
+				java_options: '-Dfhir.logdir=/var/log/fhir -Dfhir.db.location=/var/fhirdb -Dfhir.db.location.dstu2=/var/fhirdb2 -Dfhir.lucene.location.dstu2=/var/fhirlucene2'
 			},
 			mysql: {
 				version: '5.6',
