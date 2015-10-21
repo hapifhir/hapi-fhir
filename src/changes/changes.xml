@@ -197,6 +197,10 @@
 				if the same provider also contained a read operation. Thanks to GitHub user
 				@am202 for reporting!
 			</action>
+			<action type="fix" issue="245">
+				FIx issue in testpage-overlay's new Java configuration where only the first
+				configured server actually gets used.
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

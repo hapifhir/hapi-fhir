@@ -190,6 +190,10 @@
 			<id>botunge</id>
 			<name>Thomas Andersen</name>
 		</developer>
+		<developer>
+			<id>samlanfranchi</id>
+			<name>Sam Lanfranchi</name>
+		</developer>
 	</developers>
 
 	<licenses>
