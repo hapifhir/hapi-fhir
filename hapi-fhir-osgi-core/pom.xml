@@ -167,23 +167,23 @@
 			</resource>
 			<resource>
 				<directory>../hapi-fhir-structures-dstu/src/main/resources</directory>
-				<filtering>true</filtering>
+				<filtering>false</filtering>
 			</resource>
 			<resource>
 				<directory>../hapi-fhir-structures-dstu/target/generated-resources/tinder</directory>
-				<filtering>true</filtering>
+				<filtering>false</filtering>
 			</resource>
 			<resource>
 				<directory>../hapi-fhir-structures-dstu2/src/main/resources</directory>
-				<filtering>true</filtering>
+				<filtering>false</filtering>
 			</resource>
 			<resource>
 				<directory>../hapi-fhir-structures-dstu2/target/generated-resources/tinder</directory>
-				<filtering>true</filtering>
+				<filtering>false</filtering>
 			</resource>
 			<resource>
 				<directory>../hapi-fhir-structures-hl7org-dstu2/src/resources/java</directory>
-				<filtering>true</filtering>
+				<filtering>false</filtering>
 			</resource>
 		</resources>
 	</build>
