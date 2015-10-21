@@ -188,6 +188,10 @@
 				by calling the actual implementing method in the server (previously
 				the call was simulated, which meant that many features did not work)
 			</action>
+			<action type="add">
+				JPA server maximumn length for a URI search parameter has been reduced from
+				256 to 255 in order to accomodate MySQL's indexing requirements
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">
