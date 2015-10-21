@@ -187,7 +187,7 @@ public class UrlUtil {
 			char nextChar = url.charAt(idx);
 			boolean atEnd = (idx + 1) == url.length();
 			if (nextChar == '?' || nextChar == '/' || atEnd) {
-				int endIdx = atEnd ? idx + 1 : idx;
+				int endIdx = (atEnd && nextChar != '?') ? idx + 1 : idx;
 				String nextSubstring = url.substring(nextStart, endIdx);
 				if (retVal.getResourceType() == null) {
 					retVal.setResourceType(nextSubstring);

@@ -21,7 +21,7 @@
                   <li>Jetty (JPA, CLI, Public Server): 9.2.6.v20141205 -&gt; 9.3.4.v20151007 </li>
                </ul>
             ]]>
-         </action>
+			</action>
 			<action type="add">
 				JPA and Tester Overlay now use Spring Java config files instead
 				of the older XML config files. All example projects have been updated. 
@@ -182,6 +182,11 @@
 			<action type="fix">
 				Fix a crash when encoding a Binary resource in JSON encoding
 				if the resource has no content-type
+			</action>
+			<action type="fix">
+				JPA server now supports read/history/search in transaction entries
+				by calling the actual implementing method in the server (previously
+				the call was simulated, which meant that many features did not work)
 			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">

@@ -218,7 +218,9 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 
 			if (!id.hasIdPart() || !id.isIdPartValid()) {
 				try {
-					theSession.close(new CloseStatus(CloseStatus.PROTOCOL_ERROR.getCode(), "Invalid bind request - No ID included"));
+					String message = "Invalid bind request - No ID included";
+					ourLog.warn(message);
+					theSession.close(new CloseStatus(CloseStatus.PROTOCOL_ERROR.getCode(), message));
 				} catch (IOException e) {
 					handleFailure(e);
 				}
@@ -236,7 +238,9 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 				myState = new BoundStaticSubscipriptionState(theSession);
 			} catch (ResourceNotFoundException e) {
 				try {
-					theSession.close(new CloseStatus(CloseStatus.PROTOCOL_ERROR.getCode(), "Invalid bind request - Unknown subscription: " + id.getValue()));
+					String message = "Invalid bind request - Unknown subscription: " + id.getValue();
+					ourLog.warn(message);
+					theSession.close(new CloseStatus(CloseStatus.PROTOCOL_ERROR.getCode(), message));
 				} catch (IOException e1) {
 					handleFailure(e);
 				}

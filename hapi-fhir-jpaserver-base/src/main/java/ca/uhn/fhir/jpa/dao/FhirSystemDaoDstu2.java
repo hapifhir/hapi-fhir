@@ -23,6 +23,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -32,14 +33,18 @@ import java.util.Set;
 
 import javax.persistence.TypedQuery;
 
+import org.apache.http.NameValuePair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import com.google.common.collect.ArrayListMultimap;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
@@ -57,13 +62,19 @@ import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.method.MethodUtil;
+import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.method.BaseResourceReturningMethodBinding;
+import ca.uhn.fhir.rest.method.BaseResourceReturningMethodBinding.ResourceOrDstu1Bundle;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
@@ -83,12 +94,12 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		return url;
 	}
 
-	private Bundle batch(Bundle theRequest) {
+	private Bundle batch(final RequestDetails theRequestDetails, Bundle theRequest) {
 		ourLog.info("Beginning batch with {} resources", theRequest.getEntry().size());
 		long start = System.currentTimeMillis();
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
 		Bundle resp = new Bundle();
 		resp.setType(BundleTypeEnum.BATCH_RESPONSE);
@@ -96,8 +107,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		resp.addEntry().setResource(ooResp);
 
 		/*
-		 * For batch, we handle each entry as a mini-transaction in its own database transaction so that if one fails, it
-		 * doesn't prevent others
+		 * For batch, we handle each entry as a mini-transaction in its own database transaction so that if one fails, it doesn't prevent others
 		 */
 
 		for (final Entry nextRequestEntry : theRequest.getEntry()) {
@@ -109,7 +119,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 					subRequestBundle.setType(BundleTypeEnum.TRANSACTION);
 					subRequestBundle.addEntry(nextRequestEntry);
 
-					Bundle subResponseBundle = transaction(subRequestBundle, "Batch sub-request");
+					Bundle subResponseBundle = transaction(theRequestDetails, subRequestBundle, "Batch sub-request");
 					return subResponseBundle;
 				}
 			};
@@ -122,8 +132,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 				Entry subResponseEntry = nextResponseBundle.getEntry().get(0);
 				resp.addEntry(subResponseEntry);
 				/*
-				 * If the individual entry didn't have a resource in its response, bring the sub-transaction's
-				 * OperationOutcome across so the client can see it
+				 * If the individual entry didn't have a resource in its response, bring the sub-transaction's OperationOutcome across so the client can see it
 				 */
 				if (subResponseEntry.getResource() == null) {
 					subResponseEntry.setResource(nextResponseBundle.getEntry().get(0).getResource());
@@ -173,19 +182,19 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
-	public Bundle transaction(Bundle theRequest) {
+	public Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest) {
 		ActionRequestDetails requestDetails = new ActionRequestDetails(null, "Bundle", theRequest);
 		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 
-		String theActionName = "Transaction";
-		return transaction(theRequest, theActionName);
+		String actionName = "Transaction";
+		return transaction(theRequestDetails, theRequest, actionName);
 	}
 
 	@SuppressWarnings("unchecked")
-	private Bundle transaction(Bundle theRequest, String theActionName) {
+	private Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest, String theActionName) {
 		BundleTypeEnum transactionType = theRequest.getTypeElement().getValueAsEnum();
 		if (transactionType == BundleTypeEnum.BATCH) {
-			return batch(theRequest);
+			return batch(theRequestDetails, theRequest);
 		}
 
 		if (transactionType == null) {
@@ -222,7 +231,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 			if (res != null) {
 
 				nextResourceId = res.getId();
-				
+
 				if (nextResourceId.hasIdPart() == false) {
 					if (isNotBlank(nextEntry.getFullUrl())) {
 						nextResourceId = new IdDt(nextEntry.getFullUrl());
@@ -232,7 +241,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 				if (nextResourceId.hasIdPart() && nextResourceId.getIdPart().matches("[a-zA-Z]+\\:.*") && !isPlaceholder(nextResourceId)) {
 					throw new InvalidRequestException("Invalid placeholder ID found: " + nextResourceId.getIdPart() + " - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
 				}
-				
+
 				if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType() && !isPlaceholder(nextResourceId)) {
 					nextResourceId = new IdDt(toResourceName(res.getClass()), nextResourceId.getIdPart());
 					res.setId(nextResourceId);
@@ -312,67 +321,67 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 			}
 			case GET: {
 				// SEARCH/READ/VREAD
+				RequestDetails requestDetails = new RequestDetails();
+				requestDetails.setServletRequest(theRequestDetails.getServletRequest());
+				requestDetails.setRequestType(RequestTypeEnum.GET);
+				requestDetails.setServer(theRequestDetails.getServer());
+				
 				String url = extractTransactionUrlOrThrowException(nextEntry, verb);
-				UrlParts parts = UrlUtil.parseUrl(url);
-
-				@SuppressWarnings("rawtypes")
-				IFhirResourceDao dao = toDao(parts, verb.getCode(), url);
-
-				String ifNoneMatch = nextEntry.getRequest().getIfNoneMatch();
-				if (isNotBlank(ifNoneMatch)) {
-					ifNoneMatch = MethodUtil.parseETagValue(ifNoneMatch);
+				
+				int qIndex = url.indexOf('?');
+				ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
+				requestDetails.setParameters(new HashMap<String, String[]>());
+				if (qIndex != -1) {
+					String params = url.substring(qIndex);
+					List<NameValuePair> parameters = translateMatchUrl(params);
+					for (NameValuePair next : parameters) {
+						paramValues.put(next.getName(), next.getValue());
+					}
+					for (java.util.Map.Entry<String, Collection<String>> nextParamEntry : paramValues.asMap().entrySet()) {
+						String[] nextValue = nextParamEntry.getValue().toArray(new String[nextParamEntry.getValue().size()]);
+						requestDetails.getParameters().put(nextParamEntry.getKey(), nextValue);
+					}
+					url = url.substring(0, qIndex);
 				}
 
-				if (parts.getResourceId() != null && parts.getParams() == null) {
-					IResource found;
-					boolean notChanged = false;
-					if (parts.getVersionId() != null) {
-						if (isNotBlank(ifNoneMatch)) {
-							throw new InvalidRequestException("Unable to perform vread on '" + url + "' with ifNoneMatch also set. Do not include a version in the URL to perform a conditional read.");
+				requestDetails.setRequestPath(url);
+				requestDetails.setFhirServerBase(theRequestDetails.getFhirServerBase());
+
+				theRequestDetails.getServer().populateRequestDetailsFromRequestPath(requestDetails, url);
+				BaseMethodBinding<?> method = theRequestDetails.getServer().determineResourceMethod(requestDetails, url);
+				if (method == null) {
+					throw new IllegalArgumentException("Unable to handle GET " + url);
+				}
+				
+				if (isNotBlank(nextEntry.getRequest().getIfMatch())) {
+					requestDetails.addHeader(Constants.HEADER_IF_MATCH, nextEntry.getRequest().getIfMatch());
+				}
+				if (isNotBlank(nextEntry.getRequest().getIfNoneExist())) {
+					requestDetails.addHeader(Constants.HEADER_IF_NONE_EXIST, nextEntry.getRequest().getIfNoneExist());
+				}
+				if (isNotBlank(nextEntry.getRequest().getIfNoneMatch())) {
+					requestDetails.addHeader(Constants.HEADER_IF_NONE_MATCH, nextEntry.getRequest().getIfNoneMatch());
+				}
+				
+				if (method instanceof BaseResourceReturningMethodBinding) {
+					try {
+						ResourceOrDstu1Bundle responseData = ((BaseResourceReturningMethodBinding) method).invokeServer(theRequestDetails.getServer(), requestDetails, new byte[0]);
+						Entry newEntry = response.addEntry();
+						IBaseResource resource = responseData.getResource();
+						if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
+							resource = filterNestedBundle(requestDetails, resource);
 						}
-						found = (IResource) dao.read(new IdDt(parts.getResourceType(), parts.getResourceId(), parts.getVersionId()));
-					} else {
-						found = (IResource) dao.read(new IdDt(parts.getResourceType(), parts.getResourceId()));
-						if (isNotBlank(ifNoneMatch) && ifNoneMatch.equals(found.getId().getVersionIdPart())) {
-							notChanged = true;
-						}
+						newEntry.setResource((IResource) resource);
+						newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
+					} catch (NotModifiedException e) {
+						Entry newEntry = response.addEntry();
+						newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
 					}
-					Entry entry = response.addEntry();
-					if (notChanged == false) {
-						entry.setResource(found);
-					}
-					EntryResponse resp = entry.getResponse();
-					resp.setLocation(found.getId().toUnqualified().getValue());
-					resp.setEtag(found.getId().getVersionIdPart());
-					if (!notChanged) {
-						resp.setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
-					} else {
-						resp.setStatus(toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
-					}
-				} else if (parts.getParams() != null) {
-					RuntimeResourceDefinition def = getContext().getResourceDefinition(dao.getResourceType());
-					SearchParameterMap params = translateMatchUrl(url, def);
-					IBundleProvider bundle = dao.search(params);
-
-					Bundle searchBundle = new Bundle();
-					searchBundle.setTotal(bundle.size());
-
-					int configuredMax = 200; // this should probably be configurable or something
-					if (bundle.size() > configuredMax) {
-						throw new InvalidRequestException("Search nested within transaction found more than " + configuredMax + " matches, but paging is not supported in nested transactions");
-					}
-					List<IBaseResource> resourcesToAdd = bundle.getResources(0, Math.min(bundle.size(), configuredMax));
-					for (IBaseResource next : resourcesToAdd) {
-						searchBundle.addEntry().setResource((IResource) next);
-					}
-
-					Entry newEntry = response.addEntry();
-					newEntry.setResource(searchBundle);
-					newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
+				} else {
+					throw new IllegalArgumentException("Unable to handle GET " + url);
 				}
 			}
 			}
-
 		}
 
 		FhirTerser terser = getContext().newTerser();
@@ -416,7 +425,8 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 					IFhirResourceDao<?> resourceDao = getDao(nextEntry.getResource().getClass());
 					Set<Long> val = resourceDao.processMatchUrl(matchUrl);
 					if (val.size() > 1) {
-						throw new InvalidRequestException("Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");
+						throw new InvalidRequestException(
+								"Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");
 					}
 				}
 			}
@@ -442,6 +452,20 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		return response;
 	}
 
+	/**
+	 * This method is called for nested bundles (e.g. if we received a transaction with an entry that 
+	 * was a GET search, this method is called on the bundle for the search result, that will be placed in the
+	 * outer bundle). This method applies the _summary and _content parameters to the output of
+	 * that bundle.
+	 * 
+	 * TODO: This isn't the most efficient way of doing this.. hopefully we can come up with something better in the future.
+	 */
+	private IBaseResource filterNestedBundle(RequestDetails theRequestDetails, IBaseResource theResource) {
+		IParser p = getContext().newJsonParser();
+		RestfulServerUtils.configureResponseParser(theRequestDetails, p);
+		return p.parseResource(theResource.getClass(), p.encodeResourceToString(theResource));
+	}
+
 	private ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> toDao(UrlParts theParts, String theVerb, String theUrl) {
 		RuntimeResourceDefinition resType;
 		try {
@@ -459,10 +483,10 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 			throw new InvalidRequestException(msg);
 		}
 
-		if (theParts.getResourceId() == null && theParts.getParams() == null) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
-			throw new InvalidRequestException(msg);
-		}
+		// if (theParts.getResourceId() == null && theParts.getParams() == null) {
+		// String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
+		// throw new InvalidRequestException(msg);
+		// }
 
 		return dao;
 	}
@@ -475,15 +499,15 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		return retVal;
 	}
 
-	private static void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome, Entry newEntry, String theResourceType, IResource theRes) {
+	private static void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome,
+			Entry newEntry, String theResourceType, IResource theRes) {
 		IdDt newId = (IdDt) outcome.getId().toUnqualifiedVersionless();
 		IdDt resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
 			idSubstitutions.put(resourceId, newId);
 			if (isPlaceholder(resourceId)) {
 				/*
-				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified
-				 * kind too just to be lenient.
+				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified kind too just to be lenient.
 				 */
 				idSubstitutions.put(new IdDt(theResourceType + '/' + resourceId.getValue()), newId);
 			}

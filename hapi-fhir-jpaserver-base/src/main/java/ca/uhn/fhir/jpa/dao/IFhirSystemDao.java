@@ -25,6 +25,7 @@ import java.util.Map;
 
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
 /**
@@ -58,6 +59,6 @@ public interface IFhirSystemDao<T> extends IDao {
 	 */
 	MetaDt metaGetOperation();
 
-	T transaction(T theResources);
+	T transaction(RequestDetails theRequestDetails, T theResources);
 
 }

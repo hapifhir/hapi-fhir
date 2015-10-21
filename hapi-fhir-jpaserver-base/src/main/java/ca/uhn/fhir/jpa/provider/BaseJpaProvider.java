@@ -29,12 +29,23 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.MDC;
 
+import ca.uhn.fhir.rest.method.RequestDetails;
+
 public class BaseJpaProvider {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaProvider.class);
 	public static final String REMOTE_ADDR = "req.remoteAddr";
+
 	public static final String REMOTE_UA = "req.userAgent";
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaProvider.class);
+	public void endRequest(HttpServletRequest theRequest) {
+		MDC.remove(REMOTE_ADDR);
+		MDC.remove(REMOTE_UA);
+	}
+
+	public void endRequest(RequestDetails theRequest) {
+		endRequest(theRequest.getServletRequest());
+	}
 
 	public void startRequest(HttpServletRequest theRequest) {
 		if (theRequest == null) {
@@ -49,13 +60,13 @@ public class BaseJpaProvider {
 
 		Enumeration<String> forwardedFors = theRequest.getHeaders("x-forwarded-for");
 		StringBuilder b = new StringBuilder();
-		for (Enumeration<String> enums = forwardedFors; enums.hasMoreElements();) {
+		for (Enumeration<String> enums = forwardedFors; enums != null && enums.hasMoreElements();) {
 			if (b.length() > 0) {
 				b.append(" / ");
 			}
 			b.append(enums.nextElement());
 		}
-		
+
 		String forwardedFor = b.toString();
 		String ip = theRequest.getRemoteAddr();
 		if (StringUtils.isBlank(forwardedFor)) {
@@ -68,12 +79,11 @@ public class BaseJpaProvider {
 
 		String userAgent = StringUtils.defaultString(theRequest.getHeader("user-agent"));
 		org.slf4j.MDC.put(REMOTE_UA, userAgent);
-		
+
 	}
 
-	public void endRequest(HttpServletRequest theRequest) {
-		MDC.remove(REMOTE_ADDR);
-		MDC.remove(REMOTE_UA);
+	public void startRequest(RequestDetails theRequest) {
+		startRequest(theRequest.getServletRequest());
 	}
 
 }

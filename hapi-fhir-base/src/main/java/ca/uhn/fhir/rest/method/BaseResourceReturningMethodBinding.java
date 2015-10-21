@@ -67,7 +67,7 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
-abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
+public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
 	protected static final Set<String> ALLOWED_PARAMS;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
 
@@ -102,8 +102,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (collectionType != null) {
 				if (!Object.class.equals(collectionType) && !IBaseResource.class.isAssignableFrom(collectionType)) {
-					throw new ConfigurationException("Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: "
-							+ collectionType);
+					throw new ConfigurationException(
+							"Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
 				}
 			}
 			myResourceListCollectionType = collectionType;
@@ -121,8 +121,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		} else if (MethodOutcome.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.METHOD_OUTCOME;
 		} else {
-			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: "
-					+ theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException(
+					"Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
@@ -233,29 +233,52 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		throw new IllegalStateException("Should not get here!");
 	}
 
-	public abstract Object invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
-
 	@Override
 	public void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 
-		// Pretty print
-		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-
-		// Narrative mode
-		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
-
-		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest(), theServer.getDefaultResponseEncoding());
-
-		// Is this request coming from a browser
-		String uaHeader = theRequest.getServletRequest().getHeader("user-agent");
-		boolean requestIsBrowser = false;
-		if (uaHeader != null && uaHeader.contains("Mozilla")) {
-			requestIsBrowser = true;
-		}
-
 		byte[] requestContents = loadRequestContents(theRequest);
-		
+
+		final ResourceOrDstu1Bundle responseObject = invokeServer(theServer, theRequest, requestContents);
+
+		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
+		if (responseObject.getResource() != null) {
+			
+			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+				IServerInterceptor next = theServer.getInterceptors().get(i);
+				boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getResource(), theRequest.getServletRequest(), theRequest.getServletResponse());
+				if (!continueProcessing) {
+					return;
+				}
+			}
+			
+			boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
+			HttpServletResponse response = theRequest.getServletResponse();
+			RestfulServerUtils.streamResponseAsResource(theServer, response, responseObject.getResource(), prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(),
+					isAddContentLocationHeader(), theRequest);
+		} else {
+			// Is this request coming from a browser
+			String uaHeader = theRequest.getServletRequest().getHeader("user-agent");
+			boolean requestIsBrowser = false;
+			if (uaHeader != null && uaHeader.contains("Mozilla")) {
+				requestIsBrowser = true;
+			}
+			
+			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+				IServerInterceptor next = theServer.getInterceptors().get(i);
+				boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getDstu1Bundle(), theRequest.getServletRequest(), theRequest.getServletResponse());
+				if (!continueProcessing) {
+					ourLog.debug("Interceptor {} returned false, not continuing processing");
+					return;
+				}
+			}
+
+			HttpServletResponse response = theRequest.getServletResponse();
+			RestfulServerUtils.streamResponseAsBundle(theServer, response, responseObject.getDstu1Bundle(), theRequest.getFhirServerBase(), summaryMode, theRequest.isRespondGzip(), requestIsBrowser,
+					theRequest);
+		}
+	}
+
+	public ResourceOrDstu1Bundle invokeServer(RestfulServer theServer, RequestDetails theRequest, byte[] requestContents) {
 		// Method params
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
@@ -267,9 +290,10 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 		Object resultObj = invokeServer(theServer, theRequest, params);
 
-		Integer count = RestfulServerUtils.extractCountParameter(theRequest.getServletRequest());
-		boolean respondGzip = theRequest.isRespondGzip();
-		HttpServletResponse response = theRequest.getServletResponse();
+		Integer count = RestfulServerUtils.extractCountParameter(theRequest);
+
+		final ResourceOrDstu1Bundle responseObject;
+
 		switch (getReturnType()) {
 		case BUNDLE: {
 
@@ -284,7 +308,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				b.append('/');
 				b.append(theRequest.getRequestPath());
 			}
-			// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be huge 
+			// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be huge
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 				boolean first = true;
 				Map<String, String[]> parameters = theRequest.getParameters();
@@ -323,17 +347,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				bundleFactory.initializeWithBundleResource(resource);
 				bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), linkSelf, count, getResponseBundleType(), lastUpdated);
 
-				for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-					IServerInterceptor next = theServer.getInterceptors().get(i);
-					boolean continueProcessing = next.outgoingResponse(theRequest, resource, theRequest.getServletRequest(), theRequest.getServletResponse());
-					if (!continueProcessing) {
-						ourLog.debug("Interceptor {} returned false, not continuing processing");
-						return;
-					}
-				}
-				
-				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, respondGzip,
-						isAddContentLocationHeader(), theRequest);
+				responseObject = new ResourceOrDstu1Bundle(resource);
 				break;
 			} else {
 				Set<Include> includes = getRequestIncludesFromParams(params);
@@ -344,32 +358,18 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				}
 
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
+
+				EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest(), theServer.getDefaultResponseEncoding());
 				EncodingEnum linkEncoding = theRequest.getParameters().containsKey(Constants.PARAM_FORMAT) ? responseEncoding : null;
-				bundleFactory.initializeBundleFromBundleProvider(theServer, result, linkEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, 0, count, null, getResponseBundleType(),
-						includes);
+
+				boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
+				bundleFactory.initializeBundleFromBundleProvider(theServer, result, linkEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, 0, count, null, getResponseBundleType(), includes);
 				Bundle bundle = bundleFactory.getDstu1Bundle();
 				if (bundle != null) {
-					for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-						IServerInterceptor next = theServer.getInterceptors().get(i);
-						boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(), theRequest.getServletResponse());
-						if (!continueProcessing) {
-							ourLog.debug("Interceptor {} returned false, not continuing processing");
-							return;
-						}
-					}
-					RestfulServerUtils.streamResponseAsBundle(theServer, response, bundle, theRequest.getFhirServerBase(), summaryMode, respondGzip, requestIsBrowser, theRequest);
+					responseObject = new ResourceOrDstu1Bundle(bundle);
 				} else {
 					IBaseResource resBundle = bundleFactory.getResourceBundle();
-					for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-						IServerInterceptor next = theServer.getInterceptors().get(i);
-						boolean continueProcessing = next.outgoingResponse(theRequest, resBundle, theRequest.getServletRequest(), theRequest.getServletResponse());
-						if (!continueProcessing) {
-							ourLog.debug("Interceptor {} returned false, not continuing processing");
-							return;
-						}
-					}
-					RestfulServerUtils.streamResponseAsResource(theServer, response, resBundle, prettyPrint, summaryMode,
-							Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), isAddContentLocationHeader(), theRequest);
+					responseObject = new ResourceOrDstu1Bundle(resBundle);
 				}
 
 				break;
@@ -384,21 +384,16 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			}
 
 			IBaseResource resource = result.getResources(0, 1).get(0);
-
-			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-				IServerInterceptor next = theServer.getInterceptors().get(i);
-				boolean continueProcessing = next.outgoingResponse(theRequest, resource, theRequest.getServletRequest(), theRequest.getServletResponse());
-				if (!continueProcessing) {
-					return;
-				}
-			}
-
-			RestfulServerUtils.streamResponseAsResource(theServer, response, resource, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, respondGzip,
-					isAddContentLocationHeader(), theRequest);
+			responseObject = new ResourceOrDstu1Bundle(resource);
 			break;
 		}
+		default:
+			throw new IllegalStateException(); // should not happen
 		}
+		return responseObject;
 	}
+
+	public abstract Object invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
 
 	/**
 	 * Should the response include a Content-Location header. Search method bunding (and any others?) may override this to disable the content-location, since it doesn't make sense
@@ -412,7 +407,32 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	}
 
 	public enum MethodReturnTypeEnum {
-		BUNDLE, BUNDLE_PROVIDER, BUNDLE_RESOURCE, LIST_OF_RESOURCES, RESOURCE, METHOD_OUTCOME
+		BUNDLE, BUNDLE_PROVIDER, BUNDLE_RESOURCE, LIST_OF_RESOURCES, METHOD_OUTCOME, RESOURCE
+	}
+
+	public static class ResourceOrDstu1Bundle {
+
+		private final Bundle myDstu1Bundle;
+		private final IBaseResource myResource;
+
+		public ResourceOrDstu1Bundle(Bundle theBundle) {
+			myDstu1Bundle = theBundle;
+			myResource = null;
+		}
+
+		public ResourceOrDstu1Bundle(IBaseResource theResource) {
+			myResource = theResource;
+			myDstu1Bundle = null;
+		}
+
+		public Bundle getDstu1Bundle() {
+			return myDstu1Bundle;
+		}
+
+		public IBaseResource getResource() {
+			return myResource;
+		}
+
 	}
 
 	public enum ReturnTypeEnum {

@@ -8,6 +8,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketFrame;
@@ -100,8 +101,12 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 		
 		@OnWebSocketFrame
 		public void onFrame(Frame theFrame) {
-			ourLog.info("Websocket frame: {}", theFrame);
-			myQuit = true;
+			ourLog.debug("Websocket frame: {}", theFrame);
+		}
+
+		@OnWebSocketClose
+		public void onClose(int statusCode, String reason) {
+			ourLog.info("Received CLOSE status={} reason={}", statusCode, reason);
 		}
 
 		@OnWebSocketConnect

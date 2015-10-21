@@ -388,6 +388,8 @@ public class MethodUtil {
 			}
 			if (parameterType.equals(HttpServletRequest.class) || parameterType.equals(ServletRequest.class)) {
 				param = new ServletRequestParameter();
+			} else if (parameterType.equals(RequestDetails.class)) {
+				param = new RequestDetailsParameter();
 			} else if (parameterType.equals(SummaryEnum.class)) {
 				param = new SummaryEnumParameter();
 			} else if (parameterType.equals(HttpServletResponse.class) || parameterType.equals(ServletResponse.class)) {

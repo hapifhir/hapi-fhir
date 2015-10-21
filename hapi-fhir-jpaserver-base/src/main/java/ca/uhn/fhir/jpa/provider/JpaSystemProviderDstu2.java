@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.method.RequestDetails;
 
 public class JpaSystemProviderDstu2 extends BaseJpaSystemProvider<Bundle> {
 
@@ -182,12 +183,12 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProvider<Bundle> {
 	}
 	
 	@Transaction
-	public Bundle transaction(HttpServletRequest theRequest, @TransactionParam Bundle theResources) {
-		startRequest(theRequest);
+	public Bundle transaction(RequestDetails theRequestDetails, @TransactionParam Bundle theResources) {
+		startRequest(theRequestDetails);
 		try {
-			return getDao().transaction(theResources);
+			return getDao().transaction(theRequestDetails, theResources);
 		} finally {
-			endRequest(theRequest);
+			endRequest(theRequestDetails);
 		}
 	}
 

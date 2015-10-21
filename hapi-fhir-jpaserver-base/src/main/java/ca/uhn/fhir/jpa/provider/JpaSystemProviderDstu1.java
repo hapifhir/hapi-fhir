@@ -22,21 +22,20 @@ package ca.uhn.fhir.jpa.provider;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.method.RequestDetails;
 
 public class JpaSystemProviderDstu1 extends BaseJpaSystemProvider<List<IResource>> {
 
 	@Transaction
-	public List<IResource> transaction(HttpServletRequest theRequest, @TransactionParam List<IResource> theResources) {
-		startRequest(theRequest);
+	public List<IResource> transaction(RequestDetails theRequestDetails, @TransactionParam List<IResource> theResources) {
+		startRequest(theRequestDetails);
 		try {
-			return getDao().transaction(theResources);
+			return getDao().transaction(theRequestDetails, theResources);
 		} finally {
-			endRequest(theRequest);
+			endRequest(theRequestDetails);
 		}
 	}
 

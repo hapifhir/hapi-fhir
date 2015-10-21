@@ -9,6 +9,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,10 +22,10 @@ import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestDstu1Config;
@@ -41,6 +42,7 @@ import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -54,6 +56,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 	private static IFhirResourceDao<Observation> ourObservationDao;
 	private static IFhirResourceDao<Patient> ourPatientDao;
 	private static IFhirSystemDao<List<IResource>> ourSystemDao;
+	private RequestDetails myRequestDetails;
 
 	@Test
 	public void testGetResourceCounts() {
@@ -140,7 +143,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		obs.getName().addCoding().setSystem("urn:system").setCode("testPersistWithSimpleLinkO01");
 		obs.setSubject(new ResourceReferenceDt("Patient/testPersistWithSimpleLinkP01"));
 
-		ourSystemDao.transaction(Arrays.asList((IResource) patient, obs));
+		ourSystemDao.transaction(myRequestDetails, Arrays.asList((IResource) patient, obs));
 
 		String patientId = (patient.getId().getIdPart());
 		String obsId = (obs.getId().getIdPart());
@@ -169,7 +172,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		patient.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
 		obs.getName().addCoding().setSystem("urn:system").setCode("testPersistWithSimpleLinkO02");
 
-		ourSystemDao.transaction(Arrays.asList((IResource) patient, obs));
+		ourSystemDao.transaction(myRequestDetails, Arrays.asList((IResource) patient, obs));
 
 		String patientId2 = (patient.getId().getIdPart());
 		String patientVersion2 = (patient.getId().getVersionIdPart());
@@ -182,6 +185,11 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		assertEquals(obsVersion2, "2");
 
 	}
+	
+	@Before
+	public void before() {
+		myRequestDetails = mock(RequestDetails.class);
+	}
 
 	@Test
 	public void testPersistWithUnknownId() {
@@ -190,7 +198,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		obs.setSubject(new ResourceReferenceDt("Patient/999998888888"));
 
 		try {
-			ourSystemDao.transaction(Arrays.asList((IResource) obs));
+			ourSystemDao.transaction(myRequestDetails, Arrays.asList((IResource) obs));
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Resource Patient/999998888888 not found, specified in path: Observation.subject"));
 		}
@@ -200,7 +208,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		obs.setSubject(new ResourceReferenceDt("Patient/1.2.3.4"));
 
 		try {
-			ourSystemDao.transaction(Arrays.asList((IResource) obs));
+			ourSystemDao.transaction(myRequestDetails, Arrays.asList((IResource) obs));
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Resource Patient/1.2.3.4 not found, specified in path: Observation.subject"));
 		}
@@ -290,7 +298,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		patient2.setId(new IdDt("Patient/testTransactionFailsWithDusplicateIds"));
 		patient2.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
 
-		ourSystemDao.transaction(Arrays.asList((IResource) patient1, patient2));
+		ourSystemDao.transaction(myRequestDetails, Arrays.asList((IResource) patient1, patient2));
 	}
 
 	@Test
@@ -300,7 +308,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		Bundle bundle = ourFhirContext.newXmlParser().parseBundle(new InputStreamReader(bundleRes));
 		List<IResource> res = bundle.toListOfResources();
 
-		ourSystemDao.transaction(res);
+		ourSystemDao.transaction(myRequestDetails, res);
 
 		Patient p1 = (Patient) res.get(0);
 		String id = p1.getId().getValue();
@@ -333,7 +341,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		o2.setSubject(new ResourceReferenceDt("Patient/cid:patient1"));
 		res.add(o2);
 
-		ourSystemDao.transaction(res);
+		ourSystemDao.transaction(myRequestDetails, res);
 
 		assertTrue(p1.getId().getValue(), p1.getId().getIdPart().matches("^[0-9]+$"));
 		assertTrue(o1.getId().getValue(), o1.getId().getIdPart().matches("^[0-9]+$"));
@@ -355,7 +363,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 			res.add(next.getResource());
 		}
 
-		List<IResource> response = ourSystemDao.transaction(res);
+		List<IResource> response = ourSystemDao.transaction(myRequestDetails, res);
 
 		String encodeResourceToString = ourFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(response.get(0));
 		ourLog.info(encodeResourceToString);
@@ -388,7 +396,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		o2.setSubject(new ResourceReferenceDt("cid:patient1"));
 		res.add(o2);
 
-		ourSystemDao.transaction(res);
+		ourSystemDao.transaction(myRequestDetails, res);
 
 		assertTrue(p1.getId().getValue(), p1.getId().getIdPart().matches("^[0-9]+$"));
 		assertTrue(o1.getId().getValue(), o1.getId().getIdPart().matches("^[0-9]+$"));
@@ -421,7 +429,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		p3.addIdentifier().setSystem("urn:system").setValue("testTransactionWithDelete");
 		res.add(p3);
 
-		ourSystemDao.transaction(res);
+		ourSystemDao.transaction(myRequestDetails, res);
 
 		/*
 		 * Verify
@@ -447,7 +455,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		ResourceMetadataKeyEnum.DELETED_AT.put(p2, InstantDt.withCurrentTime());
 		res.add(p2);
 
-		ourSystemDao.transaction(res);
+		ourSystemDao.transaction(myRequestDetails, res);
 
 		/*
 		 * Verify

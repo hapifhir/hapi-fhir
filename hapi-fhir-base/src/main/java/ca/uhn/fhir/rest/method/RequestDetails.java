@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 
 public class RequestDetails {
 
+	private Map<String, ArrayList<String>> myHeaders = new HashMap<String, ArrayList<String>>();
 	private String myCompartmentName;
 	private String myCompleteUrl;
 	private String myFhirServerBase;
@@ -228,6 +229,24 @@ public class RequestDetails {
 		}
 		retVal.setParameters(paramNames);
 		return retVal;
+	}
+
+	public void addHeader(String theName, String theValue) {
+		String lowerCase = theName.toLowerCase();
+		ArrayList<String> list = myHeaders.get(lowerCase);
+		if (list == null) {
+			list = new ArrayList<String>();
+			myHeaders.put(lowerCase, list);
+		}
+		list.add(theValue);
+	}
+
+	public String getFirstHeader(String theName) {
+		ArrayList<String> list = myHeaders.get(theName.toLowerCase());
+		if (list == null || list.isEmpty()) {
+			return null;
+		}
+		return list.get(0);
 	}
 
 }
