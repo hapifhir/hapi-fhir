@@ -1378,4 +1378,7 @@
 		</profile>
 	</profiles>
 
+	<modules>
+		<module>hapi-fhir-base-example-embedded-ws</module>
+	</modules>
 </project>
