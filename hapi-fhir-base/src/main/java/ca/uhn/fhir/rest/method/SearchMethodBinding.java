@@ -116,10 +116,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	}
 
-	public Class<? extends IBaseResource> getDeclaredResourceType() {
-		return myDeclaredResourceType;
-	}
-
 	public String getDescription() {
 		return myDescription;
 	}
@@ -141,10 +137,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		if (!theRequest.getResourceName().equals(getResourceName())) {
-			ourLog.trace("Method {} doesn't match because resource name {} != {}", new Object[] { getMethod().getName(), theRequest.getResourceName(), getResourceName() } );
-			return false;
-		}
 		if (theRequest.getId() != null && myIdParamIndex == null) {
 			ourLog.trace("Method {} doesn't match because ID is not null: {}", theRequest.getId());
 			return false;
