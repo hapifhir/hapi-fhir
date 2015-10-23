@@ -50,7 +50,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -74,7 +73,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
@@ -1716,62 +1714,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			} else {
 				return new ArrayList<IBaseResource>(new BundleResponseHandler(myType).invokeClient(theResponseMimeType, theResponseReader, theResponseStatusCode, theHeaders).toListOfResources());
 			}
-		}
-	}
-
-	private final class ResourceResponseHandler<T extends IBaseResource> implements IClientResponseHandler<T> {
-
-		private boolean myAllowHtmlResponse;
-		private IIdType myId;
-		private Class<T> myType;
-
-		public ResourceResponseHandler(Class<T> theType, IIdType theId) {
-			myType = theType;
-			myId = theId;
-		}
-
-		public ResourceResponseHandler(Class<T> theType, IIdType theId, boolean theAllowHtmlResponse) {
-			myType = theType;
-			myId = theId;
-			myAllowHtmlResponse = theAllowHtmlResponse;
-		}
-
-		@Override
-		public T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
-			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
-			if (respType == null) {
-				if (myAllowHtmlResponse && theResponseMimeType.toLowerCase().contains(Constants.CT_HTML) && myType != null) {
-					return readHtmlResponse(theResponseReader);
-				}
-				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
-			}
-			IParser parser = respType.newParser(myContext);
-			T retVal = parser.parseResource(myType, theResponseReader);
-
-			MethodUtil.parseClientRequestResourceHeaders(myId, theHeaders, retVal);
-
-			return retVal;
-		}
-
-		@SuppressWarnings("unchecked")
-		private T readHtmlResponse(Reader theResponseReader) {
-			RuntimeResourceDefinition resDef = myContext.getResourceDefinition(myType);
-			IBaseResource instance = resDef.newInstance();
-			BaseRuntimeChildDefinition textChild = resDef.getChildByName("text");
-			BaseRuntimeElementCompositeDefinition<?> textElement = (BaseRuntimeElementCompositeDefinition<?>) textChild.getChildByName("text");
-			IBase textInstance = textElement.newInstance();
-			textChild.getMutator().addValue(instance, textInstance);
-
-			BaseRuntimeChildDefinition divChild = textElement.getChildByName("div");
-			BaseRuntimeElementDefinition<?> divElement = divChild.getChildByName("div");
-			IPrimitiveType<?> divInstance = (IPrimitiveType<?>) divElement.newInstance();
-			try {
-				divInstance.setValueAsString(IOUtils.toString(theResponseReader));
-			} catch (Exception e) {
-				throw new InvalidResponseException(400, "Failed to process HTML response from server: " + e.getMessage(), e);
-			}
-			divChild.getMutator().addValue(textInstance, divInstance);
-			return (T) instance;
 		}
 	}
 

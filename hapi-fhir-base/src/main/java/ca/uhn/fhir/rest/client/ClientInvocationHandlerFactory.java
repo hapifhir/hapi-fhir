@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.http.client.HttpClient;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -57,6 +58,7 @@ class ClientInvocationHandlerFactory {
 			myMethodToLambda.put(theClientType.getMethod("registerInterceptor", IClientInterceptor.class), new RegisterInterceptorLambda());
 			myMethodToLambda.put(theClientType.getMethod("unregisterInterceptor", IClientInterceptor.class), new UnregisterInterceptorLambda());
 			myMethodToLambda.put(theClientType.getMethod("setSummary", SummaryEnum.class), new SetSummaryLambda());
+			myMethodToLambda.put(theClientType.getMethod("fetchResourceFromUrl", Class.class, String.class), new FetchResourceFromUrlLambda());
 
 		} catch (NoSuchMethodException e) {
 			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!", e);
@@ -85,7 +87,18 @@ class ClientInvocationHandlerFactory {
 			return null;
 		}
 	}
-
+	
+	class FetchResourceFromUrlLambda implements ILambda {
+		@Override
+		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {
+			@SuppressWarnings("unchecked")
+			Class<? extends IBaseResource> type = (Class<? extends IBaseResource>) theArgs[0];
+			String url = (String) theArgs[1];
+			
+			return theTarget.fetchResourceFromUrl(type, url);
+		}
+	}
+	
 	class SetEncodingLambda implements ILambda {
 		@Override
 		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {

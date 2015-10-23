@@ -188,6 +188,12 @@
 				by calling the actual implementing method in the server (previously
 				the call was simulated, which meant that many features did not work)
 			</action>
+			<action type="fix">
+				ResourceReferenceDt#loadResource(IRestfulClient) did not
+				use the client's read functionality, so it did not
+				handle JSON responses or use interceptors. Thanks to
+				JT for reporting!
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">
