@@ -43,7 +43,10 @@ import org.hibernate.search.annotations.Indexed;
 //@formatter:on
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
 
-	public static final int MAX_LENGTH = 256;
+	/*
+	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here 
+	 */
+	public static final int MAX_LENGTH = 255;
 
 	private static final long serialVersionUID = 1L;
 

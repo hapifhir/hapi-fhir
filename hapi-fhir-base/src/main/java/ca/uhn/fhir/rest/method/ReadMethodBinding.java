@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -138,6 +140,9 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 				return false;
 			}
 		}
+		if (isNotBlank(theRequest.getCompartmentName())) {
+			return false;
+		}
 		if (theRequest.getRequestType() != RequestTypeEnum.GET) {
 			ourLog.trace("Method {} doesn't match because request type is not GET: {}", theRequest.getId(), theRequest.getRequestType());
 			return false;
@@ -198,6 +203,9 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 			return resource;
 		case BUNDLE_PROVIDER:
 			return new SimpleBundleProvider(resource);
+		case BUNDLE_RESOURCE:
+		case METHOD_OUTCOME:
+			break;
 		}
 
 		throw new IllegalStateException("" + getMethodReturnType()); // should not happen

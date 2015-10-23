@@ -27,6 +27,7 @@ public class TesterConfig {
 
 	public IServerBuilderStep1 addServer() {
 		ServerBuilder retVal = new ServerBuilder();
+		myServerBuilders.add(retVal);
 		return retVal;
 	}
 
