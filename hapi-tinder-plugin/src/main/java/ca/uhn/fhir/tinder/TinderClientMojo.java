@@ -96,7 +96,6 @@ public class TinderClientMojo extends AbstractMojo {
 		}
 
 		ProfileParser pp = new ProfileParser(version,baseDir );
-		int index = 0;
 		for (RestResource nextResource : rest.getResource()) {
 			if (StringUtils.isBlank(nextResource.getProfile().getReference().getValue())) {
 				continue;
@@ -109,7 +108,7 @@ public class TinderClientMojo extends AbstractMojo {
 			try {
 				ourLog.info("Loading Profile: {}", nextResource.getProfile().getReference().getValue());
 				profile = (Profile) nextResource.getProfile().loadResource(client);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				throw new MojoFailureException("Failed to load resource profile: " + nextResource.getProfile().getReference().getValue(), e);
 			}
 
