@@ -684,6 +684,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		Set<TagDefinition> allDefs = new HashSet<TagDefinition>();
 
+		theEntity.setHasTags(false);
+
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tagList != null) {
 			for (Tag next : tagList) {
@@ -725,9 +727,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					theEntity.getTags().remove(next);
 				}
 			}
-		}
-		if (theEntity.getTags().size() == 0) {
-			theEntity.setHasTags(false);
 		}
 
 		String title = ResourceMetadataKeyEnum.TITLE.get(theResource);

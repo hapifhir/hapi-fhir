@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import java.util.List;
@@ -31,6 +32,8 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
 		ftem.purgeAll(ResourceTable.class);
 		ftem.flushToIndexes();
+		
+		myDaoConfig.setSchedulingDisabled(true);
 	}
 
 	@Test
@@ -80,6 +83,68 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 
 	}
 
+	/**
+	 * When processing transactions, we do two passes. Make sure we don't update the 
+	 * lucene index twice since that would be inefficient
+	 */
+	@Test
+	public void testSearchDontReindexForUpdateWithIndexDisabled() {
+		Patient patient;
+		SearchParameterMap map;
+		
+		patient = new Patient();
+		patient.getText().setDiv("<div>DIVAAA</div>");
+		patient.addName().addGiven("NAMEAAA");
+		IIdType pId1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		
+		map = new SearchParameterMap();
+		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+
+		map = new SearchParameterMap();
+		map.add(Constants.PARAM_TEXT, new StringParam("DIVAAA"));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		
+		/*
+		 * Update but don't reindex
+		 */
+		
+		patient = new Patient();
+		patient.setId(pId1);
+		patient.getText().setDiv("<div>DIVBBB</div>");
+		patient.addName().addGiven("NAMEBBB");
+		myPatientDao.update(patient, null, false);
+
+		map = new SearchParameterMap();
+		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		map = new SearchParameterMap();
+		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEBBB"));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), not(contains(pId1)));
+
+		myPatientDao.update(patient, null, true);		
+		
+		map = new SearchParameterMap();
+		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), empty());
+
+		map = new SearchParameterMap();
+		map.add(Patient.SP_NAME, new StringParam("NAMEBBB"));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+
+		map = new SearchParameterMap();
+		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEBBB"));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+
+		map = new SearchParameterMap();
+		map.add(Constants.PARAM_TEXT, new StringParam("DIVBBB"));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		
+
+	}
+
+	
+	
 	@Test
 	public void testSearchWithChainedParams() {
 		String methodName = "testSearchWithChainedParams";

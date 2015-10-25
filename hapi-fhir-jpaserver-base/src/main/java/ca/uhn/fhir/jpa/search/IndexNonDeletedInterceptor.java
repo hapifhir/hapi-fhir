@@ -33,13 +33,18 @@ public class IndexNonDeletedInterceptor implements EntityIndexingInterceptor<Res
 	@Override
 	public IndexingOverride onAdd(ResourceTable entity) {
 		if (entity.getDeleted() == null) {
-			return IndexingOverride.APPLY_DEFAULT;
+			if (entity.getIndexStatus() != null) {
+				return IndexingOverride.APPLY_DEFAULT;
+			}
 		}
 		return IndexingOverride.SKIP;
 	}
 
 	@Override
 	public IndexingOverride onUpdate(ResourceTable entity) {
+		if (entity.getIndexStatus() == null) {
+			return IndexingOverride.SKIP;
+		}
 		if (entity.getDeleted() == null) {
 			return IndexingOverride.UPDATE;
 		}

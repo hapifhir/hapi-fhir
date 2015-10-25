@@ -35,14 +35,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
-import org.hibernate.search.annotations.IndexedEmbedded;
 
 import ca.uhn.fhir.jpa.search.IndexNonDeletedInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -50,7 +48,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 //@formatter:off
-@Indexed(/*interceptor=IndexNonDeletedInterceptor.class*/)	
+@Indexed(interceptor=IndexNonDeletedInterceptor.class)	
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes= {
 	@Index(name = "IDX_RES_DATE", columnList="RES_UPDATED"), 
