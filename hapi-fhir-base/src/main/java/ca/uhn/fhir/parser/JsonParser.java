@@ -698,19 +698,29 @@ public class JsonParser extends BaseParser implements IParser {
 
 	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theContainedResource) throws IOException {
 		String resourceId = null;
-		if (theResource instanceof IResource) {
-			IResource res = (IResource) theResource;
-			if (StringUtils.isNotBlank(res.getId().getIdPart())) {
-				if (theContainedResource) {
-					resourceId = res.getId().getIdPart();
-				} else if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-					resourceId = res.getId().getIdPart();
-				}
+//		if (theResource instanceof IResource) {
+//			IResource res = (IResource) theResource;
+//			if (StringUtils.isNotBlank(res.getId().getIdPart())) {
+//				if (theContainedResource) {
+//					resourceId = res.getId().getIdPart();
+//				} else if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+//					resourceId = res.getId().getIdPart();
+//				}
+//			}
+//		} else if (theResource instanceof IAnyResource) {
+//			IAnyResource res = (IAnyResource) theResource;
+//			if (/* theContainedResource && */StringUtils.isNotBlank(res.getIdElement().getIdPart())) {
+//				resourceId = res.getIdElement().getIdPart();
+//			}
+//		}
+
+		if (StringUtils.isNotBlank(theResource.getIdElement().getIdPart())) {
+			resourceId = theResource.getIdElement().getIdPart();
+			if (theResource.getIdElement().getValue().startsWith("urn:")) {
+				resourceId = null;
 			}
-		} else if (theResource instanceof IAnyResource) {
-			IAnyResource res = (IAnyResource) theResource;
-			if (/* theContainedResource && */StringUtils.isNotBlank(res.getIdElement().getIdPart())) {
-				resourceId = res.getIdElement().getIdPart();
+			if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+				resourceId = null;
 			}
 		}
 

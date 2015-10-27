@@ -716,17 +716,27 @@ public class XmlParser extends BaseParser implements IParser {
 
 	private void encodeResourceToXmlStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		String resourceId = null;
-		if (theResource instanceof IResource) {
-			// HAPI structs
-			IResource iResource = (IResource) theResource;
-			if (StringUtils.isNotBlank(iResource.getId().getIdPart())) {
-				resourceId = iResource.getId().getIdPart();
+//		if (theResource instanceof IResource) {
+//			// HAPI structs
+//			IResource iResource = (IResource) theResource;
+//			if (StringUtils.isNotBlank(iResource.getId().getIdPart())) {
+//				resourceId = iResource.getId().getIdPart();
+//			}
+//		} else {
+//			// HL7 structs
+//			IAnyResource resource = (IAnyResource) theResource;
+//			if (StringUtils.isNotBlank(resource.getIdElement().getIdPart())) {
+//				resourceId = resource.getIdElement().getIdPart();
+//			}
+//		}
+
+		if (StringUtils.isNotBlank(theResource.getIdElement().getIdPart())) {
+			resourceId = theResource.getIdElement().getIdPart();
+			if (theResource.getIdElement().getValue().startsWith("urn:")) {
+				resourceId = null;
 			}
-		} else {
-			// HL7 structs
-			IAnyResource resource = (IAnyResource) theResource;
-			if (StringUtils.isNotBlank(resource.getIdElement().getIdPart())) {
-				resourceId = resource.getIdElement().getIdPart();
+			if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+				resourceId = null;
 			}
 		}
 

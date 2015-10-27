@@ -66,7 +66,16 @@ public class JsonParserDstu2Test {
 		assertThat(encoded, containsString("\"div\":\"" + expected.replace("\"", "\\\"") + "\""));
 	}
 	
-	
+	@Test
+	public void testEncodeDoesntIncludeUuidId() {
+		Patient p = new Patient();
+		p.setId(new IdDt("urn:uuid:42795ed8-041f-4ebf-b6f4-78ef6f64c2f2"));
+		p.addIdentifier().setSystem("ACME");
+		
+		String actual = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		assertThat(actual, not(containsString("78ef6f64c2f2")));
+	}
+
 	@Test
 	public void testEncodeEmptyBinary() {
 		String output = ourCtx.newJsonParser().encodeResourceToString(new Binary());
@@ -773,7 +782,7 @@ public class JsonParserDstu2Test {
 		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getValue());
 		assertEquals("urn:uuid:", parsed.getEntry().get(0).getResource().getId().getBaseUrl());
 		assertEquals("180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getIdPart());
-		assertThat(encoded, containsString("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\""));
+		assertThat(encoded, not(containsString("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\"")));
 	}
 
 	@Test

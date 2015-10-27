@@ -207,6 +207,11 @@
 				FIx issue in testpage-overlay's new Java configuration where only the first
 				configured server actually gets used.
 			</action>
+			<action type="fix">
+				Parser (XML and JSON) shouldn't encode an ID tag in resources
+				which are part of a bundle when the resource has a UUID/OID
+				ID.
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

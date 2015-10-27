@@ -132,6 +132,17 @@ public class XmlParserDstu2Test {
 
 
 	@Test
+	public void testEncodeDoesntIncludeUuidId() {
+		Patient p = new Patient();
+		p.setId(new IdDt("urn:uuid:42795ed8-041f-4ebf-b6f4-78ef6f64c2f2"));
+		p.addIdentifier().setSystem("ACME");
+		
+		String actual = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
+		assertThat(actual, not(containsString("78ef6f64c2f2")));
+	}
+	
+	
+	@Test
 	public void testContainedResourceInExtensionUndeclared() {
 		Patient p = new Patient();
 		p.addName().addFamily("PATIENT");
@@ -661,7 +672,8 @@ public class XmlParserDstu2Test {
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder("<Bundle", "<entry>", "<fullUrl value=\"" + p.getId().getValue() + "\"/>", "<Patient", "<id value=\"" + p.getId().getIdPart() + "\"/>"));
+		assertThat(encoded, stringContainsInOrder("<Bundle", "<entry>", "<fullUrl value=\"" + p.getId().getValue() + "\"/>", "<Patient"));
+		assertThat(encoded, not(containsString("<id value=\"" + p.getId().getIdPart() + "\"/>")));
 	}
 
 	@Test
