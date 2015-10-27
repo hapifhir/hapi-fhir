@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
@@ -65,6 +66,9 @@ public class DaoConfig {
 	 * @see #setInterceptors(List)
 	 */
 	public List<IServerInterceptor> getInterceptors() {
+		if (myInterceptors == null) {
+			return Collections.emptyList();
+		}
 		return myInterceptors;
 	}
 

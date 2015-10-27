@@ -49,7 +49,6 @@ import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -175,7 +174,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 
-	private List<IDaoListener> myListeners = new ArrayList<IDaoListener>();
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
 
@@ -647,12 +645,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return true;
 	}
 
-	protected void notifyWriteCompleted() {
-		for (IDaoListener next : myListeners) {
-			next.writeCompleted();
-		}
-	}
-
 	protected void populateResourceIntoEntity(IResource theResource, ResourceTable theEntity) {
 		theEntity.setResourceType(toResourceName(theResource));
 
@@ -894,12 +886,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 		parameters = URLEncodedUtils.parse((matchUrl), Constants.CHARSET_UTF8, '&');
 		return parameters;
-	}
-
-	@Override
-	public void registerDaoListener(IDaoListener theListener) {
-		Validate.notNull(theListener, "theListener");
-		myListeners.add(theListener);
 	}
 
 	private void searchHistoryCurrentVersion(List<HistoryTuple> theTuples, List<BaseHasResource> theRetVal) {

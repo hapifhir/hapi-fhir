@@ -204,8 +204,13 @@
 				@am202 for reporting!
 			</action>
 			<action type="fix" issue="245">
-				FIx issue in testpage-overlay's new Java configuration where only the first
+				Fix issue in testpage-overlay's new Java configuration where only the first
 				configured server actually gets used.
+			</action>
+			<action type="add">
+				Introduce
+				<![CDATA[<a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/IJpaServerInterceptor.html">IJpaServerInterceptor</a>]]>
+				interceptors for JPA server which can be used for more fine grained operations.
 			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">

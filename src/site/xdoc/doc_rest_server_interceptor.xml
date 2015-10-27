@@ -275,6 +275,33 @@
 			</macro>
 			
 		</section>
+
+		<section name="JPA Server Interceptors">
+			
+			<p>
+				The HAPI <a href="./doc_jpa.html">JPA Server</a> is an added layer on top of the HAPI
+				REST server framework. If you are using it, you may wish to also register interceptors
+				against the <a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/DaoConfig.html">DaoConfig</a>
+				bean that you create using Spring configuration. 
+			</p>
+		
+			<p>
+				By registering an interceptor against the DaoConfig, the server will invoke 
+				interceptor methods for operations such as <b>create</b>, <b>update</b>, etc even
+				when these operations are found nested within a transaction. This is useful
+				if you are using interceptors to make access control decisions because
+				it avoids clients using transactions as a means of bypassing these controls.
+			</p>
+			
+			<p>
+				You may also choose to create interceptors which implement the 
+				more specialized
+				<a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/IJpaServerInterceptor.html">IJpaServerInterceptor</a>
+				interface, as this interceptor adds additional methods which are called during the JPA
+				lifecycle. 
+			</p>
+		
+		</section>
 		
 	</body>
 

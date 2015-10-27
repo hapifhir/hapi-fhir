@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.dao;
 
-import java.util.List;
-
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 
@@ -42,8 +40,4 @@ public interface IDao {
 		}
 	};
 
-	void registerDaoListener(IDaoListener theListener);
-
-//	void setResourceDaos(List<IFhirResourceDao<?>> theResourceDaos);
-	
 }

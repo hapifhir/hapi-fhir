@@ -95,6 +95,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.interceptor.IJpaServerInterceptor;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -136,6 +137,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -1031,7 +1033,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		myEntityManager.persist(newEntity);
 		myEntityManager.merge(entity);
-		notifyWriteCompleted();
+
 		ourLog.info("Processed addTag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId, w.getMillisAndRestart() });
 	}
 
@@ -1363,7 +1365,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		Date updateTime = new Date();
 		ResourceTable savedEntity = updateEntity(null, entity, true, updateTime, updateTime);
 
-		notifyWriteCompleted();
+		// Notify JPA interceptors
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IJpaServerInterceptor) {
+				((IJpaServerInterceptor) next).resourceDeleted(requestDetails, entity);
+			}
+		}
 
 		ourLog.info("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return toMethodOutcome(savedEntity, null);
@@ -1404,7 +1411,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			// Perform delete
 			Date updateTime = new Date();
 			updateEntity(null, entity, true, updateTime, updateTime);
-			notifyWriteCompleted();
+
+			// Notify JPA interceptors
+			for (IServerInterceptor next : getConfig().getInterceptors()) {
+				if (next instanceof IJpaServerInterceptor) {
+					((IJpaServerInterceptor) next).resourceDeleted(requestDetails, entity);
+				}
+			}
 
 		}
 
@@ -1455,11 +1468,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theResource.getId(), toResourceName(theResource), theResource);
 		notifyInterceptors(RestOperationTypeEnum.CREATE, requestDetails);
 
+		// Perform actual DB update
 		updateEntity(theResource, entity, false, null, thePerformIndexing, true, theUpdateTime);
 
+		// Notify JPA interceptors
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IJpaServerInterceptor) {
+				((IJpaServerInterceptor) next).resourceCreated(requestDetails, entity);
+			}
+		}
+		
 		DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(true);
-
-		notifyWriteCompleted();
 
 		String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
@@ -1909,7 +1928,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		//@formatter:on
 
 		myEntityManager.merge(entity);
-		notifyWriteCompleted();
 		ourLog.info("Processed metaAddOperation on {} in {}ms", new Object[] { theResourceId, w.getMillisAndRestart() });
 
 		return metaGetOperation(theResourceId);
@@ -2729,7 +2747,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		// Perform update
 		ResourceTable savedEntity = updateEntity(theResource, entity, true, null, thePerformIndexing, true, new Date());
 
-		notifyWriteCompleted();
+		// Notify JPA interceptors
+		for (IServerInterceptor next : getConfig().getInterceptors()) {
+			if (next instanceof IJpaServerInterceptor) {
+				((IJpaServerInterceptor) next).resourceUpdated(requestDetails, entity);
+			}
+		}
 
 		DaoMethodOutcome outcome = toMethodOutcome(savedEntity, theResource).setCreated(false);
 
