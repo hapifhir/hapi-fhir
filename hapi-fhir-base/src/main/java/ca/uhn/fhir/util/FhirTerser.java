@@ -154,7 +154,7 @@ public class FhirTerser {
 		}
 	}
 
-	public BaseRuntimeChildDefinition getDefinition(Class<? extends IResource> theResourceType, String thePath) {
+	public BaseRuntimeChildDefinition getDefinition(Class<? extends IBaseResource> theResourceType, String thePath) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
 
 		BaseRuntimeElementCompositeDefinition<?> currentDef = def;

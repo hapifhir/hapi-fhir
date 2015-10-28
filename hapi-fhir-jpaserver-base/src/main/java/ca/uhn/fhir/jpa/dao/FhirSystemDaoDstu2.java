@@ -446,8 +446,6 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info(theActionName + " completed in {}ms", new Object[] { delay });
 
-		notifyWriteCompleted();
-
 		response.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
 		return response;
 	}

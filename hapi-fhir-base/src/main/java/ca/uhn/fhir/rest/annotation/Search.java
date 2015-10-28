@@ -87,4 +87,17 @@ public @interface Search {
 	 */
 	boolean dynamic() default false;
 	
+	/**
+	 * In a REST server, should this method be invoked even if it does not have method parameters 
+	 * which correspond to all of the URL parameters passed in by the client (default is <code>false</code>).
+	 * <p>
+	 * Use this method with caution: Methods marked with a value of <code>true</code> will
+	 * be greedy, meaning they may handle invocations you had intended to be handled by other
+	 * search methods. Such a method may be invoked as long as any method parameters
+	 * marked as {@link RequiredParam required} have been satisfied. If there are other methods
+	 * which have parameters marked as {@link OptionalParam optional} which would technically be
+	 * a better match, either the this method or the other method might be called.
+	 * </p>
+	 */
+	boolean allowUnknownParams() default false;
 }

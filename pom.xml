@@ -194,6 +194,10 @@
 			<id>samlanfranchi</id>
 			<name>Sam Lanfranchi</name>
 		</developer>
+		<developer>
+			<id>jkiddo</id>
+			<name>Jens Kristian Villadsen</name>
+		</developer>
 	</developers>
 
 	<licenses>

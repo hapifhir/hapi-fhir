@@ -278,8 +278,6 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>> {
 
 		oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Transaction completed in " + delay + "ms with " + creations + " creations and " + updates + " updates");
 
-		notifyWriteCompleted();
-
 		return retVal;
 	}
 
