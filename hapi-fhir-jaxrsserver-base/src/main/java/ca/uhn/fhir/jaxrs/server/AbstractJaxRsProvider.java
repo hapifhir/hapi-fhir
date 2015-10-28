@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jaxrs.server;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -16,6 +18,7 @@ import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -25,7 +28,7 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
  * @author Peter Van Houte
  *
  */
-public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
+public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults, IResourceProvider {
 
     public static FhirContext CTX = FhirContext.forDstu2();
 
@@ -43,10 +46,10 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
      * param and query methods 
      */
     public HashMap<String, String[]> getQueryMap() {
-        MultivaluedMap<String, String> queryParameters = getInfo().getQueryParameters();
+        MultivaluedMap<String, String> queryParameters = getUriInfo().getQueryParameters();
         HashMap<String, String[]> params = new HashMap<String, String[]>();
-        for (String key : queryParameters.keySet()) {
-            params.put(key, queryParameters.get(key).toArray(new String[] {}));
+        for (Entry<String, List<String>> paramEntry : queryParameters.entrySet()) {
+            params.put(paramEntry.getKey(), paramEntry.getValue().toArray(new String[paramEntry.getValue().size()]));
         }
         return params;
     }
@@ -58,7 +61,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
     }    
 
     public String getBaseUri() {
-        return getInfo().getBaseUri().toASCIIString();
+        return getUriInfo().getBaseUri().toASCIIString();
     }
 
 	/**
@@ -73,19 +76,35 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
     }
 
 	/**
-	 * Get the info
-	 * @return the info
+	 * Get the uriInfo
+	 * @return the uri info
 	 */
-	public UriInfo getInfo() {
-		return theUriInfo;
+	public UriInfo getUriInfo() {
+		return this.theUriInfo;
 	}
+	
+	/**
+	 * Set the Uri Info
+	 * @param uriInfo the uri info
+	 */
+	public void setUriInfo(UriInfo uriInfo) {
+		this.theUriInfo = uriInfo;
+	}	
 	
 	/**
 	 * Get the headers
 	 * @return the headers
 	 */
 	public HttpHeaders getHeaders() {
-		return theHeaders;
+		return this.theHeaders;
+	}
+	
+	/**
+	 * Set the headers
+	 * @param headers the headers to set 
+	 */
+	public void setHeaders(HttpHeaders headers) {
+		this.theHeaders = headers;
 	}
 
     /**

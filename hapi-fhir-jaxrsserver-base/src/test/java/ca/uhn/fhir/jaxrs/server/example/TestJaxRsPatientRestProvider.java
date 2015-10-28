@@ -53,18 +53,18 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
  * @author axmpm
  *
  */
-@Path(JaxRsPatientRestProvider.PATH)
+@Path(TestJaxRsPatientRestProvider.PATH)
 @Stateless
 @Produces({MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML})
-public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Patient> /*implements IJaxRsPatientProvider*/ {
+public class TestJaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Patient> {
     
     static final String PATH = "/Patient";
     
     private static Long counter = 1L;
     private static final ConcurrentHashMap<String, List<Patient>> patients = new ConcurrentHashMap<String, List<Patient>>();
     
-    public JaxRsPatientRestProvider() throws Exception {
-        super(JaxRsPatientRestProvider.class);
+    public TestJaxRsPatientRestProvider() throws Exception {
+        super(TestJaxRsPatientRestProvider.class);
     }    
     
     static {

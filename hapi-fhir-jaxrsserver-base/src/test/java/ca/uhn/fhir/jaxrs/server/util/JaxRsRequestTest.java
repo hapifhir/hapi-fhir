@@ -111,7 +111,7 @@ public class JaxRsRequestTest {
 		
 		//mocks
 		provider = spy(TestDummyPatientProvider.class);
-		doReturn(uriInfo).when(provider).getInfo();
+		doReturn(uriInfo).when(provider).getUriInfo();
 		doReturn(BASEURI).when(provider).getBaseUri();
 		doReturn(headers).when(provider).getHeaders();
 		

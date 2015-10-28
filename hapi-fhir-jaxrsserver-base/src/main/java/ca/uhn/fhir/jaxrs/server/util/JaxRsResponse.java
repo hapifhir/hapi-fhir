@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import ca.uhn.fhir.parser.IParser;
@@ -43,7 +44,8 @@ public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
     @Override
     public Response sendWriterResponse(int status, String contentType, String charset, Writer writer) {
 		Object entity = writer instanceof StringWriter ? writer.toString() : writer;
-		return buildResponse(status)/*.header(HttpHeaders.CONTENT_TYPE, charset)*/.header(Constants.HEADER_CONTENT_TYPE, contentType).entity(entity).build();
+		String charContentType = contentType+";charset="+StringUtils.defaultIfBlank(charset, Constants.CHARSET_NAME_UTF8);
+		return buildResponse(status).header(Constants.HEADER_CONTENT_TYPE, charContentType).entity(entity).build();
     }
 
     @Override

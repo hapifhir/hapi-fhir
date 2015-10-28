@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jaxrs.server;
+package ca.uhn.fhir.jaxrs.server.example;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -16,8 +16,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jaxrs.server.example.JaxRsPatientRestProvider;
-import ca.uhn.fhir.jaxrs.server.example.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -56,7 +54,7 @@ public class JaxRsPatientProviderTest {
 		jettyServer.setHandler(context);
 		ServletHolder jerseyServlet = context.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/*");
 		jerseyServlet.setInitOrder(0);
-		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", JaxRsPatientRestProvider.class.getCanonicalName());
+		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", TestJaxRsPatientRestProvider.class.getCanonicalName() + "," +TestJaxRsConformanceRestProvider.class.getCanonicalName());
 		jettyServer.start();
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -75,7 +73,7 @@ public class JaxRsPatientProviderTest {
 		catch (Exception e) {
 		}
 	}
-
+	
     /** Search/Query - Type */
     @Test
     public void findUsingGenericClientBySearch() {
@@ -236,7 +234,6 @@ public class JaxRsPatientProviderTest {
     
     /** Conformance - Server */
     @Test
-    @Ignore
     public void testConformance() {
         final Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
         System.out.println(conf.getRest().get(0).getResource().get(0).getType());

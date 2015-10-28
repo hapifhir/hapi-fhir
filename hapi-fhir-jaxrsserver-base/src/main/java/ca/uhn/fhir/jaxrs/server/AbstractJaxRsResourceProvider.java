@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.BundleInclusionRule;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -43,7 +44,7 @@ import ca.uhn.fhir.util.UrlUtil;
  */
 @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
 @Consumes({MediaType.APPLICATION_FORM_URLENCODED,MediaType.APPLICATION_JSON, "application/json+fhir", "application/xml+fhir"})
-public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends AbstractJaxRsProvider implements IJaxRsResourceProvider<R> {
+public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends AbstractJaxRsProvider implements IRestfulServer<JaxRsRequest> {
 	
 	private final MethodBindings bindings;
 	
@@ -56,9 +57,9 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
     }
 
     @Override
-    public String getBaseUri() {
+	public String getBaseUri() {
         try {
-            return new URL(getInfo().getBaseUri().toURL(), getResourceType().getSimpleName()).toExternalForm();
+            return new URL(getUriInfo().getBaseUri().toURL(), getResourceType().getSimpleName()).toExternalForm();
         } catch(Exception e) {
             // cannot happen
             return null;
@@ -66,7 +67,6 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
     }
 
     @POST
-    @Override
     @Interceptors(JaxRsExceptionInterceptor.class)
     public Response create(final String resourceString)
             throws Exception {
@@ -76,20 +76,17 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
     @POST
     @Interceptors(JaxRsExceptionInterceptor.class)
     @Path("/_search")
-    @Override
     public Response searchWithPost() throws Exception {
         return executeMethod(null, RequestTypeEnum.POST, RestOperationTypeEnum.SEARCH_TYPE, null);
     }
     
     @GET
-    @Override
     @Interceptors(JaxRsExceptionInterceptor.class)    
     public Response search() throws Exception {
         return executeMethod(null, RequestTypeEnum.GET, RestOperationTypeEnum.SEARCH_TYPE, null);
     }
     
     @PUT
-    @Override
     @Path("/{id}")
     @Interceptors(JaxRsExceptionInterceptor.class)
     public Response update(@PathParam("id") final String id, final String resourceString)
@@ -98,7 +95,6 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
     }
     
     @DELETE
-    @Override
     @Path("/{id}")
     @Interceptors(JaxRsExceptionInterceptor.class)
     public Response delete(@PathParam("id") final String id) throws Exception {
@@ -107,7 +103,6 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
 
 
     @GET
-    @Override
     @Path("/{id}")
     @Interceptors(JaxRsExceptionInterceptor.class)
     public Response find(@PathParam("id") final String id) throws Exception {
@@ -120,7 +115,6 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
     }
 
     @GET
-    @Override
     @Path("/{id}/_history/{version}")
     @Interceptors(JaxRsExceptionInterceptor.class)
     public Response findHistory(@PathParam("id") final String id, @PathParam("version") final String versionString)
@@ -128,21 +122,20 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
         BaseMethodBinding<?> method = getBindings().getBinding(RestOperationTypeEnum.VREAD);
         final RequestDetails theRequest = createRequestDetails(null, RequestTypeEnum.GET, RestOperationTypeEnum.VREAD);
         if (id == null) {
-            throw new InvalidRequestException("Don't know how to handle request path: " + getInfo().getRequestUri().toASCIIString());
+            throw new InvalidRequestException("Don't know how to handle request path: " + getUriInfo().getRequestUri().toASCIIString());
         }
         theRequest.setId(new IdDt(getBaseUri(), id, UrlUtil.unescape(versionString)));
         return (Response) method.invokeServer(this, theRequest);
     }
 
-    @GET
-    @Override
+	@GET
     @Path("/{id}/{compartment}")
     @Interceptors(JaxRsExceptionInterceptor.class)
     public Response findCompartment(@PathParam("id") final String id, @PathParam("compartment") final String compartment) throws BaseServerResponseException, IOException {
         BaseMethodBinding<?> method = getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, compartment);
         final RequestDetails theRequest = createRequestDetails(null, RequestTypeEnum.GET, RestOperationTypeEnum.VREAD);
         if (id == null) {
-            throw new InvalidRequestException("Don't know how to handle request path: " + getInfo().getRequestUri().toASCIIString());
+            throw new InvalidRequestException("Don't know how to handle request path: " + getUriInfo().getRequestUri().toASCIIString());
         }
         theRequest.setCompartmentName(compartment);
         theRequest.setId(new IdDt(getBaseUri(), id));
