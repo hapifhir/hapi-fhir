@@ -29,14 +29,16 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.MDC;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.method.RequestDetails;
 
 public class BaseJpaProvider {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaProvider.class);
 	public static final String REMOTE_ADDR = "req.remoteAddr";
-
 	public static final String REMOTE_UA = "req.userAgent";
+
+	private FhirContext myContext;
 
 	public void endRequest(HttpServletRequest theRequest) {
 		MDC.remove(REMOTE_ADDR);
@@ -45,6 +47,14 @@ public class BaseJpaProvider {
 
 	public void endRequest(RequestDetails theRequest) {
 		endRequest(theRequest.getServletRequest());
+	}
+
+	public FhirContext getContext() {
+		return myContext;
+	}
+
+	public void setContext(FhirContext theContext) {
+		myContext = theContext;
 	}
 
 	public void startRequest(HttpServletRequest theRequest) {

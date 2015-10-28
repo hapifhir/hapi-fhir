@@ -54,7 +54,27 @@ public class ServerSearchDstu2Test {
 		assertEquals("searchParam1", ourLastMethod);
 		assertEquals("param1value", ourLastRef.getValue());
 	}
-	
+
+	@Test
+	public void testSearchParam2() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?param2=param2value&foo=bar");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals("searchParam2", ourLastMethod);
+		assertEquals("param2value", ourLastRef.getValue());
+	}
+
+	@Test
+	public void testUnknownSearchParam() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/?foo=bar");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(null, ourLastMethod);
+	}
 
 	@AfterClass
 	public static void afterClass() throws Exception {
@@ -86,9 +106,8 @@ public class ServerSearchDstu2Test {
 
 	public static class DummyPatientResourceProvider {
 		
-
 		//@formatter:off
-		@Search()
+		@Search(allowUnknownParams=true)
 		public List<IBaseResource> searchParam1(
 				@RequiredParam(name = "param1") StringParam theParam) {
 			ourLastMethod = "searchParam1";
@@ -104,7 +123,7 @@ public class ServerSearchDstu2Test {
 		//@formatter:on
 
 		//@formatter:off
-		@Search()
+		@Search(allowUnknownParams=true)
 		public List<IBaseResource> searchParam2(
 				@RequiredParam(name = "param2") StringParam theParam) {
 			ourLastMethod = "searchParam2";

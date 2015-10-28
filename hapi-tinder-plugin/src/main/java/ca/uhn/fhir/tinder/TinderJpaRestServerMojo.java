@@ -210,9 +210,14 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		// Conformance conformance = new FhirContext(Conformance.class).newXmlParser().parseResource(Conformance.class, metadataString);
 
 		TinderJpaRestServerMojo mojo = new TinderJpaRestServerMojo();
+		mojo.myProject = new MavenProject();
+		mojo.version = "dstu2";
 		mojo.packageBase = "ca.uhn.test";
-		mojo.baseResourceNames = java.util.Collections.singletonList("observation");
+		mojo.configPackageBase = "ca.uhn.test";
+//		mojo.baseResourceNames = new ArrayList<String>(Collections.singletonList("observation"));
 		mojo.targetDirectory = new File("target/generated/valuesets");
+		mojo.targetResourceDirectory = new File("target/generated/valuesets");
+		mojo.targetResourceSpringBeansFile = "tmp_beans.xml";
 		mojo.execute();
 	}
 

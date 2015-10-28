@@ -16,7 +16,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	private List<String> myInputStreamNames;
 	private ArrayList<InputStream> myInputStreams;
 	private String myTemplate = null;
-	private String myVersion;
+	protected String myVersion;
 
 	public ResourceGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) {
 		super(theVersion, theBaseDir);

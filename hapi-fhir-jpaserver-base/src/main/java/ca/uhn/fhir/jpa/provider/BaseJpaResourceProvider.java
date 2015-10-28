@@ -43,7 +43,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 
 public abstract class BaseJpaResourceProvider<T extends IResource> extends BaseJpaProvider implements IResourceProvider {
 
-	private FhirContext myContext;
 	private IFhirResourceDao<T> myDao;
 
 	public BaseJpaResourceProvider() {
@@ -53,10 +52,6 @@ public abstract class BaseJpaResourceProvider<T extends IResource> extends BaseJ
 	@CoverageIgnore
 	public BaseJpaResourceProvider(IFhirResourceDao<T> theDao) {
 		myDao = theDao;
-	}
-
-	public FhirContext getContext() {
-		return myContext;
 	}
 
 	public IFhirResourceDao<T> getDao() {
@@ -116,10 +111,6 @@ public abstract class BaseJpaResourceProvider<T extends IResource> extends BaseJ
 		} finally {
 			endRequest(theRequest);
 		}
-	}
-
-	public void setContext(FhirContext theContext) {
-		myContext = theContext;
 	}
 
 	@Required

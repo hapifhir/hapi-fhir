@@ -40,4 +40,5 @@ public interface IDao {
 		}
 	};
 
+	
 }

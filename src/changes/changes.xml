@@ -217,6 +217,11 @@
 				which are part of a bundle when the resource has a UUID/OID
 				ID.
 			</action>
+			<action type="add">
+				Add ability for a server REST resource provider @Search method
+				to declare that it should allow even parameters it doesn't 
+				understand.
+			<action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

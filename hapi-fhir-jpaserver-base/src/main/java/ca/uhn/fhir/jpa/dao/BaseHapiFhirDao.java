@@ -48,6 +48,7 @@ import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -134,11 +135,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	/**
 	 * These are parameters which are supported by {@link BaseHapiFhirResourceDao#searchForIds(Map)}
 	 */
-	protected static final Map<String, Class<? extends IQueryParameterType>> RESOURCE_META_PARAMS;
+	static final Map<String, Class<? extends IQueryParameterType>> RESOURCE_META_PARAMS;
 	/**
 	 * These are parameters which are supported by {@link BaseHapiFhirResourceDao#searchForIds(Map)}
 	 */
-	protected static final Map<String, Class<? extends IQueryParameterAnd<?>>> RESOURCE_META_AND_PARAMS;
+	static final Map<String, Class<? extends IQueryParameterAnd<?>>> RESOURCE_META_AND_PARAMS;
 
 	static {
 		Map<String, Class<? extends IQueryParameterType>> resourceMetaParams = new HashMap<String, Class<? extends IQueryParameterType>>();
@@ -1533,6 +1534,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		}
 		return b.toString();
+	}
+
+	public BaseHasResource readEntity(IIdType theValueId) {
+		throw new NotImplementedException("");
 	}
 
 }

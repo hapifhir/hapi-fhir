@@ -60,7 +60,7 @@ public abstract class BaseStructureParser {
 	private TreeMap<String, String> myNameToDatatypeClass = new TreeMap<String, String>();
 	private TreeMap<String, String> myNameToResourceClass = new TreeMap<String, String>();
 	private String myPackageBase;
-	private List<BaseRootType> myResources = new ArrayList<BaseRootType>();
+	protected List<BaseRootType> myResources = new ArrayList<BaseRootType>();
 	private String myVersion;
 
 	public BaseStructureParser(String theVersion, String theBaseDir) {
@@ -555,7 +555,7 @@ public abstract class BaseStructureParser {
 		}
 	}
 
-	private FhirVersionEnum determineVersionEnum() throws MojoFailureException {
+	protected FhirVersionEnum determineVersionEnum() throws MojoFailureException {
 		FhirVersionEnum versionEnum = null;
 		if ("dstu".equals(myVersion)) {
 			versionEnum = FhirVersionEnum.DSTU1;
