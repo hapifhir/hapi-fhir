@@ -2,6 +2,8 @@ package ca.uhn.fhir.jaxrs.server;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
 
 import javax.interceptor.Interceptors;
 import javax.ws.rs.Consumes;
@@ -18,7 +20,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
-import ca.uhn.fhir.jaxrs.server.util.JaxRsRequestDetails;
+import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.MethodBindings;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -26,9 +28,12 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.BundleInclusionRule;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.UrlUtil;
 
 /**
@@ -40,22 +45,18 @@ import ca.uhn.fhir.util.UrlUtil;
 @Consumes({MediaType.APPLICATION_FORM_URLENCODED,MediaType.APPLICATION_JSON, "application/json+fhir", "application/xml+fhir"})
 public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends AbstractJaxRsProvider implements IJaxRsResourceProvider<R> {
 	
-    private static MethodBindings bindings;
+	private final MethodBindings bindings;
+	
+	protected AbstractJaxRsResourceProvider() {
+		bindings = MethodBindings.getMethodBindings(this, getClass());
+    }	
 
-    public AbstractJaxRsResourceProvider(Class<?> subclass) {
-        initBindings(subclass);
+    protected AbstractJaxRsResourceProvider(Class<?> subclass) {
+    	bindings = MethodBindings.getMethodBindings(this, subclass);
     }
 
-	private void initBindings(Class<?> subclass) {
-		if(bindings == null) {
-			MethodBindings methodBindings = new MethodBindings();
-			methodBindings.findMethods(this, subclass, getFhirContext());
-			bindings = methodBindings;
-		}
-	}
-    
     @Override
-    protected String getBaseUri() {
+    public String getBaseUri() {
         try {
             return new URL(getInfo().getBaseUri().toURL(), getResourceType().getSimpleName()).toExternalForm();
         } catch(Exception e) {
@@ -115,7 +116,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
     
     protected Response customOperation(final String resource, RequestTypeEnum requestType, String id, String operationName, RestOperationTypeEnum operationType)
             throws Exception {
-        return executeMethod(resource, requestType, operationType, id, bindings.getBinding(operationType, operationName));
+        return executeMethod(resource, requestType, operationType, id, getBindings().getBinding(operationType, operationName));
     }
 
     @GET
@@ -124,7 +125,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
     @Interceptors(JaxRsExceptionInterceptor.class)
     public Response findHistory(@PathParam("id") final String id, @PathParam("version") final String versionString)
             throws BaseServerResponseException, IOException {
-        BaseMethodBinding<?> method = bindings.getBinding(RestOperationTypeEnum.VREAD);
+        BaseMethodBinding<?> method = getBindings().getBinding(RestOperationTypeEnum.VREAD);
         final RequestDetails theRequest = createRequestDetails(null, RequestTypeEnum.GET, RestOperationTypeEnum.VREAD);
         if (id == null) {
             throw new InvalidRequestException("Don't know how to handle request path: " + getInfo().getRequestUri().toASCIIString());
@@ -138,7 +139,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
     @Path("/{id}/{compartment}")
     @Interceptors(JaxRsExceptionInterceptor.class)
     public Response findCompartment(@PathParam("id") final String id, @PathParam("compartment") final String compartment) throws BaseServerResponseException, IOException {
-        BaseMethodBinding<?> method = bindings.getBinding(RestOperationTypeEnum.SEARCH_TYPE, compartment);
+        BaseMethodBinding<?> method = getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, compartment);
         final RequestDetails theRequest = createRequestDetails(null, RequestTypeEnum.GET, RestOperationTypeEnum.VREAD);
         if (id == null) {
             throw new InvalidRequestException("Don't know how to handle request path: " + getInfo().getRequestUri().toASCIIString());
@@ -150,7 +151,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
     
     private <T extends BaseMethodBinding<?>> Response executeMethod(final String resourceString, RequestTypeEnum requestType, RestOperationTypeEnum restOperation, String id) 
             throws BaseServerResponseException, IOException {
-        BaseMethodBinding<?> method = bindings.getBinding(restOperation);
+        BaseMethodBinding<?> method = getBindings().getBinding(restOperation);
         return executeMethod(resourceString, requestType, restOperation, id, method);
     }
 
@@ -162,8 +163,8 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
     }    
     
     
-    protected JaxRsRequestDetails createRequestDetails(final String resourceString, RequestTypeEnum requestType, RestOperationTypeEnum restOperation, String id) {
-    	JaxRsRequestDetails theRequest = super.createRequestDetails(resourceString, requestType, restOperation);
+    protected JaxRsRequest createRequestDetails(final String resourceString, RequestTypeEnum requestType, RestOperationTypeEnum restOperation, String id) {
+    	JaxRsRequest theRequest = super.createRequestDetails(resourceString, requestType, restOperation);
         theRequest.setId(StringUtils.isBlank(id) ? null : new IdDt(getResourceType().getName(), UrlUtil.unescape(id)));
         if(restOperation == RestOperationTypeEnum.UPDATE) {
                 String contentLocation = theRequest.getHeader(Constants.HEADER_CONTENT_LOCATION);
@@ -173,8 +174,27 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
         }
         return theRequest;
     }
+    
+    @Override
+	public List<IServerInterceptor> getInterceptors() {
+		return Collections.emptyList();
+	}
+
+	@Override
+	public IPagingProvider getPagingProvider() {
+		return null;
+	}
+
+	@Override
+	public BundleInclusionRule getBundleInclusionRule() {
+		return BundleInclusionRule.BASED_ON_INCLUDES;
+	}    
 
 	@Override
     public abstract Class<R> getResourceType();
-    
+
+	public MethodBindings getBindings() {
+		return bindings;
+	}
+
 }

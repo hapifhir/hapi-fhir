@@ -5,7 +5,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -14,55 +13,73 @@ import ca.uhn.fhir.rest.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.util.ReflectionUtil;
 
+/**
+ * @author Peter Van Houte
+ * Class that contains the method bindings defined by a ResourceProvider
+ */
 public class MethodBindings {
     
-    /** ALL METHOD BINDINGS */
-    ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String, BaseMethodBinding<?>>> allBindings = new ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String,BaseMethodBinding<?>>>();    
+	/** Static collection of bindings mapped to a class*/
+	private static final ConcurrentHashMap<Class<?>, MethodBindings> classBindings = new ConcurrentHashMap<Class<?>, MethodBindings>();
+	/** Static collection of operationBindings mapped to a class */
+    private ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String, BaseMethodBinding<?>>> operationBindings = new ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String,BaseMethodBinding<?>>>();
     
-    public <T extends AbstractJaxRsResourceProvider<?>> void findMethods(T theProvider, Class<?> subclass, FhirContext fhirContext) {
-        for (final Method m : ReflectionUtil.getDeclaredMethods(subclass)) {
-            final BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, fhirContext, theProvider);
+    public <T extends AbstractJaxRsResourceProvider<?>> MethodBindings(T theProvider, Class<?> clazz) {
+        for (final Method m : ReflectionUtil.getDeclaredMethods(clazz)) {
+            final BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, theProvider.getFhirContext(), theProvider);
             if (foundMethodBinding == null) {
                 continue;
             }
-            ConcurrentHashMap<String, BaseMethodBinding<?>> map = getAllBindingsMap(foundMethodBinding.getRestOperationType());
-            if (foundMethodBinding instanceof OperationMethodBinding) {
-                OperationMethodBinding binding = (OperationMethodBinding) foundMethodBinding;
-                putIfAbsent(map, binding.getName(), binding);
-            } else if (foundMethodBinding instanceof SearchMethodBinding) {
-                Search search = m.getAnnotation(Search.class);
-                String compartmentName = StringUtils.defaultIfBlank(search.compartmentName(), "");
-                putIfAbsent(map, compartmentName, foundMethodBinding);
-            } else {
-                putIfAbsent(map, "", foundMethodBinding);
-            }
+            String bindingKey = getBindingKey(foundMethodBinding);
+            putIfAbsent(bindingKey, foundMethodBinding);
         }
     }
 
-    private void putIfAbsent(ConcurrentHashMap<String, BaseMethodBinding<?>> map, String key, BaseMethodBinding binding) {
+	private String getBindingKey(final BaseMethodBinding<?> foundMethodBinding) {
+		if (foundMethodBinding instanceof OperationMethodBinding) {
+		    return ((OperationMethodBinding) foundMethodBinding).getName();
+		} else if (foundMethodBinding instanceof SearchMethodBinding) {
+		    Search search = foundMethodBinding.getMethod().getAnnotation(Search.class);
+		    return search.compartmentName();
+		} else {
+			return "";
+		}
+	}
+
+    private void putIfAbsent(String key, BaseMethodBinding<?> binding) {
+    	operationBindings.putIfAbsent(binding.getRestOperationType(), new ConcurrentHashMap<String, BaseMethodBinding<?>>());
+    	ConcurrentHashMap<String, BaseMethodBinding<?>> map = operationBindings.get(binding.getRestOperationType());
         if (map.containsKey(key)) {
             throw new IllegalArgumentException("Multiple Search Method Bindings Found : " + map.get(key) + " -- " + binding.getMethod());
-        }        
+        }
         map.put(key, binding);
     }
 
-    private ConcurrentHashMap<String,BaseMethodBinding<?>> getAllBindingsMap(final RestOperationTypeEnum restOperationTypeEnum) {
-        allBindings.putIfAbsent(restOperationTypeEnum, new ConcurrentHashMap<String, BaseMethodBinding<?>>());
-        return allBindings.get(restOperationTypeEnum);
-    }
+    public BaseMethodBinding<?> getBinding(RestOperationTypeEnum operationType) {
+        return getBinding(operationType, "");
+    }    
 
     public BaseMethodBinding<?> getBinding(RestOperationTypeEnum operationType, String qualifier) {
-        String nonEmptyQualifier = StringUtils.defaultIfBlank(qualifier, "");        
-        ConcurrentHashMap<String, BaseMethodBinding<?>> map = getAllBindingsMap(operationType);
-        if(!map.containsKey(nonEmptyQualifier)) {
+        String nonEmptyQualifier = StringUtils.defaultIfBlank(qualifier, "");
+		ConcurrentHashMap<String, BaseMethodBinding<?>> map = operationBindings.get(operationType);
+        if(map == null || !map.containsKey(nonEmptyQualifier)) {
             throw new UnsupportedOperationException();
         }  else {
             return map.get(nonEmptyQualifier);
         }
     }
     
-    public BaseMethodBinding<?> getBinding(RestOperationTypeEnum operationType) {
-        return getBinding(operationType, "");
-    }
+	public static <T extends AbstractJaxRsResourceProvider<?>> MethodBindings getMethodBindings(T theProvider, Class<?> clazz) {
+		if(!getClassBindings().containsKey(clazz)) {
+			MethodBindings foundBindings = new MethodBindings(theProvider, clazz);
+			getClassBindings().putIfAbsent(clazz, foundBindings);
+		}
+		return getClassBindings().get(clazz);
+	}
 
+	public static ConcurrentHashMap<Class<?>, MethodBindings> getClassBindings() {
+		return classBindings;
+	}
+		
+    
 }

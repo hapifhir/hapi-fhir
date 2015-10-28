@@ -4,12 +4,12 @@ import java.io.IOException;
 
 import javax.ws.rs.core.Response;
 
-import ca.uhn.fhir.jaxrs.server.util.JaxRsRequestDetails;
+import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
-public interface IJaxRsResourceProvider<T> extends IRestfulServer<JaxRsRequestDetails>, IResourceProvider {
+public interface IJaxRsResourceProvider<T> extends IRestfulServer<JaxRsRequest>, IResourceProvider {
 
     Response search()
                     throws Exception;

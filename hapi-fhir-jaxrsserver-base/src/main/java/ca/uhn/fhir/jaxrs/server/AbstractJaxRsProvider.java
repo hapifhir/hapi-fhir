@@ -8,7 +8,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jaxrs.server.util.JaxRsRequestDetails;
+import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -30,18 +30,19 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
     public static FhirContext CTX = FhirContext.forDstu2();
 
     @Context
-    private UriInfo info;
+    private UriInfo theUriInfo;
     @Context
-    private HttpHeaders headers;
+    private HttpHeaders theHeaders;
 
-    public FhirContext getFhirContext() {
+    @Override
+	public FhirContext getFhirContext() {
         return CTX;
     }
 
     /** 
      * param and query methods 
      */
-    protected HashMap<String, String[]> getQueryMap() {
+    public HashMap<String, String[]> getQueryMap() {
         MultivaluedMap<String, String> queryParameters = getInfo().getQueryParameters();
         HashMap<String, String[]> params = new HashMap<String, String[]>();
         for (String key : queryParameters.keySet()) {
@@ -56,48 +57,42 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
         return addressStrategy; 
     }    
 
-    protected String getBaseUri() {
+    public String getBaseUri() {
         return getInfo().getBaseUri().toASCIIString();
     }
 
 	/**
      * PARSING METHODS
      */
-    public IParser getParser(JaxRsRequestDetails theRequestDetails) {
+    public IParser getParser(JaxRsRequest theRequestDetails) {
     	return RestfulServerUtils.getNewParser(getFhirContext(), theRequestDetails);
     }
 
-    protected JaxRsRequestDetails createRequestDetails(final String resourceString, RequestTypeEnum requestType, RestOperationTypeEnum restOperation) {
-        JaxRsRequestDetails theRequest = new JaxRsRequestDetails(headers, resourceString);
-        theRequest.setFhirServerBase(getBaseUri());
-        theRequest.setRestOperationType(restOperation);
-        theRequest.setServer(this);
-        theRequest.setParameters(getQueryMap());
-        theRequest.setRequestType(requestType);
-        return theRequest;
+    protected JaxRsRequest createRequestDetails(final String resourceString, RequestTypeEnum requestType, RestOperationTypeEnum restOperation) {
+        return new JaxRsRequest(this, resourceString, requestType, restOperation);
     }
-    
 
 	/**
 	 * Get the info
 	 * @return the info
 	 */
 	public UriInfo getInfo() {
-		return info;
+		return theUriInfo;
 	}
-
+	
 	/**
-	 * Set the info
-	 * @param info the info to set
+	 * Get the headers
+	 * @return the headers
 	 */
-	public void setInfo(UriInfo info) {
-		this.info = info;
-	}    
+	public HttpHeaders getHeaders() {
+		return theHeaders;
+	}
 
     /**
      * DEFAULT VALUES
      */
-    public EncodingEnum getDefaultResponseEncoding() {
+    @Override
+	public EncodingEnum getDefaultResponseEncoding() {
         return EncodingEnum.JSON;
     }
     
@@ -119,5 +114,6 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	@Override
 	public boolean isUseBrowserFriendlyContentTypes() {
 		return true;
-	}    
+	}
+
 }
