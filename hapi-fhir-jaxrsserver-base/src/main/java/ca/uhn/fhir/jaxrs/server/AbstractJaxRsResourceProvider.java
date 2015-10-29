@@ -18,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
@@ -43,7 +44,7 @@ import ca.uhn.fhir.util.UrlUtil;
  *
  */
 @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
-@Consumes({MediaType.APPLICATION_FORM_URLENCODED,MediaType.APPLICATION_JSON, "application/json+fhir", "application/xml+fhir"})
+@Consumes({MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML})
 public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends AbstractJaxRsProvider implements IRestfulServer<JaxRsRequest> {
 	
 	private final MethodBindings bindings;
@@ -56,8 +57,8 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
     	bindings = MethodBindings.getMethodBindings(this, subclass);
     }
 
-    @Override
-	public String getBaseUri() {
+	@Override
+	public String getBaseForRequest() {
         try {
             return new URL(getUriInfo().getBaseUri().toURL(), getResourceType().getSimpleName()).toExternalForm();
         } catch(Exception e) {
@@ -111,6 +112,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
     
     protected Response customOperation(final String resource, RequestTypeEnum requestType, String id, String operationName, RestOperationTypeEnum operationType)
             throws Exception {
+    	Validate.notNull(resource, "resource may not be null");
         return executeMethod(resource, requestType, operationType, id, getBindings().getBinding(operationType, operationName));
     }
 
@@ -124,7 +126,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
         if (id == null) {
             throw new InvalidRequestException("Don't know how to handle request path: " + getUriInfo().getRequestUri().toASCIIString());
         }
-        theRequest.setId(new IdDt(getBaseUri(), id, UrlUtil.unescape(versionString)));
+        theRequest.setId(new IdDt(getBaseForRequest(), id, UrlUtil.unescape(versionString)));
         return (Response) method.invokeServer(this, theRequest);
     }
 
@@ -138,7 +140,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
             throw new InvalidRequestException("Don't know how to handle request path: " + getUriInfo().getRequestUri().toASCIIString());
         }
         theRequest.setCompartmentName(compartment);
-        theRequest.setId(new IdDt(getBaseUri(), id));
+        theRequest.setId(new IdDt(getBaseForRequest(), id));
         return (Response) method.invokeServer(this, theRequest);        
     }
     

@@ -11,7 +11,6 @@ import javax.ws.rs.core.UriInfo;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.AddProfileTagEnum;
@@ -21,7 +20,6 @@ import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
 
 /**
  * Abstract Jax Rs Rest Server
@@ -56,21 +54,21 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults, I
     
     public IServerAddressStrategy getServerAddressStrategy() {
         HardcodedServerAddressStrategy addressStrategy = new HardcodedServerAddressStrategy();
-        addressStrategy.setValue(getBaseUri());
+        addressStrategy.setValue(getBaseForRequest());
         return addressStrategy; 
-    }    
-
-    public String getBaseUri() {
+    }
+    
+    public String getBaseForServer() {
         return getUriInfo().getBaseUri().toASCIIString();
     }
+    
+    public String getBaseForRequest() {
+        return getBaseForServer();
+    }    
 
 	/**
      * PARSING METHODS
      */
-    public IParser getParser(JaxRsRequest theRequestDetails) {
-    	return RestfulServerUtils.getNewParser(getFhirContext(), theRequestDetails);
-    }
-
     protected JaxRsRequest createRequestDetails(final String resourceString, RequestTypeEnum requestType, RestOperationTypeEnum restOperation) {
         return new JaxRsRequest(this, resourceString, requestType, restOperation);
     }

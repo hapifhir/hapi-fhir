@@ -51,231 +51,207 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 /**
  * Fhir Physician Rest Service
+ * 
  * @author axmpm
  *
  */
-@Local(IJaxRsPatientProvider.class)
+@Local
 @Path(JaxRsPatientRestProvider.PATH)
-@Stateless(name = IJaxRsPatientProvider.JNDI_NAME, mappedName=IJaxRsPatientProvider.JNDI_NAME)
-@Produces({MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML})
-public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Patient> implements IJaxRsPatientProvider {
-    
-    static final String PATH = "/Patient";
-    
-    private static Long counter = 1L;
-    private static final ConcurrentHashMap<String, List<Patient>> patients = new ConcurrentHashMap<String, List<Patient>>();
-    
-    public JaxRsPatientRestProvider() throws Exception {
-        super(JaxRsPatientRestProvider.class);
-    }    
-    
-    static {
-        patients.put(""+counter, createPatient("Van Houte"));
-        patients.put(""+(counter), createPatient("Agnew"));
-        for(int i = 0 ; i<20 ; i++) {
-            patients.put(""+(counter), createPatient("Random Patient " + counter));
-        }
-    }
+@Stateless
+@Produces({ MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML })
+public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Patient> {
 
-    private static List<Patient> createPatient(final String name) {
-        final Patient patient = new Patient();
-        patient.getNameFirstRep().addFamily(name);
-        return createPatient(patient);
-    }
-    
-    private static List<Patient> createPatient(final Patient patient) {
-        patient.setId(createId(counter, 1L));
-        final LinkedList<Patient> list = new LinkedList<Patient>();
-        list.add(patient);
-        counter++;
-        return list ;
-    }    
+	static final String PATH = "/Patient";
 
-    private static IdDt createId(final Long id, final Long theVersionId) {
-        return new IdDt("Patient", "" + id, "" + theVersionId);
-    }
-    
-    @Search
-    @Override
-    public List<Patient> search(@RequiredParam(name = Patient.SP_NAME) final StringParam name) {
-        final List<Patient> result = new LinkedList<Patient>();
-        for (final List<Patient> patientIterator : patients.values()) {
-            Patient single = null;
-            for (Patient patient : patientIterator) {
-                if (name == null || patient.getNameFirstRep().getFamilyFirstRep().getValueNotNull().equals(name.getValueNotNull())) {
-                    single = patient;
-                }
-            }
-            if (single != null) {
-                result.add(single);
-            }
-        }
-        return result;
-    }
-    
-    @Update
-    @Override
-    public MethodOutcome update(@IdParam final IdDt theId, @ResourceParam final Patient patient)
-            throws Exception {
-        final String idPart = theId.getIdPart();
-        if(patients.containsKey(idPart)) {
-            final List<Patient> patientList = patients.get(idPart);
-            final Patient lastPatient = getLast(patientList);
-            patient.setId(createId(theId.getIdPartAsLong(), lastPatient.getId().getVersionIdPartAsLong()+1));
-            patientList.add(patient);
-            final MethodOutcome result = new MethodOutcome().setCreated(false);
-            result.setResource(patient);
-            result.setId(patient.getId());
-            return result;
-        } else { 
-            throw new ResourceNotFoundException(theId);
-        }
-    }    
+	private static Long counter = 1L;
+	private static final ConcurrentHashMap<String, List<Patient>> patients = new ConcurrentHashMap<String, List<Patient>>();
 
-    @Override
-    @Read
-    public Patient find(@IdParam final IdDt theId) {
-        if(patients.containsKey(theId.getIdPart())) {
-            return getLast(patients.get(theId.getIdPart()));
-        } else { 
-            throw new ResourceNotFoundException(theId);
-        }
-    }
-    
-    
-    private Patient getLast(final List<Patient> list) {
-        return list.get(list.size()-1);
-    }
+	public JaxRsPatientRestProvider() throws Exception {
+		super(JaxRsPatientRestProvider.class);
+	}
 
-    @Override
-    @Read(version = true)
-    public Patient findHistory(@IdParam final IdDt theId) {
-        if (patients.containsKey(theId.getIdPart())) {
-            final List<Patient> list = patients.get(theId.getIdPart());
-            for (final Patient patient : list) {
-                if (patient.getId().getVersionIdPartAsLong().equals(theId.getVersionIdPartAsLong())) {
-                    return patient;
-                }
-            }
-        }
-        throw new ResourceNotFoundException(theId);
-    }
+	static {
+		patients.put("" + counter, createPatient("Van Houte"));
+		patients.put("" + (counter), createPatient("Agnew"));
+		for (int i = 0; i < 20; i++) {
+			patients.put("" + (counter), createPatient("Random Patient " + counter));
+		}
+	}
 
-    @Create
-    @Override
-    public MethodOutcome create(@ResourceParam final Patient patient, @ConditionalUrlParam String theConditional) 
-            throws Exception {
-        patients.put(""+counter, createPatient(patient));
-        final MethodOutcome result = new MethodOutcome().setCreated(true);
-        result.setResource(patient);
-        result.setId(patient.getId());
-        return result;
-    }
-    
-    @Delete
-    @Override
-    public MethodOutcome delete(@IdParam final IdDt theId) {
-        final Patient deletedPatient = find(theId);
-        patients.remove(deletedPatient.getId().getIdPart());
-        final MethodOutcome result = new MethodOutcome().setCreated(true);
-        result.setResource(deletedPatient);
-        return result;
-    }
-    
-    
-    @GET
-    @Path("/{id}/$last")
-    @Interceptors(JaxRsExceptionInterceptor.class)
-    @Override
-    public Response operationLastGet(@PathParam("id") String id)
-            throws Exception {
-        return customOperation(null, RequestTypeEnum.GET, id, "$last", RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
-    }
-    
-    @Search(compartmentName="Condition")
-    @Override
-    public List<IResource> searchCompartment(@IdParam IdDt thePatientId) {
-       List<IResource> retVal=new ArrayList<IResource>();
-       Condition condition = new Condition();
-       condition.setId(new IdDt("665577"));
-       retVal.add(condition);
-       return retVal;
-    }    
-    
-    @POST
-    @Path("/{id}/$last")
-    @Interceptors(JaxRsExceptionInterceptor.class)
-    @Override
-    public Response operationLast(final String resource)
-            throws Exception {
-        return customOperation(resource, RequestTypeEnum.POST, null, "$last", RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
-    }
-    
-//    @ca.uhn.fhir.rest.annotation.Validate
-//    public MethodOutcome validate(
-//            @ResourceParam T theResource, 
-//            @ResourceParam String theRawResource, 
-//            @ResourceParam EncodingEnum theEncoding, 
-//            @ca.uhn.fhir.rest.annotation.Validate.Mode ValidationModeEnum theMode,
-//            @ca.uhn.fhir.rest.annotation.Validate.Profile String theProfile) {
-//        return validate(theResource, null, theRawResource, theEncoding, theMode, theProfile);
-//    }
+	private static List<Patient> createPatient(final String name) {
+		final Patient patient = new Patient();
+		patient.getNameFirstRep().addFamily(name);
+		return createPatient(patient);
+	}
 
-  @Operation(name="last", idempotent=true, returnParameters= {
-      @OperationParam(name="return", type=StringDt.class)
-  })
-  @Override
-  public Parameters last(@OperationParam(name = "dummy") StringDt dummyInput) {
-      System.out.println("inputparameter");
-      Parameters parameters = new Parameters();
-      Patient patient = find(new IdDt(counter.intValue()-1));
-      parameters
-          .addParameter()
-          .setName("return")
-          .setResource(patient)
-          .setValue(new StringDt((counter-1)+"" + "inputVariable [ " + dummyInput.getValue()+ "]"));
-      return parameters;
-  }    
-  
-  @Override
-  public Class<Patient> getResourceType() {
-	  return Patient.class;
-  }
-  
-  /** THE DEFAULTS */
-    @Override
-    public List<IServerInterceptor> getInterceptors() {
-        return Collections.emptyList();
-    }
+	private static List<Patient> createPatient(final Patient patient) {
+		patient.setId(createId(counter, 1L));
+		final LinkedList<Patient> list = new LinkedList<Patient>();
+		list.add(patient);
+		counter++;
+		return list;
+	}
 
-    @Override
-    public ETagSupportEnum getETagSupport() {
-        return ETagSupportEnum.DISABLED;
-    }
+	private static IdDt createId(final Long id, final Long theVersionId) {
+		return new IdDt("Patient", "" + id, "" + theVersionId);
+	}
 
-    @Override
-    public boolean isDefaultPrettyPrint() {
-        return true;
-    }
+	@Search
+	public List<Patient> search(@RequiredParam(name = Patient.SP_NAME) final StringParam name) {
+		final List<Patient> result = new LinkedList<Patient>();
+		for (final List<Patient> patientIterator : patients.values()) {
+			Patient single = null;
+			for (Patient patient : patientIterator) {
+				if (name == null || patient.getNameFirstRep().getFamilyFirstRep().getValueNotNull()
+						.equals(name.getValueNotNull())) {
+					single = patient;
+				}
+			}
+			if (single != null) {
+				result.add(single);
+			}
+		}
+		return result;
+	}
 
-    @Override
-    public AddProfileTagEnum getAddProfileTag() {
-        return AddProfileTagEnum.NEVER;
-    }
+	@Update
+	public MethodOutcome update(@IdParam final IdDt theId, @ResourceParam final Patient patient) throws Exception {
+		final String idPart = theId.getIdPart();
+		if (patients.containsKey(idPart)) {
+			final List<Patient> patientList = patients.get(idPart);
+			final Patient lastPatient = getLast(patientList);
+			patient.setId(createId(theId.getIdPartAsLong(), lastPatient.getId().getVersionIdPartAsLong() + 1));
+			patientList.add(patient);
+			final MethodOutcome result = new MethodOutcome().setCreated(false);
+			result.setResource(patient);
+			result.setId(patient.getId());
+			return result;
+		} else {
+			throw new ResourceNotFoundException(theId);
+		}
+	}
 
-    @Override
-    public boolean isUseBrowserFriendlyContentTypes() {
-        return true;
-    }
+	@Read
+	public Patient find(@IdParam final IdDt theId) {
+		if (patients.containsKey(theId.getIdPart())) {
+			return getLast(patients.get(theId.getIdPart()));
+		} else {
+			throw new ResourceNotFoundException(theId);
+		}
+	}
 
-    @Override
-    public IPagingProvider getPagingProvider() {
-        return new FifoMemoryPagingProvider(10);
-    }
+	private Patient getLast(final List<Patient> list) {
+		return list.get(list.size() - 1);
+	}
 
-    @Override
-    public BundleInclusionRule getBundleInclusionRule() {
-        return BundleInclusionRule.BASED_ON_INCLUDES;
-    }
+	@Read(version = true)
+	public Patient findHistory(@IdParam final IdDt theId) {
+		if (patients.containsKey(theId.getIdPart())) {
+			final List<Patient> list = patients.get(theId.getIdPart());
+			for (final Patient patient : list) {
+				if (patient.getId().getVersionIdPartAsLong().equals(theId.getVersionIdPartAsLong())) {
+					return patient;
+				}
+			}
+		}
+		throw new ResourceNotFoundException(theId);
+	}
+
+	@Create
+	public MethodOutcome create(@ResourceParam final Patient patient, @ConditionalUrlParam String theConditional)
+			throws Exception {
+		patients.put("" + counter, createPatient(patient));
+		final MethodOutcome result = new MethodOutcome().setCreated(true);
+		result.setResource(patient);
+		result.setId(patient.getId());
+		return result;
+	}
+
+	@Delete
+	public MethodOutcome delete(@IdParam final IdDt theId) {
+		final Patient deletedPatient = find(theId);
+		patients.remove(deletedPatient.getId().getIdPart());
+		final MethodOutcome result = new MethodOutcome().setCreated(true);
+		result.setResource(deletedPatient);
+		return result;
+	}
+
+	@GET
+	@Path("/{id}/$last")
+	@Interceptors(JaxRsExceptionInterceptor.class)
+	public Response operationLastGet(@PathParam("id") String id, String resource) throws Exception {
+		return customOperation(resource, RequestTypeEnum.GET, id, "$last",
+				RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
+	}
+
+	@Search(compartmentName = "Condition")
+	public List<IResource> searchCompartment(@IdParam IdDt thePatientId) {
+		List<IResource> retVal = new ArrayList<IResource>();
+		Condition condition = new Condition();
+		condition.setId(new IdDt("665577"));
+		retVal.add(condition);
+		return retVal;
+	}
+
+	@POST
+	@Path("/{id}/$last")
+	@Interceptors(JaxRsExceptionInterceptor.class)
+	public Response operationLast(final String resource) throws Exception {
+		return customOperation(resource, RequestTypeEnum.POST, null, "$last",
+				RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
+	}
+
+	@Operation(name = "last", idempotent = true, returnParameters = {
+			@OperationParam(name = "return", type = StringDt.class) })
+	public Parameters last(@OperationParam(name = "dummy") StringDt dummyInput) {
+		System.out.println("inputparameter");
+		Parameters parameters = new Parameters();
+		Patient patient = find(new IdDt(counter.intValue() - 1));
+		parameters.addParameter().setName("return").setResource(patient)
+				.setValue(new StringDt((counter - 1) + "" + "inputVariable [ " + dummyInput.getValue() + "]"));
+		return parameters;
+	}
+
+	@Override
+	public Class<Patient> getResourceType() {
+		return Patient.class;
+	}
+
+	/** THE DEFAULTS */
+
+	@Override
+	public List<IServerInterceptor> getInterceptors() {
+		return Collections.emptyList();
+	}
+
+	@Override
+	public ETagSupportEnum getETagSupport() {
+		return ETagSupportEnum.DISABLED;
+	}
+
+	@Override
+	public boolean isDefaultPrettyPrint() {
+		return true;
+	}
+
+	@Override
+	public AddProfileTagEnum getAddProfileTag() {
+		return AddProfileTagEnum.NEVER;
+	}
+
+	@Override
+	public boolean isUseBrowserFriendlyContentTypes() {
+		return true;
+	}
+
+	@Override
+	public IPagingProvider getPagingProvider() {
+		return new FifoMemoryPagingProvider(10);
+	}
+
+	@Override
+	public BundleInclusionRule getBundleInclusionRule() {
+		return BundleInclusionRule.BASED_ON_INCLUDES;
+	}
 
 }

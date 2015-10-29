@@ -5,8 +5,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -16,7 +18,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jaxrs.server.example.JaxRsPatientRestProvider;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -55,10 +56,11 @@ public class JaxRsPatientProviderTest {
 		jettyServer.setHandler(context);
 		ServletHolder jerseyServlet = context.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/*");
 		jerseyServlet.setInitOrder(0);
-		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", JaxRsPatientRestProvider.class.getCanonicalName());
+		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames",
+				StringUtils.join(Arrays.asList(JaxRsConformanceProvider.class.getCanonicalName(),
+						JaxRsPatientRestProvider.class.getCanonicalName()), ";"));
 		jettyServer.start();
 
-		final FhirContext ctx = FhirContext.forDstu2();
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/");
@@ -142,7 +144,7 @@ public class JaxRsPatientProviderTest {
     @Test
     @Ignore
     public void testSummary() {
-    Object response = client.search()
+    client.search()
             .forResource(Patient.class)
             .returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
             .execute();
@@ -270,8 +272,6 @@ public class JaxRsPatientProviderTest {
     
     @Test
     public void testExtendedOperationsUsingGet() {
-        client.registerInterceptor(new LoggingInterceptor(true));
-        
         // Create the input parameters to pass to the server
         Parameters inParams = new Parameters();
         inParams.addParameter().setName("start").setValue(new DateDt("2001-01-01"));
@@ -291,18 +291,6 @@ public class JaxRsPatientProviderTest {
         assertEquals("expected but found : "+ resultValue, resultValue.contains("myAwesomeDummyValue"), true);
     }
     
-    @Test
-    public void testFindUnknownPatient() {
-        try {
-            final Patient existing = client.read(Patient.class, "999955541264");
-            fail();
-        }
-        catch (final Exception e) {
-            e.printStackTrace();
-            //assertEquals(e.getStatusCode(), 404);
-        }
-    }
-
     @Test
     public void testVRead() {
         final Patient patient = client.vread(Patient.class, "1", "1");

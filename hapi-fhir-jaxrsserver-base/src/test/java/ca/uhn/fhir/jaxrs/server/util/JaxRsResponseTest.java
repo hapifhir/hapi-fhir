@@ -49,7 +49,7 @@ public class JaxRsResponseTest {
 		Set<SummaryEnum> theSummaryMode = Collections.<SummaryEnum>emptySet();
 		Response result = (Response) RestfulServerUtils.streamResponseAsBundle(request.getServer(), bundle, theSummaryMode, theRequestIsBrowser, respondGzip, request);
 		assertEquals(200, result.getStatus());
-		assertEquals(Constants.CT_FHIR_JSON, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals(Constants.CT_FHIR_JSON+Constants.CHARSET_UTF8_CTSUFFIX, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 		assertTrue(result.getEntity().toString().contains("Patient"));
 		assertTrue(result.getEntity().toString().contains("15"));
 	}
@@ -60,21 +60,9 @@ public class JaxRsResponseTest {
 		boolean respondGzip = false;
 		Response result = (Response) RestfulServerUtils.streamResponseAsBundle(request.getServer(), bundle, theSummaryMode, theRequestIsBrowser, respondGzip, request);
 		assertEquals(200, result.getStatus());
-		assertEquals(Constants.CT_JSON, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals(Constants.CT_JSON+Constants.CHARSET_UTF8_CTSUFFIX, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 		assertTrue(result.getEntity().toString().contains("Patient"));
 		assertTrue(result.getEntity().toString().contains("15"));
-	}
-	
-	@Test
-	public void testGetResponseWriterWithZip() throws IOException {
-		boolean theRequestIsBrowser = true;
-		boolean respondGzip = true;
-		Response result = (Response) RestfulServerUtils.streamResponseAsBundle(request.getServer(), bundle, theSummaryMode, theRequestIsBrowser, respondGzip, request);
-		assertEquals(200, result.getStatus());
-		assertEquals(Constants.CT_JSON, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-		assertEquals(Constants.ENCODING_GZIP, result.getHeaderString(Constants.HEADER_CONTENT_ENCODING));
-//		assertTrue(unzip(result.getEntity()).contains("Patient"));
-//		assertTrue(result.getEntity().toString().contains("15"));
 	}
 	
 	@Test
@@ -129,7 +117,7 @@ public class JaxRsResponseTest {
 		MethodOutcome methodOutcome = new MethodOutcome(theId);
 		Response result = response.returnResponse(outcome, operationStatus, allowPrefer, methodOutcome, resourceName);
 		assertEquals(200, result.getStatus());
-		assertEquals(Constants.CT_JSON, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals(Constants.CT_JSON+Constants.CHARSET_UTF8_CTSUFFIX, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 		System.out.println(result.getEntity().toString());
 		assertTrue(result.getEntity().toString().contains("resourceType\":\"Patient"));
 		assertTrue(result.getEntity().toString().contains("15"));
@@ -147,7 +135,7 @@ public class JaxRsResponseTest {
 		response.getRequestDetails().getParameters().put(Constants.PARAM_FORMAT, new String[]{Constants.CT_XML});
 		Response result = response.returnResponse(outcome, operationStatus, allowPrefer, methodOutcome, resourceName);
 		assertEquals(200, result.getStatus());
-		assertEquals(Constants.CT_XML, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals(Constants.CT_XML+Constants.CHARSET_UTF8_CTSUFFIX, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 		assertTrue(result.getEntity().toString().contains("<Patient"));
 		assertTrue(result.getEntity().toString().contains("15"));
 	}
@@ -162,7 +150,7 @@ public class JaxRsResponseTest {
 		response.getRequestDetails().getParameters().put(Constants.PARAM_FORMAT, new String[]{Constants.CT_XML});
 		Response result = response.returnResponse(outcome, operationStatus, allowPrefer, methodOutcome, resourceName);
 		assertEquals(204, result.getStatus());
-		assertEquals(Constants.CT_XML, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals(Constants.CT_XML+Constants.CHARSET_UTF8_CTSUFFIX, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 	}
 
 	private String unzip(Object entity) throws IOException {

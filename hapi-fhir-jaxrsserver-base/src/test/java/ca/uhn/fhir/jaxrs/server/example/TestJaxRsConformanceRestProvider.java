@@ -13,22 +13,23 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 
 /**
  * Fhir Physician Rest Service
+ * 
  * @author axmpm
  *
  */
 @Path(TestJaxRsConformanceRestProvider.PATH)
 @Stateless
-@Produces({MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML})
+@Produces({ MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML })
 public class TestJaxRsConformanceRestProvider extends AbstractJaxRsConformanceProvider {
-	
-    public TestJaxRsConformanceRestProvider() {
+
+	public TestJaxRsConformanceRestProvider() {
 		super("", "", "");
-	}    
+	}
 
 	@Override
 	protected ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders() throws Exception {
 		ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> map = new ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider>();
-		map.put(TestJaxRsPatientRestProvider.class, new TestJaxRsPatientRestProvider());
+		map.put(TestJaxRsMockPatientRestProvider.class, new TestJaxRsMockPatientRestProvider());
 		map.put(TestJaxRsConformanceRestProvider.class, new TestJaxRsConformanceRestProvider());
 		return map;
 	}

@@ -19,8 +19,8 @@ import org.glassfish.jersey.server.ContainerRequest;
 import org.junit.Before;
 import org.junit.Test;
 
-import ca.uhn.fhir.jaxrs.server.example.TestJaxRsPatientRestProvider;
 import ca.uhn.fhir.jaxrs.server.example.TestDummyPatientProvider;
+import ca.uhn.fhir.jaxrs.server.example.TestJaxRsMockPatientRestProvider;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
@@ -57,11 +57,11 @@ public class AbstractJaxRsConformanceProviderTest {
 	@Test
 	public void testConformanceWithMethods() throws Exception {
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
-		providers.put(TestJaxRsPatientRestProvider.class, new TestJaxRsPatientRestProvider());
+		providers.put(TestJaxRsMockPatientRestProvider.class, new TestJaxRsMockPatientRestProvider());
 		Response response = createConformanceProvider(providers).conformance();
 		assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatus());
 		assertTrue(response.getEntity().toString().contains("\"type\":\"Patient\""));
-		assertTrue(response.getEntity().toString().contains("\"$last"));
+		assertTrue(response.getEntity().toString().contains("\"$someCustomOperation"));
 		System.out.println(response);
 		System.out.println(response.getEntity());
 	}
@@ -70,12 +70,12 @@ public class AbstractJaxRsConformanceProviderTest {
 	public void testConformanceInXml() throws Exception {
 		queryParameters.put(Constants.PARAM_FORMAT, Arrays.asList(Constants.CT_XML));		
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
-		providers.put(TestJaxRsPatientRestProvider.class, new TestJaxRsPatientRestProvider());
+		providers.put(TestJaxRsMockPatientRestProvider.class, new TestJaxRsMockPatientRestProvider());
 		Response response = createConformanceProvider(providers).conformance();
 		assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatus());
 		System.out.println(response.getEntity());
 		assertTrue(response.getEntity().toString().contains(" <type value=\"Patient\"/>"));
-		assertTrue(response.getEntity().toString().contains("\"$last"));
+		assertTrue(response.getEntity().toString().contains("\"$someCustomOperation"));
 		System.out.println(response.getEntity());
 	}
 	

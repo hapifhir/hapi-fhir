@@ -79,7 +79,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
         serverConfiguration.setServerBindings(serverBindings);
         serverConfiguration.setResourceBindings(new LinkedList<ResourceBinding>(myResourceNameToBinding.values()));
         HardcodedServerAddressStrategy hardcodedServerAddressStrategy = new HardcodedServerAddressStrategy();
-        hardcodedServerAddressStrategy.setValue(getBaseUri());
+        hardcodedServerAddressStrategy.setValue(getBaseForServer());
         serverConfiguration.setServerAddressStrategy(hardcodedServerAddressStrategy);
         ServerConformanceProvider serverConformanceProvider = new ServerConformanceProvider(serverConfiguration);
         serverConformanceProvider.initializeOperations();

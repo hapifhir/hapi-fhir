@@ -1,4 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<!-- Note: HAPI projects use the "hapi-fhir" POM as their base to provide easy management. You do not need to use this in your own projects, so the "parent" tag and it's contents below may be removed 
@@ -34,43 +34,53 @@
 			<version>1.3-SNAPSHOT</version>
 		</dependency>
 
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>2.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.ejb</groupId>
+			<artifactId>ejb-api</artifactId>
+			<version>3.0</version>
+			<scope>provided</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>9.2.3.v20140905</version>
+			<version>${jetty_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>9.2.3.v20140905</version>
+			<version>${jetty_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-server</artifactId>
-			<version>2.7</version>
+			<version>${jersey_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-servlet-core</artifactId>
-			<version>2.7</version>
+			<version>${jersey_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-jetty-http</artifactId>
-			<version>2.7</version>
+			<version>${jersey_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-moxy</artifactId>
-			<version>2.7</version>
+			<version>${jersey_version}</version>
 		</dependency>
 	</dependencies>
 
 
 	<build>
-
-		<!-- Tells Maven to name the generated WAR file as hapi-fhir-jpaserver-example.war -->
 		<finalName>hapi-fhir-jaxrsserver-example</finalName>
 		<!-- This is to run the integration tests -->
 		<plugins>
@@ -90,36 +100,6 @@
 				</executions>
 			</plugin>
 
-			<plugin>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>unpack</id>
-						<phase>package</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>${project.groupId}</groupId>
-									<artifactId>${project.artifactId}</artifactId>
-									<version>${project.version}</version>
-									<type>war</type>
-									<includes>*.war</includes>
-								</artifactItem>
-							</artifactItems>
-							<outputDirectory>C:\Agfa\ORBIS-AS\server\orbis-as-08.05.07.00.0009200-UK\standalone\deployments</outputDirectory>
-							<stripVersion>true</stripVersion>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>maven-jetty-plugin</artifactId>
-				<version>8.1.16.v20140903</version>
-			</plugin>
 		</plugins>
 	</build>
 
