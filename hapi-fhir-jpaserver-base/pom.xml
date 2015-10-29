@@ -76,6 +76,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.20.0-GA</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-schematron</artifactId>
 			<scope>test</scope>
@@ -234,7 +240,7 @@
 			<artifactId>hibernate-search-orm</artifactId>
 			<version>5.5.0.Final</version>
 		</dependency>
-		
+
 		<!-- Misc -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -345,10 +351,7 @@
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>
-								<!-- 
-								<excludeResourceName>OperationDefinition</excludeResourceName>
-								<excludeResourceName>OperationOutcome</excludeResourceName>
-								-->
+								<!-- <excludeResourceName>OperationDefinition</excludeResourceName> <excludeResourceName>OperationOutcome</excludeResourceName> -->
 							</excludeResourceNames>
 						</configuration>
 					</execution>

@@ -135,6 +135,38 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	public void testEverythingReturnsCorrectBundleType() throws Exception {
+		myRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
+		myRestServer.setPagingProvider(new FifoMemoryPagingProvider(1).setDefaultPageSize(10));
+		ResponseHighlighterInterceptor interceptor = new ResponseHighlighterInterceptor();
+		myRestServer.registerInterceptor(interceptor);
+
+		for (int i = 0; i < 11; i++) {
+			Patient p = new Patient();
+			p.addName().addFamily("Name" + i);
+			ourClient.create().resource(p).execute();
+		}
+
+		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
+		get.addHeader("Accept", "application/xml+fhir");
+		CloseableHttpResponse http = ourHttpClient.execute(get);
+		try {
+			String response = IOUtils.toString(http.getEntity().getContent());
+			ourLog.info(response);
+			assertThat(response, not(containsString("_format")));
+			assertEquals(200, http.getStatusLine().getStatusCode());
+			
+			Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
+			assertEquals(BundleTypeEnum.COLLECTION, responseBundle.getTypeElement().getValueAsEnum());
+			
+		} finally {
+			http.close();
+		}
+
+		myRestServer.unregisterInterceptor(interceptor);
+	}
+
+	@Test
 	public void testEverythingType() throws Exception {
 		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
 		CloseableHttpResponse http = ourHttpClient.execute(get);

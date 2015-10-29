@@ -255,11 +255,11 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 	
 			if (searchId != null) {
 				if (theOffset + numToReturn < theResult.size()) {
-					myBundle.getLinkNext().setValue(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint));
+					myBundle.getLinkNext().setValue(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint, theBundleType));
 				}
 				if (theOffset > 0) {
 					int start = Math.max(0, theOffset - limit);
-					myBundle.getLinkPrevious().setValue(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint));
+					myBundle.getLinkPrevious().setValue(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint, theBundleType));
 				}
 			}
 		}

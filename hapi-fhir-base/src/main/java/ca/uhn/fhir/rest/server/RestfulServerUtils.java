@@ -60,6 +60,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -132,7 +133,7 @@ public class RestfulServerUtils {
 		}
 	}
 
-	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, int theOffset, int theCount, EncodingEnum theResponseEncoding, boolean thePrettyPrint) {
+	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, int theOffset, int theCount, EncodingEnum theResponseEncoding, boolean thePrettyPrint, BundleTypeEnum theBundleType) {
 		try {
 			StringBuilder b = new StringBuilder();
 			b.append(theServerBase);
@@ -171,6 +172,13 @@ public class RestfulServerUtils {
 						b.append(URLEncoder.encode(nextInclude.getValue(), "UTF-8"));
 					}
 				}
+			}
+			
+			if (theBundleType != null) {
+				b.append('&');
+				b.append(Constants.PARAM_BUNDLETYPE);
+				b.append('=');
+				b.append(theBundleType.getCode());
 			}
 
 			return b.toString();

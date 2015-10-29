@@ -364,12 +364,12 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
       if (searchId != null) {
         if (theOffset + numToReturn < theResult.size()) {
           myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(RestfulServerUtils.createPagingLink(theIncludes,
-              theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint));
+              theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint, theBundleType));
         }
         if (theOffset > 0) {
           int start = Math.max(0, theOffset - limit);
           myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(RestfulServerUtils.createPagingLink(
-              theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint));
+              theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint, theBundleType));
         }
       }
     }

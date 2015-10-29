@@ -224,9 +224,8 @@
 		<apache_httpclient_version>4.4</apache_httpclient_version>
 		<apache_httpcore_version>4.4</apache_httpcore_version>
 		<derby_version>10.12.1.1</derby_version>
-		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this 
-			version with caution! Also note that if you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration 
-			for that plugin... -->
+		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this version with caution! Also note that if 
+			you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration for that plugin... -->
 		<hibernate_version>5.0.2.Final</hibernate_version>
 		<hibernate_validator_version>5.2.1.Final</hibernate_validator_version>
 		<jetty_version>9.3.4.v20151007</jetty_version>
@@ -244,14 +243,10 @@
 		<thymeleaf-version>2.1.4.RELEASE</thymeleaf-version>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<xmlunit_version>1.6</xmlunit_version>
-		
-		<!--
-		We are aiming to still work on a very old version of SLF4j even though
-		we depend on the newest, just to be nice to users of the API. This version
-		is tested in the hapi-fhir-cobertura. 
-		-->
+
+		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
 		<slf4j_target_version>1.6.0</slf4j_target_version>
-		
+
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
@@ -501,6 +496,11 @@
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-validator</artifactId>
 				<version>${hibernate_validator_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.javassist</groupId>
+				<artifactId>javassist</artifactId>
+				<version>3.20.0-GA</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -923,43 +923,43 @@
 						<configuration>
 							<target>
 								<copy todir="target/site/apidocs">
-									<fileset dir="hapi-fhir-base/target/site/apidocs" />
+									<fileset dir="hapi-fhir-base/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-dstu">
-									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs" />
+									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-hl7org-dstu2">
-									<fileset dir="hapi-fhir-structures-hl7org-dstu2/target/site/apidocs" />
+									<fileset dir="hapi-fhir-structures-hl7org-dstu2/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-dstu2">
-									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs" />
+									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver">
-									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs" />
+									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/xref-jpaserver">
-									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref" />
+									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
 								</copy>
 								<copy todir="target/site/xref-base">
-									<fileset dir="hapi-fhir-base/target/site/xref" />
+									<fileset dir="hapi-fhir-base/target/site/xref"/>
 								</copy>
 								<!-- <copy todir="target/site/cobertura"> <fileset dir="hapi-fhir-cobertura/target/site/cobertura" /> </copy> -->
 								<copy todir="target/site">
-									<fileset dir="hapi-fhir-base/target/site" includes="checkstyle.*" />
+									<fileset dir="hapi-fhir-base/target/site" includes="checkstyle.*"/>
 								</copy>
 								<echo>Fixing Checkstyle Report</echo>
 								<replace dir="target/site" summary="true">
-									<include name="checkstyle.html" />
+									<include name="checkstyle.html"/>
 									<replacetoken>"../../</replacetoken>
 									<replacevalue>"./</replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken>http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css</replacetoken>
 									<replacevalue>./css/bootstrap-responsive.min.css</replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="index.html" />
+									<include name="index.html"/>
 									<replacetoken><![CDATA[<h2 id="Welcome">Welcome</h2>]]></replacetoken>
 									<replacevalue><![CDATA[<div class="jumbotron subhead">
 		<div class="row" id="banner">
@@ -988,33 +988,33 @@
 							<target>
 								<echo>Adding Fontawesome</echo>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[<a href="download.html" title="Download">Download</a>]]></replacetoken>
 									<replacevalue><![CDATA[<a href="download.html"  title="Download"><i class="fa fa-download"></i> Download</a>]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project" class="externalLink">GitHub Project</a>]]></replacetoken>
 									<replacevalue><![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project"  class="externalLink"><i class="fa fa-github"></i> GitHub Project</a>]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Test Servers <]]></replacetoken>
 									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-fire"></i>&nbsp;Test Servers&nbsp;<]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Documentation <]]></replacetoken>
 									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-book"></i>&nbsp;Documentation&nbsp;<]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Get Help <]]></replacetoken>
 									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-support"></i>&nbsp;Get Help&nbsp;<]]></replacevalue>
 								</replace>
 								<echo>Changing Breadcrumbs</echo>
 								<replace dir="target/site" summary="true">
-									<include name="doc_*.html" />
+									<include name="doc_*.html"/>
 									<replacetoken><![CDATA[<li class="divider">/</li>]]></replacetoken>
 									<replacevalue><![CDATA[<li  class="divider">/</li>
 			<li><a href="docindex.html" title="Documentation">Documentation</a></li>
@@ -1065,8 +1065,8 @@
 								<echo>Adding Google analytics in target/site for &lt;body&gt;</echo>
 								<replace dir="target/site" summary="true">
 									<include name="**/*.html"></include>
-									<replacefilter token="#build#" value="${label}" />
-									<replacefilter token="#version#" value="${project.version}" />
+									<replacefilter token="#build#" value="${label}"/>
+									<replacefilter token="#version#" value="${project.version}"/>
 									<replacetoken><![CDATA[</body>]]></replacetoken>
 									<replacevalue><![CDATA[
 <script>
@@ -1204,9 +1204,8 @@
 
 	<reporting>
 		<plugins>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> <reportSets> <reportSet> <reports><report>checkstyle-aggregate</report></reports> 
-				</reportSet> </reportSets> <configuration> <configLocation>config/sun_checks.xml</configLocation> <includes> hapi-fhir-base/src/main/java/**/*.java </includes> </configuration> 
-				</plugin> -->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> <reportSets> <reportSet> <reports><report>checkstyle-aggregate</report></reports> </reportSet> 
+				</reportSets> <configuration> <configLocation>config/sun_checks.xml</configLocation> <includes> hapi-fhir-base/src/main/java/**/*.java </includes> </configuration> </plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
@@ -1281,9 +1280,8 @@
 			</modules>
 			<build>
 				<plugins>
-					<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <version>${maven_assembly_plugin_version}</version> <executions> <execution> <phase>package</phase> 
-						<goals> <goal>single</goal> </goals> <configuration> <attach>false</attach> <descriptors> <descriptor>${project.basedir}/src/assembly/hapi-fhir-sample-projects.xml</descriptor> 
-						</descriptors> </configuration> </execution> </executions> </plugin> -->
+					<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <version>${maven_assembly_plugin_version}</version> <executions> <execution> <phase>package</phase> <goals> <goal>single</goal> </goals> 
+						<configuration> <attach>false</attach> <descriptors> <descriptor>${project.basedir}/src/assembly/hapi-fhir-sample-projects.xml</descriptor> </descriptors> </configuration> </execution> </executions> </plugin> -->
 				</plugins>
 			</build>
 

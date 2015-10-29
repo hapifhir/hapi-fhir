@@ -149,6 +149,11 @@ public class Constants {
 	public static final String URL_TOKEN_METADATA = "metadata";
 	public static final String PARAM_CONTENT = "_content";
 	public static final String PARAM_TEXT = "_text";
+	
+	/**
+	 * Used in paging links
+	 */
+	public static final Object PARAM_BUNDLETYPE = "_bundletype";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();

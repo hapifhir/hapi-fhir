@@ -101,20 +101,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	protected EntityManager myEntityManager;
 
 	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
+	protected PlatformTransactionManager myPlatformTransactionManager;
 
 	@Autowired
 	private DaoConfig myDaoConfig;
 
 	@Autowired(required = false)
-	private ISearchDao mySearchDao;
+	protected ISearchDao mySearchDao;
 
 	private String myResourceName;
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
 
 	@Autowired()
-	private ISearchResultDao mySearchResultDao;
+	protected ISearchResultDao mySearchResultDao;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {

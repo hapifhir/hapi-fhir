@@ -349,7 +349,11 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			}
 
 			numToReturn = Math.min(numToReturn, theResult.size() - theOffset);
-			resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
+			if (numToReturn > 0) {
+				resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
+			} else {
+				resourceList = Collections.emptyList();
+			}
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
 			if (theSearchId != null) {
@@ -390,12 +394,12 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			if (searchId != null) {
 				if (theOffset + numToReturn < theResult.size()) {
 					myBundle.addLink().setRelation(Constants.LINK_NEXT)
-							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint));
+							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint, theBundleType));
 				}
 				if (theOffset > 0) {
 					int start = Math.max(0, theOffset - limit);
 					myBundle.addLink().setRelation(Constants.LINK_PREVIOUS)
-							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint));
+							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint, theBundleType));
 				}
 			}
 		}

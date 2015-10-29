@@ -186,7 +186,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	
 	@Override
 	protected BundleTypeEnum getResponseBundleType() {
-		return null;
+		return BundleTypeEnum.COLLECTION;
 	}
 
 	public List<ReturnType> getReturnParams() {

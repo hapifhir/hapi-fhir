@@ -58,6 +58,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
@@ -511,7 +512,13 @@ public class RestfulServer extends HttpServlet {
 		String linkSelfBase = getServerAddressStrategy().determineServerBase(getServletContext(), theRequest.getServletRequest());
 		String linkSelf = linkSelfBase + theRequest.getCompleteUrl().substring(theRequest.getCompleteUrl().indexOf('?'));
 
-		bundleFactory.initializeBundleFromBundleProvider(this, resultList, responseEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, start, count, thePagingAction, null, includes);
+		BundleTypeEnum bundleType = null;
+		String[] bundleTypeValues = theRequest.getParameters().get(Constants.PARAM_BUNDLETYPE);
+		if (bundleTypeValues != null) {
+			bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
+		}
+		
+		bundleFactory.initializeBundleFromBundleProvider(this, resultList, responseEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, start, count, thePagingAction, bundleType, includes);
 
 		Bundle bundle = bundleFactory.getDstu1Bundle();
 		if (bundle != null) {
