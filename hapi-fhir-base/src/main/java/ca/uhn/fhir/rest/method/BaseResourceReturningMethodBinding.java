@@ -337,9 +337,16 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				if (count == null) {
 					count = result.preferredPageSize();
 				}
+				
+				Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
+				if (offsetI == null || offsetI < 0) {
+					offsetI = 0;
+				}
+
+				int start = Math.max(0, Math.min(offsetI, result.size() - 1));
 
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
-				bundleFactory.initializeBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, 0, count, null, getResponseBundleType(),
+				bundleFactory.initializeBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, start, count, null, getResponseBundleType(),
 						includes);
 				Bundle bundle = bundleFactory.getDstu1Bundle();
 				if (bundle != null) {
