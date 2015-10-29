@@ -657,7 +657,7 @@ public class RestfulServerUtils {
 
 	}
 
-	static Integer tryToExtractNamedParameter(RequestDetails theRequest, String name) {
+	public static Integer tryToExtractNamedParameter(RequestDetails theRequest, String name) {
 		String[] countString = theRequest.getParameters().get(name);
 		Integer count = null;
 		if (countString != null && countString.length > 0 && isNotBlank(countString[0])) {

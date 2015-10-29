@@ -62,6 +62,10 @@ public abstract class RequestDetails {
 		return myCompleteUrl;
 	}
 
+	/**
+	 * The fhir server base url, independant of the query being executed
+	 * @return the fhir server base url
+	 */
 	public String getFhirServerBase() {
 		return myFhirServerBase;
 	}
