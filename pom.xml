@@ -217,7 +217,8 @@
 			for that plugin... -->
 		<hibernate_version>5.0.1.Final</hibernate_version>
 		<hibernate_validator_version>5.2.1.Final</hibernate_validator_version>
-		<jetty_version>9.2.6.v20141205</jetty_version>
+		<jetty_version>9.2.6.v20141205</jetty_version>	
+		<jersey_version>2.7</jersey_version>
 		<maven_build_helper_plugin_version>1.9.1</maven_build_helper_plugin_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_failsafe_plugin_version>2.18.1</maven_failsafe_plugin_version>
