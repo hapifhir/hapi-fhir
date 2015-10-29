@@ -93,6 +93,7 @@
 				<item name="Annotation Client" href="./doc_rest_client_annotation.html" />
 				<item name="Interceptors (client)" href="./doc_rest_client_interceptor.html"/>
 				<item name="Client HTTP Configuration" href="./doc_rest_client_http_config.html"/>
+				<item name="Client Examples" href="./doc_rest_client_examples.html"/>
 			</item>
 			<item name="RESTful Server" href="./doc_rest_server.html" >
 				<item name="Using RESTful Server" href="./doc_rest_server.html" />

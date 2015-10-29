@@ -35,6 +35,7 @@
 				<li><a href="./doc_rest_client_annotation.html">Annotation Client</a></li>
 				<li><a href="./doc_rest_client_interceptor.html">Interceptors (client)</a></li>
 				<li><a href="./doc_rest_client_http_config.html">Client HTTP Configuration</a></li>
+				<li><a href="./doc_rest_client_examples.html">Client Examples</a></li>
 			</ul>
 			
 			<h4>RESTful Server</h4>
