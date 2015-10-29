@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 /*
@@ -33,9 +34,12 @@ public interface IJpaServerInterceptor extends IServerInterceptor {
 	 * This method is invoked by the JPA DAOs when a resource has been newly created in the database.
 	 * It will be invoked within the current transaction scope. 
 	 * <p>
-	 * This method is called after the
-	 * entity has been persisted and flushed to the database, so it is probably not a good
-	 * candidate for security decisions.
+	 * This method is called within the server database transaction, after the
+	 * entity has been persisted and flushed to the database. It may not be a good
+	 * candidate for security decisions depending on how your database is set up.
+	 * Any exceptions thrown by this method will result in the transaction being
+	 * rolled back. Thrown exceptions should be of a type which
+	 * subclasses {@link BaseServerResponseException}.
 	 * </p>
 	 * 
 	 * @param theDetails The request details
@@ -47,9 +51,12 @@ public interface IJpaServerInterceptor extends IServerInterceptor {
 	 * This method is invoked by the JPA DAOs when a resource has been updated in the database.
 	 * It will be invoked within the current transaction scope.
 	 * <p>
-	 * This method is called after the
-	 * entity has been persisted and flushed to the database, so it is probably not a good
-	 * candidate for security decisions.
+	 * This method is called within the server database transaction, after the
+	 * entity has been persisted and flushed to the database. It may not be a good
+	 * candidate for security decisions depending on how your database is set up.
+	 * Any exceptions thrown by this method will result in the transaction being
+	 * rolled back. Thrown exceptions should be of a type which
+	 * subclasses {@link BaseServerResponseException}.
 	 * </p>
 	 * 
 	 * @param theDetails The request details
@@ -61,9 +68,12 @@ public interface IJpaServerInterceptor extends IServerInterceptor {
 	 * This method is invoked by the JPA DAOs when a resource has been updated in the database.
 	 * It will be invoked within the current transaction scope.
 	 * <p>
-	 * This method is called after the
-	 * entity has been persisted and flushed to the database, so it is probably not a good
-	 * candidate for security decisions.
+	 * This method is called within the server database transaction, after the
+	 * entity has been persisted and flushed to the database. It may not be a good
+	 * candidate for security decisions depending on how your database is set up.
+	 * Any exceptions thrown by this method will result in the transaction being
+	 * rolled back. Thrown exceptions should be of a type which
+	 * subclasses {@link BaseServerResponseException}.
 	 * </p>
 	 * 
 	 * @param theDetails The request details
