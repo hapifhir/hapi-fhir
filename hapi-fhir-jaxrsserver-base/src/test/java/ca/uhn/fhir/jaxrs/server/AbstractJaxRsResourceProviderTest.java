@@ -33,10 +33,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jaxrs.server.example.RandomServerPortProvider;
-import ca.uhn.fhir.jaxrs.server.example.TestJaxRsConformanceRestProvider;
-import ca.uhn.fhir.jaxrs.server.example.TestJaxRsMockPatientRestProvider;
-import ca.uhn.fhir.jaxrs.server.interceptor.BaseServerRuntimeResponseException;
+import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
+import ca.uhn.fhir.jaxrs.server.test.RandomServerPortProvider;
+import ca.uhn.fhir.jaxrs.server.test.TestJaxRsConformanceRestProvider;
+import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProvider;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
@@ -353,7 +353,7 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	public void testXFindUnknownPatient() {
 		try {
-			BaseServerRuntimeResponseException notFoundException = new BaseServerRuntimeResponseException(new ResourceNotFoundException(new IdDt("999955541264")));
+			JaxRsResponseException notFoundException = new JaxRsResponseException(new ResourceNotFoundException(new IdDt("999955541264")));
 			when(mock.find(idCaptor.capture())).thenThrow(notFoundException);
 			client.read(Patient.class, "999955541264");
 			fail();

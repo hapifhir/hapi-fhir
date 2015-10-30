@@ -5,55 +5,67 @@ import java.io.IOException;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import javax.servlet.ServletException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 
+/**
+ * An interceptor that catches the jax-rs exceptions
+ * @author Peter Van Houte 
+ */
 public class JaxRsExceptionInterceptor {
 
+    /** the existing exception handler which is able to convert exception into responses*/
     private ExceptionHandlingInterceptor exceptionHandler;
-    @Context
-    private UriInfo info;
-    @Context
-    private HttpHeaders headers;    
     
-    AbstractJaxRsProvider theServer;
-    
-    FhirContext fhirContext = AbstractJaxRsProvider.CTX;
-    
+    /**
+     * The default constructor
+     */
     public JaxRsExceptionInterceptor() {
     	this.exceptionHandler = new ExceptionHandlingInterceptor();
     }    
     
-    public JaxRsExceptionInterceptor(ExceptionHandlingInterceptor exceptionHandler) {
+    /**
+     * A utility constructor for unit testing
+     * @param exceptionHandler the handler for the exception conversion
+     */
+    JaxRsExceptionInterceptor(ExceptionHandlingInterceptor exceptionHandler) {
 		this.exceptionHandler = exceptionHandler;
 	}
     
+	/**
+	 * This interceptor will catch all exception and convert them using the exceptionhandler
+	 * @param ctx the invocation context
+	 * @return the result
+	 * @throws JaxRsResponseException an exception that can be handled by a jee container
+	 */
 	@AroundInvoke
-    public Object intercept(final InvocationContext ctx) throws Throwable {
+    public Object intercept(final InvocationContext ctx) throws JaxRsResponseException {
         try {
             return ctx.proceed();
         } catch(final Exception theException) {
-        	theServer = (AbstractJaxRsProvider) ctx.getTarget();
+        	AbstractJaxRsProvider theServer = (AbstractJaxRsProvider) ctx.getTarget();
         	throw convertException(theServer, theException);
         }
     }
 
-	public BaseServerRuntimeResponseException convertException(final AbstractJaxRsProvider theServer, final Exception theException) {
-		JaxRsRequest requestDetails = new JaxRsRequest(theServer, null, null, null);
+	private JaxRsResponseException convertException(final AbstractJaxRsProvider theServer, final Exception theException) {
+		JaxRsRequest requestDetails = theServer.getRequest(null, null).build();
 		BaseServerResponseException convertedException = preprocessException(theException, requestDetails);
-		return new BaseServerRuntimeResponseException(convertedException);
+		return new JaxRsResponseException(convertedException);
 	}
 	
-	public Response handleException(JaxRsRequest theRequest, BaseServerRuntimeResponseException theException)
+	/**
+	 * This method converts an exception into a response
+	 * @param theRequest the request
+	 * @param theException the thrown exception
+	 * @return the response describing the error
+	 */
+	public Response convertExceptionIntoResponse(JaxRsRequest theRequest, JaxRsResponseException theException)
 			throws IOException {
 		return handleExceptionWithoutServletError(theRequest, theException);
 	}	

@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ejb.Local;
 import javax.ejb.Stateless;
-import javax.interceptor.Interceptors;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -19,7 +18,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
-import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
@@ -51,10 +49,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 /**
- * Fhir Physician Rest Service
- * 
- * @author axmpm
- *
+ * A demo JaxRs Patient Rest Provider
  */
 @Local
 @Path(JaxRsPatientRestProvider.PATH)
@@ -72,10 +67,10 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 	}
 
 	static {
-		patients.put("" + counter, createPatient("Van Houte"));
-		patients.put("" + (counter), createPatient("Agnew"));
+		patients.put(String.valueOf(counter), createPatient("Van Houte"));
+		patients.put(String.valueOf(counter), createPatient("Agnew"));
 		for (int i = 0; i < 20; i++) {
-			patients.put("" + (counter), createPatient("Random Patient " + counter));
+			patients.put(String.valueOf(counter), createPatient("Random Patient " + counter));
 		}
 	}
 
@@ -133,7 +128,6 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 	}
 
 	@Read
-	@Interceptors(JaxRsExceptionInterceptor.class)
 	public Patient find(@IdParam final IdDt theId) throws InvocationTargetException {
 		if (patients.containsKey(theId.getIdPart())) {
 			return getLast(patients.get(theId.getIdPart()));
@@ -180,9 +174,8 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 
 	@GET
 	@Path("/{id}/$last")
-	@Interceptors(JaxRsExceptionInterceptor.class)
-	public Response operationLastGet(@PathParam("id") String id, String resource) throws Exception {
-		return customOperation(resource, RequestTypeEnum.GET, id, "$last",
+	public Response operationLastGet(@PathParam("id") String id) throws Exception {
+		return customOperation(null, RequestTypeEnum.GET, id, "$last",
 				RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
 	}
 
@@ -197,7 +190,6 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 
 	@POST
 	@Path("/{id}/$last")
-	@Interceptors(JaxRsExceptionInterceptor.class)
 	public Response operationLast(final String resource) throws Exception {
 		return customOperation(resource, RequestTypeEnum.POST, null, "$last",
 				RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
@@ -206,7 +198,6 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 	@Operation(name = "last", idempotent = true, returnParameters = {
 			@OperationParam(name = "return", type = StringDt.class) })
 	public Parameters last(@OperationParam(name = "dummy") StringDt dummyInput) throws InvocationTargetException {
-		System.out.println("inputparameter");
 		Parameters parameters = new Parameters();
 		Patient patient = find(new IdDt(counter.intValue() - 1));
 		parameters.addParameter().setName("return").setResource(patient)

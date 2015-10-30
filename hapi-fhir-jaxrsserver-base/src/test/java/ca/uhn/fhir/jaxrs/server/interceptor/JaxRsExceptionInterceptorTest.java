@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
-import ca.uhn.fhir.jaxrs.server.example.TestDummyPatientProvider;
+import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -41,10 +41,10 @@ public class JaxRsExceptionInterceptorTest {
 	public void setUp() {
 		interceptor = new JaxRsExceptionInterceptor();
 		context = mock(InvocationContext.class);
-		TestDummyPatientProvider provider = spy(TestDummyPatientProvider.class);
+		TestJaxRsDummyPatientProvider provider = spy(TestJaxRsDummyPatientProvider.class);
 		when(context.getTarget()).thenReturn(provider);
 		doReturn("http://baseUri").when(provider).getBaseForServer();
-		doReturn(new HashMap<String, String[]>()).when(provider).getQueryMap();
+		doReturn(new HashMap<String, String[]>()).when(provider).getParameters();
 		doReturn(mock(HttpHeaders.class)).when(provider).getHeaders();
 	}
 
@@ -85,20 +85,17 @@ public class JaxRsExceptionInterceptorTest {
 	
 	@Test
 	public void testHandleExceptionWithServletError() throws Throwable {
-		JaxRsRequest request = new JaxRsRequest((AbstractJaxRsProvider) context.getTarget(), null, null, null);
+		JaxRsRequest request = ((AbstractJaxRsProvider) context.getTarget()).getRequest(null, null).build();
 		
 		ExceptionHandlingInterceptor exceptionHandler = spy(ExceptionHandlingInterceptor.class);
-		doThrow(new ServletException("someMessage")).when(exceptionHandler).preProcessOutgoingException(any(RequestDetails.class), any(Throwable.class),
-				isNull(HttpServletRequest.class));
 		
 		interceptor = new JaxRsExceptionInterceptor(exceptionHandler);
 		
 		when(context.proceed()).thenThrow(new ServletException());		
 		
-		BaseServerRuntimeResponseException thrownException = new BaseServerRuntimeResponseException(new NotImplementedOperationException("not implemented"));
+		JaxRsResponseException thrownException = new JaxRsResponseException(new NotImplementedOperationException("not implemented"));
 		doThrow(new javax.servlet.ServletException("someMessage")).when(exceptionHandler).handleException(request, thrownException);
-		BaseServerRuntimeResponseException internalException = thrownException;
-		Response result = interceptor.handleException(request, internalException);
+		Response result = interceptor.convertExceptionIntoResponse(request, thrownException);
 		assertEquals(InternalErrorException.STATUS_CODE, result.getStatus());
 	}
 

@@ -19,8 +19,8 @@ import org.glassfish.jersey.server.ContainerRequest;
 import org.junit.Before;
 import org.junit.Test;
 
-import ca.uhn.fhir.jaxrs.server.example.TestDummyPatientProvider;
-import ca.uhn.fhir.jaxrs.server.example.TestJaxRsMockPatientRestProvider;
+import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
+import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProvider;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
@@ -49,8 +49,16 @@ public class AbstractJaxRsConformanceProviderTest {
 	@Test
 	public void testConformance() throws Exception {
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
-		providers.put(TestDummyPatientProvider.class, new TestDummyPatientProvider());
+		providers.put(TestJaxRsDummyPatientProvider.class, new TestJaxRsDummyPatientProvider());
 		Response response = createConformanceProvider(providers).conformance();
+		System.out.println(response);
+	}
+	
+	@Test
+	public void testConformanceUsingOptions() throws Exception {
+		providers.put(AbstractJaxRsConformanceProvider.class, provider);
+		providers.put(TestJaxRsDummyPatientProvider.class, new TestJaxRsDummyPatientProvider());
+		Response response = createConformanceProvider(providers).conformanceUsingOptions();
 		System.out.println(response);
 	}
 

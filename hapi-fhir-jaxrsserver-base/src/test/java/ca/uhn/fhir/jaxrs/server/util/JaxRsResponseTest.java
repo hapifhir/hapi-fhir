@@ -3,12 +3,10 @@ package ca.uhn.fhir.jaxrs.server.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Set;
-import java.util.zip.GZIPInputStream;
 
 import javax.ws.rs.core.Response;
 
@@ -151,22 +149,6 @@ public class JaxRsResponseTest {
 		Response result = response.returnResponse(outcome, operationStatus, allowPrefer, methodOutcome, resourceName);
 		assertEquals(204, result.getStatus());
 		assertEquals(Constants.CT_XML+Constants.CHARSET_UTF8_CTSUFFIX, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-	}
-
-	private String unzip(Object entity) throws IOException {
-		byte[] compressed = ((String) entity).getBytes(Constants.CHARSET_NAME_UTF8);
-		final int BUFFER_SIZE = 32;
-		ByteArrayInputStream is = new ByteArrayInputStream(compressed);
-		GZIPInputStream gis = new GZIPInputStream(is, BUFFER_SIZE);
-		StringBuilder string = new StringBuilder();
-		byte[] data = new byte[BUFFER_SIZE];
-		int bytesRead;
-		while ((bytesRead = gis.read(data)) != -1) {
-			string.append(new String(data, 0, bytesRead));
-		}
-		gis.close();
-		is.close();
-		return string.toString();
 	}
 
 	private Bundle getSinglePatientResource() {

@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.method.ParseAction;
@@ -21,12 +22,26 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulResponse;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 
+/**
+ * The JaxRsResponse is a jax-rs specific implementation of the RestfulResponse.
+ * 
+ * @author Peter Van Houte
+ */
 public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 
-	public JaxRsResponse(JaxRsRequest jaxRsRequestDetails) {
-		super(jaxRsRequestDetails);
+	/**
+	 * The constructor
+	 * 
+	 * @param request the JaxRs Request
+	 */
+	public JaxRsResponse(JaxRsRequest request) {
+		super(request);
 	}
 
+	/**
+	 * The response writer is a simple String Writer. All output is configured
+	 * by the server.
+	 */
 	@Override
 	public Writer getResponseWriter(int statusCode, String contentType, String charset, boolean respondGzip)
 			throws UnsupportedEncodingException, IOException {
@@ -55,8 +70,8 @@ public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 			MethodOutcome response, String resourceName) throws IOException {
 		StringWriter writer = new StringWriter();
 		if (outcome != null) {
-			IParser parser = RestfulServerUtils.getNewParser(getRequestDetails().getServer().getFhirContext(),
-					getRequestDetails());
+			FhirContext fhirContext = getRequestDetails().getServer().getFhirContext();
+			IParser parser = RestfulServerUtils.getNewParser(fhirContext, getRequestDetails());
 			outcome.execute(parser, writer);
 		}
 		return sendWriterResponse(operationStatus, getParserType(), null, writer);

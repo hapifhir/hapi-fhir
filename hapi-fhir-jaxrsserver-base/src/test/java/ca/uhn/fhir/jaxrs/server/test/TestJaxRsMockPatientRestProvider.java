@@ -1,9 +1,8 @@
-package ca.uhn.fhir.jaxrs.server.example;
+package ca.uhn.fhir.jaxrs.server.test;
 
 import java.util.List;
 
 import javax.ejb.Stateless;
-import javax.interceptor.Interceptors;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -15,7 +14,6 @@ import javax.ws.rs.core.Response;
 import org.mockito.Mockito;
 
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
-import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -42,10 +40,7 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 
 /**
- * Fhir Physician Rest Service
- * 
- * @author axmpm
- *
+ * A test server delegating each call to a mock
  */
 @Path(TestJaxRsMockPatientRestProvider.PATH)
 @Stateless
@@ -96,7 +91,6 @@ public class TestJaxRsMockPatientRestProvider extends AbstractJaxRsResourceProvi
 
 	@GET
 	@Path("/{id}/$someCustomOperation")
-	@Interceptors(JaxRsExceptionInterceptor.class)
 	public Response someCustomOperationUsingGet(@PathParam("id") String id, String resource) throws Exception {
 		return customOperation(resource, RequestTypeEnum.GET, id, "$someCustomOperation",
 				RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
@@ -109,7 +103,6 @@ public class TestJaxRsMockPatientRestProvider extends AbstractJaxRsResourceProvi
 
 	@POST
 	@Path("/{id}/$someCustomOperation")
-	@Interceptors(JaxRsExceptionInterceptor.class)
 	public Response someCustomOperationUsingPost(@PathParam("id") String id, String resource) throws Exception {
 		return customOperation(resource, RequestTypeEnum.POST, id, "$someCustomOperation",
 				RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);

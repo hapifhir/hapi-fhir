@@ -11,7 +11,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import ca.uhn.fhir.jaxrs.server.example.TestDummyPatientProvider;
+import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -29,51 +29,51 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 
 @FixMethodOrder(MethodSorters.DEFAULT)
-public class MethodBindingsTest {
+public class JaxRsMethodBindingsTest {
 	
 	 @Before
 	 public void setUp() {
-		 MethodBindings.getClassBindings().clear();
+		 JaxRsMethodBindings.getClassBindings().clear();
 	 }
 
 	@Test(expected = NotImplementedOperationException.class)
 	public void testFindMethodsForProviderNotDefinedMappingMethods() {
-		new TestDummyPatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "");
+		new TestJaxRsDummyPatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "");
 	}
 	
 	@Test
 	public void testFindMethodsForProviderWithMethods() {
-		class TestFindPatientProvider extends TestDummyPatientProvider {
+		class TestFindPatientProvider extends TestJaxRsDummyPatientProvider {
 		    @Search
 		    public List<Patient> search(@RequiredParam(name = Patient.SP_NAME) final StringParam name) {
 		    	return null;
 		    }
 		}
 		new TestFindPatientProvider();
-		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE).getMethod().getDeclaringClass());
+		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
 	}
 	
 	@Test
 	public void testFindMethodsFor2ProvidersWithMethods() {
-		class TestFindPatientProvider extends TestDummyPatientProvider {
+		class TestFindPatientProvider extends TestJaxRsDummyPatientProvider {
 			@Search
 			public List<Patient> search(@RequiredParam(name = Patient.SP_NAME) final StringParam name) {
 				return null;
 			}
 		}
-		class TestUpdatePatientProvider extends TestDummyPatientProvider {
+		class TestUpdatePatientProvider extends TestJaxRsDummyPatientProvider {
 		    @Update
 		    public MethodOutcome update(@IdParam final IdDt theId, @ResourceParam final Patient patient) {
 				return null;
 			}
 		}
-		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE).getMethod().getDeclaringClass());
-		assertEquals(TestUpdatePatientProvider.class, new TestUpdatePatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE).getMethod().getDeclaringClass());
+		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
+		assertEquals(TestUpdatePatientProvider.class, new TestUpdatePatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getDeclaringClass());
 	}
 	
 	@Test
 	public void testFindMethodsWithDoubleMethodsDeclaration() {
-		class TestDoubleSearchProvider extends TestDummyPatientProvider {
+		class TestDoubleSearchProvider extends TestJaxRsDummyPatientProvider {
 			@Search
 			public List<Patient> search1(@RequiredParam(name = Patient.SP_NAME) final StringParam name) {
 				return null;
@@ -95,7 +95,7 @@ public class MethodBindingsTest {
 	
 	@Test
 	public void testFindMethodsWithMultipleMethods() {
-		class TestFindPatientProvider extends TestDummyPatientProvider {
+		class TestFindPatientProvider extends TestJaxRsDummyPatientProvider {
 			@Search
 			public List<Patient> search(@RequiredParam(name = Patient.SP_NAME) final StringParam name) {
 				return null;
@@ -113,9 +113,9 @@ public class MethodBindingsTest {
 				return null;
 			}
 		}
-		MethodBindings bindings = new TestFindPatientProvider().getBindings();
-		assertEquals("search", bindings.getBinding(RestOperationTypeEnum.SEARCH_TYPE).getMethod().getName());
-		assertEquals("update", bindings.getBinding(RestOperationTypeEnum.UPDATE).getMethod().getName());
+		JaxRsMethodBindings bindings = new TestFindPatientProvider().getBindings();
+		assertEquals("search", bindings.getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getName());
+		assertEquals("update", bindings.getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getName());
 		assertEquals("firstMethod", bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$firstMethod").getMethod().getName());
 		assertEquals("secondMethod", bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$secondMethod").getMethod().getName());
 		try {

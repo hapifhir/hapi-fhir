@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jaxrs.server.example;
+package ca.uhn.fhir.jaxrs.server.test;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,18 +12,15 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
 /**
- * Fhir Physician Rest Service
- * 
- * @author axmpm
- *
+ * A conformance provider exposes the mock patient and this provider
  */
-@Path(TestJaxRsConformanceRestProvider.PATH)
+@Path("")
 @Stateless
 @Produces({ MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML })
 public class TestJaxRsConformanceRestProvider extends AbstractJaxRsConformanceProvider {
 
 	public TestJaxRsConformanceRestProvider() {
-		super("", "", "");
+		super("description", "name", "version");
 	}
 
 	@Override

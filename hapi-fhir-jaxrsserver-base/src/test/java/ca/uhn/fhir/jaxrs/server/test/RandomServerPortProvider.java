@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jaxrs.server.example;
+package ca.uhn.fhir.jaxrs.server.test;
 
 import java.io.IOException;
 import java.net.ServerSocket;

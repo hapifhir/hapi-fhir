@@ -2,6 +2,7 @@ package ca.uhn.fhir.jaxrs.server;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.ws.rs.core.Context;
@@ -11,27 +12,30 @@ import javax.ws.rs.core.UriInfo;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
+import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 
 /**
- * Abstract Jax Rs Rest Server
+ * This is the abstract superclass for all jaxrs providers. It contains some defaults implementing
+ * the IRestfulServerDefaults interface and exposes the uri and headers.
  * @author Peter Van Houte
- *
  */
-public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults, IResourceProvider {
+public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
-    public static FhirContext CTX = FhirContext.forDstu2();
+    /** a static initialization for the fhircontext. Only DSTU2 is supported */
+   private static final FhirContext CTX = FhirContext.forDstu2();
 
+    /** the uri info */
     @Context
     private UriInfo theUriInfo;
+    /** the http headers */
     @Context
     private HttpHeaders theHeaders;
 
@@ -40,10 +44,11 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults, I
         return CTX;
     }
 
-    /** 
-     * param and query methods 
+    /**
+     * This method returns the query parameters
+     * @return the query parameters
      */
-    public HashMap<String, String[]> getQueryMap() {
+    public Map<String, String[]> getParameters() {
         MultivaluedMap<String, String> queryParameters = getUriInfo().getQueryParameters();
         HashMap<String, String[]> params = new HashMap<String, String[]>();
         for (Entry<String, List<String>> paramEntry : queryParameters.entrySet()) {
@@ -52,25 +57,36 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults, I
         return params;
     }
     
+    /**
+     * This method returns the default server address strategy. The default strategy return the 
+     * base uri for the request {@link AbstractJaxRsProvider#getBaseForRequest() getBaseForRequest()} 
+     * @return
+     */
     public IServerAddressStrategy getServerAddressStrategy() {
         HardcodedServerAddressStrategy addressStrategy = new HardcodedServerAddressStrategy();
         addressStrategy.setValue(getBaseForRequest());
         return addressStrategy; 
     }
-    
+
+    /**
+     * This method returns the server base, independent of the request or resource.
+     * @see javax.ws.rs.core.UriInfo#getBaseUri()
+     * @return the ascii string for the server base
+     */ 
     public String getBaseForServer() {
         return getUriInfo().getBaseUri().toASCIIString();
     }
     
+    /**
+     * This method returns the server base, including the resource path.
+     * {@link javax.ws.rs.core.UriInfo#getBaseUri() UriInfo#getBaseUri()} 
+     * @return the ascii string for the base resource provider path
+     */    
     public String getBaseForRequest() {
         return getBaseForServer();
     }    
 
-    protected JaxRsRequest createRequestDetails(final String resourceString, RequestTypeEnum requestType, RestOperationTypeEnum restOperation) {
-        return new JaxRsRequest(this, resourceString, requestType, restOperation);
-    }
-
-	/**
+    /**
 	 * Get the uriInfo
 	 * @return the uri info
 	 */
@@ -101,30 +117,52 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults, I
 	public void setHeaders(HttpHeaders headers) {
 		this.theHeaders = headers;
 	}
+	
+	/**
+	 * Return the requestbuilder for the server
+	 * @param requestType the type of the request
+	 * @param restOperation the rest operation type
+	 * @return the requestbuilder
+	 */
+	public Builder getRequest(RequestTypeEnum requestType, RestOperationTypeEnum restOperation) {
+		return new JaxRsRequest.Builder(this, requestType, restOperation);
+	}	
 
     /**
-     * DEFAULT VALUES
+     * DEFAULT = EncodingEnum.JSON
      */
     @Override
 	public EncodingEnum getDefaultResponseEncoding() {
         return EncodingEnum.JSON;
     }
     
+    /**
+     * DEFAULT = true
+     */
     @Override
 	public boolean isDefaultPrettyPrint() {
 		return true;
 	}
 
+    /**
+     * DEFAULT = ETagSupportEnum.DISABLED
+     */
 	@Override
 	public ETagSupportEnum getETagSupport() {
 		return ETagSupportEnum.DISABLED;
 	}
 
+    /**
+     * DEFAULT = AddProfileTagEnum.NEVER
+     */
 	@Override
 	public AddProfileTagEnum getAddProfileTag() {
 		return AddProfileTagEnum.NEVER;
 	}
 
+	   /**
+     * DEFAULT = false
+     */
 	@Override
 	public boolean isUseBrowserFriendlyContentTypes() {
 		return true;

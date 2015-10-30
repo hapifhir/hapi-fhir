@@ -18,11 +18,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
+import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -39,28 +40,43 @@ import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 /**
- * Conformance Rest Service
+ * This is the conformance provider for the jax rs servers. It requires all providers to be registered
+ * during startup because the conformance profile is generated during the postconstruct phase.
  * @author Peter Van Houte
  */
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProvider {
+public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProvider implements IResourceProvider {
 
-	public static  final String PATH = "/";
+    /** the logger */
     private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(AbstractJaxRsConformanceProvider.class);
-    
+    /** the server bindings */
     private ResourceBinding myServerBinding = new ResourceBinding();
+    /** the resource bindings */
     private ConcurrentHashMap<String, ResourceBinding> myResourceNameToBinding = new ConcurrentHashMap<String, ResourceBinding>();
+    /** the server configuration */
     private RestulfulServerConfiguration serverConfiguration = new RestulfulServerConfiguration();
-
+    
+    /** the conformance. It is created once during startup */
     private Conformance myConformance;
     
-    public AbstractJaxRsConformanceProvider(String implementationDescription, String serverName, String serverVersion) {
+    /**
+     * Constructor allowing the description, servername and server to be set
+     * @param implementationDescription the implementation description. If null, "" is used
+     * @param serverName the server name. If null, "" is used
+     * @param serverVersion the server version. If null, "" is used
+     */
+    protected AbstractJaxRsConformanceProvider(String implementationDescription, String serverName, String serverVersion) {
         serverConfiguration.setFhirContext(getFhirContext());
-        serverConfiguration.setImplementationDescription(implementationDescription);
-        serverConfiguration.setServerName(serverName);
-        serverConfiguration.setServerVersion(serverVersion);
+        serverConfiguration.setImplementationDescription(StringUtils.defaultIfEmpty(implementationDescription, ""));
+        serverConfiguration.setServerName(StringUtils.defaultIfEmpty(serverName, ""));
+        serverConfiguration.setServerVersion(StringUtils.defaultIfEmpty(serverVersion, ""));
     }
 
+	/**
+	 * This method will set the conformance during the postconstruct phase. The
+	 * method {@link AbstractJaxRsConformanceProvider#getProviders()} is used to
+	 * get all the resource providers include in the conformance
+	 */
     @PostConstruct
     protected void setUpPostConstruct() {
     	for (Entry<Class<? extends IResourceProvider>, IResourceProvider> provider : getProviders().entrySet()) {
@@ -80,24 +96,45 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
         myConformance = serverConformanceProvider.getServerConformance(null);
     }
     
+    /**
+     * This method must return all the resource providers which need to be included in the conformance 
+     * @return a map of the resource providers and their corresponding classes. This class needs to be given
+     * explicitly because retrieving the interface using {@link Object#getClass()} may not give the correct
+     * interface in a jee environment.
+     */
     protected abstract ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders();
     
+    /**
+     * This method will retrieve the conformance using the http OPTIONS method
+     * @return the response containing the conformance
+     */
     @OPTIONS
     @Path("/metadata")
     public Response conformanceUsingOptions() throws IOException {
     	return conformance();
     }
 
+    /**
+     * This method will retrieve the conformance using the http GET method
+     * @return the response containing the conformance
+     */
 	@GET
     @Path("/metadata")
     public Response conformance() throws IOException {
-        JaxRsRequest request = createRequestDetails(null, RequestTypeEnum.OPTIONS, RestOperationTypeEnum.METADATA);
-        IRestfulResponse response = request.getResponse();
+        Builder request = getRequest(RequestTypeEnum.OPTIONS, RestOperationTypeEnum.METADATA);
+        IRestfulResponse response = request.build().getResponse();
 		response.addHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "*");
 		return (Response) response.returnResponse(ParseAction.create(myConformance), Constants.STATUS_HTTP_200_OK, true, null, getResourceType().getSimpleName());
     }
 
-    public int addProvider(Object theProvider, Class<?> theProviderInterface) throws ConfigurationException {
+    /**
+     * This method will add a provider to the conformance. This method is almost an exact copy of {@link ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods } 
+     * @param theProvider an instance of the provider interface
+     * @param theProviderInterface the class describing the providers interface 
+     * @return the numbers of basemethodbindings added
+     * @see ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods
+     */
+    public int addProvider(IResourceProvider theProvider, Class<? extends IResourceProvider> theProviderInterface) throws ConfigurationException {
         int count = 0;
 
         for (Method m : ReflectionUtil.getDeclaredMethods(theProviderInterface)) {

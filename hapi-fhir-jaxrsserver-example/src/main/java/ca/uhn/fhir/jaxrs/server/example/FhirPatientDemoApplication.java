@@ -5,6 +5,7 @@ import javax.ws.rs.core.Application;
 
 /**
  * Fhir Patient Demo Application
+ * 
  * @author Peter Van Houte
  */
 @ApplicationPath(value=FhirPatientDemoApplication.PATH)

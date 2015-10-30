@@ -17,187 +17,279 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-
-import ca.uhn.fhir.jaxrs.server.interceptor.BaseServerRuntimeResponseException;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
+import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
+import ca.uhn.fhir.jaxrs.server.util.JaxRsMethodBindings;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
-import ca.uhn.fhir.jaxrs.server.util.MethodBindings;
+import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
-import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.BundleInclusionRule;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IRestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.util.UrlUtil;
 
 /**
- * Fhir Physician Rest Service
- * @author axmpm
- *
+ * This server is the abstract superclass for all resource providers. It exposes
+ * a large amount of the fhir api functionality using JAXRS
+ * @author Peter Van Houte
  */
-@Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
-@Consumes({MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML})
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
+@Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON,
+		Constants.CT_FHIR_XML })
 @Interceptors(JaxRsExceptionInterceptor.class)
-public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends AbstractJaxRsProvider implements IRestfulServer<JaxRsRequest> {
-	
-	private static final ExceptionHandlingInterceptor EXCEPTION_HANDLING_INTERCEPTOR = new ExceptionHandlingInterceptor();
-	private final MethodBindings bindings;
-	
+public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends AbstractJaxRsProvider
+		implements IRestfulServer<JaxRsRequest>, IResourceProvider {
+
+	/** the method bindings for this class */
+	private final JaxRsMethodBindings theBindings;
+
+	/**
+	 * The default constructor. The method bindings are retrieved from the class
+	 * being constructed.
+	 */
 	protected AbstractJaxRsResourceProvider() {
-		bindings = MethodBindings.getMethodBindings(this, getClass());
-    }	
+		theBindings = JaxRsMethodBindings.getMethodBindings(this, getClass());
+	}
 
-    protected AbstractJaxRsResourceProvider(Class<?> subclass) {
-    	bindings = MethodBindings.getMethodBindings(this, subclass);
-    }
+	/**
+	 * This constructor takes in an explicit interface class. This subclass
+	 * should be identical to the class being constructed but is given
+	 * explicitly in order to avoid issues with proxy classes in a jee
+	 * environment.
+	 * 
+	 * @param theProviderClass the interface of the class
+	 */
+	protected AbstractJaxRsResourceProvider(Class<? extends AbstractJaxRsProvider> theProviderClass) {
+		theBindings = JaxRsMethodBindings.getMethodBindings(this, theProviderClass);
+	}
 
+	/**
+	 * The base for request for a resource provider has the following form:</br>
+	 * {@link AbstractJaxRsResourceProvider#getBaseForServer()
+	 * getBaseForServer()} + "/" +
+	 * {@link AbstractJaxRsResourceProvider#getResourceType() getResourceType()}
+	 * .{@link java.lang.Class#getSimpleName() getSimpleName()}
+	 */
 	@Override
 	public String getBaseForRequest() {
-        try {
-            return new URL(getUriInfo().getBaseUri().toURL(), getResourceType().getSimpleName()).toExternalForm();
-        } catch(Exception e) {
-            // cannot happen
-            return null;
-        }
-    }
+		try {
+			return new URL(getUriInfo().getBaseUri().toURL(), getResourceType().getSimpleName()).toExternalForm();
+		} catch (Exception e) {
+			// cannot happen
+			return null;
+		}
+	}
 
-    @POST
-    @Interceptors(JaxRsExceptionInterceptor.class)
-    public Response create(final String resourceString)
-            throws Exception {
-        return executeMethod(resourceString, RequestTypeEnum.POST, RestOperationTypeEnum.CREATE, null);        
-    }
+	/**
+	 * Create a new resource with a server assigned id
+	 * 
+	 * @param resource the body of the post method containing resource being created in a xml/json form
+	 * @return the response
+	 * @see <a href="https://www.hl7.org/fhir/http.html#create">https://www.hl7. org/fhir/http.html#create</a>
+	 */
+	@POST
+	public Response create(final String resource) throws Exception {
+		return execute(getRequest(RequestTypeEnum.POST, RestOperationTypeEnum.CREATE).resource(resource));
+	}
 
-    @POST
-    @Interceptors(JaxRsExceptionInterceptor.class)
-    @Path("/_search")
-    public Response searchWithPost() throws Exception {
-        return executeMethod(null, RequestTypeEnum.POST, RestOperationTypeEnum.SEARCH_TYPE, null);
-    }
-    
-    @GET
-    @Interceptors(JaxRsExceptionInterceptor.class)    
-    public Response search() throws Exception {
-        return executeMethod(null, RequestTypeEnum.GET, RestOperationTypeEnum.SEARCH_TYPE, null);
-    }
-    
-    @PUT
-    @Path("/{id}")
-    @Interceptors(JaxRsExceptionInterceptor.class)
-    public Response update(@PathParam("id") final String id, final String resourceString)
-            throws Exception {
-        return executeMethod(resourceString, RequestTypeEnum.PUT, RestOperationTypeEnum.UPDATE, id);
-    }
-    
-    @DELETE
-    @Path("/{id}")
-    @Interceptors(JaxRsExceptionInterceptor.class)
-    public Response delete(@PathParam("id") final String id) throws Exception {
-        return executeMethod(null, RequestTypeEnum.DELETE, RestOperationTypeEnum.DELETE, id);
-    }
+	/**
+	 * Search the resource type based on some filter criteria
+	 * 
+	 * @return the response
+	 * @see <a href="https://www.hl7.org/fhir/http.html#search">https://www.hl7.org/fhir/http.html#search</a>
+	 */
+	@POST
+	@Path("/_search")
+	public Response searchWithPost() throws Exception {
+		return execute(getRequest(RequestTypeEnum.POST, RestOperationTypeEnum.SEARCH_TYPE));
+	}
 
-
-    @GET
-    @Path("/{id}")
-    @Interceptors(JaxRsExceptionInterceptor.class)
-    public Response find(@PathParam("id") final String id) throws Exception {
-        return executeMethod(null, RequestTypeEnum.GET, RestOperationTypeEnum.READ, id);
-    }    
-    
-    protected Response customOperation(final String resource, RequestTypeEnum requestType, String id, String operationName, RestOperationTypeEnum operationType)
-            throws Exception {
-    	Validate.notNull(resource, "resource may not be null");
-        return executeMethod(resource, requestType, operationType, id, getBindings().getBinding(operationType, operationName));
-    }
-
-    @GET
-    @Path("/{id}/_history/{version}")
-    @Interceptors(JaxRsExceptionInterceptor.class)
-    public Response findHistory(@PathParam("id") final String id, @PathParam("version") final String versionString)
-            throws BaseServerResponseException, IOException {
-        BaseMethodBinding<?> method = getBindings().getBinding(RestOperationTypeEnum.VREAD);
-        final RequestDetails theRequest = createRequestDetails(null, RequestTypeEnum.GET, RestOperationTypeEnum.VREAD);
-        if (id == null) {
-            throw new InvalidRequestException("Don't know how to handle request path: " + getUriInfo().getRequestUri().toASCIIString());
-        }
-        theRequest.setId(new IdDt(getBaseForRequest(), id, UrlUtil.unescape(versionString)));
-        return (Response) method.invokeServer(this, theRequest);
-    }
-
+	/**
+	 * Search the resource type based on some filter criteria
+	 * 
+	 * @return the response
+	 * @see <a href="https://www.hl7.org/fhir/http.html#search">https://www.hl7.org/fhir/http.html#search</a>
+	 */
 	@GET
-    @Path("/{id}/{compartment}")
-    @Interceptors(JaxRsExceptionInterceptor.class)
-    public Response findCompartment(@PathParam("id") final String id, @PathParam("compartment") final String compartment) throws BaseServerResponseException, IOException {
-        BaseMethodBinding<?> method = getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, compartment);
-        final RequestDetails theRequest = createRequestDetails(null, RequestTypeEnum.GET, RestOperationTypeEnum.VREAD);
-        if (id == null) {
-            throw new InvalidRequestException("Don't know how to handle request path: " + getUriInfo().getRequestUri().toASCIIString());
-        }
-        theRequest.setCompartmentName(compartment);
-        theRequest.setId(new IdDt(getBaseForRequest(), id));
-        return (Response) method.invokeServer(this, theRequest);        
-    }
-    
-    private <T extends BaseMethodBinding<?>> Response executeMethod(final String resourceString, RequestTypeEnum requestType, RestOperationTypeEnum restOperation, String id) 
-            throws BaseServerResponseException, IOException {
-        BaseMethodBinding<?> method = getBindings().getBinding(restOperation);
-        return executeMethod(resourceString, requestType, restOperation, id, method);
-    }
+	public Response search() throws Exception {
+		return execute(getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.SEARCH_TYPE));
+	}
 
-    private Response executeMethod(final String resourceString, RequestTypeEnum requestType, RestOperationTypeEnum restOperation, String id,
-            BaseMethodBinding<?> method)
-                    throws IOException {
-        final JaxRsRequest theRequest = createRequestDetails(resourceString, requestType, restOperation, id);
-        try {
-        	return (Response) method.invokeServer(this, theRequest);
-        } catch(BaseServerRuntimeResponseException theException) {
-        	return new JaxRsExceptionInterceptor().handleException(theRequest, theException);
-        }
-    }    
-    
-    
-    protected JaxRsRequest createRequestDetails(final String resourceString, RequestTypeEnum requestType, RestOperationTypeEnum restOperation, String id) {
-    	JaxRsRequest theRequest = super.createRequestDetails(resourceString, requestType, restOperation);
-        theRequest.setId(StringUtils.isBlank(id) ? null : new IdDt(getResourceType().getName(), UrlUtil.unescape(id)));
-        if(restOperation == RestOperationTypeEnum.UPDATE) {
-                String contentLocation = theRequest.getHeader(Constants.HEADER_CONTENT_LOCATION);
-                if (contentLocation != null) {
-                    theRequest.setId(new IdDt(contentLocation));
-            }
-        }
-        return theRequest;
-    }
-    
-    @Override
+	/**
+	 * Update an existing resource by its id (or create it if it is new)
+	 * 
+	 * @param id the id of the resource
+	 * @param resource the body contents for the put method
+	 * @return the response
+	 * @see <a href="https://www.hl7.org/fhir/http.html#update">https://www.hl7.org/fhir/http.html#update</a>
+	 */
+	@PUT
+	@Path("/{id}")
+	public Response update(@PathParam("id") final String id, final String resource) throws Exception {
+		return execute(getRequest(RequestTypeEnum.PUT, RestOperationTypeEnum.UPDATE).id(id).resource(resource));
+	}
+
+	/**
+	 * Delete a resource
+	 * 
+	 * @param id the id of the resource to delete
+	 * @return the response
+	 * @see <a href="https://www.hl7.org/fhir/http.html#delete">https://www.hl7.org/fhir/http.html#delete</a>
+	 */
+	@DELETE
+	@Path("/{id}")
+	public Response delete(@PathParam("id") final String id) throws Exception {
+		return execute(getRequest(RequestTypeEnum.DELETE, RestOperationTypeEnum.DELETE).id(id));
+	}
+
+	/**
+	 * Read the current state of the resource
+	 * 
+	 * @param id the id of the resource to read
+	 * @return the response
+	 * @see <a href="https://www.hl7.org/fhir/http.html#read">https://www.hl7.org/fhir/http.html#read</a>
+	 */
+	@GET
+	@Path("/{id}")
+	public Response find(@PathParam("id") final String id) throws Exception {
+		return execute(getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.READ).id(id));
+	}
+
+	/**
+	 * Execute a custom operation
+	 * 
+	 * @param resource the resource to create
+	 * @param requestType the type of request
+	 * @param id the id of the resource on which to perform the operation
+	 * @param operationName the name of the operation to execute
+	 * @param operationType the rest operation type
+	 * @return the response
+	 * @see <a href="https://www.hl7.org/fhir/operations.html">https://www.hl7.org/fhir/operations.html</a>
+	 */
+	protected Response customOperation(final String resource, RequestTypeEnum requestType, String id,
+			String operationName, RestOperationTypeEnum operationType) throws Exception {
+		Builder request = getRequest(requestType, operationType).resource(resource).id(id);
+		return execute(request, operationName);
+	}
+
+	/**
+	 * Retrieve the update history for a particular resource
+	 * 
+	 * @param id the id of the resource
+	 * @param version the version of the resource
+	 * @return the response
+	 * @see <a href="https://www.hl7.org/fhir/http.html#history">https://www.hl7.org/fhir/http.html#history</a>
+	 */
+	@GET
+	@Path("/{id}/_history/{version}")
+	public Response findHistory(@PathParam("id") final String id, @PathParam("version") final String version)
+			throws IOException {
+		Builder theRequest = getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.VREAD).id(id)
+				.version(version);
+		return execute(theRequest);
+	}
+
+	/**
+	 * Compartment Based Access
+	 * 
+	 * @param id the resource to which the compartment belongs
+	 * @param compartment the compartment
+	 * @return the repsonse 
+	 * @see <a href="https://www.hl7.org/fhir/http.html#search">https://www.hl7.org/fhir/http.html#search</a>
+	 * @see <a href="https://www.hl7.org/fhir/compartments.html#compartment">https://www.hl7.org/fhir/compartments.html#compartment</a>
+	 */
+	@GET
+	@Path("/{id}/{compartment}")
+	public Response findCompartment(@PathParam("id") final String id,
+			@PathParam("compartment") final String compartment) throws IOException {
+		Builder theRequest = getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.SEARCH_TYPE).id(id)
+				.compartment(compartment);
+		return execute(theRequest, compartment);
+	}
+
+	/**
+	 * Execute the method described by the requestBuilder and methodKey
+	 * 
+	 * @param theRequestBuilder the requestBuilder that contains the information about the request
+	 * @param methodKey the key determining the method to be executed
+	 * @return the response
+	 */
+	private Response execute(Builder theRequestBuilder, String methodKey) throws IOException {
+		JaxRsRequest theRequest = theRequestBuilder.build();
+		BaseMethodBinding<?> method = getBinding(theRequest.getRestOperationType(), methodKey);		
+		try {
+			return (Response) method.invokeServer(this, theRequest);
+		} catch (JaxRsResponseException theException) {
+			return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, theException);
+		}
+	}
+	
+	/**
+	 * Execute the method described by the requestBuilder
+	 * 
+	 * @param theRequestBuilder the requestBuilder that contains the information about the request
+	 * @return the response
+	 */
+	private Response execute(Builder theRequestBuilder) throws IOException {
+		return execute(theRequestBuilder, JaxRsMethodBindings.DEFAULT_METHOD_KEY);
+	}
+	
+	/**
+	 * Return the method binding for the given rest operation
+	 * 
+	 * @param restOperation the rest operation to retrieve
+	 * @param theBindingKey the key determining the method to be executed (needed for e.g. custom operation)
+	 * @return
+	 */
+	protected BaseMethodBinding<?> getBinding(RestOperationTypeEnum restOperation, String theBindingKey) {
+		return getBindings().getBinding(restOperation, theBindingKey);
+	}
+
+	/**
+	 * Default: an empty list of interceptors
+	 * 
+	 * @see ca.uhn.fhir.rest.server.IRestfulServer#getInterceptors()
+	 */
+	@Override
 	public List<IServerInterceptor> getInterceptors() {
 		return Collections.emptyList();
 	}
 
+	/**
+	 * Default: no paging provider
+	 */
 	@Override
 	public IPagingProvider getPagingProvider() {
 		return null;
 	}
 
+	/**
+	 * Default: BundleInclusionRule.BASED_ON_INCLUDES
+	 */
 	@Override
 	public BundleInclusionRule getBundleInclusionRule() {
 		return BundleInclusionRule.BASED_ON_INCLUDES;
-	}    
+	}
 
+	/**
+	 * The resource type should return conform to the generic resource included
+	 * in the topic
+	 */
 	@Override
-    public abstract Class<R> getResourceType();
+	public abstract Class<R> getResourceType();
 
-	public MethodBindings getBindings() {
-		return bindings;
+	/**
+	 * Return the bindings defined in this resource provider
+	 * 
+	 * @return the jax-rs method bindings
+	 */
+	public JaxRsMethodBindings getBindings() {
+		return theBindings;
 	}
 
 }

@@ -18,13 +18,12 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.glassfish.jersey.internal.MapPropertiesDelegate;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.junit.Before;
 import org.junit.Test;
 
-import ca.uhn.fhir.jaxrs.server.example.TestDummyPatientProvider;
+import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 
@@ -37,7 +36,7 @@ public class JaxRsRequestTest {
 	private JaxRsRequest details;
 	private MultivaluedMap<String, String> queryParameters = new MultivaluedHashMap<String, String>();
 	private ContainerRequest headers;
-	private TestDummyPatientProvider provider;
+	private TestJaxRsDummyPatientProvider provider;
 	
 	@Before
 	public void setUp() throws URISyntaxException {
@@ -96,11 +95,6 @@ public class JaxRsRequestTest {
 		assertEquals(this.provider, details.getServer());
 	}
 
-	@Test
-	public void testJaxRsRequestDetails() {
-		Validate.notNull(new JaxRsRequest());
-	}
-	
 	public JaxRsRequest createRequestDetails() throws URISyntaxException {
 		//headers
 		headers = new ContainerRequest(new URI(BASEURI), new URI(REQUESTURI), HttpMethod.GET, null, new MapPropertiesDelegate());
@@ -110,7 +104,7 @@ public class JaxRsRequestTest {
 		when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
 		
 		//mocks
-		provider = spy(TestDummyPatientProvider.class);
+		provider = spy(TestJaxRsDummyPatientProvider.class);
 		doReturn(uriInfo).when(provider).getUriInfo();
 		doReturn(BASEURI).when(provider).getBaseForRequest();
 		doReturn(BASEURI).when(provider).getBaseForServer();
