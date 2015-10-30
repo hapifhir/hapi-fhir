@@ -2,6 +2,7 @@ package ca.uhn.fhir.jaxrs.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.example.RandomServerPortProvider;
 import ca.uhn.fhir.jaxrs.server.example.TestJaxRsConformanceRestProvider;
 import ca.uhn.fhir.jaxrs.server.example.TestJaxRsMockPatientRestProvider;
+import ca.uhn.fhir.jaxrs.server.interceptor.BaseServerRuntimeResponseException;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
@@ -351,15 +353,16 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	public void testXFindUnknownPatient() {
 		try {
-			when(mock.find(idCaptor.capture())).thenThrow(new ResourceNotFoundException(new IdDt("999955541264")));
-			final Patient existing = client.read(Patient.class, "999955541264");
+			BaseServerRuntimeResponseException notFoundException = new BaseServerRuntimeResponseException(new ResourceNotFoundException(new IdDt("999955541264")));
+			when(mock.find(idCaptor.capture())).thenThrow(notFoundException);
+			client.read(Patient.class, "999955541264");
 			fail();
-		} catch (final Exception e) {
-			e.printStackTrace();
-			// assertEquals(e.getStatusCode(), 404);
+		} catch (final ResourceNotFoundException e) {
+			assertEquals(ResourceNotFoundException.STATUS_CODE, e.getStatusCode());
+			assertTrue(e.getMessage().contains("999955541264"));
 		}
-	}	
-
+	}
+	
 	private Bundle getPatientBundle(int size) {
 		Bundle result = new Bundle();
 		for (long i = 0; i < size; i++) {

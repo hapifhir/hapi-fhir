@@ -64,7 +64,7 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
         }
     }
     
-    public final Object sendWriterResponse(int status, String contentType, String charset, Writer writer) throws IOException {
+	public final Object sendWriterResponse(int status, String contentType, String charset, Writer writer) throws IOException {
         writer.close();
         return null;
     }

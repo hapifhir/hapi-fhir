@@ -66,9 +66,6 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults, I
         return getBaseForServer();
     }    
 
-	/**
-     * PARSING METHODS
-     */
     protected JaxRsRequest createRequestDetails(final String resourceString, RequestTypeEnum requestType, RestOperationTypeEnum restOperation) {
         return new JaxRsRequest(this, resourceString, requestType, restOperation);
     }

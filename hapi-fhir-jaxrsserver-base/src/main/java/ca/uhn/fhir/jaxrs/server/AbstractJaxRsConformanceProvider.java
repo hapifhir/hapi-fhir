@@ -11,8 +11,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.Local;
-import javax.ejb.Stateless;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
@@ -44,9 +42,6 @@ import ca.uhn.fhir.util.ReflectionUtil;
  * Conformance Rest Service
  * @author Peter Van Houte
  */
-@Local
-@Path("")
-@Stateless
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProvider {
 
@@ -67,8 +62,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
     }
 
     @PostConstruct
-    protected void setUpPostConstruct()
-            throws Exception {
+    protected void setUpPostConstruct() {
     	for (Entry<Class<? extends IResourceProvider>, IResourceProvider> provider : getProviders().entrySet()) {
 			addProvider(provider.getValue(), provider.getKey());
 		}
@@ -86,7 +80,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
         myConformance = serverConformanceProvider.getServerConformance(null);
     }
     
-    protected abstract ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders() throws Exception;
+    protected abstract ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders();
     
     @OPTIONS
     @Path("/metadata")

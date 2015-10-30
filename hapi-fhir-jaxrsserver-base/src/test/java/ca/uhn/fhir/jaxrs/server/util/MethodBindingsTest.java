@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 
 @FixMethodOrder(MethodSorters.DEFAULT)
 public class MethodBindingsTest {
@@ -35,7 +36,7 @@ public class MethodBindingsTest {
 		 MethodBindings.getClassBindings().clear();
 	 }
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test(expected = NotImplementedOperationException.class)
 	public void testFindMethodsForProviderNotDefinedMappingMethods() {
 		new TestDummyPatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "");
 	}
@@ -120,7 +121,7 @@ public class MethodBindingsTest {
 		try {
 			bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$thirdMethod");
 			fail();
-		} catch(UnsupportedOperationException e){
+		} catch(NotImplementedOperationException e){
 		}
 	}	
 

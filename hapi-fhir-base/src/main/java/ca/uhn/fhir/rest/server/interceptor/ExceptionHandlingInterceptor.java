@@ -36,6 +36,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.IRestfulResponse;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
@@ -47,6 +48,13 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 
 	@Override
 	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
+		handleException(theRequestDetails, theException);
+		return false;
+	}
+
+	public Object handleException(RequestDetails theRequestDetails, BaseServerResponseException theException)
+			throws ServletException, IOException {
+		IRestfulResponse response = theRequestDetails.getResponse();
 
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
@@ -64,22 +72,19 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 				if (isNotBlank(next.getKey()) && next.getValue() != null) {
 					String nextKey = next.getKey();
 					for (String nextValue : next.getValue()) {
-						theResponse.addHeader(nextKey, nextValue);
+						response.addHeader(nextKey, nextValue);
 					}
 				}
 			}
 		}
 
-		theRequestDetails.getResponse().streamResponseAsResource(oo, true, Collections.singleton(SummaryEnum.FALSE), statusCode, false, false);
-
+		return response.streamResponseAsResource(oo, true, Collections.singleton(SummaryEnum.FALSE), statusCode, false, false);
 		// theResponse.setStatus(statusCode);
 		// theRequestDetails.getServer().addHeadersToResponse(theResponse);
 		// theResponse.setContentType("text/plain");
 		// theResponse.setCharacterEncoding("UTF-8");
 		// theResponse.getWriter().append(theException.getMessage());
 		// theResponse.getWriter().close();
-
-		return false;
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.example;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -66,7 +67,7 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 	private static Long counter = 1L;
 	private static final ConcurrentHashMap<String, List<Patient>> patients = new ConcurrentHashMap<String, List<Patient>>();
 
-	public JaxRsPatientRestProvider() throws Exception {
+	public JaxRsPatientRestProvider() {
 		super(JaxRsPatientRestProvider.class);
 	}
 
@@ -132,7 +133,8 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 	}
 
 	@Read
-	public Patient find(@IdParam final IdDt theId) {
+	@Interceptors(JaxRsExceptionInterceptor.class)
+	public Patient find(@IdParam final IdDt theId) throws InvocationTargetException {
 		if (patients.containsKey(theId.getIdPart())) {
 			return getLast(patients.get(theId.getIdPart()));
 		} else {
@@ -168,7 +170,7 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 	}
 
 	@Delete
-	public MethodOutcome delete(@IdParam final IdDt theId) {
+	public MethodOutcome delete(@IdParam final IdDt theId) throws InvocationTargetException {
 		final Patient deletedPatient = find(theId);
 		patients.remove(deletedPatient.getId().getIdPart());
 		final MethodOutcome result = new MethodOutcome().setCreated(true);
@@ -203,7 +205,7 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 
 	@Operation(name = "last", idempotent = true, returnParameters = {
 			@OperationParam(name = "return", type = StringDt.class) })
-	public Parameters last(@OperationParam(name = "dummy") StringDt dummyInput) {
+	public Parameters last(@OperationParam(name = "dummy") StringDt dummyInput) throws InvocationTargetException {
 		System.out.println("inputparameter");
 		Parameters parameters = new Parameters();
 		Patient patient = find(new IdDt(counter.intValue() - 1));

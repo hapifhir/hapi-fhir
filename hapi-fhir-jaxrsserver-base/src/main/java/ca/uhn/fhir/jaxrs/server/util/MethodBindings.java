@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 /**
@@ -63,7 +64,7 @@ public class MethodBindings {
         String nonEmptyQualifier = StringUtils.defaultIfBlank(qualifier, "");
 		ConcurrentHashMap<String, BaseMethodBinding<?>> map = operationBindings.get(operationType);
         if(map == null || !map.containsKey(nonEmptyQualifier)) {
-            throw new UnsupportedOperationException();
+            throw new NotImplementedOperationException("Operation not implemented");
         }  else {
             return map.get(nonEmptyQualifier);
         }

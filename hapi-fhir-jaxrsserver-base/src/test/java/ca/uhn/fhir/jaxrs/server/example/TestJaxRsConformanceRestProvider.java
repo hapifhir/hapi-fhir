@@ -27,7 +27,7 @@ public class TestJaxRsConformanceRestProvider extends AbstractJaxRsConformancePr
 	}
 
 	@Override
-	protected ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders() throws Exception {
+	protected ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders() {
 		ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> map = new ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider>();
 		map.put(TestJaxRsMockPatientRestProvider.class, new TestJaxRsMockPatientRestProvider());
 		map.put(TestJaxRsConformanceRestProvider.class, new TestJaxRsConformanceRestProvider());

@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
+import ca.uhn.fhir.jaxrs.server.interceptor.BaseServerRuntimeResponseException;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.MethodBindings;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.UrlUtil;
 
@@ -45,8 +47,10 @@ import ca.uhn.fhir.util.UrlUtil;
  */
 @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
 @Consumes({MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML})
+@Interceptors(JaxRsExceptionInterceptor.class)
 public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends AbstractJaxRsProvider implements IRestfulServer<JaxRsRequest> {
 	
+	private static final ExceptionHandlingInterceptor EXCEPTION_HANDLING_INTERCEPTOR = new ExceptionHandlingInterceptor();
 	private final MethodBindings bindings;
 	
 	protected AbstractJaxRsResourceProvider() {
@@ -153,8 +157,12 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
     private Response executeMethod(final String resourceString, RequestTypeEnum requestType, RestOperationTypeEnum restOperation, String id,
             BaseMethodBinding<?> method)
                     throws IOException {
-        final RequestDetails theRequest = createRequestDetails(resourceString, requestType, restOperation, id);
-        return (Response) method.invokeServer(this, theRequest);
+        final JaxRsRequest theRequest = createRequestDetails(resourceString, requestType, restOperation, id);
+        try {
+        	return (Response) method.invokeServer(this, theRequest);
+        } catch(BaseServerRuntimeResponseException theException) {
+        	return new JaxRsExceptionInterceptor().handleException(theRequest, theException);
+        }
     }    
     
     

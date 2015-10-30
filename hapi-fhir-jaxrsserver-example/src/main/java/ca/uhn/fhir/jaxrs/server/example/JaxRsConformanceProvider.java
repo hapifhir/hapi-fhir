@@ -29,7 +29,7 @@ public class JaxRsConformanceProvider extends AbstractJaxRsConformanceProvider {
 	}
 
 	@Override
-	protected ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders() throws Exception {
+	protected ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders() {
 		ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> map = new ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider>();
 		map.put(JaxRsConformanceProvider.class, new JaxRsConformanceProvider());
 		map.put(JaxRsPatientRestProvider.class, new JaxRsPatientRestProvider());

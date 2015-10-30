@@ -63,7 +63,8 @@ public class JaxRsPatientProviderTest {
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/");
+		//client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/");
+		client = ourCtx.newRestfulGenericClient("http://localhost:8580/hapi-fhir-jaxrsserver-example/jaxrs-demo/");
 		client.setEncoding(EncodingEnum.JSON);
 		client.registerInterceptor(new LoggingInterceptor(true));
 	}
