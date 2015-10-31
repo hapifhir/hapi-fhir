@@ -15,7 +15,7 @@
                   <li>Commons-lang3 (Core): 3.3.2 -&gt; 3.4</li>
                   <li>Logback (Core): 1.1.2 -&gt; 1.1.3</li>
                   <li>Springframework (JPA, Web Tester): 4.1.5 -&gt; 4.2.2</li>
-                  <li>Hibernate (JPA, Web Tester): 4.2.17 -&gt; 5.0.2</li>
+                  <li>Hibernate (JPA, Web Tester): 4.2.17 -&gt; 5.0.3</li>
                   <li>Hibernate Validator (JPA, Web Tester): 5.2.1 -&gt; 5.2.2</li>
                   <li>Derby (JPA, CLI, Public Server): 10.11.1.1 -&gt; 10.12.1.1 </li>
                   <li>Jetty (JPA, CLI, Public Server): 9.2.6.v20141205 -&gt; 9.3.4.v20151007 </li>
@@ -226,6 +226,12 @@
 				Correctly set the Bundle.type value on all pages of a search result in
 				the server, and correcltly set the same value in JPA server $everything
 				results.
+			</action>
+			<action type="add">
+				JPA $everything operations now support new parameters _content 
+				and _text, which work the same way as the same parameters on a 
+				search. This is experimental, since it is not a part of the core
+				FHIR specification.
 			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">

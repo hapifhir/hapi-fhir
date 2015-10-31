@@ -29,6 +29,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -39,8 +40,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.IndexedEmbedded;
 
 import ca.uhn.fhir.jpa.search.IndexNonDeletedInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -65,6 +69,13 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
+	 */
+	@Transient()
+	@Field()
+	private String myContentText;
+
 	@Column(name = "SP_HAS_LINKS")
 	private boolean myHasLinks;
 
@@ -85,27 +96,16 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 */
-//	@Column(name = "SP_NARRATIVE_TEXT", length = Integer.MAX_VALUE - 1, nullable=true)
-//	@Lob
-	@Transient
+	@Transient()
 	@Field()
 	private String myNarrativeText;
-
-	/**
-	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
-	 */
-//	@Column(name = "SP_CONTENT_TEXT", length = Integer.MAX_VALUE - 1, nullable=true)
-//	@Lob
-	@Transient
-	@Field()
-	private String myContentText;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
 
 	@Column(name = "SP_COORDS_PRESENT")
 	private boolean myParamsCoordsPopulated;
-
+	
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
 
@@ -146,6 +146,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	private String myProfile;
 
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@IndexedEmbedded()
 	private Collection<ResourceLink> myResourceLinks;
 
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN)
@@ -303,6 +304,10 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myParamsUriPopulated;
 	}
 
+	public void setContentTextParsedIntoWords(String theContentText) {
+		myContentText = theContentText;
+	}
+
 	public void setHasLinks(boolean theHasLinks) {
 		myHasLinks = theHasLinks;
 	}
@@ -324,10 +329,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public void setNarrativeTextParsedIntoWords(String theNarrativeText) {
 		myNarrativeText = theNarrativeText;
-	}
-
-	public void setContentTextParsedIntoWords(String theContentText) {
-		myContentText = theContentText;
 	}
 
 	public void setParamsCoords(Collection<ResourceIndexedSearchParamCoords> theParamsCoords) {
@@ -460,6 +461,14 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		}
 		
 		return retVal;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("resourceType", myResourceType);
+		b.append("pid", myId);
+		return b.build();
 	}
 
 }

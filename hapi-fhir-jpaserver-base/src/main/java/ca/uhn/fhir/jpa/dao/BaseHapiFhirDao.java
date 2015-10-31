@@ -632,7 +632,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		};
 	}
 
-	protected boolean isValidPid(IIdType theId) {
+	protected static boolean isValidPid(IIdType theId) {
 		if (theId == null || theId.getIdPart() == null) {
 			return false;
 		}
@@ -1186,10 +1186,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	protected Long translateForcedIdToPid(IIdType theId) {
+		return translateForcedIdToPid(theId, myEntityManager);
+	}
+
+	static Long translateForcedIdToPid(IIdType theId, EntityManager entityManager) {
 		if (isValidPid(theId)) {
 			return theId.getIdPartAsLong();
 		} else {
-			TypedQuery<ForcedId> q = myEntityManager.createNamedQuery("Q_GET_FORCED_ID", ForcedId.class);
+			TypedQuery<ForcedId> q = entityManager.createNamedQuery("Q_GET_FORCED_ID", ForcedId.class);
 			q.setParameter("ID", theId.getIdPart());
 			try {
 				return q.getSingleResult().getResourcePid();
@@ -1356,7 +1360,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 
 		}
-
+		
 		if (theEntity.getId() == null) {
 			myEntityManager.persist(theEntity);
 
@@ -1426,6 +1430,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				myEntityManager.persist(next);
 			}
 
+			// Store resource links
 			for (ResourceLink next : resourceLinks) {
 				myEntityManager.remove(next);
 			}

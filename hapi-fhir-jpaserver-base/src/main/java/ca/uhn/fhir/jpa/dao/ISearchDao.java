@@ -25,5 +25,7 @@ import java.util.List;
 public interface ISearchDao {
 
 	List<Long> search(String theResourceName, SearchParameterMap theParams);
-	
+
+	List<Long> everything(String theResourceName, SearchParameterMap theParams);
+
 }

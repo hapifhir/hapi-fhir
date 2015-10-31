@@ -46,8 +46,6 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.dstu.resource.Device;
-import ca.uhn.fhir.model.dstu.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
@@ -55,6 +53,7 @@ import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
+import ca.uhn.fhir.model.dstu2.resource.Device;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
 import ca.uhn.fhir.model.dstu2.resource.DocumentManifest;
 import ca.uhn.fhir.model.dstu2.resource.DocumentReference;
@@ -67,6 +66,7 @@ import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
@@ -82,6 +82,7 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UnsignedIntDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -90,6 +91,9 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -100,8 +104,6 @@ import ca.uhn.fhir.util.UrlUtil;
 public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2Test.class);
-
-	// private static JpaConformanceProvider ourConfProvider;
 
 	@Override
 	public void before() throws Exception {
@@ -117,6 +119,67 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(200, resp.getStatusLine().getStatusCode());
 	}
 
+	@Test
+	public void testEverythingInstanceWithContentFilter() {
+		Patient pt1 = new Patient();
+		pt1.addName().addFamily("Everything").addGiven("Arthur");
+		IIdType ptId1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+
+		Patient pt2 = new Patient();
+		pt2.addName().addFamily("Everything").addGiven("Arthur");
+		IIdType ptId2 = myPatientDao.create(pt2).getId().toUnqualifiedVersionless();
+
+		Device dev1 = new Device();
+		dev1.setManufacturer("Some Manufacturer");
+		IIdType devId1 = myDeviceDao.create(dev1).getId().toUnqualifiedVersionless();
+		
+		Device dev2 = new Device();
+		dev2.setManufacturer("Some Manufacturer 2");
+		myDeviceDao.create(dev2).getId().toUnqualifiedVersionless();
+
+		Observation obs1 = new Observation();
+		obs1.getText().setDiv("<div>OBSTEXT1</div>");
+		obs1.getSubject().setReference(ptId1);
+		obs1.getCode().addCoding().setCode("CODE1");
+		obs1.setValue(new StringDt("obsvalue1"));
+		obs1.getDevice().setReference(devId1);
+		IIdType obsId1 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.getSubject().setReference(ptId1);
+		obs2.getCode().addCoding().setCode("CODE2");
+		obs2.setValue(new StringDt("obsvalue2"));
+		IIdType obsId2 = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
+
+		Observation obs3 = new Observation();
+		obs3.getSubject().setReference(ptId2);
+		obs3.getCode().addCoding().setCode("CODE3");
+		obs3.setValue(new StringDt("obsvalue3"));
+		IIdType obsId3 = myObservationDao.create(obs3).getId().toUnqualifiedVersionless();
+		
+		List<IIdType> actual;
+		StringAndListParam param;
+		
+		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", new Object[] {ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart()});
+		
+		param = new StringAndListParam();
+		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
+
+		//@formatter:off
+		Parameters response = ourClient
+			.operation()
+			.onInstance(ptId1)
+			.named("everything")
+			.withParameter(Parameters.class, Constants.PARAM_CONTENT, new StringDt("obsvalue1"))
+			.execute();
+		//@formatter:on
+		
+		actual = toUnqualifiedVersionlessIds((ca.uhn.fhir.model.dstu2.resource.Bundle)response.getParameter().get(0).getResource());
+		assertThat(actual, containsInAnyOrder(ptId1, obsId1, devId1));
+
+	}
+	
+	
 	@Test
 	public void testBundleCreate() throws Exception {
 		IGenericClient client = ourClient;

@@ -226,8 +226,8 @@
 		<derby_version>10.12.1.1</derby_version>
 		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this version with caution! Also note that if 
 			you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration for that plugin... -->
-		<hibernate_version>5.0.2.Final</hibernate_version>
-		<hibernate_validator_version>5.2.1.Final</hibernate_validator_version>
+		<hibernate_version>5.0.3.Final</hibernate_version>
+		<hibernate_validator_version>5.2.2.Final</hibernate_validator_version>
 		<jetty_version>9.3.4.v20151007</jetty_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_failsafe_plugin_version>2.18.1</maven_failsafe_plugin_version>
@@ -496,6 +496,11 @@
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-validator</artifactId>
 				<version>${hibernate_validator_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-search-orm</artifactId>
+				<version>5.5.0.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.javassist</groupId>

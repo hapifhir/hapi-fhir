@@ -45,6 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.dstu.resource.BaseResource;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -57,6 +59,10 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 	@Transactional()
 	@Override
 	public List<Long> search(String theResourceName, SearchParameterMap theParams) {
+		return doSearch(theResourceName, theParams, null);
+	}
+
+	private List<Long> doSearch(String theResourceName, SearchParameterMap theParams, Long theReferencingPid) {
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 		
 		QueryBuilder qb = em
@@ -72,6 +78,10 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		List<List<? extends IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
 		addTextSearch(qb, bool, textAndTerms, "myNarrativeText");
 
+		if (theReferencingPid != null) {
+			bool.must(qb.keyword().onField("myResourceLinks.myTargetResourcePid").matching(theReferencingPid).createQuery());
+		}
+		
 		if (bool.isEmpty()) {
 			return null;
 		}
@@ -92,7 +102,10 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		ArrayList<Long> retVal = new ArrayList<Long>();
 		for (Object object : result) {
 			Object[] nextArray = (Object[]) object;
-			retVal.add((Long)nextArray[0]);
+			Long next = (Long)nextArray[0];
+			if (next != null) {
+				retVal.add(next);
+			}
 		}
 
 		return retVal;
@@ -117,5 +130,24 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 			}
 		}
 	}
+
+	@Override
+	public List<Long> everything(String theResourceName, SearchParameterMap theParams) {
+		
+		Long pid = null;
+		if (theParams.get(BaseResource.SP_RES_ID) != null) {
+			StringParam idParm = (StringParam) theParams.get(BaseResource.SP_RES_ID).get(0).get(0);
+			pid = BaseHapiFhirDao.translateForcedIdToPid(new IdDt(idParm.getValue()), myEntityManager);
+		}
+
+		Long referencingPid = pid;
+		List<Long> retVal = doSearch(null, theParams, referencingPid);
+		if (referencingPid != null) {
+			retVal.add(referencingPid);
+		}
+		return retVal;
+	}
+
+
 
 }

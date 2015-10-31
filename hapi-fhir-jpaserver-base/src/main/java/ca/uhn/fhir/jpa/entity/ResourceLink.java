@@ -36,6 +36,8 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.search.annotations.ContainedIn;
+import org.hibernate.search.annotations.Field;
 
 @Entity
 @Table(name = "HFJ_RES_LINK" , indexes= {
@@ -57,6 +59,7 @@ public class ResourceLink implements Serializable {
 
 	@ManyToOne(optional = false, fetch=FetchType.LAZY)
 	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false)
+//	@ContainedIn()
 	private ResourceTable mySourceResource;
 
 	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
@@ -67,6 +70,7 @@ public class ResourceLink implements Serializable {
 	private ResourceTable myTargetResource;
 
 	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
+	@Field()
 	private Long myTargetResourcePid;
 
 	public ResourceLink() {
@@ -77,7 +81,9 @@ public class ResourceLink implements Serializable {
 		super();
 		mySourcePath = theSourcePath;
 		mySourceResource = theSourceResource;
+		mySourceResourcePid = theSourceResource.getId();
 		myTargetResource = theTargetResource;
+		myTargetResourcePid = theTargetResource.getId();
 	}
 
 	@Override
@@ -134,11 +140,13 @@ public class ResourceLink implements Serializable {
 
 	public void setSourceResource(ResourceTable theSourceResource) {
 		mySourceResource = theSourceResource;
+		mySourceResourcePid = theSourceResource.getId();
 	}
 
 	public void setTargetResource(ResourceTable theTargetResource) {
 		Validate.notNull(theTargetResource);
 		myTargetResource = theTargetResource;
+		myTargetResourcePid = theTargetResource.getId();
 	}
 
 	@Override

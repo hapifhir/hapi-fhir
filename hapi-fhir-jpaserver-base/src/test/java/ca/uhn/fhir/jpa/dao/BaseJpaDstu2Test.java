@@ -10,6 +10,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.apache.commons.io.IOUtils;
+import org.hibernate.search.jpa.FullTextEntityManager;
+import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -75,7 +77,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 
 	@Autowired
 	protected ApplicationContext myAppCtx;
-	
+
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu2")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
@@ -160,6 +162,16 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
 		myDaoConfig.setInterceptors(myInterceptor);
+	}
+
+	@Before
+	@Transactional
+	public void beforeFlushFT() {
+		FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
+		ftem.purgeAll(ResourceTable.class);
+		ftem.flushToIndexes();
+
+		myDaoConfig.setSchedulingDisabled(true);
 	}
 
 	@Before
