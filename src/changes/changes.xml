@@ -14,6 +14,7 @@
                <ul>
                   <li>Commons-lang3 (Core): 3.3.2 -&gt; 3.4</li>
                   <li>Logback (Core): 1.1.2 -&gt; 1.1.3</li>
+                  <li>SLF4j (Core): 1.7.102 -&gt; 1.7.12</li>
                   <li>Springframework (JPA, Web Tester): 4.1.5 -&gt; 4.2.2</li>
                   <li>Hibernate (JPA, Web Tester): 4.2.17 -&gt; 5.0.3</li>
                   <li>Hibernate Validator (JPA, Web Tester): 5.2.1 -&gt; 5.2.2</li>
