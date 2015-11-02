@@ -21,9 +21,12 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.BaseJpaDstu2Test;
@@ -32,12 +35,16 @@ import ca.uhn.fhir.jpa.rp.dstu2.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu2.PatientResourceProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
@@ -175,6 +182,90 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		} finally {
 			http.close();
 		}
+	}
+
+	@Transactional(propagation=Propagation.NEVER)
+	@Test
+	public void testSuggestKeywords() throws Exception {
+		
+		Patient patient = new Patient();
+		patient.addName().addFamily("testSuggest");
+		IIdType ptId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		Observation obs = new Observation();
+		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
+		obs.getSubject().setReference(ptId);
+		IIdType obsId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+
+		obs = new Observation();
+		obs.setId(obsId);
+		obs.getSubject().setReference(ptId);
+		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
+		myObservationDao.update(obs);
+		
+		HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + ptId.getIdPart() + "/$everything&searchParam=_content&text=zxc&_pretty=true&_format=xml");
+		CloseableHttpResponse http = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, http.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(http.getEntity().getContent());
+			ourLog.info(output);
+			
+			Parameters parameters = ourCtx.newXmlParser().parseResource(Parameters.class, output);
+			assertEquals(2, parameters.getParameter().size());
+			assertEquals("keyword", parameters.getParameter().get(0).getPart().get(0).getName());
+			assertEquals(new StringDt("ZXCVBNM"), parameters.getParameter().get(0).getPart().get(0).getValue());
+			assertEquals("score", parameters.getParameter().get(0).getPart().get(1).getName());
+			assertEquals(new DecimalDt("1.0"), parameters.getParameter().get(0).getPart().get(1).getValue());
+			
+		} finally {
+			http.close();
+		}
+	}
+
+	@Test
+	public void testSuggestKeywordsInvalid() throws Exception {
+		Patient patient = new Patient();
+		patient.addName().addFamily("testSuggest");
+		IIdType ptId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		Observation obs = new Observation();
+		obs.getSubject().setReference(ptId);
+		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
+		myObservationDao.create(obs);
+		
+		HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords");
+		CloseableHttpResponse http = ourHttpClient.execute(get);
+		try {
+			assertEquals(400, http.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(http.getEntity().getContent());
+			ourLog.info(output);
+			assertThat(output, containsString("Parameter 'context' must be provided"));
+		} finally {
+			http.close();
+		}
+		
+		get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + ptId.getIdPart() + "/$everything");
+		http = ourHttpClient.execute(get);
+		try {
+			assertEquals(400, http.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(http.getEntity().getContent());
+			ourLog.info(output);
+			assertThat(output, containsString("Parameter 'searchParam' must be provided"));
+		} finally {
+			http.close();
+		}
+
+		get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + ptId.getIdPart() + "/$everything&searchParam=aa");
+		http = ourHttpClient.execute(get);
+		try {
+			assertEquals(400, http.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(http.getEntity().getContent());
+			ourLog.info(output);
+			assertThat(output, containsString("Parameter 'text' must be provided"));
+		} finally {
+			http.close();
+		}
+
 	}
 
 	@Test

@@ -36,7 +36,6 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 
 @Entity
@@ -72,9 +71,9 @@ public class ResourceLink implements Serializable {
 	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
 	@Field()
 	private Long myTargetResourcePid;
-
+	
 	public ResourceLink() {
-		// nothing
+		super();
 	}
 
 	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, ResourceTable theTargetResource) {
@@ -101,7 +100,7 @@ public class ResourceLink implements Serializable {
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(mySourcePath, obj.mySourcePath);
 		b.append(mySourceResource, obj.mySourceResource);
-		b.append(myTargetResource, obj.myTargetResource);
+		b.append(myTargetResourcePid, obj.myTargetResourcePid);
 		return b.isEquals();
 	}
 
@@ -130,7 +129,7 @@ public class ResourceLink implements Serializable {
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(mySourcePath);
 		b.append(mySourceResource);
-		b.append(myTargetResource);
+		b.append(myTargetResourcePid);
 		return b.toHashCode();
 	}
 

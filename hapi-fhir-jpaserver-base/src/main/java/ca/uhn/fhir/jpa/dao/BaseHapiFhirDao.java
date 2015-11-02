@@ -31,6 +31,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1189,6 +1190,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return translateForcedIdToPid(theId, myEntityManager);
 	}
 
+	public static void validateResourceType(BaseHasResource theEntity, String theResourceName) {
+		if (!theResourceName.equals(theEntity.getResourceType())) {
+			throw new ResourceNotFoundException("Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
+		}
+	}
+
 	static Long translateForcedIdToPid(IIdType theId, EntityManager entityManager) {
 		if (isValidPid(theId)) {
 			return theId.getIdPartAsLong();
@@ -1271,9 +1278,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		if (theEntity.isParamsCoordsPopulated()) {
 			paramsCoords.addAll(theEntity.getParamsCoords());
 		}
-		Collection<ResourceLink> resourceLinks = new ArrayList<ResourceLink>();
+		Collection<ResourceLink> existingResourceLinks = new ArrayList<ResourceLink>();
 		if (theEntity.isHasLinks()) {
-			resourceLinks.addAll(theEntity.getResourceLinks());
+			existingResourceLinks.addAll(theEntity.getResourceLinks());
 		}
 
 		Set<ResourceIndexedSearchParamString> stringParams = null;
@@ -1326,6 +1333,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				}
 
 				links = extractResourceLinks(theEntity, theResource);
+
+				/* 
+				 * If the existing resource already has links and those match links we still want,
+				 * use them instead of removing them and re adding them 
+				 */
+				for (Iterator<ResourceLink> existingLinkIter = existingResourceLinks.iterator(); existingLinkIter.hasNext(); ) {
+					ResourceLink nextExisting = existingLinkIter.next();
+					if (links.remove(nextExisting)) {
+						existingLinkIter.remove();
+						links.add(nextExisting);
+					}
+				}
+				
 				populateResourceIntoEntity(theResource, theEntity);
 
 				theEntity.setUpdated(theUpdateTime);
@@ -1431,7 +1451,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 
 			// Store resource links
-			for (ResourceLink next : resourceLinks) {
+			for (ResourceLink next : existingResourceLinks) {
 				myEntityManager.remove(next);
 			}
 			for (ResourceLink next : links) {

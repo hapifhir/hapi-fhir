@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
@@ -77,7 +76,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 
 	@Autowired
 	protected ApplicationContext myAppCtx;
-
+	@Autowired
+	protected ISearchDao mySearchDao;
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu2")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;

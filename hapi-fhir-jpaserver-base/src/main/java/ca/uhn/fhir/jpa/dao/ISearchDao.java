@@ -22,8 +22,12 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.List;
 
+import ca.uhn.fhir.jpa.dao.FhirSearchDao.Suggestion;
+
 public interface ISearchDao {
 
+	List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText);
+	
 	List<Long> search(String theResourceName, SearchParameterMap theParams);
 
 	List<Long> everything(String theResourceName, SearchParameterMap theParams);

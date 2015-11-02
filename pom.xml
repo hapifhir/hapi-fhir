@@ -368,6 +368,16 @@
 				<version>4.4</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-highlighter</artifactId>
+				<version>5.3.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-analyzers-phonetic</artifactId>
+				<version>5.3.0</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.maven.doxia</groupId>
 				<artifactId>doxia-module-markdown</artifactId>
 				<version>1.6</version>

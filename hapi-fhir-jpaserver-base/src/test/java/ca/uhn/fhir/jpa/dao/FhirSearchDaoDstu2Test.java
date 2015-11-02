@@ -6,15 +6,9 @@ import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
-import org.hibernate.search.jpa.FullTextEntityManager;
-import org.hibernate.search.jpa.Search;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 
-import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -26,14 +20,6 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 	
 	@Autowired
 	private ISearchDao mySearchDao;
-	
-	@Before
-	@Transactional
-	public void beforeFlushFT() {
-		  FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
-		  ftem.purgeAll(ResourceTable.class);
-		  ftem.flushToIndexes();
-	}
 	
 	@Test
 	public void testContentSearch() {

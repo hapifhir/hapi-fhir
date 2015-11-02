@@ -1045,9 +1045,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	}
 
 	private void validateResourceType(BaseHasResource entity) {
-		if (!myResourceName.equals(entity.getResourceType())) {
-			throw new ResourceNotFoundException("Resource with ID " + entity.getIdDt().getIdPart() + " exists but it is not of type " + myResourceName + ", found resource of type " + entity.getResourceType());
-		}
+		validateResourceType(entity, myResourceName);
 	}
 
 	private void validateResourceTypeAndThrowIllegalArgumentException(IIdType theId) {

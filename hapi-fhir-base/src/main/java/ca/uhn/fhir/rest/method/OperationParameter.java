@@ -110,7 +110,7 @@ public class OperationParameter implements IParameter {
 			myMax = 1;
 		}
 		
-		myAllowGet = IPrimitiveType.class.isAssignableFrom(myParameterType);
+		myAllowGet = IPrimitiveType.class.isAssignableFrom(myParameterType) || String.class.equals(myParameterType);
 		
 		/*
 		 * The parameter can be of type string for validation methods - This is a bit
@@ -173,6 +173,12 @@ public class OperationParameter implements IParameter {
 						DateRangeParam dateRangeParam = new DateRangeParam();
 						dateRangeParam.setValuesAsQueryTokens(parameters);
 						matchingParamValues.add(dateRangeParam);
+					} else if (String.class.isAssignableFrom(myParameterType)) {
+						
+						for (String next : paramValues) {
+							matchingParamValues.add(next);
+						}
+						
 					} else {
 						for (String nextValue : paramValues) {
 							FhirContext ctx = theRequest.getServer().getFhirContext();

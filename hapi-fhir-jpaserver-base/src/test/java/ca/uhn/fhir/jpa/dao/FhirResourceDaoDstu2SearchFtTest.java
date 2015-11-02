@@ -4,8 +4,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
@@ -15,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 
+import ca.uhn.fhir.jpa.dao.FhirSearchDao.Suggestion;
 import ca.uhn.fhir.model.dstu2.resource.Device;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -27,6 +27,72 @@ import ca.uhn.fhir.rest.server.Constants;
 public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 	
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchFtTest.class);
+
+	@Test
+	public void testSuggest() {
+		Patient patient = new Patient();
+		patient.addName().addFamily("testSuggest");
+		IIdType ptId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		Observation obs = new Observation();
+		obs.getSubject().setReference(ptId);
+		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
+		myObservationDao.create(obs);
+
+		obs = new Observation();
+		obs.getSubject().setReference(ptId);
+		obs.getCode().setText("MNBVCXZ");
+		myObservationDao.create(obs);
+
+		obs = new Observation();
+		obs.getSubject().setReference(ptId);
+		obs.getCode().setText("ZXC HELLO");
+		myObservationDao.create(obs);
+
+		/*
+		 * These shouldn't match since they're for another patient
+		 */
+		patient = new Patient();
+		patient.addName().addFamily("testSuggest2");
+		IIdType ptId2 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.getSubject().setReference(ptId2);
+		obs2.getCode().setText("ZXCVBNMZZ");
+		myObservationDao.create(obs2);
+
+		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXCVBNM");
+		ourLog.info("Found: " + output);
+		assertEquals(4, output.size());
+		assertEquals("ZXCVBNM", output.get(0).getTerm());
+		assertEquals("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL", output.get(1).getTerm());
+		assertEquals("ZXC", output.get(2).getTerm());
+		assertEquals("ZXC HELLO", output.get(3).getTerm());
+
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXC");
+		ourLog.info("Found: " + output);
+		assertEquals(4, output.size());
+		assertEquals("ZXC", output.get(0).getTerm());
+		assertEquals("ZXC HELLO", output.get(1).getTerm());
+		assertEquals("ZXCVBNM", output.get(2).getTerm());
+		assertEquals("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL", output.get(3).getTerm());
+
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "HELO");
+		ourLog.info("Found: " + output);
+		assertEquals(1, output.size());
+		assertEquals("HELLO", output.get(0).getTerm());
+		
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "Z");
+		ourLog.info("Found: " + output);
+		assertEquals(0, output.size());
+
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZX");
+		ourLog.info("Found: " + output);
+		assertEquals(1, output.size());
+		assertEquals("ZXC", output.get(0).getTerm());
+
+	}
+	
 	
 	@Test
 	public void testSearchAndReindex() {
@@ -320,7 +386,7 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		IIdType pId1;
 		{
 			Patient patient = new Patient();
-			patient.addName().addGiven("methodName");
+			patient.addName().addGiven(methodName);
 			patient.addAddress().addLine("My fulltext address");
 			pId1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 		}
