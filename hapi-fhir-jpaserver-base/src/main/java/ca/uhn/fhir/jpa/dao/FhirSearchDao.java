@@ -35,16 +35,13 @@ import javax.persistence.PersistenceContextType;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.core.KeywordAnalyzer;
+import org.apache.lucene.analysis.Token;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.highlight.Formatter;
 import org.apache.lucene.search.highlight.Highlighter;
 import org.apache.lucene.search.highlight.QueryScorer;
 import org.apache.lucene.search.highlight.Scorer;
-import org.apache.lucene.search.highlight.SimpleHTMLFormatter;
 import org.apache.lucene.search.highlight.TokenGroup;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
@@ -56,7 +53,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import ca.uhn.fhir.jpa.dao.FhirSearchDao.MySuggestionFormatter;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.resource.BaseResource;
@@ -207,16 +203,29 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 			String nextValue = (String) nextAsArray[0];
 
 			try {
-				MySuggestionFormatter formatter = new MySuggestionFormatter(suggestions);
-
+				MySuggestionFormatter formatter = new MySuggestionFormatter(theText, suggestions);
 				Scorer scorer = new QueryScorer(textQuery);
 				Highlighter highlighter = new Highlighter(formatter, scorer);
-
 				Analyzer analyzer = em.getSearchFactory().getAnalyzer(ResourceTable.class);
-				highlighter.getBestFragment(analyzer.tokenStream("myContentText", nextValue), nextValue);
-				highlighter.getBestFragment(analyzer.tokenStream("myContentTextNGram", nextValue), nextValue);
-				highlighter.getBestFragment(analyzer.tokenStream("myContentTextEdgeNGram", nextValue), nextValue);
-				highlighter.getBestFragment(analyzer.tokenStream("myContentTextPhonetic", nextValue), nextValue);
+
+				formatter.setAnalyzer("myContentTextPhonetic");
+				highlighter.getBestFragments(analyzer.tokenStream("myContentTextPhonetic", nextValue), nextValue, 10);
+				
+				formatter.setAnalyzer("myContentTextNGram");
+				highlighter.getBestFragments(analyzer.tokenStream("myContentTextNGram", nextValue), nextValue, 10);
+
+				formatter.setFindPhrasesWith();
+				formatter.setAnalyzer("myContentTextEdgeNGram");
+				highlighter.getBestFragments(analyzer.tokenStream("myContentTextEdgeNGram", nextValue), nextValue, 10);
+
+//				formatter.setAnalyzer("myContentText");
+//				highlighter.getBestFragments(analyzer.tokenStream("myContentText", nextValue), nextValue, 10);
+//				formatter.setAnalyzer("myContentTextNGram");
+//				highlighter.getBestFragments(analyzer.tokenStream("myContentTextNGram", nextValue), nextValue, 10);
+//				formatter.setAnalyzer("myContentTextEdgeNGram");
+//				highlighter.getBestFragments(analyzer.tokenStream("myContentTextEdgeNGram", nextValue), nextValue, 10);
+//				formatter.setAnalyzer("myContentTextPhonetic");
+//				highlighter.getBestFragments(analyzer.tokenStream("myContentTextPhonetic", nextValue), nextValue, 10);
 			} catch (Exception e) {
 				throw new InternalErrorException(e);
 			}
@@ -227,7 +236,11 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		
 		Set<String> terms = Sets.newHashSet();
 		for (Iterator<Suggestion> iter = suggestions.iterator(); iter.hasNext(); ) {
-			if (!terms.add(iter.next().getTerm())) {
+			String nextTerm = iter.next().getTerm().toLowerCase();
+//			if (nextTerm.contains("\n")) {
+//				iter.remove();
+//			} else 
+			if (!terms.add(nextTerm)) {
 				iter.remove();
 			}
 		}
@@ -269,16 +282,52 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 	public class MySuggestionFormatter implements Formatter {
 
 		private List<Suggestion> mySuggestions;
+		private String myAnalyzer;
+		private ArrayList<String> myPartialMatchPhrases;
+		private ArrayList<Float> myPartialMatchScores;
+		private String myOriginalSearch;
 
-		public MySuggestionFormatter(List<Suggestion> theSuggestions) {
+		public MySuggestionFormatter(String theOriginalSearch, List<Suggestion> theSuggestions) {
+			myOriginalSearch = theOriginalSearch;
 			mySuggestions = theSuggestions;
+		}
+
+		public void setFindPhrasesWith() {
+			myPartialMatchPhrases = new ArrayList<String>();
+			myPartialMatchScores = new ArrayList<Float>();
+			
+			for (Suggestion next : mySuggestions) {
+				myPartialMatchPhrases.add(' ' + next.myTerm);
+				myPartialMatchScores.add(next.myScore);
+			}
+			
+			myPartialMatchPhrases.add(myOriginalSearch);
+			myPartialMatchScores.add(1.0f);
+		}
+
+		public void setAnalyzer(String theString) {
+			myAnalyzer = theString;
 		}
 
 		@Override
 		public String highlightTerm(String theOriginalText, TokenGroup theTokenGroup) {
+			ourLog.info("{} Found {} with score {}", new Object[] {myAnalyzer, theOriginalText, theTokenGroup.getTotalScore()});
 			if (theTokenGroup.getTotalScore() > 0) {
-				mySuggestions.add(new Suggestion(theOriginalText, theTokenGroup.getTotalScore()));
+				float score = theTokenGroup.getTotalScore();
+				if (theOriginalText.equalsIgnoreCase(myOriginalSearch)) {
+					score = score + 1.0f;
+				}
+				mySuggestions.add(new Suggestion(theOriginalText, score));
+			} else if (myPartialMatchPhrases != null) {
+				if (theOriginalText.length() < 100) {
+					for (int i = 0; i < myPartialMatchPhrases.size(); i++) {
+						if (theOriginalText.contains(myPartialMatchPhrases.get(i))) {
+							mySuggestions.add(new Suggestion(theOriginalText, myPartialMatchScores.get(i) - 0.5f));
+						}
+					}
+				}
 			}
+			
 			return null;
 		}
 

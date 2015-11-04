@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
@@ -59,9 +57,6 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetai
 public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao<IBaseResource>implements IFhirSystemDao<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
-
-	@PersistenceContext()
-	protected EntityManager myEntityManager;
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -220,10 +215,6 @@ public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao<IBaseReso
 			markResourceAsIndexingFailed(Long.parseLong(e.getMessage()));
 			return -1;
 		}
-	}
-
-	public void setEntityManager(EntityManager theEntityManager) {
-		myEntityManager = theEntityManager;
 	}
 
 	public void setTxManager(PlatformTransactionManager theTxManager) {

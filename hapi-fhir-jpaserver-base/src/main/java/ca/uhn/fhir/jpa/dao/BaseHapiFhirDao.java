@@ -106,6 +106,7 @@ import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -174,7 +175,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	// @PersistenceContext(name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT")
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	private EntityManager myEntityManager;
+	protected EntityManager myEntityManager;
 
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
@@ -1546,19 +1547,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	private String parseContentTextIntoWords(IResource theResource) {
-		StringBuilder b = new StringBuilder();
+		StringBuilder retVal = new StringBuilder(); 
 		@SuppressWarnings("rawtypes")
 		List<IPrimitiveType> childElements = getContext().newTerser().getAllPopulatedChildElementsOfType(theResource, IPrimitiveType.class);
 		for (@SuppressWarnings("rawtypes") IPrimitiveType nextType : childElements) {
-			String nextValue = nextType.getValueAsString();
-			if (isNotBlank(nextValue)) {
-				if (b.length() > 0 && b.charAt(b.length() - 1) != ' ') {
-					b.append(' ');
+			if (nextType instanceof StringDt) {
+				String nextValue = nextType.getValueAsString();
+				if (isNotBlank(nextValue)) {
+					retVal.append(nextValue.replace("\n", " ").replace("\r", " "));
+					retVal.append("\n");
 				}
-				b.append(nextValue);
 			}
 		}
-		return b.toString();
+		return retVal.toString();
 	}
 
 	public BaseHasResource readEntity(IIdType theValueId) {

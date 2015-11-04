@@ -16,8 +16,10 @@ import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.FhirSearchDao.Suggestion;
 import ca.uhn.fhir.model.dstu2.resource.Device;
+import ca.uhn.fhir.model.dstu2.resource.Media;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -28,6 +30,46 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 	
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchFtTest.class);
 
+	@Test
+	public void testSuggestIgnoresBase64Content() {
+		Patient patient = new Patient();
+		patient.addName().addFamily("testSuggest");
+		IIdType ptId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		Media med = new Media();
+		med.getSubject().setReference(ptId);
+		med.getSubtype().setText("Systolic Blood Pressure");
+		med.getContent().setContentType("LCws");
+		med.getContent().setData(new Base64BinaryDt(new byte[] {44,44,44,44,44,44,44,44}));
+		med.getContent().setTitle("bbbb syst");
+		myMediaDao.create(med);
+		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(med));
+		
+		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "press");
+		ourLog.info("Found: " + output);
+		assertEquals(2, output.size());
+		assertEquals("Pressure", output.get(0).getTerm());
+		assertEquals("Systolic Blood Pressure", output.get(1).getTerm());
+
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "prezure");
+		ourLog.info("Found: " + output);
+		assertEquals(2, output.size());
+		assertEquals("Pressure", output.get(0).getTerm());
+		assertEquals("Systolic Blood Pressure", output.get(1).getTerm());
+
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "syst");
+		ourLog.info("Found: " + output);
+		assertEquals(4, output.size());
+		assertEquals("syst", output.get(0).getTerm());
+		assertEquals("bbbb syst", output.get(1).getTerm());
+		assertEquals("Systolic", output.get(2).getTerm());
+		assertEquals("Systolic Blood Pressure", output.get(3).getTerm());
+		
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "LCws");
+		ourLog.info("Found: " + output);
+		assertEquals(0, output.size());
+	}
+	
 	@Test
 	public void testSuggest() {
 		Patient patient = new Patient();
@@ -47,6 +89,7 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		obs = new Observation();
 		obs.getSubject().setReference(ptId);
 		obs.getCode().setText("ZXC HELLO");
+		obs.addComponent().getCode().setText("HHHHHHHHHH");
 		myObservationDao.create(obs);
 
 		/*
@@ -79,8 +122,9 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 
 		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "HELO");
 		ourLog.info("Found: " + output);
-		assertEquals(1, output.size());
+		assertEquals(2, output.size());
 		assertEquals("HELLO", output.get(0).getTerm());
+		assertEquals("ZXC HELLO", output.get(1).getTerm());
 		
 		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "Z");
 		ourLog.info("Found: " + output);
@@ -88,8 +132,9 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 
 		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZX");
 		ourLog.info("Found: " + output);
-		assertEquals(1, output.size());
+		assertEquals(2, output.size());
 		assertEquals("ZXC", output.get(0).getTerm());
+		assertEquals("ZXC HELLO", output.get(1).getTerm());
 
 	}
 	
