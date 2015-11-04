@@ -52,6 +52,7 @@ import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt;
 import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt.Binding;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.composite.SimpleQuantityDt;
 import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
@@ -130,7 +131,17 @@ public class XmlParserDstu2Test {
 		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\"/>", output);
 	}
 
+	@Test
+	public void testParseInvalidTextualNumber() {
+		Observation obs = new Observation();
+		obs.setValue(new QuantityDt().setValue(1234));
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
+		encoded = encoded.replace("1234", "\"1234\"");
+		ourLog.info(encoded);
+		ourCtx.newJsonParser().parseResource(encoded);
+	}
 
+	
 	@Test
 	public void testEncodeDoesntIncludeUuidId() {
 		Patient p = new Patient();

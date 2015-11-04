@@ -63,7 +63,7 @@ public class BaseDateTimeDtDstu2Test {
 		String human = dt.toHumanDisplay();
 		ourLog.info(human);
 		assertThat(human, containsString("2012"));
-		assertThat(human, containsString("12:00:00"));
+		assertThat(human, containsString("12"));
 	}
 
 	public static void afterClass() {
