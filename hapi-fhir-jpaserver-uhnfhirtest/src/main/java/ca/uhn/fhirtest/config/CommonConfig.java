@@ -1,5 +1,6 @@
 package ca.uhn.fhirtest.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -11,6 +12,7 @@ public class CommonConfig {
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
 	 */
+	@Bean
 	public IServerInterceptor loggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.access");

@@ -843,6 +843,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	}
 
 	@Override
+	public void reindex(T theResource, ResourceTable theEntity) {
+		updateEntity(theResource, theEntity, false, null, true, false, theEntity.getUpdatedDate());
+	}
+	
+	@Override
 	public IBundleProvider search(Map<String, IQueryParameterType> theParams) {
 		SearchParameterMap map = new SearchParameterMap();
 		for (Entry<String, IQueryParameterType> nextEntry : theParams.entrySet()) {

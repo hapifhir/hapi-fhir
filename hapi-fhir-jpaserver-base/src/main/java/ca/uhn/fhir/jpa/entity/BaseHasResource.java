@@ -121,6 +121,10 @@ public abstract class BaseHasResource {
 		return new InstantDt(myUpdated);
 	}
 
+	public Date getUpdatedDate() {
+		return myUpdated;
+	}
+
 	public abstract long getVersion();
 
 	public boolean isHasTags() {

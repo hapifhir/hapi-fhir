@@ -70,7 +70,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu2Test.class);
 
 	@Test
-	public void testRendexing() {
+	public void testReindexing() {
 		Patient p = new Patient();
 		p.addName().addFamily("family");
 		final IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();

@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TagList;
@@ -59,6 +60,11 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	DaoMethodOutcome delete(IIdType theResource);
 
 	DaoMethodOutcome deleteByUrl(String theString);
+
+	/**
+	 * @param theTransaction Is this being called in a bundle? If so, don't throw an exception if no matches
+	 */
+	DaoMethodOutcome deleteByUrl(String theUrl, boolean theTransaction);
 
 	TagList getAllResourceTags();
 
@@ -112,6 +118,12 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId);
 
+	/**
+	 * Updates index tables associated with the given resource. Does not create a new
+	 * version or update the resource's update time.
+	 */
+	void reindex(T theResource, ResourceTable theEntity);
+
 	void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm);
 
 	IBundleProvider search(Map<String, IQueryParameterType> theParams);
@@ -141,11 +153,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * Not supported in DSTU1!
 	 */
 	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile);
-
-	/**
-	 * @param theTransaction Is this being called in a bundle? If so, don't throw an exception if no matches
-	 */
-	DaoMethodOutcome deleteByUrl(String theUrl, boolean theTransaction);
 
 //	/**
 //	 * Invoke the everything operation

@@ -43,18 +43,17 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.util.ReindexFailureException;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
-public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao<IBaseResource>implements IFhirSystemDao<T> {
+public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
 
@@ -97,36 +96,23 @@ public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao<IBaseReso
 				long start = System.currentTimeMillis();
 
 				for (ResourceTable resourceTable : resources) {
-					final IBaseResource resource;
 					try {
-						resource = toResource(resourceTable, false);
-					} catch (DataFormatException e) {
-						ourLog.warn("Failure parsing resource: {}", e.toString());
-						throw new UnprocessableEntityException(Long.toString(resourceTable.getId()));
-					}
-					@SuppressWarnings("rawtypes")
-					final IFhirResourceDao dao = getDao(resource.getClass());
-					if (dao == null) {
-						ourLog.warn("No DAO for type: {}", resource.getClass());
-						throw new UnprocessableEntityException(Long.toString(resourceTable.getId()));
-					}
+						final IBaseResource resource = toResource(resourceTable, false);
 
-					if (resource.getIdElement().isIdPartValid() == false) {
-						ourLog.warn("Not going to try and index an invalid ID: {}", resource.getIdElement());
-						throw new UnprocessableEntityException(Long.toString(resourceTable.getId()));
-					}
+						@SuppressWarnings("rawtypes")
+						final IFhirResourceDao dao = getDao(resource.getClass());
 
-					try {
-						dao.update(resource, null, true);
+						dao.reindex(resource, resourceTable);
 					} catch (Exception e) {
-						ourLog.error("Failed to index resource {}: {}", new Object[] { resource.getIdElement(), e.toString(), e });
-						throw new UnprocessableEntityException(Long.toString(resourceTable.getId()));
+						ourLog.error("Failed to index resource {}: {}", new Object[] { resourceTable.getIdDt(), e.toString(), e });
+						throw new ReindexFailureException(resourceTable.getId());
 					}
 					count++;
 				}
 
 				long delay = System.currentTimeMillis() - start;
-				ourLog.info("Indexed {} / {} resources in {}ms", new Object[] { count, resources.size(), delay });
+				long avg = (delay / resources.size());
+				ourLog.info("Indexed {} / {} resources in {}ms - Avg {}ms / resource", new Object[] { count, resources.size(), delay, avg });
 
 				return resources.size();
 			}
@@ -207,12 +193,13 @@ public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao<IBaseReso
 	}
 
 	@Override
-	@Transactional(propagation=Propagation.NOT_SUPPORTED)
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public int performReindexingPass(final Integer theCount) {
 		try {
 			return doPerformReindexingPass(theCount);
-		} catch (UnprocessableEntityException e) {
-			markResourceAsIndexingFailed(Long.parseLong(e.getMessage()));
+		} catch (ReindexFailureException e) {
+			ourLog.warn("Reindexing failed for resource {}", e.getResourceId());
+			markResourceAsIndexingFailed(e.getResourceId());
 			return -1;
 		}
 	}

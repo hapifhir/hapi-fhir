@@ -22,7 +22,6 @@ import javax.persistence.TypedQuery;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,6 +34,7 @@ import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
+import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
@@ -375,12 +375,30 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		resultIds = toUnqualifiedVersionlessIds(results);
 		assertThat(resultIds, empty());
 
+		/*
+		 * Make sure that reindexing doesn't trigger
+		 */
+		
 		mySystemDao.markAllResourcesForReindexing();
 		mySystemDao.performReindexingPass(100);
 
+		assertEquals(0, mySubscriptionDao.pollForNewUndeliveredResources());
+
+		/*
+		 * Update resources on disk
+		 */
+		IBundleProvider allObs = myObservationDao.search(new SearchParameterMap());
+		ourLog.info("Updating {} observations", allObs.size());
+		for (IBaseResource next : allObs.getResources(0, allObs.size())) {
+			ourLog.info("Updating observation");
+			Observation nextObs = (Observation) next;
+			nextObs.addPerformer().setDisplay("Some display");
+			myObservationDao.update(nextObs);
+		}
+
 		assertEquals(6, mySubscriptionDao.pollForNewUndeliveredResources());
 		assertEquals(0, mySubscriptionDao.pollForNewUndeliveredResources());
-		
+
 	}
 
 
