@@ -160,6 +160,7 @@ public class Constants {
 
 		HashSet<String> valXml = new HashSet<String>();
 		valXml.add(CT_FHIR_XML);
+		valXml.add("text/xml");
 		valXml.add("application/xml");
 		valXml.add("xml");
 		FORMAT_VAL_XML = Collections.unmodifiableSet(valXml);
@@ -169,6 +170,7 @@ public class Constants {
 
 		HashSet<String> valJson = new HashSet<String>();
 		valJson.add(CT_FHIR_JSON);
+		valJson.add("text/json");
 		valJson.add("application/json");
 		valJson.add("json");
 		FORMAT_VAL_JSON = Collections.unmodifiableSet(valJson);

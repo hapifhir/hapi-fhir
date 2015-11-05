@@ -59,7 +59,7 @@
 				Narrative generator did not include OperationOutcome.issue.diagnostics in the
 				generated narrative.
 			</action>
-			<action type="add">
+			<action type="add" issue="250">
 				Clients (generic and annotation) did not populate the Accept header on outgoing
 				requests. This is now populated to indicate that the client supports both XML and
 				JSON unless the user has explicitly requested one or the other (in which case the
@@ -233,6 +233,12 @@
 				and _text, which work the same way as the same parameters on a 
 				search. This is experimental, since it is not a part of the core
 				FHIR specification.
+			</action>
+			<action type="add" fix="250">
+				Process "Accept: text/xml" and "Accept: text/json" headers was
+				wanting the equivalent FHIR encoding styles. These are not 
+				correct, but the intention is clear so we will honour them
+				just to be helpful.
 			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">

@@ -162,6 +162,10 @@ public class ServerFeaturesTest {
 
 	}
 
+	/**
+	 * Header value should be application/xml+fhir or application/json+fhir but
+	 * we should also accept application/xml and application/json 
+	 */
 	@Test
 	public void testAcceptHeaderNonFhirTypes() throws Exception {
 
@@ -175,6 +179,31 @@ public class ServerFeaturesTest {
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", Constants.CT_JSON);
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
+
+	}
+
+	/**
+	 * Header value should be application/xml+fhir or application/json+fhir but
+	 * we should also accept text/xml and text/json 
+	 */
+	@Test
+	public void testAcceptHeaderNonFhirTypesNonStandard() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", "text/xml");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertThat(responseContent, StringContains.containsString("<identifier><use"));
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", "text/json");
 		status = ourClient.execute(httpGet);
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
