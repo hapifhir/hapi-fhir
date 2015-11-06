@@ -237,9 +237,6 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		Set<String> terms = Sets.newHashSet();
 		for (Iterator<Suggestion> iter = suggestions.iterator(); iter.hasNext(); ) {
 			String nextTerm = iter.next().getTerm().toLowerCase();
-//			if (nextTerm.contains("\n")) {
-//				iter.remove();
-//			} else 
 			if (!terms.add(nextTerm)) {
 				iter.remove();
 			}
@@ -311,7 +308,7 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 
 		@Override
 		public String highlightTerm(String theOriginalText, TokenGroup theTokenGroup) {
-			ourLog.info("{} Found {} with score {}", new Object[] {myAnalyzer, theOriginalText, theTokenGroup.getTotalScore()});
+			ourLog.debug("{} Found {} with score {}", new Object[] {myAnalyzer, theOriginalText, theTokenGroup.getTotalScore()});
 			if (theTokenGroup.getTotalScore() > 0) {
 				float score = theTokenGroup.getTotalScore();
 				if (theOriginalText.equalsIgnoreCase(myOriginalSearch)) {
