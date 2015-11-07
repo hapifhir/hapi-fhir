@@ -56,6 +56,11 @@ public class JpaConformanceProviderDstu1 extends ServerConformanceProvider {
 		super.setCache(false);
 	}
 
+	public JpaConformanceProviderDstu1(){
+		super();
+		super.setCache(false);
+	}
+
 	@Override
 	public Conformance getServerConformance(HttpServletRequest theRequest) {
 		Conformance retVal = myCachedValue;
@@ -93,6 +98,16 @@ public class JpaConformanceProviderDstu1 extends ServerConformanceProvider {
 		retVal.getImplementation().setDescription(myImplementationDescription);
 		myCachedValue = retVal;
 		return retVal;
+	}
+
+	@Override
+	public void setRestfulServer(RestfulServer theRestfulServer) {
+		this.myRestfulServer = theRestfulServer;
+		super.setRestfulServer(theRestfulServer);
+	}
+
+	public void setMySystemDao(IFhirSystemDao<List<IResource>> mySystemDao) {
+		this.mySystemDao = mySystemDao;
 	}
 
 	public void setImplementationDescription(String theImplDesc) {
