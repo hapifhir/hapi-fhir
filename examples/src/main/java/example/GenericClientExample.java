@@ -96,7 +96,7 @@ public class GenericClientExample {
                   .where(Patient.IDENTIFIER.exactly().systemAndIdentifier("system", "00001"))
                   .execute();
 
-          // This will return true if the server responded with an HTTP 201 created,
+          // This will return Boolean.TRUE if the server responded with an HTTP 201 created,
           // otherwise it will return null.
           Boolean created = outcome.getCreated();
 
