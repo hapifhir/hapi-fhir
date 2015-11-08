@@ -514,7 +514,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 				url = url.substring(0, qIndex);
 			}
 
-			requestDetails.setRequestPath("");
+			requestDetails.setRequestPath(url);
 			requestDetails.setFhirServerBase(theRequestDetails.getFhirServerBase());
 
 			theRequestDetails.getServer().populateRequestDetailsFromRequestPath(requestDetails, url);

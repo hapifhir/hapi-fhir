@@ -943,7 +943,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		Bundle respGetBundle = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(1, respGetBundle.getEntry().size());
 		assertEquals("testTransactionOrdering" + pass, ((Patient)respGetBundle.getEntry().get(0).getResource()).getNameFirstRep().getFamilyFirstRep().getValue());
-		assertEquals("/Patient?identifier=testTransactionOrdering", respGetBundle.getLink("self").getUrl());
+		assertThat(respGetBundle.getLink("self").getUrl(), endsWith("/Patient?identifier=testTransactionOrdering"));
 	}
 
 	private Bundle testTransactionOrderingCreateBundle(String methodName, int pass, IdDt patientPlaceholderId) {
