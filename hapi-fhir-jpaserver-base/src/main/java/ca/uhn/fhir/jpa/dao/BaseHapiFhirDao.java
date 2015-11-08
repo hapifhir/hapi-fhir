@@ -53,6 +53,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -93,6 +94,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -126,13 +128,19 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import net.sourceforge.cobertura.CoverageIgnore;
 
 public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
+
+	static final String OO_SEVERITY_ERROR = "error";
+	static final String OO_SEVERITY_INFO = "information";
+	static final String OO_SEVERITY_WARN = "warning";
 
 	/**
 	 * These are parameters which are supported by {@link BaseHapiFhirResourceDao#searchForIds(Map)}
@@ -160,6 +168,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		RESOURCE_META_AND_PARAMS = Collections.unmodifiableMap(resourceMetaAndParams);
 	}
 
+	
 	public static final long INDEX_STATUS_INDEXED = Long.valueOf(1L);
 	public static final long INDEX_STATUS_INDEXING_FAILED = Long.valueOf(2L);
 	public static final String NS_JPA_PROFILE = "https://github.com/jamesagnew/hapi-fhir/ns/jpa/profile";
@@ -1560,6 +1569,20 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		}
 		return retVal.toString();
+	}
+
+	protected void validateDeleteConflictsEmptyOrThrowException(List<DeleteConflict> theDeleteConflicts) {
+		if (theDeleteConflicts.isEmpty()) {
+			return;
+		}
+
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
+		for (DeleteConflict next : theDeleteConflicts) {
+			String msg = "Unable to delete " + next.getTargetId().toUnqualifiedVersionless().getValue() + " because at least one resource has a reference to this resource. First reference found was resource " + next.getTargetId().toUnqualifiedVersionless().getValue() + " in path " + next.getSourcePath();
+			OperationOutcomeUtil.addIssue(getContext(), oo, OO_SEVERITY_ERROR, msg, null, "processing");
+		}
+		
+		throw new ResourceVersionConflictException("Delete failed because of constraint failure", oo);
 	}
 
 	public BaseHasResource readEntity(IIdType theValueId) {

@@ -215,7 +215,7 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
-		assertThat(ooString, containsString("Unable to delete "+orgId.getValue()+" because at least one resource has a reference to this resource. First reference found was resource " + patId.getValue() + " in path Patient.managingOrganization"));
+		assertThat(ooString, containsString("Unable to delete Organization"));
 
 		pat.setId(patId);
 		pat.getManagingOrganization().setReference("");

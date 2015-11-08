@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -108,14 +109,15 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 				throw new InvalidRequestException("No ID supplied. ID is required when validating with mode=DELETE");
 			}
 			final ResourceTable entity = readEntityLatestVersion(theId);
+
+			// Validate that there are no resources pointing to the candidate that
+			// would prevent deletion
+			List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
+			validateOkToDelete(deleteConflicts, entity);
+			validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+				
 			OperationOutcome oo = new OperationOutcome();
-			try {
-				validateOkToDeleteOrThrowResourceVersionConflictException(entity);
-				oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Ok to delete");
-			} catch (ResourceVersionConflictException e) {
-				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setDiagnostics(e.getMessage());
-				throw new ResourceVersionConflictException(e.getMessage(), oo);
-			}
+			oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Ok to delete");
 			return new MethodOutcome(new IdDt(theId.getValue()), oo);
 		}
 
