@@ -240,6 +240,11 @@
 				correct, but the intention is clear so we will honour them
 				just to be helpful.
 			</action>
+			<action type="fix">
+				Generated Enum types for some ValueSets did not include all
+				codes (specifically, ValueSets which defined concepts containing
+				child concepts did not result in Enum values for the child concepts)
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

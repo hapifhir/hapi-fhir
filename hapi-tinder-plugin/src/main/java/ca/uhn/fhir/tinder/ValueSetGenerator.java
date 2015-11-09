@@ -44,15 +44,35 @@ import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 public class ValueSetGenerator {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetGenerator.class);
-	private List<ValueSetFileDefinition> myResourceValueSetFiles;
-	private Set<ValueSetTm> myMarkedValueSets = new HashSet<ValueSetTm>();
-	private Map<String, ValueSetTm> myValueSets = new HashMap<String, ValueSetTm>();
-	private int myValueSetCount;
 	private int myConceptCount;
+	private Set<ValueSetTm> myMarkedValueSets = new HashSet<ValueSetTm>();
+	private List<ValueSetFileDefinition> myResourceValueSetFiles;
+	private int myValueSetCount;
+	private Map<String, ValueSetTm> myValueSets = new HashMap<String, ValueSetTm>();
 	private String myVersion;
 
 	public ValueSetGenerator(String theVersion) {
 		myVersion = theVersion;
+	}
+
+	private void addDefinedConcept(ValueSetTm vs, String system, CodeSystemConcept nextConcept) {
+		String nextCodeValue = nextConcept.getCode();
+		String nextCodeDisplay = StringUtils.defaultString(nextConcept.getDisplay());
+		String nextCodeDefinition = StringUtils.defaultString(nextConcept.getDefinition());
+		vs.addConcept(system, nextCodeValue, nextCodeDisplay, nextCodeDefinition);
+		for (CodeSystemConcept nextChild : nextConcept.getConcept()) {
+			addDefinedConcept(vs, system, nextChild);
+		}
+	}
+
+	private void addDefinedConcept(ValueSetTm vs, String system, DefineConcept nextConcept) {
+		String nextCodeValue = nextConcept.getCode().getValue();
+		String nextCodeDisplay = StringUtils.defaultString(nextConcept.getDisplay().getValue());
+		String nextCodeDefinition = StringUtils.defaultString(nextConcept.getDefinition().getValue());
+		vs.addConcept(system, nextCodeValue, nextCodeDisplay, nextCodeDefinition);
+		for (DefineConcept nextChild : nextConcept.getConcept()) {
+			addDefinedConcept(vs, system, nextChild);
+		}
 	}
 
 	public String getClassForValueSetIdAndMarkAsNeeded(String theId) {
@@ -141,58 +161,6 @@ public class ValueSetGenerator {
 
 	}
 
-	private ValueSetTm parseValueSet(ValueSet nextVs) {
-		myConceptCount += nextVs.getDefine().getConcept().size();
-		ourLog.info("Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName().getValue(), myConceptCount);
-		// output.addConcept(next.getCode().getValue(),
-		// next.getDisplay().getValue(), next.getDefinition());
-
-		ValueSetTm vs = new ValueSetTm();
-
-		vs.setName(nextVs.getName().getValue());
-		vs.setDescription(nextVs.getDescription().getValue());
-		vs.setId(nextVs.getIdentifier().getValue());
-		vs.setClassName(toClassName(nextVs.getName().getValue()));
-
-		{
-			Define define = nextVs.getDefine();
-			String system = define.getSystem().getValueAsString();
-			for (DefineConcept nextConcept : define.getConcept()) {
-				String nextCodeValue = nextConcept.getCode().getValue();
-				String nextCodeDisplay = StringUtils.defaultString(nextConcept.getDisplay().getValue());
-				String nextCodeDefinition = StringUtils.defaultString(nextConcept.getDefinition().getValue());
-				vs.addConcept(system, nextCodeValue, nextCodeDisplay, nextCodeDefinition);
-			}
-		}
-
-		for (ComposeInclude nextInclude : nextVs.getCompose().getInclude()) {
-			String system = nextInclude.getSystem().getValueAsString();
-			for (CodeDt nextConcept : nextInclude.getCode()) {
-				String nextCodeValue = nextConcept.getValue();
-				vs.addConcept(system, nextCodeValue, null, null);
-			}
-		}
-
-//		if (vs.getCodes().isEmpty()) {
-//			ourLog.info("ValueSet " + nextVs.getName() + " has no codes, not going to generate any code for it");
-//			return null;
-//		}
-		
-		if (myValueSets.containsKey(vs.getName())) {
-			ourLog.warn("Duplicate Name: " + vs.getName());
-		} else {
-			myValueSets.put(vs.getName(), vs);
-		}
-
-		// This is hackish, but deals with "Administrative Gender Codes" vs "AdministrativeGender"
-		if (vs.getName().endsWith(" Codes")) {
-			myValueSets.put(vs.getName().substring(0, vs.getName().length() - 6).replace(" ", ""), vs);
-		}
-		myValueSets.put(vs.getName().replace(" ", ""), vs);
-
-		return vs;
-	}
-
 	private ValueSetTm parseValueSet(ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs) {
 		myConceptCount += nextVs.getCodeSystem().getConcept().size();
 		ourLog.info("Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName(), myConceptCount);
@@ -210,10 +178,7 @@ public class ValueSetGenerator {
 			CodeSystem define = nextVs.getCodeSystem();
 			String system = define.getSystemElement().getValueAsString();
 			for (CodeSystemConcept nextConcept : define.getConcept()) {
-				String nextCodeValue = nextConcept.getCode();
-				String nextCodeDisplay = StringUtils.defaultString(nextConcept.getDisplay());
-				String nextCodeDefinition = StringUtils.defaultString(nextConcept.getDefinition());
-				vs.addConcept(system, nextCodeValue, nextCodeDisplay, nextCodeDefinition);
+				addDefinedConcept(vs, system, nextConcept);
 			}
 		}
 
@@ -245,14 +210,57 @@ public class ValueSetGenerator {
 		return vs;
 	}
 
-	public void setResourceValueSetFiles(List<ValueSetFileDefinition> theResourceValueSetFiles) {
-		myResourceValueSetFiles = theResourceValueSetFiles;
+	private ValueSetTm parseValueSet(ValueSet nextVs) {
+		myConceptCount += nextVs.getDefine().getConcept().size();
+		ourLog.info("Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName().getValue(), myConceptCount);
+		// output.addConcept(next.getCode().getValue(),
+		// next.getDisplay().getValue(), next.getDefinition());
+
+		ValueSetTm vs = new ValueSetTm();
+
+		vs.setName(nextVs.getName().getValue());
+		vs.setDescription(nextVs.getDescription().getValue());
+		vs.setId(nextVs.getIdentifier().getValue());
+		vs.setClassName(toClassName(nextVs.getName().getValue()));
+
+		{
+			Define define = nextVs.getDefine();
+			String system = define.getSystem().getValueAsString();
+			for (DefineConcept nextConcept : define.getConcept()) {
+				addDefinedConcept(vs, system, nextConcept);
+			}
+		}
+
+		for (ComposeInclude nextInclude : nextVs.getCompose().getInclude()) {
+			String system = nextInclude.getSystem().getValueAsString();
+			for (CodeDt nextConcept : nextInclude.getCode()) {
+				String nextCodeValue = nextConcept.getValue();
+				vs.addConcept(system, nextCodeValue, null, null);
+			}
+		}
+
+//		if (vs.getCodes().isEmpty()) {
+//			ourLog.info("ValueSet " + nextVs.getName() + " has no codes, not going to generate any code for it");
+//			return null;
+//		}
+		
+		if (myValueSets.containsKey(vs.getName())) {
+			ourLog.warn("Duplicate Name: " + vs.getName());
+		} else {
+			myValueSets.put(vs.getName(), vs);
+		}
+
+		// This is hackish, but deals with "Administrative Gender Codes" vs "AdministrativeGender"
+		if (vs.getName().endsWith(" Codes")) {
+			myValueSets.put(vs.getName().substring(0, vs.getName().length() - 6).replace(" ", ""), vs);
+		}
+		myValueSets.put(vs.getName().replace(" ", ""), vs);
+
+		return vs;
 	}
 
-	public void write(Collection<ValueSetTm> theValueSets, File theOutputDirectory, String thePackageBase) throws IOException {
-		for (ValueSetTm nextValueSetTm : theValueSets) {
-			write(nextValueSetTm, theOutputDirectory, thePackageBase);
-		}
+	public void setResourceValueSetFiles(List<ValueSetFileDefinition> theResourceValueSetFiles) {
+		myResourceValueSetFiles = theResourceValueSetFiles;
 	}
 
 	private String toClassName(String theValue) {
@@ -277,6 +285,12 @@ public class ValueSetGenerator {
 
 		b.append("Enum");
 		return b.toString();
+	}
+
+	public void write(Collection<ValueSetTm> theValueSets, File theOutputDirectory, String thePackageBase) throws IOException {
+		for (ValueSetTm nextValueSetTm : theValueSets) {
+			write(nextValueSetTm, theOutputDirectory, thePackageBase);
+		}
 	}
 
 	// private void setValueSetName(String theString) {
@@ -313,19 +327,19 @@ public class ValueSetGenerator {
 		w.close();
 	}
 
-	public static void main(String[] args) throws FileNotFoundException, IOException {
-
-		ValueSetGenerator p = new ValueSetGenerator("dstu1");
-		p.parse();
-
-	}
-
 	public void writeMarkedValueSets(File theOutputDirectory, String thePackageBase) throws MojoFailureException {
 		try {
 			write(myMarkedValueSets, theOutputDirectory, thePackageBase);
 		} catch (IOException e) {
 			throw new MojoFailureException("Failed to write valueset", e);
 		}
+	}
+
+	public static void main(String[] args) throws FileNotFoundException, IOException {
+
+		ValueSetGenerator p = new ValueSetGenerator("dstu1");
+		p.parse();
+
 	}
 
 }
