@@ -23,9 +23,14 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +40,7 @@ import javax.persistence.TypedQuery;
 
 import org.apache.http.NameValuePair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -47,7 +53,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 import com.google.common.collect.ArrayListMultimap;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
+import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
@@ -85,14 +93,6 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
-
-	private String extractTransactionUrlOrThrowException(Entry nextEntry, HTTPVerbEnum verb) {
-		String url = nextEntry.getRequest().getUrl();
-		if (isBlank(url)) {
-			throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionMissingUrl", verb.name()));
-		}
-		return url;
-	}
 
 	private Bundle batch(final RequestDetails theRequestDetails, Bundle theRequest) {
 		ourLog.info("Beginning batch with {} resources", theRequest.getEntry().size());
@@ -165,6 +165,36 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		return resp;
 	}
 
+	private String extractTransactionUrlOrThrowException(Entry nextEntry, HTTPVerbEnum verb) {
+		String url = nextEntry.getRequest().getUrl();
+		if (isBlank(url)) {
+			throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionMissingUrl", verb.name()));
+		}
+		return url;
+	}
+
+	/**
+	 * This method is called for nested bundles (e.g. if we received a transaction with an entry that 
+	 * was a GET search, this method is called on the bundle for the search result, that will be placed in the
+	 * outer bundle). This method applies the _summary and _content parameters to the output of
+	 * that bundle.
+	 * 
+	 * TODO: This isn't the most efficient way of doing this.. hopefully we can come up with something better in the future.
+	 */
+	private IBaseResource filterNestedBundle(RequestDetails theRequestDetails, IBaseResource theResource) {
+		IParser p = getContext().newJsonParser();
+		RestfulServerUtils.configureResponseParser(theRequestDetails, p);
+		return p.parseResource(theResource.getClass(), p.encodeResourceToString(theResource));
+	}
+
+	private IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IResource> theClass) {
+		IFhirResourceDao<? extends IResource> retVal = getDao(theClass);
+		if (retVal == null) {
+			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + getContext().getResourceDefinition(theClass).getName());
+		}
+		return retVal;
+	}
+
 	@Override
 	public MetaDt metaGetOperation() {
 		// Notify interceptors
@@ -178,6 +208,31 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		MetaDt retVal = super.toMetaDt(tagDefinitions);
 
 		return retVal;
+	}
+
+	private ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> toDao(UrlParts theParts, String theVerb, String theUrl) {
+		RuntimeResourceDefinition resType;
+		try {
+			resType = getContext().getResourceDefinition(theParts.getResourceType());
+		} catch (DataFormatException e) {
+			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
+			throw new InvalidRequestException(msg);
+		}
+		IFhirResourceDao<? extends IBaseResource> dao = null;
+		if (resType != null) {
+			dao = getDao(resType.getImplementingClass());
+		}
+		if (dao == null) {
+			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
+			throw new InvalidRequestException(msg);
+		}
+
+		// if (theParts.getResourceId() == null && theParts.getParams() == null) {
+		// String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
+		// throw new InvalidRequestException(msg);
+		// }
+
+		return dao;
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
@@ -215,26 +270,51 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		Map<IdDt, IdDt> idSubstitutions = new HashMap<IdDt, IdDt>();
 		Map<IdDt, DaoMethodOutcome> idToPersistedOutcome = new HashMap<IdDt, DaoMethodOutcome>();
 
+		/*
+		 * We want to execute the transaction request bundle elements in the order
+		 * specified by the FHIR specification (see TransactionSorter) so we save the 
+		 * original order in the request, then sort it.
+		 * 
+		 * Entries with a type of GET are removed from the bundle so that they 
+		 * can be processed at the very end. We do this because the incoming resources
+		 * are saved in a two-phase way in order to deal with interdependencies, and
+		 * we want the GET processing to use the final indexing state
+		 */
 		Bundle response = new Bundle();
-
-		// TODO: process verbs in the correct order
-
+		List<Entry> getEntries = new ArrayList<Entry>();
+		IdentityHashMap<Entry, Integer> originalRequestOrder = new IdentityHashMap<Bundle.Entry, Integer>();
+		for (int i = 0; i < theRequest.getEntry().size(); i++) {
+			originalRequestOrder.put(theRequest.getEntry().get(i), i);
+			response.addEntry();
+			if (theRequest.getEntry().get(i).getRequest().getMethodElement().getValueAsEnum() == HTTPVerbEnum.GET) {
+				getEntries.add(theRequest.getEntry().get(i));
+			}
+		}
+		Collections.sort(theRequest.getEntry(), new TransactionSorter());
+		
+		List<IIdType> deletedResources = new ArrayList<IIdType>();
+		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
+		
+		/*
+		 * Loop through the request and process any entries of type
+		 * PUT, POST or DELETE
+		 */
 		for (int i = 0; i < theRequest.getEntry().size(); i++) {
 
 			if (i % 100 == 0) {
-				ourLog.info("Processed {} entries out of {}", i, theRequest.getEntry().size());
+				ourLog.info("Processed {} non-GET entries out of {}", i, theRequest.getEntry().size());
 			}
 
-			Entry nextEntry = theRequest.getEntry().get(i);
-			IResource res = nextEntry.getResource();
+			Entry nextReqEntry = theRequest.getEntry().get(i);
+			IResource res = nextReqEntry.getResource();
 			IdDt nextResourceId = null;
 			if (res != null) {
 
 				nextResourceId = res.getId();
 
 				if (nextResourceId.hasIdPart() == false) {
-					if (isNotBlank(nextEntry.getFullUrl())) {
-						nextResourceId = new IdDt(nextEntry.getFullUrl());
+					if (isNotBlank(nextReqEntry.getFullUrl())) {
+						nextResourceId = new IdDt(nextReqEntry.getFullUrl());
 					}
 				}
 
@@ -263,12 +343,13 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 
 			}
 
-			HTTPVerbEnum verb = nextEntry.getRequest().getMethodElement().getValueAsEnum();
+			HTTPVerbEnum verb = nextReqEntry.getRequest().getMethodElement().getValueAsEnum();
 			if (verb == null) {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextEntry.getRequest().getMethod()));
+				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextReqEntry.getRequest().getMethod()));
 			}
 
 			String resourceType = res != null ? getContext().getResourceDefinition(res).getName() : null;
+			Entry nextRespEntry = response.getEntry().get(originalRequestOrder.get(nextReqEntry));
 
 			switch (verb) {
 			case POST: {
@@ -277,24 +358,32 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 				IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 				res.setId((String) null);
 				DaoMethodOutcome outcome;
-				Entry newEntry = response.addEntry();
-				outcome = resourceDao.create(res, nextEntry.getRequest().getIfNoneExist(), false);
-				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry, resourceType, res);
+				outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false);
+				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
 				break;
 			}
 			case DELETE: {
 				// DELETE
-				Entry newEntry = response.addEntry();
-				String url = extractTransactionUrlOrThrowException(nextEntry, verb);
+				String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
 				UrlParts parts = UrlUtil.parseUrl(url);
 				ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb.getCode(), url);
+				int status = Constants.STATUS_HTTP_204_NO_CONTENT;
 				if (parts.getResourceId() != null) {
-					dao.delete(new IdDt(parts.getResourceType(), parts.getResourceId()));
+					ResourceTable deleted = dao.delete(new IdDt(parts.getResourceType(), parts.getResourceId()), deleteConflicts);
+					if (deleted != null) {
+						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless());
+					}
 				} else {
-					dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams(), true);
+					List<ResourceTable> allDeleted = dao.deleteByUrl(parts.getResourceType() + '?' + parts.getParams(), deleteConflicts);
+					for (ResourceTable deleted : allDeleted) {
+						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless());						
+					}
+					if (allDeleted.isEmpty()) {
+						status = Constants.STATUS_HTTP_404_NOT_FOUND;
+					}
 				}
 
-				newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_204_NO_CONTENT));
+				nextRespEntry.getResponse().setStatus(toStatusString(status));
 				break;
 			}
 			case PUT: {
@@ -303,9 +392,8 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 				IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 
 				DaoMethodOutcome outcome;
-				Entry newEntry = response.addEntry();
 
-				String url = extractTransactionUrlOrThrowException(nextEntry, verb);
+				String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
 
 				UrlParts parts = UrlUtil.parseUrl(url);
 				if (isNotBlank(parts.getResourceId())) {
@@ -316,80 +404,32 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 					outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false);
 				}
 
-				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry, resourceType, res);
+				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
 				break;
-			}
-			case GET: {
-				// SEARCH/READ/VREAD
-				RequestDetails requestDetails = new RequestDetails();
-				requestDetails.setServletRequest(theRequestDetails.getServletRequest());
-				requestDetails.setRequestType(RequestTypeEnum.GET);
-				requestDetails.setServer(theRequestDetails.getServer());
-				
-				String url = extractTransactionUrlOrThrowException(nextEntry, verb);
-				
-				int qIndex = url.indexOf('?');
-				ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
-				requestDetails.setParameters(new HashMap<String, String[]>());
-				if (qIndex != -1) {
-					String params = url.substring(qIndex);
-					List<NameValuePair> parameters = translateMatchUrl(params);
-					for (NameValuePair next : parameters) {
-						paramValues.put(next.getName(), next.getValue());
-					}
-					for (java.util.Map.Entry<String, Collection<String>> nextParamEntry : paramValues.asMap().entrySet()) {
-						String[] nextValue = nextParamEntry.getValue().toArray(new String[nextParamEntry.getValue().size()]);
-						requestDetails.getParameters().put(nextParamEntry.getKey(), nextValue);
-					}
-					url = url.substring(0, qIndex);
-				}
-
-				requestDetails.setRequestPath(url);
-				requestDetails.setFhirServerBase(theRequestDetails.getFhirServerBase());
-
-				theRequestDetails.getServer().populateRequestDetailsFromRequestPath(requestDetails, url);
-				BaseMethodBinding<?> method = theRequestDetails.getServer().determineResourceMethod(requestDetails, url);
-				if (method == null) {
-					throw new IllegalArgumentException("Unable to handle GET " + url);
-				}
-				
-				if (isNotBlank(nextEntry.getRequest().getIfMatch())) {
-					requestDetails.addHeader(Constants.HEADER_IF_MATCH, nextEntry.getRequest().getIfMatch());
-				}
-				if (isNotBlank(nextEntry.getRequest().getIfNoneExist())) {
-					requestDetails.addHeader(Constants.HEADER_IF_NONE_EXIST, nextEntry.getRequest().getIfNoneExist());
-				}
-				if (isNotBlank(nextEntry.getRequest().getIfNoneMatch())) {
-					requestDetails.addHeader(Constants.HEADER_IF_NONE_MATCH, nextEntry.getRequest().getIfNoneMatch());
-				}
-				
-				if (method instanceof BaseResourceReturningMethodBinding) {
-					try {
-						ResourceOrDstu1Bundle responseData = ((BaseResourceReturningMethodBinding) method).invokeServer(theRequestDetails.getServer(), requestDetails, new byte[0]);
-						Entry newEntry = response.addEntry();
-						IBaseResource resource = responseData.getResource();
-						if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
-							resource = filterNestedBundle(requestDetails, resource);
-						}
-						newEntry.setResource((IResource) resource);
-						newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
-					} catch (NotModifiedException e) {
-						Entry newEntry = response.addEntry();
-						newEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
-					}
-				} else {
-					throw new IllegalArgumentException("Unable to handle GET " + url);
-				}
 			}
 			}
 		}
 
-		FhirTerser terser = getContext().newTerser();
+		/*
+		 * Make sure that there are no conflicts from deletions. E.g. we can't delete something
+		 * if something else has a reference to it.. Unless the thing that has a reference to it
+		 * was also deleted as a part of this transaction, which is why we check this now at the 
+		 * end.
+		 */
+		
+		for (Iterator<DeleteConflict> iter = deleteConflicts.iterator(); iter.hasNext(); ) {
+			DeleteConflict next = iter.next();
+			if (deletedResources.contains(next.getTargetId().toVersionless())) {
+				iter.remove();
+			}
+		}
+		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 		/*
 		 * Perform ID substitutions and then index each resource we have saved
 		 */
 
+		FhirTerser terser = getContext().newTerser();
 		for (DaoMethodOutcome nextOutcome : idToPersistedOutcome.values()) {
 			IResource nextResource = (IResource) nextOutcome.getResource();
 			if (nextResource == null) {
@@ -443,58 +483,79 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 			ourLog.info("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 		}
 
+		/*
+		 * Loop through the request and process any entries of type GET
+		 */
+		for (int i = 0; i < getEntries.size(); i++) {
+			Entry nextReqEntry = getEntries.get(i);
+			Integer originalOrder = originalRequestOrder.get(nextReqEntry);
+			Entry nextRespEntry = response.getEntry().get(originalOrder);
+
+			RequestDetails requestDetails = new RequestDetails();
+			requestDetails.setServletRequest(theRequestDetails.getServletRequest());
+			requestDetails.setRequestType(RequestTypeEnum.GET);
+			requestDetails.setServer(theRequestDetails.getServer());
+			
+			String url = extractTransactionUrlOrThrowException(nextReqEntry, HTTPVerbEnum.GET);
+			
+			int qIndex = url.indexOf('?');
+			ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
+			requestDetails.setParameters(new HashMap<String, String[]>());
+			if (qIndex != -1) {
+				String params = url.substring(qIndex);
+				List<NameValuePair> parameters = translateMatchUrl(params);
+				for (NameValuePair next : parameters) {
+					paramValues.put(next.getName(), next.getValue());
+				}
+				for (java.util.Map.Entry<String, Collection<String>> nextParamEntry : paramValues.asMap().entrySet()) {
+					String[] nextValue = nextParamEntry.getValue().toArray(new String[nextParamEntry.getValue().size()]);
+					requestDetails.getParameters().put(nextParamEntry.getKey(), nextValue);
+				}
+				url = url.substring(0, qIndex);
+			}
+
+			requestDetails.setRequestPath(url);
+			requestDetails.setFhirServerBase(theRequestDetails.getFhirServerBase());
+
+			theRequestDetails.getServer().populateRequestDetailsFromRequestPath(requestDetails, url);
+			BaseMethodBinding<?> method = theRequestDetails.getServer().determineResourceMethod(requestDetails, url);
+			if (method == null) {
+				throw new IllegalArgumentException("Unable to handle GET " + url);
+			}
+			
+			if (isNotBlank(nextReqEntry.getRequest().getIfMatch())) {
+				requestDetails.addHeader(Constants.HEADER_IF_MATCH, nextReqEntry.getRequest().getIfMatch());
+			}
+			if (isNotBlank(nextReqEntry.getRequest().getIfNoneExist())) {
+				requestDetails.addHeader(Constants.HEADER_IF_NONE_EXIST, nextReqEntry.getRequest().getIfNoneExist());
+			}
+			if (isNotBlank(nextReqEntry.getRequest().getIfNoneMatch())) {
+				requestDetails.addHeader(Constants.HEADER_IF_NONE_MATCH, nextReqEntry.getRequest().getIfNoneMatch());
+			}
+			
+			if (method instanceof BaseResourceReturningMethodBinding) {
+				try {
+					ResourceOrDstu1Bundle responseData = ((BaseResourceReturningMethodBinding) method).invokeServer(theRequestDetails.getServer(), requestDetails, new byte[0]);
+					IBaseResource resource = responseData.getResource();
+					if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
+						resource = filterNestedBundle(requestDetails, resource);
+					}
+					nextRespEntry.setResource((IResource) resource);
+					nextRespEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
+				} catch (NotModifiedException e) {
+					nextRespEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
+				}
+			} else {
+				throw new IllegalArgumentException("Unable to handle GET " + url);
+			}
+
+		}
+		
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info(theActionName + " completed in {}ms", new Object[] { delay });
 
 		response.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
 		return response;
-	}
-
-	/**
-	 * This method is called for nested bundles (e.g. if we received a transaction with an entry that 
-	 * was a GET search, this method is called on the bundle for the search result, that will be placed in the
-	 * outer bundle). This method applies the _summary and _content parameters to the output of
-	 * that bundle.
-	 * 
-	 * TODO: This isn't the most efficient way of doing this.. hopefully we can come up with something better in the future.
-	 */
-	private IBaseResource filterNestedBundle(RequestDetails theRequestDetails, IBaseResource theResource) {
-		IParser p = getContext().newJsonParser();
-		RestfulServerUtils.configureResponseParser(theRequestDetails, p);
-		return p.parseResource(theResource.getClass(), p.encodeResourceToString(theResource));
-	}
-
-	private ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> toDao(UrlParts theParts, String theVerb, String theUrl) {
-		RuntimeResourceDefinition resType;
-		try {
-			resType = getContext().getResourceDefinition(theParts.getResourceType());
-		} catch (DataFormatException e) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
-			throw new InvalidRequestException(msg);
-		}
-		IFhirResourceDao<? extends IBaseResource> dao = null;
-		if (resType != null) {
-			dao = getDao(resType.getImplementingClass());
-		}
-		if (dao == null) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
-			throw new InvalidRequestException(msg);
-		}
-
-		// if (theParts.getResourceId() == null && theParts.getParams() == null) {
-		// String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
-		// throw new InvalidRequestException(msg);
-		// }
-
-		return dao;
-	}
-
-	private IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IResource> theClass) {
-		IFhirResourceDao<? extends IResource> retVal = getDao(theClass);
-		if (retVal == null) {
-			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + getContext().getResourceDefinition(theClass).getName());
-		}
-		return retVal;
 	}
 
 	private static void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome,
@@ -530,6 +591,49 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 
 	private static String toStatusString(int theStatusCode) {
 		return Integer.toString(theStatusCode) + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
+	}
+
+	//@formatter:off
+	/**
+	 * Transaction Order, per the spec:
+	 * 
+	 * Process any DELETE interactions
+	 * Process any POST interactions
+	 * Process any PUT interactions
+	 * Process any GET interactions
+	 */
+	//@formatter:off
+	public class TransactionSorter implements Comparator<Entry> {
+
+		@Override
+		public int compare(Entry theO1, Entry theO2) {			
+			int o1 = toOrder(theO1);
+			int o2 = toOrder(theO2);
+
+			return o1 - o2;
+		}
+
+		private int toOrder(Entry theO1) {
+			int o1 = 0;
+			if (theO1.getRequest().getMethodElement().getValueAsEnum() != null) {
+			switch (theO1.getRequest().getMethodElement().getValueAsEnum()) {
+			case DELETE:
+				o1 = 1;
+				break;
+			case POST:
+				o1 = 2;
+				break;
+			case PUT:
+				o1 = 3;
+				break;
+			case GET:
+				o1 = 4;
+				break;
+			}
+			}
+			return o1;
+		}
+
 	}
 
 }

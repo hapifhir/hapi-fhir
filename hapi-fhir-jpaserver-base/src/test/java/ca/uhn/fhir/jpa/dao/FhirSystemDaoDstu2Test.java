@@ -141,7 +141,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		assertEquals(Long.valueOf(2), entity.getIndexStatus());
 
 	}
-
+	
 	@Test
 	public void testSystemMetaOperation() {
 
@@ -589,6 +589,124 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 
 	}
 
+	/**
+	 * See #253 Test that the order of deletes is version independent
+	 */
+	@Test
+	public void testTransactionDeleteIsOrderIndependantTargetFirst() {
+		String methodName = "testTransactionDeleteIsOrderIndependantTargetFirst";
+
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType pid = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+		ourLog.info("Created patient, got it: {}", pid);
+
+		Observation o1 = new Observation();
+		o1.getSubject().setReference(pid);
+		IIdType oid1 = myObservationDao.create(o1).getId().toUnqualifiedVersionless();
+
+		Observation o2 = new Observation();
+		o2.addIdentifier().setValue(methodName);
+		o2.getSubject().setReference(pid);
+		IIdType oid2 = myObservationDao.create(o2).getId().toUnqualifiedVersionless();
+
+		myPatientDao.read(pid);
+		myObservationDao.read(oid1);
+
+		// The target is Patient, so try with it first in the bundle
+		Bundle request = new Bundle();
+		request.addEntry().getRequest().setMethod(HTTPVerbEnum.DELETE).setUrl(pid.getValue());
+		request.addEntry().getRequest().setMethod(HTTPVerbEnum.DELETE).setUrl(oid1.getValue());
+		request.addEntry().getRequest().setMethod(HTTPVerbEnum.DELETE).setUrl("Observation?identifier=" + methodName);
+		Bundle resp = mySystemDao.transaction(myRequestDetails, request);
+
+		assertEquals(3, resp.getEntry().size());
+		assertEquals("204 No Content", resp.getEntry().get(0).getResponse().getStatus());
+		assertEquals("204 No Content", resp.getEntry().get(1).getResponse().getStatus());
+		assertEquals("204 No Content", resp.getEntry().get(2).getResponse().getStatus());
+
+		try {
+			myPatientDao.read(pid);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		try {
+			myObservationDao.read(oid1);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		try {
+			myObservationDao.read(oid2);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+	}
+
+	/**
+	 * See #253 Test that the order of deletes is version independent
+	 */
+	@Test
+	public void testTransactionDeleteIsOrderIndependantTargetLast() {
+		String methodName = "testTransactionDeleteIsOrderIndependantTargetFirst";
+
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType pid = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+		ourLog.info("Created patient, got it: {}", pid);
+
+		Observation o1 = new Observation();
+		o1.getSubject().setReference(pid);
+		IIdType oid1 = myObservationDao.create(o1).getId().toUnqualifiedVersionless();
+
+		Observation o2 = new Observation();
+		o2.addIdentifier().setValue(methodName);
+		o2.getSubject().setReference(pid);
+		IIdType oid2 = myObservationDao.create(o2).getId().toUnqualifiedVersionless();
+
+		myPatientDao.read(pid);
+		myObservationDao.read(oid1);
+
+		// The target is Patient, so try with it last in the bundle
+		Bundle request = new Bundle();
+		request.addEntry().getRequest().setMethod(HTTPVerbEnum.DELETE).setUrl(oid1.getValue());
+		request.addEntry().getRequest().setMethod(HTTPVerbEnum.DELETE).setUrl("Observation?identifier=" + methodName);
+		request.addEntry().getRequest().setMethod(HTTPVerbEnum.DELETE).setUrl(pid.getValue());
+		Bundle resp = mySystemDao.transaction(myRequestDetails, request);
+
+		assertEquals(3, resp.getEntry().size());
+		assertEquals("204 No Content", resp.getEntry().get(0).getResponse().getStatus());
+		assertEquals("204 No Content", resp.getEntry().get(1).getResponse().getStatus());
+		assertEquals("204 No Content", resp.getEntry().get(2).getResponse().getStatus());
+
+		try {
+			myPatientDao.read(pid);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		try {
+			myObservationDao.read(oid1);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		try {
+			myObservationDao.read(oid2);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+	}
+
 	@Test
 	public void testTransactionDeleteMatchUrlWithOneMatch() {
 		String methodName = "testTransactionDeleteMatchUrlWithOneMatch";
@@ -670,7 +788,10 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		request.addEntry().getRequest().setMethod(HTTPVerbEnum.DELETE).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
 		// try {
-		mySystemDao.transaction(myRequestDetails, request);
+		Bundle resp = mySystemDao.transaction(myRequestDetails, request);
+		assertEquals(1, resp.getEntry().size());
+		assertEquals("404 Not Found", resp.getEntry().get(0).getResponse().getStatus());
+		
 		// fail();
 		// } catch (ResourceNotFoundException e) {
 		// assertThat(e.getMessage(), containsString("resource matching URL \"Patient?"));
@@ -763,6 +884,88 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 	}
 
 	@Test
+	public void testTransactionOrdering() {
+		String methodName = "testTransactionOrdering";
+		
+		//@formatter:off
+		/*
+		 * Transaction Order, per the spec:
+		 * 
+		 * Process any DELETE interactions
+		 * Process any POST interactions
+		 * Process any PUT interactions
+		 * Process any GET interactions
+		 * 
+		 * This test creates a transaction bundle that includes 
+		 * these four operations in the reverse order and verifies
+		 * that they are invoked correctly.
+		 */
+		//@formatter:off
+		
+		int pass = 0;
+		IdDt patientPlaceholderId = IdDt.newRandomUuid();
+		
+		Bundle req = testTransactionOrderingCreateBundle(methodName, pass, patientPlaceholderId);
+		Bundle resp = mySystemDao.transaction(myRequestDetails, req);
+		testTransactionOrderingValidateResponse(pass, resp);
+		
+		pass = 1;
+		patientPlaceholderId = IdDt.newRandomUuid();
+		
+		req = testTransactionOrderingCreateBundle(methodName, pass, patientPlaceholderId);
+		resp = mySystemDao.transaction(myRequestDetails, req);
+		testTransactionOrderingValidateResponse(pass, resp);
+
+	}
+
+	private void testTransactionOrderingValidateResponse(int pass, Bundle resp) {
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		assertEquals(4, resp.getEntry().size());
+		assertEquals("200 OK", resp.getEntry().get(0).getResponse().getStatus());
+		if (pass == 0) {
+			assertEquals("201 Created", resp.getEntry().get(1).getResponse().getStatus());
+			assertThat(resp.getEntry().get(1).getResponse().getLocation(), startsWith("Observation/"));
+			assertThat(resp.getEntry().get(1).getResponse().getLocation(), endsWith("_history/1"));
+		} else {
+			assertEquals("200 OK", resp.getEntry().get(1).getResponse().getStatus());
+			assertThat(resp.getEntry().get(1).getResponse().getLocation(), startsWith("Observation/"));
+			assertThat(resp.getEntry().get(1).getResponse().getLocation(), endsWith("_history/2"));
+		}
+		assertEquals("201 Created", resp.getEntry().get(2).getResponse().getStatus());
+		assertThat(resp.getEntry().get(2).getResponse().getLocation(), startsWith("Patient/"));
+		if (pass == 0) {
+			assertEquals("404 Not Found", resp.getEntry().get(3).getResponse().getStatus());
+		} else {
+			assertEquals("204 No Content", resp.getEntry().get(3).getResponse().getStatus());
+		}
+		
+		
+		Bundle respGetBundle = (Bundle) resp.getEntry().get(0).getResource();
+		assertEquals(1, respGetBundle.getEntry().size());
+		assertEquals("testTransactionOrdering" + pass, ((Patient)respGetBundle.getEntry().get(0).getResource()).getNameFirstRep().getFamilyFirstRep().getValue());
+		assertThat(respGetBundle.getLink("self").getUrl(), endsWith("/Patient?identifier=testTransactionOrdering"));
+	}
+
+	private Bundle testTransactionOrderingCreateBundle(String methodName, int pass, IdDt patientPlaceholderId) {
+		Bundle req = new Bundle();
+		req.addEntry().getRequest().setMethod(HTTPVerbEnum.GET).setUrl("Patient?identifier=" + methodName);
+		
+		Observation obs = new Observation();
+		obs.getSubject().setReference(patientPlaceholderId);
+		obs.addIdentifier().setValue(methodName);
+		obs.getCode().setText(methodName + pass);
+		req.addEntry().setResource(obs).getRequest().setMethod(HTTPVerbEnum.PUT).setUrl("Observation?identifier=" + methodName);
+		
+		Patient pat = new Patient();
+		pat.addIdentifier().setValue(methodName);
+		pat.addName().addFamily(methodName + pass);
+		req.addEntry().setResource(pat).setFullUrl(patientPlaceholderId.getValue()).getRequest().setMethod(HTTPVerbEnum.POST).setUrl("Patient");
+		
+		req.addEntry().getRequest().setMethod(HTTPVerbEnum.DELETE).setUrl("Patient?identifier=" + methodName);
+		return req;
+	}
+
+	@Test
 	public void testTransactionReadAndSearch() {
 		String methodName = "testTransactionReadAndSearch";
 
@@ -829,6 +1032,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		details = detailsCapt.getValue();
 		assertEquals("Patient", details.getResourceType());
 
+		
 	}
 
 	@Test

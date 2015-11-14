@@ -36,6 +36,7 @@ public abstract class BaseJpaDstu2SystemTest extends BaseJpaDstu2Test {
 		when(myRequestDetails.getServer()).thenReturn(myServer);
 		HttpServletRequest servletRequest = mock(HttpServletRequest.class);
 		when(myRequestDetails.getServletRequest()).thenReturn(servletRequest);
+		when(myRequestDetails.getFhirServerBase()).thenReturn("http://example.com/base");
 		when(servletRequest.getHeaderNames()).thenReturn(mock(Enumeration.class));
 		when(servletRequest.getRequestURL()).thenReturn(new StringBuffer("/Patient"));
 	}

@@ -245,6 +245,12 @@
 				codes (specifically, ValueSets which defined concepts containing
 				child concepts did not result in Enum values for the child concepts)
 			</action>
+			<action type="fix" fix="253">
+				In the JPA server, order of transaction processing should be 
+				DELETE, POST, PUT, GET, and the order should not matter
+				within entries with the same verb. Thanks to Bill de Beaubien
+				for reporting!
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">

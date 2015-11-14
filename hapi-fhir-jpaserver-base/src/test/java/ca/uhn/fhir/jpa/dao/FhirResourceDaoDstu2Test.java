@@ -685,8 +685,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			myOrganizationDao.delete(orgId);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), containsString("Unable to delete Organization/" + orgId.getIdPart()
-					+ " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patId.getIdPart() + " in path Patient.managingOrganization"));
+			assertThat(e.getMessage(), containsString("Delete failed because of constraint"));
 		}
 
 		myPatientDao.delete(patId);
