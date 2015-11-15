@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -89,6 +89,10 @@ public class OperationOutcomeEnumFactory implements EnumFactory<OperationOutcome
       return OperationOutcome.MSGPARAMNOREPEAT;
     if ("MSG_PARAM_UNKNOWN".equals(codeString))
       return OperationOutcome.MSGPARAMUNKNOWN;
+    if ("MSG_PARAM_INVALID".equals(codeString))
+      return OperationOutcome.MSGPARAMINVALID;
+    if ("MSG_PARAM_MODIFIER_INVALID".equals(codeString))
+      return OperationOutcome.MSGPARAMMODIFIERINVALID;
     if ("MSG_RESOURCE_EXAMPLE_PROTECTED".equals(codeString))
       return OperationOutcome.MSGRESOURCEEXAMPLEPROTECTED;
     if ("MSG_RESOURCE_ID_FAIL".equals(codeString))
@@ -187,6 +191,10 @@ public class OperationOutcomeEnumFactory implements EnumFactory<OperationOutcome
       return "MSG_PARAM_NO_REPEAT";
     if (code == OperationOutcome.MSGPARAMUNKNOWN)
       return "MSG_PARAM_UNKNOWN";
+    if (code == OperationOutcome.MSGPARAMINVALID)
+      return "MSG_PARAM_INVALID";
+    if (code == OperationOutcome.MSGPARAMMODIFIERINVALID)
+      return "MSG_PARAM_MODIFIER_INVALID";
     if (code == OperationOutcome.MSGRESOURCEEXAMPLEPROTECTED)
       return "MSG_RESOURCE_EXAMPLE_PROTECTED";
     if (code == OperationOutcome.MSGRESOURCEIDFAIL)

@@ -29,45 +29,45 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ListExampleCodes {
 
         /**
-         * A list of alerts for the patient
+         * A list of alerts for the patient.
          */
         ALERTS, 
         /**
-         * A list of part adverse reactions
+         * A list of part adverse reactions.
          */
         ADVERSERXNS, 
         /**
-         * A list of Allergies for the patient
+         * A list of Allergies for the patient.
          */
         ALLERGIES, 
         /**
-         * A list of medication statements for the patient
+         * A list of medication statements for the patient.
          */
         MEDICATIONS, 
         /**
-         * A list of problems that the patient is known of have (or have had in the past)
+         * A list of problems that the patient is known of have (or have had in the past).
          */
         PROBLEMS, 
         /**
-         * A list of items that constitute a set of work to be performed (typically this code would be specialised for more specific uses, such as a ward round list)
+         * A list of items that constitute a set of work to be performed (typically this code would be specialized for more specific uses, such as a ward round list).
          */
         WORKLIST, 
         /**
-         * A list of items waiting for an event (perhaps a surgical patient waiting list)
+         * A list of items waiting for an event (perhaps a surgical patient waiting list).
          */
         WAITING, 
         /**
-         * A set of protocols to be followed
+         * A set of protocols to be followed.
          */
         PROTOCOLS, 
         /**
-         * A set of care plans that apply in a particular context of care
+         * A set of care plans that apply in a particular context of care.
          */
         PLANS, 
         /**
@@ -116,15 +116,15 @@ public enum ListExampleCodes {
         }
         public String getDefinition() {
           switch (this) {
-            case ALERTS: return "A list of alerts for the patient";
-            case ADVERSERXNS: return "A list of part adverse reactions";
-            case ALLERGIES: return "A list of Allergies for the patient";
-            case MEDICATIONS: return "A list of medication statements for the patient";
-            case PROBLEMS: return "A list of problems that the patient is known of have (or have had in the past)";
-            case WORKLIST: return "A list of items that constitute a set of work to be performed (typically this code would be specialised for more specific uses, such as a ward round list)";
-            case WAITING: return "A list of items waiting for an event (perhaps a surgical patient waiting list)";
-            case PROTOCOLS: return "A set of protocols to be followed";
-            case PLANS: return "A set of care plans that apply in a particular context of care";
+            case ALERTS: return "A list of alerts for the patient.";
+            case ADVERSERXNS: return "A list of part adverse reactions.";
+            case ALLERGIES: return "A list of Allergies for the patient.";
+            case MEDICATIONS: return "A list of medication statements for the patient.";
+            case PROBLEMS: return "A list of problems that the patient is known of have (or have had in the past).";
+            case WORKLIST: return "A list of items that constitute a set of work to be performed (typically this code would be specialized for more specific uses, such as a ward round list).";
+            case WAITING: return "A list of items waiting for an event (perhaps a surgical patient waiting list).";
+            case PROTOCOLS: return "A set of protocols to be followed.";
+            case PLANS: return "A set of care plans that apply in a particular context of care.";
             default: return "?";
           }
         }

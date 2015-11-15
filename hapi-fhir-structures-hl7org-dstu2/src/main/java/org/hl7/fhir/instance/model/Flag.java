@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -48,15 +48,15 @@ public class Flag extends DomainResource {
 
     public enum FlagStatus {
         /**
-         * A current flag that should be displayed to a user. A system may use the category to determine which roles should view the flag
+         * A current flag that should be displayed to a user. A system may use the category to determine which roles should view the flag.
          */
         ACTIVE, 
         /**
-         * The flag does not need to be displayed any more
+         * The flag does not need to be displayed any more.
          */
         INACTIVE, 
         /**
-         * The flag was added in error, and should no longer be displayed
+         * The flag was added in error, and should no longer be displayed.
          */
         ENTEREDINERROR, 
         /**
@@ -92,9 +92,9 @@ public class Flag extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "A current flag that should be displayed to a user. A system may use the category to determine which roles should view the flag";
-            case INACTIVE: return "The flag does not need to be displayed any more";
-            case ENTEREDINERROR: return "The flag was added in error, and should no longer be displayed";
+            case ACTIVE: return "A current flag that should be displayed to a user. A system may use the category to determine which roles should view the flag.";
+            case INACTIVE: return "The flag does not need to be displayed any more.";
+            case ENTEREDINERROR: return "The flag was added in error, and should no longer be displayed.";
             default: return "?";
           }
         }

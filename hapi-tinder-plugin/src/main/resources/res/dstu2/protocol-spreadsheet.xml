@@ -2744,7 +2744,7 @@ See wiki for guidance</Font>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s88">
-					<Data ss:Type="String">We send them as a collection because a single activity may be referenced multiple times.  E.g. Activity C may be a follow-on activity to both A and B which happen in parallel.</Data>
+					<Data ss:Type="String">We send them as a collection because a single activity may be referenced multiple times; e.g. Activity C may be a follow-on activity to both A and B which happen in parallel.</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s89">
@@ -8303,7 +8303,7 @@ See wiki for guidance</Font>
 					<Data ss:Type="String">Context</Data>
 					<Comment ss:Author="">
 						<ss:Data xmlns="http://www.w3.org/TR/REC-html40">
-							<Font html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur.  E.g. ResourceName.element1.element2</Font>
+							<Font html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur; e.g. ResourceName.element1.element2</Font>
 						</ss:Data>
 					</Comment>
 					<NamedCell ss:Name="_FilterDatabase"/>
@@ -8975,7 +8975,7 @@ See wiki for guidance</Font>
 					<Data ss:Type="String">Path</Data>
 					<Comment ss:Author="">
 						<ss:Data xmlns="http://www.w3.org/TR/REC-html40">
-							<Font html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element.  E.g. ResourceName.node1.node2</Font>
+							<Font html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element; e.g. ResourceName.node1.node2</Font>
 						</ss:Data>
 					</Comment>
 					<NamedCell ss:Name="_FilterDatabase"/>
@@ -9947,7 +9947,7 @@ See wiki for guidance</Font>
 					<Data ss:Type="String">Event Code</Data>
 					<Comment ss:Author="">
 						<ss:Data xmlns="http://www.w3.org/TR/REC-html40">
-							<Font html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event.  E.g. patient-link
+							<Font html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event; e.g. patient-link
 
 </Font>
 						</ss:Data>
@@ -10646,7 +10646,7 @@ Comment the row by starting with '!'</Font>
 					<Data ss:Type="String">Filename</Data>
 					<Comment ss:Author="">
 						<ss:Data xmlns="http://www.w3.org/TR/REC-html40">
-							<Font html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file.  E.g. resource-example-file-name.xml</Font>
+							<Font html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file; e.g. resource-example-file-name.xml</Font>
 						</ss:Data>
 					</Comment>
 					<NamedCell ss:Name="_FilterDatabase"/>

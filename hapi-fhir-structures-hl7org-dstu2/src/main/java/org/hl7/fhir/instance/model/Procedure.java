@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -41,26 +41,26 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * An action that is or was performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.
+ * An action that is or was performed on a patient. This can be a physical intervention like an operation, or less invasive like counseling or hypnotherapy.
  */
 @ResourceDef(name="Procedure", profile="http://hl7.org/fhir/Profile/Procedure")
 public class Procedure extends DomainResource {
 
     public enum ProcedureStatus {
         /**
-         * The procedure is still occurring
+         * The procedure is still occurring.
          */
         INPROGRESS, 
         /**
-         * The procedure was terminated without completing successfully
+         * The procedure was terminated without completing successfully.
          */
         ABORTED, 
         /**
-         * All actions involved in the procedure have taken place
+         * All actions involved in the procedure have taken place.
          */
         COMPLETED, 
         /**
-         * The statement was entered in error and Is not valid
+         * The statement was entered in error and Is not valid.
          */
         ENTEREDINERROR, 
         /**
@@ -100,10 +100,10 @@ public class Procedure extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case INPROGRESS: return "The procedure is still occurring";
-            case ABORTED: return "The procedure was terminated without completing successfully";
-            case COMPLETED: return "All actions involved in the procedure have taken place";
-            case ENTEREDINERROR: return "The statement was entered in error and Is not valid";
+            case INPROGRESS: return "The procedure is still occurring.";
+            case ABORTED: return "The procedure was terminated without completing successfully.";
+            case COMPLETED: return "All actions involved in the procedure have taken place.";
+            case ENTEREDINERROR: return "The statement was entered in error and Is not valid.";
             default: return "?";
           }
         }
@@ -161,10 +161,10 @@ public class Procedure extends DomainResource {
         protected Resource actorTarget;
 
         /**
-         * E.g. surgeon, anaethetist, endoscopist.
+         * For example: surgeon, anaethetist, endoscopist.
          */
         @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The role the actor was in", formalDefinition="E.g. surgeon, anaethetist, endoscopist." )
+        @Description(shortDefinition="The role the actor was in", formalDefinition="For example: surgeon, anaethetist, endoscopist." )
         protected CodeableConcept role;
 
         private static final long serialVersionUID = -843698327L;
@@ -216,7 +216,7 @@ public class Procedure extends DomainResource {
         }
 
         /**
-         * @return {@link #role} (E.g. surgeon, anaethetist, endoscopist.)
+         * @return {@link #role} (For example: surgeon, anaethetist, endoscopist.)
          */
         public CodeableConcept getRole() { 
           if (this.role == null)
@@ -232,7 +232,7 @@ public class Procedure extends DomainResource {
         }
 
         /**
-         * @param value {@link #role} (E.g. surgeon, anaethetist, endoscopist.)
+         * @param value {@link #role} (For example: surgeon, anaethetist, endoscopist.)
          */
         public ProcedurePerformerComponent setRole(CodeableConcept value) { 
           this.role = value;
@@ -242,7 +242,7 @@ public class Procedure extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("actor", "Reference(Practitioner|Organization|Patient|RelatedPerson)", "The practitioner who was involved in the procedure.", 0, java.lang.Integer.MAX_VALUE, actor));
-          childrenList.add(new Property("role", "CodeableConcept", "E.g. surgeon, anaethetist, endoscopist.", 0, java.lang.Integer.MAX_VALUE, role));
+          childrenList.add(new Property("role", "CodeableConcept", "For example: surgeon, anaethetist, endoscopist.", 0, java.lang.Integer.MAX_VALUE, role));
         }
 
       public ProcedurePerformerComponent copy() {
@@ -428,29 +428,29 @@ public class Procedure extends DomainResource {
   }
 
     /**
-     * This records identifiers associated with this procedure that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
+     * This records identifiers associated with this procedure that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="External Ids for this procedure", formalDefinition="This records identifiers associated with this procedure that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
+    @Description(shortDefinition="External Identifiers for this procedure", formalDefinition="This records identifiers associated with this procedure that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
-     * The person on whom the procedure was performed.
+     * The person, animal or group on which the procedure was performed.
      */
     @Child(name = "subject", type = {Patient.class, Group.class}, order=1, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who procedure was performed on", formalDefinition="The person on whom the procedure was performed." )
+    @Description(shortDefinition="Who the procedure was performed on", formalDefinition="The person, animal or group on which the procedure was performed." )
     protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (The person on whom the procedure was performed.)
+     * The actual object that is the target of the reference (The person, animal or group on which the procedure was performed.)
      */
     protected Resource subjectTarget;
 
     /**
-     * A code specifying the state of the procedure record. Generally this will be in-progress or completed state.
+     * A code specifying the state of the procedure. Generally this will be in-progress or completed state.
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="in-progress | aborted | completed | entered-in-error", formalDefinition="A code specifying the state of the procedure record. Generally this will be in-progress or completed state." )
+    @Description(shortDefinition="in-progress | aborted | completed | entered-in-error", formalDefinition="A code specifying the state of the procedure. Generally this will be in-progress or completed state." )
     protected Enumeration<ProcedureStatus> status;
 
     /**
@@ -461,10 +461,10 @@ public class Procedure extends DomainResource {
     protected CodeableConcept category;
 
     /**
-     * The specific procedure that is performed. Use text if the exact nature of the procedure can't be coded (e.g. "Laparoscopic Appendectomy").
+     * The specific procedure that is performed. Use text if the exact nature of the procedure cannot be coded (e.g. "Laparoscopic Appendectomy").
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=4, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Identification of the procedure", formalDefinition="The specific procedure that is performed. Use text if the exact nature of the procedure can't be coded (e.g. \"Laparoscopic Appendectomy\")." )
+    @Description(shortDefinition="Identification of the procedure", formalDefinition="The specific procedure that is performed. Use text if the exact nature of the procedure cannot be coded (e.g. \"Laparoscopic Appendectomy\")." )
     protected CodeableConcept code;
 
     /**
@@ -478,7 +478,7 @@ public class Procedure extends DomainResource {
      * A code indicating why the procedure was not performed.
      */
     @Child(name = "reasonNotPerformed", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Reason procedure not performed", formalDefinition="A code indicating why the procedure was not performed." )
+    @Description(shortDefinition="Reason procedure was not performed", formalDefinition="A code indicating why the procedure was not performed." )
     protected List<CodeableConcept> reasonNotPerformed;
 
     /**
@@ -513,7 +513,7 @@ public class Procedure extends DomainResource {
      * The encounter during which the procedure was performed.
      */
     @Child(name = "encounter", type = {Encounter.class}, order=11, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The encounter when procedure performed", formalDefinition="The encounter during which the procedure was performed." )
+    @Description(shortDefinition="The encounter associated with the procedure", formalDefinition="The encounter during which the procedure was performed." )
     protected Reference encounter;
 
     /**
@@ -522,67 +522,67 @@ public class Procedure extends DomainResource {
     protected Encounter encounterTarget;
 
     /**
-     * The location where the procedure actually happened.  e.g. a newborn at home, a tracheostomy at a restaurant.
+     * The location where the procedure actually happened.  E.g. a newborn at home, a tracheostomy at a restaurant.
      */
     @Child(name = "location", type = {Location.class}, order=12, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Where the procedure happened", formalDefinition="The location where the procedure actually happened.  e.g. a newborn at home, a tracheostomy at a restaurant." )
+    @Description(shortDefinition="Where the procedure happened", formalDefinition="The location where the procedure actually happened.  E.g. a newborn at home, a tracheostomy at a restaurant." )
     protected Reference location;
 
     /**
-     * The actual object that is the target of the reference (The location where the procedure actually happened.  e.g. a newborn at home, a tracheostomy at a restaurant.)
+     * The actual object that is the target of the reference (The location where the procedure actually happened.  E.g. a newborn at home, a tracheostomy at a restaurant.)
      */
     protected Location locationTarget;
 
     /**
-     * What was the outcome of the procedure - did it resolve reasons why the procedure was performed?
+     * The outcome of the procedure - did it resolve reasons for the procedure being performed?
      */
     @Child(name = "outcome", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="What was result of procedure?", formalDefinition="What was the outcome of the procedure - did it resolve reasons why the procedure was performed?" )
+    @Description(shortDefinition="The result of procedure", formalDefinition="The outcome of the procedure - did it resolve reasons for the procedure being performed?" )
     protected CodeableConcept outcome;
 
     /**
-     * This could be a histology result. There could potentially be multiple reports - e.g. if this was a procedure that made multiple biopsies.
+     * This could be a histology result, pathology report, surgical report, etc..
      */
     @Child(name = "report", type = {DiagnosticReport.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Any report that results from the procedure", formalDefinition="This could be a histology result. There could potentially be multiple reports - e.g. if this was a procedure that made multiple biopsies." )
+    @Description(shortDefinition="Any report resulting from the procedure", formalDefinition="This could be a histology result, pathology report, surgical report, etc.." )
     protected List<Reference> report;
     /**
-     * The actual objects that are the target of the reference (This could be a histology result. There could potentially be multiple reports - e.g. if this was a procedure that made multiple biopsies.)
+     * The actual objects that are the target of the reference (This could be a histology result, pathology report, surgical report, etc..)
      */
     protected List<DiagnosticReport> reportTarget;
 
 
     /**
-     * Any complications that occurred during the procedure, or in the immediate post-operative period. These are generally tracked separately from the notes, which typically will describe the procedure itself rather than any 'post procedure' issues.
+     * Any complications that occurred during the procedure, or in the immediate post-performance period. These are generally tracked separately from the notes, which will typically describe the procedure itself rather than any 'post procedure' issues.
      */
     @Child(name = "complication", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Complication following the procedure", formalDefinition="Any complications that occurred during the procedure, or in the immediate post-operative period. These are generally tracked separately from the notes, which typically will describe the procedure itself rather than any 'post procedure' issues." )
+    @Description(shortDefinition="Complication following the procedure", formalDefinition="Any complications that occurred during the procedure, or in the immediate post-performance period. These are generally tracked separately from the notes, which will typically describe the procedure itself rather than any 'post procedure' issues." )
     protected List<CodeableConcept> complication;
 
     /**
-     * If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or potentially could be more complex in which case the CarePlan resource can be used.
+     * If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or could potentially be more complex in which case the CarePlan resource can be used.
      */
     @Child(name = "followUp", type = {CodeableConcept.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Instructions for follow up", formalDefinition="If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or potentially could be more complex in which case the CarePlan resource can be used." )
+    @Description(shortDefinition="Instructions for follow up", formalDefinition="If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or could potentially be more complex in which case the CarePlan resource can be used." )
     protected List<CodeableConcept> followUp;
 
     /**
-     * A reference to a resource that contains about this procedure's request.
+     * A reference to a resource that contains details of the request for this procedure.
      */
     @Child(name = "request", type = {CarePlan.class, DiagnosticOrder.class, ProcedureRequest.class, ReferralRequest.class}, order=17, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="A request for this procedure", formalDefinition="A reference to a resource that contains about this procedure's request." )
+    @Description(shortDefinition="A request for this procedure", formalDefinition="A reference to a resource that contains details of the request for this procedure." )
     protected Reference request;
 
     /**
-     * The actual object that is the target of the reference (A reference to a resource that contains about this procedure's request.)
+     * The actual object that is the target of the reference (A reference to a resource that contains details of the request for this procedure.)
      */
     protected Resource requestTarget;
 
     /**
-     * Any other notes about the procedure - e.g. the operative notes.
+     * Any other notes about the procedure.  E.g. the operative notes.
      */
     @Child(name = "notes", type = {Annotation.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Additional information about procedure", formalDefinition="Any other notes about the procedure - e.g. the operative notes." )
+    @Description(shortDefinition="Additional information about the procedure", formalDefinition="Any other notes about the procedure.  E.g. the operative notes." )
     protected List<Annotation> notes;
 
     /**
@@ -593,13 +593,13 @@ public class Procedure extends DomainResource {
     protected List<ProcedureFocalDeviceComponent> focalDevice;
 
     /**
-     * Identifies medications, devices and other substance used as part of the procedure.
+     * Identifies medications, devices and any other substance used as part of the procedure.
      */
     @Child(name = "used", type = {Device.class, Medication.class, Substance.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Items used during procedure", formalDefinition="Identifies medications, devices and other substance used as part of the procedure." )
+    @Description(shortDefinition="Items used during procedure", formalDefinition="Identifies medications, devices and any other substance used as part of the procedure." )
     protected List<Reference> used;
     /**
-     * The actual objects that are the target of the reference (Identifies medications, devices and other substance used as part of the procedure.)
+     * The actual objects that are the target of the reference (Identifies medications, devices and any other substance used as part of the procedure.)
      */
     protected List<Resource> usedTarget;
 
@@ -624,7 +624,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (This records identifiers associated with this procedure that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
+     * @return {@link #identifier} (This records identifiers associated with this procedure that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -642,7 +642,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (This records identifiers associated with this procedure that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
+     * @return {@link #identifier} (This records identifiers associated with this procedure that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -664,7 +664,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} (The person on whom the procedure was performed.)
+     * @return {@link #subject} (The person, animal or group on which the procedure was performed.)
      */
     public Reference getSubject() { 
       if (this.subject == null)
@@ -680,7 +680,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @param value {@link #subject} (The person on whom the procedure was performed.)
+     * @param value {@link #subject} (The person, animal or group on which the procedure was performed.)
      */
     public Procedure setSubject(Reference value) { 
       this.subject = value;
@@ -688,14 +688,14 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person on whom the procedure was performed.)
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person, animal or group on which the procedure was performed.)
      */
     public Resource getSubjectTarget() { 
       return this.subjectTarget;
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person on whom the procedure was performed.)
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person, animal or group on which the procedure was performed.)
      */
     public Procedure setSubjectTarget(Resource value) { 
       this.subjectTarget = value;
@@ -703,7 +703,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (A code specifying the state of the procedure record. Generally this will be in-progress or completed state.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (A code specifying the state of the procedure. Generally this will be in-progress or completed state.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<ProcedureStatus> getStatusElement() { 
       if (this.status == null)
@@ -723,7 +723,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (A code specifying the state of the procedure record. Generally this will be in-progress or completed state.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (A code specifying the state of the procedure. Generally this will be in-progress or completed state.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Procedure setStatusElement(Enumeration<ProcedureStatus> value) { 
       this.status = value;
@@ -731,14 +731,14 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return A code specifying the state of the procedure record. Generally this will be in-progress or completed state.
+     * @return A code specifying the state of the procedure. Generally this will be in-progress or completed state.
      */
     public ProcedureStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value A code specifying the state of the procedure record. Generally this will be in-progress or completed state.
+     * @param value A code specifying the state of the procedure. Generally this will be in-progress or completed state.
      */
     public Procedure setStatus(ProcedureStatus value) { 
         if (this.status == null)
@@ -772,7 +772,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #code} (The specific procedure that is performed. Use text if the exact nature of the procedure can't be coded (e.g. "Laparoscopic Appendectomy").)
+     * @return {@link #code} (The specific procedure that is performed. Use text if the exact nature of the procedure cannot be coded (e.g. "Laparoscopic Appendectomy").)
      */
     public CodeableConcept getCode() { 
       if (this.code == null)
@@ -788,7 +788,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @param value {@link #code} (The specific procedure that is performed. Use text if the exact nature of the procedure can't be coded (e.g. "Laparoscopic Appendectomy").)
+     * @param value {@link #code} (The specific procedure that is performed. Use text if the exact nature of the procedure cannot be coded (e.g. "Laparoscopic Appendectomy").)
      */
     public Procedure setCode(CodeableConcept value) { 
       this.code = value;
@@ -1095,7 +1095,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #location} (The location where the procedure actually happened.  e.g. a newborn at home, a tracheostomy at a restaurant.)
+     * @return {@link #location} (The location where the procedure actually happened.  E.g. a newborn at home, a tracheostomy at a restaurant.)
      */
     public Reference getLocation() { 
       if (this.location == null)
@@ -1111,7 +1111,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @param value {@link #location} (The location where the procedure actually happened.  e.g. a newborn at home, a tracheostomy at a restaurant.)
+     * @param value {@link #location} (The location where the procedure actually happened.  E.g. a newborn at home, a tracheostomy at a restaurant.)
      */
     public Procedure setLocation(Reference value) { 
       this.location = value;
@@ -1119,7 +1119,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The location where the procedure actually happened.  e.g. a newborn at home, a tracheostomy at a restaurant.)
+     * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The location where the procedure actually happened.  E.g. a newborn at home, a tracheostomy at a restaurant.)
      */
     public Location getLocationTarget() { 
       if (this.locationTarget == null)
@@ -1131,7 +1131,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The location where the procedure actually happened.  e.g. a newborn at home, a tracheostomy at a restaurant.)
+     * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The location where the procedure actually happened.  E.g. a newborn at home, a tracheostomy at a restaurant.)
      */
     public Procedure setLocationTarget(Location value) { 
       this.locationTarget = value;
@@ -1139,7 +1139,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #outcome} (What was the outcome of the procedure - did it resolve reasons why the procedure was performed?)
+     * @return {@link #outcome} (The outcome of the procedure - did it resolve reasons for the procedure being performed?)
      */
     public CodeableConcept getOutcome() { 
       if (this.outcome == null)
@@ -1155,7 +1155,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @param value {@link #outcome} (What was the outcome of the procedure - did it resolve reasons why the procedure was performed?)
+     * @param value {@link #outcome} (The outcome of the procedure - did it resolve reasons for the procedure being performed?)
      */
     public Procedure setOutcome(CodeableConcept value) { 
       this.outcome = value;
@@ -1163,7 +1163,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #report} (This could be a histology result. There could potentially be multiple reports - e.g. if this was a procedure that made multiple biopsies.)
+     * @return {@link #report} (This could be a histology result, pathology report, surgical report, etc..)
      */
     public List<Reference> getReport() { 
       if (this.report == null)
@@ -1181,7 +1181,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #report} (This could be a histology result. There could potentially be multiple reports - e.g. if this was a procedure that made multiple biopsies.)
+     * @return {@link #report} (This could be a histology result, pathology report, surgical report, etc..)
      */
     // syntactic sugar
     public Reference addReport() { //3
@@ -1203,7 +1203,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #report} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. This could be a histology result. There could potentially be multiple reports - e.g. if this was a procedure that made multiple biopsies.)
+     * @return {@link #report} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. This could be a histology result, pathology report, surgical report, etc..)
      */
     public List<DiagnosticReport> getReportTarget() { 
       if (this.reportTarget == null)
@@ -1213,7 +1213,7 @@ public class Procedure extends DomainResource {
 
     // syntactic sugar
     /**
-     * @return {@link #report} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. This could be a histology result. There could potentially be multiple reports - e.g. if this was a procedure that made multiple biopsies.)
+     * @return {@link #report} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. This could be a histology result, pathology report, surgical report, etc..)
      */
     public DiagnosticReport addReportTarget() { 
       DiagnosticReport r = new DiagnosticReport();
@@ -1224,7 +1224,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #complication} (Any complications that occurred during the procedure, or in the immediate post-operative period. These are generally tracked separately from the notes, which typically will describe the procedure itself rather than any 'post procedure' issues.)
+     * @return {@link #complication} (Any complications that occurred during the procedure, or in the immediate post-performance period. These are generally tracked separately from the notes, which will typically describe the procedure itself rather than any 'post procedure' issues.)
      */
     public List<CodeableConcept> getComplication() { 
       if (this.complication == null)
@@ -1242,7 +1242,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #complication} (Any complications that occurred during the procedure, or in the immediate post-operative period. These are generally tracked separately from the notes, which typically will describe the procedure itself rather than any 'post procedure' issues.)
+     * @return {@link #complication} (Any complications that occurred during the procedure, or in the immediate post-performance period. These are generally tracked separately from the notes, which will typically describe the procedure itself rather than any 'post procedure' issues.)
      */
     // syntactic sugar
     public CodeableConcept addComplication() { //3
@@ -1264,7 +1264,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #followUp} (If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or potentially could be more complex in which case the CarePlan resource can be used.)
+     * @return {@link #followUp} (If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or could potentially be more complex in which case the CarePlan resource can be used.)
      */
     public List<CodeableConcept> getFollowUp() { 
       if (this.followUp == null)
@@ -1282,7 +1282,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #followUp} (If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or potentially could be more complex in which case the CarePlan resource can be used.)
+     * @return {@link #followUp} (If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or could potentially be more complex in which case the CarePlan resource can be used.)
      */
     // syntactic sugar
     public CodeableConcept addFollowUp() { //3
@@ -1304,7 +1304,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #request} (A reference to a resource that contains about this procedure's request.)
+     * @return {@link #request} (A reference to a resource that contains details of the request for this procedure.)
      */
     public Reference getRequest() { 
       if (this.request == null)
@@ -1320,7 +1320,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @param value {@link #request} (A reference to a resource that contains about this procedure's request.)
+     * @param value {@link #request} (A reference to a resource that contains details of the request for this procedure.)
      */
     public Procedure setRequest(Reference value) { 
       this.request = value;
@@ -1328,14 +1328,14 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #request} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to a resource that contains about this procedure's request.)
+     * @return {@link #request} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to a resource that contains details of the request for this procedure.)
      */
     public Resource getRequestTarget() { 
       return this.requestTarget;
     }
 
     /**
-     * @param value {@link #request} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to a resource that contains about this procedure's request.)
+     * @param value {@link #request} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to a resource that contains details of the request for this procedure.)
      */
     public Procedure setRequestTarget(Resource value) { 
       this.requestTarget = value;
@@ -1343,7 +1343,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #notes} (Any other notes about the procedure - e.g. the operative notes.)
+     * @return {@link #notes} (Any other notes about the procedure.  E.g. the operative notes.)
      */
     public List<Annotation> getNotes() { 
       if (this.notes == null)
@@ -1361,7 +1361,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #notes} (Any other notes about the procedure - e.g. the operative notes.)
+     * @return {@link #notes} (Any other notes about the procedure.  E.g. the operative notes.)
      */
     // syntactic sugar
     public Annotation addNotes() { //3
@@ -1423,7 +1423,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #used} (Identifies medications, devices and other substance used as part of the procedure.)
+     * @return {@link #used} (Identifies medications, devices and any other substance used as part of the procedure.)
      */
     public List<Reference> getUsed() { 
       if (this.used == null)
@@ -1441,7 +1441,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #used} (Identifies medications, devices and other substance used as part of the procedure.)
+     * @return {@link #used} (Identifies medications, devices and any other substance used as part of the procedure.)
      */
     // syntactic sugar
     public Reference addUsed() { //3
@@ -1463,7 +1463,7 @@ public class Procedure extends DomainResource {
     }
 
     /**
-     * @return {@link #used} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Identifies medications, devices and other substance used as part of the procedure.)
+     * @return {@link #used} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Identifies medications, devices and any other substance used as part of the procedure.)
      */
     public List<Resource> getUsedTarget() { 
       if (this.usedTarget == null)
@@ -1473,11 +1473,11 @@ public class Procedure extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this procedure that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("subject", "Reference(Patient|Group)", "The person on whom the procedure was performed.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("status", "code", "A code specifying the state of the procedure record. Generally this will be in-progress or completed state.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this procedure that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("subject", "Reference(Patient|Group)", "The person, animal or group on which the procedure was performed.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("status", "code", "A code specifying the state of the procedure. Generally this will be in-progress or completed state.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("category", "CodeableConcept", "A code that classifies the procedure for searching, sorting and display purposes (e.g. \"Surgical Procedure\").", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("code", "CodeableConcept", "The specific procedure that is performed. Use text if the exact nature of the procedure can't be coded (e.g. \"Laparoscopic Appendectomy\").", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("code", "CodeableConcept", "The specific procedure that is performed. Use text if the exact nature of the procedure cannot be coded (e.g. \"Laparoscopic Appendectomy\").", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("notPerformed", "boolean", "Set this to true if the record is saying that the procedure was NOT performed.", 0, java.lang.Integer.MAX_VALUE, notPerformed));
         childrenList.add(new Property("reasonNotPerformed", "CodeableConcept", "A code indicating why the procedure was not performed.", 0, java.lang.Integer.MAX_VALUE, reasonNotPerformed));
         childrenList.add(new Property("bodySite", "CodeableConcept", "Detailed and structured anatomical location information. Multiple locations are allowed - e.g. multiple punch biopsies of a lesion.", 0, java.lang.Integer.MAX_VALUE, bodySite));
@@ -1485,15 +1485,15 @@ public class Procedure extends DomainResource {
         childrenList.add(new Property("performer", "", "Limited to 'real' people rather than equipment.", 0, java.lang.Integer.MAX_VALUE, performer));
         childrenList.add(new Property("performed[x]", "dateTime|Period", "The date(time)/period over which the procedure was performed. Allows a period to support complex procedures that span more than one date, and also allows for the length of the procedure to be captured.", 0, java.lang.Integer.MAX_VALUE, performed));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "The encounter during which the procedure was performed.", 0, java.lang.Integer.MAX_VALUE, encounter));
-        childrenList.add(new Property("location", "Reference(Location)", "The location where the procedure actually happened.  e.g. a newborn at home, a tracheostomy at a restaurant.", 0, java.lang.Integer.MAX_VALUE, location));
-        childrenList.add(new Property("outcome", "CodeableConcept", "What was the outcome of the procedure - did it resolve reasons why the procedure was performed?", 0, java.lang.Integer.MAX_VALUE, outcome));
-        childrenList.add(new Property("report", "Reference(DiagnosticReport)", "This could be a histology result. There could potentially be multiple reports - e.g. if this was a procedure that made multiple biopsies.", 0, java.lang.Integer.MAX_VALUE, report));
-        childrenList.add(new Property("complication", "CodeableConcept", "Any complications that occurred during the procedure, or in the immediate post-operative period. These are generally tracked separately from the notes, which typically will describe the procedure itself rather than any 'post procedure' issues.", 0, java.lang.Integer.MAX_VALUE, complication));
-        childrenList.add(new Property("followUp", "CodeableConcept", "If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or potentially could be more complex in which case the CarePlan resource can be used.", 0, java.lang.Integer.MAX_VALUE, followUp));
-        childrenList.add(new Property("request", "Reference(CarePlan|DiagnosticOrder|ProcedureRequest|ReferralRequest)", "A reference to a resource that contains about this procedure's request.", 0, java.lang.Integer.MAX_VALUE, request));
-        childrenList.add(new Property("notes", "Annotation", "Any other notes about the procedure - e.g. the operative notes.", 0, java.lang.Integer.MAX_VALUE, notes));
+        childrenList.add(new Property("location", "Reference(Location)", "The location where the procedure actually happened.  E.g. a newborn at home, a tracheostomy at a restaurant.", 0, java.lang.Integer.MAX_VALUE, location));
+        childrenList.add(new Property("outcome", "CodeableConcept", "The outcome of the procedure - did it resolve reasons for the procedure being performed?", 0, java.lang.Integer.MAX_VALUE, outcome));
+        childrenList.add(new Property("report", "Reference(DiagnosticReport)", "This could be a histology result, pathology report, surgical report, etc..", 0, java.lang.Integer.MAX_VALUE, report));
+        childrenList.add(new Property("complication", "CodeableConcept", "Any complications that occurred during the procedure, or in the immediate post-performance period. These are generally tracked separately from the notes, which will typically describe the procedure itself rather than any 'post procedure' issues.", 0, java.lang.Integer.MAX_VALUE, complication));
+        childrenList.add(new Property("followUp", "CodeableConcept", "If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or could potentially be more complex in which case the CarePlan resource can be used.", 0, java.lang.Integer.MAX_VALUE, followUp));
+        childrenList.add(new Property("request", "Reference(CarePlan|DiagnosticOrder|ProcedureRequest|ReferralRequest)", "A reference to a resource that contains details of the request for this procedure.", 0, java.lang.Integer.MAX_VALUE, request));
+        childrenList.add(new Property("notes", "Annotation", "Any other notes about the procedure.  E.g. the operative notes.", 0, java.lang.Integer.MAX_VALUE, notes));
         childrenList.add(new Property("focalDevice", "", "A device that is implanted, removed or otherwise manipulated (calibration, battery replacement, fitting a prosthesis, attaching a wound-vac, etc.) as a focal portion of the Procedure.", 0, java.lang.Integer.MAX_VALUE, focalDevice));
-        childrenList.add(new Property("used", "Reference(Device|Medication|Substance)", "Identifies medications, devices and other substance used as part of the procedure.", 0, java.lang.Integer.MAX_VALUE, used));
+        childrenList.add(new Property("used", "Reference(Device|Medication|Substance)", "Identifies medications, devices and any other substance used as part of the procedure.", 0, java.lang.Integer.MAX_VALUE, used));
       }
 
       public Procedure copy() {
@@ -1625,7 +1625,7 @@ public class Procedure extends DomainResource {
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="location", path="Procedure.location", description="Where the procedure happened", type="reference" )
   public static final String SP_LOCATION = "location";
-  @SearchParamDefinition(name="encounter", path="Procedure.encounter", description="The encounter when procedure performed", type="reference" )
+  @SearchParamDefinition(name="encounter", path="Procedure.encounter", description="The encounter associated with the procedure", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
 
 }

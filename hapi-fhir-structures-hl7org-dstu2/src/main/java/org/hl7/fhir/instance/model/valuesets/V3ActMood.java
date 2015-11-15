@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3ActMood {
@@ -144,6 +144,26 @@ public enum V3ActMood {
          */
         EVN_CRT, 
         /**
+         * A criterion expressed over goals (ActMood.GOL).
+         */
+        GOL_CRT, 
+        /**
+         * A criterion expressed over intents (ActMood.INT).
+         */
+        INT_CRT, 
+        /**
+         * A criterion expressed over promises (ActMood.PRMS).
+         */
+        PRMS_CRT, 
+        /**
+         * A criterion expressed over requests or orders (ActMood.RQO).
+         */
+        RQO_CRT, 
+        /**
+         * A criterion expressed over risks (ActMood.RSK).
+         */
+        RSK_CRT, 
+        /**
          * Definition: An act that is considered to have some noteworthy likelihood of occurring in the future (has_match = event).
 
                         
@@ -170,7 +190,7 @@ public enum V3ActMood {
                            Examples:Increased risk of DVT, at risk for sub-acute bacterial endocarditis.
 
                         
-                           UsageNotes:Note: An observation in RSK mood expresses the undesirable act, and not the underlying risk factor. A risk factor that is present (e.g. obesity, smoking, etc) should be expressed in event mood. INT (intent) reflects a plan for the future, which is a declaration to do something. This contrasts with RSK (risk), which is the potential that something negative will occur that may or may not ever happen. GOL (goal) reflects a hope to achieve something. EXPEC (expectation) is the prediction of a positive or negative event. This contrasts with RSK (risk), which is the potential that something negative will occur that may or may not ever happen, and may not be expected to happen.
+                           UsageNotes:Note: An observation in RSK mood expresses the undesirable act, and not the underlying risk factor. A risk factor that is present (e.g. obesity, smoking, etc.) should be expressed in event mood. INT (intent) reflects a plan for the future, which is a declaration to do something. This contrasts with RSK (risk), which is the potential that something negative will occur that may or may not ever happen. GOL (goal) reflects a hope to achieve something. EXPEC (expectation) is the prediction of a positive or negative event. This contrasts with RSK (risk), which is the potential that something negative will occur that may or may not ever happen, and may not be expected to happen.
          */
         RSK, 
         /**
@@ -222,6 +242,16 @@ public enum V3ActMood {
           return CRT;
         if ("EVN.CRT".equals(codeString))
           return EVN_CRT;
+        if ("GOL.CRT".equals(codeString))
+          return GOL_CRT;
+        if ("INT.CRT".equals(codeString))
+          return INT_CRT;
+        if ("PRMS.CRT".equals(codeString))
+          return PRMS_CRT;
+        if ("RQO.CRT".equals(codeString))
+          return RQO_CRT;
+        if ("RSK.CRT".equals(codeString))
+          return RSK_CRT;
         if ("EXPEC".equals(codeString))
           return EXPEC;
         if ("GOL".equals(codeString))
@@ -253,6 +283,11 @@ public enum V3ActMood {
             case _ACTMOODPREDICATE: return "_ActMoodPredicate";
             case CRT: return "CRT";
             case EVN_CRT: return "EVN.CRT";
+            case GOL_CRT: return "GOL.CRT";
+            case INT_CRT: return "INT.CRT";
+            case PRMS_CRT: return "PRMS.CRT";
+            case RQO_CRT: return "RQO.CRT";
+            case RSK_CRT: return "RSK.CRT";
             case EXPEC: return "EXPEC";
             case GOL: return "GOL";
             case RSK: return "RSK";
@@ -284,9 +319,14 @@ public enum V3ActMood {
             case _ACTMOODPREDICATE: return "Definition: An act that expresses condition statements for other acts.";
             case CRT: return "Deprecation Comment: \n                           This concept This codes should no longer be used.  Instead, set attribute Act.isCriterionInd to \"true\" and use the desired mood for your criterion.\r\n\n                        \n                           Definition: A condition that must be true for the source act to be considered.";
             case EVN_CRT: return "Deprecation Comment: \n                           This concept This codes should no longer be used.  Instead, set attribute Act.isCriterionInd to \"true\" and use the desired mood for your criterion.\r\n\n                        \n                           Definition: A criterion (CRT) that has_match = an event (EVN).";
+            case GOL_CRT: return "A criterion expressed over goals (ActMood.GOL).";
+            case INT_CRT: return "A criterion expressed over intents (ActMood.INT).";
+            case PRMS_CRT: return "A criterion expressed over promises (ActMood.PRMS).";
+            case RQO_CRT: return "A criterion expressed over requests or orders (ActMood.RQO).";
+            case RSK_CRT: return "A criterion expressed over risks (ActMood.RSK).";
             case EXPEC: return "Definition: An act that is considered to have some noteworthy likelihood of occurring in the future (has_match = event).\r\n\n                        \n                           Examples:Prognosis of a condition, Expected date of discharge from hospital, patient will likely need an emergency decompression of the intracranial pressure by morning.\r\n\n                        \n                           UsageNotes:INT (intent) reflects a plan for the future, which is a declaration to do something. This contrasts with expectation, which is a prediction that something will happen in the future. GOL (goal) reflects a hope rather than a prediction. RSK (risk) reflects a potential negative event that may or may not be expected to happen.";
             case GOL: return "Definition: An expectation that is considered to be desirable to occur in the future \r\n\n                        \n                           Examples:Target weight below 80Kg, Stop smoking, Regain ability to walk, goal is to administer thrombolytics to candidate patients presenting with acute myocardial infarction.\r\n\n                        \n                           UsageNotes: INT (intent) reflects a plan for the future, which is a declaration to do something.  This contrasts with goal which doesn't represent an intention to act, merely a hope for an eventual result.  A goal is distinct from the intended actions to reach that goal.  \"I will reduce the dose of drug x to 20mg\" is an intent.  \"I hope to be able to get the patient to the point where I can reduce the dose of drug x to 20mg\" is a goal. EXPEC (expectation) reflects a prediction rather than a hope. RSK (risk) reflects a potential negative event rather than a hope.";
-            case RSK: return "Definition:An act that may occur in the future and which is regarded as undesirable \r\n\n                        \n                           Examples:Increased risk of DVT, at risk for sub-acute bacterial endocarditis.\r\n\n                        \n                           UsageNotes:Note: An observation in RSK mood expresses the undesirable act, and not the underlying risk factor. A risk factor that is present (e.g. obesity, smoking, etc) should be expressed in event mood. INT (intent) reflects a plan for the future, which is a declaration to do something. This contrasts with RSK (risk), which is the potential that something negative will occur that may or may not ever happen. GOL (goal) reflects a hope to achieve something. EXPEC (expectation) is the prediction of a positive or negative event. This contrasts with RSK (risk), which is the potential that something negative will occur that may or may not ever happen, and may not be expected to happen.";
+            case RSK: return "Definition:An act that may occur in the future and which is regarded as undesirable \r\n\n                        \n                           Examples:Increased risk of DVT, at risk for sub-acute bacterial endocarditis.\r\n\n                        \n                           UsageNotes:Note: An observation in RSK mood expresses the undesirable act, and not the underlying risk factor. A risk factor that is present (e.g. obesity, smoking, etc.) should be expressed in event mood. INT (intent) reflects a plan for the future, which is a declaration to do something. This contrasts with RSK (risk), which is the potential that something negative will occur that may or may not ever happen. GOL (goal) reflects a hope to achieve something. EXPEC (expectation) is the prediction of a positive or negative event. This contrasts with RSK (risk), which is the potential that something negative will occur that may or may not ever happen, and may not be expected to happen.";
             case OPT: return "Definition: One of a set of acts that specify an option for the property values that the parent act may have. Typically used in definitions or orders to describe alternatives. An option can only be used as a group, that is, all assigned values must be used together. The actual mood of the act is the same as the parent act, and they must be linked by an actrelationship with type = OPTN.";
             default: return "?";
           }
@@ -312,6 +352,11 @@ public enum V3ActMood {
             case _ACTMOODPREDICATE: return "ActMoodPredicate";
             case CRT: return "criterion";
             case EVN_CRT: return "event criterion";
+            case GOL_CRT: return "goal criterion";
+            case INT_CRT: return "intent criterion";
+            case PRMS_CRT: return "promise criterion";
+            case RQO_CRT: return "request criterion";
+            case RSK_CRT: return "risk criterion";
             case EXPEC: return "expectation";
             case GOL: return "Goal";
             case RSK: return "risk";

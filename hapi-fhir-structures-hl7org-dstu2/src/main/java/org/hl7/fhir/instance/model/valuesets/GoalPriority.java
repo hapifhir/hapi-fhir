@@ -29,13 +29,13 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum GoalPriority {
 
         /**
-         * Indicates that the goal is of considerable importance and should be a primary focus of care delivery
+         * Indicates that the goal is of considerable importance and should be a primary focus of care delivery.
          */
         HIGH, 
         /**
@@ -74,7 +74,7 @@ public enum GoalPriority {
         }
         public String getDefinition() {
           switch (this) {
-            case HIGH: return "Indicates that the goal is of considerable importance and should be a primary focus of care delivery";
+            case HIGH: return "Indicates that the goal is of considerable importance and should be a primary focus of care delivery.";
             case MEDIUM: return "Indicates that the goal has a reasonable degree of importance and that concrete action should be taken towards the goal.  Attainment is not as critical as high-priority goals.";
             case LOW: return "The goal is desirable but is not sufficiently important to devote significant resources to.  Achievement of the goal may be sought when incidental to achieving other goals.";
             default: return "?";

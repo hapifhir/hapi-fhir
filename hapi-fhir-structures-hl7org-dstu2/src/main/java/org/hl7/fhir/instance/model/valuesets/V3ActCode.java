@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3ActCode {
@@ -91,7 +91,7 @@ public enum V3ActCode {
          */
         DAY, 
         /**
-         * Transaction counts and value totals by service location (e.g clinic).
+         * Transaction counts and value totals by service location (e.g. clinic).
          */
         LOC, 
         /**
@@ -212,6 +212,24 @@ public enum V3ActCode {
          * A billing arrangement where a Provider charges a sum to provide a group (volume) of interventions/procedures to one or more patients within a defined period of time, typically on the same date.  Interventions/procedures included in the session may vary.
          */
         SESS, 
+        /**
+         * A billing arrangement where a Provider charges a separate fee for each intervention/procedure/event or product.
+
+                        Fee for Service is used when an individual intervention/procedure/event is used for billing purposes.  In other words, fees are associated with the  intervention/procedure/event.  For example, a specific CCI (Canadian Classification of Interventions) code has an associated fee and is used for billing purposes.
+         */
+        FFS, 
+        /**
+         * A first fill where the quantity supplied is less than one full repetition of the ordered amount. (e.g. If the order was 90 tablets, 3 refills, a partial fill might be for only 30 tablets.) and also where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets)
+         */
+        FFPS, 
+        /**
+         * A first fill where the quantity supplied is equal to one full repetition of the ordered amount. (e.g. If the order was 90 tablets, 3 refills, a complete fill would be for the full 90 tablets) and also where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets).
+         */
+        FFCS, 
+        /**
+         * A fill where a small portion is provided to allow for determination of the therapy effectiveness and patient tolerance and also where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets).
+         */
+        TFS, 
         /**
          * Type of bounded ROI.
          */
@@ -699,7 +717,7 @@ public enum V3ActCode {
          */
         XRAY, 
         /**
-         * Definition: The type of consent directive, e.g., to consent or dissent to collect, access, or use in specific ways within an EHRS or for health information exchange; or to disclose  health information  for purposes such as research.
+         * Definition: The type of consent directive, e.g. to consent or dissent to collect, access, or use in specific ways within an EHRS or for health information exchange; or to disclose  health information  for purposes such as research.
          */
         _ACTCONSENTTYPE, 
         /**
@@ -753,7 +771,7 @@ public enum V3ActCode {
          */
         ID, 
         /**
-         * Used by one system to inform another that the container is in position for specimen transfer (e.g., container removal from track, pipetting, etc.).
+         * Used by one system to inform another that the container is in position for specimen transfer (e.g. container removal from track, pipetting, etc.).
          */
         IP, 
         /**
@@ -773,13 +791,13 @@ public enum V3ActCode {
          */
         R, 
         /**
-         * Used by one system to inform another that the container is no longer available within the scope of the system (e.g., tube broken or discarded).
+         * Used by one system to inform another that the container is no longer available within the scope of the system (e.g. tube broken or discarded).
          */
         X, 
         /**
-         * An observation form that determines parameters or attributes of an Act. Examples are the settings of a ventilator machine as parameters of a ventilator treatment act; the controls on dillution factors of a chemical analyzer as a parameter of a laboratory observation act; the settings of a physiologic measurement assembly (e.g., time skew) or the position of the body while measuring blood pressure.
+         * An observation form that determines parameters or attributes of an Act. Examples are the settings of a ventilator machine as parameters of a ventilator treatment act; the controls on dillution factors of a chemical analyzer as a parameter of a laboratory observation act; the settings of a physiologic measurement assembly (e.g. time skew) or the position of the body while measuring blood pressure.
 
-                        Control variables are forms of observations because just as with clinical observations, the Observation.code determines the parameter and the Observation.value assigns the value. While control variables sometimes can be observed (by noting the control settings or an actually measured feedback loop) they are not primary observations, in the sense that a control variable without a primary act is of no use (e.g., it makes no sense to record a blood pressure position without recording a blood pressure, whereas it does make sense to record a systolic blood pressure without a diastolic blood pressure).
+                        Control variables are forms of observations because just as with clinical observations, the Observation.code determines the parameter and the Observation.value assigns the value. While control variables sometimes can be observed (by noting the control settings or an actually measured feedback loop) they are not primary observations, in the sense that a control variable without a primary act is of no use (e.g. it makes no sense to record a blood pressure position without recording a blood pressure, whereas it does make sense to record a systolic blood pressure without a diastolic blood pressure).
          */
         _ACTCONTROLVARIABLE, 
         /**
@@ -810,6 +828,18 @@ public enum V3ActCode {
          * Authorization for specified healthcare service(s) and/or product(s) denied.
          */
         NAUTH, 
+        /**
+         * Indication of eligibility coverage for healthcare service(s) and/or product(s).
+         */
+        _ACTCOVERAGEELIGIBILITYCONFIRMATIONCODE, 
+        /**
+         * Insurance coverage is in effect for healthcare service(s) and/or product(s).
+         */
+        ELG, 
+        /**
+         * Insurance coverage is not in effect for healthcare service(s) and/or product(s). May optionally include reasons for the ineligibility.
+         */
+        NELG, 
         /**
          * Criteria that are applicable to the authorized coverage.
          */
@@ -846,6 +876,10 @@ public enum V3ActCode {
          * Definition: Codes representing the maximum coverate or financial participation requirements.
          */
         COVMX, 
+        /**
+         * Codes representing the types of covered parties that may receive covered benefits under a policy or program.
+         */
+        _ACTCOVEREDPARTYLIMITCODE, 
         /**
          * Definition: Set of codes indicating the type of insurance policy or program that pays for the cost of benefits provided to covered parties.
          */
@@ -960,14 +994,14 @@ public enum V3ActCode {
          */
         WCBPOL, 
         /**
-         * Definition: Set of codes indicating the type of insurance policy.  Insurance, in law and economics, is a form of risk management primarily used to hedge against the risk of potential financial loss. Insurance is defined as the equitable transfer of the risk of a potential loss, from one entity to another, in exchange for a premium and duty of care. A policy holder is an individual or an organization enters into a contract with an underwriter which stipulates that, in exchange for payment of a sum of money (a premium), one or more covered parties (insureds) is guaranteed compensation for losses resulting from certain perils under specified conditions.  The underwriter analyzes the risk of loss, makes a decision as to whether the risk is insurable, and prices the premium accordingly.  A policy provides benefits that indemnify or cover the cost of a loss incurred by a covered party, and may include coverage for services required to remediate a loss.  An insurance policy contains pertinent facts about the policy holder, the insurance coverage, the covered parties, and the insurer.  A policy may include exemptions and provisions specifying the extent to which the indemnification clause cannot be enforced for intentional tortious conduct of a covered party, e.g., whether the covered parties are jointly or severably insured.
+         * Definition: Set of codes indicating the type of insurance policy.  Insurance, in law and economics, is a form of risk management primarily used to hedge against the risk of potential financial loss. Insurance is defined as the equitable transfer of the risk of a potential loss, from one entity to another, in exchange for a premium and duty of care. A policy holder is an individual or an organization enters into a contract with an underwriter which stipulates that, in exchange for payment of a sum of money (a premium), one or more covered parties (insureds) is guaranteed compensation for losses resulting from certain perils under specified conditions.  The underwriter analyzes the risk of loss, makes a decision as to whether the risk is insurable, and prices the premium accordingly.  A policy provides benefits that indemnify or cover the cost of a loss incurred by a covered party, and may include coverage for services required to remediate a loss.  An insurance policy contains pertinent facts about the policy holder, the insurance coverage, the covered parties, and the insurer.  A policy may include exemptions and provisions specifying the extent to which the indemnification clause cannot be enforced for intentional tortious conduct of a covered party, e.g. whether the covered parties are jointly or severably insured.
 
                         
-                           Discussion: In contrast to programs, an insurance policy has one or more policy holders, who own the policy.  The policy holder may be the covered party, a relative of the covered party, a partnership, or a corporation, e.g., an employer.  A subscriber of a self-insured health insurance policy is a policy holder.  A subscriber of an employer sponsored health insurance policy is holds a certificate of coverage, but is not a policy holder; the policy holder is the employer.  See CoveredRoleType.
+                           Discussion: In contrast to programs, an insurance policy has one or more policy holders, who own the policy.  The policy holder may be the covered party, a relative of the covered party, a partnership, or a corporation, e.g. an employer.  A subscriber of a self-insured health insurance policy is a policy holder.  A subscriber of an employer sponsored health insurance policy is holds a certificate of coverage, but is not a policy holder; the policy holder is the employer.  See CoveredRoleType.
          */
         _ACTINSURANCETYPECODE, 
         /**
-         * Definition: Set of codes indicating the type of health insurance policy that covers health services provided to covered parties.  A health insurance policy is a written contract for insurance between the insurance company and the policyholder, and contains pertinent facts about the policy owner (the policy holder), the health insurance coverage, the insured subscribers and dependents, and the insurer.  Health insurance is typically administered in accordance with a plan, which specifies (1) the type of health services and health conditions that will be covered under what circumstances (e.g., exclusion of a pre-existing condition, service must be deemed medically necessary; service must not be experimental; service must provided in accordance with a protocol; drug must be on a formulary; service must be prior authorized; or be a referral from a primary care provider); (2) the type and affiliation of providers (e.g., only allopathic physicians, only in network, only providers employed by an HMO); (3) financial participations required of covered parties (e.g., co-pays, coinsurance, deductibles, out-of-pocket); and (4) the manner in which services will be paid (e.g., under indemnity or fee-for-service health plans, the covered party typically pays out-of-pocket and then file a claim for reimbursement, while health plans that have contractual relationships with providers, i.e., network providers, typically do not allow the providers to bill the covered party for the cost of the service until after filing a claim with the payer and receiving reimbursement).
+         * Definition: Set of codes indicating the type of health insurance policy that covers health services provided to covered parties.  A health insurance policy is a written contract for insurance between the insurance company and the policyholder, and contains pertinent facts about the policy owner (the policy holder), the health insurance coverage, the insured subscribers and dependents, and the insurer.  Health insurance is typically administered in accordance with a plan, which specifies (1) the type of health services and health conditions that will be covered under what circumstances (e.g. exclusion of a pre-existing condition, service must be deemed medically necessary; service must not be experimental; service must provided in accordance with a protocol; drug must be on a formulary; service must be prior authorized; or be a referral from a primary care provider); (2) the type and affiliation of providers (e.g. only allopathic physicians, only in network, only providers employed by an HMO); (3) financial participations required of covered parties (e.g. co-pays, coinsurance, deductibles, out-of-pocket); and (4) the manner in which services will be paid (e.g. under indemnity or fee-for-service health plans, the covered party typically pays out-of-pocket and then file a claim for reimbursement, while health plans that have contractual relationships with providers, i.e., network providers, typically do not allow the providers to bill the covered party for the cost of the service until after filing a claim with the payer and receiving reimbursement).
          */
         _ACTHEALTHINSURANCETYPECODE, 
         /**
@@ -975,7 +1009,7 @@ public enum V3ActCode {
          */
         DENTAL, 
         /**
-         * Definition: A health insurance policy that covers benefits for healthcare services provided for named conditions under the policy, e.g., cancer, diabetes, or HIV-AIDS.
+         * Definition: A health insurance policy that covers benefits for healthcare services provided for named conditions under the policy, e.g. cancer, diabetes, or HIV-AIDS.
          */
         DISEASE, 
         /**
@@ -1155,7 +1189,7 @@ public enum V3ActCode {
          */
         MILITARY, 
         /**
-         * Definition: A government mandated program with specific eligibility requirements based on premium contributions made during employment, length of employment, age, and employment status, e.g., being retired, disabled, or a dependent of a covered party under this program.   Benefits typically include ambulatory, inpatient, and long-term care, such as hospice care, home health care and respite care.
+         * Definition: A government mandated program with specific eligibility requirements based on premium contributions made during employment, length of employment, age, and employment status, e.g. being retired, disabled, or a dependent of a covered party under this program.   Benefits typically include ambulatory, inpatient, and long-term care, such as hospice care, home health care and respite care.
          */
         RETIRE, 
         /**
@@ -1330,7 +1364,7 @@ public enum V3ActCode {
          */
         PTNTCARE, 
         /**
-         * Description: Exposure participants' interaction occurred in an academic setting (e.g., participants are fellow students, or student and teacher).
+         * Description: Exposure participants' interaction occurred in an academic setting (e.g. participants are fellow students, or student and teacher).
          */
         SCHOOL2, 
         /**
@@ -1478,7 +1512,7 @@ public enum V3ActCode {
          */
         INFPWR, 
         /**
-         * Description: Information transfer in accordance with regulatory protocol, e.g., for public health, welfare, and safety.
+         * Description: Information transfer in accordance with regulatory protocol, e.g. for public health, welfare, and safety.
          */
         INFREG, 
         /**
@@ -1502,7 +1536,7 @@ public enum V3ActCode {
          */
         COBSCAT, 
         /**
-         * Definition:All information pertaining to a patient's demographics (such as name, date of birth, gender, address, etc).
+         * Definition:All information pertaining to a patient's demographics (such as name, date of birth, gender, address, etc.).
          */
         DEMOCAT, 
         /**
@@ -1670,6 +1704,10 @@ public enum V3ActCode {
          */
         SPEND, 
         /**
+         * The covered party pays a percentage of the cost of covered services.
+         */
+        COINS, 
+        /**
          * The billable item codes to identify modifications to a billable item charge. As for example after hours increase in the office visit fee.
          */
         _ACTINVOICEDETAILGENERICMODIFIERCODE, 
@@ -1789,6 +1827,10 @@ public enum V3ActCode {
          * Accommodations in which there are 3 or more beds.
          */
         W, 
+        /**
+         * An identifying data string for healthcare procedures.
+         */
+        _ACTINVOICEDETAILCLINICALSERVICECODE, 
         /**
          * Type of invoice element that is used to assist in describing an Invoice that is either submitted for adjudication or for which is returned on adjudication results.
 
@@ -2353,11 +2395,11 @@ public enum V3ActCode {
          */
         IND03, 
         /**
-         * Description:Provision of medication during pre-operative phase; e.g., antibiotics before dental surgery or bowel prep before colon surgery.
+         * Description:Provision of medication during pre-operative phase; e.g. antibiotics before dental surgery or bowel prep before colon surgery.
          */
         IND04, 
         /**
-         * Description:Provision of medication for pregnancy --e.g., vitamins, antibiotic treatments for vaginal tract colonization, etc.
+         * Description:Provision of medication for pregnancy --e.g. vitamins, antibiotic treatments for vaginal tract colonization, etc.
          */
         IND05, 
         /**
@@ -2373,7 +2415,7 @@ public enum V3ActCode {
 
                            
                            
-                              Verification of record - e.g., person has record in an immunization registry
+                              Verification of record - e.g. person has record in an immunization registry
 
                            
                            
@@ -2435,7 +2477,7 @@ public enum V3ActCode {
          */
         DF, 
         /**
-         * A supply action where there is no 'valid' order for the supplied medication.  E.g. Emergency vacation supply, weekend supply (when prescriber is unavailable to provide a renewal prescription)
+         * A supply action where there is no 'valid' order for the supplied medication; e.g. Emergency vacation supply, weekend supply (when prescriber is unavailable to provide a renewal prescription)
          */
         EM, 
         /**
@@ -2451,25 +2493,13 @@ public enum V3ActCode {
          */
         FFC, 
         /**
-         * A first fill where the quantity supplied is equal to one full repetition of the ordered amount. (e.g. If the order was 90 tablets, 3 refills, a complete fill would be for the full 90 tablets) and also where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets).
-         */
-        FFCS, 
-        /**
          * A first fill where the quantity supplied is less than one full repetition of the ordered amount. (e.g. If the order was 90 tablets, 3 refills, a partial fill might be for only 30 tablets.)
          */
         FFP, 
         /**
-         * A first fill where the quantity supplied is less than one full repetition of the ordered amount. (e.g. If the order was 90 tablets, 3 refills, a partial fill might be for only 30 tablets.) and also where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets)
-         */
-        FFPS, 
-        /**
          * A first fill where the strength supplied is less than the ordered strength. (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets).
          */
         FFSS, 
-        /**
-         * A fill where a small portion is provided to allow for determination of the therapy effectiveness and patient tolerance and also where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets).
-         */
-        TFS, 
         /**
          * A fill where a small portion is provided to allow for determination of the therapy effectiveness and patient tolerance.
          */
@@ -2527,7 +2557,7 @@ public enum V3ActCode {
          */
         TBS, 
         /**
-         * A supply action that provides sufficient material for a single dose via multiple products.  E.g. 2 50mg tablets for a 100mg unit dose.
+         * A supply action that provides sufficient material for a single dose via multiple products; e.g. 2 50mg tablets for a 100mg unit dose.
          */
         UDE, 
         /**
@@ -2548,7 +2578,7 @@ public enum V3ActCode {
          */
         _ACTPRIVACYPOLICY, 
         /**
-         * Definition: Specifies the type of consent directive indicated by an ActClassPolicy e.g., a 3rd party authorization to disclose or consent for a substitute decision maker (SDM) or a notice of privacy policy.
+         * Definition: Specifies the type of consent directive indicated by an ActClassPolicy e.g. a 3rd party authorization to disclose or consent for a substitute decision maker (SDM) or a notice of privacy policy.
 
                         
                            Usage Note: ActConsentDirective codes are used to specify the type of Consent Directive to which a Consent Directive Act conforms.
@@ -2583,7 +2613,7 @@ public enum V3ActCode {
          */
         OPTOUT, 
         /**
-         * A mandate, obligation, requirement, rule, or expectation characterizing the value or importance of a resource and may include its vulnerability. (Based on ISO7498-2:1989. Note: The vulnerability of personally identifiable sensitive information may be based on concerns that the unauthorized disclosure may result in social stigmatization or discrimination.) Description:  Types of Sensitivity policy that apply to Acts or Roles.  A sensitivity policy is adopted by an enterprise or group of enterprises (a 'policy domain') through a formal data use agreement that stipulates the value, importance, and vulnerability of information. A sensitivity code representing a sensitivity policy may be associated with criteria such as categories of information or sets of information identifiers (e.g., a value set of clinical codes or branch in a code system hierarchy).   These criteria may in turn be used for the Policy Decision Point in a Security Engine.  A sensitivity code may be used to set the confidentiality code used on information about Acts and Roles to trigger the security mechanisms required to control how security principals (i.e., a person, a machine, a software application) may act on the information (e.g., collection, access, use, or disclosure). Sensitivity codes are never assigned to the transport or business envelope containing patient specific information being exchanged outside of a policy domain as this would disclose the information intended to be protected by the policy.  When sensitive information is exchanged with others outside of a policy domain, the confidentiality code on the transport or business envelope conveys the receiver's responsibilities and indicates the how the information is to be safeguarded without unauthorized disclosure of the sensitive information.  This ensures that sensitive information is treated by receivers as the sender intends, accomplishing interoperability without point to point negotiations.
+         * A mandate, obligation, requirement, rule, or expectation characterizing the value or importance of a resource and may include its vulnerability. (Based on ISO7498-2:1989. Note: The vulnerability of personally identifiable sensitive information may be based on concerns that the unauthorized disclosure may result in social stigmatization or discrimination.) Description:  Types of Sensitivity policy that apply to Acts or Roles.  A sensitivity policy is adopted by an enterprise or group of enterprises (a 'policy domain') through a formal data use agreement that stipulates the value, importance, and vulnerability of information. A sensitivity code representing a sensitivity policy may be associated with criteria such as categories of information or sets of information identifiers (e.g. a value set of clinical codes or branch in a code system hierarchy).   These criteria may in turn be used for the Policy Decision Point in a Security Engine.  A sensitivity code may be used to set the confidentiality code used on information about Acts and Roles to trigger the security mechanisms required to control how security principals (i.e., a person, a machine, a software application) may act on the information (e.g. collection, access, use, or disclosure). Sensitivity codes are never assigned to the transport or business envelope containing patient specific information being exchanged outside of a policy domain as this would disclose the information intended to be protected by the policy.  When sensitive information is exchanged with others outside of a policy domain, the confidentiality code on the transport or business envelope conveys the receiver's responsibilities and indicates the how the information is to be safeguarded without unauthorized disclosure of the sensitive information.  This ensures that sensitive information is treated by receivers as the sender intends, accomplishing interoperability without point to point negotiations.
 
                         
                            Usage Note: Sensitivity codes are not useful for interoperability outside of a policy domain because sensitivity policies are typically localized and vary drastically across policy domains even for the same information category because of differing organizational business rules, security policies, and jurisdictional requirements.  For example, an employee's sensitivity code would make little sense for use outside of a policy domain.   'Taboo' would rarely be useful outside of a policy domain unless there are jurisdictional requirements requiring that a provider disclose sensitive information to a patient directly.  Sensitivity codes may be more appropriate in a legacy system's Master Files in order to notify those who access a patient's orders and observations about the sensitivity policies that apply.  Newer systems may have a security engine that uses a sensitivity policy's criteria directly.  The specializable InformationSensitivityPolicy Act.code may be useful in some scenarios if used in combination with a sensitivity identifier and/or Act.title.
@@ -2663,6 +2693,13 @@ public enum V3ActCode {
                            Open Issue: This definition conflates a rule and a characteristic, and there may be a similar issue with ts sibling codes.
          */
         TBOO, 
+        /**
+         * Types of sensitivity policies that apply to Acts.  Act.confidentialityCode is defined in the RIM as "constraints around appropriate disclosure of information about this Act, regardless of mood."
+
+                        
+                           Usage Note: ActSensitivity codes are used to bind information to an Act.confidentialityCode according to local sensitivity policy so that those confidentiality codes can then govern its handling across enterprises.  Internally to a policy domain, however, local policies guide the access control system on how end users in that policy domain are able to use information tagged with these sensitivity values.
+         */
+        SICKLE, 
         /**
          * Types of sensitivity policies that may apply to a sensitive attribute on an Entity.
 
@@ -2790,7 +2827,7 @@ public enum V3ActCode {
          */
         EMP, 
         /**
-         * Policy for handling information reported by the patient about another person, e.g., a family member, which will be afforded heightened confidentiality. Sensitive information reported by the patient about another person, e.g., family members may be deemed sensitive by default.  The flag may be set or cleared on patient's request.  
+         * Policy for handling information reported by the patient about another person, e.g. a family member, which will be afforded heightened confidentiality. Sensitive information reported by the patient about another person, e.g. family members may be deemed sensitive by default.  The flag may be set or cleared on patient's request.  
 
                         
                            Usage Note: For sensitive information relayed by or about a patient, which is deemed sensitive within the enterprise (i.e., by default regardless of whether the patient requested that the information be deemed sensitive.)   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.
@@ -2999,7 +3036,7 @@ public enum V3ActCode {
                         
 
                         
-                           Usage Notes: ISO 22600-2 species that a Refrain Policy "defines actions the subjects must refrain from performing".  Per HL7 Composite Security and Privacy Domain Analysis Model:  May be used to indicate that a specific action is prohibited based on specific access control attributes e.g., purpose of use, information type, user role, etc.
+                           Usage Notes: ISO 22600-2 species that a Refrain Policy "defines actions the subjects must refrain from performing".  Per HL7 Composite Security and Privacy Domain Analysis Model:  May be used to indicate that a specific action is prohibited based on specific access control attributes e.g. purpose of use, information type, user role, etc.
          */
         REFRAINPOLICY, 
         /**
@@ -3172,7 +3209,15 @@ public enum V3ActCode {
          */
         IMMUNIZ, 
         /**
-         * Description: A task or action that a user may perform in a clinical information system (e.g., medication order entry, laboratory test results review, problem list entry).
+         * An additional immunization administration within a series intended to bolster or enhance immunity.
+         */
+        BOOSTER, 
+        /**
+         * The first immunization administration in a series intended to produce immunity
+         */
+        INITIMMUNIZ, 
+        /**
+         * Description: A task or action that a user may perform in a clinical information system (e.g. medication order entry, laboratory test results review, problem list entry).
          */
         _ACTTASKCODE, 
         /**
@@ -3240,7 +3285,7 @@ public enum V3ActCode {
          */
         WELLREMLREV, 
         /**
-         * A person (e.g., clinician, the patient herself) reviews patient information in the electronic medical record.
+         * A person (e.g. clinician, the patient herself) reviews patient information in the electronic medical record.
          */
         PATINFO, 
         /**
@@ -3430,7 +3475,7 @@ public enum V3ActCode {
          */
         VOLUME, 
         /**
-         * The available quantity of specimen.   This is the current quantity minus any planned consumption (e.g., tests that are planned)
+         * The available quantity of specimen.   This is the current quantity minus any planned consumption (e.g. tests that are planned)
          */
         AVAILABLE, 
         /**
@@ -3582,7 +3627,7 @@ public enum V3ActCode {
          */
         SPLSHAPE, 
         /**
-         * Definition: A characteristic of an oral solid dosage form of a medicinal product, specifying the longest single dimension of the solid dosage form as a physical quantity in the dimension of length (e.g., 3 mm). The length is should be specified in millimeters and should be rounded to the nearest whole millimeter.
+         * Definition: A characteristic of an oral solid dosage form of a medicinal product, specifying the longest single dimension of the solid dosage form as a physical quantity in the dimension of length (e.g. 3 mm). The length is should be specified in millimeters and should be rounded to the nearest whole millimeter.
 
                         
                            Example: SPLSIZE for a rectangular shaped tablet is the length and SPLSIZE for a round shaped tablet is the diameter.
@@ -3720,11 +3765,11 @@ public enum V3ActCode {
         GUIDE, 
         /**
          * Information on whether an increase or decrease in score is the preferred result 
-(e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).
+(e.g. a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).
          */
         IDUR, 
         /**
-         * Describes the items counted by the measure (e.g., patients, encounters, procedures, etc.)
+         * Describes the items counted by the measure (e.g. patients, encounters, procedures, etc.)
          */
         ITMCNT, 
         /**
@@ -3744,7 +3789,7 @@ public enum V3ActCode {
          */
         MSRADJ, 
         /**
-         * Describes how to combine information calculated based on logic in each of several populations into one summarized result. It can also be used to describe how to risk adjust the data based on supplemental data elements described in the eMeasure. (e.g., pneumonia hospital measures antibiotic selection in the ICU versus non-ICU and then the roll-up of the two). 
+         * Describes how to combine information calculated based on logic in each of several populations into one summarized result. It can also be used to describe how to risk adjust the data based on supplemental data elements described in the eMeasure. (e.g. pneumonia hospital measures antibiotic selection in the ICU versus non-ICU and then the roll-up of the two). 
 
                         
                            Open Issue: The description does NOT align well with the definition used in the HQMF specfication; correct the MSGAGG definition, and the possible distinction of MSRAGG as a child of AGGREGATE.
@@ -3768,7 +3813,7 @@ public enum V3ActCode {
         MSRRPTTIME, 
         /**
          * Indicates how the calculation is performed for the eMeasure 
-(e.g., proportion, continuous variable, ratio)
+(e.g. proportion, continuous variable, ratio)
          */
         MSRSCORE, 
         /**
@@ -3787,7 +3832,7 @@ public enum V3ActCode {
         MSRTP, 
         /**
          * Indicates whether the eMeasure is used to examine a process or an outcome over time 
-(e.g., Structure, Process, Outcome).
+(e.g. Structure, Process, Outcome).
          */
         MSRTYPE, 
         /**
@@ -3803,7 +3848,7 @@ public enum V3ActCode {
          */
         SDE, 
         /**
-         * Describes the strata for which the measure is to be evaluated. There are three examples of reasons for stratification based on existing work. These include: (1) evaluate the measure based on different age groupings within the population described in the measure (e.g., evaluate the whole [age 14-25] and each sub-stratum [14-19] and [20-25]); (2) evaluate the eMeasure based on either a specific condition, a specific discharge location, or both; (3) evaluate the eMeasure based on different locations within a facility (e.g., evaluate the overall rate for all intensive care units and also some strata include additional findings [specific birth weights for neonatal intensive care units]).
+         * Describes the strata for which the measure is to be evaluated. There are three examples of reasons for stratification based on existing work. These include: (1) evaluate the measure based on different age groupings within the population described in the measure (e.g. evaluate the whole [age 14-25] and each sub-stratum [14-19] and [20-25]); (2) evaluate the eMeasure based on either a specific condition, a specific discharge location, or both; (3) evaluate the eMeasure based on different locations within a facility (e.g. evaluate the overall rate for all intensive care units and also some strata include additional findings [specific birth weights for neonatal intensive care units]).
          */
         STRAT, 
         /**
@@ -3897,7 +3942,7 @@ public enum V3ActCode {
         IPPOP, 
         /**
          * Criteria for specifying
-the measure population as a narrative description (e.g., all patients seen in the Emergency Department during the measurement period).  This is used only in continuous variable eMeasures.
+the measure population as a narrative description (e.g. all patients seen in the Emergency Department during the measurement period).  This is used only in continuous variable eMeasures.
          */
         MSRPOPL, 
         /**
@@ -3905,11 +3950,11 @@ the measure population as a narrative description (e.g., all patients seen in th
          */
         MSRPOPLEX, 
         /**
-         * Criteria for specifying the processes or outcomes expected for each patient, procedure, or other unit of measurement defined in the denominator for proportion measures, or related to (but not directly derived from) the denominator for ratio measures (e.g., a numerator listing the number of central line blood stream infections and a denominator indicating the days per thousand of central line usage in a specific time period).
+         * Criteria for specifying the processes or outcomes expected for each patient, procedure, or other unit of measurement defined in the denominator for proportion measures, or related to (but not directly derived from) the denominator for ratio measures (e.g. a numerator listing the number of central line blood stream infections and a denominator indicating the days per thousand of central line usage in a specific time period).
          */
         NUMER, 
         /**
-         * Criteria for specifying instances that should not be included in the numerator data. (e.g., if the number of central line blood stream infections per 1000 catheter days were to exclude infections with a specific bacterium, that bacterium would be listed as a numerator exclusion).  Numerator Exclusions are used only in ratio eMeasures.
+         * Criteria for specifying instances that should not be included in the numerator data. (e.g. if the number of central line blood stream infections per 1000 catheter days were to exclude infections with a specific bacterium, that bacterium would be listed as a numerator exclusion).  Numerator Exclusions are used only in ratio eMeasures.
          */
         NUMEX, 
         /**
@@ -4341,6 +4386,18 @@ the measure population as a narrative description (e.g., all patients seen in th
          */
         ALRTSTRTLATE, 
         /**
+         * Proposed therapy may be inappropriate or ineffective based on the proposed start or end time.
+         */
+        _TIMINGDETECTEDISSUECODE, 
+        /**
+         * Proposed therapy may be inappropriate or ineffective because the end of administration is too close to another planned therapy
+         */
+        ENDLATE, 
+        /**
+         * Proposed therapy may be inappropriate or ineffective because the start of administration is too late after the onset of the condition
+         */
+        STRTLATE, 
+        /**
          * Supplying the product at this time may be inappropriate or indicate compliance issues with the associated therapy
          */
         _SUPPLYDETECTEDISSUECODE, 
@@ -4425,7 +4482,7 @@ the measure population as a narrative description (e.g., all patients seen in th
          */
         DALG, 
         /**
-         * An allergy to a substance other than a drug or a food.  E.g. Latex, pollen, etc.
+         * An allergy to a substance other than a drug or a food; e.g. Latex, pollen, etc.
          */
         EALG, 
         /**
@@ -4464,6 +4521,38 @@ the measure population as a narrative description (e.g., all patients seen in th
          * A subjective evaluation of the seriousness or intensity associated with another observation.
          */
         SEV, 
+        /**
+         * FDA label data
+         */
+        _FDALABELDATA, 
+        /**
+         * FDA label coating
+         */
+        FDACOATING, 
+        /**
+         * FDA label color
+         */
+        FDACOLOR, 
+        /**
+         * FDA label imprint code
+         */
+        FDAIMPRINTCD, 
+        /**
+         * FDA label logo
+         */
+        FDALOGO, 
+        /**
+         * FDA label scoring
+         */
+        FDASCORING, 
+        /**
+         * FDA label shape
+         */
+        FDASHAPE, 
+        /**
+         * FDA label size
+         */
+        FDASIZE, 
         /**
          * Shape of the region on the object being referenced
          */
@@ -4549,7 +4638,7 @@ the measure population as a narrative description (e.g., all patients seen in th
          */
         RD, 
         /**
-         * A diet that avoids ingredients that might cause digestion problems, e.g., avoid excessive fat, avoid too much fiber (cabbage, peas, beans).
+         * A diet that avoids ingredients that might cause digestion problems, e.g. avoid excessive fat, avoid too much fiber (cabbage, peas, beans).
          */
         SCH, 
         /**
@@ -4605,7 +4694,7 @@ the measure population as a narrative description (e.g., all patients seen in th
          * Type of security metadata observation made about the category of an IT resource (data, information object, service, or system capability), which may be used to make access control decisions. Security category metadata is defined by ISO/IEC 2382-8:1998(E/F)/ T-REC-X.812-1995 as: "A nonhierarchical grouping of sensitive information used to control access to data more finely than with hierarchical security classification alone."
 
                         
-                           Rationale: A security category observation supports requirement to specify the type of IT resource to facilitate application of appropriate levels of information security according to a range of levels of impact or consequences that might result from the unauthorized disclosure, modification, or use of the information or information system.  A resource is assigned to a specific category of information (e.g., privacy, medical, proprietary, financial, investigative, contractor sensitive, security management) defined by an organization or in some instances, by a specific law, Executive Order, directive, policy, or regulation. [FIPS 199]
+                           Rationale: A security category observation supports requirement to specify the type of IT resource to facilitate application of appropriate levels of information security according to a range of levels of impact or consequences that might result from the unauthorized disclosure, modification, or use of the information or information system.  A resource is assigned to a specific category of information (e.g. privacy, medical, proprietary, financial, investigative, contractor sensitive, security management) defined by an organization or in some instances, by a specific law, Executive Order, directive, policy, or regulation. [FIPS 199]
 
                         
                            Examples: Types of security categories include:
@@ -4788,6 +4877,38 @@ the measure population as a narrative description (e.g., all patients seen in th
          */
         WRKCOMP, 
         /**
+         * An identifying code for healthcare interventions/procedures.
+         */
+        _ACTPROCEDURECODE, 
+        /**
+         * Definition: An identifying code for billable services, as opposed to codes for similar services used to identify them for functional purposes.
+         */
+        _ACTBILLABLESERVICECODE, 
+        /**
+         * Domain provides the root for HL7-defined detailed or rich codes for the Act classes.
+         */
+        _HL7DEFINEDACTCODES, 
+        /**
+         * null
+         */
+        COPAY, 
+        /**
+         * null
+         */
+        DEDUCT, 
+        /**
+         * null
+         */
+        DOSEIND, 
+        /**
+         * null
+         */
+        PRA, 
+        /**
+         * The act of putting something away for safe keeping. The "something" may be physical object such as a specimen, or information, such as observations regarding a specimen.
+         */
+        STORE, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -4868,6 +4989,14 @@ the measure population as a narrative description (e.g., all patients seen in th
           return ROST;
         if ("SESS".equals(codeString))
           return SESS;
+        if ("FFS".equals(codeString))
+          return FFS;
+        if ("FFPS".equals(codeString))
+          return FFPS;
+        if ("FFCS".equals(codeString))
+          return FFCS;
+        if ("TFS".equals(codeString))
+          return TFS;
         if ("_ActBoundedROICode".equals(codeString))
           return _ACTBOUNDEDROICODE;
         if ("ROIFS".equals(codeString))
@@ -5160,6 +5289,12 @@ the measure population as a narrative description (e.g., all patients seen in th
           return AUTH;
         if ("NAUTH".equals(codeString))
           return NAUTH;
+        if ("_ActCoverageEligibilityConfirmationCode".equals(codeString))
+          return _ACTCOVERAGEELIGIBILITYCONFIRMATIONCODE;
+        if ("ELG".equals(codeString))
+          return ELG;
+        if ("NELG".equals(codeString))
+          return NELG;
         if ("_ActCoverageLimitCode".equals(codeString))
           return _ACTCOVERAGELIMITCODE;
         if ("_ActCoverageQuantityLimitCode".equals(codeString))
@@ -5178,6 +5313,8 @@ the measure population as a narrative description (e.g., all patients seen in th
           return UNITQTY;
         if ("COVMX".equals(codeString))
           return COVMX;
+        if ("_ActCoveredPartyLimitCode".equals(codeString))
+          return _ACTCOVEREDPARTYLIMITCODE;
         if ("_ActCoverageTypeCode".equals(codeString))
           return _ACTCOVERAGETYPECODE;
         if ("_ActInsurancePolicyCode".equals(codeString))
@@ -5542,6 +5679,8 @@ the measure population as a narrative description (e.g., all patients seen in th
           return PAY;
         if ("SPEND".equals(codeString))
           return SPEND;
+        if ("COINS".equals(codeString))
+          return COINS;
         if ("_ActInvoiceDetailGenericModifierCode".equals(codeString))
           return _ACTINVOICEDETAILGENERICMODIFIERCODE;
         if ("AFTHRS".equals(codeString))
@@ -5602,6 +5741,8 @@ the measure population as a narrative description (e.g., all patients seen in th
           return SP;
         if ("W".equals(codeString))
           return W;
+        if ("_ActInvoiceDetailClinicalServiceCode".equals(codeString))
+          return _ACTINVOICEDETAILCLINICALSERVICECODE;
         if ("_ActInvoiceGroupCode".equals(codeString))
           return _ACTINVOICEGROUPCODE;
         if ("_ActInvoiceInterGroupCode".equals(codeString))
@@ -5896,16 +6037,10 @@ the measure population as a narrative description (e.g., all patients seen in th
           return FF;
         if ("FFC".equals(codeString))
           return FFC;
-        if ("FFCS".equals(codeString))
-          return FFCS;
         if ("FFP".equals(codeString))
           return FFP;
-        if ("FFPS".equals(codeString))
-          return FFPS;
         if ("FFSS".equals(codeString))
           return FFSS;
-        if ("TFS".equals(codeString))
-          return TFS;
         if ("TF".equals(codeString))
           return TF;
         if ("FS".equals(codeString))
@@ -5972,6 +6107,8 @@ the measure population as a narrative description (e.g., all patients seen in th
           return STD;
         if ("TBOO".equals(codeString))
           return TBOO;
+        if ("SICKLE".equals(codeString))
+          return SICKLE;
         if ("_EntitySensitivityPolicyType".equals(codeString))
           return _ENTITYSENSITIVITYPOLICYTYPE;
         if ("DEMO".equals(codeString))
@@ -6164,6 +6301,10 @@ the measure population as a narrative description (e.g., all patients seen in th
           return FD;
         if ("IMMUNIZ".equals(codeString))
           return IMMUNIZ;
+        if ("BOOSTER".equals(codeString))
+          return BOOSTER;
+        if ("INITIMMUNIZ".equals(codeString))
+          return INITIMMUNIZ;
         if ("_ActTaskCode".equals(codeString))
           return _ACTTASKCODE;
         if ("OE".equals(codeString))
@@ -6718,6 +6859,12 @@ the measure population as a narrative description (e.g., all patients seen in th
           return ALRTENDLATE;
         if ("ALRTSTRTLATE".equals(codeString))
           return ALRTSTRTLATE;
+        if ("_TimingDetectedIssueCode".equals(codeString))
+          return _TIMINGDETECTEDISSUECODE;
+        if ("ENDLATE".equals(codeString))
+          return ENDLATE;
+        if ("STRTLATE".equals(codeString))
+          return STRTLATE;
         if ("_SupplyDetectedIssueCode".equals(codeString))
           return _SUPPLYDETECTEDISSUECODE;
         if ("ALLDONE".equals(codeString))
@@ -6780,6 +6927,22 @@ the measure population as a narrative description (e.g., all patients seen in th
           return NAINT;
         if ("SEV".equals(codeString))
           return SEV;
+        if ("_FDALabelData".equals(codeString))
+          return _FDALABELDATA;
+        if ("FDACOATING".equals(codeString))
+          return FDACOATING;
+        if ("FDACOLOR".equals(codeString))
+          return FDACOLOR;
+        if ("FDAIMPRINTCD".equals(codeString))
+          return FDAIMPRINTCD;
+        if ("FDALOGO".equals(codeString))
+          return FDALOGO;
+        if ("FDASCORING".equals(codeString))
+          return FDASCORING;
+        if ("FDASHAPE".equals(codeString))
+          return FDASHAPE;
+        if ("FDASIZE".equals(codeString))
+          return FDASIZE;
         if ("_ROIOverlayShape".equals(codeString))
           return _ROIOVERLAYSHAPE;
         if ("CIRCLE".equals(codeString))
@@ -6878,6 +7041,22 @@ the measure population as a narrative description (e.g., all patients seen in th
           return SUBSIDFFS;
         if ("WRKCOMP".equals(codeString))
           return WRKCOMP;
+        if ("_ActProcedureCode".equals(codeString))
+          return _ACTPROCEDURECODE;
+        if ("_ActBillableServiceCode".equals(codeString))
+          return _ACTBILLABLESERVICECODE;
+        if ("_HL7DefinedActCodes".equals(codeString))
+          return _HL7DEFINEDACTCODES;
+        if ("COPAY".equals(codeString))
+          return COPAY;
+        if ("DEDUCT".equals(codeString))
+          return DEDUCT;
+        if ("DOSEIND".equals(codeString))
+          return DOSEIND;
+        if ("PRA".equals(codeString))
+          return PRA;
+        if ("STORE".equals(codeString))
+          return STORE;
         throw new Exception("Unknown V3ActCode code '"+codeString+"'");
         }
         public String toCode() {
@@ -6919,6 +7098,10 @@ the measure population as a narrative description (e.g., all patients seen in th
             case FINBILL: return "FINBILL";
             case ROST: return "ROST";
             case SESS: return "SESS";
+            case FFS: return "FFS";
+            case FFPS: return "FFPS";
+            case FFCS: return "FFCS";
+            case TFS: return "TFS";
             case _ACTBOUNDEDROICODE: return "_ActBoundedROICode";
             case ROIFS: return "ROIFS";
             case ROIPS: return "ROIPS";
@@ -7065,6 +7248,9 @@ the measure population as a narrative description (e.g., all patients seen in th
             case _ACTCOVERAGEAUTHORIZATIONCONFIRMATIONCODE: return "_ActCoverageAuthorizationConfirmationCode";
             case AUTH: return "AUTH";
             case NAUTH: return "NAUTH";
+            case _ACTCOVERAGEELIGIBILITYCONFIRMATIONCODE: return "_ActCoverageEligibilityConfirmationCode";
+            case ELG: return "ELG";
+            case NELG: return "NELG";
             case _ACTCOVERAGELIMITCODE: return "_ActCoverageLimitCode";
             case _ACTCOVERAGEQUANTITYLIMITCODE: return "_ActCoverageQuantityLimitCode";
             case COVPRD: return "COVPRD";
@@ -7074,6 +7260,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case UNITPRICE: return "UNITPRICE";
             case UNITQTY: return "UNITQTY";
             case COVMX: return "COVMX";
+            case _ACTCOVEREDPARTYLIMITCODE: return "_ActCoveredPartyLimitCode";
             case _ACTCOVERAGETYPECODE: return "_ActCoverageTypeCode";
             case _ACTINSURANCEPOLICYCODE: return "_ActInsurancePolicyCode";
             case EHCPOL: return "EHCPOL";
@@ -7256,6 +7443,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DEDUCTIBLE: return "DEDUCTIBLE";
             case PAY: return "PAY";
             case SPEND: return "SPEND";
+            case COINS: return "COINS";
             case _ACTINVOICEDETAILGENERICMODIFIERCODE: return "_ActInvoiceDetailGenericModifierCode";
             case AFTHRS: return "AFTHRS";
             case ISOL: return "ISOL";
@@ -7286,6 +7474,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case S: return "S";
             case SP: return "SP";
             case W: return "W";
+            case _ACTINVOICEDETAILCLINICALSERVICECODE: return "_ActInvoiceDetailClinicalServiceCode";
             case _ACTINVOICEGROUPCODE: return "_ActInvoiceGroupCode";
             case _ACTINVOICEINTERGROUPCODE: return "_ActInvoiceInterGroupCode";
             case CPNDDRGING: return "CPNDDRGING";
@@ -7433,11 +7622,8 @@ the measure population as a narrative description (e.g., all patients seen in th
             case SO: return "SO";
             case FF: return "FF";
             case FFC: return "FFC";
-            case FFCS: return "FFCS";
             case FFP: return "FFP";
-            case FFPS: return "FFPS";
             case FFSS: return "FFSS";
-            case TFS: return "TFS";
             case TF: return "TF";
             case FS: return "FS";
             case MS: return "MS";
@@ -7471,6 +7657,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case SEX: return "SEX";
             case STD: return "STD";
             case TBOO: return "TBOO";
+            case SICKLE: return "SICKLE";
             case _ENTITYSENSITIVITYPOLICYTYPE: return "_EntitySensitivityPolicyType";
             case DEMO: return "DEMO";
             case DOB: return "DOB";
@@ -7567,6 +7754,8 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DRUG: return "DRUG";
             case FD: return "FD";
             case IMMUNIZ: return "IMMUNIZ";
+            case BOOSTER: return "BOOSTER";
+            case INITIMMUNIZ: return "INITIMMUNIZ";
             case _ACTTASKCODE: return "_ActTaskCode";
             case OE: return "OE";
             case LABOE: return "LABOE";
@@ -7844,6 +8033,9 @@ the measure population as a narrative description (e.g., all patients seen in th
             case TIME: return "TIME";
             case ALRTENDLATE: return "ALRTENDLATE";
             case ALRTSTRTLATE: return "ALRTSTRTLATE";
+            case _TIMINGDETECTEDISSUECODE: return "_TimingDetectedIssueCode";
+            case ENDLATE: return "ENDLATE";
+            case STRTLATE: return "STRTLATE";
             case _SUPPLYDETECTEDISSUECODE: return "_SupplyDetectedIssueCode";
             case ALLDONE: return "ALLDONE";
             case FULFIL: return "FULFIL";
@@ -7875,6 +8067,14 @@ the measure population as a narrative description (e.g., all patients seen in th
             case FNAINT: return "FNAINT";
             case NAINT: return "NAINT";
             case SEV: return "SEV";
+            case _FDALABELDATA: return "_FDALabelData";
+            case FDACOATING: return "FDACOATING";
+            case FDACOLOR: return "FDACOLOR";
+            case FDAIMPRINTCD: return "FDAIMPRINTCD";
+            case FDALOGO: return "FDALOGO";
+            case FDASCORING: return "FDASCORING";
+            case FDASHAPE: return "FDASHAPE";
+            case FDASIZE: return "FDASIZE";
             case _ROIOVERLAYSHAPE: return "_ROIOverlayShape";
             case CIRCLE: return "CIRCLE";
             case ELLIPSE: return "ELLIPSE";
@@ -7924,6 +8124,14 @@ the measure population as a narrative description (e.g., all patients seen in th
             case TRSTMECOBS: return "TRSTMECOBS";
             case SUBSIDFFS: return "SUBSIDFFS";
             case WRKCOMP: return "WRKCOMP";
+            case _ACTPROCEDURECODE: return "_ActProcedureCode";
+            case _ACTBILLABLESERVICECODE: return "_ActBillableServiceCode";
+            case _HL7DEFINEDACTCODES: return "_HL7DefinedActCodes";
+            case COPAY: return "COPAY";
+            case DEDUCT: return "DEDUCT";
+            case DOSEIND: return "DOSEIND";
+            case PRA: return "PRA";
+            case STORE: return "STORE";
             default: return "?";
           }
         }
@@ -7946,7 +8154,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case _ACTADJUDICATIONGROUPCODE: return "Catagorization of grouping criteria for the associated transactions and/or summary (totals, subtotals).";
             case CONT: return "Transaction counts and value totals by Contract Identifier.";
             case DAY: return "Transaction counts and value totals for each calendar day within the date range specified.";
-            case LOC: return "Transaction counts and value totals by service location (e.g clinic).";
+            case LOC: return "Transaction counts and value totals by service location (e.g. clinic).";
             case MONTH: return "Transaction counts and value totals for each calendar month within the date range specified.";
             case PERIOD: return "Transaction counts and value totals for the date range specified.";
             case PROV: return "Transaction counts and value totals by Provider Identifier.";
@@ -7969,6 +8177,10 @@ the measure population as a narrative description (e.g., all patients seen in th
             case FINBILL: return "A billing arrangement where a Provider charges for non-clinical items.  This includes interest in arrears, mileage, etc.  Clinical content is not 	included in Invoices submitted with this type of billing arrangement.";
             case ROST: return "A billing arrangement where funding is based on a list of individuals registered as patients of the Provider.";
             case SESS: return "A billing arrangement where a Provider charges a sum to provide a group (volume) of interventions/procedures to one or more patients within a defined period of time, typically on the same date.  Interventions/procedures included in the session may vary.";
+            case FFS: return "A billing arrangement where a Provider charges a separate fee for each intervention/procedure/event or product.\r\n\n                        Fee for Service is used when an individual intervention/procedure/event is used for billing purposes.  In other words, fees are associated with the  intervention/procedure/event.  For example, a specific CCI (Canadian Classification of Interventions) code has an associated fee and is used for billing purposes.";
+            case FFPS: return "A first fill where the quantity supplied is less than one full repetition of the ordered amount. (e.g. If the order was 90 tablets, 3 refills, a partial fill might be for only 30 tablets.) and also where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets)";
+            case FFCS: return "A first fill where the quantity supplied is equal to one full repetition of the ordered amount. (e.g. If the order was 90 tablets, 3 refills, a complete fill would be for the full 90 tablets) and also where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets).";
+            case TFS: return "A fill where a small portion is provided to allow for determination of the therapy effectiveness and patient tolerance and also where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets).";
             case _ACTBOUNDEDROICODE: return "Type of bounded ROI.";
             case ROIFS: return "A fully specified bounded Region of Interest (ROI) delineates a ROI in which only those dimensions participate that are specified by boundary criteria, whereas all other dimensions are excluded.  For example a ROI to mark an episode of \"ST elevation\" in a subset of the EKG leads V2, V3, and V4 would include 4 boundaries, one each for time, V2, V3, and V4.";
             case ROIPS: return "A partially specified bounded Region of Interest (ROI) specifies a ROI in which at least all values in the dimensions specified by the boundary criteria participate. For example, if an episode of ventricular fibrillations (VFib) is observed, it usually doesn't make sense to exclude any EKG leads from the observation and the partially specified ROI would contain only one boundary for time indicating the time interval where VFib was observed.";
@@ -8089,7 +8301,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case MODEL: return "Description: Digital Model Attachment";
             case WIATTCH: return "Description: Work Injury related additional Information Attachment";
             case XRAY: return "Description: Digital X-Ray Attachment";
-            case _ACTCONSENTTYPE: return "Definition: The type of consent directive, e.g., to consent or dissent to collect, access, or use in specific ways within an EHRS or for health information exchange; or to disclose  health information  for purposes such as research.";
+            case _ACTCONSENTTYPE: return "Definition: The type of consent directive, e.g. to consent or dissent to collect, access, or use in specific ways within an EHRS or for health information exchange; or to disclose  health information  for purposes such as research.";
             case ICOL: return "Definition: Consent to have healthcare information collected in an electronic health record.  This entails that the information may be used in analysis, modified, updated.";
             case IDSCL: return "Definition: Consent to have collected healthcare information disclosed.";
             case INFA: return "Definition: Consent to access healthcare information.";
@@ -8101,13 +8313,13 @@ the measure population as a narrative description (e.g., all patients seen in th
             case RSREID: return "Definition: Consent to have de-identified healthcare information in an electronic health record that is accessed for research purposes re-identified under specific circumstances outlined in the consent.\r\n\n                        \n                           Example:: Where there is a need to inform the subject of potential health issues.";
             case _ACTCONTAINERREGISTRATIONCODE: return "Constrains the ActCode to the domain of Container Registration";
             case ID: return "Used by one system to inform another that it has received a container.";
-            case IP: return "Used by one system to inform another that the container is in position for specimen transfer (e.g., container removal from track, pipetting, etc.).";
+            case IP: return "Used by one system to inform another that the container is in position for specimen transfer (e.g. container removal from track, pipetting, etc.).";
             case L: return "Used by one system to inform another that the container has been released from that system.";
             case M: return "Used by one system to inform another that the container did not arrive at its next expected location.";
             case O: return "Used by one system to inform another that the specific container is being processed by the equipment. It is useful as a response to a query about Container Status, when the specific step of the process is not relevant.";
             case R: return "Status is used by one system to inform another that the processing has been completed, but the container has not been released from that system.";
-            case X: return "Used by one system to inform another that the container is no longer available within the scope of the system (e.g., tube broken or discarded).";
-            case _ACTCONTROLVARIABLE: return "An observation form that determines parameters or attributes of an Act. Examples are the settings of a ventilator machine as parameters of a ventilator treatment act; the controls on dillution factors of a chemical analyzer as a parameter of a laboratory observation act; the settings of a physiologic measurement assembly (e.g., time skew) or the position of the body while measuring blood pressure.\r\n\n                        Control variables are forms of observations because just as with clinical observations, the Observation.code determines the parameter and the Observation.value assigns the value. While control variables sometimes can be observed (by noting the control settings or an actually measured feedback loop) they are not primary observations, in the sense that a control variable without a primary act is of no use (e.g., it makes no sense to record a blood pressure position without recording a blood pressure, whereas it does make sense to record a systolic blood pressure without a diastolic blood pressure).";
+            case X: return "Used by one system to inform another that the container is no longer available within the scope of the system (e.g. tube broken or discarded).";
+            case _ACTCONTROLVARIABLE: return "An observation form that determines parameters or attributes of an Act. Examples are the settings of a ventilator machine as parameters of a ventilator treatment act; the controls on dillution factors of a chemical analyzer as a parameter of a laboratory observation act; the settings of a physiologic measurement assembly (e.g. time skew) or the position of the body while measuring blood pressure.\r\n\n                        Control variables are forms of observations because just as with clinical observations, the Observation.code determines the parameter and the Observation.value assigns the value. While control variables sometimes can be observed (by noting the control settings or an actually measured feedback loop) they are not primary observations, in the sense that a control variable without a primary act is of no use (e.g. it makes no sense to record a blood pressure position without recording a blood pressure, whereas it does make sense to record a systolic blood pressure without a diastolic blood pressure).";
             case AUTO: return "Specifies whether or not automatic repeat testing is to be initiated on specimens.";
             case ENDC: return "A baseline value for the measured test that is inherently contained in the diluent.  In the calculation of the actual result for the measured test, this baseline value is normally considered.";
             case REFLEX: return "Specifies whether or not further testing may be automatically or manually initiated on specimens.";
@@ -8115,6 +8327,9 @@ the measure population as a narrative description (e.g., all patients seen in th
             case _ACTCOVERAGEAUTHORIZATIONCONFIRMATIONCODE: return "Indication of authorization for healthcare service(s) and/or product(s).  If authorization is approved, funds are set aside.";
             case AUTH: return "Authorization approved and funds have been set aside to pay for specified healthcare service(s) and/or product(s) within defined criteria for the authorization.";
             case NAUTH: return "Authorization for specified healthcare service(s) and/or product(s) denied.";
+            case _ACTCOVERAGEELIGIBILITYCONFIRMATIONCODE: return "Indication of eligibility coverage for healthcare service(s) and/or product(s).";
+            case ELG: return "Insurance coverage is in effect for healthcare service(s) and/or product(s).";
+            case NELG: return "Insurance coverage is not in effect for healthcare service(s) and/or product(s). May optionally include reasons for the ineligibility.";
             case _ACTCOVERAGELIMITCODE: return "Criteria that are applicable to the authorized coverage.";
             case _ACTCOVERAGEQUANTITYLIMITCODE: return "Maximum amount paid or maximum number of services/products covered; or maximum amount or number covered during a specified time period under the policy or program.";
             case COVPRD: return "Codes representing the time period during which coverage is available; or financial participation requirements are in effect.";
@@ -8124,6 +8339,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case UNITPRICE: return "Maximum unit price that will be covered for the authorized product or service.";
             case UNITQTY: return "Maximum number of items that will be covered of the product or service specified.";
             case COVMX: return "Definition: Codes representing the maximum coverate or financial participation requirements.";
+            case _ACTCOVEREDPARTYLIMITCODE: return "Codes representing the types of covered parties that may receive covered benefits under a policy or program.";
             case _ACTCOVERAGETYPECODE: return "Definition: Set of codes indicating the type of insurance policy or program that pays for the cost of benefits provided to covered parties.";
             case _ACTINSURANCEPOLICYCODE: return "Set of codes indicating the type of insurance policy or other source of funds to cover healthcare costs.";
             case EHCPOL: return "Private insurance policy that provides coverage in addition to other policies (e.g. in addition to a Public Healthcare insurance policy).";
@@ -8145,10 +8361,10 @@ the measure population as a narrative description (e.g., all patients seen in th
             case SUBSIDMC: return "Definition: A government health program that provides coverage through managed care contracts for health services to persons meeting eligibility criteria such as income, location of residence, access to other coverages, health condition, and age, the cost of which is to some extent subsidized by public funds. \r\n\n                        \n                           Discussion: The structure and business processes for underwriting and administering a subsidized managed care program is further specified by the Underwriter and Payer Role.class and Role.code.";
             case SUBSUPP: return "Definition: A government health program that provides coverage for health services to persons meeting eligibility criteria for a supplemental health policy or program such as income, location of residence, access to other coverages, health condition, and age, the cost of which is to some extent subsidized by public funds.\r\n\n                        \n                           Example:  Supplemental health coverage program may cover the cost of a health program or policy financial participations, such as the copays and the premiums, and may provide coverage for services in addition to those covered under the supplemented health program or policy.  In the U.S., Medicaid programs may pay the premium for a covered party who is also covered under the  Medicare program or a private health policy.\r\n\n                        \n                           Discussion: The structure and business processes for underwriting and administering a subsidized supplemental retiree health program is further specified by the Underwriter and Payer Role.class and Role.code.";
             case WCBPOL: return "Insurance policy for injuries sustained in the work place or in the course of employment.";
-            case _ACTINSURANCETYPECODE: return "Definition: Set of codes indicating the type of insurance policy.  Insurance, in law and economics, is a form of risk management primarily used to hedge against the risk of potential financial loss. Insurance is defined as the equitable transfer of the risk of a potential loss, from one entity to another, in exchange for a premium and duty of care. A policy holder is an individual or an organization enters into a contract with an underwriter which stipulates that, in exchange for payment of a sum of money (a premium), one or more covered parties (insureds) is guaranteed compensation for losses resulting from certain perils under specified conditions.  The underwriter analyzes the risk of loss, makes a decision as to whether the risk is insurable, and prices the premium accordingly.  A policy provides benefits that indemnify or cover the cost of a loss incurred by a covered party, and may include coverage for services required to remediate a loss.  An insurance policy contains pertinent facts about the policy holder, the insurance coverage, the covered parties, and the insurer.  A policy may include exemptions and provisions specifying the extent to which the indemnification clause cannot be enforced for intentional tortious conduct of a covered party, e.g., whether the covered parties are jointly or severably insured.\r\n\n                        \n                           Discussion: In contrast to programs, an insurance policy has one or more policy holders, who own the policy.  The policy holder may be the covered party, a relative of the covered party, a partnership, or a corporation, e.g., an employer.  A subscriber of a self-insured health insurance policy is a policy holder.  A subscriber of an employer sponsored health insurance policy is holds a certificate of coverage, but is not a policy holder; the policy holder is the employer.  See CoveredRoleType.";
-            case _ACTHEALTHINSURANCETYPECODE: return "Definition: Set of codes indicating the type of health insurance policy that covers health services provided to covered parties.  A health insurance policy is a written contract for insurance between the insurance company and the policyholder, and contains pertinent facts about the policy owner (the policy holder), the health insurance coverage, the insured subscribers and dependents, and the insurer.  Health insurance is typically administered in accordance with a plan, which specifies (1) the type of health services and health conditions that will be covered under what circumstances (e.g., exclusion of a pre-existing condition, service must be deemed medically necessary; service must not be experimental; service must provided in accordance with a protocol; drug must be on a formulary; service must be prior authorized; or be a referral from a primary care provider); (2) the type and affiliation of providers (e.g., only allopathic physicians, only in network, only providers employed by an HMO); (3) financial participations required of covered parties (e.g., co-pays, coinsurance, deductibles, out-of-pocket); and (4) the manner in which services will be paid (e.g., under indemnity or fee-for-service health plans, the covered party typically pays out-of-pocket and then file a claim for reimbursement, while health plans that have contractual relationships with providers, i.e., network providers, typically do not allow the providers to bill the covered party for the cost of the service until after filing a claim with the payer and receiving reimbursement).";
+            case _ACTINSURANCETYPECODE: return "Definition: Set of codes indicating the type of insurance policy.  Insurance, in law and economics, is a form of risk management primarily used to hedge against the risk of potential financial loss. Insurance is defined as the equitable transfer of the risk of a potential loss, from one entity to another, in exchange for a premium and duty of care. A policy holder is an individual or an organization enters into a contract with an underwriter which stipulates that, in exchange for payment of a sum of money (a premium), one or more covered parties (insureds) is guaranteed compensation for losses resulting from certain perils under specified conditions.  The underwriter analyzes the risk of loss, makes a decision as to whether the risk is insurable, and prices the premium accordingly.  A policy provides benefits that indemnify or cover the cost of a loss incurred by a covered party, and may include coverage for services required to remediate a loss.  An insurance policy contains pertinent facts about the policy holder, the insurance coverage, the covered parties, and the insurer.  A policy may include exemptions and provisions specifying the extent to which the indemnification clause cannot be enforced for intentional tortious conduct of a covered party, e.g. whether the covered parties are jointly or severably insured.\r\n\n                        \n                           Discussion: In contrast to programs, an insurance policy has one or more policy holders, who own the policy.  The policy holder may be the covered party, a relative of the covered party, a partnership, or a corporation, e.g. an employer.  A subscriber of a self-insured health insurance policy is a policy holder.  A subscriber of an employer sponsored health insurance policy is holds a certificate of coverage, but is not a policy holder; the policy holder is the employer.  See CoveredRoleType.";
+            case _ACTHEALTHINSURANCETYPECODE: return "Definition: Set of codes indicating the type of health insurance policy that covers health services provided to covered parties.  A health insurance policy is a written contract for insurance between the insurance company and the policyholder, and contains pertinent facts about the policy owner (the policy holder), the health insurance coverage, the insured subscribers and dependents, and the insurer.  Health insurance is typically administered in accordance with a plan, which specifies (1) the type of health services and health conditions that will be covered under what circumstances (e.g. exclusion of a pre-existing condition, service must be deemed medically necessary; service must not be experimental; service must provided in accordance with a protocol; drug must be on a formulary; service must be prior authorized; or be a referral from a primary care provider); (2) the type and affiliation of providers (e.g. only allopathic physicians, only in network, only providers employed by an HMO); (3) financial participations required of covered parties (e.g. co-pays, coinsurance, deductibles, out-of-pocket); and (4) the manner in which services will be paid (e.g. under indemnity or fee-for-service health plans, the covered party typically pays out-of-pocket and then file a claim for reimbursement, while health plans that have contractual relationships with providers, i.e., network providers, typically do not allow the providers to bill the covered party for the cost of the service until after filing a claim with the payer and receiving reimbursement).";
             case DENTAL: return "Definition: A health insurance policy that that covers benefits for dental services.";
-            case DISEASE: return "Definition: A health insurance policy that covers benefits for healthcare services provided for named conditions under the policy, e.g., cancer, diabetes, or HIV-AIDS.";
+            case DISEASE: return "Definition: A health insurance policy that covers benefits for healthcare services provided for named conditions under the policy, e.g. cancer, diabetes, or HIV-AIDS.";
             case DRUGPOL: return "Definition: A health insurance policy that covers benefits for prescription drugs, pharmaceuticals, and supplies.";
             case HIP: return "Definition: A health insurance policy that covers healthcare benefits by protecting covered parties from medical expenses arising from health conditions, sickness, or accidental injury as well as preventive care. Health insurance policies explicitly exclude coverage for losses insured under a disability policy, workers' compensation program, liability insurance (including automobile insurance); or for medical expenses, coverage for on-site medical clinics or for limited dental or vision benefits when these are provided under a separate policy.\r\n\n                        \n                           Discussion: Health insurance policies are offered by health insurance plans that typically reimburse providers for covered services on a fee-for-service basis, that is, a fee that is the allowable amount that a provider may charge.  This is in contrast to managed care plans, which typically prepay providers a per-member/per-month amount or capitation as reimbursement for all covered services rendered.  Health insurance plans include indemnity and healthcare services plans.";
             case LTC: return "Definition: An insurance policy that covers benefits for long-term care services people need when they no longer can care for themselves. This may be due to an accident, disability, prolonged illness or the simple process of aging. Long-term care services assist with activities of daily living including:\r\n\n                        \n                           \n                              Help at home with day-to-day activities, such as cooking, cleaning, bathing and dressing\r\n\n                           \n                           \n                              Care in the community, such as in an adult day care facility\r\n\n                           \n                           \n                              Supervised care provided in an assisted living facility\r\n\n                           \n                           \n                              Skilled care provided in a nursing home";
@@ -8178,7 +8394,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case HIRISK: return "Definition: A government program that provides health coverage to individuals who are considered medically uninsurable or high risk, and who have been denied health insurance due to a serious health condition. In certain cases, it also applies to those who have been quoted very high premiums a\" again, due to a serious health condition.  The pool charges premiums for coverage.  Because the pool covers high-risk people, it incurs a higher level of claims than premiums can cover. The insurance industry pays into the pool to make up the difference and help it remain viable.";
             case IND: return "Definition: Services provided directly and through contracted and operated indigenous peoples health programs.\r\n\n                        \n                           Example: Indian Health Service in the U.S.";
             case MILITARY: return "Definition: A government program that provides coverage for health services to military personnel, retirees, and dependents.  A covered party who is a subscriber can choose from among Fee-for-Service (FFS) plans, and their Preferred Provider Organizations (PPO), or Plans offering a Point of Service (POS) Product, or Health Maintenance Organizations.\r\n\n                        \n                           Example: In the U.S., TRICARE, CHAMPUS.";
-            case RETIRE: return "Definition: A government mandated program with specific eligibility requirements based on premium contributions made during employment, length of employment, age, and employment status, e.g., being retired, disabled, or a dependent of a covered party under this program.   Benefits typically include ambulatory, inpatient, and long-term care, such as hospice care, home health care and respite care.";
+            case RETIRE: return "Definition: A government mandated program with specific eligibility requirements based on premium contributions made during employment, length of employment, age, and employment status, e.g. being retired, disabled, or a dependent of a covered party under this program.   Benefits typically include ambulatory, inpatient, and long-term care, such as hospice care, home health care and respite care.";
             case SOCIAL: return "Definition: A social service program funded by a public or governmental entity.\r\n\n                        \n                           Example: Programs providing habilitation, food, lodging, medicine, transportation, equipment, devices, products, education, training, counseling, alteration of living or work space, and other resources to persons meeting eligibility criteria.";
             case VET: return "Definition: Services provided directly and through contracted and operated veteran health programs.";
             case _ACTDETECTEDISSUEMANAGEMENTCODE: return "Codes dealing with the management of Detected Issue observations";
@@ -8221,7 +8437,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case LTRMCARE: return "Description: Exposure participants' interaction occurred in the course of one or both participants being resident at a long term care facility (second participant may be a visitor, worker, resident or a physical place or object within the facility).";
             case PLACE: return "Description: An interaction where the exposure participants were both present in the same location/place/space.";
             case PTNTCARE: return "Description: Exposure participants' interaction occurred during the course of  health care delivery by a provider (e.g. a physician treating a patient in her office).";
-            case SCHOOL2: return "Description: Exposure participants' interaction occurred in an academic setting (e.g., participants are fellow students, or student and teacher).";
+            case SCHOOL2: return "Description: Exposure participants' interaction occurred in an academic setting (e.g. participants are fellow students, or student and teacher).";
             case SOCIAL2: return "Description: An interaction where the exposure participants are social associates or members of the same extended family";
             case SUBSTNCE: return "Description: An interaction where the exposure participants shared or co-used a common substance (e.g. drugs, needles, or common food item).";
             case TRAVINT: return "Description: An interaction where the exposure participants traveled together in/on the same vehicle/trip (e.g. concurrent co-passengers).";
@@ -8258,13 +8474,13 @@ the measure population as a narrative description (e.g., all patients seen in th
             case INFDNG: return "Consent to collect, access, use, or disclose specified patient health information only if necessary to avert potential danger to other persons.";
             case INFEMER: return "Description: Information transfer in accordance with emergency information transfer protocol.";
             case INFPWR: return "Consent to collect, access, use, or disclose specified patient health information only if necessary to avert potential public welfare risk.";
-            case INFREG: return "Description: Information transfer in accordance with regulatory protocol, e.g., for public health, welfare, and safety.";
+            case INFREG: return "Description: Information transfer in accordance with regulatory protocol, e.g. for public health, welfare, and safety.";
             case _ACTINFORMATIONCATEGORYCODE: return "Definition:Indicates the set of information types which may be manipulated or referenced, such as for recommending access restrictions.";
             case ALLCAT: return "Description: All patient information.";
             case ALLGCAT: return "Definition:All information pertaining to a patient's allergy and intolerance records.";
             case ARCAT: return "Description: All information pertaining to a patient's adverse drug reactions.";
             case COBSCAT: return "Definition:All information pertaining to a patient's common observation records (height, weight, blood pressure, temperature, etc.).";
-            case DEMOCAT: return "Definition:All information pertaining to a patient's demographics (such as name, date of birth, gender, address, etc).";
+            case DEMOCAT: return "Definition:All information pertaining to a patient's demographics (such as name, date of birth, gender, address, etc.).";
             case DICAT: return "Definition:All information pertaining to a patient's diagnostic image records (orders & results).";
             case IMMUCAT: return "Definition:All information pertaining to a patient's vaccination records.";
             case LABCAT: return "Description: All information pertaining to a patient's lab test records (orders & results)";
@@ -8306,6 +8522,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DEDUCTIBLE: return "That portion of the eligible charges which a covered party must pay in a particular period (e.g. annual) before the benefits are payable by the adjudicator. This amount represents the covered party's deductible that is applied to a particular adjudication result. It is expressed as a negative dollar amount in adjudication results.";
             case PAY: return "The guarantor, who may be the patient, pays the entire charge for a service. Reasons for such action may include: there is no insurance coverage for the service (e.g. cosmetic surgery); the patient wishes to self-pay for the service; or the insurer denies payment for the service due to contractual provisions such as the need for prior authorization.";
             case SPEND: return "That total amount of the eligible charges which a covered party must periodically pay for services and/or products prior to the Medicaid program providing any coverage. This amount represents the covered party's spend down that is applied to a particular adjudication result. It is expressed as a negative dollar amount in adjudication results";
+            case COINS: return "The covered party pays a percentage of the cost of covered services.";
             case _ACTINVOICEDETAILGENERICMODIFIERCODE: return "The billable item codes to identify modifications to a billable item charge. As for example after hours increase in the office visit fee.";
             case AFTHRS: return "Premium paid on service fees in compensation for practicing outside of normal working hours.";
             case ISOL: return "Premium paid on service fees in compensation for practicing in a remote location.";
@@ -8336,6 +8553,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case S: return "Uniquely designed and elegantly decorated accommodations with many amenities available for an additional charge.";
             case SP: return "Accommodations in which there are 2 beds.";
             case W: return "Accommodations in which there are 3 or more beds.";
+            case _ACTINVOICEDETAILCLINICALSERVICECODE: return "An identifying data string for healthcare procedures.";
             case _ACTINVOICEGROUPCODE: return "Type of invoice element that is used to assist in describing an Invoice that is either submitted for adjudication or for which is returned on adjudication results.\r\n\n                        Invoice elements of this type signify a grouping of one or more children (detail) invoice elements.  They do not have intrinsic costing associated with them, but merely reflect the sum of all costing for it's immediate children invoice elements.";
             case _ACTINVOICEINTERGROUPCODE: return "Type of invoice element that is used to assist in describing an Invoice that is either submitted for adjudication or for which is returned on adjudication results.\r\n\n                        Invoice elements of this type signify a grouping of one or more children (detail) invoice elements.  They do not have intrinsic costing associated with them, but merely reflect the sum of all costing for it's immediate children invoice elements.\r\n\n                        The domain is only specified for an intermediate invoice element group (non-root or non-top level) for an Invoice.";
             case CPNDDRGING: return "A grouping of invoice element groups and details including the ones specifying the compound ingredients being invoiced. It may also contain generic detail items such as markup.";
@@ -8468,9 +8686,9 @@ the measure population as a narrative description (e.g., all patients seen in th
             case IND01: return "Description:Contrast agent required for imaging study.";
             case IND02: return "Description:Provision of prescription or direction to consume a product for purposes of bowel clearance in preparation for a colonoscopy.";
             case IND03: return "Description:Provision of medication as a preventative measure during a treatment or other period of increased risk.";
-            case IND04: return "Description:Provision of medication during pre-operative phase; e.g., antibiotics before dental surgery or bowel prep before colon surgery.";
-            case IND05: return "Description:Provision of medication for pregnancy --e.g., vitamins, antibiotic treatments for vaginal tract colonization, etc.";
-            case _ACTOBSERVATIONVERIFICATIONTYPE: return "Identifies the type of verification investigation being undertaken with respect to the subject of the verification activity.\r\n\n                        \n                           Examples:\n                        \r\n\n                        \n                           \n                              Verification of eligibility for coverage under a policy or program - aka enrolled/covered by a policy or program\r\n\n                           \n                           \n                              Verification of record - e.g., person has record in an immunization registry\r\n\n                           \n                           \n                              Verification of enumeration - e.g. NPI\r\n\n                           \n                           \n                              Verification of Board Certification - provider specific\r\n\n                           \n                           \n                              Verification of Certification - e.g. JAHCO, NCQA, URAC\r\n\n                           \n                           \n                              Verification of Conformance - e.g. entity use with HIPAA, conformant to the CCHIT EHR system criteria\r\n\n                           \n                           \n                              Verification of Provider Credentials\r\n\n                           \n                           \n                              Verification of no adverse findings - e.g. on National Provider Data Bank, Health Integrity Protection Data Base (HIPDB)";
+            case IND04: return "Description:Provision of medication during pre-operative phase; e.g. antibiotics before dental surgery or bowel prep before colon surgery.";
+            case IND05: return "Description:Provision of medication for pregnancy --e.g. vitamins, antibiotic treatments for vaginal tract colonization, etc.";
+            case _ACTOBSERVATIONVERIFICATIONTYPE: return "Identifies the type of verification investigation being undertaken with respect to the subject of the verification activity.\r\n\n                        \n                           Examples:\n                        \r\n\n                        \n                           \n                              Verification of eligibility for coverage under a policy or program - aka enrolled/covered by a policy or program\r\n\n                           \n                           \n                              Verification of record - e.g. person has record in an immunization registry\r\n\n                           \n                           \n                              Verification of enumeration - e.g. NPI\r\n\n                           \n                           \n                              Verification of Board Certification - provider specific\r\n\n                           \n                           \n                              Verification of Certification - e.g. JAHCO, NCQA, URAC\r\n\n                           \n                           \n                              Verification of Conformance - e.g. entity use with HIPAA, conformant to the CCHIT EHR system criteria\r\n\n                           \n                           \n                              Verification of Provider Credentials\r\n\n                           \n                           \n                              Verification of no adverse findings - e.g. on National Provider Data Bank, Health Integrity Protection Data Base (HIPDB)";
             case VFPAPER: return "Definition:Indicates that the paper version of the record has, should be or is being verified against the electronic version.";
             case _ACTPAYMENTCODE: return "Code identifying the method or the movement of payment instructions.\r\n\n                        Codes are drawn from X12 data element 591 (PaymentMethodCode)";
             case ACH: return "Automated Clearing House (ACH).";
@@ -8479,15 +8697,12 @@ the measure population as a narrative description (e.g., all patients seen in th
             case NON: return "Non-Payment Data.";
             case _ACTPHARMACYSUPPLYTYPE: return "Identifies types of dispensing events";
             case DF: return "A fill providing sufficient supply for one day";
-            case EM: return "A supply action where there is no 'valid' order for the supplied medication.  E.g. Emergency vacation supply, weekend supply (when prescriber is unavailable to provide a renewal prescription)";
+            case EM: return "A supply action where there is no 'valid' order for the supplied medication; e.g. Emergency vacation supply, weekend supply (when prescriber is unavailable to provide a renewal prescription)";
             case SO: return "An emergency supply where the expectation is that a formal order authorizing the supply will be provided at a later date.";
             case FF: return "The initial fill against an order.  (This includes initial fills against refill orders.)";
             case FFC: return "A first fill where the quantity supplied is equal to one full repetition of the ordered amount. (e.g. If the order was 90 tablets, 3 refills, a complete fill would be for the full 90 tablets).";
-            case FFCS: return "A first fill where the quantity supplied is equal to one full repetition of the ordered amount. (e.g. If the order was 90 tablets, 3 refills, a complete fill would be for the full 90 tablets) and also where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets).";
             case FFP: return "A first fill where the quantity supplied is less than one full repetition of the ordered amount. (e.g. If the order was 90 tablets, 3 refills, a partial fill might be for only 30 tablets.)";
-            case FFPS: return "A first fill where the quantity supplied is less than one full repetition of the ordered amount. (e.g. If the order was 90 tablets, 3 refills, a partial fill might be for only 30 tablets.) and also where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets)";
             case FFSS: return "A first fill where the strength supplied is less than the ordered strength. (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets).";
-            case TFS: return "A fill where a small portion is provided to allow for determination of the therapy effectiveness and patient tolerance and also where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets).";
             case TF: return "A fill where a small portion is provided to allow for determination of the therapy effectiveness and patient tolerance.";
             case FS: return "A supply action to restock a smaller more local dispensary.";
             case MS: return "A supply of a manufacturer sample";
@@ -8502,15 +8717,15 @@ the measure population as a narrative description (e.g., all patients seen in th
             case RFS: return "A fill against an order that has already been filled (or partially filled) at least once and where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets).";
             case TB: return "A fill where the remainder of a 'complete' fill is provided after a trial fill has been provided.";
             case TBS: return "A fill where the remainder of a 'complete' fill is provided after a trial fill has been provided and where the strength supplied is less than the ordered strength (e.g. 10mg for an order of 50mg where a subsequent fill will dispense 40mg tablets).";
-            case UDE: return "A supply action that provides sufficient material for a single dose via multiple products.  E.g. 2 50mg tablets for a 100mg unit dose.";
+            case UDE: return "A supply action that provides sufficient material for a single dose via multiple products; e.g. 2 50mg tablets for a 100mg unit dose.";
             case _ACTPOLICYTYPE: return "Description:Types of policies that further specify the ActClassPolicy value set.";
             case _ACTPRIVACYPOLICY: return "A policy deeming certain information to be private to an individual or organization.\r\n\n                        \n                           Definition: A mandate, obligation, requirement, rule, or expectation relating to privacy.\r\n\n                        \n                           Discussion: ActPrivacyPolicyType codes support the designation of the 1..* policies that are applicable to an Act such as a Consent Directive, a Role such as a VIP Patient, or an Entity such as a patient who is a minor.  1..* ActPrivacyPolicyType values may be associated with an Act or Role to indicate the policies that govern the assignment of an Act or Role confidentialityCode.  Use of multiple ActPrivacyPolicyType values enables fine grain specification of applicable policies, but must be carefully assigned to ensure cogency and avoid creation of conflicting policy mandates.\r\n\n                        \n                           Usage Note: Statutory title may be named in the ActClassPolicy Act Act.title to specify which privacy policy is being referenced.";
-            case _ACTCONSENTDIRECTIVE: return "Definition: Specifies the type of consent directive indicated by an ActClassPolicy e.g., a 3rd party authorization to disclose or consent for a substitute decision maker (SDM) or a notice of privacy policy.\r\n\n                        \n                           Usage Note: ActConsentDirective codes are used to specify the type of Consent Directive to which a Consent Directive Act conforms.";
+            case _ACTCONSENTDIRECTIVE: return "Definition: Specifies the type of consent directive indicated by an ActClassPolicy e.g. a 3rd party authorization to disclose or consent for a substitute decision maker (SDM) or a notice of privacy policy.\r\n\n                        \n                           Usage Note: ActConsentDirective codes are used to specify the type of Consent Directive to which a Consent Directive Act conforms.";
             case EMRGONLY: return "This general consent directive specifically limits disclosure of health information for purpose of emergency treatment. Additional parameters may further limit the disclosure to specific users, roles, duration, types of information, and impose uses obligations.\r\n\n                        \n                           Definition: Opt-in to disclosure of health information for emergency only consent directive.";
             case NOPP: return "Acknowledgement of custodian notice of privacy practices.\r\n\n                        \n                           Usage Notes: This type of consent directive acknowledges a custodian's notice of privacy practices including its permitted collection, access, use and disclosure of health information to users and for purposes of use specified.";
             case OPTIN: return "This general consent directive permits disclosure of health information.  Additional parameter may limit authorized users, purpose of use, user obligations, duration, or information types permitted to be disclosed, and impose uses obligations.\r\n\n                        \n                           Definition: Opt-in to disclosure of health information consent directive.";
             case OPTOUT: return "This general consent directive prohibits disclosure of health information.  Additional parameters may permit access to some information types by certain users, roles, purposes of use, durations and impose user obligations.\r\n\n                        \n                           Definition: Opt-out of disclosure of health information consent directive.";
-            case _INFORMATIONSENSITIVITYPOLICY: return "A mandate, obligation, requirement, rule, or expectation characterizing the value or importance of a resource and may include its vulnerability. (Based on ISO7498-2:1989. Note: The vulnerability of personally identifiable sensitive information may be based on concerns that the unauthorized disclosure may result in social stigmatization or discrimination.) Description:  Types of Sensitivity policy that apply to Acts or Roles.  A sensitivity policy is adopted by an enterprise or group of enterprises (a 'policy domain') through a formal data use agreement that stipulates the value, importance, and vulnerability of information. A sensitivity code representing a sensitivity policy may be associated with criteria such as categories of information or sets of information identifiers (e.g., a value set of clinical codes or branch in a code system hierarchy).   These criteria may in turn be used for the Policy Decision Point in a Security Engine.  A sensitivity code may be used to set the confidentiality code used on information about Acts and Roles to trigger the security mechanisms required to control how security principals (i.e., a person, a machine, a software application) may act on the information (e.g., collection, access, use, or disclosure). Sensitivity codes are never assigned to the transport or business envelope containing patient specific information being exchanged outside of a policy domain as this would disclose the information intended to be protected by the policy.  When sensitive information is exchanged with others outside of a policy domain, the confidentiality code on the transport or business envelope conveys the receiver's responsibilities and indicates the how the information is to be safeguarded without unauthorized disclosure of the sensitive information.  This ensures that sensitive information is treated by receivers as the sender intends, accomplishing interoperability without point to point negotiations.\r\n\n                        \n                           Usage Note: Sensitivity codes are not useful for interoperability outside of a policy domain because sensitivity policies are typically localized and vary drastically across policy domains even for the same information category because of differing organizational business rules, security policies, and jurisdictional requirements.  For example, an employee's sensitivity code would make little sense for use outside of a policy domain.   'Taboo' would rarely be useful outside of a policy domain unless there are jurisdictional requirements requiring that a provider disclose sensitive information to a patient directly.  Sensitivity codes may be more appropriate in a legacy system's Master Files in order to notify those who access a patient's orders and observations about the sensitivity policies that apply.  Newer systems may have a security engine that uses a sensitivity policy's criteria directly.  The specializable InformationSensitivityPolicy Act.code may be useful in some scenarios if used in combination with a sensitivity identifier and/or Act.title.";
+            case _INFORMATIONSENSITIVITYPOLICY: return "A mandate, obligation, requirement, rule, or expectation characterizing the value or importance of a resource and may include its vulnerability. (Based on ISO7498-2:1989. Note: The vulnerability of personally identifiable sensitive information may be based on concerns that the unauthorized disclosure may result in social stigmatization or discrimination.) Description:  Types of Sensitivity policy that apply to Acts or Roles.  A sensitivity policy is adopted by an enterprise or group of enterprises (a 'policy domain') through a formal data use agreement that stipulates the value, importance, and vulnerability of information. A sensitivity code representing a sensitivity policy may be associated with criteria such as categories of information or sets of information identifiers (e.g. a value set of clinical codes or branch in a code system hierarchy).   These criteria may in turn be used for the Policy Decision Point in a Security Engine.  A sensitivity code may be used to set the confidentiality code used on information about Acts and Roles to trigger the security mechanisms required to control how security principals (i.e., a person, a machine, a software application) may act on the information (e.g. collection, access, use, or disclosure). Sensitivity codes are never assigned to the transport or business envelope containing patient specific information being exchanged outside of a policy domain as this would disclose the information intended to be protected by the policy.  When sensitive information is exchanged with others outside of a policy domain, the confidentiality code on the transport or business envelope conveys the receiver's responsibilities and indicates the how the information is to be safeguarded without unauthorized disclosure of the sensitive information.  This ensures that sensitive information is treated by receivers as the sender intends, accomplishing interoperability without point to point negotiations.\r\n\n                        \n                           Usage Note: Sensitivity codes are not useful for interoperability outside of a policy domain because sensitivity policies are typically localized and vary drastically across policy domains even for the same information category because of differing organizational business rules, security policies, and jurisdictional requirements.  For example, an employee's sensitivity code would make little sense for use outside of a policy domain.   'Taboo' would rarely be useful outside of a policy domain unless there are jurisdictional requirements requiring that a provider disclose sensitive information to a patient directly.  Sensitivity codes may be more appropriate in a legacy system's Master Files in order to notify those who access a patient's orders and observations about the sensitivity policies that apply.  Newer systems may have a security engine that uses a sensitivity policy's criteria directly.  The specializable InformationSensitivityPolicy Act.code may be useful in some scenarios if used in combination with a sensitivity identifier and/or Act.title.";
             case _ACTINFORMATIONSENSITIVITYPOLICY: return "Types of sensitivity policies that apply to Acts.  Act.confidentialityCode is defined in the RIM as \"constraints around appropriate disclosure of information about this Act, regardless of mood.\"\r\n\n                        \n                           Usage Note: ActSensitivity codes are used to bind information to an Act.confidentialityCode according to local sensitivity policy so that those confidentiality codes can then govern its handling across enterprises.  Internally to a policy domain, however, local policies guide the access control system on how end users in that policy domain are  able to use information tagged with these sensitivity values.";
             case ETH: return "Policy for handling alcohol or drug-abuse information, which will be afforded heightened confidentiality.  Information handling protocols based on organizational policies related to alcohol or drug-abuse information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case GDIS: return "Policy for handling genetic disease information, which will be afforded heightened confidentiality. Information handling protocols based on organizational policies related to genetic disease information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
@@ -8521,6 +8736,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case SEX: return "Policy for handling sexuality and reproductive health information, which will be afforded heightened confidentiality.  Information handling protocols based on organizational policies related to sexuality and reproductive health information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case STD: return "Policy for handling sexually transmitted disease information, which will be afforded heightened confidentiality.\n Information handling protocols based on organizational policies related to sexually transmitted disease information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case TBOO: return "Policy for handling information not to be initially disclosed or discussed with patient except by a physician assigned to patient in this case. Information handling protocols based on organizational policies related to sensitive patient information that must be initially discussed with the patient by an attending physician before being disclosed to the patient.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.\r\n\n                        \n                           Open Issue: This definition conflates a rule and a characteristic, and there may be a similar issue with ts sibling codes.";
+            case SICKLE: return "Types of sensitivity policies that apply to Acts.  Act.confidentialityCode is defined in the RIM as \"constraints around appropriate disclosure of information about this Act, regardless of mood.\"\r\n\n                        \n                           Usage Note: ActSensitivity codes are used to bind information to an Act.confidentialityCode according to local sensitivity policy so that those confidentiality codes can then govern its handling across enterprises.  Internally to a policy domain, however, local policies guide the access control system on how end users in that policy domain are able to use information tagged with these sensitivity values.";
             case _ENTITYSENSITIVITYPOLICYTYPE: return "Types of sensitivity policies that may apply to a sensitive attribute on an Entity.\r\n\n                        \n                           Usage Note: EntitySensitivity codes are used to convey a policy that is applicable to sensitive information conveyed by an entity attribute.  May be used to bind a Role.confidentialityCode associated with an Entity per organizational policy.  Role.confidentialityCode is defined in the RIM as \"an indication of the appropriate disclosure of information about this Role with respect to the playing Entity.\"";
             case DEMO: return "Policy for handling all demographic information about an information subject, which will be afforded heightened confidentiality. Policies may govern sensitivity of information related to all demographic about an information subject, the disclosure of which could impact the privacy, well-being, or safety of that subject.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case DOB: return "Policy for handling information related to an information subject's date of birth, which will be afforded heightened confidentiality.Policies may govern sensitivity of information related to an information subject's date of birth, the disclosure of which could impact the privacy, well-being, or safety of that subject.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
@@ -8539,7 +8755,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DIA: return "Policy for handling information related to a diagnosis, health condition or health problem, which will be afforded heightened confidentiality.  Diagnostic, health condition or health problem related information may be deemed sensitive by organizational policy, and require heightened confidentiality.\r\n\n                        \n                           Usage Note: For use within an enterprise that provides heightened confidentiality to  diagnostic, health condition or health problem related information deemed sensitive.   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case DRGIS: return "Policy for handling information related to a drug, which will be afforded heightened confidentiality. Drug information may be deemed sensitive by organizational policy, and require heightened confidentiality.\r\n\n                        \n                           Usage Note: For use within an enterprise that provides heightened confidentiality to drug information deemed sensitive.   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case EMP: return "Policy for handling information related to an employee, which will be afforded heightened confidentiality. When a patient is an employee, an enterprise may have a policy that requires heightened confidentiality.  Information deemed sensitive typically includes health information and patient role information including patient status, demographics, next of kin, and location.\r\n\n                        \n                           Usage Note: Policy for handling information related to an employee, which will be afforded heightened confidentiality.  Description:  When a patient is an employee, an enterprise may have a policy that requires heightened confidentiality.  Information deemed sensitive typically includes health information and patient role information including patient status, demographics, next of kin, and location.";
-            case PDS: return "Policy for handling information reported by the patient about another person, e.g., a family member, which will be afforded heightened confidentiality. Sensitive information reported by the patient about another person, e.g., family members may be deemed sensitive by default.  The flag may be set or cleared on patient's request.  \r\n\n                        \n                           Usage Note: For sensitive information relayed by or about a patient, which is deemed sensitive within the enterprise (i.e., by default regardless of whether the patient requested that the information be deemed sensitive.)   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
+            case PDS: return "Policy for handling information reported by the patient about another person, e.g. a family member, which will be afforded heightened confidentiality. Sensitive information reported by the patient about another person, e.g. family members may be deemed sensitive by default.  The flag may be set or cleared on patient's request.  \r\n\n                        \n                           Usage Note: For sensitive information relayed by or about a patient, which is deemed sensitive within the enterprise (i.e., by default regardless of whether the patient requested that the information be deemed sensitive.)   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case PRS: return "For sensitive information relayed by or about a patient, which is deemed sensitive within the enterprise (i.e., by default regardless of whether the patient requested that the information be deemed sensitive.)   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.\r\n\n                        \n                           Usage Note: For use within an enterprise that provides heightened confidentiality to certain types of information designated by a patient as sensitive.   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case COMPT: return "This is the healthcare analog to the US Intelligence Community's concept of a Special Access Program.  Compartment codes may be used in as a field value in an initiator's clearance to indicate permission to access and use an IT Resource with a security label having the same compartment value in security category label field.\r\n\n                        Map: Aligns with ISO 2382-8 definition of Compartment - \"A division of data into isolated blocks with separate security controls for the purpose of reducing risk.\"";
             case HRCOMPT: return "A security category label field value, which indicates that access and use of an IT resource is restricted to members of human resources department or workflow.";
@@ -8577,7 +8793,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case PRIVMARK: return "Custodian must create and/or maintain human readable security label tags as required by policy.\r\n\n                        Map:  Aligns with ISO 22600-3 Section A.3.4.3 description of privacy mark:  \"If present, the privacy-mark is not used for access control. The content of the privacy-mark may be defined by the security policy in force (identified by the security-policy-identifier) which may define a list of values to be used. Alternately, the value may be determined by the originator of the security-label.\"";
             case PSEUD: return "Custodian system must strip information of data that would allow the identification of the source of the information or the information subject.  Custodian may retain a key to relink data necessary to reidentify the information subject.";
             case REDACT: return "Custodian system must remove information, which is not authorized to be access, used, or disclosed from records made available to otherwise authorized users.";
-            case REFRAINPOLICY: return "Conveys prohibited actions which an information custodian, receiver, or user is not permitted to perform unless otherwise authorized or permitted under specified circumstances.\r\n\n                        \r\n\n                        \n                           Usage Notes: ISO 22600-2 species that a Refrain Policy \"defines actions the subjects must refrain from performing\".  Per HL7 Composite Security and Privacy Domain Analysis Model:  May be used to indicate that a specific action is prohibited based on specific access control attributes e.g., purpose of use, information type, user role, etc.";
+            case REFRAINPOLICY: return "Conveys prohibited actions which an information custodian, receiver, or user is not permitted to perform unless otherwise authorized or permitted under specified circumstances.\r\n\n                        \r\n\n                        \n                           Usage Notes: ISO 22600-2 species that a Refrain Policy \"defines actions the subjects must refrain from performing\".  Per HL7 Composite Security and Privacy Domain Analysis Model:  May be used to indicate that a specific action is prohibited based on specific access control attributes e.g. purpose of use, information type, user role, etc.";
             case NOAUTH: return "Prohibition on disclosure without information subject's authorization.";
             case NOCOLLECT: return "Prohibition on collection or storage of the information.";
             case NODSCLCD: return "Prohibition on disclosure without organizational approved patient restriction.";
@@ -8617,7 +8833,9 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DRUG: return "The introduction of a drug into a subject with the intention of altering its biologic state with the intent of improving its health status.";
             case FD: return "Description: The introduction of material into a subject with the intent of providing nutrition or other dietary supplements (e.g. minerals or vitamins).";
             case IMMUNIZ: return "The introduction of an immunogen with the intent of stimulating an immune response, aimed at preventing subsequent infections by more viable agents.";
-            case _ACTTASKCODE: return "Description: A task or action that a user may perform in a clinical information system (e.g., medication order entry, laboratory test results review, problem list entry).";
+            case BOOSTER: return "An additional immunization administration within a series intended to bolster or enhance immunity.";
+            case INITIMMUNIZ: return "The first immunization administration in a series intended to produce immunity";
+            case _ACTTASKCODE: return "Description: A task or action that a user may perform in a clinical information system (e.g. medication order entry, laboratory test results review, problem list entry).";
             case OE: return "A clinician creates a request for a service to be performed for a given patient.";
             case LABOE: return "A clinician creates a request for a laboratory test to be done for a given patient.";
             case MEDOE: return "A clinician creates a request for the administration of one or more medications to a given patient.";
@@ -8634,7 +8852,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case IMMLREV: return "Description: A person reviews a list of immunizations due or received for a given patient.";
             case REMLREV: return "Description: A person reviews a list of health care reminders for a given patient.";
             case WELLREMLREV: return "Description: A person reviews a list of wellness or preventive care reminders for a given patient.";
-            case PATINFO: return "A person (e.g., clinician, the patient herself) reviews patient information in the electronic medical record.";
+            case PATINFO: return "A person (e.g. clinician, the patient herself) reviews patient information in the electronic medical record.";
             case ALLERLE: return "Description: A person enters a known allergy for a given patient.";
             case CDSREV: return "A person reviews a recommendation/assessment provided automatically by a clinical decision support application for a given patient.";
             case CLINNOTEREV: return "A person reviews a clinical note of a given patient.";
@@ -8680,7 +8898,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case ICTERUS: return "An observation that describes the icterus index of the specimen.  It is recommended to use mMol/L of bilirubin";
             case LIPEMIA: return "An observation used to describe the Lipemia Index of the specimen. It is recommended to use the optical turbidity at 600 nm (in absorbance units).";
             case VOLUME: return "An observation that reports the volume of a sample.";
-            case AVAILABLE: return "The available quantity of specimen.   This is the current quantity minus any planned consumption (e.g., tests that are planned)";
+            case AVAILABLE: return "The available quantity of specimen.   This is the current quantity minus any planned consumption (e.g. tests that are planned)";
             case CONSUMPTION: return "The quantity of specimen that is used each time the equipment uses this substance";
             case CURRENT: return "The current quantity of the specimen, i.e., initial quantity minus what has been actually used.";
             case INITIAL: return "The initial quantity of the specimen in inventory";
@@ -8713,7 +8931,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case SPLIMPRINT: return "Definition:  A characteristic of an oral solid dosage form of a medicinal product, specifying the alphanumeric text that appears on the solid dosage form, including text that is embossed, debossed, engraved or printed with ink. The presence of other non-textual distinguishing marks or symbols is recorded by SPLSYMBOL.\r\n\n                        \n                           Examples: Included in SPLIMPRINT are alphanumeric text that appears on the bands of banded capsules and logos and other symbols that can be interpreted as letters or numbers.\r\n\n                        \n                           Constraints: The Observation.value must be of type Character String (ST). Excluded from SPLIMPRINT are internal and external cut-outs in the form of alphanumeric text and the letter 'R' with a circle around it (when referring to a registered trademark) and the letters 'TM' (when referring to a 'trade mark').  To record text, begin on either side or part of the dosage form. Start at the top left and progress as one would normally read a book.  Enter a semicolon to show separation between words or line divisions.";
             case SPLSCORING: return "Definition: A characteristic of an oral solid dosage form of a medicinal product, specifying the number of equal pieces that the solid dosage form can be divided into using score line(s). \r\n\n                        \n                           Example: One score line creating two equal pieces is given a value of 2, two parallel score lines creating three equal pieces is given a value of 3.\r\n\n                        \n                           Constraints: Whether three parallel score lines create four equal pieces or two intersecting score lines create two equal pieces using one score line and four equal pieces using both score lines, both have the scoring value of 4. Solid dosage forms that are not scored are given a value of 1. Solid dosage forms that can only be divided into unequal pieces are given a null-value with nullFlavor other (OTH).";
             case SPLSHAPE: return "Description: A characteristic of an oral solid dosage form of a medicinal product, specifying the two dimensional representation of the solid dose form, in terms of the outside perimeter of a solid dosage form when the dosage form, resting on a flat surface, is viewed from directly above, including slight rounding of corners. SPLSHAPE does not include embossing, scoring, debossing, or internal cut-outs.  SPLSHAPE is independent of the orientation of the imprint and logo. Shapes can include: Triangle (3 sided); Square; Round; Semicircle; Pentagon (5 sided); Diamond; Double circle; Bullet; Hexagon (6 sided); Rectangle; Gear; Capsule; Heptagon (7 sided); Trapezoid; Oval; Clover; Octagon (8 sided); Tear; Freeform.";
-            case SPLSIZE: return "Definition: A characteristic of an oral solid dosage form of a medicinal product, specifying the longest single dimension of the solid dosage form as a physical quantity in the dimension of length (e.g., 3 mm). The length is should be specified in millimeters and should be rounded to the nearest whole millimeter.\r\n\n                        \n                           Example: SPLSIZE for a rectangular shaped tablet is the length and SPLSIZE for a round shaped tablet is the diameter.";
+            case SPLSIZE: return "Definition: A characteristic of an oral solid dosage form of a medicinal product, specifying the longest single dimension of the solid dosage form as a physical quantity in the dimension of length (e.g. 3 mm). The length is should be specified in millimeters and should be rounded to the nearest whole millimeter.\r\n\n                        \n                           Example: SPLSIZE for a rectangular shaped tablet is the length and SPLSIZE for a round shaped tablet is the diameter.";
             case SPLSYMBOL: return "Definition: A characteristic of an oral solid dosage form of a medicinal product, to describe whether or not the medicinal product has a mark or symbol appearing on it for easy and definite recognition.  Score lines, letters, numbers, and internal and external cut-outs are not considered marks or symbols. See SPLSCORING and SPLIMPRINT for these characteristics.\r\n\n                        \n                           Constraints: The Observation.value must be a Boolean (BL) with <u>true</u> indicating the presence and <u>false</u> for the absence of marks or symbols.\r\n\n                        \n                           Example:";
             case _OBSERVATIONISSUETRIGGERCODEDOBSERVATIONTYPE: return "Distinguishes the kinds of coded observations that could be the trigger for clinical issue detection. These are observations that are not measurable, but instead can be defined with codes. Coded observation types include: Allergy, Intolerance, Medical Condition, Pregnancy status, etc.";
             case _CASETRANSMISSIONMODE: return "Code for the mechanism by which disease was acquired by the living subject involved in the public health case. Includes sexually transmitted, airborne, bloodborne, vectorborne, foodborne, zoonotic, nosocomial, mechanical, dermal, congenital, environmental exposure, indeterminate.";
@@ -8745,26 +8963,26 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DISC: return "Disclaimer information for the eMeasure.";
             case FINALDT: return "The timestamp when the eMeasure was last packaged in the Measure Authoring Tool.";
             case GUIDE: return "Used to allow measure developers to provide additional guidance for implementers to understand greater specificity than could be provided in the logic for data criteria.";
-            case IDUR: return "Information on whether an increase or decrease in score is the preferred result \n(e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).";
-            case ITMCNT: return "Describes the items counted by the measure (e.g., patients, encounters, procedures, etc.)";
+            case IDUR: return "Information on whether an increase or decrease in score is the preferred result \n(e.g. a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).";
+            case ITMCNT: return "Describes the items counted by the measure (e.g. patients, encounters, procedures, etc.)";
             case KEY: return "A significant word that aids in discoverability.";
             case MEDT: return "The end date of the measurement period.";
             case MSD: return "The start date of the measurement period.";
             case MSRADJ: return "The method of adjusting for clinical severity and conditions present at the start of care that can influence patient outcomes for making valid comparisons of outcome measures across providers. Indicates whether an eMeasure is subject to the statistical process for reducing, removing, or clarifying the influences of confounding factors to allow more useful comparisons.";
-            case MSRAGG: return "Describes how to combine information calculated based on logic in each of several populations into one summarized result. It can also be used to describe how to risk adjust the data based on supplemental data elements described in the eMeasure. (e.g., pneumonia hospital measures antibiotic selection in the ICU versus non-ICU and then the roll-up of the two). \r\n\n                        \n                           Open Issue: The description does NOT align well with the definition used in the HQMF specfication; correct the MSGAGG definition, and the possible distinction of MSRAGG as a child of AGGREGATE.";
+            case MSRAGG: return "Describes how to combine information calculated based on logic in each of several populations into one summarized result. It can also be used to describe how to risk adjust the data based on supplemental data elements described in the eMeasure. (e.g. pneumonia hospital measures antibiotic selection in the ICU versus non-ICU and then the roll-up of the two). \r\n\n                        \n                           Open Issue: The description does NOT align well with the definition used in the HQMF specfication; correct the MSGAGG definition, and the possible distinction of MSRAGG as a child of AGGREGATE.";
             case MSRIMPROV: return "Information on whether an increase or decrease in score is the preferred result. This should reflect information on which way is better, an increase or decrease in score.";
             case MSRJUR: return "The list of jurisdiction(s) for which the measure applies.";
             case MSRRPTR: return "Type of person or organization that is expected to report the issue.";
             case MSRRPTTIME: return "The maximum time that may elapse following completion of the measure until the measure report must be sent to the receiver.";
-            case MSRSCORE: return "Indicates how the calculation is performed for the eMeasure \n(e.g., proportion, continuous variable, ratio)";
+            case MSRSCORE: return "Indicates how the calculation is performed for the eMeasure \n(e.g. proportion, continuous variable, ratio)";
             case MSRSET: return "Location(s) in which care being measured is rendered\r\n\n                        Usage Note: MSRSET is used rather than RoleCode because the setting applies to what is being measured, as opposed to participating directly in the health quality measure documantion itself).";
             case MSRTOPIC: return "health quality measure topic type";
             case MSRTP: return "The time period for which the eMeasure applies.";
-            case MSRTYPE: return "Indicates whether the eMeasure is used to examine a process or an outcome over time \n(e.g., Structure, Process, Outcome).";
+            case MSRTYPE: return "Indicates whether the eMeasure is used to examine a process or an outcome over time \n(e.g. Structure, Process, Outcome).";
             case RAT: return "Succinct statement of the need for the measure. Usually includes statements pertaining to Importance criterion: impact, gap in care and evidence.";
             case REF: return "Identifies bibliographic citations or references to clinical practice guidelines, sources of evidence, or other relevant materials supporting the intent and rationale of the eMeasure.";
             case SDE: return "Comparison of results across strata can be used to show where disparities exist or where there is a need to expose differences in results. For example, Centers for Medicare & Medicaid Services (CMS) in the U.S. defines four required Supplemental Data Elements (payer, ethnicity, race, and gender), which are variables used to aggregate data into various subgroups. Additional supplemental data elements required for risk adjustment or other purposes of data aggregation can be included in the Supplemental Data Element section.";
-            case STRAT: return "Describes the strata for which the measure is to be evaluated. There are three examples of reasons for stratification based on existing work. These include: (1) evaluate the measure based on different age groupings within the population described in the measure (e.g., evaluate the whole [age 14-25] and each sub-stratum [14-19] and [20-25]); (2) evaluate the eMeasure based on either a specific condition, a specific discharge location, or both; (3) evaluate the eMeasure based on different locations within a facility (e.g., evaluate the overall rate for all intensive care units and also some strata include additional findings [specific birth weights for neonatal intensive care units]).";
+            case STRAT: return "Describes the strata for which the measure is to be evaluated. There are three examples of reasons for stratification based on existing work. These include: (1) evaluate the measure based on different age groupings within the population described in the measure (e.g. evaluate the whole [age 14-25] and each sub-stratum [14-19] and [20-25]); (2) evaluate the eMeasure based on either a specific condition, a specific discharge location, or both; (3) evaluate the eMeasure based on different locations within a facility (e.g. evaluate the overall rate for all intensive care units and also some strata include additional findings [specific birth weights for neonatal intensive care units]).";
             case TRANF: return "Can be a URL or hyperlinks that link to the transmission formats that are specified for a particular reporting program.";
             case USE: return "Usage notes.";
             case _OBSERVATIONSEQUENCETYPE: return "ObservationSequenceType";
@@ -8786,10 +9004,10 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DENOM: return "Criteria for specifying the entities to be evaluated by a specific quality measure, based on a shared common set of characteristics (within a specific measurement set to which a given measure belongs).  The denominator can be the same as the initial population, or it may be a subset of the initial population to further constrain it for the purpose of the eMeasure. Different measures within an eMeasure set may have different denominators. Continuous Variable eMeasures do not have a denominator, but instead define a measure population.";
             case IPOP: return "Criteria for specifying the entities to be evaluated by a specific quality measure, based on a shared common set of characteristics (within a specific measurement set to which a given measure belongs).";
             case IPPOP: return "Criteria for specifying the patients to be evaluated by a specific quality measure, based on a shared common set of characteristics (within a specific measurement set to which a given measure belongs). Details often include information based upon specific age groups, diagnoses, diagnostic and procedure codes, and enrollment periods.";
-            case MSRPOPL: return "Criteria for specifying\nthe measure population as a narrative description (e.g., all patients seen in the Emergency Department during the measurement period).  This is used only in continuous variable eMeasures.";
+            case MSRPOPL: return "Criteria for specifying\nthe measure population as a narrative description (e.g. all patients seen in the Emergency Department during the measurement period).  This is used only in continuous variable eMeasures.";
             case MSRPOPLEX: return "Criteria for specifying subjects who should be removed from the eMeasure's Initial Population and Measure Population. Measure Population Exclusions are used in Continuous Variable measures to help narrow the Measure Population before determining the value(s) of the continuous variable(s).";
-            case NUMER: return "Criteria for specifying the processes or outcomes expected for each patient, procedure, or other unit of measurement defined in the denominator for proportion measures, or related to (but not directly derived from) the denominator for ratio measures (e.g., a numerator listing the number of central line blood stream infections and a denominator indicating the days per thousand of central line usage in a specific time period).";
-            case NUMEX: return "Criteria for specifying instances that should not be included in the numerator data. (e.g., if the number of central line blood stream infections per 1000 catheter days were to exclude infections with a specific bacterium, that bacterium would be listed as a numerator exclusion).  Numerator Exclusions are used only in ratio eMeasures.";
+            case NUMER: return "Criteria for specifying the processes or outcomes expected for each patient, procedure, or other unit of measurement defined in the denominator for proportion measures, or related to (but not directly derived from) the denominator for ratio measures (e.g. a numerator listing the number of central line blood stream infections and a denominator indicating the days per thousand of central line usage in a specific time period).";
+            case NUMEX: return "Criteria for specifying instances that should not be included in the numerator data. (e.g. if the number of central line blood stream infections per 1000 catheter days were to exclude infections with a specific bacterium, that bacterium would be listed as a numerator exclusion).  Numerator Exclusions are used only in ratio eMeasures.";
             case _PREFERENCEOBSERVATIONTYPE: return "Types of observations that can be made about Preferences.";
             case PREFSTRENGTH: return "An observation about how important a preference is to the target of the preference.";
             case ADVERSEREACTION: return "Indicates that the observation is of an unexpected negative occurrence in the subject suspected to result from the subject's exposure to one or more agents.  Observation values would be the symptom resulting from the reaction.";
@@ -8894,6 +9112,9 @@ the measure population as a narrative description (e.g., all patients seen in th
             case TIME: return "Description:Proposed therapy may be inappropriate or ineffective based on the proposed start or end time.";
             case ALRTENDLATE: return "Definition:Proposed therapy may be inappropriate or ineffective because the end of administration is too close to another planned therapy.";
             case ALRTSTRTLATE: return "Definition:Proposed therapy may be inappropriate or ineffective because the start of administration is too late after the onset of the condition.";
+            case _TIMINGDETECTEDISSUECODE: return "Proposed therapy may be inappropriate or ineffective based on the proposed start or end time.";
+            case ENDLATE: return "Proposed therapy may be inappropriate or ineffective because the end of administration is too close to another planned therapy";
+            case STRTLATE: return "Proposed therapy may be inappropriate or ineffective because the start of administration is too late after the onset of the condition";
             case _SUPPLYDETECTEDISSUECODE: return "Supplying the product at this time may be inappropriate or indicate compliance issues with the associated therapy";
             case ALLDONE: return "Definition:The requested action has already been performed and so this request has no effect";
             case FULFIL: return "Definition:The therapy being performed is in some way out of alignment with the requested therapy.";
@@ -8915,7 +9136,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case OINT: return "Hypersensitivity resulting in an adverse reaction upon exposure to an agent.";
             case ALG: return "Hypersensitivity to an agent caused by an immunologic response to an initial exposure";
             case DALG: return "An allergy to a pharmaceutical product.";
-            case EALG: return "An allergy to a substance other than a drug or a food.  E.g. Latex, pollen, etc.";
+            case EALG: return "An allergy to a substance other than a drug or a food; e.g. Latex, pollen, etc.";
             case FALG: return "An allergy to a substance generally consumed for nutritional purposes.";
             case DINT: return "Hypersensitivity resulting in an adverse reaction upon exposure to a drug.";
             case DNAINT: return "Hypersensitivity to an agent caused by a mechanism other than an immunologic response to an initial exposure";
@@ -8925,6 +9146,14 @@ the measure population as a narrative description (e.g., all patients seen in th
             case FNAINT: return "Hypersensitivity to an agent caused by a mechanism other than an immunologic response to an initial exposure";
             case NAINT: return "Hypersensitivity to an agent caused by a mechanism other than an immunologic response to an initial exposure";
             case SEV: return "A subjective evaluation of the seriousness or intensity associated with another observation.";
+            case _FDALABELDATA: return "FDA label data";
+            case FDACOATING: return "FDA label coating";
+            case FDACOLOR: return "FDA label color";
+            case FDAIMPRINTCD: return "FDA label imprint code";
+            case FDALOGO: return "FDA label logo";
+            case FDASCORING: return "FDA label scoring";
+            case FDASHAPE: return "FDA label shape";
+            case FDASIZE: return "FDA label size";
             case _ROIOVERLAYSHAPE: return "Shape of the region on the object being referenced";
             case CIRCLE: return "A circle defined by two (column,row) pairs. The first point is the center of the circle and the second point is a point on the perimeter of the circle.";
             case ELLIPSE: return "An ellipse defined by four (column,row) pairs, the first two points specifying the endpoints of the major axis and the second two points specifying the endpoints of the minor axis.";
@@ -8946,7 +9175,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case PAF: return "Phenylketonuria diet.";
             case PAR: return "Patient is supplied with parenteral nutrition, typically described in terms of i.v. medications.";
             case RD: return "A diet that seeks to reduce body fat, typically low energy content (800-1600 kcal).";
-            case SCH: return "A diet that avoids ingredients that might cause digestion problems, e.g., avoid excessive fat, avoid too much fiber (cabbage, peas, beans).";
+            case SCH: return "A diet that avoids ingredients that might cause digestion problems, e.g. avoid excessive fat, avoid too much fiber (cabbage, peas, beans).";
             case SUPPLEMENT: return "A diet that is not intended to be complete but is added to other diets.";
             case T: return "This is not really a diet, since it contains little nutritional value, but is essentially just water.  Used before coloscopy examinations.";
             case VLI: return "Diet with low content of the amino-acids valin, leucin, and isoleucin, for \"maple syrup disease.\"";
@@ -8954,7 +9183,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case F: return "Description:Indicates that a result is complete.  No further results are to come.  This maps to the 'complete' state in the observation result status code.";
             case PRLMN: return "Description:Indicates that a result is incomplete.  There are further results to come.  This maps to the 'active' state in the observation result status code.";
             case SECOBS: return "An observation identifying security metadata about an IT resource (data, information object, service, or system capability), which may be used to make access control decisions.  Security metadata are used to name security labels.  \r\n\n                        \n                           Rationale: According to ISO/TS 22600-3:2009(E) A.9.1.7 SECURITY LABEL MATCHING, Security label matching compares the initiator's clearance to the target's security label.  All of the following must be true for authorization to be granted:\r\n\n                        \n                           The security policy identifiers shall be identical\n                           The classification level of the initiator shall be greater than or equal to that of the target (that is, there shall be at least one value in the classification list of the clearance greater than or equal to the classification of the target), and \n                           For each security category in the target label, there shall be a security category of the same type in the initiator's clearance and the initiator's classification level shall dominate that of the target.\n                        \n                        \n                           Examples: SecurityObservationType  security label fields include:\r\n\n                        \n                           Confidentiality classification\n                           Compartment category\n                           Sensitivity category\n                           Security mechanisms used to ensure data integrity or to perform authorized data transformation\n                           Indicators of an IT resource completeness, veracity, reliability, trustworthiness, or provenance.\n                        \n                        \n                           Usage Note: SecurityObservationType codes designate security label field types, which are valued with an applicable SecurityObservationValue code as the \"security label tag\".";
-            case SECCATOBS: return "Type of security metadata observation made about the category of an IT resource (data, information object, service, or system capability), which may be used to make access control decisions. Security category metadata is defined by ISO/IEC 2382-8:1998(E/F)/ T-REC-X.812-1995 as: \"A nonhierarchical grouping of sensitive information used to control access to data more finely than with hierarchical security classification alone.\"\r\n\n                        \n                           Rationale: A security category observation supports requirement to specify the type of IT resource to facilitate application of appropriate levels of information security according to a range of levels of impact or consequences that might result from the unauthorized disclosure, modification, or use of the information or information system.  A resource is assigned to a specific category of information (e.g., privacy, medical, proprietary, financial, investigative, contractor sensitive, security management) defined by an organization or in some instances, by a specific law, Executive Order, directive, policy, or regulation. [FIPS 199]\r\n\n                        \n                           Examples: Types of security categories include:\r\n\n                        \n                           Compartment:  A division of data into isolated blocks with separate security controls for the purpose of reducing risk. (ISO 2382-8).  A security label tag that \"segments\" an IT resource by indicating that access and use is restricted to members of a defined community or project. (HL7 Healthcare Classification System)  \n                           Sensitivity:  The characteristic of an IT resource which implies its value or importance and may include its vulnerability. (ISO 7492-2)  Privacy metadata for information perceived as undesirable to share.  (HL7 Healthcare Classification System)";
+            case SECCATOBS: return "Type of security metadata observation made about the category of an IT resource (data, information object, service, or system capability), which may be used to make access control decisions. Security category metadata is defined by ISO/IEC 2382-8:1998(E/F)/ T-REC-X.812-1995 as: \"A nonhierarchical grouping of sensitive information used to control access to data more finely than with hierarchical security classification alone.\"\r\n\n                        \n                           Rationale: A security category observation supports requirement to specify the type of IT resource to facilitate application of appropriate levels of information security according to a range of levels of impact or consequences that might result from the unauthorized disclosure, modification, or use of the information or information system.  A resource is assigned to a specific category of information (e.g. privacy, medical, proprietary, financial, investigative, contractor sensitive, security management) defined by an organization or in some instances, by a specific law, Executive Order, directive, policy, or regulation. [FIPS 199]\r\n\n                        \n                           Examples: Types of security categories include:\r\n\n                        \n                           Compartment:  A division of data into isolated blocks with separate security controls for the purpose of reducing risk. (ISO 2382-8).  A security label tag that \"segments\" an IT resource by indicating that access and use is restricted to members of a defined community or project. (HL7 Healthcare Classification System)  \n                           Sensitivity:  The characteristic of an IT resource which implies its value or importance and may include its vulnerability. (ISO 7492-2)  Privacy metadata for information perceived as undesirable to share.  (HL7 Healthcare Classification System)";
             case SECCLASSOBS: return "Type of security metadata observation made about the classification of an IT resource (data, information object, service, or system capability), which may be used to make access control decisions.  Security classification is defined by ISO/IEC 2382-8:1998(E/F)/ T-REC-X.812-1995 as: \"The determination of which specific degree of protection against access the data or information requires, together with a designation of that degree of protection.\"  Security classification metadata is based on an analysis of applicable policies and the risk of financial, reputational, or other harm that could result from unauthorized disclosure.\r\n\n                        \n                           Rationale: A security classification observation may indicate that the confidentiality level indicated by an Act or Role confidentiality attribute has been overridden by the entity responsible for ascribing the SecurityClassificationObservationValue.  This supports the business requirement for increasing or decreasing the level of confidentiality (classification or declassification) based on parameters beyond the original assignment of an Act or Role confidentiality.\r\n\n                        \n                           Examples: Types of security classification include: HL7 Confidentiality Codes such as very restricted, unrestricted, and normal.  Intelligence community examples include top secret, secret, and confidential.\r\n\n                        \n                           Usage Note: Security classification observation type codes designate security label field types, which are valued with an applicable SecurityClassificationObservationValue code as the \"security label tag\".";
             case SECCONOBS: return "Type of security metadata observation made about the control of an IT resource (data, information object, service, or system capability), which may be used to make access control decisions.  Security control metadata convey instructions to users and receivers for secure distribution, transmission, and storage; dictate obligations or mandated actions; specify any action prohibited by refrain policy such as dissemination controls; and stipulate the permissible purpose of use of an IT resource.  \r\n\n                        \n                           Rationale: A security control observation supports requirement to specify applicable management, operational, and technical controls (i.e., safeguards or countermeasures) prescribed for an information system to protect the confidentiality, integrity, and availability of the system and its information. [FIPS 199]\r\n\n                        \n                           Examples: Types of security control metadata include: \r\n\n                        \n                           handling caveats\n                           dissemination controls\n                           obligations\n                           refrain policies\n                           purpose of use constraints";
             case SECINTOBS: return "Type of security metadata observation made about the integrity of an IT resource (data, information object, service, or system capability), which may be used to make access control decisions.\r\n\n                        \n                           Rationale: A security integrity observation supports the requirement to guard against improper information modification or destruction, and includes ensuring information non-repudiation and authenticity. (44 U.S.C., SEC. 3542)\r\n\n                        \n                           Examples: Types of security integrity metadata include: \r\n\n                        \n                           Integrity status, which indicates the completeness or workflow status of an IT resource (data, information object, service, or system capability)\n                           Integrity confidence, which indicates the reliability and trustworthiness of an IT resource\n                           Integrity control, which indicates pertinent handling caveats, obligations, refrain policies, and purpose of use for  the resource\n                           Data integrity, which indicate the security mechanisms used to ensure that the accuracy and consistency are preserved regardless of changes made (ISO/IEC DIS 2382-8)\n                           Alteration integrity, which indicate the security mechanisms used for authorized transformations of the resource\n                           Integrity provenance, which indicates the entity responsible for a report or assertion relayed \"second-hand\" about an IT resource";
@@ -8974,6 +9203,14 @@ the measure population as a narrative description (e.g., all patients seen in th
             case TRSTMECOBS: return "Type of security metadata observation made about a security architecture system component that supports enforcement of security policies.";
             case SUBSIDFFS: return "Definition: A government health program that provides coverage on a fee for service basis for health services to persons meeting eligibility criteria such as income, location of residence, access to other coverages, health condition, and age, the cost of which is to some extent subsidized by public funds.\r\n\n                        \n                           Discussion: The structure and business processes for underwriting and administering a subsidized fee for service program is further specified by the Underwriter and Payer Role.class and Role.code.";
             case WRKCOMP: return "Definition: Government mandated program providing coverage, disability income, and vocational rehabilitation for injuries sustained in the work place or in the course of employment.  Employers may either self-fund the program, purchase commercial coverage, or pay a premium to a government entity that administers the program.  Employees may be required to pay premiums toward the cost of coverage as well.";
+            case _ACTPROCEDURECODE: return "An identifying code for healthcare interventions/procedures.";
+            case _ACTBILLABLESERVICECODE: return "Definition: An identifying code for billable services, as opposed to codes for similar services used to identify them for functional purposes.";
+            case _HL7DEFINEDACTCODES: return "Domain provides the root for HL7-defined detailed or rich codes for the Act classes.";
+            case COPAY: return "";
+            case DEDUCT: return "";
+            case DOSEIND: return "";
+            case PRA: return "";
+            case STORE: return "The act of putting something away for safe keeping. The \"something\" may be physical object such as a specimen, or information, such as observations regarding a specimen.";
             default: return "?";
           }
         }
@@ -9016,6 +9253,10 @@ the measure population as a narrative description (e.g., all patients seen in th
             case FINBILL: return "financial";
             case ROST: return "roster funding";
             case SESS: return "sessional funding";
+            case FFS: return "fee for service";
+            case FFPS: return "first fill, part fill, partial strength";
+            case FFCS: return "first fill complete, partial strength";
+            case TFS: return "trial fill partial strength";
             case _ACTBOUNDEDROICODE: return "ActBoundedROICode";
             case ROIFS: return "fully specified ROI";
             case ROIPS: return "partially specified ROI";
@@ -9162,6 +9403,9 @@ the measure population as a narrative description (e.g., all patients seen in th
             case _ACTCOVERAGEAUTHORIZATIONCONFIRMATIONCODE: return "ActCoverageAuthorizationConfirmationCode";
             case AUTH: return "Authorized";
             case NAUTH: return "Not Authorized";
+            case _ACTCOVERAGEELIGIBILITYCONFIRMATIONCODE: return "ActCoverageEligibilityConfirmationCode";
+            case ELG: return "Eligible";
+            case NELG: return "Not Eligible";
             case _ACTCOVERAGELIMITCODE: return "ActCoverageLimitCode";
             case _ACTCOVERAGEQUANTITYLIMITCODE: return "ActCoverageQuantityLimitCode";
             case COVPRD: return "coverage period";
@@ -9171,6 +9415,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case UNITPRICE: return "Unit Price";
             case UNITQTY: return "Unit Quantity";
             case COVMX: return "coverage maximum";
+            case _ACTCOVEREDPARTYLIMITCODE: return "ActCoveredPartyLimitCode";
             case _ACTCOVERAGETYPECODE: return "ActCoverageTypeCode";
             case _ACTINSURANCEPOLICYCODE: return "ActInsurancePolicyCode";
             case EHCPOL: return "extended healthcare";
@@ -9353,6 +9598,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DEDUCTIBLE: return "deductible";
             case PAY: return "payment";
             case SPEND: return "spend down";
+            case COINS: return "co-insurance";
             case _ACTINVOICEDETAILGENERICMODIFIERCODE: return "ActInvoiceDetailGenericModifierCode";
             case AFTHRS: return "non-normal hours";
             case ISOL: return "isolation allowance";
@@ -9383,6 +9629,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case S: return "Suite";
             case SP: return "Semi-private";
             case W: return "Ward";
+            case _ACTINVOICEDETAILCLINICALSERVICECODE: return "ActInvoiceDetailClinicalServiceCode";
             case _ACTINVOICEGROUPCODE: return "ActInvoiceGroupCode";
             case _ACTINVOICEINTERGROUPCODE: return "ActInvoiceInterGroupCode";
             case CPNDDRGING: return "compound drug invoice group";
@@ -9530,11 +9777,8 @@ the measure population as a narrative description (e.g., all patients seen in th
             case SO: return "Script Owing";
             case FF: return "First Fill";
             case FFC: return "First Fill - Complete";
-            case FFCS: return "first fill complete, partial strength";
             case FFP: return "First Fill - Part Fill";
-            case FFPS: return "first fill, part fill, partial strength";
             case FFSS: return "first fill, partial strength";
-            case TFS: return "trial fill partial strength";
             case TF: return "Trial Fill";
             case FS: return "Floor stock";
             case MS: return "Manufacturer Sample";
@@ -9568,6 +9812,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case SEX: return "sexuality and reproductive health information sensitivity";
             case STD: return "sexually transmitted disease information sensitivity";
             case TBOO: return "taboo";
+            case SICKLE: return "sickle cell";
             case _ENTITYSENSITIVITYPOLICYTYPE: return "EntityInformationSensitivityPolicy";
             case DEMO: return "all demographic information sensitivity";
             case DOB: return "date of birth information sensitivity";
@@ -9664,6 +9909,8 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DRUG: return "Drug therapy";
             case FD: return "food";
             case IMMUNIZ: return "Immunization";
+            case BOOSTER: return "Booster Immunization";
+            case INITIMMUNIZ: return "Initial Immunization";
             case _ACTTASKCODE: return "ActTaskCode";
             case OE: return "order entry task";
             case LABOE: return "laboratory test order entry task";
@@ -9941,6 +10188,9 @@ the measure population as a narrative description (e.g., all patients seen in th
             case TIME: return "timing detected issue";
             case ALRTENDLATE: return "end too late alert";
             case ALRTSTRTLATE: return "start too late alert";
+            case _TIMINGDETECTEDISSUECODE: return "TimingDetectedIssueCode";
+            case ENDLATE: return "End Too Late Alert";
+            case STRTLATE: return "Start Too Late Alert";
             case _SUPPLYDETECTEDISSUECODE: return "SupplyDetectedIssueCode";
             case ALLDONE: return "already performed";
             case FULFIL: return "fulfillment alert";
@@ -9972,6 +10222,14 @@ the measure population as a narrative description (e.g., all patients seen in th
             case FNAINT: return "Food Non-Allergy Intolerance";
             case NAINT: return "Non-Allergy Intolerance";
             case SEV: return "Severity Observation";
+            case _FDALABELDATA: return "FDALabelData";
+            case FDACOATING: return "coating";
+            case FDACOLOR: return "color";
+            case FDAIMPRINTCD: return "imprint code";
+            case FDALOGO: return "logo";
+            case FDASCORING: return "scoring";
+            case FDASHAPE: return "shape";
+            case FDASIZE: return "size";
             case _ROIOVERLAYSHAPE: return "ROIOverlayShape";
             case CIRCLE: return "circle";
             case ELLIPSE: return "ellipse";
@@ -10021,6 +10279,14 @@ the measure population as a narrative description (e.g., all patients seen in th
             case TRSTMECOBS: return "trust mechanism observation";
             case SUBSIDFFS: return "subsidized fee for service program";
             case WRKCOMP: return "(workers compensation program";
+            case _ACTPROCEDURECODE: return "ActProcedureCode";
+            case _ACTBILLABLESERVICECODE: return "ActBillableServiceCode";
+            case _HL7DEFINEDACTCODES: return "HL7DefinedActCodes";
+            case COPAY: return "COPAY";
+            case DEDUCT: return "DEDUCT";
+            case DOSEIND: return "DOSEIND";
+            case PRA: return "PRA";
+            case STORE: return "Storage";
             default: return "?";
           }
     }

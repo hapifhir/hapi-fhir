@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -49,7 +49,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
     public enum ConformanceStatementKind {
         /**
-         * The Conformance instance represents the present capabilities of a specific system instance.  This is the kind returned by OPTIONS for a FHIR server end-point
+         * The Conformance instance represents the present capabilities of a specific system instance.  This is the kind returned by OPTIONS for a FHIR server end-point.
          */
         INSTANCE, 
         /**
@@ -57,7 +57,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
          */
         CAPABILITY, 
         /**
-         * The Conformance instance represents a set of requirements for other systems to meet.  E.g. as part of an implementation guide or 'request for proposal'
+         * The Conformance instance represents a set of requirements for other systems to meet; e.g. as part of an implementation guide or 'request for proposal'.
          */
         REQUIREMENTS, 
         /**
@@ -93,9 +93,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
         public String getDefinition() {
           switch (this) {
-            case INSTANCE: return "The Conformance instance represents the present capabilities of a specific system instance.  This is the kind returned by OPTIONS for a FHIR server end-point";
+            case INSTANCE: return "The Conformance instance represents the present capabilities of a specific system instance.  This is the kind returned by OPTIONS for a FHIR server end-point.";
             case CAPABILITY: return "The Conformance instance represents the capabilities of a system or piece of software, independent of a particular installation.";
-            case REQUIREMENTS: return "The Conformance instance represents a set of requirements for other systems to meet.  E.g. as part of an implementation guide or 'request for proposal'";
+            case REQUIREMENTS: return "The Conformance instance represents a set of requirements for other systems to meet; e.g. as part of an implementation guide or 'request for proposal'.";
             default: return "?";
           }
         }
@@ -135,19 +135,19 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
     public enum UnknownContentCode {
         /**
-         * The application does not accept either unknown elements or extensions
+         * The application does not accept either unknown elements or extensions.
          */
         NO, 
         /**
-         * The application accepts unknown extensions, but not unknown elements
+         * The application accepts unknown extensions, but not unknown elements.
          */
         EXTENSIONS, 
         /**
-         * The application accepts unknown elements, but not unknown extensions
+         * The application accepts unknown elements, but not unknown extensions.
          */
         ELEMENTS, 
         /**
-         * The application accepts unknown elements and extensions
+         * The application accepts unknown elements and extensions.
          */
         BOTH, 
         /**
@@ -187,10 +187,10 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
         public String getDefinition() {
           switch (this) {
-            case NO: return "The application does not accept either unknown elements or extensions";
-            case EXTENSIONS: return "The application accepts unknown extensions, but not unknown elements";
-            case ELEMENTS: return "The application accepts unknown elements, but not unknown extensions";
-            case BOTH: return "The application accepts unknown elements and extensions";
+            case NO: return "The application does not accept either unknown elements or extensions.";
+            case EXTENSIONS: return "The application accepts unknown extensions, but not unknown elements.";
+            case ELEMENTS: return "The application accepts unknown elements, but not unknown extensions.";
+            case BOTH: return "The application accepts unknown elements and extensions.";
             default: return "?";
           }
         }
@@ -235,11 +235,11 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
     public enum RestfulConformanceMode {
         /**
-         * The application acts as a client for this resource
+         * The application acts as a client for this resource.
          */
         CLIENT, 
         /**
-         * The application acts as a server for this resource
+         * The application acts as a server for this resource.
          */
         SERVER, 
         /**
@@ -271,8 +271,8 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
         public String getDefinition() {
           switch (this) {
-            case CLIENT: return "The application acts as a client for this resource";
-            case SERVER: return "The application acts as a server for this resource";
+            case CLIENT: return "The application acts as a client for this resource.";
+            case SERVER: return "The application acts as a server for this resource.";
             default: return "?";
           }
         }
@@ -477,15 +477,15 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
     public enum ResourceVersionPolicy {
         /**
-         * VersionId meta-property is not suppoerted (server) or used (client)
+         * VersionId meta-property is not supported (server) or used (client).
          */
         NOVERSION, 
         /**
-         * VersionId meta-property is suppoerted (server) or used (client)
+         * VersionId meta-property is supported (server) or used (client).
          */
         VERSIONED, 
         /**
-         * VersionId is must be correct for updates (server) or will be specified (If-match header) for updates (client)
+         * VersionId is must be correct for updates (server) or will be specified (If-match header) for updates (client).
          */
         VERSIONEDUPDATE, 
         /**
@@ -521,9 +521,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
         public String getDefinition() {
           switch (this) {
-            case NOVERSION: return "VersionId meta-property is not suppoerted (server) or used (client)";
-            case VERSIONED: return "VersionId meta-property is suppoerted (server) or used (client)";
-            case VERSIONEDUPDATE: return "VersionId is must be correct for updates (server) or will be specified (If-match header) for updates (client)";
+            case NOVERSION: return "VersionId meta-property is not supported (server) or used (client).";
+            case VERSIONED: return "VersionId meta-property is supported (server) or used (client).";
+            case VERSIONEDUPDATE: return "VersionId is must be correct for updates (server) or will be specified (If-match header) for updates (client).";
             default: return "?";
           }
         }
@@ -563,15 +563,15 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
     public enum ConditionalDeleteStatus {
         /**
-         * No support for conditional deletes
+         * No support for conditional deletes.
          */
         NOTSUPPORTED, 
         /**
-         * Conditional deletes are supported, but only single resources at a time
+         * Conditional deletes are supported, but only single resources at a time.
          */
         SINGLE, 
         /**
-         * Conditional deletes are supported, and multiple resources can be deleted in a single interaction
+         * Conditional deletes are supported, and multiple resources can be deleted in a single interaction.
          */
         MULTIPLE, 
         /**
@@ -607,9 +607,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
         public String getDefinition() {
           switch (this) {
-            case NOTSUPPORTED: return "No support for conditional deletes";
-            case SINGLE: return "Conditional deletes are supported, but only single resources at a time";
-            case MULTIPLE: return "Conditional deletes are supported, and multiple resources can be deleted in a single interaction";
+            case NOTSUPPORTED: return "No support for conditional deletes.";
+            case SINGLE: return "Conditional deletes are supported, but only single resources at a time.";
+            case MULTIPLE: return "Conditional deletes are supported, and multiple resources can be deleted in a single interaction.";
             default: return "?";
           }
         }
@@ -649,23 +649,23 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
     public enum SearchModifierCode {
         /**
-         * The search parameter returns resources that have a value or not
+         * The search parameter returns resources that have a value or not.
          */
         MISSING, 
         /**
-         * The search parameter returns resources that have a value that exactly matches the supplied parameter (the whole string, including casing and accents)
+         * The search parameter returns resources that have a value that exactly matches the supplied parameter (the whole string, including casing and accents).
          */
         EXACT, 
         /**
-         * The search parameter returns resources that include the supplied parameter value anywhere within the field being searched
+         * The search parameter returns resources that include the supplied parameter value anywhere within the field being searched.
          */
         CONTAINS, 
         /**
-         * The search parameter returns resources that do not contain a match
+         * The search parameter returns resources that do not contain a match .
          */
         NOT, 
         /**
-         * The search parameter is processed as a string that searches text associated with the code/value - either CodeableConcept.text, Coding.display, or Identifier.type.text
+         * The search parameter is processed as a string that searches text associated with the code/value - either CodeableConcept.text, Coding.display, or Identifier.type.text.
          */
         TEXT, 
         /**
@@ -673,19 +673,19 @@ public class Conformance extends DomainResource implements IBaseConformance {
          */
         IN, 
         /**
-         * The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is not in the specified value set
+         * The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is not in the specified value set.
          */
         NOTIN, 
         /**
-         * The search parameter tests whether the value in a resource is subsumed by the specified value (is-a, or heirarchical relationships)
+         * The search parameter tests whether the value in a resource is subsumed by the specified value (is-a, or hierarchical relationships).
          */
         BELOW, 
         /**
-         * The search parameter tests whether the value in a resource subsumes the specified value (is-a, or heirarchical relationships)
+         * The search parameter tests whether the value in a resource subsumes the specified value (is-a, or hierarchical relationships).
          */
         ABOVE, 
         /**
-         * The search parameter only applies to the Resource Type specified as a modifier (e.g. the modifier is not actually :type, but :Patient etc)
+         * The search parameter only applies to the Resource Type specified as a modifier (e.g. the modifier is not actually :type, but :Patient etc.).
          */
         TYPE, 
         /**
@@ -749,16 +749,16 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
         public String getDefinition() {
           switch (this) {
-            case MISSING: return "The search parameter returns resources that have a value or not";
-            case EXACT: return "The search parameter returns resources that have a value that exactly matches the supplied parameter (the whole string, including casing and accents)";
-            case CONTAINS: return "The search parameter returns resources that include the supplied parameter value anywhere within the field being searched";
-            case NOT: return "The search parameter returns resources that do not contain a match";
-            case TEXT: return "The search parameter is processed as a string that searches text associated with the code/value - either CodeableConcept.text, Coding.display, or Identifier.type.text";
+            case MISSING: return "The search parameter returns resources that have a value or not.";
+            case EXACT: return "The search parameter returns resources that have a value that exactly matches the supplied parameter (the whole string, including casing and accents).";
+            case CONTAINS: return "The search parameter returns resources that include the supplied parameter value anywhere within the field being searched.";
+            case NOT: return "The search parameter returns resources that do not contain a match .";
+            case TEXT: return "The search parameter is processed as a string that searches text associated with the code/value - either CodeableConcept.text, Coding.display, or Identifier.type.text.";
             case IN: return "The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is in the specified value set.";
-            case NOTIN: return "The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is not in the specified value set";
-            case BELOW: return "The search parameter tests whether the value in a resource is subsumed by the specified value (is-a, or heirarchical relationships)";
-            case ABOVE: return "The search parameter tests whether the value in a resource subsumes the specified value (is-a, or heirarchical relationships)";
-            case TYPE: return "The search parameter only applies to the Resource Type specified as a modifier (e.g. the modifier is not actually :type, but :Patient etc)";
+            case NOTIN: return "The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is not in the specified value set.";
+            case BELOW: return "The search parameter tests whether the value in a resource is subsumed by the specified value (is-a, or hierarchical relationships).";
+            case ABOVE: return "The search parameter tests whether the value in a resource subsumes the specified value (is-a, or hierarchical relationships).";
+            case TYPE: return "The search parameter only applies to the Resource Type specified as a modifier (e.g. the modifier is not actually :type, but :Patient etc.).";
             default: return "?";
           }
         }
@@ -919,19 +919,19 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
     public enum TransactionMode {
         /**
-         * Neither Batch or Transaction supported
+         * Neither batch or transaction is supported.
          */
         NOTSUPPORTED, 
         /**
-         * Batches supported
+         * Batches are  supported.
          */
         BATCH, 
         /**
-         * Transactions Supported
+         * Transactions are supported.
          */
         TRANSACTION, 
         /**
-         * Both Batches and Transactions Supported
+         * Both batches and transactions are supported.
          */
         BOTH, 
         /**
@@ -971,10 +971,10 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
         public String getDefinition() {
           switch (this) {
-            case NOTSUPPORTED: return "Neither Batch or Transaction supported";
-            case BATCH: return "Batches supported";
-            case TRANSACTION: return "Transactions Supported";
-            case BOTH: return "Both Batches and Transactions Supported";
+            case NOTSUPPORTED: return "Neither batch or transaction is supported.";
+            case BATCH: return "Batches are  supported.";
+            case TRANSACTION: return "Transactions are supported.";
+            case BOTH: return "Both batches and transactions are supported.";
             default: return "?";
           }
         }
@@ -1019,15 +1019,15 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
     public enum MessageSignificanceCategory {
         /**
-         * The message represents/requests a change that should not be processed more than once. E.g. Making a booking for an appointment
+         * The message represents/requests a change that should not be processed more than once; e.g. Making a booking for an appointment.
          */
         CONSEQUENCE, 
         /**
-         * The message represents a response to query for current information. Retrospective processing is wrong and/or wasteful
+         * The message represents a response to query for current information. Retrospective processing is wrong and/or wasteful.
          */
         CURRENCY, 
         /**
-         * The content is not necessarily intended to be current, and it can be reprocessed, though there may be version issues created by processing old notifications
+         * The content is not necessarily intended to be current, and it can be reprocessed, though there may be version issues created by processing old notifications.
          */
         NOTIFICATION, 
         /**
@@ -1063,9 +1063,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
         public String getDefinition() {
           switch (this) {
-            case CONSEQUENCE: return "The message represents/requests a change that should not be processed more than once. E.g. Making a booking for an appointment";
-            case CURRENCY: return "The message represents a response to query for current information. Retrospective processing is wrong and/or wasteful";
-            case NOTIFICATION: return "The content is not necessarily intended to be current, and it can be reprocessed, though there may be version issues created by processing old notifications";
+            case CONSEQUENCE: return "The message represents/requests a change that should not be processed more than once; e.g. Making a booking for an appointment.";
+            case CURRENCY: return "The message represents a response to query for current information. Retrospective processing is wrong and/or wasteful.";
+            case NOTIFICATION: return "The content is not necessarily intended to be current, and it can be reprocessed, though there may be version issues created by processing old notifications.";
             default: return "?";
           }
         }
@@ -1105,11 +1105,11 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
     public enum ConformanceEventMode {
         /**
-         * The application sends requests and receives responses
+         * The application sends requests and receives responses.
          */
         SENDER, 
         /**
-         * The application receives requests and sends responses
+         * The application receives requests and sends responses.
          */
         RECEIVER, 
         /**
@@ -1141,8 +1141,8 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
         public String getDefinition() {
           switch (this) {
-            case SENDER: return "The application sends requests and receives responses";
-            case RECEIVER: return "The application receives requests and sends responses";
+            case SENDER: return "The application sends requests and receives responses.";
+            case RECEIVER: return "The application receives requests and sends responses.";
             default: return "?";
           }
         }
@@ -1177,11 +1177,11 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
     public enum DocumentMode {
         /**
-         * The application produces documents of the specified type
+         * The application produces documents of the specified type.
          */
         PRODUCER, 
         /**
-         * The application consumes documents of the specified type
+         * The application consumes documents of the specified type.
          */
         CONSUMER, 
         /**
@@ -1213,8 +1213,8 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
         public String getDefinition() {
           switch (this) {
-            case PRODUCER: return "The application produces documents of the specified type";
-            case CONSUMER: return "The application consumes documents of the specified type";
+            case PRODUCER: return "The application produces documents of the specified type.";
+            case CONSUMER: return "The application consumes documents of the specified type.";
             default: return "?";
           }
         }
@@ -4532,7 +4532,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
          * An endpoint (network accessible address) to which messages and/or replies are to be sent.
          */
         @Child(name = "endpoint", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="A messaging service end point", formalDefinition="An endpoint (network accessible address) to which messages and/or replies are to be sent." )
+        @Description(shortDefinition="A messaging service end-point", formalDefinition="An endpoint (network accessible address) to which messages and/or replies are to be sent." )
         protected List<ConformanceMessagingEndpointComponent> endpoint;
 
         /**
@@ -4550,10 +4550,10 @@ public class Conformance extends DomainResource implements IBaseConformance {
         protected StringType documentation;
 
         /**
-         * A description of the solution's support for an event at this end point.
+         * A description of the solution's support for an event at this end-point.
          */
         @Child(name = "event", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Declare support for this event", formalDefinition="A description of the solution's support for an event at this end point." )
+        @Description(shortDefinition="Declare support for this event", formalDefinition="A description of the solution's support for an event at this end-point." )
         protected List<ConformanceMessagingEventComponent> event;
 
         private static final long serialVersionUID = -712362545L;
@@ -4700,7 +4700,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
-         * @return {@link #event} (A description of the solution's support for an event at this end point.)
+         * @return {@link #event} (A description of the solution's support for an event at this end-point.)
          */
         public List<ConformanceMessagingEventComponent> getEvent() { 
           if (this.event == null)
@@ -4718,7 +4718,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
-         * @return {@link #event} (A description of the solution's support for an event at this end point.)
+         * @return {@link #event} (A description of the solution's support for an event at this end-point.)
          */
     // syntactic sugar
         public ConformanceMessagingEventComponent addEvent() { //3
@@ -4744,7 +4744,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
           childrenList.add(new Property("endpoint", "", "An endpoint (network accessible address) to which messages and/or replies are to be sent.", 0, java.lang.Integer.MAX_VALUE, endpoint));
           childrenList.add(new Property("reliableCache", "unsignedInt", "Length if the receiver's reliable messaging cache in minutes (if a receiver) or how long the cache length on the receiver should be (if a sender).", 0, java.lang.Integer.MAX_VALUE, reliableCache));
           childrenList.add(new Property("documentation", "string", "Documentation about the system's messaging capabilities for this endpoint not otherwise documented by the conformance statement.  For example, process for becoming an authorized messaging exchange partner.", 0, java.lang.Integer.MAX_VALUE, documentation));
-          childrenList.add(new Property("event", "", "A description of the solution's support for an event at this end point.", 0, java.lang.Integer.MAX_VALUE, event));
+          childrenList.add(new Property("event", "", "A description of the solution's support for an event at this end-point.", 0, java.lang.Integer.MAX_VALUE, event));
         }
 
       public ConformanceMessagingComponent copy() {
@@ -4808,7 +4808,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
          * The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier.
          */
         @Child(name = "address", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Address of end point", formalDefinition="The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier." )
+        @Description(shortDefinition="Address of end-point", formalDefinition="The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier." )
         protected UriType address;
 
         private static final long serialVersionUID = 1294656428L;
@@ -5655,10 +5655,10 @@ public class Conformance extends DomainResource implements IBaseConformance {
     protected List<ConformanceContactComponent> contact;
 
     /**
-     * The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the conformance statement changes.
+     * The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.
      */
     @Child(name = "date", type = {DateTimeType.class}, order=7, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Publication Date(/time)", formalDefinition="The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the conformance statement changes." )
+    @Description(shortDefinition="Publication Date(/time)", formalDefinition="The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes." )
     protected DateTimeType date;
 
     /**
@@ -5676,10 +5676,10 @@ public class Conformance extends DomainResource implements IBaseConformance {
     protected StringType requirements;
 
     /**
-     * A copyright statement relating to the conformamce statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.
+     * A copyright statement relating to the conformance statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.
      */
     @Child(name = "copyright", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Use and/or Publishing restrictions", formalDefinition="A copyright statement relating to the conformamce statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement." )
+    @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the conformance statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement." )
     protected StringType copyright;
 
     /**
@@ -6108,7 +6108,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the conformance statement changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -6128,7 +6128,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the conformance statement changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public Conformance setDateElement(DateTimeType value) { 
       this.date = value;
@@ -6136,14 +6136,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
     }
 
     /**
-     * @return The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the conformance statement changes.
+     * @return The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the conformance statement changes.
+     * @param value The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.
      */
     public Conformance setDate(Date value) { 
         if (this.date == null)
@@ -6251,7 +6251,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
     }
 
     /**
-     * @return {@link #copyright} (A copyright statement relating to the conformamce statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     * @return {@link #copyright} (A copyright statement relating to the conformance statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
      */
     public StringType getCopyrightElement() { 
       if (this.copyright == null)
@@ -6271,7 +6271,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
     }
 
     /**
-     * @param value {@link #copyright} (A copyright statement relating to the conformamce statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     * @param value {@link #copyright} (A copyright statement relating to the conformance statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
      */
     public Conformance setCopyrightElement(StringType value) { 
       this.copyright = value;
@@ -6279,14 +6279,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
     }
 
     /**
-     * @return A copyright statement relating to the conformamce statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.
+     * @return A copyright statement relating to the conformance statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.
      */
     public String getCopyright() { 
       return this.copyright == null ? null : this.copyright.getValue();
     }
 
     /**
-     * @param value A copyright statement relating to the conformamce statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.
+     * @param value A copyright statement relating to the conformance statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.
      */
     public Conformance setCopyright(String value) { 
       if (Utilities.noString(value))
@@ -6726,10 +6726,10 @@ public class Conformance extends DomainResource implements IBaseConformance {
         childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the conformance.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the conformance statement changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("description", "string", "A free text natural language description of the conformance statement and its use. Typically, this is used when the conformance statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("requirements", "string", "Explains why this conformance statement is needed and why it's been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
-        childrenList.add(new Property("copyright", "string", "A copyright statement relating to the conformamce statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.", 0, java.lang.Integer.MAX_VALUE, copyright));
+        childrenList.add(new Property("copyright", "string", "A copyright statement relating to the conformance statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("kind", "code", "The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind not instance of software) or a class of implementation (e.g. a desired purchase).", 0, java.lang.Integer.MAX_VALUE, kind));
         childrenList.add(new Property("software", "", "Software that is covered by this conformance statement.  It is used when the conformance statement describes the capabilities of a particular software version, independent of an installation.", 0, java.lang.Integer.MAX_VALUE, software));
         childrenList.add(new Property("implementation", "", "Identifies a specific implementation instance that is described by the conformance statement - i.e. a particular installation, rather than the capabilities of a software program.", 0, java.lang.Integer.MAX_VALUE, implementation));

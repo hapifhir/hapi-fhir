@@ -29,13 +29,13 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum OrganizationType {
 
         /**
-         * An organization that provides healthcare services
+         * An organization that provides healthcare services.
          */
         PROV, 
         /**
@@ -43,39 +43,39 @@ public enum OrganizationType {
          */
         DEPT, 
         /**
-         * An organizational team is usualy a grouping of practitioners that perform a specific function within an organization (which could be a top level organization, or a department)
+         * An organizational team is usually a grouping of practitioners that perform a specific function within an organization (which could be a top level organization, or a department).
          */
         TEAM, 
         /**
-         * A political body, often used when including organization records for government bodies such as a Federal Government, State or Local Government
+         * A political body, often used when including organization records for government bodies such as a Federal Government, State or Local Government.
          */
         GOVT, 
         /**
-         * A company that provides insurance to its subscribers that may include healthcare related policies
+         * A company that provides insurance to its subscribers that may include healthcare related policies.
          */
         INS, 
         /**
-         * An educational institution that provides education or research facilitites
+         * An educational institution that provides education or research facilities.
          */
         EDU, 
         /**
-         * An organization that is identified as a part of a religeous institution
+         * An organization that is identified as a part of a religious institution.
          */
         RELI, 
         /**
-         * An organization that is identified as a Pharmaceutical/Clinical Research Sponsor
+         * An organization that is identified as a Pharmaceutical/Clinical Research Sponsor.
          */
         CRS, 
         /**
-         * An un-incorporated community group
+         * An un-incorporated community group.
          */
         CG, 
         /**
-         * An organization that is a registered business or corporation but not identified by other types
+         * An organization that is a registered business or corporation but not identified by other types.
          */
         BUS, 
         /**
-         * Other type of organization not already specified
+         * Other type of organization not already specified.
          */
         OTHER, 
         /**
@@ -130,17 +130,17 @@ public enum OrganizationType {
         }
         public String getDefinition() {
           switch (this) {
-            case PROV: return "An organization that provides healthcare services";
+            case PROV: return "An organization that provides healthcare services.";
             case DEPT: return "A department or ward within a hospital (Generally is not applicable to top level organizations)";
-            case TEAM: return "An organizational team is usualy a grouping of practitioners that perform a specific function within an organization (which could be a top level organization, or a department)";
-            case GOVT: return "A political body, often used when including organization records for government bodies such as a Federal Government, State or Local Government";
-            case INS: return "A company that provides insurance to its subscribers that may include healthcare related policies";
-            case EDU: return "An educational institution that provides education or research facilitites";
-            case RELI: return "An organization that is identified as a part of a religeous institution";
-            case CRS: return "An organization that is identified as a Pharmaceutical/Clinical Research Sponsor";
-            case CG: return "An un-incorporated community group";
-            case BUS: return "An organization that is a registered business or corporation but not identified by other types";
-            case OTHER: return "Other type of organization not already specified";
+            case TEAM: return "An organizational team is usually a grouping of practitioners that perform a specific function within an organization (which could be a top level organization, or a department).";
+            case GOVT: return "A political body, often used when including organization records for government bodies such as a Federal Government, State or Local Government.";
+            case INS: return "A company that provides insurance to its subscribers that may include healthcare related policies.";
+            case EDU: return "An educational institution that provides education or research facilities.";
+            case RELI: return "An organization that is identified as a part of a religious institution.";
+            case CRS: return "An organization that is identified as a Pharmaceutical/Clinical Research Sponsor.";
+            case CG: return "An un-incorporated community group.";
+            case BUS: return "An organization that is a registered business or corporation but not identified by other types.";
+            case OTHER: return "Other type of organization not already specified.";
             default: return "?";
           }
         }

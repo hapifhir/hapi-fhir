@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -48,55 +48,55 @@ public class DiagnosticOrder extends DomainResource {
 
     public enum DiagnosticOrderStatus {
         /**
-         * The request has been proposed
+         * The request has been proposed.
          */
         PROPOSED, 
         /**
-         * the request is in preliminary form prior to being sent
+         * The request is in preliminary form prior to being sent.
          */
         DRAFT, 
         /**
-         * The request has been planned
+         * The request has been planned.
          */
         PLANNED, 
         /**
-         * The request has been placed
+         * The request has been placed.
          */
         REQUESTED, 
         /**
-         * The receiving system has received the order, but not yet decided whether it will be performed
+         * The receiving system has received the order, but not yet decided whether it will be performed.
          */
         RECEIVED, 
         /**
-         * The receiving system has accepted the order, but work has not yet commenced
+         * The receiving system has accepted the order, but work has not yet commenced.
          */
         ACCEPTED, 
         /**
-         * The work to fulfill the order is happening
+         * The work to fulfill the order is happening.
          */
         INPROGRESS, 
         /**
-         * The work is complete, and the outcomes are being reviewed for approval
+         * The work is complete, and the outcomes are being reviewed for approval.
          */
         REVIEW, 
         /**
-         * The work has been complete, the report(s) released, and no further work is planned
+         * The work has been completed, the report(s) released, and no further work is planned.
          */
         COMPLETED, 
         /**
-         * the request has been withdrawn
+         * The request has been withdrawn.
          */
         CANCELLED, 
         /**
-         * The request has been held by originating system/user request
+         * The request has been held by originating system/user request.
          */
         SUSPENDED, 
         /**
-         * The receiving system has declined to fulfill the request
+         * The receiving system has declined to fulfill the request.
          */
         REJECTED, 
         /**
-         * The diagnostic investigation was attempted, but due to some procedural error, it could not be completed
+         * The diagnostic investigation was attempted, but due to some procedural error, it could not be completed.
          */
         FAILED, 
         /**
@@ -172,19 +172,19 @@ public class DiagnosticOrder extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSED: return "The request has been proposed";
-            case DRAFT: return "the request is in preliminary form prior to being sent";
-            case PLANNED: return "The request has been planned";
-            case REQUESTED: return "The request has been placed";
-            case RECEIVED: return "The receiving system has received the order, but not yet decided whether it will be performed";
-            case ACCEPTED: return "The receiving system has accepted the order, but work has not yet commenced";
-            case INPROGRESS: return "The work to fulfill the order is happening";
-            case REVIEW: return "The work is complete, and the outcomes are being reviewed for approval";
-            case COMPLETED: return "The work has been complete, the report(s) released, and no further work is planned";
-            case CANCELLED: return "the request has been withdrawn";
-            case SUSPENDED: return "The request has been held by originating system/user request";
-            case REJECTED: return "The receiving system has declined to fulfill the request";
-            case FAILED: return "The diagnostic investigation was attempted, but due to some procedural error, it could not be completed";
+            case PROPOSED: return "The request has been proposed.";
+            case DRAFT: return "The request is in preliminary form prior to being sent.";
+            case PLANNED: return "The request has been planned.";
+            case REQUESTED: return "The request has been placed.";
+            case RECEIVED: return "The receiving system has received the order, but not yet decided whether it will be performed.";
+            case ACCEPTED: return "The receiving system has accepted the order, but work has not yet commenced.";
+            case INPROGRESS: return "The work to fulfill the order is happening.";
+            case REVIEW: return "The work is complete, and the outcomes are being reviewed for approval.";
+            case COMPLETED: return "The work has been completed, the report(s) released, and no further work is planned.";
+            case CANCELLED: return "The request has been withdrawn.";
+            case SUSPENDED: return "The request has been held by originating system/user request.";
+            case REJECTED: return "The receiving system has declined to fulfill the request.";
+            case FAILED: return "The diagnostic investigation was attempted, but due to some procedural error, it could not be completed.";
             default: return "?";
           }
         }
@@ -274,19 +274,19 @@ public class DiagnosticOrder extends DomainResource {
 
     public enum DiagnosticOrderPriority {
         /**
-         * The order has a normal priority
+         * The order has a normal priority .
          */
         ROUTINE, 
         /**
-         * The order should be urgently
+         * The order should be urgently.
          */
         URGENT, 
         /**
-         * The order is time-critical
+         * The order is time-critical.
          */
         STAT, 
         /**
-         * The order should be acted on as soon as possible
+         * The order should be acted on as soon as possible.
          */
         ASAP, 
         /**
@@ -326,10 +326,10 @@ public class DiagnosticOrder extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ROUTINE: return "The order has a normal priority";
-            case URGENT: return "The order should be urgently";
-            case STAT: return "The order is time-critical";
-            case ASAP: return "The order should be acted on as soon as possible";
+            case ROUTINE: return "The order has a normal priority .";
+            case URGENT: return "The order should be urgently.";
+            case STAT: return "The order is time-critical.";
+            case ASAP: return "The order should be acted on as soon as possible.";
             default: return "?";
           }
         }
@@ -396,14 +396,14 @@ public class DiagnosticOrder extends DomainResource {
         protected DateTimeType dateTime;
 
         /**
-         * The person who was responsible for performing or recording the action.
+         * The person responsible for performing or recording the action.
          */
         @Child(name = "actor", type = {Practitioner.class, Device.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Who recorded or did this", formalDefinition="The person who was responsible for performing or recording the action." )
+        @Description(shortDefinition="Who recorded or did this", formalDefinition="The person responsible for performing or recording the action." )
         protected Reference actor;
 
         /**
-         * The actual object that is the target of the reference (The person who was responsible for performing or recording the action.)
+         * The actual object that is the target of the reference (The person responsible for performing or recording the action.)
          */
         protected Resource actorTarget;
 
@@ -540,7 +540,7 @@ public class DiagnosticOrder extends DomainResource {
         }
 
         /**
-         * @return {@link #actor} (The person who was responsible for performing or recording the action.)
+         * @return {@link #actor} (The person responsible for performing or recording the action.)
          */
         public Reference getActor() { 
           if (this.actor == null)
@@ -556,7 +556,7 @@ public class DiagnosticOrder extends DomainResource {
         }
 
         /**
-         * @param value {@link #actor} (The person who was responsible for performing or recording the action.)
+         * @param value {@link #actor} (The person responsible for performing or recording the action.)
          */
         public DiagnosticOrderEventComponent setActor(Reference value) { 
           this.actor = value;
@@ -564,14 +564,14 @@ public class DiagnosticOrder extends DomainResource {
         }
 
         /**
-         * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person who was responsible for performing or recording the action.)
+         * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person responsible for performing or recording the action.)
          */
         public Resource getActorTarget() { 
           return this.actorTarget;
         }
 
         /**
-         * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person who was responsible for performing or recording the action.)
+         * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person responsible for performing or recording the action.)
          */
         public DiagnosticOrderEventComponent setActorTarget(Resource value) { 
           this.actorTarget = value;
@@ -583,7 +583,7 @@ public class DiagnosticOrder extends DomainResource {
           childrenList.add(new Property("status", "code", "The status for the event.", 0, java.lang.Integer.MAX_VALUE, status));
           childrenList.add(new Property("description", "CodeableConcept", "Additional information about the event that occurred - e.g. if the status remained unchanged.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("dateTime", "dateTime", "The date/time at which the event occurred.", 0, java.lang.Integer.MAX_VALUE, dateTime));
-          childrenList.add(new Property("actor", "Reference(Practitioner|Device)", "The person who was responsible for performing or recording the action.", 0, java.lang.Integer.MAX_VALUE, actor));
+          childrenList.add(new Property("actor", "Reference(Practitioner|Device)", "The person responsible for performing or recording the action.", 0, java.lang.Integer.MAX_VALUE, actor));
         }
 
       public DiagnosticOrderEventComponent copy() {
@@ -1027,10 +1027,10 @@ public class DiagnosticOrder extends DomainResource {
     protected Enumeration<DiagnosticOrderPriority> priority;
 
     /**
-     * A summary of the events of interest that have occurred as the request is processed. E.g. when the order was made, various processing steps (specimens received), when it was completed.
+     * A summary of the events of interest that have occurred as the request is processed; e.g. when the order was made, various processing steps (specimens received), when it was completed.
      */
     @Child(name = "event", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A list of events of interest in the lifecycle", formalDefinition="A summary of the events of interest that have occurred as the request is processed. E.g. when the order was made, various processing steps (specimens received), when it was completed." )
+    @Description(shortDefinition="A list of events of interest in the lifecycle", formalDefinition="A summary of the events of interest that have occurred as the request is processed; e.g. when the order was made, various processing steps (specimens received), when it was completed." )
     protected List<DiagnosticOrderEventComponent> event;
 
     /**
@@ -1041,10 +1041,10 @@ public class DiagnosticOrder extends DomainResource {
     protected List<DiagnosticOrderItemComponent> item;
 
     /**
-     * Any other notes associated with this patient or specimen or order (e.g. "patient hates needles").
+     * Any other notes associated with this patient, specimen or order (e.g. "patient hates needles").
      */
     @Child(name = "note", type = {Annotation.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Other notes and comments", formalDefinition="Any other notes associated with this patient or specimen or order (e.g. \"patient hates needles\")." )
+    @Description(shortDefinition="Other notes and comments", formalDefinition="Any other notes associated with this patient, specimen or order (e.g. \"patient hates needles\")." )
     protected List<Annotation> note;
 
     private static final long serialVersionUID = 700891227L;
@@ -1480,7 +1480,7 @@ public class DiagnosticOrder extends DomainResource {
     }
 
     /**
-     * @return {@link #event} (A summary of the events of interest that have occurred as the request is processed. E.g. when the order was made, various processing steps (specimens received), when it was completed.)
+     * @return {@link #event} (A summary of the events of interest that have occurred as the request is processed; e.g. when the order was made, various processing steps (specimens received), when it was completed.)
      */
     public List<DiagnosticOrderEventComponent> getEvent() { 
       if (this.event == null)
@@ -1498,7 +1498,7 @@ public class DiagnosticOrder extends DomainResource {
     }
 
     /**
-     * @return {@link #event} (A summary of the events of interest that have occurred as the request is processed. E.g. when the order was made, various processing steps (specimens received), when it was completed.)
+     * @return {@link #event} (A summary of the events of interest that have occurred as the request is processed; e.g. when the order was made, various processing steps (specimens received), when it was completed.)
      */
     // syntactic sugar
     public DiagnosticOrderEventComponent addEvent() { //3
@@ -1560,7 +1560,7 @@ public class DiagnosticOrder extends DomainResource {
     }
 
     /**
-     * @return {@link #note} (Any other notes associated with this patient or specimen or order (e.g. "patient hates needles").)
+     * @return {@link #note} (Any other notes associated with this patient, specimen or order (e.g. "patient hates needles").)
      */
     public List<Annotation> getNote() { 
       if (this.note == null)
@@ -1578,7 +1578,7 @@ public class DiagnosticOrder extends DomainResource {
     }
 
     /**
-     * @return {@link #note} (Any other notes associated with this patient or specimen or order (e.g. "patient hates needles").)
+     * @return {@link #note} (Any other notes associated with this patient, specimen or order (e.g. "patient hates needles").)
      */
     // syntactic sugar
     public Annotation addNote() { //3
@@ -1610,9 +1610,9 @@ public class DiagnosticOrder extends DomainResource {
         childrenList.add(new Property("specimen", "Reference(Specimen)", "One or more specimens that the diagnostic investigation is about.", 0, java.lang.Integer.MAX_VALUE, specimen));
         childrenList.add(new Property("status", "code", "The status of the order.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("priority", "code", "The clinical priority associated with this order.", 0, java.lang.Integer.MAX_VALUE, priority));
-        childrenList.add(new Property("event", "", "A summary of the events of interest that have occurred as the request is processed. E.g. when the order was made, various processing steps (specimens received), when it was completed.", 0, java.lang.Integer.MAX_VALUE, event));
+        childrenList.add(new Property("event", "", "A summary of the events of interest that have occurred as the request is processed; e.g. when the order was made, various processing steps (specimens received), when it was completed.", 0, java.lang.Integer.MAX_VALUE, event));
         childrenList.add(new Property("item", "", "The specific diagnostic investigations that are requested as part of this request. Sometimes, there can only be one item per request, but in most contexts, more than one investigation can be requested.", 0, java.lang.Integer.MAX_VALUE, item));
-        childrenList.add(new Property("note", "Annotation", "Any other notes associated with this patient or specimen or order (e.g. \"patient hates needles\").", 0, java.lang.Integer.MAX_VALUE, note));
+        childrenList.add(new Property("note", "Annotation", "Any other notes associated with this patient, specimen or order (e.g. \"patient hates needles\").", 0, java.lang.Integer.MAX_VALUE, note));
       }
 
       public DiagnosticOrder copy() {

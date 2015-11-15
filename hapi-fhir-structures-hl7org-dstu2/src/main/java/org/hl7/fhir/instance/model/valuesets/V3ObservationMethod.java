@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3ObservationMethod {
@@ -1263,6 +1263,10 @@ public enum V3ObservationMethod {
          */
         _0279, 
         /**
+         * Molecular, Nucleic acid probe
+         */
+        _0127, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -1875,6 +1879,8 @@ public enum V3ObservationMethod {
           return _0278;
         if ("0279".equals(codeString))
           return _0279;
+        if ("0127".equals(codeString))
+          return _0127;
         throw new Exception("Unknown V3ObservationMethod code '"+codeString+"'");
         }
         public String toCode() {
@@ -2182,6 +2188,7 @@ public enum V3ObservationMethod {
             case _0277: return "0277";
             case _0278: return "0278";
             case _0279: return "0279";
+            case _0127: return "0127";
             default: return "?";
           }
         }
@@ -2493,6 +2500,7 @@ public enum V3ObservationMethod {
             case _0277: return "Serum bactericidal titer";
             case _0278: return "Agar screen";
             case _0279: return "Disk induction";
+            case _0127: return "Molecular, Nucleic acid probe";
             default: return "?";
           }
         }
@@ -2801,6 +2809,7 @@ public enum V3ObservationMethod {
             case _0277: return "Serum bactericidal titer";
             case _0278: return "Agar screen";
             case _0279: return "Disk induction";
+            case _0127: return "Nucleic acid probe";
             default: return "?";
           }
     }

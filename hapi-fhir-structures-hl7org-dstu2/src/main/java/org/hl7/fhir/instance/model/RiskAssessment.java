@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -408,14 +408,14 @@ public class RiskAssessment extends DomainResource {
     protected Condition conditionTarget;
 
     /**
-     * The encounter where the assessement was performed.
+     * The encounter where the assessment was performed.
      */
     @Child(name = "encounter", type = {Encounter.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Where was assessment performed?", formalDefinition="The encounter where the assessement was performed." )
+    @Description(shortDefinition="Where was assessment performed?", formalDefinition="The encounter where the assessment was performed." )
     protected Reference encounter;
 
     /**
-     * The actual object that is the target of the reference (The encounter where the assessement was performed.)
+     * The actual object that is the target of the reference (The encounter where the assessment was performed.)
      */
     protected Encounter encounterTarget;
 
@@ -439,10 +439,10 @@ public class RiskAssessment extends DomainResource {
     protected Identifier identifier;
 
     /**
-     * The algorithm, processs or mechanism used to evaluate the risk.
+     * The algorithm, process or mechanism used to evaluate the risk.
      */
     @Child(name = "method", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Evaluation mechanism", formalDefinition="The algorithm, processs or mechanism used to evaluate the risk." )
+    @Description(shortDefinition="Evaluation mechanism", formalDefinition="The algorithm, process or mechanism used to evaluate the risk." )
     protected CodeableConcept method;
 
     /**
@@ -613,7 +613,7 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @return {@link #encounter} (The encounter where the assessement was performed.)
+     * @return {@link #encounter} (The encounter where the assessment was performed.)
      */
     public Reference getEncounter() { 
       if (this.encounter == null)
@@ -629,7 +629,7 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @param value {@link #encounter} (The encounter where the assessement was performed.)
+     * @param value {@link #encounter} (The encounter where the assessment was performed.)
      */
     public RiskAssessment setEncounter(Reference value) { 
       this.encounter = value;
@@ -637,7 +637,7 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter where the assessement was performed.)
+     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter where the assessment was performed.)
      */
     public Encounter getEncounterTarget() { 
       if (this.encounterTarget == null)
@@ -649,7 +649,7 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter where the assessement was performed.)
+     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter where the assessment was performed.)
      */
     public RiskAssessment setEncounterTarget(Encounter value) { 
       this.encounterTarget = value;
@@ -720,7 +720,7 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @return {@link #method} (The algorithm, processs or mechanism used to evaluate the risk.)
+     * @return {@link #method} (The algorithm, process or mechanism used to evaluate the risk.)
      */
     public CodeableConcept getMethod() { 
       if (this.method == null)
@@ -736,7 +736,7 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @param value {@link #method} (The algorithm, processs or mechanism used to evaluate the risk.)
+     * @param value {@link #method} (The algorithm, process or mechanism used to evaluate the risk.)
      */
     public RiskAssessment setMethod(CodeableConcept value) { 
       this.method = value;
@@ -886,10 +886,10 @@ public class RiskAssessment extends DomainResource {
         childrenList.add(new Property("subject", "Reference(Patient|Group)", "The patient or group the risk assessment applies to.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("date", "dateTime", "The date (and possibly time) the risk assessment was performed.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("condition", "Reference(Condition)", "For assessments or prognosis specific to a particular condition, indicates the condition being assessed.", 0, java.lang.Integer.MAX_VALUE, condition));
-        childrenList.add(new Property("encounter", "Reference(Encounter)", "The encounter where the assessement was performed.", 0, java.lang.Integer.MAX_VALUE, encounter));
+        childrenList.add(new Property("encounter", "Reference(Encounter)", "The encounter where the assessment was performed.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("performer", "Reference(Practitioner|Device)", "The provider or software application that performed the assessment.", 0, java.lang.Integer.MAX_VALUE, performer));
         childrenList.add(new Property("identifier", "Identifier", "Business identifier assigned to the risk assessment.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("method", "CodeableConcept", "The algorithm, processs or mechanism used to evaluate the risk.", 0, java.lang.Integer.MAX_VALUE, method));
+        childrenList.add(new Property("method", "CodeableConcept", "The algorithm, process or mechanism used to evaluate the risk.", 0, java.lang.Integer.MAX_VALUE, method));
         childrenList.add(new Property("basis", "Reference(Any)", "Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).", 0, java.lang.Integer.MAX_VALUE, basis));
         childrenList.add(new Property("prediction", "", "Describes the expected outcome for the subject.", 0, java.lang.Integer.MAX_VALUE, prediction));
         childrenList.add(new Property("mitigation", "string", "A description of the steps that might be taken to reduce the identified risk(s).", 0, java.lang.Integer.MAX_VALUE, mitigation));

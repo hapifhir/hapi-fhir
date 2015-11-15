@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -243,6 +243,50 @@ public class V3ActClassEnumFactory implements EnumFactory<V3ActClass> {
       return V3ActClass.TRNS;
     if ("XACT".equals(codeString))
       return V3ActClass.XACT;
+    if ("_ActClassContainer".equals(codeString))
+      return V3ActClass._ACTCLASSCONTAINER;
+    if ("ENTRY".equals(codeString))
+      return V3ActClass.ENTRY;
+    if ("ORGANIZER".equals(codeString))
+      return V3ActClass.ORGANIZER;
+    if ("DOCCNTNT".equals(codeString))
+      return V3ActClass.DOCCNTNT;
+    if ("DOCLIST".equals(codeString))
+      return V3ActClass.DOCLIST;
+    if ("DOCLSTITM".equals(codeString))
+      return V3ActClass.DOCLSTITM;
+    if ("DOCPARA".equals(codeString))
+      return V3ActClass.DOCPARA;
+    if ("DOCTBL".equals(codeString))
+      return V3ActClass.DOCTBL;
+    if ("LINKHTML".equals(codeString))
+      return V3ActClass.LINKHTML;
+    if ("LOCALATTR".equals(codeString))
+      return V3ActClass.LOCALATTR;
+    if ("LOCALMRKP".equals(codeString))
+      return V3ActClass.LOCALMRKP;
+    if ("ordered".equals(codeString))
+      return V3ActClass.ORDERED;
+    if ("REFR".equals(codeString))
+      return V3ActClass.REFR;
+    if ("TBLCOL".equals(codeString))
+      return V3ActClass.TBLCOL;
+    if ("TBLCOLGP".equals(codeString))
+      return V3ActClass.TBLCOLGP;
+    if ("TBLDATA".equals(codeString))
+      return V3ActClass.TBLDATA;
+    if ("TBLHDR".equals(codeString))
+      return V3ActClass.TBLHDR;
+    if ("TBLROW".equals(codeString))
+      return V3ActClass.TBLROW;
+    if ("tbody".equals(codeString))
+      return V3ActClass.TBODY;
+    if ("tfoot".equals(codeString))
+      return V3ActClass.TFOOT;
+    if ("thead".equals(codeString))
+      return V3ActClass.THEAD;
+    if ("unordered".equals(codeString))
+      return V3ActClass.UNORDERED;
     throw new IllegalArgumentException("Unknown V3ActClass code '"+codeString+"'");
   }
 
@@ -451,6 +495,50 @@ public class V3ActClassEnumFactory implements EnumFactory<V3ActClass> {
       return "TRNS";
     if (code == V3ActClass.XACT)
       return "XACT";
+    if (code == V3ActClass._ACTCLASSCONTAINER)
+      return "_ActClassContainer";
+    if (code == V3ActClass.ENTRY)
+      return "ENTRY";
+    if (code == V3ActClass.ORGANIZER)
+      return "ORGANIZER";
+    if (code == V3ActClass.DOCCNTNT)
+      return "DOCCNTNT";
+    if (code == V3ActClass.DOCLIST)
+      return "DOCLIST";
+    if (code == V3ActClass.DOCLSTITM)
+      return "DOCLSTITM";
+    if (code == V3ActClass.DOCPARA)
+      return "DOCPARA";
+    if (code == V3ActClass.DOCTBL)
+      return "DOCTBL";
+    if (code == V3ActClass.LINKHTML)
+      return "LINKHTML";
+    if (code == V3ActClass.LOCALATTR)
+      return "LOCALATTR";
+    if (code == V3ActClass.LOCALMRKP)
+      return "LOCALMRKP";
+    if (code == V3ActClass.ORDERED)
+      return "ordered";
+    if (code == V3ActClass.REFR)
+      return "REFR";
+    if (code == V3ActClass.TBLCOL)
+      return "TBLCOL";
+    if (code == V3ActClass.TBLCOLGP)
+      return "TBLCOLGP";
+    if (code == V3ActClass.TBLDATA)
+      return "TBLDATA";
+    if (code == V3ActClass.TBLHDR)
+      return "TBLHDR";
+    if (code == V3ActClass.TBLROW)
+      return "TBLROW";
+    if (code == V3ActClass.TBODY)
+      return "tbody";
+    if (code == V3ActClass.TFOOT)
+      return "tfoot";
+    if (code == V3ActClass.THEAD)
+      return "thead";
+    if (code == V3ActClass.UNORDERED)
+      return "unordered";
     return "?";
   }
 

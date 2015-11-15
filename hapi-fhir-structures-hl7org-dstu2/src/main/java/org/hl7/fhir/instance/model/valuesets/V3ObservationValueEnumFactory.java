@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -487,6 +487,14 @@ public class V3ObservationValueEnumFactory implements EnumFactory<V3ObservationV
       return V3ObservationValue.INPNDUPD;
     if ("NELG".equals(codeString))
       return V3ObservationValue.NELG;
+    if ("_AnnotationValue".equals(codeString))
+      return V3ObservationValue._ANNOTATIONVALUE;
+    if ("_CommonClinicalObservationValue".equals(codeString))
+      return V3ObservationValue._COMMONCLINICALOBSERVATIONVALUE;
+    if ("_IndividualCaseSafetyReportValueDomains".equals(codeString))
+      return V3ObservationValue._INDIVIDUALCASESAFETYREPORTVALUEDOMAINS;
+    if ("_IndicationValue".equals(codeString))
+      return V3ObservationValue._INDICATIONVALUE;
     throw new IllegalArgumentException("Unknown V3ObservationValue code '"+codeString+"'");
   }
 
@@ -939,6 +947,14 @@ public class V3ObservationValueEnumFactory implements EnumFactory<V3ObservationV
       return "INPNDUPD";
     if (code == V3ObservationValue.NELG)
       return "NELG";
+    if (code == V3ObservationValue._ANNOTATIONVALUE)
+      return "_AnnotationValue";
+    if (code == V3ObservationValue._COMMONCLINICALOBSERVATIONVALUE)
+      return "_CommonClinicalObservationValue";
+    if (code == V3ObservationValue._INDIVIDUALCASESAFETYREPORTVALUEDOMAINS)
+      return "_IndividualCaseSafetyReportValueDomains";
+    if (code == V3ObservationValue._INDICATIONVALUE)
+      return "_IndicationValue";
     return "?";
   }
 

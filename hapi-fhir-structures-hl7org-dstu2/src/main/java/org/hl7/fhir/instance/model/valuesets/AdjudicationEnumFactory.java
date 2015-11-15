@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -45,8 +45,8 @@ public class AdjudicationEnumFactory implements EnumFactory<Adjudication> {
       return Adjudication.COPAY;
     if ("eligible".equals(codeString))
       return Adjudication.ELIGIBLE;
-    if ("deductable".equals(codeString))
-      return Adjudication.DEDUCTABLE;
+    if ("deductible".equals(codeString))
+      return Adjudication.DEDUCTIBLE;
     if ("eligpercent".equals(codeString))
       return Adjudication.ELIGPERCENT;
     if ("tax".equals(codeString))
@@ -63,8 +63,8 @@ public class AdjudicationEnumFactory implements EnumFactory<Adjudication> {
       return "copay";
     if (code == Adjudication.ELIGIBLE)
       return "eligible";
-    if (code == Adjudication.DEDUCTABLE)
-      return "deductable";
+    if (code == Adjudication.DEDUCTIBLE)
+      return "deductible";
     if (code == Adjudication.ELIGPERCENT)
       return "eligpercent";
     if (code == Adjudication.TAX)

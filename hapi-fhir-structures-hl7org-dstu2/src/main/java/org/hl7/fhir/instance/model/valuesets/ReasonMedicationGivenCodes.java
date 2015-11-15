@@ -29,21 +29,21 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ReasonMedicationGivenCodes {
 
         /**
-         * No reason known
+         * No reason known.
          */
         A, 
         /**
-         * The administration was following an ordered protocol
+         * The administration was following an ordered protocol.
          */
         B, 
         /**
-         * The administration was needed to treat an emergency
+         * The administration was needed to treat an emergency.
          */
         C, 
         /**
@@ -74,9 +74,9 @@ public enum ReasonMedicationGivenCodes {
         }
         public String getDefinition() {
           switch (this) {
-            case A: return "No reason known";
-            case B: return "The administration was following an ordered protocol";
-            case C: return "The administration was needed to treat an emergency";
+            case A: return "No reason known.";
+            case B: return "The administration was following an ordered protocol.";
+            case C: return "The administration was needed to treat an emergency.";
             default: return "?";
           }
         }

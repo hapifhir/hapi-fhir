@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -42,15 +42,15 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * Base Resource for everything.
+ * This is the base resource type for everything.
  */
 public abstract class Resource extends BaseResource implements IAnyResource {
 
     /**
-     * The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes.
+     * The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.
      */
     @Child(name = "id", type = {IdType.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Logical id of this artifact", formalDefinition="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes." )
+    @Description(shortDefinition="Logical id of this artifact", formalDefinition="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes." )
     protected IdType id;
 
     /**
@@ -84,7 +84,7 @@ public abstract class Resource extends BaseResource implements IAnyResource {
     }
 
     /**
-     * @return {@link #id} (The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes.). This is the underlying object with id, value and extensions. The accessor "getId" gives direct access to the value
+     * @return {@link #id} (The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.). This is the underlying object with id, value and extensions. The accessor "getId" gives direct access to the value
      */
     public IdType getIdElement() { 
       if (this.id == null)
@@ -104,7 +104,7 @@ public abstract class Resource extends BaseResource implements IAnyResource {
     }
 
     /**
-     * @param value {@link #id} (The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes.). This is the underlying object with id, value and extensions. The accessor "getId" gives direct access to the value
+     * @param value {@link #id} (The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.). This is the underlying object with id, value and extensions. The accessor "getId" gives direct access to the value
      */
     public Resource setIdElement(IdType value) { 
       this.id = value;
@@ -112,14 +112,14 @@ public abstract class Resource extends BaseResource implements IAnyResource {
     }
 
     /**
-     * @return The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes.
+     * @return The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.
      */
     public String getId() { 
       return this.id == null ? null : this.id.getValue();
     }
 
     /**
-     * @param value The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes.
+     * @param value The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.
      */
     public Resource setId(String value) { 
       if (Utilities.noString(value))
@@ -255,7 +255,7 @@ public abstract class Resource extends BaseResource implements IAnyResource {
     }
 
       protected void listChildren(List<Property> childrenList) {
-        childrenList.add(new Property("id", "id", "The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes.", 0, java.lang.Integer.MAX_VALUE, id));
+        childrenList.add(new Property("id", "id", "The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.", 0, java.lang.Integer.MAX_VALUE, id));
         childrenList.add(new Property("meta", "Meta", "The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.", 0, java.lang.Integer.MAX_VALUE, meta));
         childrenList.add(new Property("implicitRules", "uri", "A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content.", 0, java.lang.Integer.MAX_VALUE, implicitRules));
         childrenList.add(new Property("language", "code", "The base language in which the resource is written.", 0, java.lang.Integer.MAX_VALUE, language));

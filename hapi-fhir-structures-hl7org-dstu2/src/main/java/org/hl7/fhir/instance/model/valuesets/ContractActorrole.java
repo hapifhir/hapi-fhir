@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ContractActorrole {
@@ -74,8 +74,8 @@ public enum ContractActorrole {
         }
         public String getDisplay() {
           switch (this) {
-            case PRACTITIONER: return "practitioner";
-            case PATIENT: return "patient";
+            case PRACTITIONER: return "Practitioner";
+            case PATIENT: return "Patient";
             default: return "?";
           }
     }

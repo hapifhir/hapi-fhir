@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -113,6 +113,14 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.ROST;
     if ("SESS".equals(codeString))
       return V3ActCode.SESS;
+    if ("FFS".equals(codeString))
+      return V3ActCode.FFS;
+    if ("FFPS".equals(codeString))
+      return V3ActCode.FFPS;
+    if ("FFCS".equals(codeString))
+      return V3ActCode.FFCS;
+    if ("TFS".equals(codeString))
+      return V3ActCode.TFS;
     if ("_ActBoundedROICode".equals(codeString))
       return V3ActCode._ACTBOUNDEDROICODE;
     if ("ROIFS".equals(codeString))
@@ -405,6 +413,12 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.AUTH;
     if ("NAUTH".equals(codeString))
       return V3ActCode.NAUTH;
+    if ("_ActCoverageEligibilityConfirmationCode".equals(codeString))
+      return V3ActCode._ACTCOVERAGEELIGIBILITYCONFIRMATIONCODE;
+    if ("ELG".equals(codeString))
+      return V3ActCode.ELG;
+    if ("NELG".equals(codeString))
+      return V3ActCode.NELG;
     if ("_ActCoverageLimitCode".equals(codeString))
       return V3ActCode._ACTCOVERAGELIMITCODE;
     if ("_ActCoverageQuantityLimitCode".equals(codeString))
@@ -423,6 +437,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.UNITQTY;
     if ("COVMX".equals(codeString))
       return V3ActCode.COVMX;
+    if ("_ActCoveredPartyLimitCode".equals(codeString))
+      return V3ActCode._ACTCOVEREDPARTYLIMITCODE;
     if ("_ActCoverageTypeCode".equals(codeString))
       return V3ActCode._ACTCOVERAGETYPECODE;
     if ("_ActInsurancePolicyCode".equals(codeString))
@@ -787,6 +803,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.PAY;
     if ("SPEND".equals(codeString))
       return V3ActCode.SPEND;
+    if ("COINS".equals(codeString))
+      return V3ActCode.COINS;
     if ("_ActInvoiceDetailGenericModifierCode".equals(codeString))
       return V3ActCode._ACTINVOICEDETAILGENERICMODIFIERCODE;
     if ("AFTHRS".equals(codeString))
@@ -847,6 +865,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.SP;
     if ("W".equals(codeString))
       return V3ActCode.W;
+    if ("_ActInvoiceDetailClinicalServiceCode".equals(codeString))
+      return V3ActCode._ACTINVOICEDETAILCLINICALSERVICECODE;
     if ("_ActInvoiceGroupCode".equals(codeString))
       return V3ActCode._ACTINVOICEGROUPCODE;
     if ("_ActInvoiceInterGroupCode".equals(codeString))
@@ -1141,16 +1161,10 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.FF;
     if ("FFC".equals(codeString))
       return V3ActCode.FFC;
-    if ("FFCS".equals(codeString))
-      return V3ActCode.FFCS;
     if ("FFP".equals(codeString))
       return V3ActCode.FFP;
-    if ("FFPS".equals(codeString))
-      return V3ActCode.FFPS;
     if ("FFSS".equals(codeString))
       return V3ActCode.FFSS;
-    if ("TFS".equals(codeString))
-      return V3ActCode.TFS;
     if ("TF".equals(codeString))
       return V3ActCode.TF;
     if ("FS".equals(codeString))
@@ -1217,6 +1231,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.STD;
     if ("TBOO".equals(codeString))
       return V3ActCode.TBOO;
+    if ("SICKLE".equals(codeString))
+      return V3ActCode.SICKLE;
     if ("_EntitySensitivityPolicyType".equals(codeString))
       return V3ActCode._ENTITYSENSITIVITYPOLICYTYPE;
     if ("DEMO".equals(codeString))
@@ -1409,6 +1425,10 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.FD;
     if ("IMMUNIZ".equals(codeString))
       return V3ActCode.IMMUNIZ;
+    if ("BOOSTER".equals(codeString))
+      return V3ActCode.BOOSTER;
+    if ("INITIMMUNIZ".equals(codeString))
+      return V3ActCode.INITIMMUNIZ;
     if ("_ActTaskCode".equals(codeString))
       return V3ActCode._ACTTASKCODE;
     if ("OE".equals(codeString))
@@ -1963,6 +1983,12 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.ALRTENDLATE;
     if ("ALRTSTRTLATE".equals(codeString))
       return V3ActCode.ALRTSTRTLATE;
+    if ("_TimingDetectedIssueCode".equals(codeString))
+      return V3ActCode._TIMINGDETECTEDISSUECODE;
+    if ("ENDLATE".equals(codeString))
+      return V3ActCode.ENDLATE;
+    if ("STRTLATE".equals(codeString))
+      return V3ActCode.STRTLATE;
     if ("_SupplyDetectedIssueCode".equals(codeString))
       return V3ActCode._SUPPLYDETECTEDISSUECODE;
     if ("ALLDONE".equals(codeString))
@@ -2025,6 +2051,22 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.NAINT;
     if ("SEV".equals(codeString))
       return V3ActCode.SEV;
+    if ("_FDALabelData".equals(codeString))
+      return V3ActCode._FDALABELDATA;
+    if ("FDACOATING".equals(codeString))
+      return V3ActCode.FDACOATING;
+    if ("FDACOLOR".equals(codeString))
+      return V3ActCode.FDACOLOR;
+    if ("FDAIMPRINTCD".equals(codeString))
+      return V3ActCode.FDAIMPRINTCD;
+    if ("FDALOGO".equals(codeString))
+      return V3ActCode.FDALOGO;
+    if ("FDASCORING".equals(codeString))
+      return V3ActCode.FDASCORING;
+    if ("FDASHAPE".equals(codeString))
+      return V3ActCode.FDASHAPE;
+    if ("FDASIZE".equals(codeString))
+      return V3ActCode.FDASIZE;
     if ("_ROIOverlayShape".equals(codeString))
       return V3ActCode._ROIOVERLAYSHAPE;
     if ("CIRCLE".equals(codeString))
@@ -2123,6 +2165,22 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.SUBSIDFFS;
     if ("WRKCOMP".equals(codeString))
       return V3ActCode.WRKCOMP;
+    if ("_ActProcedureCode".equals(codeString))
+      return V3ActCode._ACTPROCEDURECODE;
+    if ("_ActBillableServiceCode".equals(codeString))
+      return V3ActCode._ACTBILLABLESERVICECODE;
+    if ("_HL7DefinedActCodes".equals(codeString))
+      return V3ActCode._HL7DEFINEDACTCODES;
+    if ("COPAY".equals(codeString))
+      return V3ActCode.COPAY;
+    if ("DEDUCT".equals(codeString))
+      return V3ActCode.DEDUCT;
+    if ("DOSEIND".equals(codeString))
+      return V3ActCode.DOSEIND;
+    if ("PRA".equals(codeString))
+      return V3ActCode.PRA;
+    if ("STORE".equals(codeString))
+      return V3ActCode.STORE;
     throw new IllegalArgumentException("Unknown V3ActCode code '"+codeString+"'");
   }
 
@@ -2201,6 +2259,14 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "ROST";
     if (code == V3ActCode.SESS)
       return "SESS";
+    if (code == V3ActCode.FFS)
+      return "FFS";
+    if (code == V3ActCode.FFPS)
+      return "FFPS";
+    if (code == V3ActCode.FFCS)
+      return "FFCS";
+    if (code == V3ActCode.TFS)
+      return "TFS";
     if (code == V3ActCode._ACTBOUNDEDROICODE)
       return "_ActBoundedROICode";
     if (code == V3ActCode.ROIFS)
@@ -2493,6 +2559,12 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "AUTH";
     if (code == V3ActCode.NAUTH)
       return "NAUTH";
+    if (code == V3ActCode._ACTCOVERAGEELIGIBILITYCONFIRMATIONCODE)
+      return "_ActCoverageEligibilityConfirmationCode";
+    if (code == V3ActCode.ELG)
+      return "ELG";
+    if (code == V3ActCode.NELG)
+      return "NELG";
     if (code == V3ActCode._ACTCOVERAGELIMITCODE)
       return "_ActCoverageLimitCode";
     if (code == V3ActCode._ACTCOVERAGEQUANTITYLIMITCODE)
@@ -2511,6 +2583,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "UNITQTY";
     if (code == V3ActCode.COVMX)
       return "COVMX";
+    if (code == V3ActCode._ACTCOVEREDPARTYLIMITCODE)
+      return "_ActCoveredPartyLimitCode";
     if (code == V3ActCode._ACTCOVERAGETYPECODE)
       return "_ActCoverageTypeCode";
     if (code == V3ActCode._ACTINSURANCEPOLICYCODE)
@@ -2875,6 +2949,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "PAY";
     if (code == V3ActCode.SPEND)
       return "SPEND";
+    if (code == V3ActCode.COINS)
+      return "COINS";
     if (code == V3ActCode._ACTINVOICEDETAILGENERICMODIFIERCODE)
       return "_ActInvoiceDetailGenericModifierCode";
     if (code == V3ActCode.AFTHRS)
@@ -2935,6 +3011,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "SP";
     if (code == V3ActCode.W)
       return "W";
+    if (code == V3ActCode._ACTINVOICEDETAILCLINICALSERVICECODE)
+      return "_ActInvoiceDetailClinicalServiceCode";
     if (code == V3ActCode._ACTINVOICEGROUPCODE)
       return "_ActInvoiceGroupCode";
     if (code == V3ActCode._ACTINVOICEINTERGROUPCODE)
@@ -3229,16 +3307,10 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "FF";
     if (code == V3ActCode.FFC)
       return "FFC";
-    if (code == V3ActCode.FFCS)
-      return "FFCS";
     if (code == V3ActCode.FFP)
       return "FFP";
-    if (code == V3ActCode.FFPS)
-      return "FFPS";
     if (code == V3ActCode.FFSS)
       return "FFSS";
-    if (code == V3ActCode.TFS)
-      return "TFS";
     if (code == V3ActCode.TF)
       return "TF";
     if (code == V3ActCode.FS)
@@ -3305,6 +3377,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "STD";
     if (code == V3ActCode.TBOO)
       return "TBOO";
+    if (code == V3ActCode.SICKLE)
+      return "SICKLE";
     if (code == V3ActCode._ENTITYSENSITIVITYPOLICYTYPE)
       return "_EntitySensitivityPolicyType";
     if (code == V3ActCode.DEMO)
@@ -3497,6 +3571,10 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "FD";
     if (code == V3ActCode.IMMUNIZ)
       return "IMMUNIZ";
+    if (code == V3ActCode.BOOSTER)
+      return "BOOSTER";
+    if (code == V3ActCode.INITIMMUNIZ)
+      return "INITIMMUNIZ";
     if (code == V3ActCode._ACTTASKCODE)
       return "_ActTaskCode";
     if (code == V3ActCode.OE)
@@ -4051,6 +4129,12 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "ALRTENDLATE";
     if (code == V3ActCode.ALRTSTRTLATE)
       return "ALRTSTRTLATE";
+    if (code == V3ActCode._TIMINGDETECTEDISSUECODE)
+      return "_TimingDetectedIssueCode";
+    if (code == V3ActCode.ENDLATE)
+      return "ENDLATE";
+    if (code == V3ActCode.STRTLATE)
+      return "STRTLATE";
     if (code == V3ActCode._SUPPLYDETECTEDISSUECODE)
       return "_SupplyDetectedIssueCode";
     if (code == V3ActCode.ALLDONE)
@@ -4113,6 +4197,22 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "NAINT";
     if (code == V3ActCode.SEV)
       return "SEV";
+    if (code == V3ActCode._FDALABELDATA)
+      return "_FDALabelData";
+    if (code == V3ActCode.FDACOATING)
+      return "FDACOATING";
+    if (code == V3ActCode.FDACOLOR)
+      return "FDACOLOR";
+    if (code == V3ActCode.FDAIMPRINTCD)
+      return "FDAIMPRINTCD";
+    if (code == V3ActCode.FDALOGO)
+      return "FDALOGO";
+    if (code == V3ActCode.FDASCORING)
+      return "FDASCORING";
+    if (code == V3ActCode.FDASHAPE)
+      return "FDASHAPE";
+    if (code == V3ActCode.FDASIZE)
+      return "FDASIZE";
     if (code == V3ActCode._ROIOVERLAYSHAPE)
       return "_ROIOverlayShape";
     if (code == V3ActCode.CIRCLE)
@@ -4211,6 +4311,22 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "SUBSIDFFS";
     if (code == V3ActCode.WRKCOMP)
       return "WRKCOMP";
+    if (code == V3ActCode._ACTPROCEDURECODE)
+      return "_ActProcedureCode";
+    if (code == V3ActCode._ACTBILLABLESERVICECODE)
+      return "_ActBillableServiceCode";
+    if (code == V3ActCode._HL7DEFINEDACTCODES)
+      return "_HL7DefinedActCodes";
+    if (code == V3ActCode.COPAY)
+      return "COPAY";
+    if (code == V3ActCode.DEDUCT)
+      return "DEDUCT";
+    if (code == V3ActCode.DOSEIND)
+      return "DOSEIND";
+    if (code == V3ActCode.PRA)
+      return "PRA";
+    if (code == V3ActCode.STORE)
+      return "STORE";
     return "?";
   }
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum LocationPhysicalType {
@@ -43,43 +43,43 @@ public enum LocationPhysicalType {
          */
         WI, 
         /**
-         * A Level in a multi-level Building/Structure
+         * A Level in a multi-level Building/Structure.
          */
         LVL, 
         /**
-         * Any corridor within a Building, that is not within
+         * Any corridor within a Building, that is not within.
          */
         CO, 
         /**
-         * A space that is allocated as a room, it may have walls/roof etc, but does not require these
+         * A space that is allocated as a room, it may have walls/roof etc., but does not require these.
          */
         RO, 
         /**
-         * A space that is allocated for sleeping/laying on
+         * A space that is allocated for sleeping/laying on.
          */
         BD, 
         /**
-         * A means of transportation
+         * A means of transportation.
          */
         VE, 
         /**
-         * A residential dwelling. Usually used to reference a location that a person/patient may reside
+         * A residential dwelling. Usually used to reference a location that a person/patient may reside.
          */
         HO, 
         /**
-         * A container that can store goods, equipment, medications or other items
+         * A container that can store goods, equipment, medications or other items.
          */
         CA, 
         /**
-         * A defined path to travel between 2 points that has a known name
+         * A defined path to travel between 2 points that has a known name.
          */
         RD, 
         /**
-         * A wide scope that covers a conceptual domain, such as a Nation (Country wide community or Federal Government - e.g. Ministry of Health),  Province or State (community or Government), Business (throughout the enterprise), Nation with a business scope of an agency (eg. CDC, FDA etc.) or a Business segment (UK Pharmacy)
+         * A wide scope that covers a conceptual domain, such as a Nation (Country wide community or Federal Government - e.g. Ministry of Health),  Province or State (community or Government), Business (throughout the enterprise), Nation with a business scope of an agency (e.g. CDC, FDA etc.) or a Business segment (UK Pharmacy).
          */
         JDN, 
         /**
-         * An defined boundary, such as a state, region, country, county
+         * A defined boundary, such as a state, region, country, county
          */
         AREA, 
         /**
@@ -139,16 +139,16 @@ public enum LocationPhysicalType {
           switch (this) {
             case BU: return "Any Building or structure. This may contain rooms, corridors, wings, etc. It may not have walls, or a roof, but is considered a defined/allocated space.";
             case WI: return "A Wing within a Building, this often contains levels, rooms and corridors.";
-            case LVL: return "A Level in a multi-level Building/Structure";
-            case CO: return "Any corridor within a Building, that is not within";
-            case RO: return "A space that is allocated as a room, it may have walls/roof etc, but does not require these";
-            case BD: return "A space that is allocated for sleeping/laying on";
-            case VE: return "A means of transportation";
-            case HO: return "A residential dwelling. Usually used to reference a location that a person/patient may reside";
-            case CA: return "A container that can store goods, equipment, medications or other items";
-            case RD: return "A defined path to travel between 2 points that has a known name";
-            case JDN: return "A wide scope that covers a conceptual domain, such as a Nation (Country wide community or Federal Government - e.g. Ministry of Health),  Province or State (community or Government), Business (throughout the enterprise), Nation with a business scope of an agency (eg. CDC, FDA etc.) or a Business segment (UK Pharmacy)";
-            case AREA: return "An defined boundary, such as a state, region, country, county";
+            case LVL: return "A Level in a multi-level Building/Structure.";
+            case CO: return "Any corridor within a Building, that is not within.";
+            case RO: return "A space that is allocated as a room, it may have walls/roof etc., but does not require these.";
+            case BD: return "A space that is allocated for sleeping/laying on.";
+            case VE: return "A means of transportation.";
+            case HO: return "A residential dwelling. Usually used to reference a location that a person/patient may reside.";
+            case CA: return "A container that can store goods, equipment, medications or other items.";
+            case RD: return "A defined path to travel between 2 points that has a known name.";
+            case JDN: return "A wide scope that covers a conceptual domain, such as a Nation (Country wide community or Federal Government - e.g. Ministry of Health),  Province or State (community or Government), Business (throughout the enterprise), Nation with a business scope of an agency (e.g. CDC, FDA etc.) or a Business segment (UK Pharmacy).";
+            case AREA: return "A defined boundary, such as a state, region, country, county";
             default: return "?";
           }
         }

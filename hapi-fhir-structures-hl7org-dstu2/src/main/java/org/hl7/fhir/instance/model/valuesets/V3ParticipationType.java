@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3ParticipationType {
@@ -71,7 +71,7 @@ public enum V3ParticipationType {
          */
         REF, 
         /**
-         * Parties that may or should contribute or have contributed information to the Act. Such information includes information leading to the decision to perform the Act and how to perform the Act (e.g., consultant), information that the Act itself seeks to reveal (e.g., informant of clinical history), or information about what Act was performed (e.g., informant witness).
+         * Parties that may or should contribute or have contributed information to the Act. Such information includes information leading to the decision to perform the Act and how to perform the Act (e.g. consultant), information that the Act itself seeks to reveal (e.g. informant of clinical history), or information about what Act was performed (e.g. informant witness).
          */
         _PARTICIPATIONINFORMATIONGENERATOR, 
         /**
@@ -96,7 +96,7 @@ public enum V3ParticipationType {
          */
         AUT, 
         /**
-         * A source of reported information (e.g., a next of kin who answers questions about the patient's history).  For history questions, the patient is logically an informant, yet the informant of history questions is implicitly the subject.
+         * A source of reported information (e.g. a next of kin who answers questions about the patient's history).  For history questions, the patient is logically an informant, yet the informant of history questions is implicitly the subject.
          */
         INF, 
         /**
@@ -112,7 +112,7 @@ public enum V3ParticipationType {
          */
         WIT, 
         /**
-         * An entity (person, organization or device) that is in charge of maintaining the information of this act (e.g., who maintains the report or the master service catalog item, etc.).
+         * An entity (person, organization or device) that is in charge of maintaining the information of this act (e.g. who maintains the report or the master service catalog item, etc.).
          */
         CST, 
         /**
@@ -126,7 +126,7 @@ public enum V3ParticipationType {
                            Examples: A "plasma porcelain substance concentration" has analyte a Role with player substance Entity "porcelain".
 
                         
-                           UsageNotes: The Role that this participation connects to may be any Role whose player is that substance measured. Very often, the scoper may indicate the system in which the component is being measured. E.g., for "plasma porcelain" the scoper could be "Plasma".
+                           UsageNotes: The Role that this participation connects to may be any Role whose player is that substance measured. Very often, the scoper may indicate the system in which the component is being measured; e.g. for "plasma porcelain" the scoper could be "Plasma".
          */
         ALY, 
         /**
@@ -142,6 +142,10 @@ public enum V3ParticipationType {
          */
         CSM, 
         /**
+         * Something incorporated in the subject of a therapy service to achieve a physiologic effect (e.g. heal, relieve, provoke a condition, etc.) on the subject.  In an administration service the therapeutic agent is a consumable, in a preparation or dispense service, it is a product.  Thus, consumable or product must be specified in accordance with the kind of service.
+         */
+        TPA, 
+        /**
          * Participant used in performing the act without being substantially affected by the act (i.e. durable or inert with respect to that particular service).
 
                         
@@ -149,7 +153,7 @@ public enum V3ParticipationType {
          */
         DEV, 
         /**
-         * A device that changes ownership due to the service, e.g., a pacemaker, a prosthesis, an insulin injection equipment (pen), etc.  Such material may need to be restocked after he service.
+         * A device that changes ownership due to the service, e.g. a pacemaker, a prosthesis, an insulin injection equipment (pen), etc.  Such material may need to be restocked after he service.
          */
         NRD, 
         /**
@@ -177,7 +181,7 @@ public enum V3ParticipationType {
          */
         EXSRC, 
         /**
-         * Participant material that is brought forth (produced) in the act (e.g., specimen in a specimen collection, access or drainage in a placement service, medication package in a dispense service). It does not matter whether the material produced had existence prior to the service, or whether it is created in the service (e.g., in supply services the product is taken from a stock).
+         * Participant material that is brought forth (produced) in the act (e.g. specimen in a specimen collection, access or drainage in a placement service, medication package in a dispense service). It does not matter whether the material produced had existence prior to the service, or whether it is created in the service (e.g. in supply services the product is taken from a stock).
          */
         PRD, 
         /**
@@ -238,11 +242,11 @@ public enum V3ParticipationType {
          */
         IRCP, 
         /**
-         * An information recipient to notify for urgent matters about this Act. (e.g., in a laboratory order, critical results are being called by phone right away, this is the contact to call; or for an inpatient encounter, a next of kin to notify when the patient becomes critically ill).
+         * An information recipient to notify for urgent matters about this Act. (e.g. in a laboratory order, critical results are being called by phone right away, this is the contact to call; or for an inpatient encounter, a next of kin to notify when the patient becomes critically ill).
          */
         NOT, 
         /**
-         * Information recipient to whom an act statement is primarily directed. E.g., a primary care provider receiving a discharge letter from a hospitalist, a health department receiving information on a suspected case of infectious disease. Multiple of these participations may exist on the same act without requiring that recipients be ranked as primary vs. secondary.
+         * Information recipient to whom an act statement is primarily directed; e.g. a primary care provider receiving a discharge letter from a hospitalist, a health department receiving information on a suspected case of infectious disease. Multiple of these participations may exist on the same act without requiring that recipients be ranked as primary vs. secondary.
          */
         PRCP, 
         /**
@@ -256,15 +260,15 @@ public enum V3ParticipationType {
          */
         REFT, 
         /**
-         * A secondary information recipient, who receives copies (e.g., a primary care provider receiving copies of results as ordered by specialist).
+         * A secondary information recipient, who receives copies (e.g. a primary care provider receiving copies of results as ordered by specialist).
          */
         TRC, 
         /**
-         * The facility where the service is done.  May be a static building (or room therein) or a moving location (e.g., ambulance, helicopter, aircraft, train, truck, ship, etc.)
+         * The facility where the service is done.  May be a static building (or room therein) or a moving location (e.g. ambulance, helicopter, aircraft, train, truck, ship, etc.)
          */
         LOC, 
         /**
-         * The destination for services.  May be a static building (or room therein) or a movable facility (e.g., ship).
+         * The destination for services.  May be a static building (or room therein) or a movable facility (e.g. ship).
          */
         DST, 
         /**
@@ -272,11 +276,11 @@ public enum V3ParticipationType {
          */
         ELOC, 
         /**
-         * The location of origin for services.  May be a static building (or room therein) or a movable facility (e.g., ship).
+         * The location of origin for services.  May be a static building (or room therein) or a movable facility (e.g. ship).
          */
         ORG, 
         /**
-         * Some services take place at multiple concurrent locations (e.g., telemedicine, telephone consultation).  The location where the principal performing actor is located is taken as the primary location (LOC) while the other location(s) are considered "remote."
+         * Some services take place at multiple concurrent locations (e.g. telemedicine, telephone consultation).  The location where the principal performing actor is located is taken as the primary location (LOC) while the other location(s) are considered "remote."
          */
         RML, 
         /**
@@ -373,6 +377,8 @@ public enum V3ParticipationType {
           return CAT;
         if ("CSM".equals(codeString))
           return CSM;
+        if ("TPA".equals(codeString))
+          return TPA;
         if ("DEV".equals(codeString))
           return DEV;
         if ("NRD".equals(codeString))
@@ -476,6 +482,7 @@ public enum V3ParticipationType {
             case BBY: return "BBY";
             case CAT: return "CAT";
             case CSM: return "CSM";
+            case TPA: return "TPA";
             case DEV: return "DEV";
             case NRD: return "NRD";
             case RDV: return "RDV";
@@ -532,27 +539,28 @@ public enum V3ParticipationType {
             case DIS: return "The practitioner who is responsible for the discharge of a patient from a patient encounter.";
             case ESC: return "Only with Transportation services.  A person who escorts the patient.";
             case REF: return "A person having referred the subject of the service to the performer (referring physician).  Typically, a referring physician will receive a report.";
-            case _PARTICIPATIONINFORMATIONGENERATOR: return "Parties that may or should contribute or have contributed information to the Act. Such information includes information leading to the decision to perform the Act and how to perform the Act (e.g., consultant), information that the Act itself seeks to reveal (e.g., informant of clinical history), or information about what Act was performed (e.g., informant witness).";
+            case _PARTICIPATIONINFORMATIONGENERATOR: return "Parties that may or should contribute or have contributed information to the Act. Such information includes information leading to the decision to perform the Act and how to perform the Act (e.g. consultant), information that the Act itself seeks to reveal (e.g. informant of clinical history), or information about what Act was performed (e.g. informant witness).";
             case AUT: return "Definition: A party that originates the Act and therefore has responsibility for the information given in the Act and ownership of this Act.\r\n\n                        \n                           Example: the report writer, the person writing the act definition, the guideline author, the placer of an order, the EKG cart (device) creating a report etc. Every Act should have an author. Authorship is regardless of mood always actual authorship. \r\n\n                        Examples of such policies might include:\r\n\n                        \n                           \n                              The author and anyone they explicitly delegate may update the report;\r\n\n                           \n                           \n                              All administrators within the same clinic may cancel and reschedule appointments created by other administrators within that clinic;\r\n\n                           \n                        \n                        A party that is neither an author nor a party who is extended authorship maintenance rights by policy, may only amend, reverse, override, replace, or follow up in other ways on this Act, whereby the Act remains intact and is linked to another Act authored by that other party.";
-            case INF: return "A source of reported information (e.g., a next of kin who answers questions about the patient's history).  For history questions, the patient is logically an informant, yet the informant of history questions is implicitly the subject.";
+            case INF: return "A source of reported information (e.g. a next of kin who answers questions about the patient's history).  For history questions, the patient is logically an informant, yet the informant of history questions is implicitly the subject.";
             case TRANS: return "An entity entering the data into the originating system. The data entry entity is collected optionally for internal quality control purposes. This includes the transcriptionist for dictated text transcribed into electronic form.";
             case ENT: return "A person entering the data into the originating system.  The data entry person is collected optionally for internal quality control purposes.  This includes the transcriptionist for dictated text.";
             case WIT: return "Only with service events.  A person witnessing the action happening without doing anything.  A witness is not necessarily aware, much less approves of anything stated in the service event.  Example for a witness is students watching an operation or an advanced directive witness.";
-            case CST: return "An entity (person, organization or device) that is in charge of maintaining the information of this act (e.g., who maintains the report or the master service catalog item, etc.).";
+            case CST: return "An entity (person, organization or device) that is in charge of maintaining the information of this act (e.g. who maintains the report or the master service catalog item, etc.).";
             case DIR: return "Target participant  that is substantially present in the act  and which is directly involved in the action (includes consumed material, devices, etc.).";
-            case ALY: return "The target of an Observation action. Links an observation to a Role whose player is the substance or most specific component entity (material, micro-organism, etc.) being measured within the subject.\r\n\n                        \n                           Examples: A \"plasma porcelain substance concentration\" has analyte a Role with player substance Entity \"porcelain\".\r\n\n                        \n                           UsageNotes: The Role that this participation connects to may be any Role whose player is that substance measured. Very often, the scoper may indicate the system in which the component is being measured. E.g., for \"plasma porcelain\" the scoper could be \"Plasma\".";
+            case ALY: return "The target of an Observation action. Links an observation to a Role whose player is the substance or most specific component entity (material, micro-organism, etc.) being measured within the subject.\r\n\n                        \n                           Examples: A \"plasma porcelain substance concentration\" has analyte a Role with player substance Entity \"porcelain\".\r\n\n                        \n                           UsageNotes: The Role that this participation connects to may be any Role whose player is that substance measured. Very often, the scoper may indicate the system in which the component is being measured; e.g. for \"plasma porcelain\" the scoper could be \"Plasma\".";
             case BBY: return "In an obstetric service, the baby.";
             case CAT: return "The catalyst of a chemical reaction, such as an enzyme or a platinum surface. In biochemical reactions, connects the enzyme with the molecular interaction";
             case CSM: return "Participant material that is taken up, diminished, altered, or disappears in the act.";
+            case TPA: return "Something incorporated in the subject of a therapy service to achieve a physiologic effect (e.g. heal, relieve, provoke a condition, etc.) on the subject.  In an administration service the therapeutic agent is a consumable, in a preparation or dispense service, it is a product.  Thus, consumable or product must be specified in accordance with the kind of service.";
             case DEV: return "Participant used in performing the act without being substantially affected by the act (i.e. durable or inert with respect to that particular service).\r\n\n                        \n                           Examples: monitoring equipment, tools, but also access/drainage lines, prostheses, pace maker, etc.";
-            case NRD: return "A device that changes ownership due to the service, e.g., a pacemaker, a prosthesis, an insulin injection equipment (pen), etc.  Such material may need to be restocked after he service.";
+            case NRD: return "A device that changes ownership due to the service, e.g. a pacemaker, a prosthesis, an insulin injection equipment (pen), etc.  Such material may need to be restocked after he service.";
             case RDV: return "A device that does not change ownership due to the service, i.e., a surgical instrument or tool or an endoscope.  The distinction between reuseable and non-reuseable must be made in order to know whether material must be re-stocked.";
             case DON: return "In some organ transplantation services and rarely in transfusion services a donor will be a target participant in the service.  However, in most cases transplantation is decomposed in three services: explantation, transport, and implantation.  The identity of the donor (recipient) is often irrelevant for the explantation (implantation) service.";
             case EXPAGNT: return "Description: The entity playing the associated role is the physical (including energy), chemical or biological substance that is participating in the exposure.  For example in communicable diseases, the associated playing entity is the disease causing pathogen.";
             case EXPART: return "Description:Direct participation in an exposure act where it is unknown that the participant is the source or subject of the exposure.  If the participant is known to be the contact of an exposure then the SBJ participation type should be used.  If the participant is known to be the source then the EXSRC participation type should be used.";
             case EXPTRGT: return "Description: The entity playing the associated role is the target (contact) of exposure.";
             case EXSRC: return "Description:The entity playing the associated role is the source of exposure.";
-            case PRD: return "Participant material that is brought forth (produced) in the act (e.g., specimen in a specimen collection, access or drainage in a placement service, medication package in a dispense service). It does not matter whether the material produced had existence prior to the service, or whether it is created in the service (e.g., in supply services the product is taken from a stock).";
+            case PRD: return "Participant material that is brought forth (produced) in the act (e.g. specimen in a specimen collection, access or drainage in a placement service, medication package in a dispense service). It does not matter whether the material produced had existence prior to the service, or whether it is created in the service (e.g. in supply services the product is taken from a stock).";
             case SBJ: return "The principle target on which the action happens.\r\n\n                        \n                           Examples: The patient in physical examination, a specimen in a lab observation. May also be a patient's family member (teaching) or a device or room (cleaning, disinfecting, housekeeping). \r\n\n                        \n                           UsageNotes: Not all direct targets are subjects. Consumables and devices used as tools for an act are not subjects. However, a device may be a subject of a maintenance action.";
             case SPC: return "The subject of non-clinical (e.g. laboratory) observation services is a specimen.";
             case IND: return "Target that is not substantially present in the act and which is not directly affected by the act, but which will be a focus of the record or documentation of the act.";
@@ -564,16 +572,16 @@ public enum V3ParticipationType {
             case RCT: return "The record target indicates whose medical record holds the documentation of this act.  This is especially important when the subject of a service is not the patient himself.";
             case RCV: return "The person (or organization) who receives the product of an Act.";
             case IRCP: return "A party, who may or should receive or who has recieved the Act or subsequent or derivative information of that Act. Information recipient is inert, i.e., independent of mood.\" Rationale: this is a generalization of a too diverse family that the definition can't be any more specific, and the concept is abstract so one of the specializations should be used.";
-            case NOT: return "An information recipient to notify for urgent matters about this Act. (e.g., in a laboratory order, critical results are being called by phone right away, this is the contact to call; or for an inpatient encounter, a next of kin to notify when the patient becomes critically ill).";
-            case PRCP: return "Information recipient to whom an act statement is primarily directed. E.g., a primary care provider receiving a discharge letter from a hospitalist, a health department receiving information on a suspected case of infectious disease. Multiple of these participations may exist on the same act without requiring that recipients be ranked as primary vs. secondary.";
+            case NOT: return "An information recipient to notify for urgent matters about this Act. (e.g. in a laboratory order, critical results are being called by phone right away, this is the contact to call; or for an inpatient encounter, a next of kin to notify when the patient becomes critically ill).";
+            case PRCP: return "Information recipient to whom an act statement is primarily directed; e.g. a primary care provider receiving a discharge letter from a hospitalist, a health department receiving information on a suspected case of infectious disease. Multiple of these participations may exist on the same act without requiring that recipients be ranked as primary vs. secondary.";
             case REFB: return "A participant (e.g. provider) who has referred the subject of an act (e.g. patient).\r\n\n                        Typically, a referred by participant will provide a report (e.g. referral).";
             case REFT: return "The person who receives the patient";
-            case TRC: return "A secondary information recipient, who receives copies (e.g., a primary care provider receiving copies of results as ordered by specialist).";
-            case LOC: return "The facility where the service is done.  May be a static building (or room therein) or a moving location (e.g., ambulance, helicopter, aircraft, train, truck, ship, etc.)";
-            case DST: return "The destination for services.  May be a static building (or room therein) or a movable facility (e.g., ship).";
+            case TRC: return "A secondary information recipient, who receives copies (e.g. a primary care provider receiving copies of results as ordered by specialist).";
+            case LOC: return "The facility where the service is done.  May be a static building (or room therein) or a moving location (e.g. ambulance, helicopter, aircraft, train, truck, ship, etc.)";
+            case DST: return "The destination for services.  May be a static building (or room therein) or a movable facility (e.g. ship).";
             case ELOC: return "A location where data about an Act was entered.";
-            case ORG: return "The location of origin for services.  May be a static building (or room therein) or a movable facility (e.g., ship).";
-            case RML: return "Some services take place at multiple concurrent locations (e.g., telemedicine, telephone consultation).  The location where the principal performing actor is located is taken as the primary location (LOC) while the other location(s) are considered \"remote.\"";
+            case ORG: return "The location of origin for services.  May be a static building (or room therein) or a movable facility (e.g. ship).";
+            case RML: return "Some services take place at multiple concurrent locations (e.g. telemedicine, telephone consultation).  The location where the principal performing actor is located is taken as the primary location (LOC) while the other location(s) are considered \"remote.\"";
             case VIA: return "For services, an intermediate location that specifies a path between origin an destination.";
             case PRF: return "Definition: A person, non-person living subject, organization or device that who actually and principally carries out the action. Device should only be assigned as a performer in circumstances where the device is performing independent of human intervention.  Need not be the principal responsible actor.\r\n\n                        \n                           Exampe: A surgery resident operating under supervision of attending surgeon, a search and rescue dog locating survivors, an electronic laboratory analyzer or the laboratory discipline requested to perform a laboratory test. The performer may also be the patient in self-care, e.g. fingerstick blood sugar. The traditional order filler is a performer. This information should accompany every service event.\r\n\n                        \n                           Note: that existing HL7 designs assign an organization as the playing entity of the Role that is the performer.  These designs should be revised in subsequent releases to make this the scooping entity for the role involved.";
             case DIST: return "Distributes material used in or generated during the act.";
@@ -609,6 +617,7 @@ public enum V3ParticipationType {
             case BBY: return "baby";
             case CAT: return "catalyst";
             case CSM: return "consumable";
+            case TPA: return "therapeutic agent";
             case DEV: return "device";
             case NRD: return "non-reuseable device";
             case RDV: return "reusable device";

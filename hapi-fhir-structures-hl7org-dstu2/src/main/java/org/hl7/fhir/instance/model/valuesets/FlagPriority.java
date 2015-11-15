@@ -29,25 +29,25 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum FlagPriority {
 
         /**
-         * No alarm
+         * No alarm.
          */
         PN, 
         /**
-         * Low priority
+         * Low priority.
          */
         PL, 
         /**
-         * Medium priority
+         * Medium priority.
          */
         PM, 
         /**
-         * High priority
+         * High priority.
          */
         PH, 
         /**
@@ -81,10 +81,10 @@ public enum FlagPriority {
         }
         public String getDefinition() {
           switch (this) {
-            case PN: return "No alarm";
-            case PL: return "Low priority";
-            case PM: return "Medium priority";
-            case PH: return "High priority";
+            case PN: return "No alarm.";
+            case PL: return "Low priority.";
+            case PM: return "Medium priority.";
+            case PH: return "High priority.";
             default: return "?";
           }
         }

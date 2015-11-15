@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -265,6 +265,10 @@ public class V3EntityCodeEnumFactory implements EnumFactory<V3EntityCode> {
       return V3EntityCode.BLDPRD;
     if ("VCCNE".equals(codeString))
       return V3EntityCode.VCCNE;
+    if ("_DrugEntity".equals(codeString))
+      return V3EntityCode._DRUGENTITY;
+    if ("_ClinicalDrug".equals(codeString))
+      return V3EntityCode._CLINICALDRUG;
     if ("_NonDrugAgentEntity".equals(codeString))
       return V3EntityCode._NONDRUGAGENTENTITY;
     if ("NDA01".equals(codeString))
@@ -555,6 +559,10 @@ public class V3EntityCodeEnumFactory implements EnumFactory<V3EntityCode> {
       return "BLDPRD";
     if (code == V3EntityCode.VCCNE)
       return "VCCNE";
+    if (code == V3EntityCode._DRUGENTITY)
+      return "_DrugEntity";
+    if (code == V3EntityCode._CLINICALDRUG)
+      return "_ClinicalDrug";
     if (code == V3EntityCode._NONDRUGAGENTENTITY)
       return "_NonDrugAgentEntity";
     if (code == V3EntityCode.NDA01)

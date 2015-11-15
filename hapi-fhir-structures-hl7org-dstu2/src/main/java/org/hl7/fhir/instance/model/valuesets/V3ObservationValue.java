@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3ObservationValue {
 
         /**
-         * Codes specify the category of observation, evidence, or document used to assess for services, e.g., discharge planning, or to establish eligibility for coverage under a policy or program. The type of evidence is coded as observation values.
+         * Codes specify the category of observation, evidence, or document used to assess for services, e.g. discharge planning, or to establish eligibility for coverage under a policy or program. The type of evidence is coded as observation values.
          */
         _ACTCOVERAGEASSESSMENTOBSERVATIONVALUE, 
         /**
-         * Code specifying financial indicators used to assess or establish eligibility for coverage under a policy or program; e.g., pay stub; tax or income document; asset document; living expenses.
+         * Code specifying financial indicators used to assess or establish eligibility for coverage under a policy or program; e.g. pay stub; tax or income document; asset document; living expenses.
          */
         _ACTFINANCIALSTATUSOBSERVATIONVALUE, 
         /**
@@ -51,7 +51,7 @@ public enum V3ObservationValue {
          */
         ANNUITY, 
         /**
-         * Indicator of real property ownership, e.g., deed or real estate contract.
+         * Indicator of real property ownership, e.g. deed or real estate contract.
          */
         PROP, 
         /**
@@ -63,7 +63,7 @@ public enum V3ObservationValue {
          */
         TRUST, 
         /**
-         * Code specifying income indicators used to assess or establish eligibility for coverage under a policy or program; e.g., pay or pension check, child support payments received or provided, and taxes paid.
+         * Code specifying income indicators used to assess or establish eligibility for coverage under a policy or program; e.g. pay or pension check, child support payments received or provided, and taxes paid.
          */
         INCOME, 
         /**
@@ -75,27 +75,27 @@ public enum V3ObservationValue {
          */
         DISABL, 
         /**
-         * Indicator of investment income, e.g., dividend check, annuity payment; real estate rent, investment divestiture proceeds; trust or endowment check.
+         * Indicator of investment income, e.g. dividend check, annuity payment; real estate rent, investment divestiture proceeds; trust or endowment check.
          */
         INVEST, 
         /**
-         * Indicator of paid employment, e.g., letter of hire, contract, employer letter; copy of pay check or pay stub.
+         * Indicator of paid employment, e.g. letter of hire, contract, employer letter; copy of pay check or pay stub.
          */
         PAY, 
         /**
-         * Indicator of retirement payment, e.g., pension check.
+         * Indicator of retirement payment, e.g. pension check.
          */
         RETIRE, 
         /**
-         * Indicator of spousal or partner support payments received or provided; e.g., alimony payment; support stipulations in a divorce settlement.
+         * Indicator of spousal or partner support payments received or provided; e.g. alimony payment; support stipulations in a divorce settlement.
          */
         SPOUSAL, 
         /**
-         * Indicator of income supplement, e.g., gifting, parental income support; stipend, or grant.
+         * Indicator of income supplement, e.g. gifting, parental income support; stipend, or grant.
          */
         SUPPLE, 
         /**
-         * Indicator of tax obligation or payment, e.g., statement of taxable income.
+         * Indicator of tax obligation or payment, e.g. statement of taxable income.
          */
         TAX, 
         /**
@@ -115,7 +115,7 @@ public enum V3ObservationValue {
          */
         HEALTH, 
         /**
-         * Indicator of housing expense, e.g., household appliances, fixtures, furnishings, and maintenance and repairs.
+         * Indicator of housing expense, e.g. household appliances, fixtures, furnishings, and maintenance and repairs.
          */
         HOUSE, 
         /**
@@ -135,7 +135,7 @@ public enum V3ObservationValue {
          */
         SUNDRY, 
         /**
-         * Indicator of transportation expenses, e.g., vehicle payments, vehicle insurance, vehicle fuel, and vehicle maintenance and repairs.
+         * Indicator of transportation expenses, e.g. vehicle payments, vehicle insurance, vehicle fuel, and vehicle maintenance and repairs.
          */
         TRANS, 
         /**
@@ -143,7 +143,7 @@ public enum V3ObservationValue {
          */
         UTIL, 
         /**
-         * Code specifying eligibility indicators used to assess or establish eligibility for coverage under a policy or program eligibility status, e.g., certificates of creditable coverage; student enrollment; adoption, marriage or birth certificate.
+         * Code specifying eligibility indicators used to assess or establish eligibility for coverage under a policy or program eligibility status, e.g. certificates of creditable coverage; student enrollment; adoption, marriage or birth certificate.
          */
         ELSTAT, 
         /**
@@ -167,7 +167,7 @@ public enum V3ObservationValue {
          */
         FOSTER, 
         /**
-         * Indicator of status as covered member under a policy or program, e.g., member id card or coverage document.
+         * Indicator of status as covered member under a policy or program, e.g. member id card or coverage document.
          */
         MEMBER, 
         /**
@@ -187,7 +187,7 @@ public enum V3ObservationValue {
          */
         STUDENRL, 
         /**
-         * Code specifying non-clinical indicators related to health status used to assess or establish eligibility for coverage under a policy or program, e.g., pregnancy, disability, drug use, mental health issues.
+         * Code specifying non-clinical indicators related to health status used to assess or establish eligibility for coverage under a policy or program, e.g. pregnancy, disability, drug use, mental health issues.
          */
         HLSTAT, 
         /**
@@ -259,7 +259,7 @@ public enum V3ObservationValue {
          */
         UNREL, 
         /**
-         * Code specifying observations or indicators related to socio-economic status used to assess to assess for services, e.g., discharge planning, or to establish eligibility for coverage under a policy or program.
+         * Code specifying observations or indicators related to socio-economic status used to assess to assess for services, e.g. discharge planning, or to establish eligibility for coverage under a policy or program.
          */
         SOECSTAT, 
         /**
@@ -291,7 +291,7 @@ public enum V3ObservationValue {
          */
         UNEMPL, 
         /**
-         * Indicates the result of a particular allergy test.  E.g. Negative, Mild, Moderate, Severe
+         * Indicates the result of a particular allergy test; e.g. Negative, Mild, Moderate, Severe
          */
         _ALLERGYTESTVALUE, 
         /**
@@ -315,7 +315,7 @@ public enum V3ObservationValue {
          */
         A4, 
         /**
-         * Description:Coded observation values for coverage limitations, for e.g., types of claims or types of parties covered under a policy or program.
+         * Description:Coded observation values for coverage limitations, for e.g. types of claims or types of parties covered under a policy or program.
          */
         _COVERAGELIMITOBSERVATIONVALUE, 
         /**
@@ -323,7 +323,7 @@ public enum V3ObservationValue {
          */
         _COVERAGELEVELOBSERVATIONVALUE, 
         /**
-         * Description:Child over an age as specified by coverage policy or program, e.g., student, differently abled, and income dependent.
+         * Description:Child over an age as specified by coverage policy or program, e.g. student, differently abled, and income dependent.
          */
         ADC, 
         /**
@@ -351,7 +351,7 @@ public enum V3ObservationValue {
          */
         IND, 
         /**
-         * Description:A pair of people of the same gender who live together as a family as specified by coverage policy or program, e.g., Naomi and Ruth from the Book of Ruth; Socrates and Alcibiades
+         * Description:A pair of people of the same gender who live together as a family as specified by coverage policy or program, e.g. Naomi and Ruth from the Book of Ruth; Socrates and Alcibiades
          */
         SSP, 
         /**
@@ -383,19 +383,19 @@ public enum V3ObservationValue {
          */
         _OBSERVATIONMEASURESCORING, 
         /**
-         * A measure in which either short-term cross-section or long-term longitudinal analysis is performed over a group of subjects defined by a set of common properties or defining characteristics (e.g., Male smokers between the ages of 40 and 50 years, exposure to treatment, exposure duration).
+         * A measure in which either short-term cross-section or long-term longitudinal analysis is performed over a group of subjects defined by a set of common properties or defining characteristics (e.g. Male smokers between the ages of 40 and 50 years, exposure to treatment, exposure duration).
          */
         COHORT, 
         /**
-         * A measure score in which each individual value for the measure can fall anywhere along a continuous scale (e.g., mean time to thrombolytics which aggregates the time in minutes from a case presenting with chest pain to the time of administration of thrombolytics).
+         * A measure score in which each individual value for the measure can fall anywhere along a continuous scale (e.g. mean time to thrombolytics which aggregates the time in minutes from a case presenting with chest pain to the time of administration of thrombolytics).
          */
         CONTVAR, 
         /**
-         * A score derived by dividing the number of cases that meet a criterion for quality (the numerator) by the number of eligible cases within a given time frame (the denominator) where the numerator cases are a subset of the denominator cases (e.g., percentage of eligible women with a mammogram performed in the last year).
+         * A score derived by dividing the number of cases that meet a criterion for quality (the numerator) by the number of eligible cases within a given time frame (the denominator) where the numerator cases are a subset of the denominator cases (e.g. percentage of eligible women with a mammogram performed in the last year).
          */
         PROPOR, 
         /**
-         * A score that may have a value of zero or greater that is derived by dividing a count of one type of data by a count of another type of data (e.g., the number of patients with central lines who develop infection divided by the number of central line days).
+         * A score that may have a value of zero or greater that is derived by dividing a count of one type of data by a count of another type of data (e.g. the number of patients with central lines who develop infection divided by the number of central line days).
          */
         RATIO, 
         /**
@@ -461,15 +461,15 @@ public enum V3ObservationValue {
         IPP, 
         /**
          * Measure population is used only in continuous variable eMeasures. It is a narrative description of the eMeasure population. 
-(e.g., all patients seen in the Emergency Department during the measurement period).
+(e.g. all patients seen in the Emergency Department during the measurement period).
          */
         MSRPOPL, 
         /**
-         * Numerators are used in proportion and ratio eMeasures. In proportion measures the numerator criteria are the processes or outcomes expected for each patient, procedure, or other unit of measurement defined in the denominator. In ratio measures the numerator is related, but not directly derived from the denominator (e.g., a numerator listing the number of central line blood stream infections and a denominator indicating the days per thousand of central line usage in a specific time period).
+         * Numerators are used in proportion and ratio eMeasures. In proportion measures the numerator criteria are the processes or outcomes expected for each patient, procedure, or other unit of measurement defined in the denominator. In ratio measures the numerator is related, but not directly derived from the denominator (e.g. a numerator listing the number of central line blood stream infections and a denominator indicating the days per thousand of central line usage in a specific time period).
          */
         NUMER, 
         /**
-         * Numerator Exclusions are used only in ratio eMeasures to define instances that should not be included in the numerator data. (e.g., if the number of central line blood stream infections per 1000 catheter days were to exclude infections with a specific bacterium, that bacterium would be listed as a numerator exclusion.)
+         * Numerator Exclusions are used only in ratio eMeasures to define instances that should not be included in the numerator data. (e.g. if the number of central line blood stream infections per 1000 catheter days were to exclude infections with a specific bacterium, that bacterium would be listed as a numerator exclusion.)
          */
         NUMEX, 
         /**
@@ -516,11 +516,11 @@ public enum V3ObservationValue {
          */
         _SECALTINTOBV, 
         /**
-         * Security metadata observation values used to indicate the use of a more abstract version of the content, e.g., replacing exact value of an age or date field with a range, or remove the left digits of a credit card number or SSN.
+         * Security metadata observation values used to indicate the use of a more abstract version of the content, e.g. replacing exact value of an age or date field with a range, or remove the left digits of a credit card number or SSN.
          */
         ABSTRED, 
         /**
-         * Security metadata observation values used to indicate the use of an algorithmic combination of actual values with the result of an aggregate function, e.g., average, sum, or count in order to limit disclosure of an IT resource (data, information object, service, or system capability) to the minimum necessary.
+         * Security metadata observation values used to indicate the use of an algorithmic combination of actual values with the result of an aggregate function, e.g. average, sum, or count in order to limit disclosure of an IT resource (data, information object, service, or system capability) to the minimum necessary.
          */
         AGGRED, 
         /**
@@ -549,7 +549,7 @@ public enum V3ObservationValue {
          * Security metadata observation value conveying the alteration integrity of an IT resource (data, information object, service, or system capability), by indicating the mechanism by which software systems can strip portions of the resource that could allow the identification of the source of the information or the information subject.  Custodian may retain a key to relink data necessary to reidentify the information subject.
 
                         
-                           Rationale: Personal data which has been processed to make it impossible to know whose data it is. Used particularly for secondary use of health data. In some cases, it may be possible for authorized individuals to restore the identity of the individual, e.g.,for public health case management.  Based on ISO/TS 25237:2008 Health informaticsâ€”Pseudonymization
+                           Rationale: Personal data which has been processed to make it impossible to know whose data it is. Used particularly for secondary use of health data. In some cases, it may be possible for authorized individuals to restore the identity of the individual, e.g.for public health case management.  Based on ISO/TS 25237:2008 Health informaticsâ€”Pseudonymization
          */
         PSEUDED, 
         /**
@@ -617,7 +617,7 @@ public enum V3ObservationValue {
          * Security metadata observation value used to indicate the mechanism by which software systems use digital signature to establish that data has not been modified.  
 
                         
-                           Rationale: This definition is intended to align with the ISO 22600-2 3.3.26 definition of digital signature:  Data appended to, or a cryptographic transformation (see cryptography) of, a data unit that allows a recipient of the data unit to prove the source and integrity of the data unit and protect against forgery e.g., by the recipient.
+                           Rationale: This definition is intended to align with the ISO 22600-2 3.3.26 definition of digital signature:  Data appended to, or a cryptographic transformation (see cryptography) of, a data unit that allows a recipient of the data unit to prove the source and integrity of the data unit and protect against forgery e.g. by the recipient.
          */
         DIGSIG, 
         /**
@@ -1052,6 +1052,22 @@ Long-term shared authentication secrets, if used, are never revealed to any part
          * Definition: Coverage is not in effect for healthcare service(s) and/or product(s). May optionally include reasons for the ineligibility.
          */
         NELG, 
+        /**
+         * AnnotationValue
+         */
+        _ANNOTATIONVALUE, 
+        /**
+         * Description:Used in a patient care message to value simple clinical (non-lab) observations.
+         */
+        _COMMONCLINICALOBSERVATIONVALUE, 
+        /**
+         * This domain is established as a parent to a variety of value domains being defined to support the communication of Individual Case Safety Reports to regulatory bodies. Arguably, this aggregation is not taxonomically pure, but the grouping will facilitate the management of these domains.
+         */
+        _INDIVIDUALCASESAFETYREPORTVALUEDOMAINS, 
+        /**
+         * Indicates the specific observation result which is the reason for the action (prescription, lab test, etc.); e.g. Headache, Ear infection, planned diagnostic image (requiring contrast agent), etc.
+         */
+        _INDICATIONVALUE, 
         /**
          * added to help the parsers
          */
@@ -1507,6 +1523,14 @@ Long-term shared authentication secrets, if used, are never revealed to any part
           return INPNDUPD;
         if ("NELG".equals(codeString))
           return NELG;
+        if ("_AnnotationValue".equals(codeString))
+          return _ANNOTATIONVALUE;
+        if ("_CommonClinicalObservationValue".equals(codeString))
+          return _COMMONCLINICALOBSERVATIONVALUE;
+        if ("_IndividualCaseSafetyReportValueDomains".equals(codeString))
+          return _INDIVIDUALCASESAFETYREPORTVALUEDOMAINS;
+        if ("_IndicationValue".equals(codeString))
+          return _INDICATIONVALUE;
         throw new Exception("Unknown V3ObservationValue code '"+codeString+"'");
         }
         public String toCode() {
@@ -1735,6 +1759,10 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case INPNDINV: return "INPNDINV";
             case INPNDUPD: return "INPNDUPD";
             case NELG: return "NELG";
+            case _ANNOTATIONVALUE: return "_AnnotationValue";
+            case _COMMONCLINICALOBSERVATIONVALUE: return "_CommonClinicalObservationValue";
+            case _INDIVIDUALCASESAFETYREPORTVALUEDOMAINS: return "_IndividualCaseSafetyReportValueDomains";
+            case _INDICATIONVALUE: return "_IndicationValue";
             default: return "?";
           }
         }
@@ -1743,45 +1771,45 @@ Long-term shared authentication secrets, if used, are never revealed to any part
         }
         public String getDefinition() {
           switch (this) {
-            case _ACTCOVERAGEASSESSMENTOBSERVATIONVALUE: return "Codes specify the category of observation, evidence, or document used to assess for services, e.g., discharge planning, or to establish eligibility for coverage under a policy or program. The type of evidence is coded as observation values.";
-            case _ACTFINANCIALSTATUSOBSERVATIONVALUE: return "Code specifying financial indicators used to assess or establish eligibility for coverage under a policy or program; e.g., pay stub; tax or income document; asset document; living expenses.";
+            case _ACTCOVERAGEASSESSMENTOBSERVATIONVALUE: return "Codes specify the category of observation, evidence, or document used to assess for services, e.g. discharge planning, or to establish eligibility for coverage under a policy or program. The type of evidence is coded as observation values.";
+            case _ACTFINANCIALSTATUSOBSERVATIONVALUE: return "Code specifying financial indicators used to assess or establish eligibility for coverage under a policy or program; e.g. pay stub; tax or income document; asset document; living expenses.";
             case ASSET: return "Codes specifying asset indicators used to assess or establish eligibility for coverage under a policy or program.";
             case ANNUITY: return "Indicator of annuity ownership or status as beneficiary.";
-            case PROP: return "Indicator of real property ownership, e.g., deed or real estate contract.";
+            case PROP: return "Indicator of real property ownership, e.g. deed or real estate contract.";
             case RETACCT: return "Indicator of retirement investment account ownership.";
             case TRUST: return "Indicator of status as trust beneficiary.";
-            case INCOME: return "Code specifying income indicators used to assess or establish eligibility for coverage under a policy or program; e.g., pay or pension check, child support payments received or provided, and taxes paid.";
+            case INCOME: return "Code specifying income indicators used to assess or establish eligibility for coverage under a policy or program; e.g. pay or pension check, child support payments received or provided, and taxes paid.";
             case CHILD: return "Indicator of child support payments received or provided.";
             case DISABL: return "Indicator of disability income replacement payment.";
-            case INVEST: return "Indicator of investment income, e.g., dividend check, annuity payment; real estate rent, investment divestiture proceeds; trust or endowment check.";
-            case PAY: return "Indicator of paid employment, e.g., letter of hire, contract, employer letter; copy of pay check or pay stub.";
-            case RETIRE: return "Indicator of retirement payment, e.g., pension check.";
-            case SPOUSAL: return "Indicator of spousal or partner support payments received or provided; e.g., alimony payment; support stipulations in a divorce settlement.";
-            case SUPPLE: return "Indicator of income supplement, e.g., gifting, parental income support; stipend, or grant.";
-            case TAX: return "Indicator of tax obligation or payment, e.g., statement of taxable income.";
+            case INVEST: return "Indicator of investment income, e.g. dividend check, annuity payment; real estate rent, investment divestiture proceeds; trust or endowment check.";
+            case PAY: return "Indicator of paid employment, e.g. letter of hire, contract, employer letter; copy of pay check or pay stub.";
+            case RETIRE: return "Indicator of retirement payment, e.g. pension check.";
+            case SPOUSAL: return "Indicator of spousal or partner support payments received or provided; e.g. alimony payment; support stipulations in a divorce settlement.";
+            case SUPPLE: return "Indicator of income supplement, e.g. gifting, parental income support; stipend, or grant.";
+            case TAX: return "Indicator of tax obligation or payment, e.g. statement of taxable income.";
             case LIVEXP: return "Codes specifying living expense indicators used to assess or establish eligibility for coverage under a policy or program.";
             case CLOTH: return "Indicator of clothing expenses.";
             case FOOD: return "Indicator of transportation expenses.";
             case HEALTH: return "Indicator of health expenses; including medication costs, health service costs, financial participations, and health coverage premiums.";
-            case HOUSE: return "Indicator of housing expense, e.g., household appliances, fixtures, furnishings, and maintenance and repairs.";
+            case HOUSE: return "Indicator of housing expense, e.g. household appliances, fixtures, furnishings, and maintenance and repairs.";
             case LEGAL: return "Indicator of legal expenses.";
             case MORTG: return "Indicator of mortgage amount, interest, and payments.";
             case RENT: return "Indicator of rental or lease payments.";
             case SUNDRY: return "Indicator of transportation expenses.";
-            case TRANS: return "Indicator of transportation expenses, e.g., vehicle payments, vehicle insurance, vehicle fuel, and vehicle maintenance and repairs.";
+            case TRANS: return "Indicator of transportation expenses, e.g. vehicle payments, vehicle insurance, vehicle fuel, and vehicle maintenance and repairs.";
             case UTIL: return "Indicator of transportation expenses.";
-            case ELSTAT: return "Code specifying eligibility indicators used to assess or establish eligibility for coverage under a policy or program eligibility status, e.g., certificates of creditable coverage; student enrollment; adoption, marriage or birth certificate.";
+            case ELSTAT: return "Code specifying eligibility indicators used to assess or establish eligibility for coverage under a policy or program eligibility status, e.g. certificates of creditable coverage; student enrollment; adoption, marriage or birth certificate.";
             case ADOPT: return "Indicator of adoption.";
             case BTHCERT: return "Indicator of birth.";
             case CCOC: return "Indicator of creditable coverage.";
             case DRLIC: return "Indicator of driving status.";
             case FOSTER: return "Indicator of foster child status.";
-            case MEMBER: return "Indicator of status as covered member under a policy or program, e.g., member id card or coverage document.";
+            case MEMBER: return "Indicator of status as covered member under a policy or program, e.g. member id card or coverage document.";
             case MIL: return "Indicator of military status.";
             case MRGCERT: return "Indicator of marriage status.";
             case PASSPORT: return "Indicator of citizenship.";
             case STUDENRL: return "Indicator of student status.";
-            case HLSTAT: return "Code specifying non-clinical indicators related to health status used to assess or establish eligibility for coverage under a policy or program, e.g., pregnancy, disability, drug use, mental health issues.";
+            case HLSTAT: return "Code specifying non-clinical indicators related to health status used to assess or establish eligibility for coverage under a policy or program, e.g. pregnancy, disability, drug use, mental health issues.";
             case DISABLE: return "Indication of disability.";
             case DRUG: return "Indication of drug use.";
             case IVDRG: return "Indication of IV drug use .";
@@ -1799,7 +1827,7 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case RELAT: return "Living with one or more relatives. Maps to PD1-2   Living arrangement   (IS)   00742 [R]";
             case SPS: return "Living only with spouse or life partner. Maps to PD1-2   Living arrangement   (IS)   00742 [S]";
             case UNREL: return "Living with one or more unrelated persons.";
-            case SOECSTAT: return "Code specifying observations or indicators related to socio-economic status used to assess to assess for services, e.g., discharge planning, or to establish eligibility for coverage under a policy or program.";
+            case SOECSTAT: return "Code specifying observations or indicators related to socio-economic status used to assess to assess for services, e.g. discharge planning, or to establish eligibility for coverage under a policy or program.";
             case ABUSE: return "Indication of abuse victim.";
             case HMLESS: return "Indication of status as homeless.";
             case ILGIM: return "Indication of status as illegal immigrant.";
@@ -1807,22 +1835,22 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case PROB: return "Indication of probation status.";
             case REFUG: return "Indication of refugee status.";
             case UNEMPL: return "Indication of unemployed status.";
-            case _ALLERGYTESTVALUE: return "Indicates the result of a particular allergy test.  E.g. Negative, Mild, Moderate, Severe";
+            case _ALLERGYTESTVALUE: return "Indicates the result of a particular allergy test; e.g. Negative, Mild, Moderate, Severe";
             case A0: return "Description:Patient exhibits no reaction to the challenge agent.";
             case A1: return "Description:Patient exhibits a minimal reaction to the challenge agent.";
             case A2: return "Description:Patient exhibits a mild reaction to the challenge agent.";
             case A3: return "Description:Patient exhibits moderate reaction to the challenge agent.";
             case A4: return "Description:Patient exhibits a severe reaction to the challenge agent.";
-            case _COVERAGELIMITOBSERVATIONVALUE: return "Description:Coded observation values for coverage limitations, for e.g., types of claims or types of parties covered under a policy or program.";
+            case _COVERAGELIMITOBSERVATIONVALUE: return "Description:Coded observation values for coverage limitations, for e.g. types of claims or types of parties covered under a policy or program.";
             case _COVERAGELEVELOBSERVATIONVALUE: return "Description:Coded observation values for types of covered parties under a policy or program based on their personal relationships or employment status.";
-            case ADC: return "Description:Child over an age as specified by coverage policy or program, e.g., student, differently abled, and income dependent.";
+            case ADC: return "Description:Child over an age as specified by coverage policy or program, e.g. student, differently abled, and income dependent.";
             case CHD: return "Description:Dependent biological, adopted, foster child as specified by coverage policy or program.";
             case DEP: return "Description:Person requiring functional and/or financial assistance from another person as specified by coverage policy or program.";
             case DP: return "Description:Persons registered as a family unit in a domestic partner registry as specified by law and by coverage policy or program.";
             case ECH: return "Description:An individual employed by an employer who receive remuneration in wages, salary, commission, tips, piece-rates, or pay-in-kind through the employeraTMs payment system (i.e., not a contractor) as specified by coverage policy or program.";
             case FLY: return "Description:As specified by coverage policy or program.";
             case IND: return "Description:Person as specified by coverage policy or program.";
-            case SSP: return "Description:A pair of people of the same gender who live together as a family as specified by coverage policy or program, e.g., Naomi and Ruth from the Book of Ruth; Socrates and Alcibiades";
+            case SSP: return "Description:A pair of people of the same gender who live together as a family as specified by coverage policy or program, e.g. Naomi and Ruth from the Book of Ruth; Socrates and Alcibiades";
             case _CRITICALITYOBSERVATIONVALUE: return "A clinical judgment as to the worst case result of a future exposure (including substance administration). When the worst case result is assessed to have a life-threatening or organ system threatening potential, it is considered to be of high criticality.";
             case CRITH: return "Worst case result of a future exposure is assessed to be life-threatening.";
             case CRITL: return "Worst case result of a future exposure is not assessed to be life-threatening.";
@@ -1830,10 +1858,10 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case _GENETICOBSERVATIONVALUE: return "Description: The domain contains genetic analysis specific observation values, e.g. Homozygote, Heterozygote, etc.";
             case HOMOZYGOTE: return "Description: An individual having different alleles at one or more loci regarding a specific character";
             case _OBSERVATIONMEASURESCORING: return "Observation values used to indicate the type of scoring (e.g. proportion, ratio) used by a health quality measure.";
-            case COHORT: return "A measure in which either short-term cross-section or long-term longitudinal analysis is performed over a group of subjects defined by a set of common properties or defining characteristics (e.g., Male smokers between the ages of 40 and 50 years, exposure to treatment, exposure duration).";
-            case CONTVAR: return "A measure score in which each individual value for the measure can fall anywhere along a continuous scale (e.g., mean time to thrombolytics which aggregates the time in minutes from a case presenting with chest pain to the time of administration of thrombolytics).";
-            case PROPOR: return "A score derived by dividing the number of cases that meet a criterion for quality (the numerator) by the number of eligible cases within a given time frame (the denominator) where the numerator cases are a subset of the denominator cases (e.g., percentage of eligible women with a mammogram performed in the last year).";
-            case RATIO: return "A score that may have a value of zero or greater that is derived by dividing a count of one type of data by a count of another type of data (e.g., the number of patients with central lines who develop infection divided by the number of central line days).";
+            case COHORT: return "A measure in which either short-term cross-section or long-term longitudinal analysis is performed over a group of subjects defined by a set of common properties or defining characteristics (e.g. Male smokers between the ages of 40 and 50 years, exposure to treatment, exposure duration).";
+            case CONTVAR: return "A measure score in which each individual value for the measure can fall anywhere along a continuous scale (e.g. mean time to thrombolytics which aggregates the time in minutes from a case presenting with chest pain to the time of administration of thrombolytics).";
+            case PROPOR: return "A score derived by dividing the number of cases that meet a criterion for quality (the numerator) by the number of eligible cases within a given time frame (the denominator) where the numerator cases are a subset of the denominator cases (e.g. percentage of eligible women with a mammogram performed in the last year).";
+            case RATIO: return "A score that may have a value of zero or greater that is derived by dividing a count of one type of data by a count of another type of data (e.g. the number of patients with central lines who develop infection divided by the number of central line days).";
             case _OBSERVATIONMEASURETYPE: return "Observation values used to indicate what kind of health quality measure is used.";
             case COMPOSITE: return "A measure that is composed from one or more other measures and indicates an overall summary of those measures.";
             case EFFICIENCY: return "A measure related to the efficiency of medical treatment.";
@@ -1848,9 +1876,9 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case DENOM: return "It can be the same as the initial patient population or a subset of the initial patient population to further constrain the population for the purpose of the eMeasure. Different measures within an eMeasure set may have different Denominators. Continuous Variable eMeasures do not have a Denominator, but instead define a Measure Population.";
             case IP: return "The initial population refers to all entities to be evaluated by a specific quality measure who share a common set of specified characteristics within a specific measurement set to which a given measure belongs.";
             case IPP: return "The initial patient population refers to all patients to be evaluated by a specific quality measure who share a common set of specified characteristics within a specific measurement set to which a given measure belongs. Details often include information based upon specific age groups, diagnoses, diagnostic and procedure codes, and enrollment periods.";
-            case MSRPOPL: return "Measure population is used only in continuous variable eMeasures. It is a narrative description of the eMeasure population. \n(e.g., all patients seen in the Emergency Department during the measurement period).";
-            case NUMER: return "Numerators are used in proportion and ratio eMeasures. In proportion measures the numerator criteria are the processes or outcomes expected for each patient, procedure, or other unit of measurement defined in the denominator. In ratio measures the numerator is related, but not directly derived from the denominator (e.g., a numerator listing the number of central line blood stream infections and a denominator indicating the days per thousand of central line usage in a specific time period).";
-            case NUMEX: return "Numerator Exclusions are used only in ratio eMeasures to define instances that should not be included in the numerator data. (e.g., if the number of central line blood stream infections per 1000 catheter days were to exclude infections with a specific bacterium, that bacterium would be listed as a numerator exclusion.)";
+            case MSRPOPL: return "Measure population is used only in continuous variable eMeasures. It is a narrative description of the eMeasure population. \n(e.g. all patients seen in the Emergency Department during the measurement period).";
+            case NUMER: return "Numerators are used in proportion and ratio eMeasures. In proportion measures the numerator criteria are the processes or outcomes expected for each patient, procedure, or other unit of measurement defined in the denominator. In ratio measures the numerator is related, but not directly derived from the denominator (e.g. a numerator listing the number of central line blood stream infections and a denominator indicating the days per thousand of central line usage in a specific time period).";
+            case NUMEX: return "Numerator Exclusions are used only in ratio eMeasures to define instances that should not be included in the numerator data. (e.g. if the number of central line blood stream infections per 1000 catheter days were to exclude infections with a specific bacterium, that bacterium would be listed as a numerator exclusion.)";
             case _PARTIALCOMPLETIONSCALE: return "PartialCompletionScale";
             case G: return "Value for Act.partialCompletionCode attribute that implies 81-99% completion";
             case LE: return "Value for Act.partialCompletionCode attribute that implies 61-80% completion";
@@ -1861,12 +1889,12 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case _SECURITYOBSERVATIONVALUE: return "Observation values used to indicate security observation metadata.";
             case _SECINTOBV: return "Abstract security observation values used to indicate security integrity metadata.\r\n\n                        \n                           Examples: Codes conveying integrity status, integrity confidence, and provenance.";
             case _SECALTINTOBV: return "Abstract security metadata observation values used to indicate mechanism used for authorized alteration of an IT resource (data, information object, service, or system capability)";
-            case ABSTRED: return "Security metadata observation values used to indicate the use of a more abstract version of the content, e.g., replacing exact value of an age or date field with a range, or remove the left digits of a credit card number or SSN.";
-            case AGGRED: return "Security metadata observation values used to indicate the use of an algorithmic combination of actual values with the result of an aggregate function, e.g., average, sum, or count in order to limit disclosure of an IT resource (data, information object, service, or system capability) to the minimum necessary.";
+            case ABSTRED: return "Security metadata observation values used to indicate the use of a more abstract version of the content, e.g. replacing exact value of an age or date field with a range, or remove the left digits of a credit card number or SSN.";
+            case AGGRED: return "Security metadata observation values used to indicate the use of an algorithmic combination of actual values with the result of an aggregate function, e.g. average, sum, or count in order to limit disclosure of an IT resource (data, information object, service, or system capability) to the minimum necessary.";
             case ANONYED: return "Security metadata observation value conveying the alteration integrity of an IT resource (data, information object, service, or system capability) by used to indicate the mechanism by which software systems can strip portions of the resource that could allow the identification of the source of the information or the information subject.  No key to relink the data is retained.";
             case MAPPED: return "Security metadata observation value used to indicate that the IT resource semantic content has been transformed from one encoding to another.\r\n\n                        \n                           Usage Note: \"MAP\" code does not indicate the semantic fidelity of the transformed content.\r\n\n                        To indicate semantic fidelity for maps of HL7 to other code systems, this security alteration integrity observation may be further specified using an Act valued with Value Set: MapRelationship (2.16.840.1.113883.1.11.11052).\r\n\n                        Semantic fidelity of the mapped IT Resource may also be indicated using a SecurityIntegrityConfidenceObservation.";
             case MASKED: return "Security metadata observation value conveying the alteration integrity of an IT resource (data, information object, service, or system capability) by indicating the mechanism by which software systems can make data unintelligible (that is, as unreadable and unusable by algorithmically transforming plaintext into ciphertext) such that it can only be accessed or used by authorized users.  An authorized user may be provided a key to decrypt per license or \"shared secret\".\r\n\n                        \n                           Usage Note: \"MASKED\" may be used, per applicable policy, as a flag to indicate to a user or receiver that some portion of an IT resource has been further encrypted, and may be accessed only by an authorized user or receiver to which a decryption key is provided.";
-            case PSEUDED: return "Security metadata observation value conveying the alteration integrity of an IT resource (data, information object, service, or system capability), by indicating the mechanism by which software systems can strip portions of the resource that could allow the identification of the source of the information or the information subject.  Custodian may retain a key to relink data necessary to reidentify the information subject.\r\n\n                        \n                           Rationale: Personal data which has been processed to make it impossible to know whose data it is. Used particularly for secondary use of health data. In some cases, it may be possible for authorized individuals to restore the identity of the individual, e.g.,for public health case management.  Based on ISO/TS 25237:2008 Health informaticsâ€”Pseudonymization";
+            case PSEUDED: return "Security metadata observation value conveying the alteration integrity of an IT resource (data, information object, service, or system capability), by indicating the mechanism by which software systems can strip portions of the resource that could allow the identification of the source of the information or the information subject.  Custodian may retain a key to relink data necessary to reidentify the information subject.\r\n\n                        \n                           Rationale: Personal data which has been processed to make it impossible to know whose data it is. Used particularly for secondary use of health data. In some cases, it may be possible for authorized individuals to restore the identity of the individual, e.g.for public health case management.  Based on ISO/TS 25237:2008 Health informaticsâ€”Pseudonymization";
             case REDACTED: return "Security metadata observation value used to indicate the mechanism by which software systems can filter an IT resource (data, information object, service, or system capability) to remove any portion of the resource that is not authorized to be access, used, or disclosed.\r\n\n                        \n                           Usage Note: \"REDACTED\" may be used, per applicable policy, as a flag to indicate to a user or receiver that some portion of an IT resource has filtered and not included in the content accessed or received.";
             case SUBSETTED: return "Metadata observation used to indicate that some information has been removed from the source object when the view this object contains was constructed because of configuration options when the view was created. The content may not be suitable for use as the basis of a record update\r\n\n                        \n                           Usage Note: This is not suitable to be used when information is removed for security reasons - see the code REDACTED for this use.";
             case SYNTAC: return "Security metadata observation value used to indicate that the IT resource syntax has been transformed from one syntactical representation to another.  \r\n\n                        \n                           Usage Note: \"SYNTAC\" code does not indicate the syntactical correctness of the syntactically transformed IT resource.";
@@ -1874,7 +1902,7 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case VERSIONED: return "Security metadata observation value conveying the alteration integrity of an IT resource (data, information object, service, or system capability)  which indicates that the resource only retains versions of an IT resource  for access and use per applicable policy\r\n\n                        \n                           Usage Note: When this code is used, expectation is that the system has removed historical versions of the data that falls outside the time period deemed to be the effective time of the applicable version.";
             case _SECDATINTOBV: return "Abstract security observation values used to indicate data integrity metadata.\r\n\n                        \n                           Examples: Codes conveying the mechanism used to preserve the accuracy and consistency of an IT resource such as a digital signature and a cryptographic hash function.";
             case CRYTOHASH: return "Security metadata observation value used to indicate the mechanism by which software systems can establish that data was not modified in transit.\r\n\n                        \n                           Rationale: This definition is intended to align with the ISO 22600-2 3.3.19 definition of cryptographic checkvalue: Information which is derived by performing a cryptographic transformation (see cryptography) on the data unit.  The derivation of the checkvalue may be performed in one or more steps and is a result of a mathematical function of the key and a data unit. It is usually used to check the integrity of a data unit.\r\n\n                        \n                           Examples: \n                        \r\n\n                        \n                           SHA-1\n                           SHA-2 (Secure Hash Algorithm)";
-            case DIGSIG: return "Security metadata observation value used to indicate the mechanism by which software systems use digital signature to establish that data has not been modified.  \r\n\n                        \n                           Rationale: This definition is intended to align with the ISO 22600-2 3.3.26 definition of digital signature:  Data appended to, or a cryptographic transformation (see cryptography) of, a data unit that allows a recipient of the data unit to prove the source and integrity of the data unit and protect against forgery e.g., by the recipient.";
+            case DIGSIG: return "Security metadata observation value used to indicate the mechanism by which software systems use digital signature to establish that data has not been modified.  \r\n\n                        \n                           Rationale: This definition is intended to align with the ISO 22600-2 3.3.26 definition of digital signature:  Data appended to, or a cryptographic transformation (see cryptography) of, a data unit that allows a recipient of the data unit to prove the source and integrity of the data unit and protect against forgery e.g. by the recipient.";
             case _SECINTCONOBV: return "Abstract security observation value used to indicate integrity confidence metadata.\r\n\n                        \n                           Examples: Codes conveying the level of reliability and trustworthiness of an IT resource.";
             case HRELIABLE: return "Security metadata observation value used to indicate that the veracity or trustworthiness of an IT resource (data, information object, service, or system capability) for a specified purpose of use is perceived to be or deemed by policy to be very high.";
             case RELIABLE: return "Security metadata observation value used to indicate that the veracity or trustworthiness of an IT resource (data, information object, service, or system capability) for a specified purpose of use is perceived to be or deemed by policy to be adequate.";
@@ -1967,6 +1995,10 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case INPNDINV: return "Definition: Coverage is not in effect for healthcare service(s) and/or product(s) - Pending Investigation.";
             case INPNDUPD: return "Definition: Coverage is not in effect for healthcare service(s) and/or product(s) - Pending Eligibility Update.";
             case NELG: return "Definition: Coverage is not in effect for healthcare service(s) and/or product(s). May optionally include reasons for the ineligibility.";
+            case _ANNOTATIONVALUE: return "AnnotationValue";
+            case _COMMONCLINICALOBSERVATIONVALUE: return "Description:Used in a patient care message to value simple clinical (non-lab) observations.";
+            case _INDIVIDUALCASESAFETYREPORTVALUEDOMAINS: return "This domain is established as a parent to a variety of value domains being defined to support the communication of Individual Case Safety Reports to regulatory bodies. Arguably, this aggregation is not taxonomically pure, but the grouping will facilitate the management of these domains.";
+            case _INDICATIONVALUE: return "Indicates the specific observation result which is the reason for the action (prescription, lab test, etc.); e.g. Headache, Ear infection, planned diagnostic image (requiring contrast agent), etc.";
             default: return "?";
           }
         }
@@ -2196,6 +2228,10 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case INPNDINV: return "inactive - pending investigation";
             case INPNDUPD: return "inactive - pending eligibility update";
             case NELG: return "not eligible";
+            case _ANNOTATIONVALUE: return "AnnotationValue";
+            case _COMMONCLINICALOBSERVATIONVALUE: return "common clinical observation";
+            case _INDIVIDUALCASESAFETYREPORTVALUEDOMAINS: return "Individual Case Safety Report Value Domains";
+            case _INDICATIONVALUE: return "IndicationValue";
             default: return "?";
           }
     }

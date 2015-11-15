@@ -140,7 +140,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
     org.hl7.fhir.instance.validation.InstanceValidator v;
     try {
-      v = new org.hl7.fhir.instance.validation.InstanceValidator(workerContext, workerContext);
+      v = new org.hl7.fhir.instance.validation.InstanceValidator(workerContext);
     } catch (Exception e) {
       throw new ConfigurationException(e);
     }

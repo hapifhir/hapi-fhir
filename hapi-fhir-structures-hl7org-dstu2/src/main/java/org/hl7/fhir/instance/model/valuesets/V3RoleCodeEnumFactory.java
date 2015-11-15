@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -89,6 +89,8 @@ public class V3RoleCodeEnumFactory implements EnumFactory<V3RoleCode> {
       return V3RoleCode.SEE;
     if ("SNIFF".equals(codeString))
       return V3RoleCode.SNIFF;
+    if ("_CertifiedEntityType".equals(codeString))
+      return V3RoleCode._CERTIFIEDENTITYTYPE;
     if ("_CitizenRoleType".equals(codeString))
       return V3RoleCode._CITIZENROLETYPE;
     if ("CAS".equals(codeString))
@@ -425,6 +427,22 @@ public class V3RoleCodeEnumFactory implements EnumFactory<V3RoleCode> {
       return V3RoleCode.FSTUD;
     if ("PSTUD".equals(codeString))
       return V3RoleCode.PSTUD;
+    if ("ADOPT".equals(codeString))
+      return V3RoleCode.ADOPT;
+    if ("GCHILD".equals(codeString))
+      return V3RoleCode.GCHILD;
+    if ("GPARNT".equals(codeString))
+      return V3RoleCode.GPARNT;
+    if ("NAT".equals(codeString))
+      return V3RoleCode.NAT;
+    if ("NIENE".equals(codeString))
+      return V3RoleCode.NIENE;
+    if ("PARNT".equals(codeString))
+      return V3RoleCode.PARNT;
+    if ("SPSE".equals(codeString))
+      return V3RoleCode.SPSE;
+    if ("STEP".equals(codeString))
+      return V3RoleCode.STEP;
     if ("_CoveredPartyRoleType".equals(codeString))
       return V3RoleCode._COVEREDPARTYROLETYPE;
     if ("_ClaimantCoveredPartyRoleType".equals(codeString))
@@ -769,6 +787,20 @@ public class V3RoleCodeEnumFactory implements EnumFactory<V3RoleCode> {
       return V3RoleCode.SUBJECT;
     if ("thirdParty".equals(codeString))
       return V3RoleCode.THIRDPARTY;
+    if ("DEP".equals(codeString))
+      return V3RoleCode.DEP;
+    if ("DEPEN".equals(codeString))
+      return V3RoleCode.DEPEN;
+    if ("FM".equals(codeString))
+      return V3RoleCode.FM;
+    if ("INDIV".equals(codeString))
+      return V3RoleCode.INDIV;
+    if ("NAMED".equals(codeString))
+      return V3RoleCode.NAMED;
+    if ("PSYCHCF".equals(codeString))
+      return V3RoleCode.PSYCHCF;
+    if ("SUBSCR".equals(codeString))
+      return V3RoleCode.SUBSCR;
     throw new IllegalArgumentException("Unknown V3RoleCode code '"+codeString+"'");
   }
 
@@ -823,6 +855,8 @@ public class V3RoleCodeEnumFactory implements EnumFactory<V3RoleCode> {
       return "SEE";
     if (code == V3RoleCode.SNIFF)
       return "SNIFF";
+    if (code == V3RoleCode._CERTIFIEDENTITYTYPE)
+      return "_CertifiedEntityType";
     if (code == V3RoleCode._CITIZENROLETYPE)
       return "_CitizenRoleType";
     if (code == V3RoleCode.CAS)
@@ -1159,6 +1193,22 @@ public class V3RoleCodeEnumFactory implements EnumFactory<V3RoleCode> {
       return "FSTUD";
     if (code == V3RoleCode.PSTUD)
       return "PSTUD";
+    if (code == V3RoleCode.ADOPT)
+      return "ADOPT";
+    if (code == V3RoleCode.GCHILD)
+      return "GCHILD";
+    if (code == V3RoleCode.GPARNT)
+      return "GPARNT";
+    if (code == V3RoleCode.NAT)
+      return "NAT";
+    if (code == V3RoleCode.NIENE)
+      return "NIENE";
+    if (code == V3RoleCode.PARNT)
+      return "PARNT";
+    if (code == V3RoleCode.SPSE)
+      return "SPSE";
+    if (code == V3RoleCode.STEP)
+      return "STEP";
     if (code == V3RoleCode._COVEREDPARTYROLETYPE)
       return "_CoveredPartyRoleType";
     if (code == V3RoleCode._CLAIMANTCOVEREDPARTYROLETYPE)
@@ -1503,6 +1553,20 @@ public class V3RoleCodeEnumFactory implements EnumFactory<V3RoleCode> {
       return "subject";
     if (code == V3RoleCode.THIRDPARTY)
       return "thirdParty";
+    if (code == V3RoleCode.DEP)
+      return "DEP";
+    if (code == V3RoleCode.DEPEN)
+      return "DEPEN";
+    if (code == V3RoleCode.FM)
+      return "FM";
+    if (code == V3RoleCode.INDIV)
+      return "INDIV";
+    if (code == V3RoleCode.NAMED)
+      return "NAMED";
+    if (code == V3RoleCode.PSYCHCF)
+      return "PSYCHCF";
+    if (code == V3RoleCode.SUBSCR)
+      return "SUBSCR";
     return "?";
   }
 

@@ -29,33 +29,33 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum MessageReasonEncounter {
 
         /**
-         * The patient has been admitted
+         * The patient has been admitted.
          */
         ADMIT, 
         /**
-         * The patient has been discharged
+         * The patient has been discharged.
          */
         DISCHARGE, 
         /**
-         * The patient has temporarily left the institution
+         * The patient has temporarily left the institution.
          */
         ABSENT, 
         /**
-         * The patient has returned from a temporary absence
+         * The patient has returned from a temporary absence.
          */
         RETURN, 
         /**
-         * The patient has been moved to a new location
+         * The patient has been moved to a new location.
          */
         MOVED, 
         /**
-         * Encounter details have been updated (e.g. to correct a coding error)
+         * Encounter details have been updated (e.g. to correct a coding error).
          */
         EDIT, 
         /**
@@ -95,12 +95,12 @@ public enum MessageReasonEncounter {
         }
         public String getDefinition() {
           switch (this) {
-            case ADMIT: return "The patient has been admitted";
-            case DISCHARGE: return "The patient has been discharged";
-            case ABSENT: return "The patient has temporarily left the institution";
-            case RETURN: return "The patient has returned from a temporary absence";
-            case MOVED: return "The patient has been moved to a new location";
-            case EDIT: return "Encounter details have been updated (e.g. to correct a coding error)";
+            case ADMIT: return "The patient has been admitted.";
+            case DISCHARGE: return "The patient has been discharged.";
+            case ABSENT: return "The patient has temporarily left the institution.";
+            case RETURN: return "The patient has returned from a temporary absence.";
+            case MOVED: return "The patient has been moved to a new location.";
+            case EDIT: return "Encounter details have been updated (e.g. to correct a coding error).";
             default: return "?";
           }
         }

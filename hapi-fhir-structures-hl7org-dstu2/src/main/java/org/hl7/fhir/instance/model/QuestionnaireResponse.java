@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -738,10 +738,10 @@ public class QuestionnaireResponse extends DomainResource {
     @Block()
     public static class QuestionAnswerComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The answer (or one of the answers) provided by the respondant to the question.
+         * The answer (or one of the answers) provided by the respondent to the question.
          */
         @Child(name = "value", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Single-valued answer to the question", formalDefinition="The answer (or one of the answers) provided by the respondant to the question." )
+        @Description(shortDefinition="Single-valued answer to the question", formalDefinition="The answer (or one of the answers) provided by the respondent to the question." )
         protected Type value;
 
         /**
@@ -761,14 +761,14 @@ public class QuestionnaireResponse extends DomainResource {
       }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public Type getValue() { 
           return this.value;
         }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public BooleanType getValueBooleanType() throws Exception { 
           if (!(this.value instanceof BooleanType))
@@ -781,7 +781,7 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public DecimalType getValueDecimalType() throws Exception { 
           if (!(this.value instanceof DecimalType))
@@ -794,7 +794,7 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public IntegerType getValueIntegerType() throws Exception { 
           if (!(this.value instanceof IntegerType))
@@ -807,7 +807,7 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public DateType getValueDateType() throws Exception { 
           if (!(this.value instanceof DateType))
@@ -820,7 +820,7 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public DateTimeType getValueDateTimeType() throws Exception { 
           if (!(this.value instanceof DateTimeType))
@@ -833,7 +833,7 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public InstantType getValueInstantType() throws Exception { 
           if (!(this.value instanceof InstantType))
@@ -846,7 +846,7 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public TimeType getValueTimeType() throws Exception { 
           if (!(this.value instanceof TimeType))
@@ -859,7 +859,7 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public StringType getValueStringType() throws Exception { 
           if (!(this.value instanceof StringType))
@@ -872,7 +872,7 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public UriType getValueUriType() throws Exception { 
           if (!(this.value instanceof UriType))
@@ -885,7 +885,7 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public Attachment getValueAttachment() throws Exception { 
           if (!(this.value instanceof Attachment))
@@ -898,7 +898,7 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public Coding getValueCoding() throws Exception { 
           if (!(this.value instanceof Coding))
@@ -911,7 +911,7 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public Quantity getValueQuantity() throws Exception { 
           if (!(this.value instanceof Quantity))
@@ -924,7 +924,7 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public Reference getValueReference() throws Exception { 
           if (!(this.value instanceof Reference))
@@ -941,7 +941,7 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+         * @param value {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public QuestionAnswerComponent setValue(Type value) { 
           this.value = value;
@@ -990,7 +990,7 @@ public class QuestionnaireResponse extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("value[x]", "boolean|decimal|integer|date|dateTime|instant|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondant to the question.", 0, java.lang.Integer.MAX_VALUE, value));
+          childrenList.add(new Property("value[x]", "boolean|decimal|integer|date|dateTime|instant|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, java.lang.Integer.MAX_VALUE, value));
           childrenList.add(new Property("group", "@QuestionnaireResponse.group", "Nested group, containing nested question for this question. The order of groups within the question is relevant.", 0, java.lang.Integer.MAX_VALUE, group));
         }
 

@@ -29,105 +29,105 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum TestscriptOperationCodes {
 
         /**
-         * Read the current state of the resource
+         * Read the current state of the resource.
          */
         READ, 
         /**
-         * Read the state of a specific version of the resource
+         * Read the state of a specific version of the resource.
          */
         VREAD, 
         /**
-         * Update an existing resource by its id (or create it if it is new)
+         * Update an existing resource by its id (or create it if it is new).
          */
         UPDATE, 
         /**
-         * Delete a resource
+         * Delete a resource.
          */
         DELETE, 
         /**
-         * Retrieve the update history for a particular resource or resource type
+         * Retrieve the update history for a particular resource or resource type.
          */
         HISTORY, 
         /**
-         * Create a new resource with a server assigned id
+         * Create a new resource with a server assigned id.
          */
         CREATE, 
         /**
-         * Search based on some filter criteria
+         * Search based on some filter criteria.
          */
         SEARCH, 
         /**
-         * Update, create or delete a set of resources as a single transaction
+         * Update, create or delete a set of resources as a single transaction.
          */
         TRANSACTION, 
         /**
-         * Get a conformance statement for the system
+         * Get a conformance statement for the system.
          */
         CONFORMANCE, 
         /**
-         * Closure Table Maintenance
+         * Closure Table Maintenance.
          */
         CLOSURE, 
         /**
-         * Generate a Document
+         * Generate a Document.
          */
         DOCUMENT, 
         /**
-         * Fetch Encounter/Patient Record
+         * Fetch Encounter/Patient Record.
          */
         EVERYTHING, 
         /**
-         * Value Set Expansion
+         * Value Set Expansion.
          */
         EXPAND, 
         /**
-         * Find a functional list
+         * Find a functional list.
          */
         FIND, 
         /**
-         * Concept Look Up
+         * Concept Look Up.
          */
         LOOKUP, 
         /**
-         * Access a list of profiles, tags, and security labels
+         * Access a list of profiles, tags, and security labels.
          */
         META, 
         /**
-         * Add profiles, tags, and security labels to a resource
+         * Add profiles, tags, and security labels to a resource.
          */
         METAADD, 
         /**
-         * Delete profiles, tags, and security labels for a resource
+         * Delete profiles, tags, and security labels for a resource.
          */
         METADELETE, 
         /**
-         * Populate Questionnaire
+         * Populate Questionnaire.
          */
         POPULATE, 
         /**
-         * Process Message
+         * Process Message.
          */
         PROCESSMESSAGE, 
         /**
-         * Build Questionnaire
+         * Build Questionnaire.
          */
         QUESTIONNAIRE, 
         /**
-         * Concept Translation
+         * Concept Translation.
          */
         TRANSLATE, 
         /**
-         * Validate a resource
+         * Validate a resource.
          */
         VALIDATE, 
         /**
-         * Value Set based Validation
+         * Value Set based Validation.
          */
         VALIDATECODE, 
         /**
@@ -221,30 +221,30 @@ public enum TestscriptOperationCodes {
         }
         public String getDefinition() {
           switch (this) {
-            case READ: return "Read the current state of the resource";
-            case VREAD: return "Read the state of a specific version of the resource";
-            case UPDATE: return "Update an existing resource by its id (or create it if it is new)";
-            case DELETE: return "Delete a resource";
-            case HISTORY: return "Retrieve the update history for a particular resource or resource type";
-            case CREATE: return "Create a new resource with a server assigned id";
-            case SEARCH: return "Search based on some filter criteria";
-            case TRANSACTION: return "Update, create or delete a set of resources as a single transaction";
-            case CONFORMANCE: return "Get a conformance statement for the system";
-            case CLOSURE: return "Closure Table Maintenance";
-            case DOCUMENT: return "Generate a Document";
-            case EVERYTHING: return "Fetch Encounter/Patient Record";
-            case EXPAND: return "Value Set Expansion";
-            case FIND: return "Find a functional list";
-            case LOOKUP: return "Concept Look Up";
-            case META: return "Access a list of profiles, tags, and security labels";
-            case METAADD: return "Add profiles, tags, and security labels to a resource";
-            case METADELETE: return "Delete profiles, tags, and security labels for a resource";
-            case POPULATE: return "Populate Questionnaire";
-            case PROCESSMESSAGE: return "Process Message";
-            case QUESTIONNAIRE: return "Build Questionnaire";
-            case TRANSLATE: return "Concept Translation";
-            case VALIDATE: return "Validate a resource";
-            case VALIDATECODE: return "Value Set based Validation";
+            case READ: return "Read the current state of the resource.";
+            case VREAD: return "Read the state of a specific version of the resource.";
+            case UPDATE: return "Update an existing resource by its id (or create it if it is new).";
+            case DELETE: return "Delete a resource.";
+            case HISTORY: return "Retrieve the update history for a particular resource or resource type.";
+            case CREATE: return "Create a new resource with a server assigned id.";
+            case SEARCH: return "Search based on some filter criteria.";
+            case TRANSACTION: return "Update, create or delete a set of resources as a single transaction.";
+            case CONFORMANCE: return "Get a conformance statement for the system.";
+            case CLOSURE: return "Closure Table Maintenance.";
+            case DOCUMENT: return "Generate a Document.";
+            case EVERYTHING: return "Fetch Encounter/Patient Record.";
+            case EXPAND: return "Value Set Expansion.";
+            case FIND: return "Find a functional list.";
+            case LOOKUP: return "Concept Look Up.";
+            case META: return "Access a list of profiles, tags, and security labels.";
+            case METAADD: return "Add profiles, tags, and security labels to a resource.";
+            case METADELETE: return "Delete profiles, tags, and security labels for a resource.";
+            case POPULATE: return "Populate Questionnaire.";
+            case PROCESSMESSAGE: return "Process Message.";
+            case QUESTIONNAIRE: return "Build Questionnaire.";
+            case TRANSLATE: return "Concept Translation.";
+            case VALIDATE: return "Validate a resource.";
+            case VALIDATECODE: return "Value Set based Validation.";
             default: return "?";
           }
         }

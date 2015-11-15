@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -42,22 +42,22 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * The header for a message exchange that is either requesting or responding to an action.  The Reference(s) that are the subject of the action as well as other Information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.
+ * The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.
  */
 @ResourceDef(name="MessageHeader", profile="http://hl7.org/fhir/Profile/MessageHeader")
 public class MessageHeader extends DomainResource {
 
     public enum ResponseType {
         /**
-         * The message was accepted and processed without error
+         * The message was accepted and processed without error.
          */
         OK, 
         /**
-         * Some internal unexpected error occurred - wait and try again. Note - this is usually used for things like database unavailable, which may be expected to resolve, though human intervention may be required
+         * Some internal unexpected error occurred - wait and try again. Note - this is usually used for things like database unavailable, which may be expected to resolve, though human intervention may be required.
          */
         TRANSIENTERROR, 
         /**
-         * The message was rejected because of some content in it. There is no point in re-sending without change. The response narrative SHALL describe what the issue is.
+         * The message was rejected because of some content in it. There is no point in re-sending without change. The response narrative SHALL describe the issue.
          */
         FATALERROR, 
         /**
@@ -93,9 +93,9 @@ public class MessageHeader extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case OK: return "The message was accepted and processed without error";
-            case TRANSIENTERROR: return "Some internal unexpected error occurred - wait and try again. Note - this is usually used for things like database unavailable, which may be expected to resolve, though human intervention may be required";
-            case FATALERROR: return "The message was rejected because of some content in it. There is no point in re-sending without change. The response narrative SHALL describe what the issue is.";
+            case OK: return "The message was accepted and processed without error.";
+            case TRANSIENTERROR: return "Some internal unexpected error occurred - wait and try again. Note - this is usually used for things like database unavailable, which may be expected to resolve, though human intervention may be required.";
+            case FATALERROR: return "The message was rejected because of some content in it. There is no point in re-sending without change. The response narrative SHALL describe the issue.";
             default: return "?";
           }
         }
@@ -988,10 +988,10 @@ public class MessageHeader extends DomainResource {
     protected Resource responsibleTarget;
 
     /**
-     * Coded indication of the cause for the event - indicates  a reason for the occurance of the event that is a focus of this message.
+     * Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message.
      */
     @Child(name = "reason", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Cause of event", formalDefinition="Coded indication of the cause for the event - indicates  a reason for the occurance of the event that is a focus of this message." )
+    @Description(shortDefinition="Cause of event", formalDefinition="Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message." )
     protected CodeableConcept reason;
 
     /**
@@ -1349,7 +1349,7 @@ public class MessageHeader extends DomainResource {
     }
 
     /**
-     * @return {@link #reason} (Coded indication of the cause for the event - indicates  a reason for the occurance of the event that is a focus of this message.)
+     * @return {@link #reason} (Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message.)
      */
     public CodeableConcept getReason() { 
       if (this.reason == null)
@@ -1365,7 +1365,7 @@ public class MessageHeader extends DomainResource {
     }
 
     /**
-     * @param value {@link #reason} (Coded indication of the cause for the event - indicates  a reason for the occurance of the event that is a focus of this message.)
+     * @param value {@link #reason} (Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message.)
      */
     public MessageHeader setReason(CodeableConcept value) { 
       this.reason = value;
@@ -1432,7 +1432,7 @@ public class MessageHeader extends DomainResource {
         childrenList.add(new Property("author", "Reference(Practitioner)", "The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("receiver", "Reference(Practitioner|Organization)", "Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn't sufficient.", 0, java.lang.Integer.MAX_VALUE, receiver));
         childrenList.add(new Property("responsible", "Reference(Practitioner|Organization)", "The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party.", 0, java.lang.Integer.MAX_VALUE, responsible));
-        childrenList.add(new Property("reason", "CodeableConcept", "Coded indication of the cause for the event - indicates  a reason for the occurance of the event that is a focus of this message.", 0, java.lang.Integer.MAX_VALUE, reason));
+        childrenList.add(new Property("reason", "CodeableConcept", "Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("data", "Reference(Any)", "The actual data of the message - a reference to the root/focus class of the event.", 0, java.lang.Integer.MAX_VALUE, data));
       }
 

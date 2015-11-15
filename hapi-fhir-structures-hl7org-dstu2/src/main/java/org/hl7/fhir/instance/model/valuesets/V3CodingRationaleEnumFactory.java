@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -49,6 +49,12 @@ public class V3CodingRationaleEnumFactory implements EnumFactory<V3CodingRationa
       return V3CodingRationale.PR;
     if ("R".equals(codeString))
       return V3CodingRationale.R;
+    if ("HL7".equals(codeString))
+      return V3CodingRationale.HL7;
+    if ("SH".equals(codeString))
+      return V3CodingRationale.SH;
+    if ("SRC".equals(codeString))
+      return V3CodingRationale.SRC;
     throw new IllegalArgumentException("Unknown V3CodingRationale code '"+codeString+"'");
   }
 
@@ -63,6 +69,12 @@ public class V3CodingRationaleEnumFactory implements EnumFactory<V3CodingRationa
       return "PR";
     if (code == V3CodingRationale.R)
       return "R";
+    if (code == V3CodingRationale.HL7)
+      return "HL7";
+    if (code == V3CodingRationale.SH)
+      return "SH";
+    if (code == V3CodingRationale.SRC)
+      return "SRC";
     return "?";
   }
 

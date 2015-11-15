@@ -29,29 +29,29 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum XdsRelationshipType {
 
         /**
-         * A separate XDS Document that references a prior document, and may extend or  alter the observations in the prior document
+         * A separate XDS document that references a prior document, and may extend or alter the observations in the prior document.
          */
         APND, 
         /**
-         * A new version of an existing document
+         * A new version of an existing document.
          */
         RPLC, 
         /**
-         * A transformed document is derived by a machine translation from some other format
+         * A transformed document is derived by a machine translation from some other format.
          */
         XFRM, 
         /**
-         * Both a XFRM and a RPLC relationship
+         * Both a XFRM and a RPLC relationship.
          */
         XFRMRPLC, 
         /**
-         * This document signs the target document
+         * This document signs the target document.
          */
         SIGNS, 
         /**
@@ -88,20 +88,20 @@ public enum XdsRelationshipType {
         }
         public String getDefinition() {
           switch (this) {
-            case APND: return "A separate XDS Document that references a prior document, and may extend or  alter the observations in the prior document";
-            case RPLC: return "A new version of an existing document";
-            case XFRM: return "A transformed document is derived by a machine translation from some other format";
-            case XFRMRPLC: return "Both a XFRM and a RPLC relationship";
-            case SIGNS: return "This document signs the target document";
+            case APND: return "A separate XDS document that references a prior document, and may extend or alter the observations in the prior document.";
+            case RPLC: return "A new version of an existing document.";
+            case XFRM: return "A transformed document is derived by a machine translation from some other format.";
+            case XFRMRPLC: return "Both a XFRM and a RPLC relationship.";
+            case SIGNS: return "This document signs the target document.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case APND: return "A P N D";
-            case RPLC: return "R P L C";
-            case XFRM: return "X F R M";
-            case XFRMRPLC: return "X F R M R P L C";
+            case APND: return "APND";
+            case RPLC: return "RPLC";
+            case XFRM: return "XFRM";
+            case XFRMRPLC: return "XFRM_RPLC";
             case SIGNS: return "Signs";
             default: return "?";
           }

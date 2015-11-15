@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -66,10 +66,10 @@ public class BodySite extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * Named anatomical location - ideally would be coded where possible.
+     * Named anatomical location - ideally coded where possible.
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Named anatomical location", formalDefinition="Named anatomical location - ideally would be coded where possible." )
+    @Description(shortDefinition="Named anatomical location", formalDefinition="Named anatomical location - ideally coded where possible." )
     protected CodeableConcept code;
 
     /**
@@ -195,7 +195,7 @@ public class BodySite extends DomainResource {
     }
 
     /**
-     * @return {@link #code} (Named anatomical location - ideally would be coded where possible.)
+     * @return {@link #code} (Named anatomical location - ideally coded where possible.)
      */
     public CodeableConcept getCode() { 
       if (this.code == null)
@@ -211,7 +211,7 @@ public class BodySite extends DomainResource {
     }
 
     /**
-     * @param value {@link #code} (Named anatomical location - ideally would be coded where possible.)
+     * @param value {@link #code} (Named anatomical location - ideally coded where possible.)
      */
     public BodySite setCode(CodeableConcept value) { 
       this.code = value;
@@ -351,7 +351,7 @@ public class BodySite extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("patient", "Reference(Patient)", "The person to which the body site belongs.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("identifier", "Identifier", "Identifier for this instance of the anatomical location.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("code", "CodeableConcept", "Named anatomical location - ideally would be coded where possible.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("code", "CodeableConcept", "Named anatomical location - ideally coded where possible.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("modifier", "CodeableConcept", "Modifier to refine the anatomical location.  These include modifiers for laterality, relative location, directionality, number, and plane.", 0, java.lang.Integer.MAX_VALUE, modifier));
         childrenList.add(new Property("description", "string", "Description of anatomical location.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("image", "Attachment", "Image or images used to identify a location.", 0, java.lang.Integer.MAX_VALUE, image));

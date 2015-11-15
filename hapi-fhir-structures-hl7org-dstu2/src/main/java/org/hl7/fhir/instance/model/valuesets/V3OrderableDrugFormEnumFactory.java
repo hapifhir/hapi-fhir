@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -303,6 +303,8 @@ public class V3OrderableDrugFormEnumFactory implements EnumFactory<V3OrderableDr
       return V3OrderableDrugForm.ERCAP12;
     if ("ERCAP24".equals(codeString))
       return V3OrderableDrugForm.ERCAP24;
+    if ("ERECCAP".equals(codeString))
+      return V3OrderableDrugForm.ERECCAP;
     if ("TAB".equals(codeString))
       return V3OrderableDrugForm.TAB;
     if ("ORTAB".equals(codeString))
@@ -627,6 +629,8 @@ public class V3OrderableDrugFormEnumFactory implements EnumFactory<V3OrderableDr
       return "ERCAP12";
     if (code == V3OrderableDrugForm.ERCAP24)
       return "ERCAP24";
+    if (code == V3OrderableDrugForm.ERECCAP)
+      return "ERECCAP";
     if (code == V3OrderableDrugForm.TAB)
       return "TAB";
     if (code == V3OrderableDrugForm.ORTAB)

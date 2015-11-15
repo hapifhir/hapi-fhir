@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3RoleCode {
@@ -153,6 +153,10 @@ public enum V3RoleCode {
          * Description:Dogs trained or having the ability to detect imminent seizures or cancers in humans, probably as a result of volatile chemical (odors) given off by the malignancy of the host.
          */
         SNIFF, 
+        /**
+         * Defines types of certifications for all entities
+         */
+        _CERTIFIEDENTITYTYPE, 
         /**
          * A role type used to qualify a person's legal status within a country or nation.
          */
@@ -811,7 +815,7 @@ public enum V3RoleCode {
 
                         
                            
-                              The sole basis for coverage, e.g., being differently abled may qualify a person for disability coverage
+                              The sole basis for coverage, e.g. being differently abled may qualify a person for disability coverage
 
                            
                            
@@ -819,18 +823,18 @@ public enum V3RoleCode {
 
                            
                            
-                              May impact the level of coverage for a covered party under a policy or program, e.g., being differently abled may qualify a program eligible for additional benefits.
+                              May impact the level of coverage for a covered party under a policy or program, e.g. being differently abled may qualify a program eligible for additional benefits.
 
                            
                         
                         
-                           Discussion:  The Abstract Value Set "CoverageRoleType", which was developed for use in the Canadian realm "pre-coordinate" coverage roles with other roles that a covered party must play in order to be eligible for coverage, e.g., "handicapped dependent".   These role.codes may only be used with COVPTY to avoid overlapping concepts that would result from using them to specify the specializations of COVPTY, e.g., the role.class DEPEN should not be used with the role.code family dependent because that relationship has overlapping concepts due to the role.code precoodination and is conveyed in FICO with the personal relationship role that has a PART role link to the covered party role.  For the same reasons, the role.class DEPEN should not be used with the role.code HANDIC (handicapped dependent); the role.code DIFFABLE (differently abled) should be used instead.
+                           Discussion:  The Abstract Value Set "CoverageRoleType", which was developed for use in the Canadian realm "pre-coordinate" coverage roles with other roles that a covered party must play in order to be eligible for coverage, e.g. "handicapped dependent".   These role.codes may only be used with COVPTY to avoid overlapping concepts that would result from using them to specify the specializations of COVPTY, e.g. the role.class DEPEN should not be used with the role.code family dependent because that relationship has overlapping concepts due to the role.code precoodination and is conveyed in FICO with the personal relationship role that has a PART role link to the covered party role.  For the same reasons, the role.class DEPEN should not be used with the role.code HANDIC (handicapped dependent); the role.code DIFFABLE (differently abled) should be used instead.
 
                         In summary, the coded concepts in the Abstract Value Set "CoveredPartyRoleType" can be "post-coordinated" with the "RoleClassCoveredParty" Abstract Value Set.  Decoupling these concepts is intended to support an expansive range of covered party concepts and their semantic comparability.
          */
         _POLICYORPROGRAMCOVERAGEROLETYPE, 
         /**
-         * Role recognized through the issuance of insurance coverage to an identified covered party who has this relationship with the policy holder such as the policy holder themselves (self), spouse, child, etc
+         * Role recognized through the issuance of insurance coverage to an identified covered party who has this relationship with the policy holder such as the policy holder themselves (self), spouse, child, etc.
          */
         _COVERAGEROLETYPE, 
         /**
@@ -866,13 +870,45 @@ public enum V3RoleCode {
          */
         PSTUD, 
         /**
+         * A child taken into one's family through legal means and raised as one's own child.
+         */
+        ADOPT, 
+        /**
+         * A child of one's son or daughter.
+         */
+        GCHILD, 
+        /**
+         * parent of a parent of the subject.
+         */
+        GPARNT, 
+        /**
+         * A child as determined by birth.
+         */
+        NAT, 
+        /**
+         * A child of one's brother or sister or of the brother or sister of one's spouse.
+         */
+        NIENE, 
+        /**
+         * One that begets or brings forth offspring or a person who brings up and cares for another (Webster's Collegiate Dictionary)
+         */
+        PARNT, 
+        /**
+         * A marriage partner; a husband or wife.
+         */
+        SPSE, 
+        /**
+         * A child receiving parental care and nurture from a person who is related to them through marriage to their parent.
+         */
+        STEP, 
+        /**
          * A role recognized through the eligibility of an identified living subject for benefits covered under an insurance policy or a program.  Eligibility as a covered party may be conditioned on a relationship with (1) the policy holder such as the policy holder who is covered as an individual under a poliy or as a party sponsored for coverage by the policy holder.
 
                         
                            Example:An employee as a subscriber; or (2) on being scoped another covered party such as the subscriber, as in the case of a dependent. 
 
                         
-                           Discussion:  The Abstract Value Set "CoverageRoleType", which was developed for use in the Canadian realm "pre-coordinate" coverage roles with other roles that a covered party must play in order to be eligible for coverage, e.g., "handicapped dependent".  Other codes in the Abstract Value Set CoveredPartyRoleType domain can be "post-coordinated" with the EligiblePartyRoleType codes to denote comparable concepts.  Decoupling the concepts is intended to support a wider range of concepts and semantic comparability of coded concepts.
+                           Discussion:  The Abstract Value Set "CoverageRoleType", which was developed for use in the Canadian realm "pre-coordinate" coverage roles with other roles that a covered party must play in order to be eligible for coverage, e.g. "handicapped dependent".  Other codes in the Abstract Value Set CoveredPartyRoleType domain can be "post-coordinated" with the EligiblePartyRoleType codes to denote comparable concepts.  Decoupling the concepts is intended to support a wider range of concepts and semantic comparability of coded concepts.
          */
         _COVEREDPARTYROLETYPE, 
         /**
@@ -915,7 +951,7 @@ public enum V3RoleCode {
          * Description: A person, who is a minor or is deemed incompetent, who plays the role of a program eligible where eligibility for coverage is based on meeting program eligibility criteria for status as a ward of a court or jurisdiction.
 
                         
-                           Discussion: This CoveredPartyRoleType.code is typically used when the CoveredPartyRole class code is a "claimant", "program eligible", a "named insured", an "individual Insured" or a "dependent", and the person's status as a ward meets program or policy criteria. In the case of a ward covered under a program providing financial or health benefits, a governmental agency may take temporary custody of a minor or incompetent for his/her protection and care, e.g., if the ward is suffering from neglect or abuse, or has been in trouble with the law.
+                           Discussion: This CoveredPartyRoleType.code is typically used when the CoveredPartyRole class code is a "claimant", "program eligible", a "named insured", an "individual Insured" or a "dependent", and the person's status as a ward meets program or policy criteria. In the case of a ward covered under a program providing financial or health benefits, a governmental agency may take temporary custody of a minor or incompetent for his/her protection and care, e.g. if the ward is suffering from neglect or abuse, or has been in trouble with the law.
          */
         WARD, 
         /**
@@ -985,7 +1021,7 @@ public enum V3RoleCode {
          */
         SCN, 
         /**
-         * A role of a place that further classifies the setting (e.g., accident site, road side, work site, community location) in which services are delivered.
+         * A role of a place that further classifies the setting (e.g. accident site, road side, work site, community location) in which services are delivered.
          */
         _SERVICEDELIVERYLOCATIONROLETYPE, 
         /**
@@ -993,7 +1029,7 @@ public enum V3RoleCode {
          */
         _DEDICATEDSERVICEDELIVERYLOCATIONROLETYPE, 
         /**
-         * A role of a place that further classifies the clinical setting (e.g., cardiology clinic, primary care clinic, rehabilitation hospital, skilled nursing facility) in which care is delivered during an encounter.
+         * A role of a place that further classifies the clinical setting (e.g. cardiology clinic, primary care clinic, rehabilitation hospital, skilled nursing facility) in which care is delivered during an encounter.
          */
         _DEDICATEDCLINICALLOCATIONROLETYPE, 
         /**
@@ -1001,7 +1037,7 @@ public enum V3RoleCode {
          */
         DX, 
         /**
-         * A practice setting where cardiovascular diagnostic procedures or therapeutic interventions are performed (e.g., cardiac catheterization lab, echocardiography suite)
+         * A practice setting where cardiovascular diagnostic procedures or therapeutic interventions are performed (e.g. cardiac catheterization lab, echocardiography suite)
          */
         CVDX, 
         /**
@@ -1061,7 +1097,7 @@ public enum V3RoleCode {
          */
         RHAT, 
         /**
-         * Description: A location that plays the role of delivering services which may include adaptation, rehabilitation and social integration services for people with intellectual and/or pervasive development disorders such as autism or severe behaviour disorder.
+         * Description: A location that plays the role of delivering services which may include adaptation, rehabilitation and social integration services for people with intellectual and/or pervasive development disorders such as autism or severe behavior disorder.
          */
         RHII, 
         /**
@@ -1593,6 +1629,34 @@ public enum V3RoleCode {
          */
         THIRDPARTY, 
         /**
+         * null
+         */
+        DEP, 
+        /**
+         * A party covered under a policy based on association with a subscriber.
+         */
+        DEPEN, 
+        /**
+         * A member of the covered party's family. This could be the spouse, a parent, a grand parent, a sibling, etc.
+         */
+        FM, 
+        /**
+         * A party covered under a policy as the policyholder.
+         */
+        INDIV, 
+        /**
+         * A party to an insurance policy to whom the insurer agrees to indemnify for losses, provides benefits for, or renders services.
+         */
+        NAMED, 
+        /**
+         * null
+         */
+        PSYCHCF, 
+        /**
+         * A party covered under a policy based on association with a sponsor who is the policy holder, and whose association may provide for the eligibility of dependents for coverage
+         */
+        SUBSCR, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -1649,6 +1713,8 @@ public enum V3RoleCode {
           return SEE;
         if ("SNIFF".equals(codeString))
           return SNIFF;
+        if ("_CertifiedEntityType".equals(codeString))
+          return _CERTIFIEDENTITYTYPE;
         if ("_CitizenRoleType".equals(codeString))
           return _CITIZENROLETYPE;
         if ("CAS".equals(codeString))
@@ -1985,6 +2051,22 @@ public enum V3RoleCode {
           return FSTUD;
         if ("PSTUD".equals(codeString))
           return PSTUD;
+        if ("ADOPT".equals(codeString))
+          return ADOPT;
+        if ("GCHILD".equals(codeString))
+          return GCHILD;
+        if ("GPARNT".equals(codeString))
+          return GPARNT;
+        if ("NAT".equals(codeString))
+          return NAT;
+        if ("NIENE".equals(codeString))
+          return NIENE;
+        if ("PARNT".equals(codeString))
+          return PARNT;
+        if ("SPSE".equals(codeString))
+          return SPSE;
+        if ("STEP".equals(codeString))
+          return STEP;
         if ("_CoveredPartyRoleType".equals(codeString))
           return _COVEREDPARTYROLETYPE;
         if ("_ClaimantCoveredPartyRoleType".equals(codeString))
@@ -2329,6 +2411,20 @@ public enum V3RoleCode {
           return SUBJECT;
         if ("thirdParty".equals(codeString))
           return THIRDPARTY;
+        if ("DEP".equals(codeString))
+          return DEP;
+        if ("DEPEN".equals(codeString))
+          return DEPEN;
+        if ("FM".equals(codeString))
+          return FM;
+        if ("INDIV".equals(codeString))
+          return INDIV;
+        if ("NAMED".equals(codeString))
+          return NAMED;
+        if ("PSYCHCF".equals(codeString))
+          return PSYCHCF;
+        if ("SUBSCR".equals(codeString))
+          return SUBSCR;
         throw new Exception("Unknown V3RoleCode code '"+codeString+"'");
         }
         public String toCode() {
@@ -2358,6 +2454,7 @@ public enum V3RoleCode {
             case CCO: return "CCO";
             case SEE: return "SEE";
             case SNIFF: return "SNIFF";
+            case _CERTIFIEDENTITYTYPE: return "_CertifiedEntityType";
             case _CITIZENROLETYPE: return "_CitizenRoleType";
             case CAS: return "CAS";
             case CASM: return "CASM";
@@ -2526,6 +2623,14 @@ public enum V3RoleCode {
             case STUD: return "STUD";
             case FSTUD: return "FSTUD";
             case PSTUD: return "PSTUD";
+            case ADOPT: return "ADOPT";
+            case GCHILD: return "GCHILD";
+            case GPARNT: return "GPARNT";
+            case NAT: return "NAT";
+            case NIENE: return "NIENE";
+            case PARNT: return "PARNT";
+            case SPSE: return "SPSE";
+            case STEP: return "STEP";
             case _COVEREDPARTYROLETYPE: return "_CoveredPartyRoleType";
             case _CLAIMANTCOVEREDPARTYROLETYPE: return "_ClaimantCoveredPartyRoleType";
             case CRIMEVIC: return "CRIMEVIC";
@@ -2698,6 +2803,13 @@ public enum V3RoleCode {
             case PT: return "PT";
             case SUBJECT: return "subject";
             case THIRDPARTY: return "thirdParty";
+            case DEP: return "DEP";
+            case DEPEN: return "DEPEN";
+            case FM: return "FM";
+            case INDIV: return "INDIV";
+            case NAMED: return "NAMED";
+            case PSYCHCF: return "PSYCHCF";
+            case SUBSCR: return "SUBSCR";
             default: return "?";
           }
         }
@@ -2731,6 +2843,7 @@ public enum V3RoleCode {
             case CCO: return "Description:Companion animals, such as dogs, cats, and rabbits, which may be provided to patients to improve general mood, decrease depression and loneliness, and distract from stress-inducing concerns to improve quality of life.";
             case SEE: return "Description:Dogs trained to assist persons who are seeing impaired or blind.";
             case SNIFF: return "Description:Dogs trained or having the ability to detect imminent seizures or cancers in humans, probably as a result of volatile chemical (odors) given off by the malignancy of the host.";
+            case _CERTIFIEDENTITYTYPE: return "Defines types of certifications for all entities";
             case _CITIZENROLETYPE: return "A role type used to qualify a person's legal status within a country or nation.";
             case CAS: return "A person who has fled his or her home country to find a safe place elsewhere.";
             case CASM: return "A person who is someone of below legal age who has fled his or her home country, without his or her parents, to find a safe place elsewhere at time of categorization.";
@@ -2889,8 +3002,8 @@ public enum V3RoleCode {
             case NBOR: return "The player of the role lives near or next to the 	scoping person.";
             case ONESELF: return "The relationship that a person has with his or her self.";
             case ROOM: return "One who shares living quarters with the subject.";
-            case _POLICYORPROGRAMCOVERAGEROLETYPE: return "Description: A role recognized through the eligibility of an identified party for benefits covered under an insurance policy or a program based on meeting eligibility criteria.\r\n\n                        Eligibility as a covered party may be conditioned on the party meeting criteria to qualify for coverage under a policy or program, which may be mandated by law.  These criteria may be: \r\n\n                        \n                           \n                              The sole basis for coverage, e.g., being differently abled may qualify a person for disability coverage\r\n\n                           \n                           \n                              May more fully qualify a covered party role e.g, being differently abled may qualify an adult child as a dependent\r\n\n                           \n                           \n                              May impact the level of coverage for a covered party under a policy or program, e.g., being differently abled may qualify a program eligible for additional benefits.\r\n\n                           \n                        \n                        \n                           Discussion:  The Abstract Value Set \"CoverageRoleType\", which was developed for use in the Canadian realm \"pre-coordinate\" coverage roles with other roles that a covered party must play in order to be eligible for coverage, e.g., \"handicapped dependent\".   These role.codes may only be used with COVPTY to avoid overlapping concepts that would result from using them to specify the specializations of COVPTY, e.g., the role.class DEPEN should not be used with the role.code family dependent because that relationship has overlapping concepts due to the role.code precoodination and is conveyed in FICO with the personal relationship role that has a PART role link to the covered party role.  For the same reasons, the role.class DEPEN should not be used with the role.code HANDIC (handicapped dependent); the role.code DIFFABLE (differently abled) should be used instead.\r\n\n                        In summary, the coded concepts in the Abstract Value Set \"CoveredPartyRoleType\" can be \"post-coordinated\" with the \"RoleClassCoveredParty\" Abstract Value Set.  Decoupling these concepts is intended to support an expansive range of covered party concepts and their semantic comparability.";
-            case _COVERAGEROLETYPE: return "Role recognized through the issuance of insurance coverage to an identified covered party who has this relationship with the policy holder such as the policy holder themselves (self), spouse, child, etc";
+            case _POLICYORPROGRAMCOVERAGEROLETYPE: return "Description: A role recognized through the eligibility of an identified party for benefits covered under an insurance policy or a program based on meeting eligibility criteria.\r\n\n                        Eligibility as a covered party may be conditioned on the party meeting criteria to qualify for coverage under a policy or program, which may be mandated by law.  These criteria may be: \r\n\n                        \n                           \n                              The sole basis for coverage, e.g. being differently abled may qualify a person for disability coverage\r\n\n                           \n                           \n                              May more fully qualify a covered party role e.g, being differently abled may qualify an adult child as a dependent\r\n\n                           \n                           \n                              May impact the level of coverage for a covered party under a policy or program, e.g. being differently abled may qualify a program eligible for additional benefits.\r\n\n                           \n                        \n                        \n                           Discussion:  The Abstract Value Set \"CoverageRoleType\", which was developed for use in the Canadian realm \"pre-coordinate\" coverage roles with other roles that a covered party must play in order to be eligible for coverage, e.g. \"handicapped dependent\".   These role.codes may only be used with COVPTY to avoid overlapping concepts that would result from using them to specify the specializations of COVPTY, e.g. the role.class DEPEN should not be used with the role.code family dependent because that relationship has overlapping concepts due to the role.code precoodination and is conveyed in FICO with the personal relationship role that has a PART role link to the covered party role.  For the same reasons, the role.class DEPEN should not be used with the role.code HANDIC (handicapped dependent); the role.code DIFFABLE (differently abled) should be used instead.\r\n\n                        In summary, the coded concepts in the Abstract Value Set \"CoveredPartyRoleType\" can be \"post-coordinated\" with the \"RoleClassCoveredParty\" Abstract Value Set.  Decoupling these concepts is intended to support an expansive range of covered party concepts and their semantic comparability.";
+            case _COVERAGEROLETYPE: return "Role recognized through the issuance of insurance coverage to an identified covered party who has this relationship with the policy holder such as the policy holder themselves (self), spouse, child, etc.";
             case FAMDEP: return "The player of the role is dependent of the scoping entity.";
             case HANDIC: return "Covered party is a dependent of the policy holder with a physical or mental disability causing a disadvantage that makes independent achievement unusually difficult.";
             case INJ: return "Covered party is an injured party with a legal claim for compensation against a policy holder under an insurance policy.";
@@ -2899,14 +3012,22 @@ public enum V3RoleCode {
             case STUD: return "Covered party to an insurance policy has coverage through full-time or part-time attendance at a recognized educational institution as defined by a particular insurance policy.";
             case FSTUD: return "Covered party to an insurance policy has coverage through full-time attendance at a recognized educational institution as defined by a particular insurance policy.";
             case PSTUD: return "Covered party to an insurance policy has coverage through part-time attendance at a recognized educational institution as defined by a particular insurance policy.";
-            case _COVEREDPARTYROLETYPE: return "A role recognized through the eligibility of an identified living subject for benefits covered under an insurance policy or a program.  Eligibility as a covered party may be conditioned on a relationship with (1) the policy holder such as the policy holder who is covered as an individual under a poliy or as a party sponsored for coverage by the policy holder.\r\n\n                        \n                           Example:An employee as a subscriber; or (2) on being scoped another covered party such as the subscriber, as in the case of a dependent. \r\n\n                        \n                           Discussion:  The Abstract Value Set \"CoverageRoleType\", which was developed for use in the Canadian realm \"pre-coordinate\" coverage roles with other roles that a covered party must play in order to be eligible for coverage, e.g., \"handicapped dependent\".  Other codes in the Abstract Value Set CoveredPartyRoleType domain can be \"post-coordinated\" with the EligiblePartyRoleType codes to denote comparable concepts.  Decoupling the concepts is intended to support a wider range of concepts and semantic comparability of coded concepts.";
+            case ADOPT: return "A child taken into one's family through legal means and raised as one's own child.";
+            case GCHILD: return "A child of one's son or daughter.";
+            case GPARNT: return "parent of a parent of the subject.";
+            case NAT: return "A child as determined by birth.";
+            case NIENE: return "A child of one's brother or sister or of the brother or sister of one's spouse.";
+            case PARNT: return "One that begets or brings forth offspring or a person who brings up and cares for another (Webster's Collegiate Dictionary)";
+            case SPSE: return "A marriage partner; a husband or wife.";
+            case STEP: return "A child receiving parental care and nurture from a person who is related to them through marriage to their parent.";
+            case _COVEREDPARTYROLETYPE: return "A role recognized through the eligibility of an identified living subject for benefits covered under an insurance policy or a program.  Eligibility as a covered party may be conditioned on a relationship with (1) the policy holder such as the policy holder who is covered as an individual under a poliy or as a party sponsored for coverage by the policy holder.\r\n\n                        \n                           Example:An employee as a subscriber; or (2) on being scoped another covered party such as the subscriber, as in the case of a dependent. \r\n\n                        \n                           Discussion:  The Abstract Value Set \"CoverageRoleType\", which was developed for use in the Canadian realm \"pre-coordinate\" coverage roles with other roles that a covered party must play in order to be eligible for coverage, e.g. \"handicapped dependent\".  Other codes in the Abstract Value Set CoveredPartyRoleType domain can be \"post-coordinated\" with the EligiblePartyRoleType codes to denote comparable concepts.  Decoupling the concepts is intended to support a wider range of concepts and semantic comparability of coded concepts.";
             case _CLAIMANTCOVEREDPARTYROLETYPE: return "DescriptionA role recognized through the eligibility of a party play a claimant for benefits covered or provided under an insurance policy.";
             case CRIMEVIC: return "Description: A person playing the role of program eligible under a program based on allegations of being the victim of a crime.\r\n\n                        \n                           Discussion: This CoveredPartyRoleType.code is typically used when the CoveredPartyRole class code is \"program eligible\" and the person's status as a crime victim meets jurisdictional or program criteria.";
             case INJWKR: return "Description: A person playing the role of program eligible under a workers compensation program based on the filing of work-related injury claim.\r\n\n                        \n                           Discussion:  This CoveredPartyRoleType.code is used when the CoveredPartyRole class code is either \"program eligible\", a \"named insured\", and \"individual insured\",  or \"dependent\", and the person's status as differently abled or \"handicapped\" meets jurisdictional, policy, or program criteria.";
             case _DEPENDENTCOVEREDPARTYROLETYPE: return "Description: A role recognized through the eligibility of a party to play a dependent for benefits covered or provided under a health insurance policy because of an association with the subscriber that is recognized by the policy underwriter.";
             case COCBEN: return "Description: A person playing the role of an individual insured with continuity of coverage under a policy which is being terminated based on loss of original status that was the basis for coverage.  Criteria for qualifying for continuity of coverage may be set by law.\r\n\n                        \n                           Discussion: This CoveredPartyRoleType.code is typically used when the CoveredPartyRole class code is either \"program eligible\" or \"subscriber\" and the person's status as a continuity of coverage beneficiary meets jurisdictional or policy criteria.";
             case DIFFABL: return "Description: A person playing the role of program eligible under a program based on meeting criteria for health or functional limitation set by law or by the program.\r\n\n                        \n                           Discussion: This CoveredPartyRoleType.code is typically used when the CoveredPartyRole class code is either \"program eligible\", \"named insured\", \"individual insured\", or \"dependent\", and the person's status as differently abled meets jurisdictional, policy, or program criteria.";
-            case WARD: return "Description: A person, who is a minor or is deemed incompetent, who plays the role of a program eligible where eligibility for coverage is based on meeting program eligibility criteria for status as a ward of a court or jurisdiction.\r\n\n                        \n                           Discussion: This CoveredPartyRoleType.code is typically used when the CoveredPartyRole class code is a \"claimant\", \"program eligible\", a \"named insured\", an \"individual Insured\" or a \"dependent\", and the person's status as a ward meets program or policy criteria. In the case of a ward covered under a program providing financial or health benefits, a governmental agency may take temporary custody of a minor or incompetent for his/her protection and care, e.g., if the ward is suffering from neglect or abuse, or has been in trouble with the law.";
+            case WARD: return "Description: A person, who is a minor or is deemed incompetent, who plays the role of a program eligible where eligibility for coverage is based on meeting program eligibility criteria for status as a ward of a court or jurisdiction.\r\n\n                        \n                           Discussion: This CoveredPartyRoleType.code is typically used when the CoveredPartyRole class code is a \"claimant\", \"program eligible\", a \"named insured\", an \"individual Insured\" or a \"dependent\", and the person's status as a ward meets program or policy criteria. In the case of a ward covered under a program providing financial or health benefits, a governmental agency may take temporary custody of a minor or incompetent for his/her protection and care, e.g. if the ward is suffering from neglect or abuse, or has been in trouble with the law.";
             case _INDIVIDUALINSUREDPARTYROLETYPE: return "A role recognized through the eligibility of a party to play an individual insured for benefits covered or provided under an insurance policy where the party is also the policy holder.";
             case RETIREE: return "Description: A person playing the role of an individual insured under a policy based on meeting criteria for the employment status of retired set by law or the policy.\r\n\n                        \n                           Discussion: This CoveredPartyRoleType.code is typically used when the CoveredPartyRole class code is either \"program eligible\" or \"subscriber\" and the person's status as a retiree meets jurisdictional or policy criteria.";
             case _PROGRAMELIGIBLEPARTYROLETYPE: return "Description:A role recognized through the eligibility of a party to play a program eligible for benefits covered or provided under a program.";
@@ -2919,11 +3040,11 @@ public enum V3RoleCode {
             case _RESEARCHSUBJECTROLEBASIS: return "Specifies the administrative functionality within a formal experimental design for which the ResearchSubject role was established.  Examples: screening - role is used for pre-enrollment evaluation portion of the design; enrolled - role is used for subjects admitted to the active treatment portion of the design.";
             case ERL: return "Definition:The specific role being played by a research subject participating in the active treatment or primary data collection portion of a research study.";
             case SCN: return "Definition:The specific role being played by a research subject participating in the pre-enrollment evaluation portion of  a research study.";
-            case _SERVICEDELIVERYLOCATIONROLETYPE: return "A role of a place that further classifies the setting (e.g., accident site, road side, work site, community location) in which services are delivered.";
+            case _SERVICEDELIVERYLOCATIONROLETYPE: return "A role of a place that further classifies the setting (e.g. accident site, road side, work site, community location) in which services are delivered.";
             case _DEDICATEDSERVICEDELIVERYLOCATIONROLETYPE: return "A role of a place that further classifies a setting that is intended to house the provision of services.";
-            case _DEDICATEDCLINICALLOCATIONROLETYPE: return "A role of a place that further classifies the clinical setting (e.g., cardiology clinic, primary care clinic, rehabilitation hospital, skilled nursing facility) in which care is delivered during an encounter.";
+            case _DEDICATEDCLINICALLOCATIONROLETYPE: return "A role of a place that further classifies the clinical setting (e.g. cardiology clinic, primary care clinic, rehabilitation hospital, skilled nursing facility) in which care is delivered during an encounter.";
             case DX: return "A practice setting where diagnostic procedures or therapeutic interventions are performed";
-            case CVDX: return "A practice setting where cardiovascular diagnostic procedures or therapeutic interventions are performed (e.g., cardiac catheterization lab, echocardiography suite)";
+            case CVDX: return "A practice setting where cardiovascular diagnostic procedures or therapeutic interventions are performed (e.g. cardiac catheterization lab, echocardiography suite)";
             case CATH: return "Cardiac catheterization lab";
             case ECHO: return "Echocardiography lab";
             case GIDX: return "A practice setting where GI procedures (such as endoscopies) are performed";
@@ -2938,7 +3059,7 @@ public enum V3RoleCode {
             case PSYCHF: return "Healthcare facility that cares for patients with psychiatric illness(s).";
             case RH: return "(X12N 283X00000N)";
             case RHAT: return "Description: A location that plays the role of delivering services which may include life training and/or social support to people with addictions.";
-            case RHII: return "Description: A location that plays the role of delivering services which may include adaptation, rehabilitation and social integration services for people with intellectual and/or pervasive development disorders such as autism or severe behaviour disorder.";
+            case RHII: return "Description: A location that plays the role of delivering services which may include adaptation, rehabilitation and social integration services for people with intellectual and/or pervasive development disorders such as autism or severe behavior disorder.";
             case RHMAD: return "Description: A location that plays the role of delivering services which may social support services for adolescents who are pregnant or have child and are experiencing adaptation issues/difficulties in their current or eventual parenting role.";
             case RHPI: return "Description: A location that plays the role of delivering services which may include adaptation, rehabilitation and social integration services for people with physical impairments.";
             case RHPIH: return "Description: A location that plays the role of delivering services for people with hearing impairments.";
@@ -3071,6 +3192,13 @@ public enum V3RoleCode {
             case PT: return "The recipient for the service(s) and/or product(s) when they are not the covered party.";
             case SUBJECT: return "Self";
             case THIRDPARTY: return "Third Party";
+            case DEP: return "";
+            case DEPEN: return "A party covered under a policy based on association with a subscriber.";
+            case FM: return "A member of the covered party's family. This could be the spouse, a parent, a grand parent, a sibling, etc.";
+            case INDIV: return "A party covered under a policy as the policyholder.";
+            case NAMED: return "A party to an insurance policy to whom the insurer agrees to indemnify for losses, provides benefits for, or renders services.";
+            case PSYCHCF: return "";
+            case SUBSCR: return "A party covered under a policy based on association with a sponsor who is the policy holder, and whose association may provide for the eligibility of dependents for coverage";
             default: return "?";
           }
         }
@@ -3101,6 +3229,7 @@ public enum V3RoleCode {
             case CCO: return "Clinical Companion";
             case SEE: return "Seeing";
             case SNIFF: return "Sniffing";
+            case _CERTIFIEDENTITYTYPE: return "CertifiedEntityType";
             case _CITIZENROLETYPE: return "CitizenRoleType";
             case CAS: return "asylum seeker";
             case CASM: return "single minor asylum seeker";
@@ -3269,6 +3398,14 @@ public enum V3RoleCode {
             case STUD: return "student";
             case FSTUD: return "full-time student";
             case PSTUD: return "part-time student";
+            case ADOPT: return "adopted child";
+            case GCHILD: return "grandchild";
+            case GPARNT: return "grandparent";
+            case NAT: return "natural child";
+            case NIENE: return "niece/nephew";
+            case PARNT: return "parent";
+            case SPSE: return "spouse";
+            case STEP: return "step child";
             case _COVEREDPARTYROLETYPE: return "covered party role type";
             case _CLAIMANTCOVEREDPARTYROLETYPE: return "ClaimantCoveredPartyRoleType";
             case CRIMEVIC: return "crime victim";
@@ -3441,6 +3578,13 @@ public enum V3RoleCode {
             case PT: return "Patient";
             case SUBJECT: return "Self";
             case THIRDPARTY: return "Third Party";
+            case DEP: return "DEP";
+            case DEPEN: return "dependent";
+            case FM: return "Family Member";
+            case INDIV: return "individual";
+            case NAMED: return "named insured";
+            case PSYCHCF: return "PSYCHCF";
+            case SUBSCR: return "subscriber";
             default: return "?";
           }
     }

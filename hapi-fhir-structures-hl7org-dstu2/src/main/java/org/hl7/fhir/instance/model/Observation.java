@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -48,31 +48,31 @@ public class Observation extends DomainResource {
 
     public enum ObservationStatus {
         /**
-         * The existence of the observation is registered, but there is no result yet available
+         * The existence of the observation is registered, but there is no result yet available.
          */
         REGISTERED, 
         /**
-         * This is an initial or interim observation: data may be incomplete or unverified
+         * This is an initial or interim observation: data may be incomplete or unverified.
          */
         PRELIMINARY, 
         /**
-         * The observation is complete and verified by an authorized person
+         * The observation is complete and verified by an authorized person.
          */
         FINAL, 
         /**
-         * The observation has been modified subsequent to being Final, and is complete and verified by an authorized person
+         * The observation has been modified subsequent to being Final, and is complete and verified by an authorized person.
          */
         AMENDED, 
         /**
-         * The observation is unavailable because the measurement was not started or not completed (also sometimes called "aborted")
+         * The observation is unavailable because the measurement was not started or not completed (also sometimes called "aborted").
          */
         CANCELLED, 
         /**
-         * The observation has been withdrawn following previous Final release
+         * The observation has been withdrawn following previous final release.
          */
         ENTEREDINERROR, 
         /**
-         * The observation status is unknown.  Note that "unknown" is a value of last resort and every attempt should be made to provide a meaningful value other than "unknown"
+         * The observation status is unknown.  Note that "unknown" is a value of last resort and every attempt should be made to provide a meaningful value other than "unknown".
          */
         UNKNOWN, 
         /**
@@ -124,13 +124,13 @@ public class Observation extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case REGISTERED: return "The existence of the observation is registered, but there is no result yet available";
-            case PRELIMINARY: return "This is an initial or interim observation: data may be incomplete or unverified";
-            case FINAL: return "The observation is complete and verified by an authorized person";
-            case AMENDED: return "The observation has been modified subsequent to being Final, and is complete and verified by an authorized person";
-            case CANCELLED: return "The observation is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\")";
-            case ENTEREDINERROR: return "The observation has been withdrawn following previous Final release";
-            case UNKNOWN: return "The observation status is unknown.  Note that \"unknown\" is a value of last resort and every attempt should be made to provide a meaningful value other than \"unknown\"";
+            case REGISTERED: return "The existence of the observation is registered, but there is no result yet available.";
+            case PRELIMINARY: return "This is an initial or interim observation: data may be incomplete or unverified.";
+            case FINAL: return "The observation is complete and verified by an authorized person.";
+            case AMENDED: return "The observation has been modified subsequent to being Final, and is complete and verified by an authorized person.";
+            case CANCELLED: return "The observation is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\").";
+            case ENTEREDINERROR: return "The observation has been withdrawn following previous final release.";
+            case UNKNOWN: return "The observation status is unknown.  Note that \"unknown\" is a value of last resort and every attempt should be made to provide a meaningful value other than \"unknown\".";
             default: return "?";
           }
         }
@@ -140,7 +140,7 @@ public class Observation extends DomainResource {
             case PRELIMINARY: return "Preliminary";
             case FINAL: return "Final";
             case AMENDED: return "Amended";
-            case CANCELLED: return "Cancelled";
+            case CANCELLED: return "cancelled";
             case ENTEREDINERROR: return "Entered in Error";
             case UNKNOWN: return "Unknown Status";
             default: return "?";
@@ -190,27 +190,27 @@ public class Observation extends DomainResource {
 
     public enum ObservationRelationshipType {
         /**
-         * This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group
+         * This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group.
          */
         HASMEMBER, 
         /**
-         * The target resource (Observation or QuestionnaireAnswer) is part of the information from which this observation value is derived. (e.g. calculated anion gap, Apgar score)  NOTE:  "derived-from" is only logical choice when referencing QuestionnaireAnswer
+         * The target resource (Observation or QuestionnaireResponse) is part of the information from which this observation value is derived. (e.g. calculated anion gap, Apgar score)  NOTE:  "derived-from" is only logical choice when referencing QuestionnaireResponse.
          */
         DERIVEDFROM, 
         /**
-         * This observation follows the target observation (e.g. timed tests such as Glucose Tolerance Test)
+         * This observation follows the target observation (e.g. timed tests such as Glucose Tolerance Test).
          */
         SEQUELTO, 
         /**
-         * This observation replaces a previous observation (i.e. a revised value). The target observation is now obsolete
+         * This observation replaces a previous observation (i.e. a revised value). The target observation is now obsolete.
          */
         REPLACES, 
         /**
-         * The value of the target observation qualifies (refines) the semantics of the source observation (e.g. a lipaemia measure target from a plasma measure)
+         * The value of the target observation qualifies (refines) the semantics of the source observation (e.g. a lipemia measure target from a plasma measure).
          */
         QUALIFIEDBY, 
         /**
-         * The value of the target observation interferes (degardes quality, or prevents valid observation) with the semantics of the source observation (e.g. a hemolysis measure target from a plasma potassium measure which has no value)
+         * The value of the target observation interferes (degrades quality, or prevents valid observation) with the semantics of the source observation (e.g. a hemolysis measure target from a plasma potassium measure which has no value).
          */
         INTERFEREDBY, 
         /**
@@ -258,12 +258,12 @@ public class Observation extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case HASMEMBER: return "This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group";
-            case DERIVEDFROM: return "The target resource (Observation or QuestionnaireAnswer) is part of the information from which this observation value is derived. (e.g. calculated anion gap, Apgar score)  NOTE:  \"derived-from\" is only logical choice when referencing QuestionnaireAnswer";
-            case SEQUELTO: return "This observation follows the target observation (e.g. timed tests such as Glucose Tolerance Test)";
-            case REPLACES: return "This observation replaces a previous observation (i.e. a revised value). The target observation is now obsolete";
-            case QUALIFIEDBY: return "The value of the target observation qualifies (refines) the semantics of the source observation (e.g. a lipaemia measure target from a plasma measure)";
-            case INTERFEREDBY: return "The value of the target observation interferes (degardes quality, or prevents valid observation) with the semantics of the source observation (e.g. a hemolysis measure target from a plasma potassium measure which has no value)";
+            case HASMEMBER: return "This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group.";
+            case DERIVEDFROM: return "The target resource (Observation or QuestionnaireResponse) is part of the information from which this observation value is derived. (e.g. calculated anion gap, Apgar score)  NOTE:  \"derived-from\" is only logical choice when referencing QuestionnaireResponse.";
+            case SEQUELTO: return "This observation follows the target observation (e.g. timed tests such as Glucose Tolerance Test).";
+            case REPLACES: return "This observation replaces a previous observation (i.e. a revised value). The target observation is now obsolete.";
+            case QUALIFIEDBY: return "The value of the target observation qualifies (refines) the semantics of the source observation (e.g. a lipemia measure target from a plasma measure).";
+            case INTERFEREDBY: return "The value of the target observation interferes (degrades quality, or prevents valid observation) with the semantics of the source observation (e.g. a hemolysis measure target from a plasma potassium measure which has no value).";
             default: return "?";
           }
         }
@@ -272,7 +272,7 @@ public class Observation extends DomainResource {
             case HASMEMBER: return "Has Member";
             case DERIVEDFROM: return "Derived From";
             case SEQUELTO: return "Sequel To";
-            case REPLACES: return "Replaces Replaces";
+            case REPLACES: return "Replaces";
             case QUALIFIEDBY: return "Qualified By";
             case INTERFEREDBY: return "Interfered By";
             default: return "?";
@@ -319,17 +319,17 @@ public class Observation extends DomainResource {
     @Block()
     public static class ObservationReferenceRangeComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless. (e.g. reference range is <=2.3).
+         * The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless (e.g. reference range is <=2.3).
          */
         @Child(name = "low", type = {SimpleQuantity.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Low Range, if relevant", formalDefinition="The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless. (e.g. reference range is <=2.3)." )
+        @Description(shortDefinition="Low Range, if relevant", formalDefinition="The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless (e.g. reference range is <=2.3)." )
         protected SimpleQuantity low;
 
         /**
-         * The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless. (e.g. reference range is >= 2.3).
+         * The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless (e.g. reference range is >= 2.3).
          */
         @Child(name = "high", type = {SimpleQuantity.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="High Range, if relevant", formalDefinition="The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless. (e.g. reference range is >= 2.3)." )
+        @Description(shortDefinition="High Range, if relevant", formalDefinition="The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless (e.g. reference range is >= 2.3)." )
         protected SimpleQuantity high;
 
         /**
@@ -363,7 +363,7 @@ public class Observation extends DomainResource {
       }
 
         /**
-         * @return {@link #low} (The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless. (e.g. reference range is <=2.3).)
+         * @return {@link #low} (The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless (e.g. reference range is <=2.3).)
          */
         public SimpleQuantity getLow() { 
           if (this.low == null)
@@ -379,7 +379,7 @@ public class Observation extends DomainResource {
         }
 
         /**
-         * @param value {@link #low} (The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless. (e.g. reference range is <=2.3).)
+         * @param value {@link #low} (The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless (e.g. reference range is <=2.3).)
          */
         public ObservationReferenceRangeComponent setLow(SimpleQuantity value) { 
           this.low = value;
@@ -387,7 +387,7 @@ public class Observation extends DomainResource {
         }
 
         /**
-         * @return {@link #high} (The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless. (e.g. reference range is >= 2.3).)
+         * @return {@link #high} (The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless (e.g. reference range is >= 2.3).)
          */
         public SimpleQuantity getHigh() { 
           if (this.high == null)
@@ -403,7 +403,7 @@ public class Observation extends DomainResource {
         }
 
         /**
-         * @param value {@link #high} (The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless. (e.g. reference range is >= 2.3).)
+         * @param value {@link #high} (The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless (e.g. reference range is >= 2.3).)
          */
         public ObservationReferenceRangeComponent setHigh(SimpleQuantity value) { 
           this.high = value;
@@ -509,8 +509,8 @@ public class Observation extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("low", "SimpleQuantity", "The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless. (e.g. reference range is <=2.3).", 0, java.lang.Integer.MAX_VALUE, low));
-          childrenList.add(new Property("high", "SimpleQuantity", "The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless. (e.g. reference range is >= 2.3).", 0, java.lang.Integer.MAX_VALUE, high));
+          childrenList.add(new Property("low", "SimpleQuantity", "The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless (e.g. reference range is <=2.3).", 0, java.lang.Integer.MAX_VALUE, low));
+          childrenList.add(new Property("high", "SimpleQuantity", "The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless (e.g. reference range is >= 2.3).", 0, java.lang.Integer.MAX_VALUE, high));
           childrenList.add(new Property("meaning", "CodeableConcept", "Code for the meaning of the reference range.", 0, java.lang.Integer.MAX_VALUE, meaning));
           childrenList.add(new Property("age", "Range", "The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.", 0, java.lang.Integer.MAX_VALUE, age));
           childrenList.add(new Property("text", "string", "Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of \"Negative\" or a list or table of 'normals'.", 0, java.lang.Integer.MAX_VALUE, text));
@@ -566,14 +566,14 @@ public class Observation extends DomainResource {
         protected Enumeration<ObservationRelationshipType> type;
 
         /**
-         * A reference to the observation or questionnaireanswer that is related to this observation.
+         * A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation.
          */
         @Child(name = "target", type = {Observation.class, QuestionnaireResponse.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Resource that is related to this one", formalDefinition="A reference to the observation or questionnaireanswer that is related to this observation." )
+        @Description(shortDefinition="Resource that is related to this one", formalDefinition="A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation." )
         protected Reference target;
 
         /**
-         * The actual object that is the target of the reference (A reference to the observation or questionnaireanswer that is related to this observation.)
+         * The actual object that is the target of the reference (A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation.)
          */
         protected Resource targetTarget;
 
@@ -644,7 +644,7 @@ public class Observation extends DomainResource {
         }
 
         /**
-         * @return {@link #target} (A reference to the observation or questionnaireanswer that is related to this observation.)
+         * @return {@link #target} (A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation.)
          */
         public Reference getTarget() { 
           if (this.target == null)
@@ -660,7 +660,7 @@ public class Observation extends DomainResource {
         }
 
         /**
-         * @param value {@link #target} (A reference to the observation or questionnaireanswer that is related to this observation.)
+         * @param value {@link #target} (A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation.)
          */
         public ObservationRelatedComponent setTarget(Reference value) { 
           this.target = value;
@@ -668,14 +668,14 @@ public class Observation extends DomainResource {
         }
 
         /**
-         * @return {@link #target} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to the observation or questionnaireanswer that is related to this observation.)
+         * @return {@link #target} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation.)
          */
         public Resource getTargetTarget() { 
           return this.targetTarget;
         }
 
         /**
-         * @param value {@link #target} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to the observation or questionnaireanswer that is related to this observation.)
+         * @param value {@link #target} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation.)
          */
         public ObservationRelatedComponent setTargetTarget(Resource value) { 
           this.targetTarget = value;
@@ -685,7 +685,7 @@ public class Observation extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "code", "A code specifying the kind of relationship that exists with the target resource.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("target", "Reference(Observation|QuestionnaireResponse)", "A reference to the observation or questionnaireanswer that is related to this observation.", 0, java.lang.Integer.MAX_VALUE, target));
+          childrenList.add(new Property("target", "Reference(Observation|QuestionnaireResponse)", "A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation.", 0, java.lang.Integer.MAX_VALUE, target));
         }
 
       public ObservationRelatedComponent copy() {
@@ -750,7 +750,7 @@ public class Observation extends DomainResource {
          * Guidance on how to interpret the value by comparison to a normal or recommended range.
          */
         @Child(name = "referenceRange", type = {ObservationReferenceRangeComponent.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Provides guide for interpretation ofcomponent result", formalDefinition="Guidance on how to interpret the value by comparison to a normal or recommended range." )
+        @Description(shortDefinition="Provides guide for interpretation of component result", formalDefinition="Guidance on how to interpret the value by comparison to a normal or recommended range." )
         protected List<ObservationReferenceRangeComponent> referenceRange;
 
         private static final long serialVersionUID = 946602904L;
@@ -1073,10 +1073,10 @@ public class Observation extends DomainResource {
     protected Enumeration<ObservationStatus> status;
 
     /**
-     * A code that classifies the the general type of observation being made.  This is used  for searching, sorting and display purposes.
+     * A code that classifies the general type of observation being made.  This is used  for searching, sorting and display purposes.
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Classification of  type of observation", formalDefinition="A code that classifies the the general type of observation being made.  This is used  for searching, sorting and display purposes." )
+    @Description(shortDefinition="Classification of  type of observation", formalDefinition="A code that classifies the general type of observation being made.  This is used  for searching, sorting and display purposes." )
     protected CodeableConcept category;
 
     /**
@@ -1099,14 +1099,14 @@ public class Observation extends DomainResource {
     protected Resource subjectTarget;
 
     /**
-     * The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made.
+     * The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made.
      */
     @Child(name = "encounter", type = {Encounter.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Healthcare event during which this observation is made", formalDefinition="The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made." )
+    @Description(shortDefinition="Healthcare event during which this observation is made", formalDefinition="The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made." )
     protected Reference encounter;
 
     /**
-     * The actual object that is the target of the reference (The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made.)
+     * The actual object that is the target of the reference (The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made.)
      */
     protected Encounter encounterTarget;
 
@@ -1114,7 +1114,7 @@ public class Observation extends DomainResource {
      * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.
      */
     @Child(name = "effective", type = {DateTimeType.class, Period.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Clinically Relevant time/time-period for observation", formalDefinition="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself." )
+    @Description(shortDefinition="Clinically relevant time/time-period for observation", formalDefinition="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself." )
     protected Type effective;
 
     /**
@@ -1165,10 +1165,10 @@ public class Observation extends DomainResource {
     protected StringType comments;
 
     /**
-     * Indicates the site on the subject's body where the observation was made ( i.e. the target site).
+     * Indicates the site on the subject's body where the observation was made (i.e. the target site).
      */
     @Child(name = "bodySite", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Observed body part", formalDefinition="Indicates the site on the subject's body where the observation was made ( i.e. the target site)." )
+    @Description(shortDefinition="Observed body part", formalDefinition="Indicates the site on the subject's body where the observation was made (i.e. the target site)." )
     protected CodeableConcept bodySite;
 
     /**
@@ -1210,17 +1210,17 @@ public class Observation extends DomainResource {
     protected List<ObservationReferenceRangeComponent> referenceRange;
 
     /**
-     * A  reference to another resource ( usally another Observation but could  also be a QuestionnaireAnswer) whose relationship is defined by the relationship type code.
+     * A  reference to another resource (usually another Observation but could  also be a QuestionnaireAnswer) whose relationship is defined by the relationship type code.
      */
     @Child(name = "related", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Resource related to this observation", formalDefinition="A  reference to another resource ( usally another Observation but could  also be a QuestionnaireAnswer) whose relationship is defined by the relationship type code." )
+    @Description(shortDefinition="Resource related to this observation", formalDefinition="A  reference to another resource (usually another Observation but could  also be a QuestionnaireAnswer) whose relationship is defined by the relationship type code." )
     protected List<ObservationRelatedComponent> related;
 
     /**
-     * Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations.
+     * Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations.
      */
     @Child(name = "component", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Component results", formalDefinition="Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations." )
+    @Description(shortDefinition="Component results", formalDefinition="Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations." )
     protected List<ObservationComponentComponent> component;
 
     private static final long serialVersionUID = -931593572L;
@@ -1327,7 +1327,7 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (A code that classifies the the general type of observation being made.  This is used  for searching, sorting and display purposes.)
+     * @return {@link #category} (A code that classifies the general type of observation being made.  This is used  for searching, sorting and display purposes.)
      */
     public CodeableConcept getCategory() { 
       if (this.category == null)
@@ -1343,7 +1343,7 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @param value {@link #category} (A code that classifies the the general type of observation being made.  This is used  for searching, sorting and display purposes.)
+     * @param value {@link #category} (A code that classifies the general type of observation being made.  This is used  for searching, sorting and display purposes.)
      */
     public Observation setCategory(CodeableConcept value) { 
       this.category = value;
@@ -1414,7 +1414,7 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @return {@link #encounter} (The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made.)
+     * @return {@link #encounter} (The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made.)
      */
     public Reference getEncounter() { 
       if (this.encounter == null)
@@ -1430,7 +1430,7 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @param value {@link #encounter} (The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made.)
+     * @param value {@link #encounter} (The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made.)
      */
     public Observation setEncounter(Reference value) { 
       this.encounter = value;
@@ -1438,7 +1438,7 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made.)
+     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made.)
      */
     public Encounter getEncounterTarget() { 
       if (this.encounterTarget == null)
@@ -1450,7 +1450,7 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made.)
+     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made.)
      */
     public Observation setEncounterTarget(Encounter value) { 
       this.encounterTarget = value;
@@ -1847,7 +1847,7 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @return {@link #bodySite} (Indicates the site on the subject's body where the observation was made ( i.e. the target site).)
+     * @return {@link #bodySite} (Indicates the site on the subject's body where the observation was made (i.e. the target site).)
      */
     public CodeableConcept getBodySite() { 
       if (this.bodySite == null)
@@ -1863,7 +1863,7 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @param value {@link #bodySite} (Indicates the site on the subject's body where the observation was made ( i.e. the target site).)
+     * @param value {@link #bodySite} (Indicates the site on the subject's body where the observation was made (i.e. the target site).)
      */
     public Observation setBodySite(CodeableConcept value) { 
       this.bodySite = value;
@@ -2018,7 +2018,7 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @return {@link #related} (A  reference to another resource ( usally another Observation but could  also be a QuestionnaireAnswer) whose relationship is defined by the relationship type code.)
+     * @return {@link #related} (A  reference to another resource (usually another Observation but could  also be a QuestionnaireAnswer) whose relationship is defined by the relationship type code.)
      */
     public List<ObservationRelatedComponent> getRelated() { 
       if (this.related == null)
@@ -2036,7 +2036,7 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @return {@link #related} (A  reference to another resource ( usally another Observation but could  also be a QuestionnaireAnswer) whose relationship is defined by the relationship type code.)
+     * @return {@link #related} (A  reference to another resource (usually another Observation but could  also be a QuestionnaireAnswer) whose relationship is defined by the relationship type code.)
      */
     // syntactic sugar
     public ObservationRelatedComponent addRelated() { //3
@@ -2058,7 +2058,7 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @return {@link #component} (Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations.)
+     * @return {@link #component} (Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations.)
      */
     public List<ObservationComponentComponent> getComponent() { 
       if (this.component == null)
@@ -2076,7 +2076,7 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @return {@link #component} (Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations.)
+     * @return {@link #component} (Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations.)
      */
     // syntactic sugar
     public ObservationComponentComponent addComponent() { //3
@@ -2101,10 +2101,10 @@ public class Observation extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "A unique identifier for the simple observation instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "The status of the result value.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("category", "CodeableConcept", "A code that classifies the the general type of observation being made.  This is used  for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category));
+        childrenList.add(new Property("category", "CodeableConcept", "A code that classifies the general type of observation being made.  This is used  for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category));
         childrenList.add(new Property("code", "CodeableConcept", "Describes what was observed. Sometimes this is called the observation \"name\".", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus, donor,  other observer (for example a relative or EMT), or any observation made about the subject.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("encounter", "Reference(Encounter)", "The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made.", 0, java.lang.Integer.MAX_VALUE, encounter));
+        childrenList.add(new Property("encounter", "Reference(Encounter)", "The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("effective[x]", "dateTime|Period", "The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.", 0, java.lang.Integer.MAX_VALUE, effective));
         childrenList.add(new Property("issued", "instant", "The date and time this observation was made available to providers, typically after the results have been reviewed and verified.", 0, java.lang.Integer.MAX_VALUE, issued));
         childrenList.add(new Property("performer", "Reference(Practitioner|Organization|Patient|RelatedPerson)", "Who was responsible for asserting the observed value as \"true\".", 0, java.lang.Integer.MAX_VALUE, performer));
@@ -2112,13 +2112,13 @@ public class Observation extends DomainResource {
         childrenList.add(new Property("dataAbsentReason", "CodeableConcept", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, java.lang.Integer.MAX_VALUE, dataAbsentReason));
         childrenList.add(new Property("interpretation", "CodeableConcept", "The assessment made based on the result of the observation.  Intended as a simple compact code often placed adjacent to the result value in reports and flow sheets to signal the meaning/normalcy status of the result. Otherwise known as abnormal flag.", 0, java.lang.Integer.MAX_VALUE, interpretation));
         childrenList.add(new Property("comments", "string", "May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.", 0, java.lang.Integer.MAX_VALUE, comments));
-        childrenList.add(new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the observation was made ( i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, bodySite));
+        childrenList.add(new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the observation was made (i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, bodySite));
         childrenList.add(new Property("method", "CodeableConcept", "Indicates the mechanism used to perform the observation.", 0, java.lang.Integer.MAX_VALUE, method));
         childrenList.add(new Property("specimen", "Reference(Specimen)", "The specimen that was used when this observation was made.", 0, java.lang.Integer.MAX_VALUE, specimen));
         childrenList.add(new Property("device", "Reference(Device|DeviceMetric)", "The device used to generate the observation data.", 0, java.lang.Integer.MAX_VALUE, device));
         childrenList.add(new Property("referenceRange", "", "Guidance on how to interpret the value by comparison to a normal or recommended range.", 0, java.lang.Integer.MAX_VALUE, referenceRange));
-        childrenList.add(new Property("related", "", "A  reference to another resource ( usally another Observation but could  also be a QuestionnaireAnswer) whose relationship is defined by the relationship type code.", 0, java.lang.Integer.MAX_VALUE, related));
-        childrenList.add(new Property("component", "", "Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations.", 0, java.lang.Integer.MAX_VALUE, component));
+        childrenList.add(new Property("related", "", "A  reference to another resource (usually another Observation but could  also be a QuestionnaireAnswer) whose relationship is defined by the relationship type code.", 0, java.lang.Integer.MAX_VALUE, related));
+        childrenList.add(new Property("component", "", "Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations.", 0, java.lang.Integer.MAX_VALUE, component));
       }
 
       public Observation copy() {
@@ -2237,7 +2237,7 @@ public class Observation extends DomainResource {
   public static final String SP_COMPONENTCODE = "component-code";
   @SearchParamDefinition(name="value-string", path="Observation.valueString", description="The value of the observation, if the value is a string, and also searches in CodeableConcept.text", type="string" )
   public static final String SP_VALUESTRING = "value-string";
-  @SearchParamDefinition(name="identifier", path="Observation.identifier", description="The unique Id for a particular observation", type="token" )
+  @SearchParamDefinition(name="identifier", path="Observation.identifier", description="The unique id for a particular observation", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="component-code-value-[x]", path="", description="Both component code and one of the component value parameters", type="composite" )
   public static final String SP_COMPONENTCODEVALUEX = "component-code-value-[x]";

@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum SupplyrequestKind {
 
         /**
-         * Supply is stored and requested from central supply
+         * Supply is stored and requested from central supply.
          */
         CENTRAL, 
         /**
-         * Supply is not onsite and must be requested from an outside vendor using a non-stock requisition
+         * Supply is not onsite and must be requested from an outside vendor using a non-stock requisition.
          */
         NONSTOCK, 
         /**
@@ -67,8 +67,8 @@ public enum SupplyrequestKind {
         }
         public String getDefinition() {
           switch (this) {
-            case CENTRAL: return "Supply is stored and requested from central supply";
-            case NONSTOCK: return "Supply is not onsite and must be requested from an outside vendor using a non-stock requisition";
+            case CENTRAL: return "Supply is stored and requested from central supply.";
+            case NONSTOCK: return "Supply is not onsite and must be requested from an outside vendor using a non-stock requisition.";
             default: return "?";
           }
         }

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3EntityNamePartQualifier {
@@ -55,11 +55,11 @@ public enum V3EntityNamePartQualifier {
          */
         CL, 
         /**
-         * Indicates that a name part is just an initial. Initials do not imply a trailing period since this would not work with non-Latin scripts.  Initials may consist of more than one letter, e.g., "Ph." could stand for "Philippe" or "Th." for "Thomas".
+         * Indicates that a name part is just an initial. Initials do not imply a trailing period since this would not work with non-Latin scripts.  Initials may consist of more than one letter, e.g. "Ph." could stand for "Philippe" or "Th." for "Thomas".
          */
         IN, 
         /**
-         * For organizations a suffix indicating the legal status, e.g., "Inc.", "Co.", "AG", "GmbH", "B.V." "S.A.",  "Ltd." etc.
+         * For organizations a suffix indicating the legal status, e.g. "Inc.", "Co.", "AG", "GmbH", "B.V." "S.A.",  "Ltd." etc.
          */
         LS, 
         /**
@@ -249,6 +249,22 @@ public enum V3EntityNamePartQualifier {
          */
         USE, 
         /**
+         * PersonNamePartQualifier
+         */
+        _PERSONNAMEPARTQUALIFIER, 
+        /**
+         * PersonNamePartAffixTypes
+         */
+        _PERSONNAMEPARTAFFIXTYPES, 
+        /**
+         * PersonNamePartChangeQualifier
+         */
+        _PERSONNAMEPARTCHANGEQUALIFIER, 
+        /**
+         * PersonNamePartMiscQualifier
+         */
+        _PERSONNAMEPARTMISCQUALIFIER, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -305,6 +321,14 @@ public enum V3EntityNamePartQualifier {
           return TMK;
         if ("USE".equals(codeString))
           return USE;
+        if ("_PersonNamePartQualifier".equals(codeString))
+          return _PERSONNAMEPARTQUALIFIER;
+        if ("_PersonNamePartAffixTypes".equals(codeString))
+          return _PERSONNAMEPARTAFFIXTYPES;
+        if ("_PersonNamePartChangeQualifier".equals(codeString))
+          return _PERSONNAMEPARTCHANGEQUALIFIER;
+        if ("_PersonNamePartMiscQualifier".equals(codeString))
+          return _PERSONNAMEPARTMISCQUALIFIER;
         throw new Exception("Unknown V3EntityNamePartQualifier code '"+codeString+"'");
         }
         public String toCode() {
@@ -334,6 +358,10 @@ public enum V3EntityNamePartQualifier {
             case TIME: return "TIME";
             case TMK: return "TMK";
             case USE: return "USE";
+            case _PERSONNAMEPARTQUALIFIER: return "_PersonNamePartQualifier";
+            case _PERSONNAMEPARTAFFIXTYPES: return "_PersonNamePartAffixTypes";
+            case _PERSONNAMEPARTCHANGEQUALIFIER: return "_PersonNamePartChangeQualifier";
+            case _PERSONNAMEPARTMISCQUALIFIER: return "_PersonNamePartMiscQualifier";
             default: return "?";
           }
         }
@@ -347,8 +375,8 @@ public enum V3EntityNamePartQualifier {
             case AD: return "The name the person was given at the time of adoption.";
             case BR: return "A name that a person had shortly after being born. Usually for family names but may be used to mark given names at birth that may have changed later.";
             case CL: return "A callme name is (usually a given name) that is preferred when a person is directly addressed.";
-            case IN: return "Indicates that a name part is just an initial. Initials do not imply a trailing period since this would not work with non-Latin scripts.  Initials may consist of more than one letter, e.g., \"Ph.\" could stand for \"Philippe\" or \"Th.\" for \"Thomas\".";
-            case LS: return "For organizations a suffix indicating the legal status, e.g., \"Inc.\", \"Co.\", \"AG\", \"GmbH\", \"B.V.\" \"S.A.\",  \"Ltd.\" etc.";
+            case IN: return "Indicates that a name part is just an initial. Initials do not imply a trailing period since this would not work with non-Latin scripts.  Initials may consist of more than one letter, e.g. \"Ph.\" could stand for \"Philippe\" or \"Th.\" for \"Thomas\".";
+            case LS: return "For organizations a suffix indicating the legal status, e.g. \"Inc.\", \"Co.\", \"AG\", \"GmbH\", \"B.V.\" \"S.A.\",  \"Ltd.\" etc.";
             case NB: return "In Europe and Asia, there are still people with nobility titles (aristocrats).  German \"von\" is generally a nobility title, not a mere voorvoegsel.  Others are \"Earl of\" or \"His Majesty King of...\" etc.  Rarely used nowadays, but some systems do keep track of this.";
             case PR: return "Primarily in the British Imperial culture people tend to have an abbreviation of their professional organization as part of their credential suffices.";
             case SP: return "The name assumed from the partner in a marital relationship (hence the \"SP\"). Usually the spouse's family name. Note that no inference about gender can be made from the existence of spouse names.";
@@ -367,6 +395,10 @@ public enum V3EntityNamePartQualifier {
             case TIME: return "Description: This refers to a time or time period that may be specified in the text of the medicinal product name\r\n\n                        \n                           Example:\n                        \r\n\n                        \n                           For an influenza vaccine 'Drug-FLU season 2008/2009', the time/period part is \"2008/2009 season\"";
             case TMK: return "Description: This refers to trademark/company element if present in the medicinal product name.\r\n\n                        EXAMPLES: \r\n\n                        \n                           \n                              for Insulin Human Winthrop Comb 15: Winthrop";
             case USE: return "Description: This refers to the intended use if present in the medicinal product name without the trademark or the name of the marketing authorization holder or any other descriptor reflected in the product name.\n\r\n\n                        \n                           Examples:\n                        \r\n\n                        \n                           For 'Drug-BI Caplets - Heartburn Relief', the intended use part is: \"Heartburn Relief\"\n                           For 'Medicine Honey Syrup for Soothing Coughs' the intended use part is \"Soothing Coughs\"";
+            case _PERSONNAMEPARTQUALIFIER: return "PersonNamePartQualifier";
+            case _PERSONNAMEPARTAFFIXTYPES: return "PersonNamePartAffixTypes";
+            case _PERSONNAMEPARTCHANGEQUALIFIER: return "PersonNamePartChangeQualifier";
+            case _PERSONNAMEPARTMISCQUALIFIER: return "PersonNamePartMiscQualifier";
             default: return "?";
           }
         }
@@ -397,6 +429,10 @@ public enum V3EntityNamePartQualifier {
             case TIME: return "TimeOrPeriodName";
             case TMK: return "trademark name";
             case USE: return "intended use name";
+            case _PERSONNAMEPARTQUALIFIER: return "PersonNamePartQualifier";
+            case _PERSONNAMEPARTAFFIXTYPES: return "PersonNamePartAffixTypes";
+            case _PERSONNAMEPARTCHANGEQUALIFIER: return "PersonNamePartChangeQualifier";
+            case _PERSONNAMEPARTMISCQUALIFIER: return "PersonNamePartMiscQualifier";
             default: return "?";
           }
     }

@@ -74,6 +74,9 @@ public class ToolingExtensions {
   public static final String EXT_ISSUE_SOURCE = "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source";
   public static final String EXT_DISPLAY_HINT = "http://hl7.org/fhir/StructureDefinition/structuredefinition-display-hint"; 
   public static final String EXT_REPLACED_BY = "http://hl7.org/fhir/StructureDefinition/valueset-replacedby";
+  public static final String EXT_JSON_TYPE = "http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type"; 
+  public static final String EXT_XML_TYPE = "http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type"; 
+  public static final String EXT_REGEX = "http://hl7.org/fhir/StructureDefinition/structuredefinition-regex"; 
 
   // unregistered?
 
@@ -87,7 +90,6 @@ public class ToolingExtensions {
   public static final String EXT_CIMI_REFERENCE = "http://hl7.org/fhir/StructureDefinition/cimi-reference";
   public static final String EXT_UNCLOSED = "http://hl7.org/fhir/StructureDefinition/valueset-unclosed";
   public static final String EXT_FMM_LEVEL = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm";
-  public static final String EXT_FMM_LEVEL_NO_WARN = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm-no-warnings";
 
 
   // specific extension helpers
@@ -228,7 +230,7 @@ public class ToolingExtensions {
     return readStringExtension(c, EXT_COMMENT);    
   }
 
-  public static Boolean getDeprecated(ConceptDefinitionComponent c) {
+  public static Boolean getDeprecated(Element c) {
     return readBooleanExtension(c, EXT_DEPRECATED);    
   }
 
@@ -236,7 +238,7 @@ public class ToolingExtensions {
     return findStringExtension(c, EXT_COMMENT);    
   }
 
-  public static boolean hasDeprecated(ConceptDefinitionComponent c) {
+  public static boolean hasDeprecated(Element c) {
     return findBooleanExtension(c, EXT_DEPRECATED);    
   }
 

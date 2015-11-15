@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -49,11 +49,11 @@ public class OperationDefinition extends DomainResource {
 
     public enum OperationKind {
         /**
-         * This operation is invoked as an operation
+         * This operation is invoked as an operation.
          */
         OPERATION, 
         /**
-         * This operation is a named query, invoked using the search mechanism
+         * This operation is a named query, invoked using the search mechanism.
          */
         QUERY, 
         /**
@@ -85,8 +85,8 @@ public class OperationDefinition extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case OPERATION: return "This operation is invoked as an operation";
-            case QUERY: return "This operation is a named query, invoked using the search mechanism";
+            case OPERATION: return "This operation is invoked as an operation.";
+            case QUERY: return "This operation is a named query, invoked using the search mechanism.";
             default: return "?";
           }
         }
@@ -121,11 +121,11 @@ public class OperationDefinition extends DomainResource {
 
     public enum OperationParameterUse {
         /**
-         * This is an input parameter
+         * This is an input parameter.
          */
         IN, 
         /**
-         * This is an output parameter
+         * This is an output parameter.
          */
         OUT, 
         /**
@@ -157,8 +157,8 @@ public class OperationDefinition extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case IN: return "This is an input parameter";
-            case OUT: return "This is an output parameter";
+            case IN: return "This is an input parameter.";
+            case OUT: return "This is an output parameter.";
             default: return "?";
           }
         }
@@ -1061,7 +1061,7 @@ public class OperationDefinition extends DomainResource {
      * An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published.
      */
     @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Logical url to reference this operation definition", formalDefinition="An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published." )
+    @Description(shortDefinition="Logical URL to reference this operation definition", formalDefinition="An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published." )
     protected UriType url;
 
     /**
@@ -1086,10 +1086,10 @@ public class OperationDefinition extends DomainResource {
     protected Enumeration<ConformanceResourceStatus> status;
 
     /**
-     * Whether this is operation or named query.
+     * Whether this is an operation or a named query.
      */
     @Child(name = "kind", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="operation | query", formalDefinition="Whether this is operation or named query." )
+    @Description(shortDefinition="operation | query", formalDefinition="Whether this is an operation or a named query." )
     protected Enumeration<OperationKind> kind;
 
     /**
@@ -1114,10 +1114,10 @@ public class OperationDefinition extends DomainResource {
     protected List<OperationDefinitionContactComponent> contact;
 
     /**
-     * The date that this version of the profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the Operation Definition changes.
+     * The date this version of the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the Operation Definition changes.
      */
     @Child(name = "date", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Date for this version of the operation definition", formalDefinition="The date that this version of the profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the Operation Definition changes." )
+    @Description(shortDefinition="Date for this version of the operation definition", formalDefinition="The date this version of the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the Operation Definition changes." )
     protected DateTimeType date;
 
     /**
@@ -1406,7 +1406,7 @@ public class OperationDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #kind} (Whether this is operation or named query.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+     * @return {@link #kind} (Whether this is an operation or a named query.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
      */
     public Enumeration<OperationKind> getKindElement() { 
       if (this.kind == null)
@@ -1426,7 +1426,7 @@ public class OperationDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #kind} (Whether this is operation or named query.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+     * @param value {@link #kind} (Whether this is an operation or a named query.). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
      */
     public OperationDefinition setKindElement(Enumeration<OperationKind> value) { 
       this.kind = value;
@@ -1434,14 +1434,14 @@ public class OperationDefinition extends DomainResource {
     }
 
     /**
-     * @return Whether this is operation or named query.
+     * @return Whether this is an operation or a named query.
      */
     public OperationKind getKind() { 
       return this.kind == null ? null : this.kind.getValue();
     }
 
     /**
-     * @param value Whether this is operation or named query.
+     * @param value Whether this is an operation or a named query.
      */
     public OperationDefinition setKind(OperationKind value) { 
         if (this.kind == null)
@@ -1585,7 +1585,7 @@ public class OperationDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date that this version of the profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the Operation Definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date this version of the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the Operation Definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -1605,7 +1605,7 @@ public class OperationDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #date} (The date that this version of the profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the Operation Definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date this version of the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the Operation Definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public OperationDefinition setDateElement(DateTimeType value) { 
       this.date = value;
@@ -1613,14 +1613,14 @@ public class OperationDefinition extends DomainResource {
     }
 
     /**
-     * @return The date that this version of the profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the Operation Definition changes.
+     * @return The date this version of the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the Operation Definition changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date that this version of the profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the Operation Definition changes.
+     * @param value The date this version of the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the Operation Definition changes.
      */
     public OperationDefinition setDate(Date value) { 
       if (value == null)
@@ -2104,11 +2104,11 @@ public class OperationDefinition extends DomainResource {
         childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A free text natural language name identifying the operation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("status", "code", "The status of the profile.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("kind", "code", "Whether this is operation or named query.", 0, java.lang.Integer.MAX_VALUE, kind));
+        childrenList.add(new Property("kind", "code", "Whether this is an operation or a named query.", 0, java.lang.Integer.MAX_VALUE, kind));
         childrenList.add(new Property("experimental", "boolean", "This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the operation definition.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("date", "dateTime", "The date that this version of the profile was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the Operation Definition changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("date", "dateTime", "The date this version of the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the Operation Definition changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("description", "string", "A free text natural language description of the profile and its use.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("requirements", "string", "Explains why this operation definition is needed and why it's been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("idempotent", "boolean", "Operations that are idempotent (see [HTTP specification definition of idempotent](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html)) may be invoked by performing an HTTP GET operation instead of a POST.", 0, java.lang.Integer.MAX_VALUE, idempotent));
@@ -2223,7 +2223,7 @@ public class OperationDefinition extends DomainResource {
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="version", path="OperationDefinition.version", description="Logical id for this version of the operation definition", type="token" )
   public static final String SP_VERSION = "version";
-  @SearchParamDefinition(name="url", path="OperationDefinition.url", description="Logical url to reference this operation definition", type="uri" )
+  @SearchParamDefinition(name="url", path="OperationDefinition.url", description="Logical URL to reference this operation definition", type="uri" )
   public static final String SP_URL = "url";
   @SearchParamDefinition(name="system", path="OperationDefinition.system", description="Invoke at the system level?", type="token" )
   public static final String SP_SYSTEM = "system";

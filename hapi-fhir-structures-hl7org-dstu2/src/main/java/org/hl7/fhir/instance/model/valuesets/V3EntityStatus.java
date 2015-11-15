@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3EntityStatus {
@@ -47,6 +47,10 @@ public enum V3EntityStatus {
          */
         INACTIVE, 
         /**
+         * The state representing the normal termination of an Entity record.
+         */
+        TERMINATED, 
+        /**
          * The state representing the termination of an Entity record instance that was created in error.
          */
         NULLIFIED, 
@@ -63,6 +67,8 @@ public enum V3EntityStatus {
           return ACTIVE;
         if ("inactive".equals(codeString))
           return INACTIVE;
+        if ("terminated".equals(codeString))
+          return TERMINATED;
         if ("nullified".equals(codeString))
           return NULLIFIED;
         throw new Exception("Unknown V3EntityStatus code '"+codeString+"'");
@@ -72,6 +78,7 @@ public enum V3EntityStatus {
             case NORMAL: return "normal";
             case ACTIVE: return "active";
             case INACTIVE: return "inactive";
+            case TERMINATED: return "terminated";
             case NULLIFIED: return "nullified";
             default: return "?";
           }
@@ -84,6 +91,7 @@ public enum V3EntityStatus {
             case NORMAL: return "The 'typical' state. Excludes \"nullified\" which represents the termination state of an Entity record instance that was created in error.";
             case ACTIVE: return "The state representing the fact that the Entity record is currently active.";
             case INACTIVE: return "Definition: The state representing the fact that the entity is inactive.";
+            case TERMINATED: return "The state representing the normal termination of an Entity record.";
             case NULLIFIED: return "The state representing the termination of an Entity record instance that was created in error.";
             default: return "?";
           }
@@ -93,6 +101,7 @@ public enum V3EntityStatus {
             case NORMAL: return "normal";
             case ACTIVE: return "active";
             case INACTIVE: return "inactive";
+            case TERMINATED: return "terminated";
             case NULLIFIED: return "nullified";
             default: return "?";
           }

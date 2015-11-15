@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3NullFlavor {
@@ -47,7 +47,7 @@ public enum V3NullFlavor {
          */
         DER, 
         /**
-         * Description:The actual value is not a member of the set of permitted data values in the constrained value domain of a variable. (e.g., concept not provided by required code system).
+         * Description:The actual value is not a member of the set of permitted data values in the constrained value domain of a variable. (e.g. concept not provided by required code system).
 
                         
                            Usage Notes: This flavor and its specializations are most commonly used with the CD datatype and its flavors.  However, it may apply to *any* datatype where the constraints of the type are tighter than can be conveyed.  For example, a PQ that is for a true measured amount whose units are not supported in UCUM, a need to convey a REAL when the type has been constrained to INT, etc.
@@ -82,7 +82,7 @@ public enum V3NullFlavor {
          */
         MSK, 
         /**
-         * Known to have no proper value (e.g., last menstrual period for a male).
+         * Known to have no proper value (e.g. last menstrual period for a male).
          */
         NA, 
         /**
@@ -97,7 +97,7 @@ public enum V3NullFlavor {
          */
         UNK, 
         /**
-         * Information was sought but not found (e.g., patient was asked but didn't know)
+         * Information was sought but not found (e.g. patient was asked but didn't know)
          */
         ASKU, 
         /**
@@ -105,17 +105,21 @@ public enum V3NullFlavor {
          */
         NAV, 
         /**
-         * This information has not been sought (e.g., patient was not asked)
+         * This information has not been sought (e.g. patient was not asked)
          */
         NASK, 
         /**
-         * Description:The specific quantity is not known, but is known to be non-zero and is not specified because it makes up the bulk of the material. e.g. 'Add 10mg of ingredient X, 50mg of ingredient Y, and sufficient quantity of water to 100mL.' The null flavor would be used to express the quantity of water.
+         * Description:The specific quantity is not known, but is known to be non-zero and is not specified because it makes up the bulk of the material; e.g. 'Add 10mg of ingredient X, 50mg of ingredient Y, and sufficient quantity of water to 100mL.' The null flavor would be used to express the quantity of water.
          */
         QS, 
         /**
          * The content is greater than zero, but too small to be quantified.
          */
         TRC, 
+        /**
+         * Value is not present in a message.  This is only defined in messages, never in application data!  All values not present in the message must be replaced by the applicable default, or no-information (NI) as the default of all defaults.
+         */
+        NP, 
         /**
          * added to help the parsers
          */
@@ -153,6 +157,8 @@ public enum V3NullFlavor {
           return QS;
         if ("TRC".equals(codeString))
           return TRC;
+        if ("NP".equals(codeString))
+          return NP;
         throw new Exception("Unknown V3NullFlavor code '"+codeString+"'");
         }
         public String toCode() {
@@ -172,6 +178,7 @@ public enum V3NullFlavor {
             case NASK: return "NASK";
             case QS: return "QS";
             case TRC: return "TRC";
+            case NP: return "NP";
             default: return "?";
           }
         }
@@ -183,18 +190,19 @@ public enum V3NullFlavor {
             case NI: return "Description:The value is exceptional (missing, omitted, incomplete, improper). No information as to the reason for being an exceptional value is provided. This is the most general exceptional value. It is also the default exceptional value.";
             case INV: return "Description:The value as represented in the instance is not a member of the set of permitted data values in the constrained value domain of a variable.";
             case DER: return "Description:An actual value may exist, but it must be derived from the provided information (usually an EXPR generic data type extension will be used to convey the derivation expressionexpression .";
-            case OTH: return "Description:The actual value is not a member of the set of permitted data values in the constrained value domain of a variable. (e.g., concept not provided by required code system).\r\n\n                        \n                           Usage Notes: This flavor and its specializations are most commonly used with the CD datatype and its flavors.  However, it may apply to *any* datatype where the constraints of the type are tighter than can be conveyed.  For example, a PQ that is for a true measured amount whose units are not supported in UCUM, a need to convey a REAL when the type has been constrained to INT, etc.\r\n\n                        With coded datatypes, this null flavor may only be used if the vocabulary binding has a coding strength of CNE.  By definition, all local codes and original text are part of the value set if the coding strength is CWE.";
+            case OTH: return "Description:The actual value is not a member of the set of permitted data values in the constrained value domain of a variable. (e.g. concept not provided by required code system).\r\n\n                        \n                           Usage Notes: This flavor and its specializations are most commonly used with the CD datatype and its flavors.  However, it may apply to *any* datatype where the constraints of the type are tighter than can be conveyed.  For example, a PQ that is for a true measured amount whose units are not supported in UCUM, a need to convey a REAL when the type has been constrained to INT, etc.\r\n\n                        With coded datatypes, this null flavor may only be used if the vocabulary binding has a coding strength of CNE.  By definition, all local codes and original text are part of the value set if the coding strength is CWE.";
             case NINF: return "Negative infinity of numbers.";
             case PINF: return "Positive infinity of numbers.";
             case UNC: return "Description: The actual value has not yet been encoded within the approved value domain.\r\n\n                        \n                           Example: Original text or a local code has been specified but translation or encoding to the approved value set has not yet occurred due to limitations of the sending system.  Original text has been captured for a PQ, but not attempt has been made to split the value and unit or to encode the unit in UCUM.\r\n\n                        \n                           Usage Notes: If it is known that it is not possible to encode the concept, OTH should be used instead.  However, use of UNC does not necessarily guarantee the concept will be encodable, only that encoding has not been attempted.\r\n\n                        Data type properties such as original text and translations may be present when this null flavor is included.";
             case MSK: return "There is information on this item available but it has not been provided by the sender due to security, privacy or other reasons. There may be an alternate mechanism for gaining access to this information.\r\n\n                        Note: using this null flavor does provide information that may be a breach of confidentiality, even though no detail data is provided.  Its primary purpose is for those circumstances where it is necessary to inform the receiver that the information does exist without providing any detail.";
-            case NA: return "Known to have no proper value (e.g., last menstrual period for a male).";
+            case NA: return "Known to have no proper value (e.g. last menstrual period for a male).";
             case UNK: return "Description:A proper value is applicable, but not known.\r\n\n                        \n                           Usage Notes: This means the actual value is not known.  If the only thing that is unknown is how to properly express the value in the necessary constraints (value set, datatype, etc.), then the OTH or UNC flavor should be used.  No properties should be included for a datatype with this property unless:\r\n\n                        \n                           Those properties themselves directly translate to a semantic of \"unknown\".  (E.g. a local code sent as a translation that conveys 'unknown')\n                           Those properties further qualify the nature of what is unknown.  (E.g. specifying a use code of \"H\" and a URL prefix of \"tel:\" to convey that it is the home phone number that is unknown.)";
-            case ASKU: return "Information was sought but not found (e.g., patient was asked but didn't know)";
+            case ASKU: return "Information was sought but not found (e.g. patient was asked but didn't know)";
             case NAV: return "Information is not available at this time but it is expected that it will be available later.";
-            case NASK: return "This information has not been sought (e.g., patient was not asked)";
-            case QS: return "Description:The specific quantity is not known, but is known to be non-zero and is not specified because it makes up the bulk of the material. e.g. 'Add 10mg of ingredient X, 50mg of ingredient Y, and sufficient quantity of water to 100mL.' The null flavor would be used to express the quantity of water.";
+            case NASK: return "This information has not been sought (e.g. patient was not asked)";
+            case QS: return "Description:The specific quantity is not known, but is known to be non-zero and is not specified because it makes up the bulk of the material; e.g. 'Add 10mg of ingredient X, 50mg of ingredient Y, and sufficient quantity of water to 100mL.' The null flavor would be used to express the quantity of water.";
             case TRC: return "The content is greater than zero, but too small to be quantified.";
+            case NP: return "Value is not present in a message.  This is only defined in messages, never in application data!  All values not present in the message must be replaced by the applicable default, or no-information (NI) as the default of all defaults.";
             default: return "?";
           }
         }
@@ -215,6 +223,7 @@ public enum V3NullFlavor {
             case NASK: return "not asked";
             case QS: return "Sufficient Quantity";
             case TRC: return "trace";
+            case NP: return "not present";
             default: return "?";
           }
     }

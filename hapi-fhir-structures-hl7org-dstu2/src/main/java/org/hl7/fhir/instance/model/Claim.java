@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -66,7 +66,7 @@ public class Claim extends DomainResource {
          */
         PROFESSIONAL, 
         /**
-         * A claim for Vision (Opthamologist, Optometrist and Optician) goods and services.
+         * A claim for Vision (Ophthamologist, Optometrist and Optician) goods and services.
          */
         VISION, 
         /**
@@ -114,7 +114,7 @@ public class Claim extends DomainResource {
             case ORAL: return "A claim for Oral Health (Dentist, Denturist, Hygienist) goods and services.";
             case PHARMACY: return "A claim for Pharmacy based goods and services.";
             case PROFESSIONAL: return "A claim for Professional, typically out-patient, goods and services.";
-            case VISION: return "A claim for Vision (Opthamologist, Optometrist and Optician) goods and services.";
+            case VISION: return "A claim for Vision (Ophthamologist, Optometrist and Optician) goods and services.";
             default: return "?";
           }
         }
@@ -676,7 +676,7 @@ public class Claim extends DomainResource {
          * The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated.
          */
         @Child(name = "focal", type = {BooleanType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Is the focal Coverage", formalDefinition="The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated." )
+        @Description(shortDefinition="The focal Coverage", formalDefinition="The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated." )
         protected BooleanType focal;
 
         /**
@@ -1222,10 +1222,10 @@ public class Claim extends DomainResource {
         protected DecimalType points;
 
         /**
-         * The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
+         * The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
          */
         @Child(name = "net", type = {Money.class}, order=11, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Total item cost", formalDefinition="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
+        @Description(shortDefinition="Total item cost", formalDefinition="The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
         protected Money net;
 
         /**
@@ -1236,24 +1236,24 @@ public class Claim extends DomainResource {
         protected Coding udi;
 
         /**
-         * Physical service site on the patient (limb, tooth, etc).
+         * Physical service site on the patient (limb, tooth, etc.).
          */
         @Child(name = "bodySite", type = {Coding.class}, order=13, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Service Location", formalDefinition="Physical service site on the patient (limb, tooth, etc)." )
+        @Description(shortDefinition="Service Location", formalDefinition="Physical service site on the patient (limb, tooth, etc.)." )
         protected Coding bodySite;
 
         /**
-         * A region or surface of the site, eg. limb region or tooth surface(s).
+         * A region or surface of the site, e.g. limb region or tooth surface(s).
          */
         @Child(name = "subSite", type = {Coding.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Service Sub-location", formalDefinition="A region or surface of the site, eg. limb region or tooth surface(s)." )
+        @Description(shortDefinition="Service Sub-location", formalDefinition="A region or surface of the site, e.g. limb region or tooth surface(s)." )
         protected List<Coding> subSite;
 
         /**
-         * Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen.
+         * Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen.
          */
         @Child(name = "modifier", type = {Coding.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Service/Product billing modifiers", formalDefinition="Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen." )
+        @Description(shortDefinition="Service/Product billing modifiers", formalDefinition="Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen." )
         protected List<Coding> modifier;
 
         /**
@@ -1676,7 +1676,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @return {@link #net} (The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         * @return {@link #net} (The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
          */
         public Money getNet() { 
           if (this.net == null)
@@ -1692,7 +1692,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @param value {@link #net} (The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         * @param value {@link #net} (The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
          */
         public ItemsComponent setNet(Money value) { 
           this.net = value;
@@ -1724,7 +1724,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @return {@link #bodySite} (Physical service site on the patient (limb, tooth, etc).)
+         * @return {@link #bodySite} (Physical service site on the patient (limb, tooth, etc.).)
          */
         public Coding getBodySite() { 
           if (this.bodySite == null)
@@ -1740,7 +1740,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @param value {@link #bodySite} (Physical service site on the patient (limb, tooth, etc).)
+         * @param value {@link #bodySite} (Physical service site on the patient (limb, tooth, etc.).)
          */
         public ItemsComponent setBodySite(Coding value) { 
           this.bodySite = value;
@@ -1748,7 +1748,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @return {@link #subSite} (A region or surface of the site, eg. limb region or tooth surface(s).)
+         * @return {@link #subSite} (A region or surface of the site, e.g. limb region or tooth surface(s).)
          */
         public List<Coding> getSubSite() { 
           if (this.subSite == null)
@@ -1766,7 +1766,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @return {@link #subSite} (A region or surface of the site, eg. limb region or tooth surface(s).)
+         * @return {@link #subSite} (A region or surface of the site, e.g. limb region or tooth surface(s).)
          */
     // syntactic sugar
         public Coding addSubSite() { //3
@@ -1788,7 +1788,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @return {@link #modifier} (Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen.)
+         * @return {@link #modifier} (Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen.)
          */
         public List<Coding> getModifier() { 
           if (this.modifier == null)
@@ -1806,7 +1806,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @return {@link #modifier} (Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen.)
+         * @return {@link #modifier} (Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen.)
          */
     // syntactic sugar
         public Coding addModifier() { //3
@@ -1903,11 +1903,11 @@ public class Claim extends DomainResource {
           childrenList.add(new Property("unitPrice", "Money", "If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.", 0, java.lang.Integer.MAX_VALUE, unitPrice));
           childrenList.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, java.lang.Integer.MAX_VALUE, factor));
           childrenList.add(new Property("points", "decimal", "An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.", 0, java.lang.Integer.MAX_VALUE, points));
-          childrenList.add(new Property("net", "Money", "The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, java.lang.Integer.MAX_VALUE, net));
+          childrenList.add(new Property("net", "Money", "The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, java.lang.Integer.MAX_VALUE, net));
           childrenList.add(new Property("udi", "Coding", "List of Unique Device Identifiers associated with this line item.", 0, java.lang.Integer.MAX_VALUE, udi));
-          childrenList.add(new Property("bodySite", "Coding", "Physical service site on the patient (limb, tooth, etc).", 0, java.lang.Integer.MAX_VALUE, bodySite));
-          childrenList.add(new Property("subSite", "Coding", "A region or surface of the site, eg. limb region or tooth surface(s).", 0, java.lang.Integer.MAX_VALUE, subSite));
-          childrenList.add(new Property("modifier", "Coding", "Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen.", 0, java.lang.Integer.MAX_VALUE, modifier));
+          childrenList.add(new Property("bodySite", "Coding", "Physical service site on the patient (limb, tooth, etc.).", 0, java.lang.Integer.MAX_VALUE, bodySite));
+          childrenList.add(new Property("subSite", "Coding", "A region or surface of the site, e.g. limb region or tooth surface(s).", 0, java.lang.Integer.MAX_VALUE, subSite));
+          childrenList.add(new Property("modifier", "Coding", "Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen.", 0, java.lang.Integer.MAX_VALUE, modifier));
           childrenList.add(new Property("detail", "", "Second tier of goods and services.", 0, java.lang.Integer.MAX_VALUE, detail));
           childrenList.add(new Property("prosthesis", "", "The materials and placement date of prior fixed prosthesis.", 0, java.lang.Integer.MAX_VALUE, prosthesis));
         }
@@ -2044,10 +2044,10 @@ public class Claim extends DomainResource {
         protected DecimalType points;
 
         /**
-         * The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
+         * The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
          */
         @Child(name = "net", type = {Money.class}, order=8, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Total additional item cost", formalDefinition="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
+        @Description(shortDefinition="Total additional item cost", formalDefinition="The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
         protected Money net;
 
         /**
@@ -2323,7 +2323,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @return {@link #net} (The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         * @return {@link #net} (The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
          */
         public Money getNet() { 
           if (this.net == null)
@@ -2339,7 +2339,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @param value {@link #net} (The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         * @param value {@link #net} (The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
          */
         public DetailComponent setNet(Money value) { 
           this.net = value;
@@ -2419,7 +2419,7 @@ public class Claim extends DomainResource {
           childrenList.add(new Property("unitPrice", "Money", "If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.", 0, java.lang.Integer.MAX_VALUE, unitPrice));
           childrenList.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, java.lang.Integer.MAX_VALUE, factor));
           childrenList.add(new Property("points", "decimal", "An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.", 0, java.lang.Integer.MAX_VALUE, points));
-          childrenList.add(new Property("net", "Money", "The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, java.lang.Integer.MAX_VALUE, net));
+          childrenList.add(new Property("net", "Money", "The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, java.lang.Integer.MAX_VALUE, net));
           childrenList.add(new Property("udi", "Coding", "List of Unique Device Identifiers associated with this line item.", 0, java.lang.Integer.MAX_VALUE, udi));
           childrenList.add(new Property("subDetail", "", "Third tier of goods and services.", 0, java.lang.Integer.MAX_VALUE, subDetail));
         }
@@ -2494,10 +2494,10 @@ public class Claim extends DomainResource {
         protected Coding type;
 
         /**
-         * The fee for an addittional service or product or charge.
+         * The fee for an additional  service or product or charge.
          */
         @Child(name = "service", type = {Coding.class}, order=3, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Additional item codes", formalDefinition="The fee for an addittional service or product or charge." )
+        @Description(shortDefinition="Additional item codes", formalDefinition="The fee for an additional  service or product or charge." )
         protected Coding service;
 
         /**
@@ -2508,10 +2508,10 @@ public class Claim extends DomainResource {
         protected SimpleQuantity quantity;
 
         /**
-         * The fee for an addittional service or product or charge.
+         * The fee for an additional  service or product or charge.
          */
         @Child(name = "unitPrice", type = {Money.class}, order=5, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Fee, charge or cost per point", formalDefinition="The fee for an addittional service or product or charge." )
+        @Description(shortDefinition="Fee, charge or cost per point", formalDefinition="The fee for an additional  service or product or charge." )
         protected Money unitPrice;
 
         /**
@@ -2529,10 +2529,10 @@ public class Claim extends DomainResource {
         protected DecimalType points;
 
         /**
-         * The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
+         * The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
          */
         @Child(name = "net", type = {Money.class}, order=8, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Net additional item cost", formalDefinition="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
+        @Description(shortDefinition="Net additional item cost", formalDefinition="The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
         protected Money net;
 
         /**
@@ -2631,7 +2631,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @return {@link #service} (The fee for an addittional service or product or charge.)
+         * @return {@link #service} (The fee for an additional  service or product or charge.)
          */
         public Coding getService() { 
           if (this.service == null)
@@ -2647,7 +2647,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @param value {@link #service} (The fee for an addittional service or product or charge.)
+         * @param value {@link #service} (The fee for an additional  service or product or charge.)
          */
         public SubDetailComponent setService(Coding value) { 
           this.service = value;
@@ -2679,7 +2679,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @return {@link #unitPrice} (The fee for an addittional service or product or charge.)
+         * @return {@link #unitPrice} (The fee for an additional  service or product or charge.)
          */
         public Money getUnitPrice() { 
           if (this.unitPrice == null)
@@ -2695,7 +2695,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @param value {@link #unitPrice} (The fee for an addittional service or product or charge.)
+         * @param value {@link #unitPrice} (The fee for an additional  service or product or charge.)
          */
         public SubDetailComponent setUnitPrice(Money value) { 
           this.unitPrice = value;
@@ -2801,7 +2801,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @return {@link #net} (The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         * @return {@link #net} (The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
          */
         public Money getNet() { 
           if (this.net == null)
@@ -2817,7 +2817,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @param value {@link #net} (The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         * @param value {@link #net} (The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
          */
         public SubDetailComponent setNet(Money value) { 
           this.net = value;
@@ -2852,12 +2852,12 @@ public class Claim extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("sequence", "positiveInt", "A service line number.", 0, java.lang.Integer.MAX_VALUE, sequence));
           childrenList.add(new Property("type", "Coding", "The type of product or service.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("service", "Coding", "The fee for an addittional service or product or charge.", 0, java.lang.Integer.MAX_VALUE, service));
+          childrenList.add(new Property("service", "Coding", "The fee for an additional  service or product or charge.", 0, java.lang.Integer.MAX_VALUE, service));
           childrenList.add(new Property("quantity", "SimpleQuantity", "The number of repetitions of a service or product.", 0, java.lang.Integer.MAX_VALUE, quantity));
-          childrenList.add(new Property("unitPrice", "Money", "The fee for an addittional service or product or charge.", 0, java.lang.Integer.MAX_VALUE, unitPrice));
+          childrenList.add(new Property("unitPrice", "Money", "The fee for an additional  service or product or charge.", 0, java.lang.Integer.MAX_VALUE, unitPrice));
           childrenList.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, java.lang.Integer.MAX_VALUE, factor));
           childrenList.add(new Property("points", "decimal", "An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.", 0, java.lang.Integer.MAX_VALUE, points));
-          childrenList.add(new Property("net", "Money", "The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, java.lang.Integer.MAX_VALUE, net));
+          childrenList.add(new Property("net", "Money", "The quantity times the unit price for an additional  service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, java.lang.Integer.MAX_VALUE, net));
           childrenList.add(new Property("udi", "Coding", "List of Unique Device Identifiers associated with this line item.", 0, java.lang.Integer.MAX_VALUE, udi));
         }
 
@@ -3363,10 +3363,10 @@ public class Claim extends DomainResource {
     protected Enumeration<Use> use;
 
     /**
-     * Immediate (STAT), best effort (NORMAL), deferred (DEFER).
+     * Immediate (stat), best effort (normal), deferred (deferred).
      */
     @Child(name = "priority", type = {Coding.class}, order=9, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Desired processing priority", formalDefinition="Immediate (STAT), best effort (NORMAL), deferred (DEFER)." )
+    @Description(shortDefinition="Desired processing priority", formalDefinition="Immediate (stat), best effort (normal), deferred (deferred)." )
     protected Coding priority;
 
     /**
@@ -3484,10 +3484,10 @@ public class Claim extends DomainResource {
     protected List<Coding> exception;
 
     /**
-     * Name of school for over-aged dependants.
+     * Name of school for over-aged dependents.
      */
     @Child(name = "school", type = {StringType.class}, order=22, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Name of School", formalDefinition="Name of school for over-aged dependants." )
+    @Description(shortDefinition="Name of School", formalDefinition="Name of school for over-aged dependents." )
     protected StringType school;
 
     /**
@@ -3914,7 +3914,7 @@ public class Claim extends DomainResource {
     }
 
     /**
-     * @return {@link #priority} (Immediate (STAT), best effort (NORMAL), deferred (DEFER).)
+     * @return {@link #priority} (Immediate (stat), best effort (normal), deferred (deferred).)
      */
     public Coding getPriority() { 
       if (this.priority == null)
@@ -3930,7 +3930,7 @@ public class Claim extends DomainResource {
     }
 
     /**
-     * @param value {@link #priority} (Immediate (STAT), best effort (NORMAL), deferred (DEFER).)
+     * @param value {@link #priority} (Immediate (stat), best effort (normal), deferred (deferred).)
      */
     public Claim setPriority(Coding value) { 
       this.priority = value;
@@ -4405,7 +4405,7 @@ public class Claim extends DomainResource {
     }
 
     /**
-     * @return {@link #school} (Name of school for over-aged dependants.). This is the underlying object with id, value and extensions. The accessor "getSchool" gives direct access to the value
+     * @return {@link #school} (Name of school for over-aged dependents.). This is the underlying object with id, value and extensions. The accessor "getSchool" gives direct access to the value
      */
     public StringType getSchoolElement() { 
       if (this.school == null)
@@ -4425,7 +4425,7 @@ public class Claim extends DomainResource {
     }
 
     /**
-     * @param value {@link #school} (Name of school for over-aged dependants.). This is the underlying object with id, value and extensions. The accessor "getSchool" gives direct access to the value
+     * @param value {@link #school} (Name of school for over-aged dependents.). This is the underlying object with id, value and extensions. The accessor "getSchool" gives direct access to the value
      */
     public Claim setSchoolElement(StringType value) { 
       this.school = value;
@@ -4433,14 +4433,14 @@ public class Claim extends DomainResource {
     }
 
     /**
-     * @return Name of school for over-aged dependants.
+     * @return Name of school for over-aged dependents.
      */
     public String getSchool() { 
       return this.school == null ? null : this.school.getValue();
     }
 
     /**
-     * @param value Name of school for over-aged dependants.
+     * @param value Name of school for over-aged dependents.
      */
     public Claim setSchool(String value) { 
       if (Utilities.noString(value))
@@ -4697,7 +4697,7 @@ public class Claim extends DomainResource {
         childrenList.add(new Property("provider", "Reference(Practitioner)", "The provider which is responsible for the bill, claim pre-determination, pre-authorization.", 0, java.lang.Integer.MAX_VALUE, provider));
         childrenList.add(new Property("organization", "Reference(Organization)", "The organization which is responsible for the bill, claim pre-determination, pre-authorization.", 0, java.lang.Integer.MAX_VALUE, organization));
         childrenList.add(new Property("use", "code", "Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).", 0, java.lang.Integer.MAX_VALUE, use));
-        childrenList.add(new Property("priority", "Coding", "Immediate (STAT), best effort (NORMAL), deferred (DEFER).", 0, java.lang.Integer.MAX_VALUE, priority));
+        childrenList.add(new Property("priority", "Coding", "Immediate (stat), best effort (normal), deferred (deferred).", 0, java.lang.Integer.MAX_VALUE, priority));
         childrenList.add(new Property("fundsReserve", "Coding", "In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved ('Patient' or 'Provider') to pay for the Benefits determined on the subsequent claim(s). 'None' explicitly indicates no funds reserving is requested.", 0, java.lang.Integer.MAX_VALUE, fundsReserve));
         childrenList.add(new Property("enterer", "Reference(Practitioner)", "Person who created the invoice/claim/pre-determination or pre-authorization.", 0, java.lang.Integer.MAX_VALUE, enterer));
         childrenList.add(new Property("facility", "Reference(Location)", "Facility where the services were provided.", 0, java.lang.Integer.MAX_VALUE, facility));
@@ -4710,7 +4710,7 @@ public class Claim extends DomainResource {
         childrenList.add(new Property("patient", "Reference(Patient)", "Patient Resource.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("coverage", "", "Financial instrument by which payment information for health care.", 0, java.lang.Integer.MAX_VALUE, coverage));
         childrenList.add(new Property("exception", "Coding", "Factors which may influence the applicability of coverage.", 0, java.lang.Integer.MAX_VALUE, exception));
-        childrenList.add(new Property("school", "string", "Name of school for over-aged dependants.", 0, java.lang.Integer.MAX_VALUE, school));
+        childrenList.add(new Property("school", "string", "Name of school for over-aged dependents.", 0, java.lang.Integer.MAX_VALUE, school));
         childrenList.add(new Property("accident", "date", "Date of an accident which these services are addressing.", 0, java.lang.Integer.MAX_VALUE, accident));
         childrenList.add(new Property("accidentType", "Coding", "Type of accident: work, auto, etc.", 0, java.lang.Integer.MAX_VALUE, accidentType));
         childrenList.add(new Property("interventionException", "Coding", "A list of intervention and exception codes which may influence the adjudication of the claim.", 0, java.lang.Integer.MAX_VALUE, interventionException));

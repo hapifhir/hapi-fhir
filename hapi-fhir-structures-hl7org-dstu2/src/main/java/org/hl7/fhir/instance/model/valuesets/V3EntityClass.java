@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3EntityClass {
@@ -71,7 +71,7 @@ public enum V3EntityClass {
          */
         MAT, 
         /**
-         * A substance that is fully defined by an organic or inorganic chemical formula, includes mixtures of other chemical substances. Refine using, e.g., IUPAC codes.
+         * A substance that is fully defined by an organic or inorganic chemical formula, includes mixtures of other chemical substances. Refine using, e.g. IUPAC codes.
          */
         CHEM, 
         /**
@@ -114,7 +114,7 @@ public enum V3EntityClass {
          */
         PUB, 
         /**
-         * A politically organized body of people bonded by territory, culture, or ethnicity, having sovereignty (to a certain extent) granted by other states (enclosing or neighboring states). This includes countries (nations), provinces (e.g., one of the United States of America or a French departement), counties or municipalities. Refine using, e.g., ISO country codes, FIPS-PUB state codes, etc.
+         * A politically organized body of people bonded by territory, culture, or ethnicity, having sovereignty (to a certain extent) granted by other states (enclosing or neighboring states). This includes countries (nations), provinces (e.g. one of the United States of America or a French departement), counties or municipalities. Refine using, e.g. ISO country codes, FIPS-PUB state codes, etc.
          */
         STATE, 
         /**
@@ -254,7 +254,7 @@ public enum V3EntityClass {
             case PLNT: return "A living subject from the order of plants.";
             case PSN: return "A living subject of the species homo sapiens.";
             case MAT: return "Any thing that has extension in space and mass, may be of living or non-living origin.";
-            case CHEM: return "A substance that is fully defined by an organic or inorganic chemical formula, includes mixtures of other chemical substances. Refine using, e.g., IUPAC codes.";
+            case CHEM: return "A substance that is fully defined by an organic or inorganic chemical formula, includes mixtures of other chemical substances. Refine using, e.g. IUPAC codes.";
             case FOOD: return "Naturally occurring, processed or manufactured entities that are primarily used as food for humans and animals.";
             case MMAT: return "Corresponds to the ManufacturedMaterial class";
             case CONT: return "A container of other entities.";
@@ -264,7 +264,7 @@ public enum V3EntityClass {
             case MODDV: return "Class to contain unique attributes of diagnostic imaging equipment.";
             case ORG: return "A social or legal structure formed by human beings.";
             case PUB: return "An agency of the people of a state often assuming some authority over a certain matter. Includes government, governmental agencies, associations.";
-            case STATE: return "A politically organized body of people bonded by territory, culture, or ethnicity, having sovereignty (to a certain extent) granted by other states (enclosing or neighboring states). This includes countries (nations), provinces (e.g., one of the United States of America or a French departement), counties or municipalities. Refine using, e.g., ISO country codes, FIPS-PUB state codes, etc.";
+            case STATE: return "A politically organized body of people bonded by territory, culture, or ethnicity, having sovereignty (to a certain extent) granted by other states (enclosing or neighboring states). This includes countries (nations), provinces (e.g. one of the United States of America or a French departement), counties or municipalities. Refine using, e.g. ISO country codes, FIPS-PUB state codes, etc.";
             case NAT: return "A politically organized body of people bonded by territory and known as a nation.";
             case PLC: return "A physical place or site with its containing structure. May be natural or man-made. The geographic position of a place may or may not be constant.";
             case CITY: return "The territory of a city, town or other municipality.";

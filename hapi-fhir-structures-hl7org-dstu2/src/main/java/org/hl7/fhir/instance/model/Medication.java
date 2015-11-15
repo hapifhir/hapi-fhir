@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -249,10 +249,10 @@ public class Medication extends DomainResource {
         protected Resource itemTarget;
 
         /**
-         * Specifies how many (or how much) of the items there are in this Medication.  E.g. 250 mg per tablet.
+         * Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet.
          */
         @Child(name = "amount", type = {Ratio.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="How much ingredient in product", formalDefinition="Specifies how many (or how much) of the items there are in this Medication.  E.g. 250 mg per tablet." )
+        @Description(shortDefinition="Quantity of ingredient present", formalDefinition="Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet." )
         protected Ratio amount;
 
         private static final long serialVersionUID = -1217232889L;
@@ -312,7 +312,7 @@ public class Medication extends DomainResource {
         }
 
         /**
-         * @return {@link #amount} (Specifies how many (or how much) of the items there are in this Medication.  E.g. 250 mg per tablet.)
+         * @return {@link #amount} (Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet.)
          */
         public Ratio getAmount() { 
           if (this.amount == null)
@@ -328,7 +328,7 @@ public class Medication extends DomainResource {
         }
 
         /**
-         * @param value {@link #amount} (Specifies how many (or how much) of the items there are in this Medication.  E.g. 250 mg per tablet.)
+         * @param value {@link #amount} (Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet.)
          */
         public MedicationProductIngredientComponent setAmount(Ratio value) { 
           this.amount = value;
@@ -338,7 +338,7 @@ public class Medication extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("item", "Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, java.lang.Integer.MAX_VALUE, item));
-          childrenList.add(new Property("amount", "Ratio", "Specifies how many (or how much) of the items there are in this Medication.  E.g. 250 mg per tablet.", 0, java.lang.Integer.MAX_VALUE, amount));
+          childrenList.add(new Property("amount", "Ratio", "Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet.", 0, java.lang.Integer.MAX_VALUE, amount));
         }
 
       public MedicationProductIngredientComponent copy() {
@@ -555,7 +555,7 @@ public class Medication extends DomainResource {
          * A set of components that go to make up the described item.
          */
         @Child(name = "content", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="What is  in the package?", formalDefinition="A set of components that go to make up the described item." )
+        @Description(shortDefinition="What is  in the package", formalDefinition="A set of components that go to make up the described item." )
         protected List<MedicationPackageContentComponent> content;
 
         private static final long serialVersionUID = 503772472L;
@@ -694,7 +694,7 @@ public class Medication extends DomainResource {
          * The amount of the product that is in the package.
          */
         @Child(name = "amount", type = {SimpleQuantity.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="How many are in the package?", formalDefinition="The amount of the product that is in the package." )
+        @Description(shortDefinition="Quantity present in the package", formalDefinition="The amount of the product that is in the package." )
         protected SimpleQuantity amount;
 
         private static final long serialVersionUID = -1150048030L;

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -645,6 +645,8 @@ public class V3ObservationMethodEnumFactory implements EnumFactory<V3Observation
       return V3ObservationMethod._0278;
     if ("0279".equals(codeString))
       return V3ObservationMethod._0279;
+    if ("0127".equals(codeString))
+      return V3ObservationMethod._0127;
     throw new IllegalArgumentException("Unknown V3ObservationMethod code '"+codeString+"'");
   }
 
@@ -1255,6 +1257,8 @@ public class V3ObservationMethodEnumFactory implements EnumFactory<V3Observation
       return "0278";
     if (code == V3ObservationMethod._0279)
       return "0279";
+    if (code == V3ObservationMethod._0127)
+      return "0127";
     return "?";
   }
 

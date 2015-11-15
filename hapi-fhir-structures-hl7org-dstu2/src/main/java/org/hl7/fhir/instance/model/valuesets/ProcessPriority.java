@@ -29,21 +29,21 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ProcessPriority {
 
         /**
-         * Immediately in real time
+         * Immediately in real time.
          */
         STAT, 
         /**
-         * With best effort
+         * With best effort.
          */
         NORMAL, 
         /**
-         * Later, when possible
+         * Later, when possible.
          */
         DEFERRED, 
         /**
@@ -74,9 +74,9 @@ public enum ProcessPriority {
         }
         public String getDefinition() {
           switch (this) {
-            case STAT: return "Immediately in real time";
-            case NORMAL: return "With best effort";
-            case DEFERRED: return "Later, when possible";
+            case STAT: return "Immediately in real time.";
+            case NORMAL: return "With best effort.";
+            case DEFERRED: return "Later, when possible.";
             default: return "?";
           }
         }

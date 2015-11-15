@@ -29,25 +29,25 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ConditionCategory {
 
         /**
-         * The patient considers the condition an issue to be addressed
+         * The patient considers the condition an issue to be addressed.
          */
         COMPLAINT, 
         /**
-         * A symptom of a condition (as might be mentioned in a review of systems)
+         * A symptom of a condition (as might be mentioned in a review of systems).
          */
         SYMPTOM, 
         /**
-         * An observation made by a healthcare provider
+         * An observation made by a healthcare provider.
          */
         FINDING, 
         /**
-         * This is a judgment made by a healthcare provider that the patient has a particular disease or condition
+         * This is a judgment made by a healthcare provider that the patient has a particular disease or condition.
          */
         DIAGNOSIS, 
         /**
@@ -81,10 +81,10 @@ public enum ConditionCategory {
         }
         public String getDefinition() {
           switch (this) {
-            case COMPLAINT: return "The patient considers the condition an issue to be addressed";
-            case SYMPTOM: return "A symptom of a condition (as might be mentioned in a review of systems)";
-            case FINDING: return "An observation made by a healthcare provider";
-            case DIAGNOSIS: return "This is a judgment made by a healthcare provider that the patient has a particular disease or condition";
+            case COMPLAINT: return "The patient considers the condition an issue to be addressed.";
+            case SYMPTOM: return "A symptom of a condition (as might be mentioned in a review of systems).";
+            case FINDING: return "An observation made by a healthcare provider.";
+            case DIAGNOSIS: return "This is a judgment made by a healthcare provider that the patient has a particular disease or condition.";
             default: return "?";
           }
         }

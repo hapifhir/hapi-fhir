@@ -29,29 +29,29 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum FlagCategory {
 
         /**
-         * Flags relating to the subject's dietary needs
+         * Flags related to the subject's dietary needs.
          */
         DIET, 
         /**
-         * Flags related to the patient's medications
+         * Flags related to the patient's medications.
          */
         DRUG, 
         /**
-         * Flags related to performing laboratory tests and related processes (e.g. phlebotamy)
+         * Flags related to performing laboratory tests and related processes (e.g. phlebotomy).
          */
         LAB, 
         /**
-         * Flags relating to administrative and financial processes
+         * Flags related to administrative and financial processes.
          */
         ADMIN, 
         /**
-         * Flags relating to coming into contact with the patient
+         * Flags related to coming into contact with the patient.
          */
         CONTACT, 
         /**
@@ -88,11 +88,11 @@ public enum FlagCategory {
         }
         public String getDefinition() {
           switch (this) {
-            case DIET: return "Flags relating to the subject's dietary needs";
-            case DRUG: return "Flags related to the patient's medications";
-            case LAB: return "Flags related to performing laboratory tests and related processes (e.g. phlebotamy)";
-            case ADMIN: return "Flags relating to administrative and financial processes";
-            case CONTACT: return "Flags relating to coming into contact with the patient";
+            case DIET: return "Flags related to the subject's dietary needs.";
+            case DRUG: return "Flags related to the patient's medications.";
+            case LAB: return "Flags related to performing laboratory tests and related processes (e.g. phlebotomy).";
+            case ADMIN: return "Flags related to administrative and financial processes.";
+            case CONTACT: return "Flags related to coming into contact with the patient.";
             default: return "?";
           }
         }

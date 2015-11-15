@@ -1,1084 +1,1646 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <StructureDefinition xmlns="http://hl7.org/fhir">
- <id value="AllergyIntolerance"/>
- <meta>
-  <lastUpdated value="2015-09-01T19:08:30.802-04:00"/>
- </meta>
- <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
-  <valueInteger value="0"/>
- </extension>
- <url value="http://hl7.org/fhir/StructureDefinition/AllergyIntolerance"/>
- <name value="AllergyIntolerance"/>
- <status value="draft"/>
- <publisher value="Health Level Seven International (Patient Care)"/>
- <contact>
-  <telecom>
-   <system value="other"/>
-   <value value="http://hl7.org/fhir"/>
-  </telecom>
- </contact>
- <contact>
-  <telecom>
-   <system value="other"/>
-   <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
-  </telecom>
- </contact>
- <date value="2015-09-01T19:08:30-04:00"/>
- <description value="Base StructureDefinition for AllergyIntolerance Resource"/>
- <requirements value="To record a clinical assessment of a propensity, or potential risk to an individual, of an adverse reaction upon future exposure to the specified substance, or class of substance."/>
- <mapping>
-  <identity value="w5"/>
-  <uri value="http://hl7.org/fhir/w5"/>
-  <name value="W5 Mapping"/>
- </mapping>
- <mapping>
-  <identity value="rim"/>
-  <uri value="http://hl7.org/v3"/>
-  <name value="RIM"/>
- </mapping>
- <kind value="resource"/>
- <abstract value="false"/>
- <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
- <snapshot>
-  <element>
-   <path value="AllergyIntolerance"/>
-   <short value="Allergy or Intolerance (generally: Risk Of Adverse reaction to a substance)"/>
-   <definition value="Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance."/>
-   <comments value="Substances include, but are not limited to: a therapeutic substance administered correctly at an appropriate dosage for the individual; food; material derived from plants or animals; or venom from insect stings."/>
-   <alias value="Allergy"/>
-   <alias value="Intolerance"/>
-   <alias value="Adverse Reaction"/>
-   <min value="0"/>
-   <max value="*"/>
-   <type>
-    <code value="DomainResource"/>
-   </type>
-   <mapping>
+  <id value="AllergyIntolerance"/>
+  <meta>
+    <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  </meta>
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <table border="0" cellpadding="0" cellspacing="0" style="border: 0px; font-size: 11px; font-family: verdana; vertical-align: top;">
+        <tr style="border: 1px #F0F0F0 solid; font-size: 11px; font-family: verdana; vertical-align: top;">
+          <th style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="formats.html#table" title="The logical name of the element">Name</a>
+          </th>
+          <th style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="formats.html#table" title="Information about the use of the element">Flags</a>
+          </th>
+          <th style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="formats.html#table" title="Minimum and Maximum # of times the the element can appear in the instance">Card.</a>
+          </th>
+          <th style="width: 100px" class="hierarchy">
+            <a href="formats.html#table" title="Reference to the type of the element">Type</a>
+          </th>
+          <th style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="formats.html#table" title="Additional information about the element">Description &amp; Constraints</a>
+            <span style="float: right">
+              <a href="formats.html#table" title="Legend for this format">
+                <img src="help16.png" alt="doco" style="background-color: inherit"/>
+              </a>
+            </span>
+          </th>
+        </tr>
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJBSURBVDjLhdKxa5NBGMfx713yvkmbJnaoFiSF4mJTh06Kg4OgiyCCRXCof4YIdXdxFhQVHPo3OFSoUx0FySQttaVKYq2NbdO8ed/L3fM4JG3tYPvAcfBw9+HHPWdUlf/V0tLSqKo+EpEHInJFRIohhDUR+RBCeDM7O7ua55QSkRfVanVufHyckZERrLV0Op2Zra2tmXq9fg+YsmcAdyYnJykUCke9OI6ZmJgghHAZ4KwE3ntPs9mkVCohIjQaDWq1GiEEAM5KoHEcY62lVCrRarUoFotUKpUjIL/y/uqXYmV62ph/LSVrr30P4bEFcM4B0Ov1jk547/uAUTs1ceNdZIwB7V/GGHz6+9LXxY96eDiEgHMOY8xJAK8p4grZz5cElwNbwZgyxYu3EFM01lriOCZJEqIoIooiALIsGwA9Y1UcwcWoKNLdpLu9zvbnBWqNBhuvn5EDUmB0EH/1E2TZw5U+YLQovkun+Ytsaw1xCbnCOap334LC7s4Oe/ttvA+ICLmhMXRxDufczUECS37oAuevPwUEVFFp4/eXkXSdYc2IopSepnjtUh5/wg9gfn6+OQBUNaRIUkfDHhraSLoBKqikIF3yHJDLHaAkFOLciVHnyVAVj/S2Ub/XRyQD9aAZKgkaOohvo6ENgykcA07VEFDfQv1uf4W9Y8y30bCPhg4qKZJtMnjTPqBO/vhkZ7h3EJeRslWNQMqgY2jIAIfa/m5sIKSpqpPsGEiz599e3b+GchtD+bSvjQJm2SG6cNj6C+QmaxAek5tyAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Resource" class="hierarchy"/> 
+            <span title="AllergyIntolerance : Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.">AllergyIntolerance</span>
+            <a name="AllergyIntolerance"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy"/>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy"/>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="domainresource.html">DomainResource</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Allergy or Intolerance (generally: Risk Of Adverse reaction to a substance)</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,R0lGODlhEAAQAOZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///////yH5BAEAAH8ALAAAAAAQABAAAAfNgH+Cg36FfoOIhH4JBxBghYl/hQkNAV0IVT5GkJKLCwtQaSsSdx9aR26Gcwt2IkQaNRI6dBERIzCFDSgWSW8WCDkbBnoOQ3uFARc/JQJfCAZlT0x4ZFyFBxdNQT9ZCBNWKQoKUQ+FEDgcdTIAV14YDmg2CgSFA0hmQC5TLE4VRTdrKJAoxOeFCzZSwsw4U6BCizwUQhQyEaAPiAwCVNCY0FCNnA6GPAwYoETIFgY9loiRA4dToTYnsOxg8CBGHE6ICvEYQ4AKzkidfgoKBAA7" alt="." style="background-color: white; background-color: inherit" title="Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.identifier : This records identifiers associated with this allergy/intolerance concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).">identifier</span>
+            <a name="AllergyIntolerance.identifier"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#Identifier">Identifier</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">External ids for this item</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.onset : Record of the date and/or time of the onset of the Allergy or Intolerance.">onset</span>
+            <a name="AllergyIntolerance.onset"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#dateTime">dateTime</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Date(/time) when manifestations showed</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.recordedDate : Date when the sensitivity was recorded.">recordedDate</span>
+            <a name="AllergyIntolerance.recordedDate"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#dateTime">dateTime</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">When recorded</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Reference to another Resource" class="hierarchy"/> 
+            <span title="AllergyIntolerance.recorder : Individual who recorded the record and takes responsibility for its conten.">recorder</span>
+            <a name="AllergyIntolerance.recorder"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="references.html">Reference</a>(
+            <a href="practitioner.html">Practitioner</a> | 
+            <a href="patient.html">Patient</a>)
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Who recorded the sensitivity</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Reference to another Resource" class="hierarchy"/> 
+            <span title="AllergyIntolerance.patient : The patient who has the allergy or intolerance.">patient</span>
+            <a name="AllergyIntolerance.patient"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">1..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="references.html">Reference</a>(
+            <a href="patient.html">Patient</a>)
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Who the sensitivity is for</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Reference to another Resource" class="hierarchy"/> 
+            <span title="AllergyIntolerance.reporter : The source of the information about the allergy that is recorded.">reporter</span>
+            <a name="AllergyIntolerance.reporter"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="references.html">Reference</a>(
+            <a href="patient.html">Patient</a> | 
+            <a href="relatedperson.html">RelatedPerson</a> | 
+            <a href="practitioner.html">Practitioner</a>)
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Source of the information about the allergy</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,R0lGODlhEAAQAOZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///////yH5BAEAAH8ALAAAAAAQABAAAAfNgH+Cg36FfoOIhH4JBxBghYl/hQkNAV0IVT5GkJKLCwtQaSsSdx9aR26Gcwt2IkQaNRI6dBERIzCFDSgWSW8WCDkbBnoOQ3uFARc/JQJfCAZlT0x4ZFyFBxdNQT9ZCBNWKQoKUQ+FEDgcdTIAV14YDmg2CgSFA0hmQC5TLE4VRTdrKJAoxOeFCzZSwsw4U6BCizwUQhQyEaAPiAwCVNCY0FCNnA6GPAwYoETIFgY9loiRA4dToTYnsOxg8CBGHE6ICvEYQ4AKzkidfgoKBAA7" alt="." style="background-color: white; background-color: inherit" title="Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.substance : Identification of a substance, or a class of substances, that is considered to be responsible for the adverse reaction risk.">substance</span>
+            <a name="AllergyIntolerance.substance"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">1..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#CodeableConcept">CodeableConcept</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Substance, (or class) considered to be responsible for risk
+            <br/>
+            <a href="valueset-allergyintolerance-substance-code.html" title="Type of the substance and Negation codes for reporting no known allergies.">AllergyIntolerance Substance and Negation Codes</a> (
+            <a href="terminologies.html#example" title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included.">Example</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.status : Assertion about certainty associated with the propensity, or potential risk, of a reaction to the identified Substance.">status</span>
+            <a name="AllergyIntolerance.status"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is a modifier element">?! </span>
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#code">code</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">active | unconfirmed | confirmed | inactive | resolved | refuted | entered-in-error
+            <br/>
+            <a href="valueset-allergy-intolerance-status.html" title="Assertion about certainty associated with a propensity, or potential risk, of a reaction to the identified Substance.">AllergyIntoleranceStatus</a> (
+            <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set.">Required</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.criticality : Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance.">criticality</span>
+            <a name="AllergyIntolerance.criticality"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#code">code</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">CRITL | CRITH | CRITU
+            <br/>
+            <a href="valueset-allergy-intolerance-criticality.html" title="Estimate of the potential clinical harm, or seriousness, of a reaction to an identified Substance.">AllergyIntoleranceCriticality</a> (
+            <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set.">Required</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.type : Identification of the underlying physiological mechanism for the reaction risk.">type</span>
+            <a name="AllergyIntolerance.type"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#code">code</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">allergy | intolerance - Underlying mechanism (if known)
+            <br/>
+            <a href="valueset-allergy-intolerance-type.html" title="Identification of the underlying physiological mechanism for a Reaction Risk.">AllergyIntoleranceType</a> (
+            <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set.">Required</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.category : Category of the identified Substance.">category</span>
+            <a name="AllergyIntolerance.category"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#code">code</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">food | medication | environment | other - Category of Substance
+            <br/>
+            <a href="valueset-allergy-intolerance-category.html" title="Category of an identified Substance.">AllergyIntoleranceCategory</a> (
+            <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set.">Required</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.lastOccurence : Represents the date and/or time of the last known occurrence of a reaction event.">lastOccurence</span>
+            <a name="AllergyIntolerance.lastOccurence"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#dateTime">dateTime</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Date(/time) of last known occurrence of a reaction</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,R0lGODlhEAAQAOZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///////yH5BAEAAH8ALAAAAAAQABAAAAfNgH+Cg36FfoOIhH4JBxBghYl/hQkNAV0IVT5GkJKLCwtQaSsSdx9aR26Gcwt2IkQaNRI6dBERIzCFDSgWSW8WCDkbBnoOQ3uFARc/JQJfCAZlT0x4ZFyFBxdNQT9ZCBNWKQoKUQ+FEDgcdTIAV14YDmg2CgSFA0hmQC5TLE4VRTdrKJAoxOeFCzZSwsw4U6BCizwUQhQyEaAPiAwCVNCY0FCNnA6GPAwYoETIFgY9loiRA4dToTYnsOxg8CBGHE6ICvEYQ4AKzkidfgoKBAA7" alt="." style="background-color: white; background-color: inherit" title="Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.note : Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.">note</span>
+            <a name="AllergyIntolerance.note"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy"/>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#Annotation">Annotation</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Additional text not captured in other fields</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAI0lEQVR42u3QIQEAAAACIL/6/4MvTAQOkLYBAAB4kAAAANwMad9AqkRjgNAAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzME+lXFigAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+3OsRUAIAjEUOL+O8cJABttJM11/x1qZAGqRBEVcNIqdWj1efDqQbb3HwwwwEfABmQUHSPM9dtDAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,R0lGODlhEAAQAMQfAOvGUf7ztuvPMf/78/fkl/Pbg+u8Rvjqteu2Pf3zxPz36Pz0z+vTmPzurPvuw/npofbjquvNefHVduuyN+uuMu3Oafbgjfnqvf/3zv/3xevPi+vRjP/20/bmsP///////yH5BAEAAB8ALAAAAAAQABAAAAV24CeOZGmepqeqqOgxjBZFa+19r4ftWQUAgqDgltthMshMIJAZ4jYDHsBARSAmFOJvq+g6HIdEFgcYmBWNxoNAsDjGHgBnmV5bCoUDHLBIq9sFEhIdcAYJdYASFRUQhQkLCwkOFwcdEBAXhVabE52ecDahKy0oIQA7" alt="." style="background-color: white; background-color: inherit" title="Element" class="hierarchy"/> 
+            <span title="AllergyIntolerance.reaction : Details about each adverse reaction event linked to exposure to the identified Substance.">reaction</span>
+            <a name="AllergyIntolerance.reaction"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy"/>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="backboneelement.html">BackboneElement</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Adverse Reaction Events linked to exposure to substance</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII=" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,R0lGODlhEAAQAOZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///////yH5BAEAAH8ALAAAAAAQABAAAAfNgH+Cg36FfoOIhH4JBxBghYl/hQkNAV0IVT5GkJKLCwtQaSsSdx9aR26Gcwt2IkQaNRI6dBERIzCFDSgWSW8WCDkbBnoOQ3uFARc/JQJfCAZlT0x4ZFyFBxdNQT9ZCBNWKQoKUQ+FEDgcdTIAV14YDmg2CgSFA0hmQC5TLE4VRTdrKJAoxOeFCzZSwsw4U6BCizwUQhQyEaAPiAwCVNCY0FCNnA6GPAwYoETIFgY9loiRA4dToTYnsOxg8CBGHE6ICvEYQ4AKzkidfgoKBAA7" alt="." style="background-color: white; background-color: inherit" title="Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.reaction.substance : Identification of the specific substance considered to be responsible for the Adverse Reaction event. Note: the substance for a specific reaction may be different to the substance identified as the cause of the risk, but must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite substance that includes the identified substance. It must be clinically safe to only process the AllergyIntolerance.substance and ignore the AllergyIntolerance.event.substance.">substance</span>
+            <a name="AllergyIntolerance.reaction.substance"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#CodeableConcept">CodeableConcept</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Specific substance considered to be responsible for event
+            <br/>
+            <a href="valueset-substance-code.html" title="Codes defining the type of the substance.">Substance Code</a> (
+            <a href="terminologies.html#example" title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included.">Example</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII=" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.reaction.certainty : Statement about the degree of clinical certainty that the specific substance was the cause of the manifestation in this reaction event.">certainty</span>
+            <a name="AllergyIntolerance.reaction.certainty"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#code">code</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">unlikely | likely | confirmed - clinical certainty about the specific substance
+            <br/>
+            <a href="valueset-reaction-event-certainty.html" title="Statement about the degree of clinical certainty that a Specific Substance was the cause of the Manifestation in an reaction event.">AllergyIntoleranceCertainty</a> (
+            <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set.">Required</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII=" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,R0lGODlhEAAQAOZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///////yH5BAEAAH8ALAAAAAAQABAAAAfNgH+Cg36FfoOIhH4JBxBghYl/hQkNAV0IVT5GkJKLCwtQaSsSdx9aR26Gcwt2IkQaNRI6dBERIzCFDSgWSW8WCDkbBnoOQ3uFARc/JQJfCAZlT0x4ZFyFBxdNQT9ZCBNWKQoKUQ+FEDgcdTIAV14YDmg2CgSFA0hmQC5TLE4VRTdrKJAoxOeFCzZSwsw4U6BCizwUQhQyEaAPiAwCVNCY0FCNnA6GPAwYoETIFgY9loiRA4dToTYnsOxg8CBGHE6ICvEYQ4AKzkidfgoKBAA7" alt="." style="background-color: white; background-color: inherit" title="Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.reaction.manifestation : Clinical symptoms and/or signs that are observed or associated with the adverse reaction event.">manifestation</span>
+            <a name="AllergyIntolerance.reaction.manifestation"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">1..*</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#CodeableConcept">CodeableConcept</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Clinical symptoms/signs associated with the Event
+            <br/>
+            <a href="valueset-manifestation-codes.html" title="Clinical symptoms and/or signs that are observed or associated with an Adverse Reaction Event.">SNOMED CT Clinical Findings</a> (
+            <a href="terminologies.html#example" title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included.">Example</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII=" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.reaction.description : Text description about the reaction as a whole, including details of the manifestation if required.">description</span>
+            <a name="AllergyIntolerance.reaction.description"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy"/>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#string">string</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Description of the event as a whole</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII=" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.reaction.onset : Record of the date and/or time of the onset of the Reaction.">onset</span>
+            <a name="AllergyIntolerance.reaction.onset"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#dateTime">dateTime</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Date(/time) when manifestations showed</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII=" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.reaction.severity : Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations.">severity</span>
+            <a name="AllergyIntolerance.reaction.severity"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#code">code</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">mild | moderate | severe (of event as a whole)
+            <br/>
+            <a href="valueset-reaction-event-severity.html" title="Clinical assessment of the severity of a reaction event as a whole, potentially considering multiple different manifestations.">AllergyIntoleranceSeverity</a> (
+            <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set.">Required</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII=" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,R0lGODlhEAAQAOZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///////yH5BAEAAH8ALAAAAAAQABAAAAfNgH+Cg36FfoOIhH4JBxBghYl/hQkNAV0IVT5GkJKLCwtQaSsSdx9aR26Gcwt2IkQaNRI6dBERIzCFDSgWSW8WCDkbBnoOQ3uFARc/JQJfCAZlT0x4ZFyFBxdNQT9ZCBNWKQoKUQ+FEDgcdTIAV14YDmg2CgSFA0hmQC5TLE4VRTdrKJAoxOeFCzZSwsw4U6BCizwUQhQyEaAPiAwCVNCY0FCNnA6GPAwYoETIFgY9loiRA4dToTYnsOxg8CBGHE6ICvEYQ4AKzkidfgoKBAA7" alt="." style="background-color: white; background-color: inherit" title="Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.reaction.exposureRoute : Identification of the route by which the subject was exposed to the substance.">exposureRoute</span>
+            <a name="AllergyIntolerance.reaction.exposureRoute"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#CodeableConcept">CodeableConcept</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">How the subject was exposed to the substance
+            <br/>
+            <a href="valueset-route-codes.html" title="A coded concept describing the route or physiological path of administration of a therapeutic agent into or onto the body of a subject.">SNOMED CT Route Codes</a> (
+            <a href="terminologies.html#example" title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included.">Example</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAI0lEQVR42u3QIQEAAAACIL/6/4MvTAQOkLYBAAB4kAAAANwMad9AqkRjgNAAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII=" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzME+lXFigAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+3OsRUAIAjEUOL+O8cJABttJM11/x1qZAGqRBEVcNIqdWj1efDqQbb3HwwwwEfABmQUHSPM9dtDAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,R0lGODlhEAAQAOZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///////yH5BAEAAH8ALAAAAAAQABAAAAfNgH+Cg36FfoOIhH4JBxBghYl/hQkNAV0IVT5GkJKLCwtQaSsSdx9aR26Gcwt2IkQaNRI6dBERIzCFDSgWSW8WCDkbBnoOQ3uFARc/JQJfCAZlT0x4ZFyFBxdNQT9ZCBNWKQoKUQ+FEDgcdTIAV14YDmg2CgSFA0hmQC5TLE4VRTdrKJAoxOeFCzZSwsw4U6BCizwUQhQyEaAPiAwCVNCY0FCNnA6GPAwYoETIFgY9loiRA4dToTYnsOxg8CBGHE6ICvEYQ4AKzkidfgoKBAA7" alt="." style="background-color: white; background-color: inherit" title="Data Type" class="hierarchy"/> 
+            <span title="AllergyIntolerance.reaction.note : Additional text about the adverse reaction event not captured in other fields.">note</span>
+            <a name="AllergyIntolerance.reaction.note"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy"/>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#Annotation">Annotation</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Text about event not captured in other fields</td>
+        </tr>
+
+        <tr>
+          <td colspan="5" class="hierarchy">
+            <br/>
+            <a href="formats.html#table" title="Legend for this format">
+              <img src="help16.png" alt="doco" style="background-color: inherit"/> Documentation for this format
+            </a>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </text>
+  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+    <valueInteger value="1"/>
+  </extension>
+  <url value="http://hl7.org/fhir/StructureDefinition/AllergyIntolerance"/>
+  <name value="AllergyIntolerance"/>
+  <status value="draft"/>
+  <publisher value="Health Level Seven International (Patient Care)"/>
+  <contact>
+    <telecom>
+      <system value="other"/>
+      <value value="http://hl7.org/fhir"/>
+    </telecom>
+  </contact>
+  <contact>
+    <telecom>
+      <system value="other"/>
+      <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+    </telecom>
+  </contact>
+  <date value="2015-11-11T10:54:01-05:00"/>
+  <description value="Base StructureDefinition for AllergyIntolerance Resource"/>
+  <requirements value="To record a clinical assessment of a propensity, or potential risk to an individual, of an adverse reaction upon future exposure to the specified substance, or class of substance."/>
+  <fhirVersion value="1.0.2"/>
+  <mapping>
     <identity value="w5"/>
-    <map value="clinical.general"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.id"/>
-   <short value="Logical id of this artifact"/>
-   <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-   <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="id"/>
-   </type>
-   <isSummary value="true"/>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.meta"/>
-   <short value="Metadata about the resource"/>
-   <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="Meta"/>
-   </type>
-   <isSummary value="true"/>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.implicitRules"/>
-   <short value="A set of rules under which this content was created"/>
-   <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-   <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="uri"/>
-   </type>
-   <isModifier value="true"/>
-   <isSummary value="true"/>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.language"/>
-   <short value="Language of the resource content"/>
-   <definition value="The base language in which the resource is written."/>
-   <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="code"/>
-   </type>
-   <binding>
-    <strength value="required"/>
-    <description value="A human language"/>
-    <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
-   </binding>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.text"/>
-   <short value="Text summary of the resource, for human interpretation"/>
-   <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-   <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
-   <alias value="narrative"/>
-   <alias value="html"/>
-   <alias value="xhtml"/>
-   <alias value="display"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="Narrative"/>
-   </type>
-   <condition value="dom-1"/>
-   <mapping>
+    <uri value="http://hl7.org/fhir/w5"/>
+    <name value="W5 Mapping"/>
+  </mapping>
+  <mapping>
+    <identity value="v2"/>
+    <uri value="http://hl7.org/v2"/>
+    <name value="HL7 v2"/>
+  </mapping>
+  <mapping>
     <identity value="rim"/>
-    <map value="Act.text?"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.contained"/>
-   <short value="Contained, inline Resources"/>
-   <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-   <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
-   <alias value="inline resources"/>
-   <alias value="anonymous resources"/>
-   <alias value="contained resources"/>
-   <min value="0"/>
-   <max value="*"/>
-   <type>
-    <code value="Resource"/>
-   </type>
-   <mapping>
-    <identity value="rim"/>
-    <map value="N/A"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.extension"/>
-   <short value="Additional Content defined by implementations"/>
-   <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
-   <alias value="extensions"/>
-   <alias value="user content"/>
-   <min value="0"/>
-   <max value="*"/>
-   <type>
-    <code value="Extension"/>
-   </type>
-   <mapping>
-    <identity value="rim"/>
-    <map value="N/A"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.modifierExtension"/>
-   <short value="Extensions that cannot be ignored"/>
-   <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
-   <alias value="extensions"/>
-   <alias value="user content"/>
-   <min value="0"/>
-   <max value="*"/>
-   <type>
-    <code value="Extension"/>
-   </type>
-   <isModifier value="true"/>
-   <mapping>
-    <identity value="rim"/>
-    <map value="N/A"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.identifier"/>
-   <short value="External Ids for this item"/>
-   <definition value="This records identifiers associated with this allergy/intolerance concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
-   <min value="0"/>
-   <max value="*"/>
-   <type>
-    <code value="Identifier"/>
-   </type>
-   <isSummary value="true"/>
-   <mapping>
-    <identity value="rim"/>
-    <map value=".id"/>
-   </mapping>
-   <mapping>
-    <identity value="w5"/>
-    <map value="id"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.onset"/>
-   <short value="Date(/time) when manifestations showed"/>
-   <definition value="Record of the date and/or time of the onset of the Allergy or Intolerance."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="dateTime"/>
-   </type>
-   <isSummary value="true"/>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.recordedDate"/>
-   <short value="When recorded"/>
-   <definition value="Date when the sensitivity was recorded."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="dateTime"/>
-   </type>
-   <isSummary value="true"/>
-   <mapping>
-    <identity value="rim"/>
-    <map value=".participation[typeCode=AUT].time"/>
-   </mapping>
-   <mapping>
-    <identity value="w5"/>
-    <map value="when.recorded"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.recorder"/>
-   <short value="Who recorded the sensitivity"/>
-   <definition value="Individual who recorded the record and takes responsibility for its conten."/>
-   <alias value="Author"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="Reference"/>
-    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
-   </type>
-   <type>
-    <code value="Reference"/>
-    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
-   </type>
-   <isSummary value="true"/>
-   <mapping>
-    <identity value="rim"/>
-    <map value=".participation[typeCode=AUT].role"/>
-   </mapping>
-   <mapping>
-    <identity value="w5"/>
-    <map value="who.author"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.patient"/>
-   <short value="Who the sensitivity is for"/>
-   <definition value="The patient who has the allergy or intolerance."/>
-   <alias value="Patient"/>
-   <min value="1"/>
-   <max value="1"/>
-   <type>
-    <code value="Reference"/>
-    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
-   </type>
-   <isSummary value="true"/>
-   <mapping>
-    <identity value="rim"/>
-    <map value=".participation[typeCode=SBJ].role[classCode=PAT]"/>
-   </mapping>
-   <mapping>
-    <identity value="w5"/>
-    <map value="who.focus"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reporter"/>
-   <short value="Source of the information about the allergy"/>
-   <definition value="The source of the information about the allergy that is recorded."/>
-   <comments value="The recorder takes repsonsibility for the content, but can reference the source from where they got it."/>
-   <alias value="Source"/>
-   <alias value="Informant"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="Reference"/>
-    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
-   </type>
-   <type>
-    <code value="Reference"/>
-    <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
-   </type>
-   <type>
-    <code value="Reference"/>
-    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
-   </type>
-   <isSummary value="true"/>
-   <mapping>
-    <identity value="w5"/>
-    <map value="who.source"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.substance"/>
-   <short value="Substance, (or class) considered to be responsible for risk"/>
-   <definition value="Identification of a substance, or a class of substances, that is considered to be responsible for the Adverse reaction risk."/>
-   <comments value="It is strongly recommended that Substance be coded with a terminology, where possible. For example, some terminologies used include RxNorm, Snomed CT, DM+D, NDFRT, ICD-9, IDC-10, UNI, ATC and CPT. Plain text should only be used if there is no appropriate terminology available. Additional details about a substance can be specified in the text."/>
-   <alias value="Agent"/>
-   <min value="1"/>
-   <max value="1"/>
-   <type>
-    <code value="CodeableConcept"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="example"/>
-    <description value="Type of the substance and Negation codes for reporting No Known Allergies"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/allergyintolerance-substance-code"/>
-    </valueSetReference>
-   </binding>
-   <mapping>
-    <identity value="w5"/>
-    <map value="what"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.status"/>
-   <short value="active | unconfirmed | confirmed | inactive | resolved | refuted | entered-in-error"/>
-   <definition value="Assertion about certainty associated with the propensity, or potential risk, of a reaction to the identified Substance."/>
-   <comments value="Decision support would typically raise alerts for 'Unconfirmed', 'Confirmed', and 'Resolved' and ignore a 'Refuted' reaction. In particular, 'Refuted' may be useful for reconciliation of the Adverse Reaction List. Some implementations may choose to make this field mandatory."/>
-   <alias value="State"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="code"/>
-   </type>
-   <isModifier value="true"/>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="required"/>
-    <description value="Assertion about certainty associated with a propensity, or potential risk, of a reaction to the identified Substance"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-status"/>
-    </valueSetReference>
-   </binding>
-   <mapping>
-    <identity value="w5"/>
-    <map value="status"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.criticality"/>
-   <short value="CRITL | CRITH | CRITU"/>
-   <definition value="Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance."/>
-   <comments value="The default criticality value for any propensity to an Adverse Reaction should be 'Low Risk', indicating at the very least a relative contraindication to deliberate or voluntary exposure to the Substance. 'High Risk' is flagged if the clinician has identified a propensity for a more serious or potentially life-threatening reaction, such as anaphylaxis, and implies an absolute contraindication to deliberate or voluntary exposure to the substance. If this element is missing, the criticality is unknown (though it may be known elsewhere)."/>
-   <alias value="Severity"/>
-   <alias value="Seriousness"/>
-   <alias value="Contra-indication"/>
-   <alias value="Risk"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="code"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="required"/>
-    <description value="Estimate of the potential clinical harm, or seriousness, of a reaction to an identified Substance"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-criticality"/>
-    </valueSetReference>
-   </binding>
-   <mapping>
-    <identity value="w5"/>
-    <map value="grade"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.type"/>
-   <short value="allergy | intolerance - Underlying mechanism (if known)"/>
-   <definition value="Identification of the underlying physiological mechanism for the reaction risk."/>
-   <comments value="Allergic (immune-mediated) responses have been traditionally regarded as an indicator for potential escalation to significant future risk. Contemporary knowledge suggests that some reactions previously thought to be allergic (immune-mediated) are, in fact, non-immune, but in some cases can still pose a life threatening risk.  It is acknowledged that many clinicians may not be in a position to distinguish the mechanism of a particular reaction.  Often the term &quot;allergy&quot; is used rather generically and may overlap with the use of &quot;intolerance&quot; - in practice the boundaries between these two concepts may not be well-defined or understood.  This data element is included nevertheless because many legacy systems have captured this attribute.  Immunological testing may provide supporting evidence for the basis and causative substance , but no tests are 100% sensitive or specific for sensitivity to a particular substance.  If, as is commonly the case, it is unclear whether the reaction is an allergy or an intolerance, then the type element should be omitted."/>
-   <alias value="Category"/>
-   <alias value="Class"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="code"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="required"/>
-    <description value="Identification of the underlying physiological mechanism for a Reaction Risk"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-type"/>
-    </valueSetReference>
-   </binding>
-   <mapping>
-    <identity value="w5"/>
-    <map value="class"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.category"/>
-   <short value="food | medication | environment | other - Category of Substance"/>
-   <definition value="Category of the identified Substance."/>
-   <comments value="This data element has been included because it is currently being captured in some clinical systems. This data can be derived from the Substance where coding systems are used, and is effectively redundant in that situation."/>
-   <alias value="Category"/>
-   <alias value="Type"/>
-   <alias value="Reaction Type"/>
-   <alias value="Class"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="code"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="required"/>
-    <description value="Category of an identified Substance"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-category"/>
-    </valueSetReference>
-   </binding>
-   <mapping>
-    <identity value="w5"/>
-    <map value="class"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.lastOccurence"/>
-   <short value="Date(/time) of last known occurence of a reaction"/>
-   <definition value="Represents the date and/or time of the last known occurence of a reaction event."/>
-   <comments value="This date may be replicated by one of the Onset of Reaction dates. Where a textual representation of the date of last occurence is required e.g 'In Childhood, '10 years ago' the Comment element should be used."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="dateTime"/>
-   </type>
-   <isSummary value="true"/>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.note"/>
-   <short value="Additional text not captured in other fields"/>
-   <definition value="Additional narrative about the propensity for the Adverse Reaction, not captured in other fields."/>
-   <comments value="For example: including reason for flagging a Seriousness of 'High Risk'; and instructions related to future exposure or administration of the Substance, such as administration within an Intensive Care Unit or under corticosteroid cover. The notes should be related to an allergy or intolerance as a condition in general and not related to any particular episode of it. For episode notes and descriptions, use AllergyIntolerance.event.description and  AllergyIntolerance.event.notes."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="Annotation"/>
-   </type>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction"/>
-   <short value="Adverse Reaction Events linked to exposure to substance"/>
-   <definition value="Details about each Adverse Reaction Event linked to exposure to the identified Substance."/>
-   <min value="0"/>
-   <max value="*"/>
-   <type>
-    <code value="BackboneElement"/>
-   </type>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.id"/>
-   <representation value="xmlAttr"/>
-   <short value="xml:id (or equivalent in JSON)"/>
-   <definition value="unique id for the element within a resource (for internal references)."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="id"/>
-   </type>
-   <mapping>
-    <identity value="rim"/>
-    <map value="n/a"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.extension"/>
-   <short value="Additional Content defined by implementations"/>
-   <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
-   <alias value="extensions"/>
-   <alias value="user content"/>
-   <min value="0"/>
-   <max value="*"/>
-   <type>
-    <code value="Extension"/>
-   </type>
-   <mapping>
-    <identity value="rim"/>
-    <map value="n/a"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.modifierExtension"/>
-   <short value="Extensions that cannot be ignored"/>
-   <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-   <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
-   <alias value="extensions"/>
-   <alias value="user content"/>
-   <alias value="modifiers"/>
-   <min value="0"/>
-   <max value="*"/>
-   <type>
-    <code value="Extension"/>
-   </type>
-   <isModifier value="true"/>
-   <mapping>
-    <identity value="rim"/>
-    <map value="N/A"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.substance"/>
-   <short value="Specific substance considered to be responsible for event"/>
-   <definition value="Identification of the specific substance considered to be responsible for the Adverse Reaction event. Note: the substance for a specific reaction may be different to the substance identified as the cause of the risk, but must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite substance that includes the identified substance. It must be clinically safe to only process the AllergyIntolerance.substance and ignore the AllergyIntolerance.event.substance."/>
-   <comments value="Coding of the Specific Substance with a terminology capable of triggering decision support should be used wherever possible.  The Substance field allows for the use of a specific substance or a group or class of substances, for example &quot;Penicillins&quot;. The specific Substance field could be used for Amoxycillin. Duplication is acceptable when a specific substance has been recorded in the 'Substance' field."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="CodeableConcept"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="example"/>
-    <description value="Type of the substance"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/substance-code"/>
-    </valueSetReference>
-   </binding>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.certainty"/>
-   <short value="unlikely | likely | confirmed - clinical certainty about the specific substance"/>
-   <definition value="Statement about the degree of clinical certainty that the Specific Substance was the cause of the Manifestation in this reaction event."/>
-   <alias value="Cause"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="code"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="required"/>
-    <description value="Statement about the degree of clinical certainty that a Specific Substance was the cause of the Manifestation in an reaction event"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/reaction-event-certainty"/>
-    </valueSetReference>
-   </binding>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.manifestation"/>
-   <short value="Clinical symptoms/signs associated with the Event"/>
-   <definition value="Clinical symptoms and/or signs that are observed or associated with the Adverse Reaction Event."/>
-   <comments value="Manifestation can be expressed as a single word, phrase or brief description. For example: nausea, rash or no reaction. It is preferable that Manifestation should be coded with a terminology, where possible. The values entered here may be used to display on an application screen as part of a list of adverse reactions, as recommended in the UK NHS CUI guidelines.  Terminologies commonly used include, but are not limited to, SNOMED-CT or ICD10."/>
-   <alias value="Symptoms"/>
-   <alias value="Signs"/>
-   <min value="1"/>
-   <max value="*"/>
-   <type>
-    <code value="CodeableConcept"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="example"/>
-    <description value="Clinical symptoms and/or signs that are observed or associated with an Adverse Reaction Event"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/manifestation-codes"/>
-    </valueSetReference>
-   </binding>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.description"/>
-   <short value="Description of the event as a whole"/>
-   <definition value="Text description about the Reaction as a whole, including details of the manifestation if required."/>
-   <comments value="Use the description to provide any details of a particular event of the occurred reaction such as circumstances, reaction specifics, what happened before/after. Information, related to the event, but not describing a particular care should be captured in the comment field. For example: at the age of four, the patient was given penicillin for strep throat and subsequently developed severe hives."/>
-   <alias value="Narrative"/>
-   <alias value="Text"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="string"/>
-   </type>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.onset"/>
-   <short value="Date(/time) when manifestations showed"/>
-   <definition value="Record of the date and/or time of the onset of the Reaction."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="dateTime"/>
-   </type>
-   <isSummary value="true"/>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.severity"/>
-   <short value="mild | moderate | severe (of event as a whole)"/>
-   <definition value="Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations."/>
-   <comments value="It is acknowledged that this assessment is very subjective. There may be some some specific practice domains where objective scales have been applied. Objective scales can be included in this model as extensions."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="code"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="required"/>
-    <description value="Clinical assessment of the severity of a reaction event as a whole, potentially considering multiple different manifestations"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/reaction-event-severity"/>
-    </valueSetReference>
-   </binding>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.exposureRoute"/>
-   <short value="How the subject was exposed to the substance"/>
-   <definition value="Identification of the route by which the subject was exposed to the substance."/>
-   <comments value="Coding of the Route of Exposure with a terminology should be used wherever possible."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="CodeableConcept"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="example"/>
-    <description value="A coded concept describing the route or physiological path of administration of a therapeutic agent into or onto the body of a subject."/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/route-codes"/>
-    </valueSetReference>
-   </binding>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.note"/>
-   <short value="Text about event not captured in other fields"/>
-   <definition value="Additional text about the Adverse Reaction event not captured in other fields."/>
-   <comments value="Use this field to record information indirectly related to a particular event and not captured in the description. For example: Clinical records are no longer available, recorded based on information provided to the patient by her mother and her mother is deceased."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="Annotation"/>
-   </type>
-  </element>
- </snapshot>
- <differential>
-  <element>
-   <path value="AllergyIntolerance"/>
-   <short value="Allergy or Intolerance (generally: Risk Of Adverse reaction to a substance)"/>
-   <definition value="Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance."/>
-   <comments value="Substances include, but are not limited to: a therapeutic substance administered correctly at an appropriate dosage for the individual; food; material derived from plants or animals; or venom from insect stings."/>
-   <alias value="Allergy"/>
-   <alias value="Intolerance"/>
-   <alias value="Adverse Reaction"/>
-   <min value="0"/>
-   <max value="*"/>
-   <type>
-    <code value="DomainResource"/>
-   </type>
-   <mapping>
-    <identity value="w5"/>
-    <map value="clinical.general"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.identifier"/>
-   <short value="External Ids for this item"/>
-   <definition value="This records identifiers associated with this allergy/intolerance concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
-   <min value="0"/>
-   <max value="*"/>
-   <type>
-    <code value="Identifier"/>
-   </type>
-   <isSummary value="true"/>
-   <mapping>
-    <identity value="rim"/>
-    <map value=".id"/>
-   </mapping>
-   <mapping>
-    <identity value="w5"/>
-    <map value="id"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.onset"/>
-   <short value="Date(/time) when manifestations showed"/>
-   <definition value="Record of the date and/or time of the onset of the Allergy or Intolerance."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="dateTime"/>
-   </type>
-   <isSummary value="true"/>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.recordedDate"/>
-   <short value="When recorded"/>
-   <definition value="Date when the sensitivity was recorded."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="dateTime"/>
-   </type>
-   <isSummary value="true"/>
-   <mapping>
-    <identity value="rim"/>
-    <map value=".participation[typeCode=AUT].time"/>
-   </mapping>
-   <mapping>
-    <identity value="w5"/>
-    <map value="when.recorded"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.recorder"/>
-   <short value="Who recorded the sensitivity"/>
-   <definition value="Individual who recorded the record and takes responsibility for its conten."/>
-   <alias value="Author"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="Reference"/>
-    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
-   </type>
-   <type>
-    <code value="Reference"/>
-    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
-   </type>
-   <isSummary value="true"/>
-   <mapping>
-    <identity value="rim"/>
-    <map value=".participation[typeCode=AUT].role"/>
-   </mapping>
-   <mapping>
-    <identity value="w5"/>
-    <map value="who.author"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.patient"/>
-   <short value="Who the sensitivity is for"/>
-   <definition value="The patient who has the allergy or intolerance."/>
-   <alias value="Patient"/>
-   <min value="1"/>
-   <max value="1"/>
-   <type>
-    <code value="Reference"/>
-    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
-   </type>
-   <isSummary value="true"/>
-   <mapping>
-    <identity value="rim"/>
-    <map value=".participation[typeCode=SBJ].role[classCode=PAT]"/>
-   </mapping>
-   <mapping>
-    <identity value="w5"/>
-    <map value="who.focus"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reporter"/>
-   <short value="Source of the information about the allergy"/>
-   <definition value="The source of the information about the allergy that is recorded."/>
-   <comments value="The recorder takes repsonsibility for the content, but can reference the source from where they got it."/>
-   <alias value="Source"/>
-   <alias value="Informant"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="Reference"/>
-    <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
-   </type>
-   <type>
-    <code value="Reference"/>
-    <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
-   </type>
-   <type>
-    <code value="Reference"/>
-    <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
-   </type>
-   <isSummary value="true"/>
-   <mapping>
-    <identity value="w5"/>
-    <map value="who.source"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.substance"/>
-   <short value="Substance, (or class) considered to be responsible for risk"/>
-   <definition value="Identification of a substance, or a class of substances, that is considered to be responsible for the Adverse reaction risk."/>
-   <comments value="It is strongly recommended that Substance be coded with a terminology, where possible. For example, some terminologies used include RxNorm, Snomed CT, DM+D, NDFRT, ICD-9, IDC-10, UNI, ATC and CPT. Plain text should only be used if there is no appropriate terminology available. Additional details about a substance can be specified in the text."/>
-   <alias value="Agent"/>
-   <min value="1"/>
-   <max value="1"/>
-   <type>
-    <code value="CodeableConcept"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="example"/>
-    <description value="Type of the substance and Negation codes for reporting No Known Allergies"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/allergyintolerance-substance-code"/>
-    </valueSetReference>
-   </binding>
-   <mapping>
-    <identity value="w5"/>
-    <map value="what"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.status"/>
-   <short value="active | unconfirmed | confirmed | inactive | resolved | refuted | entered-in-error"/>
-   <definition value="Assertion about certainty associated with the propensity, or potential risk, of a reaction to the identified Substance."/>
-   <comments value="Decision support would typically raise alerts for 'Unconfirmed', 'Confirmed', and 'Resolved' and ignore a 'Refuted' reaction. In particular, 'Refuted' may be useful for reconciliation of the Adverse Reaction List. Some implementations may choose to make this field mandatory."/>
-   <alias value="State"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="code"/>
-   </type>
-   <isModifier value="true"/>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="required"/>
-    <description value="Assertion about certainty associated with a propensity, or potential risk, of a reaction to the identified Substance"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-status"/>
-    </valueSetReference>
-   </binding>
-   <mapping>
-    <identity value="w5"/>
-    <map value="status"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.criticality"/>
-   <short value="CRITL | CRITH | CRITU"/>
-   <definition value="Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance."/>
-   <comments value="The default criticality value for any propensity to an Adverse Reaction should be 'Low Risk', indicating at the very least a relative contraindication to deliberate or voluntary exposure to the Substance. 'High Risk' is flagged if the clinician has identified a propensity for a more serious or potentially life-threatening reaction, such as anaphylaxis, and implies an absolute contraindication to deliberate or voluntary exposure to the substance. If this element is missing, the criticality is unknown (though it may be known elsewhere)."/>
-   <alias value="Severity"/>
-   <alias value="Seriousness"/>
-   <alias value="Contra-indication"/>
-   <alias value="Risk"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="code"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="required"/>
-    <description value="Estimate of the potential clinical harm, or seriousness, of a reaction to an identified Substance"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-criticality"/>
-    </valueSetReference>
-   </binding>
-   <mapping>
-    <identity value="w5"/>
-    <map value="grade"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.type"/>
-   <short value="allergy | intolerance - Underlying mechanism (if known)"/>
-   <definition value="Identification of the underlying physiological mechanism for the reaction risk."/>
-   <comments value="Allergic (immune-mediated) responses have been traditionally regarded as an indicator for potential escalation to significant future risk. Contemporary knowledge suggests that some reactions previously thought to be allergic (immune-mediated) are, in fact, non-immune, but in some cases can still pose a life threatening risk.  It is acknowledged that many clinicians may not be in a position to distinguish the mechanism of a particular reaction.  Often the term &quot;allergy&quot; is used rather generically and may overlap with the use of &quot;intolerance&quot; - in practice the boundaries between these two concepts may not be well-defined or understood.  This data element is included nevertheless because many legacy systems have captured this attribute.  Immunological testing may provide supporting evidence for the basis and causative substance , but no tests are 100% sensitive or specific for sensitivity to a particular substance.  If, as is commonly the case, it is unclear whether the reaction is an allergy or an intolerance, then the type element should be omitted."/>
-   <alias value="Category"/>
-   <alias value="Class"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="code"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="required"/>
-    <description value="Identification of the underlying physiological mechanism for a Reaction Risk"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-type"/>
-    </valueSetReference>
-   </binding>
-   <mapping>
-    <identity value="w5"/>
-    <map value="class"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.category"/>
-   <short value="food | medication | environment | other - Category of Substance"/>
-   <definition value="Category of the identified Substance."/>
-   <comments value="This data element has been included because it is currently being captured in some clinical systems. This data can be derived from the Substance where coding systems are used, and is effectively redundant in that situation."/>
-   <alias value="Category"/>
-   <alias value="Type"/>
-   <alias value="Reaction Type"/>
-   <alias value="Class"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="code"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="required"/>
-    <description value="Category of an identified Substance"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-category"/>
-    </valueSetReference>
-   </binding>
-   <mapping>
-    <identity value="w5"/>
-    <map value="class"/>
-   </mapping>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.lastOccurence"/>
-   <short value="Date(/time) of last known occurence of a reaction"/>
-   <definition value="Represents the date and/or time of the last known occurence of a reaction event."/>
-   <comments value="This date may be replicated by one of the Onset of Reaction dates. Where a textual representation of the date of last occurence is required e.g 'In Childhood, '10 years ago' the Comment element should be used."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="dateTime"/>
-   </type>
-   <isSummary value="true"/>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.note"/>
-   <short value="Additional text not captured in other fields"/>
-   <definition value="Additional narrative about the propensity for the Adverse Reaction, not captured in other fields."/>
-   <comments value="For example: including reason for flagging a Seriousness of 'High Risk'; and instructions related to future exposure or administration of the Substance, such as administration within an Intensive Care Unit or under corticosteroid cover. The notes should be related to an allergy or intolerance as a condition in general and not related to any particular episode of it. For episode notes and descriptions, use AllergyIntolerance.event.description and  AllergyIntolerance.event.notes."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="Annotation"/>
-   </type>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction"/>
-   <short value="Adverse Reaction Events linked to exposure to substance"/>
-   <definition value="Details about each Adverse Reaction Event linked to exposure to the identified Substance."/>
-   <min value="0"/>
-   <max value="*"/>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.substance"/>
-   <short value="Specific substance considered to be responsible for event"/>
-   <definition value="Identification of the specific substance considered to be responsible for the Adverse Reaction event. Note: the substance for a specific reaction may be different to the substance identified as the cause of the risk, but must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite substance that includes the identified substance. It must be clinically safe to only process the AllergyIntolerance.substance and ignore the AllergyIntolerance.event.substance."/>
-   <comments value="Coding of the Specific Substance with a terminology capable of triggering decision support should be used wherever possible.  The Substance field allows for the use of a specific substance or a group or class of substances, for example &quot;Penicillins&quot;. The specific Substance field could be used for Amoxycillin. Duplication is acceptable when a specific substance has been recorded in the 'Substance' field."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="CodeableConcept"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="example"/>
-    <description value="Type of the substance"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/substance-code"/>
-    </valueSetReference>
-   </binding>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.certainty"/>
-   <short value="unlikely | likely | confirmed - clinical certainty about the specific substance"/>
-   <definition value="Statement about the degree of clinical certainty that the Specific Substance was the cause of the Manifestation in this reaction event."/>
-   <alias value="Cause"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="code"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="required"/>
-    <description value="Statement about the degree of clinical certainty that a Specific Substance was the cause of the Manifestation in an reaction event"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/reaction-event-certainty"/>
-    </valueSetReference>
-   </binding>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.manifestation"/>
-   <short value="Clinical symptoms/signs associated with the Event"/>
-   <definition value="Clinical symptoms and/or signs that are observed or associated with the Adverse Reaction Event."/>
-   <comments value="Manifestation can be expressed as a single word, phrase or brief description. For example: nausea, rash or no reaction. It is preferable that Manifestation should be coded with a terminology, where possible. The values entered here may be used to display on an application screen as part of a list of adverse reactions, as recommended in the UK NHS CUI guidelines.  Terminologies commonly used include, but are not limited to, SNOMED-CT or ICD10."/>
-   <alias value="Symptoms"/>
-   <alias value="Signs"/>
-   <min value="1"/>
-   <max value="*"/>
-   <type>
-    <code value="CodeableConcept"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="example"/>
-    <description value="Clinical symptoms and/or signs that are observed or associated with an Adverse Reaction Event"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/manifestation-codes"/>
-    </valueSetReference>
-   </binding>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.description"/>
-   <short value="Description of the event as a whole"/>
-   <definition value="Text description about the Reaction as a whole, including details of the manifestation if required."/>
-   <comments value="Use the description to provide any details of a particular event of the occurred reaction such as circumstances, reaction specifics, what happened before/after. Information, related to the event, but not describing a particular care should be captured in the comment field. For example: at the age of four, the patient was given penicillin for strep throat and subsequently developed severe hives."/>
-   <alias value="Narrative"/>
-   <alias value="Text"/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="string"/>
-   </type>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.onset"/>
-   <short value="Date(/time) when manifestations showed"/>
-   <definition value="Record of the date and/or time of the onset of the Reaction."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="dateTime"/>
-   </type>
-   <isSummary value="true"/>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.severity"/>
-   <short value="mild | moderate | severe (of event as a whole)"/>
-   <definition value="Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations."/>
-   <comments value="It is acknowledged that this assessment is very subjective. There may be some some specific practice domains where objective scales have been applied. Objective scales can be included in this model as extensions."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="code"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="required"/>
-    <description value="Clinical assessment of the severity of a reaction event as a whole, potentially considering multiple different manifestations"/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/reaction-event-severity"/>
-    </valueSetReference>
-   </binding>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.exposureRoute"/>
-   <short value="How the subject was exposed to the substance"/>
-   <definition value="Identification of the route by which the subject was exposed to the substance."/>
-   <comments value="Coding of the Route of Exposure with a terminology should be used wherever possible."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="CodeableConcept"/>
-   </type>
-   <isSummary value="true"/>
-   <binding>
-    <strength value="example"/>
-    <description value="A coded concept describing the route or physiological path of administration of a therapeutic agent into or onto the body of a subject."/>
-    <valueSetReference>
-     <reference value="http://hl7.org/fhir/ValueSet/route-codes"/>
-    </valueSetReference>
-   </binding>
-  </element>
-  <element>
-   <path value="AllergyIntolerance.reaction.note"/>
-   <short value="Text about event not captured in other fields"/>
-   <definition value="Additional text about the Adverse Reaction event not captured in other fields."/>
-   <comments value="Use this field to record information indirectly related to a particular event and not captured in the description. For example: Clinical records are no longer available, recorded based on information provided to the patient by her mother and her mother is deceased."/>
-   <min value="0"/>
-   <max value="1"/>
-   <type>
-    <code value="Annotation"/>
-   </type>
-  </element>
- </differential>
+    <uri value="http://hl7.org/v3"/>
+    <name value="RIM"/>
+  </mapping>
+  <kind value="resource"/>
+  <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
+  <snapshot>
+    <element>
+      <path value="AllergyIntolerance"/>
+      <short value="Allergy or Intolerance (generally: Risk Of Adverse reaction to a substance)"/>
+      <definition value="Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance."/>
+      <comments value="Substances include, but are not limited to: a therapeutic substance administered correctly at an appropriate dosage for the individual; food; material derived from plants or animals; or venom from insect stings."/>
+      <alias value="Allergy"/>
+      <alias value="Intolerance"/>
+      <alias value="Adverse Reaction"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="DomainResource"/>
+      </type>
+      <mapping>
+        <identity value="w5"/>
+        <map value="clinical.general"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.id"/>
+      <short value="Logical id of this artifact"/>
+      <definition value="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes."/>
+      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="id"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.meta"/>
+      <short value="Metadata about the resource"/>
+      <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Meta"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.implicitRules"/>
+      <short value="A set of rules under which this content was created"/>
+      <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However, the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="uri"/>
+      </type>
+      <isModifier value="true"/>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.language"/>
+      <short value="Language of the resource content"/>
+      <definition value="The base language in which the resource is written."/>
+      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <binding>
+        <strength value="required"/>
+        <description value="A human language."/>
+        <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+      </binding>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.text"/>
+      <short value="Text summary of the resource, for human interpretation"/>
+      <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+      <alias value="narrative"/>
+      <alias value="html"/>
+      <alias value="xhtml"/>
+      <alias value="display"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Narrative"/>
+      </type>
+      <condition value="dom-1"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="Act.text?"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.contained"/>
+      <short value="Contained, inline Resources"/>
+      <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+      <alias value="inline resources"/>
+      <alias value="anonymous resources"/>
+      <alias value="contained resources"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Resource"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.identifier"/>
+      <short value="External ids for this item"/>
+      <definition value="This records identifiers associated with this allergy/intolerance concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Identifier"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="IAM-7"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value=".id"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="id"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.onset"/>
+      <short value="Date(/time) when manifestations showed"/>
+      <definition value="Record of the date and/or time of the onset of the Allergy or Intolerance."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.recordedDate"/>
+      <short value="When recorded"/>
+      <definition value="Date when the sensitivity was recorded."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="IAM-20"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value=".participation[typeCode=AUT].time"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="when.recorded"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.recorder"/>
+      <short value="Who recorded the sensitivity"/>
+      <definition value="Individual who recorded the record and takes responsibility for its conten."/>
+      <alias value="Author"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value=".participation[typeCode=AUT].role"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="who.author"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.patient"/>
+      <short value="Who the sensitivity is for"/>
+      <definition value="The patient who has the allergy or intolerance."/>
+      <alias value="Patient"/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="(PID-3)"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value=".participation[typeCode=SBJ].role[classCode=PAT]"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="who.focus"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reporter"/>
+      <short value="Source of the information about the allergy"/>
+      <definition value="The source of the information about the allergy that is recorded."/>
+      <comments value="The recorder takes repsonsibility for the content, but can reference the source from where they got it."/>
+      <alias value="Source"/>
+      <alias value="Informant"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="IAM-14 (if patient) / IAM-18 (if practitioner)"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="who.source"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.substance"/>
+      <short value="Substance, (or class) considered to be responsible for risk"/>
+      <definition value="Identification of a substance, or a class of substances, that is considered to be responsible for the adverse reaction risk."/>
+      <comments value="It is strongly recommended that the substance be coded with a terminology, where possible. For example, some terminologies used include RxNorm, SNOMED CT, DM+D, NDFRT, ICD-9, IDC-10, UNI, ATC and CPT. Plain text should only be used if there is no appropriate terminology available. Additional details about a substance can be specified in the text."/>
+      <alias value="Agent"/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="example"/>
+        <description value="Type of the substance and Negation codes for reporting no known allergies."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/allergyintolerance-substance-code"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="AL1-3 / IAM-3"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="what"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.status"/>
+      <short value="active | unconfirmed | confirmed | inactive | resolved | refuted | entered-in-error"/>
+      <definition value="Assertion about certainty associated with the propensity, or potential risk, of a reaction to the identified Substance."/>
+      <comments value="Decision support would typically raise alerts for &#39;Unconfirmed&#39;, &#39;Confirmed&#39;, and &#39;Resolved&#39; and ignore a &#39;Refuted&#39; reaction. In particular, &#39;Refuted&#39; may be useful for reconciliation of the Adverse Reaction List. Some implementations may choose to make this field mandatory."/>
+      <alias value="State"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isModifier value="true"/>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="required"/>
+        <description value="Assertion about certainty associated with a propensity, or potential risk, of a reaction to the identified Substance."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-status"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="IAM-17"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="status"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.criticality"/>
+      <short value="CRITL | CRITH | CRITU"/>
+      <definition value="Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance."/>
+      <comments value="The default criticality value for any propensity to an adverse reaction should be &#39;Low Risk&#39;, indicating at the very least a relative contraindication to deliberate or voluntary exposure to the Substance. &#39;High Risk&#39; is flagged if the clinician has identified a propensity for a more serious or potentially life-threatening reaction, such as anaphylaxis, and implies an absolute contraindication to deliberate or voluntary exposure to the substance. If this element is missing, the criticality is unknown (though it may be known elsewhere)."/>
+      <alias value="Severity"/>
+      <alias value="Seriousness"/>
+      <alias value="Contra-indication"/>
+      <alias value="Risk"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="required"/>
+        <description value="Estimate of the potential clinical harm, or seriousness, of a reaction to an identified Substance."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-criticality"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="w5"/>
+        <map value="grade"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.type"/>
+      <short value="allergy | intolerance - Underlying mechanism (if known)"/>
+      <definition value="Identification of the underlying physiological mechanism for the reaction risk."/>
+      <comments value="Allergic (typically immune-mediated) reactions have been traditionally regarded as an indicator for potential escalation to significant future risk. Contemporary knowledge suggests that some reactions previously thought to be immune-mediated are, in fact, non-immune, but in some cases can still pose a life threatening risk. It is acknowledged that many clinicians may not be in a position to distinguish the mechanism of a particular reaction. Often the term &quot;allergy&quot; is used rather generically and may overlap with the use of &quot;intolerance&quot; - in practice the boundaries between these two concepts may not be well-defined or understood. This data element is included nevertheless, because many legacy systems have captured this attribute. Immunologic testing may provide supporting evidence for the basis of the reaction and the causative substance, but no tests are 100% sensitive or specific for sensitivity to a particular substance. If, as is commonly the case, it is unclear whether the reaction is due to an allergy or an intolerance, then the type element should be omitted from the resource."/>
+      <alias value="Category"/>
+      <alias value="Class"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="required"/>
+        <description value="Identification of the underlying physiological mechanism for a Reaction Risk."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-type"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="IAM-9"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="class"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.category"/>
+      <short value="food | medication | environment | other - Category of Substance"/>
+      <definition value="Category of the identified Substance."/>
+      <comments value="This data element has been included because it is currently being captured in some clinical systems. This data can be derived from the Substance where coding systems are used, and is effectively redundant in that situation."/>
+      <alias value="Category"/>
+      <alias value="Type"/>
+      <alias value="Reaction Type"/>
+      <alias value="Class"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="required"/>
+        <description value="Category of an identified Substance."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-category"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="w5"/>
+        <map value="class"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.lastOccurence"/>
+      <short value="Date(/time) of last known occurrence of a reaction"/>
+      <definition value="Represents the date and/or time of the last known occurrence of a reaction event."/>
+      <comments value="This date may be replicated by one of the Onset of Reaction dates. Where a textual representation of the date of last occurrence is required e.g. &#39;In Childhood, &#39;10 years ago&#39; the Comment element should be used."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.note"/>
+      <short value="Additional text not captured in other fields"/>
+      <definition value="Additional narrative about the propensity for the Adverse Reaction, not captured in other fields."/>
+      <comments value="For example: including reason for flagging a seriousness of &#39;High Risk&#39;; and instructions related to future exposure or administration of the Substance, such as administration within an Intensive Care Unit or under corticosteroid cover. The notes should be related to an allergy or intolerance as a condition in general and not related to any particular episode of it. For episode notes and descriptions, use AllergyIntolerance.event.description and  AllergyIntolerance.event.notes."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Annotation"/>
+      </type>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction"/>
+      <short value="Adverse Reaction Events linked to exposure to substance"/>
+      <definition value="Details about each adverse reaction event linked to exposure to the identified Substance."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="BackboneElement"/>
+      </type>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.substance"/>
+      <short value="Specific substance considered to be responsible for event"/>
+      <definition value="Identification of the specific substance considered to be responsible for the Adverse Reaction event. Note: the substance for a specific reaction may be different to the substance identified as the cause of the risk, but must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite substance that includes the identified substance. It must be clinically safe to only process the AllergyIntolerance.substance and ignore the AllergyIntolerance.event.substance."/>
+      <comments value="Coding of the specific substance with a terminology capable of triggering decision support should be used wherever possible.  The substance field allows for the use of a specific substance or a group or class of substances, for example &quot;Penicillins&quot;. The specific substance field could be used for Amoxycillin. Duplication is acceptable when a specific substance has been recorded in the &#39;substance&#39; field."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="example"/>
+        <description value="Codes defining the type of the substance."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/substance-code"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.certainty"/>
+      <short value="unlikely | likely | confirmed - clinical certainty about the specific substance"/>
+      <definition value="Statement about the degree of clinical certainty that the specific substance was the cause of the manifestation in this reaction event."/>
+      <alias value="Cause"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="required"/>
+        <description value="Statement about the degree of clinical certainty that a Specific Substance was the cause of the Manifestation in an reaction event."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/reaction-event-certainty"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.manifestation"/>
+      <short value="Clinical symptoms/signs associated with the Event"/>
+      <definition value="Clinical symptoms and/or signs that are observed or associated with the adverse reaction event."/>
+      <comments value="Manifestation can be expressed as a single word, phrase or brief description. For example: nausea, rash or no reaction. It is preferable that manifestation should be coded with a terminology, where possible. The values entered here may be used to display on an application screen as part of a list of adverse reactions, as recommended in the UK NHS CUI guidelines.  Terminologies commonly used include, but are not limited to, SNOMED CT or ICD10."/>
+      <alias value="Symptoms"/>
+      <alias value="Signs"/>
+      <min value="1"/>
+      <max value="*"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="example"/>
+        <description value="Clinical symptoms and/or signs that are observed or associated with an Adverse Reaction Event."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/manifestation-codes"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.description"/>
+      <short value="Description of the event as a whole"/>
+      <definition value="Text description about the reaction as a whole, including details of the manifestation if required."/>
+      <comments value="Use the description to provide any details of a particular event of the occurred reaction such as circumstances, reaction specifics, what happened before/after. Information, related to the event, but not describing a particular care should be captured in the comment field. For example: at the age of four, the patient was given penicillin for strep throat and subsequently developed severe hives."/>
+      <alias value="Narrative"/>
+      <alias value="Text"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="string"/>
+      </type>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.onset"/>
+      <short value="Date(/time) when manifestations showed"/>
+      <definition value="Record of the date and/or time of the onset of the Reaction."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.severity"/>
+      <short value="mild | moderate | severe (of event as a whole)"/>
+      <definition value="Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations."/>
+      <comments value="It is acknowledged that this assessment is very subjective. There may be some some specific practice domains where objective scales have been applied. Objective scales can be included in this model as extensions."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="required"/>
+        <description value="Clinical assessment of the severity of a reaction event as a whole, potentially considering multiple different manifestations."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/reaction-event-severity"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.exposureRoute"/>
+      <short value="How the subject was exposed to the substance"/>
+      <definition value="Identification of the route by which the subject was exposed to the substance."/>
+      <comments value="Coding of the route of exposure with a terminology should be used wherever possible."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="example"/>
+        <description value="A coded concept describing the route or physiological path of administration of a therapeutic agent into or onto the body of a subject."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/route-codes"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.note"/>
+      <short value="Text about event not captured in other fields"/>
+      <definition value="Additional text about the adverse reaction event not captured in other fields."/>
+      <comments value="Use this field to record information indirectly related to a particular event and not captured in the description. For example: Clinical records are no longer available, recorded based on information provided to the patient by her mother and her mother is deceased."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Annotation"/>
+      </type>
+    </element>
+  </snapshot>
+  <differential>
+    <element>
+      <path value="AllergyIntolerance"/>
+      <short value="Allergy or Intolerance (generally: Risk Of Adverse reaction to a substance)"/>
+      <definition value="Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance."/>
+      <comments value="Substances include, but are not limited to: a therapeutic substance administered correctly at an appropriate dosage for the individual; food; material derived from plants or animals; or venom from insect stings."/>
+      <alias value="Allergy"/>
+      <alias value="Intolerance"/>
+      <alias value="Adverse Reaction"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="DomainResource"/>
+      </type>
+      <mapping>
+        <identity value="w5"/>
+        <map value="clinical.general"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.identifier"/>
+      <short value="External ids for this item"/>
+      <definition value="This records identifiers associated with this allergy/intolerance concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Identifier"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="IAM-7"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value=".id"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="id"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.onset"/>
+      <short value="Date(/time) when manifestations showed"/>
+      <definition value="Record of the date and/or time of the onset of the Allergy or Intolerance."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.recordedDate"/>
+      <short value="When recorded"/>
+      <definition value="Date when the sensitivity was recorded."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="IAM-20"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value=".participation[typeCode=AUT].time"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="when.recorded"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.recorder"/>
+      <short value="Who recorded the sensitivity"/>
+      <definition value="Individual who recorded the record and takes responsibility for its conten."/>
+      <alias value="Author"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value=".participation[typeCode=AUT].role"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="who.author"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.patient"/>
+      <short value="Who the sensitivity is for"/>
+      <definition value="The patient who has the allergy or intolerance."/>
+      <alias value="Patient"/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="(PID-3)"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value=".participation[typeCode=SBJ].role[classCode=PAT]"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="who.focus"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reporter"/>
+      <short value="Source of the information about the allergy"/>
+      <definition value="The source of the information about the allergy that is recorded."/>
+      <comments value="The recorder takes repsonsibility for the content, but can reference the source from where they got it."/>
+      <alias value="Source"/>
+      <alias value="Informant"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="IAM-14 (if patient) / IAM-18 (if practitioner)"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="who.source"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.substance"/>
+      <short value="Substance, (or class) considered to be responsible for risk"/>
+      <definition value="Identification of a substance, or a class of substances, that is considered to be responsible for the adverse reaction risk."/>
+      <comments value="It is strongly recommended that the substance be coded with a terminology, where possible. For example, some terminologies used include RxNorm, SNOMED CT, DM+D, NDFRT, ICD-9, IDC-10, UNI, ATC and CPT. Plain text should only be used if there is no appropriate terminology available. Additional details about a substance can be specified in the text."/>
+      <alias value="Agent"/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="example"/>
+        <description value="Type of the substance and Negation codes for reporting no known allergies."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/allergyintolerance-substance-code"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="AL1-3 / IAM-3"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="what"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.status"/>
+      <short value="active | unconfirmed | confirmed | inactive | resolved | refuted | entered-in-error"/>
+      <definition value="Assertion about certainty associated with the propensity, or potential risk, of a reaction to the identified Substance."/>
+      <comments value="Decision support would typically raise alerts for &#39;Unconfirmed&#39;, &#39;Confirmed&#39;, and &#39;Resolved&#39; and ignore a &#39;Refuted&#39; reaction. In particular, &#39;Refuted&#39; may be useful for reconciliation of the Adverse Reaction List. Some implementations may choose to make this field mandatory."/>
+      <alias value="State"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isModifier value="true"/>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="required"/>
+        <description value="Assertion about certainty associated with a propensity, or potential risk, of a reaction to the identified Substance."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-status"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="IAM-17"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="status"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.criticality"/>
+      <short value="CRITL | CRITH | CRITU"/>
+      <definition value="Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance."/>
+      <comments value="The default criticality value for any propensity to an adverse reaction should be &#39;Low Risk&#39;, indicating at the very least a relative contraindication to deliberate or voluntary exposure to the Substance. &#39;High Risk&#39; is flagged if the clinician has identified a propensity for a more serious or potentially life-threatening reaction, such as anaphylaxis, and implies an absolute contraindication to deliberate or voluntary exposure to the substance. If this element is missing, the criticality is unknown (though it may be known elsewhere)."/>
+      <alias value="Severity"/>
+      <alias value="Seriousness"/>
+      <alias value="Contra-indication"/>
+      <alias value="Risk"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="required"/>
+        <description value="Estimate of the potential clinical harm, or seriousness, of a reaction to an identified Substance."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-criticality"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="w5"/>
+        <map value="grade"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.type"/>
+      <short value="allergy | intolerance - Underlying mechanism (if known)"/>
+      <definition value="Identification of the underlying physiological mechanism for the reaction risk."/>
+      <comments value="Allergic (typically immune-mediated) reactions have been traditionally regarded as an indicator for potential escalation to significant future risk. Contemporary knowledge suggests that some reactions previously thought to be immune-mediated are, in fact, non-immune, but in some cases can still pose a life threatening risk. It is acknowledged that many clinicians may not be in a position to distinguish the mechanism of a particular reaction. Often the term &quot;allergy&quot; is used rather generically and may overlap with the use of &quot;intolerance&quot; - in practice the boundaries between these two concepts may not be well-defined or understood. This data element is included nevertheless, because many legacy systems have captured this attribute. Immunologic testing may provide supporting evidence for the basis of the reaction and the causative substance, but no tests are 100% sensitive or specific for sensitivity to a particular substance. If, as is commonly the case, it is unclear whether the reaction is due to an allergy or an intolerance, then the type element should be omitted from the resource."/>
+      <alias value="Category"/>
+      <alias value="Class"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="required"/>
+        <description value="Identification of the underlying physiological mechanism for a Reaction Risk."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-type"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="IAM-9"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="class"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.category"/>
+      <short value="food | medication | environment | other - Category of Substance"/>
+      <definition value="Category of the identified Substance."/>
+      <comments value="This data element has been included because it is currently being captured in some clinical systems. This data can be derived from the Substance where coding systems are used, and is effectively redundant in that situation."/>
+      <alias value="Category"/>
+      <alias value="Type"/>
+      <alias value="Reaction Type"/>
+      <alias value="Class"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="required"/>
+        <description value="Category of an identified Substance."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/allergy-intolerance-category"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="w5"/>
+        <map value="class"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.lastOccurence"/>
+      <short value="Date(/time) of last known occurrence of a reaction"/>
+      <definition value="Represents the date and/or time of the last known occurrence of a reaction event."/>
+      <comments value="This date may be replicated by one of the Onset of Reaction dates. Where a textual representation of the date of last occurrence is required e.g. &#39;In Childhood, &#39;10 years ago&#39; the Comment element should be used."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.note"/>
+      <short value="Additional text not captured in other fields"/>
+      <definition value="Additional narrative about the propensity for the Adverse Reaction, not captured in other fields."/>
+      <comments value="For example: including reason for flagging a seriousness of &#39;High Risk&#39;; and instructions related to future exposure or administration of the Substance, such as administration within an Intensive Care Unit or under corticosteroid cover. The notes should be related to an allergy or intolerance as a condition in general and not related to any particular episode of it. For episode notes and descriptions, use AllergyIntolerance.event.description and  AllergyIntolerance.event.notes."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Annotation"/>
+      </type>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction"/>
+      <short value="Adverse Reaction Events linked to exposure to substance"/>
+      <definition value="Details about each adverse reaction event linked to exposure to the identified Substance."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="BackboneElement"/>
+      </type>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.substance"/>
+      <short value="Specific substance considered to be responsible for event"/>
+      <definition value="Identification of the specific substance considered to be responsible for the Adverse Reaction event. Note: the substance for a specific reaction may be different to the substance identified as the cause of the risk, but must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite substance that includes the identified substance. It must be clinically safe to only process the AllergyIntolerance.substance and ignore the AllergyIntolerance.event.substance."/>
+      <comments value="Coding of the specific substance with a terminology capable of triggering decision support should be used wherever possible.  The substance field allows for the use of a specific substance or a group or class of substances, for example &quot;Penicillins&quot;. The specific substance field could be used for Amoxycillin. Duplication is acceptable when a specific substance has been recorded in the &#39;substance&#39; field."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="example"/>
+        <description value="Codes defining the type of the substance."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/substance-code"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.certainty"/>
+      <short value="unlikely | likely | confirmed - clinical certainty about the specific substance"/>
+      <definition value="Statement about the degree of clinical certainty that the specific substance was the cause of the manifestation in this reaction event."/>
+      <alias value="Cause"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="required"/>
+        <description value="Statement about the degree of clinical certainty that a Specific Substance was the cause of the Manifestation in an reaction event."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/reaction-event-certainty"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.manifestation"/>
+      <short value="Clinical symptoms/signs associated with the Event"/>
+      <definition value="Clinical symptoms and/or signs that are observed or associated with the adverse reaction event."/>
+      <comments value="Manifestation can be expressed as a single word, phrase or brief description. For example: nausea, rash or no reaction. It is preferable that manifestation should be coded with a terminology, where possible. The values entered here may be used to display on an application screen as part of a list of adverse reactions, as recommended in the UK NHS CUI guidelines.  Terminologies commonly used include, but are not limited to, SNOMED CT or ICD10."/>
+      <alias value="Symptoms"/>
+      <alias value="Signs"/>
+      <min value="1"/>
+      <max value="*"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="example"/>
+        <description value="Clinical symptoms and/or signs that are observed or associated with an Adverse Reaction Event."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/manifestation-codes"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.description"/>
+      <short value="Description of the event as a whole"/>
+      <definition value="Text description about the reaction as a whole, including details of the manifestation if required."/>
+      <comments value="Use the description to provide any details of a particular event of the occurred reaction such as circumstances, reaction specifics, what happened before/after. Information, related to the event, but not describing a particular care should be captured in the comment field. For example: at the age of four, the patient was given penicillin for strep throat and subsequently developed severe hives."/>
+      <alias value="Narrative"/>
+      <alias value="Text"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="string"/>
+      </type>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.onset"/>
+      <short value="Date(/time) when manifestations showed"/>
+      <definition value="Record of the date and/or time of the onset of the Reaction."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.severity"/>
+      <short value="mild | moderate | severe (of event as a whole)"/>
+      <definition value="Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations."/>
+      <comments value="It is acknowledged that this assessment is very subjective. There may be some some specific practice domains where objective scales have been applied. Objective scales can be included in this model as extensions."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="required"/>
+        <description value="Clinical assessment of the severity of a reaction event as a whole, potentially considering multiple different manifestations."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/reaction-event-severity"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.exposureRoute"/>
+      <short value="How the subject was exposed to the substance"/>
+      <definition value="Identification of the route by which the subject was exposed to the substance."/>
+      <comments value="Coding of the route of exposure with a terminology should be used wherever possible."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="example"/>
+        <description value="A coded concept describing the route or physiological path of administration of a therapeutic agent into or onto the body of a subject."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/route-codes"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="AllergyIntolerance.reaction.note"/>
+      <short value="Text about event not captured in other fields"/>
+      <definition value="Additional text about the adverse reaction event not captured in other fields."/>
+      <comments value="Use this field to record information indirectly related to a particular event and not captured in the description. For example: Clinical records are no longer available, recorded based on information provided to the patient by her mother and her mother is deceased."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Annotation"/>
+      </type>
+    </element>
+  </differential>
 </StructureDefinition>

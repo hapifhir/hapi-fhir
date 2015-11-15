@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3ActReason {
@@ -321,7 +321,7 @@ public enum V3ActReason {
          */
         ELIGDTRM, 
         /**
-         * To perform one or more operations on information used for conducting eligibility verification of coverage in a program or policy.  May entail provider contacting coverage source (e.g., government health program such as workers compensation or health plan) for confirmation of enrollment, eligibility for specific services, and any applicable copays.
+         * To perform one or more operations on information used for conducting eligibility verification of coverage in a program or policy.  May entail provider contacting coverage source (e.g. government health program such as workers compensation or health plan) for confirmation of enrollment, eligibility for specific services, and any applicable copays.
          */
         ELIGVER, 
         /**
@@ -385,7 +385,7 @@ public enum V3ActReason {
          */
         ETREAT, 
         /**
-         * To perform one or more operations on information for provision of health care to a population of living subjects, e.g., needle exchange program.
+         * To perform one or more operations on information for provision of health care to a population of living subjects, e.g. needle exchange program.
          */
         POPHLTH, 
         /**
@@ -530,7 +530,7 @@ public enum V3ActReason {
          */
         VACSAF, 
         /**
-         * Indicates why a fulfiller refused to fulfill a supply order, and considered it important to notify other providers of their decision.  E.g. "Suspect fraud", "Possible abuse", "Contraindicated".
+         * Indicates why a fulfiller refused to fulfill a supply order, and considered it important to notify other providers of their decision; e.g. "Suspect fraud", "Possible abuse", "Contraindicated".
 
                         (used when capturing 'refusal to fill' annotations)
          */
@@ -718,6 +718,10 @@ public enum V3ActReason {
          * Description: The agent does not have permission.
          */
         NOAGNTPERM, 
+        /**
+         * Description: The user does not have permission.
+         */
+        NOUSRPERM, 
         /**
          * Description: The record and version requested to update is not the current version.
          */
@@ -1103,6 +1107,82 @@ public enum V3ActReason {
          */
         RQ, 
         /**
+         * Definition: This domain is used to document reasons for providing a billable service; the billable services may include both clinical services and social services.
+         */
+        _ACTBILLABLESERVICEREASON, 
+        /**
+         * Reason for Clinical Service being performed.
+
+                        This domain excludes reasons specified by diagnosed conditions.
+
+                        Examples of values from this domain include duplicate therapy and fraudulent prescription.
+         */
+        _ACTBILLABLECLINICALSERVICEREASON, 
+        /**
+         * null
+         */
+        BONUS, 
+        /**
+         * Description:The level of coverage under the policy or program is available only to children
+         */
+        CHD, 
+        /**
+         * Description:The level of coverage under the policy or program is available only to a subscriber's dependents.
+         */
+        DEP, 
+        /**
+         * Description:The level of coverage under the policy or program is available to an employee and his or her children.
+         */
+        ECH, 
+        /**
+         * null
+         */
+        EDU, 
+        /**
+         * Description:The level of coverage under the policy or program is available only to an employee.
+         */
+        EMP, 
+        /**
+         * Description:The level of coverage under the policy or program is available to an employee and his or her spouse.
+         */
+        ESP, 
+        /**
+         * Description:The level of coverage under the policy or program is available to a subscriber's family.
+         */
+        FAM, 
+        /**
+         * Description:The level of coverage under the policy or program is available to an individual.
+         */
+        IND, 
+        /**
+         * null
+         */
+        INVOICE, 
+        /**
+         * null
+         */
+        PROA, 
+        /**
+         * null
+         */
+        RECOV, 
+        /**
+         * null
+         */
+        RETRO, 
+        /**
+         * Description:The level of coverage under the policy or program is available to a subscriber's spouse and children
+         */
+        SPC, 
+        /**
+         * Description:The level of coverage under the policy or program is available only to a subscribers spouse
+         */
+        SPO, 
+        /**
+         * null
+         */
+        TRAN, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -1409,6 +1489,8 @@ public enum V3ActReason {
           return NOUSERPERM;
         if ("NOAGNTPERM".equals(codeString))
           return NOAGNTPERM;
+        if ("NOUSRPERM".equals(codeString))
+          return NOUSRPERM;
         if ("WRNGVER".equals(codeString))
           return WRNGVER;
         if ("_ControlActReason".equals(codeString))
@@ -1595,6 +1677,42 @@ public enum V3ActReason {
           return ER;
         if ("RQ".equals(codeString))
           return RQ;
+        if ("_ActBillableServiceReason".equals(codeString))
+          return _ACTBILLABLESERVICEREASON;
+        if ("_ActBillableClinicalServiceReason".equals(codeString))
+          return _ACTBILLABLECLINICALSERVICEREASON;
+        if ("BONUS".equals(codeString))
+          return BONUS;
+        if ("CHD".equals(codeString))
+          return CHD;
+        if ("DEP".equals(codeString))
+          return DEP;
+        if ("ECH".equals(codeString))
+          return ECH;
+        if ("EDU".equals(codeString))
+          return EDU;
+        if ("EMP".equals(codeString))
+          return EMP;
+        if ("ESP".equals(codeString))
+          return ESP;
+        if ("FAM".equals(codeString))
+          return FAM;
+        if ("IND".equals(codeString))
+          return IND;
+        if ("INVOICE".equals(codeString))
+          return INVOICE;
+        if ("PROA".equals(codeString))
+          return PROA;
+        if ("RECOV".equals(codeString))
+          return RECOV;
+        if ("RETRO".equals(codeString))
+          return RETRO;
+        if ("SPC".equals(codeString))
+          return SPC;
+        if ("SPO".equals(codeString))
+          return SPO;
+        if ("TRAN".equals(codeString))
+          return TRAN;
         throw new Exception("Unknown V3ActReason code '"+codeString+"'");
         }
         public String toCode() {
@@ -1749,6 +1867,7 @@ public enum V3ActReason {
             case NOPERM: return "NOPERM";
             case NOUSERPERM: return "NOUSERPERM";
             case NOAGNTPERM: return "NOAGNTPERM";
+            case NOUSRPERM: return "NOUSRPERM";
             case WRNGVER: return "WRNGVER";
             case _CONTROLACTREASON: return "_ControlActReason";
             case _MEDICATIONORDERABORTREASONCODE: return "_MedicationOrderAbortReasonCode";
@@ -1842,6 +1961,24 @@ public enum V3ActReason {
             case _TRANSFERACTREASON: return "_TransferActReason";
             case ER: return "ER";
             case RQ: return "RQ";
+            case _ACTBILLABLESERVICEREASON: return "_ActBillableServiceReason";
+            case _ACTBILLABLECLINICALSERVICEREASON: return "_ActBillableClinicalServiceReason";
+            case BONUS: return "BONUS";
+            case CHD: return "CHD";
+            case DEP: return "DEP";
+            case ECH: return "ECH";
+            case EDU: return "EDU";
+            case EMP: return "EMP";
+            case ESP: return "ESP";
+            case FAM: return "FAM";
+            case IND: return "IND";
+            case INVOICE: return "INVOICE";
+            case PROA: return "PROA";
+            case RECOV: return "RECOV";
+            case RETRO: return "RETRO";
+            case SPC: return "SPC";
+            case SPO: return "SPO";
+            case TRAN: return "TRAN";
             default: return "?";
           }
         }
@@ -1906,7 +2043,7 @@ public enum V3ActReason {
             case COVAUTH: return "To perform one or more operations on information for conducting prior authorization or predetermination of coverage for services.";
             case COVERAGE: return "To perform one or more operations on information for conducting activities related to coverage under a program or policy.";
             case ELIGDTRM: return "To perform one or more operations on information used for conducting eligibility determination for coverage in a program or policy.  May entail review of financial status or disability assessment.";
-            case ELIGVER: return "To perform one or more operations on information used for conducting eligibility verification of coverage in a program or policy.  May entail provider contacting coverage source (e.g., government health program such as workers compensation or health plan) for confirmation of enrollment, eligibility for specific services, and any applicable copays.";
+            case ELIGVER: return "To perform one or more operations on information used for conducting eligibility verification of coverage in a program or policy.  May entail provider contacting coverage source (e.g. government health program such as workers compensation or health plan) for confirmation of enrollment, eligibility for specific services, and any applicable copays.";
             case ENROLLM: return "To perform one or more operations on information used for enrolling a covered party in a program or policy.  May entail recording of covered party's and any dependent's demographic information and benefit choices.";
             case REMITADV: return "To perform one or more operations on information about the amount remitted for a health care claim.";
             case HRESCH: return "To perform one or more operations on information for conducting scientific investigations to obtain health care knowledge.";
@@ -1922,7 +2059,7 @@ public enum V3ActReason {
             case CAREMGT: return "To perform one or more operations on information for provision of health care coordination.";
             case CLINTRL: return "To perform health care as part of the clinical trial protocol.";
             case ETREAT: return "To perform one or more operations on information for provision of immediately needed health care for an emergent condition.";
-            case POPHLTH: return "To perform one or more operations on information for provision of health care to a population of living subjects, e.g., needle exchange program.";
+            case POPHLTH: return "To perform one or more operations on information for provision of health care to a population of living subjects, e.g. needle exchange program.";
             case _ACTINFORMATIONPRIVACYREASON: return "Description:The rationale or purpose for an act relating to the management of personal information, such as disclosing personal tax information for the purpose of complying with a court order.";
             case MARKT: return "Description:";
             case OPERAT: return "Description:Administrative and contractual processes required to support an activity, product, or service";
@@ -1957,7 +2094,7 @@ public enum V3ActReason {
             case RELIG: return "Definition:The patient or their guardian objects to receiving the vaccine on religious grounds.";
             case VACEFF: return "Definition:The intended vaccine has expired or is otherwise believed to no longer be effective.\r\n\n                        \n                           Example:Due to temperature exposure.";
             case VACSAF: return "Definition:The patient or their guardian objects to receiving the vaccine because of concerns over its safety.";
-            case _ACTSUPPLYFULFILLMENTREFUSALREASON: return "Indicates why a fulfiller refused to fulfill a supply order, and considered it important to notify other providers of their decision.  E.g. \"Suspect fraud\", \"Possible abuse\", \"Contraindicated\".\r\n\n                        (used when capturing 'refusal to fill' annotations)";
+            case _ACTSUPPLYFULFILLMENTREFUSALREASON: return "Indicates why a fulfiller refused to fulfill a supply order, and considered it important to notify other providers of their decision; e.g. \"Suspect fraud\", \"Possible abuse\", \"Contraindicated\".\r\n\n                        (used when capturing 'refusal to fill' annotations)";
             case FRR01: return "Definition:The order has been stopped by the prescriber but this fact has not necessarily captured electronically.\r\n\n                        \n                           Example:A verbal stop, a fax, etc.";
             case FRR02: return "Definition:Order has not been fulfilled within a reasonable amount of time, and may not be current.";
             case FRR03: return "Definition:Data needed to safely act on the order which was expected to become available independent of the order is not yet available\r\n\n                        \n                           Example:Lab results, diagnostic imaging, etc.";
@@ -2000,6 +2137,7 @@ public enum V3ActReason {
             case NOPERM: return "Description: There is no permission.";
             case NOUSERPERM: return "Definition:The user does not have permission";
             case NOAGNTPERM: return "Description: The agent does not have permission.";
+            case NOUSRPERM: return "Description: The user does not have permission.";
             case WRNGVER: return "Description: The record and version requested to update is not the current version.";
             case _CONTROLACTREASON: return "Identifies why a specific query, request, or other trigger event occurred.";
             case _MEDICATIONORDERABORTREASONCODE: return "Description:Indicates the reason the medication order should be aborted.";
@@ -2093,6 +2231,24 @@ public enum V3ActReason {
             case _TRANSFERACTREASON: return "The explanation for why a patient is moved from one location to another within the organization";
             case ER: return "Moved to an error in placing the patient in the original location.";
             case RQ: return "Moved at the request of the patient.";
+            case _ACTBILLABLESERVICEREASON: return "Definition: This domain is used to document reasons for providing a billable service; the billable services may include both clinical services and social services.";
+            case _ACTBILLABLECLINICALSERVICEREASON: return "Reason for Clinical Service being performed.\r\n\n                        This domain excludes reasons specified by diagnosed conditions.\r\n\n                        Examples of values from this domain include duplicate therapy and fraudulent prescription.";
+            case BONUS: return "";
+            case CHD: return "Description:The level of coverage under the policy or program is available only to children";
+            case DEP: return "Description:The level of coverage under the policy or program is available only to a subscriber's dependents.";
+            case ECH: return "Description:The level of coverage under the policy or program is available to an employee and his or her children.";
+            case EDU: return "";
+            case EMP: return "Description:The level of coverage under the policy or program is available only to an employee.";
+            case ESP: return "Description:The level of coverage under the policy or program is available to an employee and his or her spouse.";
+            case FAM: return "Description:The level of coverage under the policy or program is available to a subscriber's family.";
+            case IND: return "Description:The level of coverage under the policy or program is available to an individual.";
+            case INVOICE: return "";
+            case PROA: return "";
+            case RECOV: return "";
+            case RETRO: return "";
+            case SPC: return "Description:The level of coverage under the policy or program is available to a subscriber's spouse and children";
+            case SPO: return "Description:The level of coverage under the policy or program is available only to a subscribers spouse";
+            case TRAN: return "";
             default: return "?";
           }
         }
@@ -2248,6 +2404,7 @@ public enum V3ActReason {
             case NOPERM: return "no permission";
             case NOUSERPERM: return "no user permission";
             case NOAGNTPERM: return "no agent permission";
+            case NOUSRPERM: return "no user permission";
             case WRNGVER: return "wrong version";
             case _CONTROLACTREASON: return "ControlActReason";
             case _MEDICATIONORDERABORTREASONCODE: return "medication order abort reason";
@@ -2341,6 +2498,24 @@ public enum V3ActReason {
             case _TRANSFERACTREASON: return "TransferActReason";
             case ER: return "Error";
             case RQ: return "Request";
+            case _ACTBILLABLESERVICEREASON: return "ActBillableServiceReason";
+            case _ACTBILLABLECLINICALSERVICEREASON: return "ActBillableClinicalServiceReason";
+            case BONUS: return "BONUS";
+            case CHD: return "Children only";
+            case DEP: return "Dependents only";
+            case ECH: return "Employee and children";
+            case EDU: return "EDU";
+            case EMP: return "Employee only";
+            case ESP: return "Employee and spouse";
+            case FAM: return "Family";
+            case IND: return "Individual";
+            case INVOICE: return "INVOICE";
+            case PROA: return "PROA";
+            case RECOV: return "RECOV";
+            case RETRO: return "RETRO";
+            case SPC: return "Spouse and children";
+            case SPO: return "Spouse only";
+            case TRAN: return "TRAN";
             default: return "?";
           }
     }

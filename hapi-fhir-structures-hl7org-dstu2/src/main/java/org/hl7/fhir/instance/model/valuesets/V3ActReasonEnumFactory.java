@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -339,6 +339,8 @@ public class V3ActReasonEnumFactory implements EnumFactory<V3ActReason> {
       return V3ActReason.NOUSERPERM;
     if ("NOAGNTPERM".equals(codeString))
       return V3ActReason.NOAGNTPERM;
+    if ("NOUSRPERM".equals(codeString))
+      return V3ActReason.NOUSRPERM;
     if ("WRNGVER".equals(codeString))
       return V3ActReason.WRNGVER;
     if ("_ControlActReason".equals(codeString))
@@ -525,6 +527,42 @@ public class V3ActReasonEnumFactory implements EnumFactory<V3ActReason> {
       return V3ActReason.ER;
     if ("RQ".equals(codeString))
       return V3ActReason.RQ;
+    if ("_ActBillableServiceReason".equals(codeString))
+      return V3ActReason._ACTBILLABLESERVICEREASON;
+    if ("_ActBillableClinicalServiceReason".equals(codeString))
+      return V3ActReason._ACTBILLABLECLINICALSERVICEREASON;
+    if ("BONUS".equals(codeString))
+      return V3ActReason.BONUS;
+    if ("CHD".equals(codeString))
+      return V3ActReason.CHD;
+    if ("DEP".equals(codeString))
+      return V3ActReason.DEP;
+    if ("ECH".equals(codeString))
+      return V3ActReason.ECH;
+    if ("EDU".equals(codeString))
+      return V3ActReason.EDU;
+    if ("EMP".equals(codeString))
+      return V3ActReason.EMP;
+    if ("ESP".equals(codeString))
+      return V3ActReason.ESP;
+    if ("FAM".equals(codeString))
+      return V3ActReason.FAM;
+    if ("IND".equals(codeString))
+      return V3ActReason.IND;
+    if ("INVOICE".equals(codeString))
+      return V3ActReason.INVOICE;
+    if ("PROA".equals(codeString))
+      return V3ActReason.PROA;
+    if ("RECOV".equals(codeString))
+      return V3ActReason.RECOV;
+    if ("RETRO".equals(codeString))
+      return V3ActReason.RETRO;
+    if ("SPC".equals(codeString))
+      return V3ActReason.SPC;
+    if ("SPO".equals(codeString))
+      return V3ActReason.SPO;
+    if ("TRAN".equals(codeString))
+      return V3ActReason.TRAN;
     throw new IllegalArgumentException("Unknown V3ActReason code '"+codeString+"'");
   }
 
@@ -829,6 +867,8 @@ public class V3ActReasonEnumFactory implements EnumFactory<V3ActReason> {
       return "NOUSERPERM";
     if (code == V3ActReason.NOAGNTPERM)
       return "NOAGNTPERM";
+    if (code == V3ActReason.NOUSRPERM)
+      return "NOUSRPERM";
     if (code == V3ActReason.WRNGVER)
       return "WRNGVER";
     if (code == V3ActReason._CONTROLACTREASON)
@@ -1015,6 +1055,42 @@ public class V3ActReasonEnumFactory implements EnumFactory<V3ActReason> {
       return "ER";
     if (code == V3ActReason.RQ)
       return "RQ";
+    if (code == V3ActReason._ACTBILLABLESERVICEREASON)
+      return "_ActBillableServiceReason";
+    if (code == V3ActReason._ACTBILLABLECLINICALSERVICEREASON)
+      return "_ActBillableClinicalServiceReason";
+    if (code == V3ActReason.BONUS)
+      return "BONUS";
+    if (code == V3ActReason.CHD)
+      return "CHD";
+    if (code == V3ActReason.DEP)
+      return "DEP";
+    if (code == V3ActReason.ECH)
+      return "ECH";
+    if (code == V3ActReason.EDU)
+      return "EDU";
+    if (code == V3ActReason.EMP)
+      return "EMP";
+    if (code == V3ActReason.ESP)
+      return "ESP";
+    if (code == V3ActReason.FAM)
+      return "FAM";
+    if (code == V3ActReason.IND)
+      return "IND";
+    if (code == V3ActReason.INVOICE)
+      return "INVOICE";
+    if (code == V3ActReason.PROA)
+      return "PROA";
+    if (code == V3ActReason.RECOV)
+      return "RECOV";
+    if (code == V3ActReason.RETRO)
+      return "RETRO";
+    if (code == V3ActReason.SPC)
+      return "SPC";
+    if (code == V3ActReason.SPO)
+      return "SPO";
+    if (code == V3ActReason.TRAN)
+      return "TRAN";
     return "?";
   }
 

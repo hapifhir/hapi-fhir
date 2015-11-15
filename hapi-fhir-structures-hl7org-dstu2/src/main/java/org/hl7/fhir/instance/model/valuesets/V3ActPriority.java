@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3ActPriority {
@@ -79,11 +79,11 @@ public enum V3ActPriority {
          */
         RR, 
         /**
-         * With highest priority (e.g., emergency).
+         * With highest priority (e.g. emergency).
          */
         S, 
         /**
-         * It is critical to come as close as possible to the requested time (e.g., for a through antimicrobial level).
+         * It is critical to come as close as possible to the requested time (e.g. for a through antimicrobial level).
          */
         T, 
         /**
@@ -169,8 +169,8 @@ public enum V3ActPriority {
             case PRN: return "An \"as needed\" order should be accompanied by a description of what constitutes a need. This description is represented by an observation service predicate as a precondition.";
             case R: return "Routine service, do at usual work hours.";
             case RR: return "A report should be prepared and sent as quickly as possible.";
-            case S: return "With highest priority (e.g., emergency).";
-            case T: return "It is critical to come as close as possible to the requested time (e.g., for a through antimicrobial level).";
+            case S: return "With highest priority (e.g. emergency).";
+            case T: return "It is critical to come as close as possible to the requested time (e.g. for a through antimicrobial level).";
             case UD: return "Drug is to be used as directed by the prescriber.";
             case UR: return "Calls for prompt action.";
             default: return "?";
