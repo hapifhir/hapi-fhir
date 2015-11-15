@@ -251,6 +251,12 @@
 				within entries with the same verb. Thanks to Bill de Beaubien
 				for reporting!
 			</action>
+			<action type="add" fix="254">
+				Add the ability to wire JPA conformance providers
+				using Spring (basically, add default constructors
+				and setters to the conformance providers). Thanks
+				to C. Mike Bylund for the pull request!
+			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">
 			<action type="add">
