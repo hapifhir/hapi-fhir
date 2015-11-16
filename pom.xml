@@ -232,7 +232,6 @@
 			you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration for that plugin... -->
 		<hibernate_version>5.0.3.Final</hibernate_version>
 		<hibernate_validator_version>5.2.2.Final</hibernate_validator_version>
-		<jetty_version>9.3.4.v20151007</jetty_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_failsafe_plugin_version>2.18.1</maven_failsafe_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
@@ -428,47 +427,47 @@
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-http</artifactId>
-				<version>9.2.13.v20150730</version>
+				<version>9.2.14.v20151106</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-servlets</artifactId>
-				<version>9.2.13.v20150730</version>
+				<version>9.2.14.v20151106</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-servlet</artifactId>
-				<version>9.2.13.v20150730</version>
+				<version>9.2.14.v20151106</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-server</artifactId>
-				<version>9.2.13.v20150730</version>
+				<version>9.2.14.v20151106</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-util</artifactId>
-				<version>9.2.13.v20150730</version>
+				<version>9.2.14.v20151106</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-webapp</artifactId>
-				<version>9.2.13.v20150730</version>
+				<version>9.2.14.v20151106</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-api</artifactId>
-				<version>9.2.13.v20150730</version>
+				<version>9.2.14.v20151106</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-client</artifactId>
-				<version>9.2.13.v20150730</version>
+				<version>9.2.14.v20151106</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-server</artifactId>
-				<version>9.2.13.v20150730</version>
+				<version>9.2.14.v20151106</version>
 			</dependency>
 			<dependency>
 				<groupId>org.fusesource.jansi</groupId>
@@ -745,7 +744,7 @@
 				<plugin>
 					<groupId>org.eclipse.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
-					<version>9.2.13.v20150730</version>
+					<version>9.2.14.v20151106</version>
 				</plugin>
 				<plugin>
 					<groupId>org.eluder.coveralls</groupId>
