@@ -724,421 +724,431 @@
 <a class="jxr_linenumber" name="L716" href="#L716">716</a> 
 <a class="jxr_linenumber" name="L717" href="#L717">717</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> encodeResourceToXmlStreamWriter(<a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource, XMLStreamWriter theEventWriter, <strong class="jxr_keyword">boolean</strong> theIncludedResource) <strong class="jxr_keyword">throws</strong> XMLStreamException, DataFormatException {
 <a class="jxr_linenumber" name="L718" href="#L718">718</a> 		String resourceId = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L719" href="#L719">719</a> 		<strong class="jxr_keyword">if</strong> (theResource instanceof IResource) {
-<a class="jxr_linenumber" name="L720" href="#L720">720</a> 			<em class="jxr_comment">// HAPI structs</em>
-<a class="jxr_linenumber" name="L721" href="#L721">721</a> 			IResource iResource = (IResource) theResource;
-<a class="jxr_linenumber" name="L722" href="#L722">722</a> 			<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(iResource.getId().getIdPart())) {
-<a class="jxr_linenumber" name="L723" href="#L723">723</a> 				resourceId = iResource.getId().getIdPart();
-<a class="jxr_linenumber" name="L724" href="#L724">724</a> 			}
-<a class="jxr_linenumber" name="L725" href="#L725">725</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L726" href="#L726">726</a> 			<em class="jxr_comment">// HL7 structs</em>
-<a class="jxr_linenumber" name="L727" href="#L727">727</a> 			IAnyResource resource = (IAnyResource) theResource;
-<a class="jxr_linenumber" name="L728" href="#L728">728</a> 			<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(resource.getIdElement().getIdPart())) {
-<a class="jxr_linenumber" name="L729" href="#L729">729</a> 				resourceId = resource.getIdElement().getIdPart();
-<a class="jxr_linenumber" name="L730" href="#L730">730</a> 			}
-<a class="jxr_linenumber" name="L731" href="#L731">731</a> 		}
+<a class="jxr_linenumber" name="L719" href="#L719">719</a> <em class="jxr_comment">//		if (theResource instanceof IResource) {</em>
+<a class="jxr_linenumber" name="L720" href="#L720">720</a> <em class="jxr_comment">//			// HAPI structs</em>
+<a class="jxr_linenumber" name="L721" href="#L721">721</a> <em class="jxr_comment">//			IResource iResource = (IResource) theResource;</em>
+<a class="jxr_linenumber" name="L722" href="#L722">722</a> <em class="jxr_comment">//			if (StringUtils.isNotBlank(iResource.getId().getIdPart())) {</em>
+<a class="jxr_linenumber" name="L723" href="#L723">723</a> <em class="jxr_comment">//				resourceId = iResource.getId().getIdPart();</em>
+<a class="jxr_linenumber" name="L724" href="#L724">724</a> <em class="jxr_comment">//			}</em>
+<a class="jxr_linenumber" name="L725" href="#L725">725</a> <em class="jxr_comment">//		} else {</em>
+<a class="jxr_linenumber" name="L726" href="#L726">726</a> <em class="jxr_comment">//			// HL7 structs</em>
+<a class="jxr_linenumber" name="L727" href="#L727">727</a> <em class="jxr_comment">//			IAnyResource resource = (IAnyResource) theResource;</em>
+<a class="jxr_linenumber" name="L728" href="#L728">728</a> <em class="jxr_comment">//			if (StringUtils.isNotBlank(resource.getIdElement().getIdPart())) {</em>
+<a class="jxr_linenumber" name="L729" href="#L729">729</a> <em class="jxr_comment">//				resourceId = resource.getIdElement().getIdPart();</em>
+<a class="jxr_linenumber" name="L730" href="#L730">730</a> <em class="jxr_comment">//			}</em>
+<a class="jxr_linenumber" name="L731" href="#L731">731</a> <em class="jxr_comment">//		}</em>
 <a class="jxr_linenumber" name="L732" href="#L732">732</a> 
-<a class="jxr_linenumber" name="L733" href="#L733">733</a> 		<strong class="jxr_keyword">if</strong> (isOmitResourceId() &amp;&amp; !theIncludedResource) {
-<a class="jxr_linenumber" name="L734" href="#L734">734</a> 			resourceId = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L735" href="#L735">735</a> 		}
-<a class="jxr_linenumber" name="L736" href="#L736">736</a> 
-<a class="jxr_linenumber" name="L737" href="#L737">737</a> 		encodeResourceToXmlStreamWriter(theResource, theEventWriter, theIncludedResource, resourceId);
-<a class="jxr_linenumber" name="L738" href="#L738">738</a> 	}
-<a class="jxr_linenumber" name="L739" href="#L739">739</a> 
-<a class="jxr_linenumber" name="L740" href="#L740">740</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> encodeResourceToXmlStreamWriter(<a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource, XMLStreamWriter theEventWriter, <strong class="jxr_keyword">boolean</strong> theContainedResource, String theResourceId) <strong class="jxr_keyword">throws</strong> XMLStreamException {
-<a class="jxr_linenumber" name="L741" href="#L741">741</a> 		<strong class="jxr_keyword">if</strong> (!theContainedResource) {
-<a class="jxr_linenumber" name="L742" href="#L742">742</a> 			<strong class="jxr_keyword">super</strong>.containResourcesForEncoding(theResource);
-<a class="jxr_linenumber" name="L743" href="#L743">743</a> 		}
-<a class="jxr_linenumber" name="L744" href="#L744">744</a> 
-<a class="jxr_linenumber" name="L745" href="#L745">745</a> 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
-<a class="jxr_linenumber" name="L746" href="#L746">746</a> 		<strong class="jxr_keyword">if</strong> (resDef == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L747" href="#L747">747</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unknown resource type: "</span> + theResource.getClass());
-<a class="jxr_linenumber" name="L748" href="#L748">748</a> 		}
+<a class="jxr_linenumber" name="L733" href="#L733">733</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(theResource.getIdElement().getIdPart())) {
+<a class="jxr_linenumber" name="L734" href="#L734">734</a> 			resourceId = theResource.getIdElement().getIdPart();
+<a class="jxr_linenumber" name="L735" href="#L735">735</a> 			<strong class="jxr_keyword">if</strong> (theResource.getIdElement().getValue().startsWith(<span class="jxr_string">"urn:"</span>)) {
+<a class="jxr_linenumber" name="L736" href="#L736">736</a> 				resourceId = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L737" href="#L737">737</a> 			}
+<a class="jxr_linenumber" name="L738" href="#L738">738</a> 			<strong class="jxr_keyword">if</strong> (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+<a class="jxr_linenumber" name="L739" href="#L739">739</a> 				resourceId = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L740" href="#L740">740</a> 			}
+<a class="jxr_linenumber" name="L741" href="#L741">741</a> 		}
+<a class="jxr_linenumber" name="L742" href="#L742">742</a> 
+<a class="jxr_linenumber" name="L743" href="#L743">743</a> 		<strong class="jxr_keyword">if</strong> (isOmitResourceId() &amp;&amp; !theIncludedResource) {
+<a class="jxr_linenumber" name="L744" href="#L744">744</a> 			resourceId = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L745" href="#L745">745</a> 		}
+<a class="jxr_linenumber" name="L746" href="#L746">746</a> 
+<a class="jxr_linenumber" name="L747" href="#L747">747</a> 		encodeResourceToXmlStreamWriter(theResource, theEventWriter, theIncludedResource, resourceId);
+<a class="jxr_linenumber" name="L748" href="#L748">748</a> 	}
 <a class="jxr_linenumber" name="L749" href="#L749">749</a> 
-<a class="jxr_linenumber" name="L750" href="#L750">750</a> 		theEventWriter.writeStartElement(resDef.getName());
-<a class="jxr_linenumber" name="L751" href="#L751">751</a> 		theEventWriter.writeDefaultNamespace(FHIR_NS);
-<a class="jxr_linenumber" name="L752" href="#L752">752</a> 
-<a class="jxr_linenumber" name="L753" href="#L753">753</a> 		<strong class="jxr_keyword">if</strong> (theResource instanceof IAnyResource) {
+<a class="jxr_linenumber" name="L750" href="#L750">750</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> encodeResourceToXmlStreamWriter(<a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource, XMLStreamWriter theEventWriter, <strong class="jxr_keyword">boolean</strong> theContainedResource, String theResourceId) <strong class="jxr_keyword">throws</strong> XMLStreamException {
+<a class="jxr_linenumber" name="L751" href="#L751">751</a> 		<strong class="jxr_keyword">if</strong> (!theContainedResource) {
+<a class="jxr_linenumber" name="L752" href="#L752">752</a> 			<strong class="jxr_keyword">super</strong>.containResourcesForEncoding(theResource);
+<a class="jxr_linenumber" name="L753" href="#L753">753</a> 		}
 <a class="jxr_linenumber" name="L754" href="#L754">754</a> 
-<a class="jxr_linenumber" name="L755" href="#L755">755</a> 			<em class="jxr_comment">// HL7.org Structures</em>
-<a class="jxr_linenumber" name="L756" href="#L756">756</a> 			writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"id"</span>, theResourceId);
-<a class="jxr_linenumber" name="L757" href="#L757">757</a> 			encodeCompositeElementToStreamWriter(theResource, theResource, theEventWriter, resDef, theContainedResource, <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/BaseParser.html">CompositeChildElement</a>(resDef));
-<a class="jxr_linenumber" name="L758" href="#L758">758</a> 
-<a class="jxr_linenumber" name="L759" href="#L759">759</a> 		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L760" href="#L760">760</a> 
-<a class="jxr_linenumber" name="L761" href="#L761">761</a> 			<strong class="jxr_keyword">if</strong> (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+<a class="jxr_linenumber" name="L755" href="#L755">755</a> 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
+<a class="jxr_linenumber" name="L756" href="#L756">756</a> 		<strong class="jxr_keyword">if</strong> (resDef == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L757" href="#L757">757</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unknown resource type: "</span> + theResource.getClass());
+<a class="jxr_linenumber" name="L758" href="#L758">758</a> 		}
+<a class="jxr_linenumber" name="L759" href="#L759">759</a> 
+<a class="jxr_linenumber" name="L760" href="#L760">760</a> 		theEventWriter.writeStartElement(resDef.getName());
+<a class="jxr_linenumber" name="L761" href="#L761">761</a> 		theEventWriter.writeDefaultNamespace(FHIR_NS);
 <a class="jxr_linenumber" name="L762" href="#L762">762</a> 
-<a class="jxr_linenumber" name="L763" href="#L763">763</a> 				<em class="jxr_comment">// DSTU2+</em>
+<a class="jxr_linenumber" name="L763" href="#L763">763</a> 		<strong class="jxr_keyword">if</strong> (theResource instanceof IAnyResource) {
 <a class="jxr_linenumber" name="L764" href="#L764">764</a> 
-<a class="jxr_linenumber" name="L765" href="#L765">765</a> 				IResource resource = (IResource) theResource;
-<a class="jxr_linenumber" name="L766" href="#L766">766</a> 				writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"id"</span>, theResourceId);
-<a class="jxr_linenumber" name="L767" href="#L767">767</a> 
-<a class="jxr_linenumber" name="L768" href="#L768">768</a> 				InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-<a class="jxr_linenumber" name="L769" href="#L769">769</a> 				IdDt resourceId = resource.getId();
-<a class="jxr_linenumber" name="L770" href="#L770">770</a> 				String versionIdPart = resourceId.getVersionIdPart();
-<a class="jxr_linenumber" name="L771" href="#L771">771</a> 				<strong class="jxr_keyword">if</strong> (isBlank(versionIdPart)) {
-<a class="jxr_linenumber" name="L772" href="#L772">772</a> 					versionIdPart = ResourceMetadataKeyEnum.VERSION.get(resource);
-<a class="jxr_linenumber" name="L773" href="#L773">773</a> 				}
-<a class="jxr_linenumber" name="L774" href="#L774">774</a> 				List&lt;BaseCodingDt&gt; securityLabels = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.SECURITY_LABELS);
-<a class="jxr_linenumber" name="L775" href="#L775">775</a> 				List&lt;IdDt&gt; profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
-<a class="jxr_linenumber" name="L776" href="#L776">776</a> 				TagList tags = getMetaTagsForEncoding((resource));
+<a class="jxr_linenumber" name="L765" href="#L765">765</a> 			<em class="jxr_comment">// HL7.org Structures</em>
+<a class="jxr_linenumber" name="L766" href="#L766">766</a> 			writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"id"</span>, theResourceId);
+<a class="jxr_linenumber" name="L767" href="#L767">767</a> 			encodeCompositeElementToStreamWriter(theResource, theResource, theEventWriter, resDef, theContainedResource, <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/BaseParser.html">CompositeChildElement</a>(resDef));
+<a class="jxr_linenumber" name="L768" href="#L768">768</a> 
+<a class="jxr_linenumber" name="L769" href="#L769">769</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L770" href="#L770">770</a> 
+<a class="jxr_linenumber" name="L771" href="#L771">771</a> 			<strong class="jxr_keyword">if</strong> (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+<a class="jxr_linenumber" name="L772" href="#L772">772</a> 
+<a class="jxr_linenumber" name="L773" href="#L773">773</a> 				<em class="jxr_comment">// DSTU2+</em>
+<a class="jxr_linenumber" name="L774" href="#L774">774</a> 
+<a class="jxr_linenumber" name="L775" href="#L775">775</a> 				IResource resource = (IResource) theResource;
+<a class="jxr_linenumber" name="L776" href="#L776">776</a> 				writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"id"</span>, theResourceId);
 <a class="jxr_linenumber" name="L777" href="#L777">777</a> 
-<a class="jxr_linenumber" name="L778" href="#L778">778</a> 				<strong class="jxr_keyword">if</strong> (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
-<a class="jxr_linenumber" name="L779" href="#L779">779</a> 					theEventWriter.writeStartElement(<span class="jxr_string">"meta"</span>);
-<a class="jxr_linenumber" name="L780" href="#L780">780</a> 					writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"versionId"</span>, versionIdPart);
-<a class="jxr_linenumber" name="L781" href="#L781">781</a> 					<strong class="jxr_keyword">if</strong> (updated != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L782" href="#L782">782</a> 						writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"lastUpdated"</span>, updated.getValueAsString());
-<a class="jxr_linenumber" name="L783" href="#L783">783</a> 					}
-<a class="jxr_linenumber" name="L784" href="#L784">784</a> 
-<a class="jxr_linenumber" name="L785" href="#L785">785</a> 					<strong class="jxr_keyword">for</strong> (IdDt profile : profiles) {
-<a class="jxr_linenumber" name="L786" href="#L786">786</a> 						theEventWriter.writeStartElement(<span class="jxr_string">"profile"</span>);
-<a class="jxr_linenumber" name="L787" href="#L787">787</a> 						theEventWriter.writeAttribute(<span class="jxr_string">"value"</span>, profile.getValue());
-<a class="jxr_linenumber" name="L788" href="#L788">788</a> 						theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L789" href="#L789">789</a> 					}
-<a class="jxr_linenumber" name="L790" href="#L790">790</a> 					<strong class="jxr_keyword">for</strong> (BaseCodingDt securityLabel : securityLabels) {
-<a class="jxr_linenumber" name="L791" href="#L791">791</a> 						theEventWriter.writeStartElement(<span class="jxr_string">"security"</span>);
-<a class="jxr_linenumber" name="L792" href="#L792">792</a> 						BaseRuntimeElementCompositeDefinition&lt;?&gt; def = (BaseRuntimeElementCompositeDefinition&lt;?&gt;) myContext.getElementDefinition(securityLabel.getClass());
-<a class="jxr_linenumber" name="L793" href="#L793">793</a> 						encodeCompositeElementChildrenToStreamWriter(resource, securityLabel, theEventWriter, def.getChildren(), theContainedResource, <strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L794" href="#L794">794</a> 						theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L795" href="#L795">795</a> 					}
-<a class="jxr_linenumber" name="L796" href="#L796">796</a> 					<strong class="jxr_keyword">if</strong> (tags != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L797" href="#L797">797</a> 						<strong class="jxr_keyword">for</strong> (Tag tag : tags) {
-<a class="jxr_linenumber" name="L798" href="#L798">798</a> 							<strong class="jxr_keyword">if</strong> (tag.isEmpty()) {
-<a class="jxr_linenumber" name="L799" href="#L799">799</a> 								<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L800" href="#L800">800</a> 							}
-<a class="jxr_linenumber" name="L801" href="#L801">801</a> 							theEventWriter.writeStartElement(<span class="jxr_string">"tag"</span>);
-<a class="jxr_linenumber" name="L802" href="#L802">802</a> 							writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"system"</span>, tag.getScheme());
-<a class="jxr_linenumber" name="L803" href="#L803">803</a> 							writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"code"</span>, tag.getTerm());
-<a class="jxr_linenumber" name="L804" href="#L804">804</a> 							writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"display"</span>, tag.getLabel());
-<a class="jxr_linenumber" name="L805" href="#L805">805</a> 							theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L806" href="#L806">806</a> 						}
-<a class="jxr_linenumber" name="L807" href="#L807">807</a> 					}
-<a class="jxr_linenumber" name="L808" href="#L808">808</a> 					theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L809" href="#L809">809</a> 				}
-<a class="jxr_linenumber" name="L810" href="#L810">810</a> 
-<a class="jxr_linenumber" name="L811" href="#L811">811</a> 				<strong class="jxr_keyword">if</strong> (theResource instanceof IBaseBinary) {
-<a class="jxr_linenumber" name="L812" href="#L812">812</a> 					IBaseBinary bin = (IBaseBinary) theResource;
-<a class="jxr_linenumber" name="L813" href="#L813">813</a> 					writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"contentType"</span>, bin.getContentType());
-<a class="jxr_linenumber" name="L814" href="#L814">814</a> 					writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"content"</span>, bin.getContentAsBase64());
-<a class="jxr_linenumber" name="L815" href="#L815">815</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L816" href="#L816">816</a> 					encodeResourceToStreamWriterInDstu2Format(resDef, theResource, theResource, theEventWriter, resDef, theContainedResource);
-<a class="jxr_linenumber" name="L817" href="#L817">817</a> 				}
-<a class="jxr_linenumber" name="L818" href="#L818">818</a> 
-<a class="jxr_linenumber" name="L819" href="#L819">819</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L778" href="#L778">778</a> 				InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+<a class="jxr_linenumber" name="L779" href="#L779">779</a> 				IdDt resourceId = resource.getId();
+<a class="jxr_linenumber" name="L780" href="#L780">780</a> 				String versionIdPart = resourceId.getVersionIdPart();
+<a class="jxr_linenumber" name="L781" href="#L781">781</a> 				<strong class="jxr_keyword">if</strong> (isBlank(versionIdPart)) {
+<a class="jxr_linenumber" name="L782" href="#L782">782</a> 					versionIdPart = ResourceMetadataKeyEnum.VERSION.get(resource);
+<a class="jxr_linenumber" name="L783" href="#L783">783</a> 				}
+<a class="jxr_linenumber" name="L784" href="#L784">784</a> 				List&lt;BaseCodingDt&gt; securityLabels = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.SECURITY_LABELS);
+<a class="jxr_linenumber" name="L785" href="#L785">785</a> 				List&lt;IdDt&gt; profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
+<a class="jxr_linenumber" name="L786" href="#L786">786</a> 				TagList tags = getMetaTagsForEncoding((resource));
+<a class="jxr_linenumber" name="L787" href="#L787">787</a> 
+<a class="jxr_linenumber" name="L788" href="#L788">788</a> 				<strong class="jxr_keyword">if</strong> (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
+<a class="jxr_linenumber" name="L789" href="#L789">789</a> 					theEventWriter.writeStartElement(<span class="jxr_string">"meta"</span>);
+<a class="jxr_linenumber" name="L790" href="#L790">790</a> 					writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"versionId"</span>, versionIdPart);
+<a class="jxr_linenumber" name="L791" href="#L791">791</a> 					<strong class="jxr_keyword">if</strong> (updated != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L792" href="#L792">792</a> 						writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"lastUpdated"</span>, updated.getValueAsString());
+<a class="jxr_linenumber" name="L793" href="#L793">793</a> 					}
+<a class="jxr_linenumber" name="L794" href="#L794">794</a> 
+<a class="jxr_linenumber" name="L795" href="#L795">795</a> 					<strong class="jxr_keyword">for</strong> (IdDt profile : profiles) {
+<a class="jxr_linenumber" name="L796" href="#L796">796</a> 						theEventWriter.writeStartElement(<span class="jxr_string">"profile"</span>);
+<a class="jxr_linenumber" name="L797" href="#L797">797</a> 						theEventWriter.writeAttribute(<span class="jxr_string">"value"</span>, profile.getValue());
+<a class="jxr_linenumber" name="L798" href="#L798">798</a> 						theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L799" href="#L799">799</a> 					}
+<a class="jxr_linenumber" name="L800" href="#L800">800</a> 					<strong class="jxr_keyword">for</strong> (BaseCodingDt securityLabel : securityLabels) {
+<a class="jxr_linenumber" name="L801" href="#L801">801</a> 						theEventWriter.writeStartElement(<span class="jxr_string">"security"</span>);
+<a class="jxr_linenumber" name="L802" href="#L802">802</a> 						BaseRuntimeElementCompositeDefinition&lt;?&gt; def = (BaseRuntimeElementCompositeDefinition&lt;?&gt;) myContext.getElementDefinition(securityLabel.getClass());
+<a class="jxr_linenumber" name="L803" href="#L803">803</a> 						encodeCompositeElementChildrenToStreamWriter(resource, securityLabel, theEventWriter, def.getChildren(), theContainedResource, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L804" href="#L804">804</a> 						theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L805" href="#L805">805</a> 					}
+<a class="jxr_linenumber" name="L806" href="#L806">806</a> 					<strong class="jxr_keyword">if</strong> (tags != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L807" href="#L807">807</a> 						<strong class="jxr_keyword">for</strong> (Tag tag : tags) {
+<a class="jxr_linenumber" name="L808" href="#L808">808</a> 							<strong class="jxr_keyword">if</strong> (tag.isEmpty()) {
+<a class="jxr_linenumber" name="L809" href="#L809">809</a> 								<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L810" href="#L810">810</a> 							}
+<a class="jxr_linenumber" name="L811" href="#L811">811</a> 							theEventWriter.writeStartElement(<span class="jxr_string">"tag"</span>);
+<a class="jxr_linenumber" name="L812" href="#L812">812</a> 							writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"system"</span>, tag.getScheme());
+<a class="jxr_linenumber" name="L813" href="#L813">813</a> 							writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"code"</span>, tag.getTerm());
+<a class="jxr_linenumber" name="L814" href="#L814">814</a> 							writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"display"</span>, tag.getLabel());
+<a class="jxr_linenumber" name="L815" href="#L815">815</a> 							theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L816" href="#L816">816</a> 						}
+<a class="jxr_linenumber" name="L817" href="#L817">817</a> 					}
+<a class="jxr_linenumber" name="L818" href="#L818">818</a> 					theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L819" href="#L819">819</a> 				}
 <a class="jxr_linenumber" name="L820" href="#L820">820</a> 
-<a class="jxr_linenumber" name="L821" href="#L821">821</a> 				<em class="jxr_comment">// DSTU1</em>
-<a class="jxr_linenumber" name="L822" href="#L822">822</a> 				<strong class="jxr_keyword">if</strong> (theResourceId != <strong class="jxr_keyword">null</strong> &amp;&amp; theContainedResource) {
-<a class="jxr_linenumber" name="L823" href="#L823">823</a> 					theEventWriter.writeAttribute(<span class="jxr_string">"id"</span>, theResourceId);
-<a class="jxr_linenumber" name="L824" href="#L824">824</a> 				}
-<a class="jxr_linenumber" name="L825" href="#L825">825</a> 
-<a class="jxr_linenumber" name="L826" href="#L826">826</a> 				<strong class="jxr_keyword">if</strong> (theResource instanceof IBaseBinary) {
-<a class="jxr_linenumber" name="L827" href="#L827">827</a> 					IBaseBinary bin = (IBaseBinary) theResource;
-<a class="jxr_linenumber" name="L828" href="#L828">828</a> 					<strong class="jxr_keyword">if</strong> (bin.getContentType() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L829" href="#L829">829</a> 						theEventWriter.writeAttribute(<span class="jxr_string">"contentType"</span>, bin.getContentType());
-<a class="jxr_linenumber" name="L830" href="#L830">830</a> 					}
-<a class="jxr_linenumber" name="L831" href="#L831">831</a> 					theEventWriter.writeCharacters(bin.getContentAsBase64());
-<a class="jxr_linenumber" name="L832" href="#L832">832</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L833" href="#L833">833</a> 					encodeCompositeElementToStreamWriter(theResource, theResource, theEventWriter, resDef, theContainedResource, <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/BaseParser.html">CompositeChildElement</a>(resDef));
+<a class="jxr_linenumber" name="L821" href="#L821">821</a> 				<strong class="jxr_keyword">if</strong> (theResource instanceof IBaseBinary) {
+<a class="jxr_linenumber" name="L822" href="#L822">822</a> 					IBaseBinary bin = (IBaseBinary) theResource;
+<a class="jxr_linenumber" name="L823" href="#L823">823</a> 					writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"contentType"</span>, bin.getContentType());
+<a class="jxr_linenumber" name="L824" href="#L824">824</a> 					writeOptionalTagWithValue(theEventWriter, <span class="jxr_string">"content"</span>, bin.getContentAsBase64());
+<a class="jxr_linenumber" name="L825" href="#L825">825</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L826" href="#L826">826</a> 					encodeResourceToStreamWriterInDstu2Format(resDef, theResource, theResource, theEventWriter, resDef, theContainedResource);
+<a class="jxr_linenumber" name="L827" href="#L827">827</a> 				}
+<a class="jxr_linenumber" name="L828" href="#L828">828</a> 
+<a class="jxr_linenumber" name="L829" href="#L829">829</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L830" href="#L830">830</a> 
+<a class="jxr_linenumber" name="L831" href="#L831">831</a> 				<em class="jxr_comment">// DSTU1</em>
+<a class="jxr_linenumber" name="L832" href="#L832">832</a> 				<strong class="jxr_keyword">if</strong> (theResourceId != <strong class="jxr_keyword">null</strong> &amp;&amp; theContainedResource) {
+<a class="jxr_linenumber" name="L833" href="#L833">833</a> 					theEventWriter.writeAttribute(<span class="jxr_string">"id"</span>, theResourceId);
 <a class="jxr_linenumber" name="L834" href="#L834">834</a> 				}
 <a class="jxr_linenumber" name="L835" href="#L835">835</a> 
-<a class="jxr_linenumber" name="L836" href="#L836">836</a> 			}
-<a class="jxr_linenumber" name="L837" href="#L837">837</a> 
-<a class="jxr_linenumber" name="L838" href="#L838">838</a> 		}
-<a class="jxr_linenumber" name="L839" href="#L839">839</a> 
-<a class="jxr_linenumber" name="L840" href="#L840">840</a> 		theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L841" href="#L841">841</a> 	}
-<a class="jxr_linenumber" name="L842" href="#L842">842</a> 
-<a class="jxr_linenumber" name="L843" href="#L843">843</a> 	@Override
-<a class="jxr_linenumber" name="L844" href="#L844">844</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> encodeTagListToWriter(<a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> theTagList, Writer theWriter) <strong class="jxr_keyword">throws</strong> IOException {
-<a class="jxr_linenumber" name="L845" href="#L845">845</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L846" href="#L846">846</a> 			XMLStreamWriter eventWriter = createXmlWriter(theWriter);
+<a class="jxr_linenumber" name="L836" href="#L836">836</a> 				<strong class="jxr_keyword">if</strong> (theResource instanceof IBaseBinary) {
+<a class="jxr_linenumber" name="L837" href="#L837">837</a> 					IBaseBinary bin = (IBaseBinary) theResource;
+<a class="jxr_linenumber" name="L838" href="#L838">838</a> 					<strong class="jxr_keyword">if</strong> (bin.getContentType() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L839" href="#L839">839</a> 						theEventWriter.writeAttribute(<span class="jxr_string">"contentType"</span>, bin.getContentType());
+<a class="jxr_linenumber" name="L840" href="#L840">840</a> 					}
+<a class="jxr_linenumber" name="L841" href="#L841">841</a> 					theEventWriter.writeCharacters(bin.getContentAsBase64());
+<a class="jxr_linenumber" name="L842" href="#L842">842</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L843" href="#L843">843</a> 					encodeCompositeElementToStreamWriter(theResource, theResource, theEventWriter, resDef, theContainedResource, <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/parser/BaseParser.html">CompositeChildElement</a>(resDef));
+<a class="jxr_linenumber" name="L844" href="#L844">844</a> 				}
+<a class="jxr_linenumber" name="L845" href="#L845">845</a> 
+<a class="jxr_linenumber" name="L846" href="#L846">846</a> 			}
 <a class="jxr_linenumber" name="L847" href="#L847">847</a> 
-<a class="jxr_linenumber" name="L848" href="#L848">848</a> 			eventWriter.writeStartElement(TagList.ELEMENT_NAME_LC);
-<a class="jxr_linenumber" name="L849" href="#L849">849</a> 			eventWriter.writeDefaultNamespace(FHIR_NS);
-<a class="jxr_linenumber" name="L850" href="#L850">850</a> 
-<a class="jxr_linenumber" name="L851" href="#L851">851</a> 			<strong class="jxr_keyword">for</strong> (Tag next : theTagList) {
-<a class="jxr_linenumber" name="L852" href="#L852">852</a> 				eventWriter.writeStartElement(TagList.ATTR_CATEGORY);
-<a class="jxr_linenumber" name="L853" href="#L853">853</a> 
-<a class="jxr_linenumber" name="L854" href="#L854">854</a> 				<strong class="jxr_keyword">if</strong> (isNotBlank(next.getTerm())) {
-<a class="jxr_linenumber" name="L855" href="#L855">855</a> 					eventWriter.writeAttribute(Tag.ATTR_TERM, next.getTerm());
-<a class="jxr_linenumber" name="L856" href="#L856">856</a> 				}
-<a class="jxr_linenumber" name="L857" href="#L857">857</a> 				<strong class="jxr_keyword">if</strong> (isNotBlank(next.getLabel())) {
-<a class="jxr_linenumber" name="L858" href="#L858">858</a> 					eventWriter.writeAttribute(Tag.ATTR_LABEL, next.getLabel());
-<a class="jxr_linenumber" name="L859" href="#L859">859</a> 				}
-<a class="jxr_linenumber" name="L860" href="#L860">860</a> 				<strong class="jxr_keyword">if</strong> (isNotBlank(next.getScheme())) {
-<a class="jxr_linenumber" name="L861" href="#L861">861</a> 					eventWriter.writeAttribute(Tag.ATTR_SCHEME, next.getScheme());
-<a class="jxr_linenumber" name="L862" href="#L862">862</a> 				}
+<a class="jxr_linenumber" name="L848" href="#L848">848</a> 		}
+<a class="jxr_linenumber" name="L849" href="#L849">849</a> 
+<a class="jxr_linenumber" name="L850" href="#L850">850</a> 		theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L851" href="#L851">851</a> 	}
+<a class="jxr_linenumber" name="L852" href="#L852">852</a> 
+<a class="jxr_linenumber" name="L853" href="#L853">853</a> 	@Override
+<a class="jxr_linenumber" name="L854" href="#L854">854</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> encodeTagListToWriter(<a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> theTagList, Writer theWriter) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L855" href="#L855">855</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L856" href="#L856">856</a> 			XMLStreamWriter eventWriter = createXmlWriter(theWriter);
+<a class="jxr_linenumber" name="L857" href="#L857">857</a> 
+<a class="jxr_linenumber" name="L858" href="#L858">858</a> 			eventWriter.writeStartElement(TagList.ELEMENT_NAME_LC);
+<a class="jxr_linenumber" name="L859" href="#L859">859</a> 			eventWriter.writeDefaultNamespace(FHIR_NS);
+<a class="jxr_linenumber" name="L860" href="#L860">860</a> 
+<a class="jxr_linenumber" name="L861" href="#L861">861</a> 			<strong class="jxr_keyword">for</strong> (Tag next : theTagList) {
+<a class="jxr_linenumber" name="L862" href="#L862">862</a> 				eventWriter.writeStartElement(TagList.ATTR_CATEGORY);
 <a class="jxr_linenumber" name="L863" href="#L863">863</a> 
-<a class="jxr_linenumber" name="L864" href="#L864">864</a> 				eventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L865" href="#L865">865</a> 			}
-<a class="jxr_linenumber" name="L866" href="#L866">866</a> 
-<a class="jxr_linenumber" name="L867" href="#L867">867</a> 			eventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L868" href="#L868">868</a> 			eventWriter.close();
-<a class="jxr_linenumber" name="L869" href="#L869">869</a> 		} <strong class="jxr_keyword">catch</strong> (XMLStreamException e) {
-<a class="jxr_linenumber" name="L870" href="#L870">870</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Failed to initialize STaX event factory"</span>, e);
-<a class="jxr_linenumber" name="L871" href="#L871">871</a> 		}
-<a class="jxr_linenumber" name="L872" href="#L872">872</a> 	}
+<a class="jxr_linenumber" name="L864" href="#L864">864</a> 				<strong class="jxr_keyword">if</strong> (isNotBlank(next.getTerm())) {
+<a class="jxr_linenumber" name="L865" href="#L865">865</a> 					eventWriter.writeAttribute(Tag.ATTR_TERM, next.getTerm());
+<a class="jxr_linenumber" name="L866" href="#L866">866</a> 				}
+<a class="jxr_linenumber" name="L867" href="#L867">867</a> 				<strong class="jxr_keyword">if</strong> (isNotBlank(next.getLabel())) {
+<a class="jxr_linenumber" name="L868" href="#L868">868</a> 					eventWriter.writeAttribute(Tag.ATTR_LABEL, next.getLabel());
+<a class="jxr_linenumber" name="L869" href="#L869">869</a> 				}
+<a class="jxr_linenumber" name="L870" href="#L870">870</a> 				<strong class="jxr_keyword">if</strong> (isNotBlank(next.getScheme())) {
+<a class="jxr_linenumber" name="L871" href="#L871">871</a> 					eventWriter.writeAttribute(Tag.ATTR_SCHEME, next.getScheme());
+<a class="jxr_linenumber" name="L872" href="#L872">872</a> 				}
 <a class="jxr_linenumber" name="L873" href="#L873">873</a> 
-<a class="jxr_linenumber" name="L874" href="#L874">874</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> encodeUndeclaredExtensions(<a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource, XMLStreamWriter theWriter, List&lt;? <strong class="jxr_keyword">extends</strong> IBaseExtension&lt;?, ?&gt;&gt; theExtensions, String tagName, <strong class="jxr_keyword">boolean</strong> theIncludedResource)
-<a class="jxr_linenumber" name="L875" href="#L875">875</a> 			<strong class="jxr_keyword">throws</strong> XMLStreamException, <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a> {
-<a class="jxr_linenumber" name="L876" href="#L876">876</a> 		<strong class="jxr_keyword">for</strong> (IBaseExtension&lt;?, ?&gt; next : theExtensions) {
-<a class="jxr_linenumber" name="L877" href="#L877">877</a> 			<strong class="jxr_keyword">if</strong> (next == <strong class="jxr_keyword">null</strong> || (ElementUtil.isEmpty(next.getValue()) &amp;&amp; next.getExtension().isEmpty())) {
-<a class="jxr_linenumber" name="L878" href="#L878">878</a> 				<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L879" href="#L879">879</a> 			}
-<a class="jxr_linenumber" name="L880" href="#L880">880</a> 
-<a class="jxr_linenumber" name="L881" href="#L881">881</a> 			theWriter.writeStartElement(tagName);
-<a class="jxr_linenumber" name="L882" href="#L882">882</a> 
-<a class="jxr_linenumber" name="L883" href="#L883">883</a> 			String url = next.getUrl();
-<a class="jxr_linenumber" name="L884" href="#L884">884</a> 			theWriter.writeAttribute(<span class="jxr_string">"url"</span>, url);
-<a class="jxr_linenumber" name="L885" href="#L885">885</a> 
-<a class="jxr_linenumber" name="L886" href="#L886">886</a> 			<strong class="jxr_keyword">if</strong> (next.getValue() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L887" href="#L887">887</a> 				IBaseDatatype value = next.getValue();
-<a class="jxr_linenumber" name="L888" href="#L888">888</a> 				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
-<a class="jxr_linenumber" name="L889" href="#L889">889</a> 				String childName = extDef.getChildNameByDatatype(value.getClass());
-<a class="jxr_linenumber" name="L890" href="#L890">890</a> 				BaseRuntimeElementDefinition&lt;?&gt; childDef;
-<a class="jxr_linenumber" name="L891" href="#L891">891</a> 				<strong class="jxr_keyword">if</strong> (childName == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L892" href="#L892">892</a> 					childDef = myContext.getElementDefinition(value.getClass());
-<a class="jxr_linenumber" name="L893" href="#L893">893</a> 					<strong class="jxr_keyword">if</strong> (childDef == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L894" href="#L894">894</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unable to encode extension, unrecognized child element type: "</span> + value.getClass().getCanonicalName());
-<a class="jxr_linenumber" name="L895" href="#L895">895</a> 					} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L896" href="#L896">896</a> 						childName = RuntimeChildUndeclaredExtensionDefinition.createExtensionChildName(childDef);
-<a class="jxr_linenumber" name="L897" href="#L897">897</a> 					}
-<a class="jxr_linenumber" name="L898" href="#L898">898</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L899" href="#L899">899</a> 					childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
-<a class="jxr_linenumber" name="L900" href="#L900">900</a> 					<strong class="jxr_keyword">if</strong> (childDef == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L901" href="#L901">901</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unable to encode extension, unrecognized child element type: "</span> + value.getClass().getCanonicalName());
-<a class="jxr_linenumber" name="L902" href="#L902">902</a> 					}
-<a class="jxr_linenumber" name="L903" href="#L903">903</a> 				}
-<a class="jxr_linenumber" name="L904" href="#L904">904</a> 				encodeChildElementToStreamWriter(theResource, theWriter, value, childName, childDef, <strong class="jxr_keyword">null</strong>, theIncludedResource, <strong class="jxr_keyword">null</strong>);
-<a class="jxr_linenumber" name="L905" href="#L905">905</a> 			}
-<a class="jxr_linenumber" name="L906" href="#L906">906</a> 
-<a class="jxr_linenumber" name="L907" href="#L907">907</a> 			<em class="jxr_comment">// child extensions</em>
-<a class="jxr_linenumber" name="L908" href="#L908">908</a> 			encodeExtensionsIfPresent(theResource, theWriter, next, theIncludedResource);
-<a class="jxr_linenumber" name="L909" href="#L909">909</a> 
-<a class="jxr_linenumber" name="L910" href="#L910">910</a> 			theWriter.writeEndElement();
-<a class="jxr_linenumber" name="L911" href="#L911">911</a> 		}
-<a class="jxr_linenumber" name="L912" href="#L912">912</a> 	}
-<a class="jxr_linenumber" name="L913" href="#L913">913</a> 
-<a class="jxr_linenumber" name="L914" href="#L914">914</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> encodeXhtml(<a href="../../../../ca/uhn/fhir/model/primitive/XhtmlDt.html">XhtmlDt</a> theDt, XMLStreamWriter theEventWriter) <strong class="jxr_keyword">throws</strong> XMLStreamException {
-<a class="jxr_linenumber" name="L915" href="#L915">915</a> 		<strong class="jxr_keyword">if</strong> (theDt == <strong class="jxr_keyword">null</strong> || theDt.getValue() == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L916" href="#L916">916</a> 			<strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L917" href="#L917">917</a> 		}
-<a class="jxr_linenumber" name="L918" href="#L918">918</a> 
-<a class="jxr_linenumber" name="L919" href="#L919">919</a> 		<strong class="jxr_keyword">boolean</strong> firstElement = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L920" href="#L920">920</a> 		<strong class="jxr_keyword">for</strong> (XMLEvent event : theDt.getValue()) {
-<a class="jxr_linenumber" name="L921" href="#L921">921</a> 			<strong class="jxr_keyword">switch</strong> (event.getEventType()) {
-<a class="jxr_linenumber" name="L922" href="#L922">922</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.ATTRIBUTE:
-<a class="jxr_linenumber" name="L923" href="#L923">923</a> 				Attribute attr = (Attribute) event;
-<a class="jxr_linenumber" name="L924" href="#L924">924</a> 				<strong class="jxr_keyword">if</strong> (isBlank(attr.getName().getPrefix())) {
-<a class="jxr_linenumber" name="L925" href="#L925">925</a> 					<strong class="jxr_keyword">if</strong> (isBlank(attr.getName().getNamespaceURI())) {
-<a class="jxr_linenumber" name="L926" href="#L926">926</a> 						theEventWriter.writeAttribute(attr.getName().getLocalPart(), attr.getValue());
-<a class="jxr_linenumber" name="L927" href="#L927">927</a> 					} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L928" href="#L928">928</a> 						theEventWriter.writeAttribute(attr.getName().getNamespaceURI(), attr.getName().getLocalPart(), attr.getValue());
-<a class="jxr_linenumber" name="L929" href="#L929">929</a> 					}
-<a class="jxr_linenumber" name="L930" href="#L930">930</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L931" href="#L931">931</a> 					theEventWriter.writeAttribute(attr.getName().getPrefix(), attr.getName().getNamespaceURI(), attr.getName().getLocalPart(), attr.getValue());
-<a class="jxr_linenumber" name="L932" href="#L932">932</a> 				}
-<a class="jxr_linenumber" name="L933" href="#L933">933</a> 
-<a class="jxr_linenumber" name="L934" href="#L934">934</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L935" href="#L935">935</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.CDATA:
-<a class="jxr_linenumber" name="L936" href="#L936">936</a> 				theEventWriter.writeCData(((Characters) event).getData());
-<a class="jxr_linenumber" name="L937" href="#L937">937</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L938" href="#L938">938</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.CHARACTERS:
-<a class="jxr_linenumber" name="L939" href="#L939">939</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.SPACE:
-<a class="jxr_linenumber" name="L940" href="#L940">940</a> 				String data = ((Characters) event).getData();
-<a class="jxr_linenumber" name="L941" href="#L941">941</a> 				theEventWriter.writeCharacters(data);
-<a class="jxr_linenumber" name="L942" href="#L942">942</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L943" href="#L943">943</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.COMMENT:
-<a class="jxr_linenumber" name="L944" href="#L944">944</a> 				theEventWriter.writeComment(((Comment) event).getText());
-<a class="jxr_linenumber" name="L945" href="#L945">945</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L946" href="#L946">946</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.END_ELEMENT:
-<a class="jxr_linenumber" name="L947" href="#L947">947</a> 				theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L948" href="#L948">948</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L949" href="#L949">949</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.ENTITY_REFERENCE:
-<a class="jxr_linenumber" name="L950" href="#L950">950</a> 				EntityReference er = (EntityReference) event;
-<a class="jxr_linenumber" name="L951" href="#L951">951</a> 				theEventWriter.writeEntityRef(er.getName());
+<a class="jxr_linenumber" name="L874" href="#L874">874</a> 				eventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L875" href="#L875">875</a> 			}
+<a class="jxr_linenumber" name="L876" href="#L876">876</a> 
+<a class="jxr_linenumber" name="L877" href="#L877">877</a> 			eventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L878" href="#L878">878</a> 			eventWriter.close();
+<a class="jxr_linenumber" name="L879" href="#L879">879</a> 		} <strong class="jxr_keyword">catch</strong> (XMLStreamException e) {
+<a class="jxr_linenumber" name="L880" href="#L880">880</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Failed to initialize STaX event factory"</span>, e);
+<a class="jxr_linenumber" name="L881" href="#L881">881</a> 		}
+<a class="jxr_linenumber" name="L882" href="#L882">882</a> 	}
+<a class="jxr_linenumber" name="L883" href="#L883">883</a> 
+<a class="jxr_linenumber" name="L884" href="#L884">884</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> encodeUndeclaredExtensions(<a href="../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource, XMLStreamWriter theWriter, List&lt;? <strong class="jxr_keyword">extends</strong> IBaseExtension&lt;?, ?&gt;&gt; theExtensions, String tagName, <strong class="jxr_keyword">boolean</strong> theIncludedResource)
+<a class="jxr_linenumber" name="L885" href="#L885">885</a> 			<strong class="jxr_keyword">throws</strong> XMLStreamException, <a href="../../../../ca/uhn/fhir/parser/DataFormatException.html">DataFormatException</a> {
+<a class="jxr_linenumber" name="L886" href="#L886">886</a> 		<strong class="jxr_keyword">for</strong> (IBaseExtension&lt;?, ?&gt; next : theExtensions) {
+<a class="jxr_linenumber" name="L887" href="#L887">887</a> 			<strong class="jxr_keyword">if</strong> (next == <strong class="jxr_keyword">null</strong> || (ElementUtil.isEmpty(next.getValue()) &amp;&amp; next.getExtension().isEmpty())) {
+<a class="jxr_linenumber" name="L888" href="#L888">888</a> 				<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L889" href="#L889">889</a> 			}
+<a class="jxr_linenumber" name="L890" href="#L890">890</a> 
+<a class="jxr_linenumber" name="L891" href="#L891">891</a> 			theWriter.writeStartElement(tagName);
+<a class="jxr_linenumber" name="L892" href="#L892">892</a> 
+<a class="jxr_linenumber" name="L893" href="#L893">893</a> 			String url = next.getUrl();
+<a class="jxr_linenumber" name="L894" href="#L894">894</a> 			theWriter.writeAttribute(<span class="jxr_string">"url"</span>, url);
+<a class="jxr_linenumber" name="L895" href="#L895">895</a> 
+<a class="jxr_linenumber" name="L896" href="#L896">896</a> 			<strong class="jxr_keyword">if</strong> (next.getValue() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L897" href="#L897">897</a> 				IBaseDatatype value = next.getValue();
+<a class="jxr_linenumber" name="L898" href="#L898">898</a> 				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
+<a class="jxr_linenumber" name="L899" href="#L899">899</a> 				String childName = extDef.getChildNameByDatatype(value.getClass());
+<a class="jxr_linenumber" name="L900" href="#L900">900</a> 				BaseRuntimeElementDefinition&lt;?&gt; childDef;
+<a class="jxr_linenumber" name="L901" href="#L901">901</a> 				<strong class="jxr_keyword">if</strong> (childName == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L902" href="#L902">902</a> 					childDef = myContext.getElementDefinition(value.getClass());
+<a class="jxr_linenumber" name="L903" href="#L903">903</a> 					<strong class="jxr_keyword">if</strong> (childDef == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L904" href="#L904">904</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unable to encode extension, unrecognized child element type: "</span> + value.getClass().getCanonicalName());
+<a class="jxr_linenumber" name="L905" href="#L905">905</a> 					} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L906" href="#L906">906</a> 						childName = RuntimeChildUndeclaredExtensionDefinition.createExtensionChildName(childDef);
+<a class="jxr_linenumber" name="L907" href="#L907">907</a> 					}
+<a class="jxr_linenumber" name="L908" href="#L908">908</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L909" href="#L909">909</a> 					childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
+<a class="jxr_linenumber" name="L910" href="#L910">910</a> 					<strong class="jxr_keyword">if</strong> (childDef == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L911" href="#L911">911</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unable to encode extension, unrecognized child element type: "</span> + value.getClass().getCanonicalName());
+<a class="jxr_linenumber" name="L912" href="#L912">912</a> 					}
+<a class="jxr_linenumber" name="L913" href="#L913">913</a> 				}
+<a class="jxr_linenumber" name="L914" href="#L914">914</a> 				encodeChildElementToStreamWriter(theResource, theWriter, value, childName, childDef, <strong class="jxr_keyword">null</strong>, theIncludedResource, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L915" href="#L915">915</a> 			}
+<a class="jxr_linenumber" name="L916" href="#L916">916</a> 
+<a class="jxr_linenumber" name="L917" href="#L917">917</a> 			<em class="jxr_comment">// child extensions</em>
+<a class="jxr_linenumber" name="L918" href="#L918">918</a> 			encodeExtensionsIfPresent(theResource, theWriter, next, theIncludedResource);
+<a class="jxr_linenumber" name="L919" href="#L919">919</a> 
+<a class="jxr_linenumber" name="L920" href="#L920">920</a> 			theWriter.writeEndElement();
+<a class="jxr_linenumber" name="L921" href="#L921">921</a> 		}
+<a class="jxr_linenumber" name="L922" href="#L922">922</a> 	}
+<a class="jxr_linenumber" name="L923" href="#L923">923</a> 
+<a class="jxr_linenumber" name="L924" href="#L924">924</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> encodeXhtml(<a href="../../../../ca/uhn/fhir/model/primitive/XhtmlDt.html">XhtmlDt</a> theDt, XMLStreamWriter theEventWriter) <strong class="jxr_keyword">throws</strong> XMLStreamException {
+<a class="jxr_linenumber" name="L925" href="#L925">925</a> 		<strong class="jxr_keyword">if</strong> (theDt == <strong class="jxr_keyword">null</strong> || theDt.getValue() == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L926" href="#L926">926</a> 			<strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L927" href="#L927">927</a> 		}
+<a class="jxr_linenumber" name="L928" href="#L928">928</a> 
+<a class="jxr_linenumber" name="L929" href="#L929">929</a> 		<strong class="jxr_keyword">boolean</strong> firstElement = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L930" href="#L930">930</a> 		<strong class="jxr_keyword">for</strong> (XMLEvent event : theDt.getValue()) {
+<a class="jxr_linenumber" name="L931" href="#L931">931</a> 			<strong class="jxr_keyword">switch</strong> (event.getEventType()) {
+<a class="jxr_linenumber" name="L932" href="#L932">932</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.ATTRIBUTE:
+<a class="jxr_linenumber" name="L933" href="#L933">933</a> 				Attribute attr = (Attribute) event;
+<a class="jxr_linenumber" name="L934" href="#L934">934</a> 				<strong class="jxr_keyword">if</strong> (isBlank(attr.getName().getPrefix())) {
+<a class="jxr_linenumber" name="L935" href="#L935">935</a> 					<strong class="jxr_keyword">if</strong> (isBlank(attr.getName().getNamespaceURI())) {
+<a class="jxr_linenumber" name="L936" href="#L936">936</a> 						theEventWriter.writeAttribute(attr.getName().getLocalPart(), attr.getValue());
+<a class="jxr_linenumber" name="L937" href="#L937">937</a> 					} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L938" href="#L938">938</a> 						theEventWriter.writeAttribute(attr.getName().getNamespaceURI(), attr.getName().getLocalPart(), attr.getValue());
+<a class="jxr_linenumber" name="L939" href="#L939">939</a> 					}
+<a class="jxr_linenumber" name="L940" href="#L940">940</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L941" href="#L941">941</a> 					theEventWriter.writeAttribute(attr.getName().getPrefix(), attr.getName().getNamespaceURI(), attr.getName().getLocalPart(), attr.getValue());
+<a class="jxr_linenumber" name="L942" href="#L942">942</a> 				}
+<a class="jxr_linenumber" name="L943" href="#L943">943</a> 
+<a class="jxr_linenumber" name="L944" href="#L944">944</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L945" href="#L945">945</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.CDATA:
+<a class="jxr_linenumber" name="L946" href="#L946">946</a> 				theEventWriter.writeCData(((Characters) event).getData());
+<a class="jxr_linenumber" name="L947" href="#L947">947</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L948" href="#L948">948</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.CHARACTERS:
+<a class="jxr_linenumber" name="L949" href="#L949">949</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.SPACE:
+<a class="jxr_linenumber" name="L950" href="#L950">950</a> 				String data = ((Characters) event).getData();
+<a class="jxr_linenumber" name="L951" href="#L951">951</a> 				theEventWriter.writeCharacters(data);
 <a class="jxr_linenumber" name="L952" href="#L952">952</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L953" href="#L953">953</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.NAMESPACE:
-<a class="jxr_linenumber" name="L954" href="#L954">954</a> 				Namespace ns = (Namespace) event;
-<a class="jxr_linenumber" name="L955" href="#L955">955</a> 				theEventWriter.writeNamespace(ns.getPrefix(), ns.getNamespaceURI());
-<a class="jxr_linenumber" name="L956" href="#L956">956</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L957" href="#L957">957</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.START_ELEMENT:
-<a class="jxr_linenumber" name="L958" href="#L958">958</a> 				StartElement se = event.asStartElement();
-<a class="jxr_linenumber" name="L959" href="#L959">959</a> 				<strong class="jxr_keyword">if</strong> (firstElement) {
-<a class="jxr_linenumber" name="L960" href="#L960">960</a> 					<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(se.getName().getPrefix())) {
-<a class="jxr_linenumber" name="L961" href="#L961">961</a> 						String namespaceURI = se.getName().getNamespaceURI();
-<a class="jxr_linenumber" name="L962" href="#L962">962</a> 						<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(namespaceURI)) {
-<a class="jxr_linenumber" name="L963" href="#L963">963</a> 							namespaceURI = <span class="jxr_string">"http://www.w3.org/1999/xhtml"</span>;
-<a class="jxr_linenumber" name="L964" href="#L964">964</a> 						}
-<a class="jxr_linenumber" name="L965" href="#L965">965</a> 						theEventWriter.writeStartElement(se.getName().getLocalPart());
-<a class="jxr_linenumber" name="L966" href="#L966">966</a> 						theEventWriter.writeDefaultNamespace(namespaceURI);
-<a class="jxr_linenumber" name="L967" href="#L967">967</a> 					} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L968" href="#L968">968</a> 						String prefix = se.getName().getPrefix();
-<a class="jxr_linenumber" name="L969" href="#L969">969</a> 						String namespaceURI = se.getName().getNamespaceURI();
-<a class="jxr_linenumber" name="L970" href="#L970">970</a> 						theEventWriter.writeStartElement(prefix, se.getName().getLocalPart(), namespaceURI);
-<a class="jxr_linenumber" name="L971" href="#L971">971</a> 						theEventWriter.writeNamespace(prefix, namespaceURI);
-<a class="jxr_linenumber" name="L972" href="#L972">972</a> 					}
-<a class="jxr_linenumber" name="L973" href="#L973">973</a> 					firstElement = false;
-<a class="jxr_linenumber" name="L974" href="#L974">974</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L975" href="#L975">975</a> 					<strong class="jxr_keyword">if</strong> (isBlank(se.getName().getPrefix())) {
-<a class="jxr_linenumber" name="L976" href="#L976">976</a> 						<strong class="jxr_keyword">if</strong> (isBlank(se.getName().getNamespaceURI())) {
-<a class="jxr_linenumber" name="L977" href="#L977">977</a> 							theEventWriter.writeStartElement(se.getName().getLocalPart());
-<a class="jxr_linenumber" name="L978" href="#L978">978</a> 						} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L979" href="#L979">979</a> 							<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(se.getName().getPrefix())) {
-<a class="jxr_linenumber" name="L980" href="#L980">980</a> 								theEventWriter.writeStartElement(se.getName().getLocalPart());
-<a class="jxr_linenumber" name="L981" href="#L981">981</a> 								<em class="jxr_comment">// theEventWriter.writeDefaultNamespace(se.getName().getNamespaceURI());</em>
-<a class="jxr_linenumber" name="L982" href="#L982">982</a> 							} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L983" href="#L983">983</a> 								theEventWriter.writeStartElement(se.getName().getNamespaceURI(), se.getName().getLocalPart());
-<a class="jxr_linenumber" name="L984" href="#L984">984</a> 							}
-<a class="jxr_linenumber" name="L985" href="#L985">985</a> 						}
-<a class="jxr_linenumber" name="L986" href="#L986">986</a> 					} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L987" href="#L987">987</a> 						theEventWriter.writeStartElement(se.getName().getPrefix(), se.getName().getLocalPart(), se.getName().getNamespaceURI());
-<a class="jxr_linenumber" name="L988" href="#L988">988</a> 					}
-<a class="jxr_linenumber" name="L989" href="#L989">989</a> 					<strong class="jxr_keyword">for</strong> (Iterator&lt;?&gt; attrIter = se.getAttributes(); attrIter.hasNext();) {
-<a class="jxr_linenumber" name="L990" href="#L990">990</a> 						Attribute next = (Attribute) attrIter.next();
-<a class="jxr_linenumber" name="L991" href="#L991">991</a> 						theEventWriter.writeAttribute(next.getName().getLocalPart(), next.getValue());
-<a class="jxr_linenumber" name="L992" href="#L992">992</a> 					}
-<a class="jxr_linenumber" name="L993" href="#L993">993</a> 				}
-<a class="jxr_linenumber" name="L994" href="#L994">994</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L995" href="#L995">995</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.DTD:
-<a class="jxr_linenumber" name="L996" href="#L996">996</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.END_DOCUMENT:
-<a class="jxr_linenumber" name="L997" href="#L997">997</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.ENTITY_DECLARATION:
-<a class="jxr_linenumber" name="L998" href="#L998">998</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.NOTATION_DECLARATION:
-<a class="jxr_linenumber" name="L999" href="#L999">999</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.PROCESSING_INSTRUCTION:
-<a class="jxr_linenumber" name="L1000" href="#L1000">1000</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.START_DOCUMENT:
-<a class="jxr_linenumber" name="L1001" href="#L1001">1001</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L1002" href="#L1002">1002</a> 			}
-<a class="jxr_linenumber" name="L1003" href="#L1003">1003</a> 
-<a class="jxr_linenumber" name="L1004" href="#L1004">1004</a> 		}
-<a class="jxr_linenumber" name="L1005" href="#L1005">1005</a> 	}
-<a class="jxr_linenumber" name="L1006" href="#L1006">1006</a> 
-<a class="jxr_linenumber" name="L1007" href="#L1007">1007</a> 	@Override
-<a class="jxr_linenumber" name="L1008" href="#L1008">1008</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> getEncoding() {
-<a class="jxr_linenumber" name="L1009" href="#L1009">1009</a> 		<strong class="jxr_keyword">return</strong> EncodingEnum.XML;
-<a class="jxr_linenumber" name="L1010" href="#L1010">1010</a> 	}
-<a class="jxr_linenumber" name="L1011" href="#L1011">1011</a> 
-<a class="jxr_linenumber" name="L1012" href="#L1012">1012</a> 	@Override
-<a class="jxr_linenumber" name="L1013" href="#L1013">1013</a> 	<strong class="jxr_keyword">public</strong> &lt;T <strong class="jxr_keyword">extends</strong> IBaseResource&gt; <a href="../../../../ca/uhn/fhir/model/api/Bundle.html">Bundle</a> parseBundle(Class&lt;T&gt; theResourceType, Reader theReader) {
-<a class="jxr_linenumber" name="L1014" href="#L1014">1014</a> 		XMLEventReader streamReader = createStreamReader(theReader);
-<a class="jxr_linenumber" name="L1015" href="#L1015">1015</a> 
-<a class="jxr_linenumber" name="L1016" href="#L1016">1016</a> 		<strong class="jxr_keyword">return</strong> parseBundle(streamReader, theResourceType);
-<a class="jxr_linenumber" name="L1017" href="#L1017">1017</a> 	}
-<a class="jxr_linenumber" name="L1018" href="#L1018">1018</a> 
-<a class="jxr_linenumber" name="L1019" href="#L1019">1019</a> 	<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/api/Bundle.html">Bundle</a> parseBundle(XMLEventReader theStreamReader, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
-<a class="jxr_linenumber" name="L1020" href="#L1020">1020</a> 		ParserState&lt;Bundle&gt; parserState = ParserState.getPreAtomInstance(myContext, theResourceType, false, getErrorHandler());
-<a class="jxr_linenumber" name="L1021" href="#L1021">1021</a> 		<strong class="jxr_keyword">return</strong> doXmlLoop(theStreamReader, parserState);
-<a class="jxr_linenumber" name="L1022" href="#L1022">1022</a> 	}
-<a class="jxr_linenumber" name="L1023" href="#L1023">1023</a> 
-<a class="jxr_linenumber" name="L1024" href="#L1024">1024</a> 	<strong class="jxr_keyword">private</strong> &lt;T <strong class="jxr_keyword">extends</strong> IBaseResource&gt; T parseResource(Class&lt;T&gt; theResourceType, XMLEventReader theStreamReader) {
-<a class="jxr_linenumber" name="L1025" href="#L1025">1025</a> 		ParserState&lt;T&gt; parserState = ParserState.getPreResourceInstance(theResourceType, myContext, false, getErrorHandler());
-<a class="jxr_linenumber" name="L1026" href="#L1026">1026</a> 		<strong class="jxr_keyword">return</strong> doXmlLoop(theStreamReader, parserState);
+<a class="jxr_linenumber" name="L953" href="#L953">953</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.COMMENT:
+<a class="jxr_linenumber" name="L954" href="#L954">954</a> 				theEventWriter.writeComment(((Comment) event).getText());
+<a class="jxr_linenumber" name="L955" href="#L955">955</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L956" href="#L956">956</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.END_ELEMENT:
+<a class="jxr_linenumber" name="L957" href="#L957">957</a> 				theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L958" href="#L958">958</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L959" href="#L959">959</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.ENTITY_REFERENCE:
+<a class="jxr_linenumber" name="L960" href="#L960">960</a> 				EntityReference er = (EntityReference) event;
+<a class="jxr_linenumber" name="L961" href="#L961">961</a> 				theEventWriter.writeEntityRef(er.getName());
+<a class="jxr_linenumber" name="L962" href="#L962">962</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L963" href="#L963">963</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.NAMESPACE:
+<a class="jxr_linenumber" name="L964" href="#L964">964</a> 				Namespace ns = (Namespace) event;
+<a class="jxr_linenumber" name="L965" href="#L965">965</a> 				theEventWriter.writeNamespace(ns.getPrefix(), ns.getNamespaceURI());
+<a class="jxr_linenumber" name="L966" href="#L966">966</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L967" href="#L967">967</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.START_ELEMENT:
+<a class="jxr_linenumber" name="L968" href="#L968">968</a> 				StartElement se = event.asStartElement();
+<a class="jxr_linenumber" name="L969" href="#L969">969</a> 				<strong class="jxr_keyword">if</strong> (firstElement) {
+<a class="jxr_linenumber" name="L970" href="#L970">970</a> 					<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(se.getName().getPrefix())) {
+<a class="jxr_linenumber" name="L971" href="#L971">971</a> 						String namespaceURI = se.getName().getNamespaceURI();
+<a class="jxr_linenumber" name="L972" href="#L972">972</a> 						<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(namespaceURI)) {
+<a class="jxr_linenumber" name="L973" href="#L973">973</a> 							namespaceURI = <span class="jxr_string">"http://www.w3.org/1999/xhtml"</span>;
+<a class="jxr_linenumber" name="L974" href="#L974">974</a> 						}
+<a class="jxr_linenumber" name="L975" href="#L975">975</a> 						theEventWriter.writeStartElement(se.getName().getLocalPart());
+<a class="jxr_linenumber" name="L976" href="#L976">976</a> 						theEventWriter.writeDefaultNamespace(namespaceURI);
+<a class="jxr_linenumber" name="L977" href="#L977">977</a> 					} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L978" href="#L978">978</a> 						String prefix = se.getName().getPrefix();
+<a class="jxr_linenumber" name="L979" href="#L979">979</a> 						String namespaceURI = se.getName().getNamespaceURI();
+<a class="jxr_linenumber" name="L980" href="#L980">980</a> 						theEventWriter.writeStartElement(prefix, se.getName().getLocalPart(), namespaceURI);
+<a class="jxr_linenumber" name="L981" href="#L981">981</a> 						theEventWriter.writeNamespace(prefix, namespaceURI);
+<a class="jxr_linenumber" name="L982" href="#L982">982</a> 					}
+<a class="jxr_linenumber" name="L983" href="#L983">983</a> 					firstElement = false;
+<a class="jxr_linenumber" name="L984" href="#L984">984</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L985" href="#L985">985</a> 					<strong class="jxr_keyword">if</strong> (isBlank(se.getName().getPrefix())) {
+<a class="jxr_linenumber" name="L986" href="#L986">986</a> 						<strong class="jxr_keyword">if</strong> (isBlank(se.getName().getNamespaceURI())) {
+<a class="jxr_linenumber" name="L987" href="#L987">987</a> 							theEventWriter.writeStartElement(se.getName().getLocalPart());
+<a class="jxr_linenumber" name="L988" href="#L988">988</a> 						} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L989" href="#L989">989</a> 							<strong class="jxr_keyword">if</strong> (StringUtils.isBlank(se.getName().getPrefix())) {
+<a class="jxr_linenumber" name="L990" href="#L990">990</a> 								theEventWriter.writeStartElement(se.getName().getLocalPart());
+<a class="jxr_linenumber" name="L991" href="#L991">991</a> 								<em class="jxr_comment">// theEventWriter.writeDefaultNamespace(se.getName().getNamespaceURI());</em>
+<a class="jxr_linenumber" name="L992" href="#L992">992</a> 							} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L993" href="#L993">993</a> 								theEventWriter.writeStartElement(se.getName().getNamespaceURI(), se.getName().getLocalPart());
+<a class="jxr_linenumber" name="L994" href="#L994">994</a> 							}
+<a class="jxr_linenumber" name="L995" href="#L995">995</a> 						}
+<a class="jxr_linenumber" name="L996" href="#L996">996</a> 					} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L997" href="#L997">997</a> 						theEventWriter.writeStartElement(se.getName().getPrefix(), se.getName().getLocalPart(), se.getName().getNamespaceURI());
+<a class="jxr_linenumber" name="L998" href="#L998">998</a> 					}
+<a class="jxr_linenumber" name="L999" href="#L999">999</a> 					<strong class="jxr_keyword">for</strong> (Iterator&lt;?&gt; attrIter = se.getAttributes(); attrIter.hasNext();) {
+<a class="jxr_linenumber" name="L1000" href="#L1000">1000</a> 						Attribute next = (Attribute) attrIter.next();
+<a class="jxr_linenumber" name="L1001" href="#L1001">1001</a> 						theEventWriter.writeAttribute(next.getName().getLocalPart(), next.getValue());
+<a class="jxr_linenumber" name="L1002" href="#L1002">1002</a> 					}
+<a class="jxr_linenumber" name="L1003" href="#L1003">1003</a> 				}
+<a class="jxr_linenumber" name="L1004" href="#L1004">1004</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L1005" href="#L1005">1005</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.DTD:
+<a class="jxr_linenumber" name="L1006" href="#L1006">1006</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.END_DOCUMENT:
+<a class="jxr_linenumber" name="L1007" href="#L1007">1007</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.ENTITY_DECLARATION:
+<a class="jxr_linenumber" name="L1008" href="#L1008">1008</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.NOTATION_DECLARATION:
+<a class="jxr_linenumber" name="L1009" href="#L1009">1009</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.PROCESSING_INSTRUCTION:
+<a class="jxr_linenumber" name="L1010" href="#L1010">1010</a> 			<strong class="jxr_keyword">case</strong> XMLStreamConstants.START_DOCUMENT:
+<a class="jxr_linenumber" name="L1011" href="#L1011">1011</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L1012" href="#L1012">1012</a> 			}
+<a class="jxr_linenumber" name="L1013" href="#L1013">1013</a> 
+<a class="jxr_linenumber" name="L1014" href="#L1014">1014</a> 		}
+<a class="jxr_linenumber" name="L1015" href="#L1015">1015</a> 	}
+<a class="jxr_linenumber" name="L1016" href="#L1016">1016</a> 
+<a class="jxr_linenumber" name="L1017" href="#L1017">1017</a> 	@Override
+<a class="jxr_linenumber" name="L1018" href="#L1018">1018</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> getEncoding() {
+<a class="jxr_linenumber" name="L1019" href="#L1019">1019</a> 		<strong class="jxr_keyword">return</strong> EncodingEnum.XML;
+<a class="jxr_linenumber" name="L1020" href="#L1020">1020</a> 	}
+<a class="jxr_linenumber" name="L1021" href="#L1021">1021</a> 
+<a class="jxr_linenumber" name="L1022" href="#L1022">1022</a> 	@Override
+<a class="jxr_linenumber" name="L1023" href="#L1023">1023</a> 	<strong class="jxr_keyword">public</strong> &lt;T <strong class="jxr_keyword">extends</strong> IBaseResource&gt; <a href="../../../../ca/uhn/fhir/model/api/Bundle.html">Bundle</a> parseBundle(Class&lt;T&gt; theResourceType, Reader theReader) {
+<a class="jxr_linenumber" name="L1024" href="#L1024">1024</a> 		XMLEventReader streamReader = createStreamReader(theReader);
+<a class="jxr_linenumber" name="L1025" href="#L1025">1025</a> 
+<a class="jxr_linenumber" name="L1026" href="#L1026">1026</a> 		<strong class="jxr_keyword">return</strong> parseBundle(streamReader, theResourceType);
 <a class="jxr_linenumber" name="L1027" href="#L1027">1027</a> 	}
 <a class="jxr_linenumber" name="L1028" href="#L1028">1028</a> 
-<a class="jxr_linenumber" name="L1029" href="#L1029">1029</a> 	@Override
-<a class="jxr_linenumber" name="L1030" href="#L1030">1030</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> parseTagList(Reader theReader) {
-<a class="jxr_linenumber" name="L1031" href="#L1031">1031</a> 		XMLEventReader streamReader = createStreamReader(theReader);
-<a class="jxr_linenumber" name="L1032" href="#L1032">1032</a> 
-<a class="jxr_linenumber" name="L1033" href="#L1033">1033</a> 		ParserState&lt;TagList&gt; parserState = ParserState.getPreTagListInstance(myContext, false, getErrorHandler());
-<a class="jxr_linenumber" name="L1034" href="#L1034">1034</a> 		<strong class="jxr_keyword">return</strong> doXmlLoop(streamReader, parserState);
-<a class="jxr_linenumber" name="L1035" href="#L1035">1035</a> 	}
-<a class="jxr_linenumber" name="L1036" href="#L1036">1036</a> 
-<a class="jxr_linenumber" name="L1037" href="#L1037">1037</a> 	@Override
-<a class="jxr_linenumber" name="L1038" href="#L1038">1038</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/IParser.html">IParser</a> setPrettyPrint(<strong class="jxr_keyword">boolean</strong> thePrettyPrint) {
-<a class="jxr_linenumber" name="L1039" href="#L1039">1039</a> 		myPrettyPrint = thePrettyPrint;
-<a class="jxr_linenumber" name="L1040" href="#L1040">1040</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L1041" href="#L1041">1041</a> 	}
+<a class="jxr_linenumber" name="L1029" href="#L1029">1029</a> 	<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/model/api/Bundle.html">Bundle</a> parseBundle(XMLEventReader theStreamReader, Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theResourceType) {
+<a class="jxr_linenumber" name="L1030" href="#L1030">1030</a> 		ParserState&lt;Bundle&gt; parserState = ParserState.getPreAtomInstance(myContext, theResourceType, false, getErrorHandler());
+<a class="jxr_linenumber" name="L1031" href="#L1031">1031</a> 		<strong class="jxr_keyword">return</strong> doXmlLoop(theStreamReader, parserState);
+<a class="jxr_linenumber" name="L1032" href="#L1032">1032</a> 	}
+<a class="jxr_linenumber" name="L1033" href="#L1033">1033</a> 
+<a class="jxr_linenumber" name="L1034" href="#L1034">1034</a> 	<strong class="jxr_keyword">private</strong> &lt;T <strong class="jxr_keyword">extends</strong> IBaseResource&gt; T parseResource(Class&lt;T&gt; theResourceType, XMLEventReader theStreamReader) {
+<a class="jxr_linenumber" name="L1035" href="#L1035">1035</a> 		ParserState&lt;T&gt; parserState = ParserState.getPreResourceInstance(theResourceType, myContext, false, getErrorHandler());
+<a class="jxr_linenumber" name="L1036" href="#L1036">1036</a> 		<strong class="jxr_keyword">return</strong> doXmlLoop(theStreamReader, parserState);
+<a class="jxr_linenumber" name="L1037" href="#L1037">1037</a> 	}
+<a class="jxr_linenumber" name="L1038" href="#L1038">1038</a> 
+<a class="jxr_linenumber" name="L1039" href="#L1039">1039</a> 	@Override
+<a class="jxr_linenumber" name="L1040" href="#L1040">1040</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> parseTagList(Reader theReader) {
+<a class="jxr_linenumber" name="L1041" href="#L1041">1041</a> 		XMLEventReader streamReader = createStreamReader(theReader);
 <a class="jxr_linenumber" name="L1042" href="#L1042">1042</a> 
-<a class="jxr_linenumber" name="L1043" href="#L1043">1043</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1044" href="#L1044">1044</a> <em class="jxr_javadoccomment">	 * This is just to work around the fact that casting java.util.List&lt;ca.uhn.fhir.model.api.ExtensionDt&gt; to java.util.List&lt;? extends org.hl7.fhir.instance.model.api.IBaseExtension&lt;?, ?&gt;&gt; seems to be</em>
-<a class="jxr_linenumber" name="L1045" href="#L1045">1045</a> <em class="jxr_javadoccomment">	 * rejected by the compiler some of the time.</em>
-<a class="jxr_linenumber" name="L1046" href="#L1046">1046</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1047" href="#L1047">1047</a> 	<strong class="jxr_keyword">private</strong> &lt;Q <strong class="jxr_keyword">extends</strong> IBaseExtension&lt;?, ?&gt;&gt; List&lt;IBaseExtension&lt;?, ?&gt;&gt; toBaseExtensionList(<strong class="jxr_keyword">final</strong> List&lt;Q&gt; theList) {
-<a class="jxr_linenumber" name="L1048" href="#L1048">1048</a> 		List&lt;IBaseExtension&lt;?, ?&gt;&gt; retVal = <strong class="jxr_keyword">new</strong> ArrayList&lt;IBaseExtension&lt;?, ?&gt;&gt;(theList.size());
-<a class="jxr_linenumber" name="L1049" href="#L1049">1049</a> 		retVal.addAll(theList);
-<a class="jxr_linenumber" name="L1050" href="#L1050">1050</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L1043" href="#L1043">1043</a> 		ParserState&lt;TagList&gt; parserState = ParserState.getPreTagListInstance(myContext, false, getErrorHandler());
+<a class="jxr_linenumber" name="L1044" href="#L1044">1044</a> 		<strong class="jxr_keyword">return</strong> doXmlLoop(streamReader, parserState);
+<a class="jxr_linenumber" name="L1045" href="#L1045">1045</a> 	}
+<a class="jxr_linenumber" name="L1046" href="#L1046">1046</a> 
+<a class="jxr_linenumber" name="L1047" href="#L1047">1047</a> 	@Override
+<a class="jxr_linenumber" name="L1048" href="#L1048">1048</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/parser/IParser.html">IParser</a> setPrettyPrint(<strong class="jxr_keyword">boolean</strong> thePrettyPrint) {
+<a class="jxr_linenumber" name="L1049" href="#L1049">1049</a> 		myPrettyPrint = thePrettyPrint;
+<a class="jxr_linenumber" name="L1050" href="#L1050">1050</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L1051" href="#L1051">1051</a> 	}
 <a class="jxr_linenumber" name="L1052" href="#L1052">1052</a> 
-<a class="jxr_linenumber" name="L1053" href="#L1053">1053</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeAtomLink(XMLStreamWriter theEventWriter, String theRel, <a href="../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a> theStringDt) <strong class="jxr_keyword">throws</strong> XMLStreamException {
-<a class="jxr_linenumber" name="L1054" href="#L1054">1054</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(theStringDt.getValue())) {
-<a class="jxr_linenumber" name="L1055" href="#L1055">1055</a> 			theEventWriter.writeStartElement(<span class="jxr_string">"link"</span>);
-<a class="jxr_linenumber" name="L1056" href="#L1056">1056</a> 			theEventWriter.writeAttribute(<span class="jxr_string">"rel"</span>, theRel);
-<a class="jxr_linenumber" name="L1057" href="#L1057">1057</a> 			theEventWriter.writeAttribute(<span class="jxr_string">"href"</span>, theStringDt.getValue());
-<a class="jxr_linenumber" name="L1058" href="#L1058">1058</a> 			theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L1059" href="#L1059">1059</a> 		}
-<a class="jxr_linenumber" name="L1060" href="#L1060">1060</a> 	}
-<a class="jxr_linenumber" name="L1061" href="#L1061">1061</a> 
-<a class="jxr_linenumber" name="L1062" href="#L1062">1062</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeBundleResourceLink(XMLStreamWriter theEventWriter, String theRel, <a href="../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a> theUrl) <strong class="jxr_keyword">throws</strong> XMLStreamException {
-<a class="jxr_linenumber" name="L1063" href="#L1063">1063</a> 		<strong class="jxr_keyword">if</strong> (theUrl.isEmpty() == false) {
-<a class="jxr_linenumber" name="L1064" href="#L1064">1064</a> 			theEventWriter.writeStartElement(<span class="jxr_string">"link"</span>);
-<a class="jxr_linenumber" name="L1065" href="#L1065">1065</a> 			theEventWriter.writeStartElement(<span class="jxr_string">"relation"</span>);
-<a class="jxr_linenumber" name="L1066" href="#L1066">1066</a> 			theEventWriter.writeAttribute(<span class="jxr_string">"value"</span>, theRel);
-<a class="jxr_linenumber" name="L1067" href="#L1067">1067</a> 			theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L1068" href="#L1068">1068</a> 			theEventWriter.writeStartElement(<span class="jxr_string">"url"</span>);
-<a class="jxr_linenumber" name="L1069" href="#L1069">1069</a> 			theEventWriter.writeAttribute(<span class="jxr_string">"value"</span>, theUrl.getValue());
-<a class="jxr_linenumber" name="L1070" href="#L1070">1070</a> 			theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L1071" href="#L1071">1071</a> 			theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L1072" href="#L1072">1072</a> 		}
-<a class="jxr_linenumber" name="L1073" href="#L1073">1073</a> 	}
-<a class="jxr_linenumber" name="L1074" href="#L1074">1074</a> 
-<a class="jxr_linenumber" name="L1075" href="#L1075">1075</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeCategories(XMLStreamWriter eventWriter, <a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> categories) <strong class="jxr_keyword">throws</strong> XMLStreamException {
-<a class="jxr_linenumber" name="L1076" href="#L1076">1076</a> 		<strong class="jxr_keyword">if</strong> (categories != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1077" href="#L1077">1077</a> 			<strong class="jxr_keyword">for</strong> (Tag next : categories) {
-<a class="jxr_linenumber" name="L1078" href="#L1078">1078</a> 				eventWriter.writeStartElement(<span class="jxr_string">"category"</span>);
-<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a> 				eventWriter.writeAttribute(<span class="jxr_string">"term"</span>, defaultString(next.getTerm()));
-<a class="jxr_linenumber" name="L1080" href="#L1080">1080</a> 				eventWriter.writeAttribute(<span class="jxr_string">"label"</span>, defaultString(next.getLabel()));
-<a class="jxr_linenumber" name="L1081" href="#L1081">1081</a> 				eventWriter.writeAttribute(<span class="jxr_string">"scheme"</span>, defaultString(next.getScheme()));
-<a class="jxr_linenumber" name="L1082" href="#L1082">1082</a> 				eventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L1083" href="#L1083">1083</a> 			}
-<a class="jxr_linenumber" name="L1084" href="#L1084">1084</a> 		}
-<a class="jxr_linenumber" name="L1085" href="#L1085">1085</a> 	}
-<a class="jxr_linenumber" name="L1086" href="#L1086">1086</a> 
-<a class="jxr_linenumber" name="L1087" href="#L1087">1087</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeOptionalAttribute(XMLStreamWriter theEventWriter, String theName, String theValue) <strong class="jxr_keyword">throws</strong> XMLStreamException {
-<a class="jxr_linenumber" name="L1088" href="#L1088">1088</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(theValue)) {
-<a class="jxr_linenumber" name="L1089" href="#L1089">1089</a> 			theEventWriter.writeAttribute(theName, theValue);
-<a class="jxr_linenumber" name="L1090" href="#L1090">1090</a> 		}
-<a class="jxr_linenumber" name="L1091" href="#L1091">1091</a> 	}
-<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a> 
-<a class="jxr_linenumber" name="L1093" href="#L1093">1093</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeOptionalTagWithTextNode(XMLStreamWriter theEventWriter, String theTagName, <a href="../../../../ca/uhn/fhir/model/primitive/InstantDt.html">InstantDt</a> theInstantDt) <strong class="jxr_keyword">throws</strong> XMLStreamException {
-<a class="jxr_linenumber" name="L1094" href="#L1094">1094</a> 		<strong class="jxr_keyword">if</strong> (theInstantDt.getValue() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1095" href="#L1095">1095</a> 			theEventWriter.writeStartElement(theTagName);
-<a class="jxr_linenumber" name="L1096" href="#L1096">1096</a> 			theEventWriter.writeCharacters(theInstantDt.getValueAsString());
-<a class="jxr_linenumber" name="L1097" href="#L1097">1097</a> 			theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L1098" href="#L1098">1098</a> 		}
-<a class="jxr_linenumber" name="L1099" href="#L1099">1099</a> 	}
-<a class="jxr_linenumber" name="L1100" href="#L1100">1100</a> 
-<a class="jxr_linenumber" name="L1101" href="#L1101">1101</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeOptionalTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, <a href="../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a> theTextValue) <strong class="jxr_keyword">throws</strong> XMLStreamException {
-<a class="jxr_linenumber" name="L1102" href="#L1102">1102</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(theTextValue.getValue())) {
-<a class="jxr_linenumber" name="L1103" href="#L1103">1103</a> 			theEventWriter.writeStartElement(theElementName);
-<a class="jxr_linenumber" name="L1104" href="#L1104">1104</a> 			theEventWriter.writeCharacters(theTextValue.getValue());
-<a class="jxr_linenumber" name="L1105" href="#L1105">1105</a> 			theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L1106" href="#L1106">1106</a> 		}
-<a class="jxr_linenumber" name="L1107" href="#L1107">1107</a> 	}
-<a class="jxr_linenumber" name="L1108" href="#L1108">1108</a> 
-<a class="jxr_linenumber" name="L1109" href="#L1109">1109</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeOptionalTagWithValue(XMLStreamWriter theEventWriter, String theName, String theValue) <strong class="jxr_keyword">throws</strong> XMLStreamException {
-<a class="jxr_linenumber" name="L1110" href="#L1110">1110</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(theValue)) {
-<a class="jxr_linenumber" name="L1111" href="#L1111">1111</a> 			theEventWriter.writeStartElement(theName);
-<a class="jxr_linenumber" name="L1112" href="#L1112">1112</a> 			theEventWriter.writeAttribute(<span class="jxr_string">"value"</span>, theValue);
-<a class="jxr_linenumber" name="L1113" href="#L1113">1113</a> 			theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L1114" href="#L1114">1114</a> 		}
-<a class="jxr_linenumber" name="L1115" href="#L1115">1115</a> 	}
-<a class="jxr_linenumber" name="L1116" href="#L1116">1116</a> 
-<a class="jxr_linenumber" name="L1117" href="#L1117">1117</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, <a href="../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theIdDt) <strong class="jxr_keyword">throws</strong> XMLStreamException {
-<a class="jxr_linenumber" name="L1118" href="#L1118">1118</a> 		theEventWriter.writeStartElement(theElementName);
-<a class="jxr_linenumber" name="L1119" href="#L1119">1119</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(theIdDt.getValue())) {
-<a class="jxr_linenumber" name="L1120" href="#L1120">1120</a> 			theEventWriter.writeCharacters(theIdDt.getValue());
-<a class="jxr_linenumber" name="L1121" href="#L1121">1121</a> 		}
-<a class="jxr_linenumber" name="L1122" href="#L1122">1122</a> 		theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L1123" href="#L1123">1123</a> 	}
-<a class="jxr_linenumber" name="L1124" href="#L1124">1124</a> 
-<a class="jxr_linenumber" name="L1125" href="#L1125">1125</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, <a href="../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a> theStringDt) <strong class="jxr_keyword">throws</strong> XMLStreamException {
-<a class="jxr_linenumber" name="L1126" href="#L1126">1126</a> 		theEventWriter.writeStartElement(theElementName);
-<a class="jxr_linenumber" name="L1127" href="#L1127">1127</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(theStringDt.getValue())) {
-<a class="jxr_linenumber" name="L1128" href="#L1128">1128</a> 			theEventWriter.writeCharacters(theStringDt.getValue());
-<a class="jxr_linenumber" name="L1129" href="#L1129">1129</a> 		}
-<a class="jxr_linenumber" name="L1130" href="#L1130">1130</a> 		theEventWriter.writeEndElement();
-<a class="jxr_linenumber" name="L1131" href="#L1131">1131</a> 	}
-<a class="jxr_linenumber" name="L1132" href="#L1132">1132</a> 
-<a class="jxr_linenumber" name="L1133" href="#L1133">1133</a> }
+<a class="jxr_linenumber" name="L1053" href="#L1053">1053</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1054" href="#L1054">1054</a> <em class="jxr_javadoccomment">	 * This is just to work around the fact that casting java.util.List&lt;ca.uhn.fhir.model.api.ExtensionDt&gt; to java.util.List&lt;? extends org.hl7.fhir.instance.model.api.IBaseExtension&lt;?, ?&gt;&gt; seems to be</em>
+<a class="jxr_linenumber" name="L1055" href="#L1055">1055</a> <em class="jxr_javadoccomment">	 * rejected by the compiler some of the time.</em>
+<a class="jxr_linenumber" name="L1056" href="#L1056">1056</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L1057" href="#L1057">1057</a> 	<strong class="jxr_keyword">private</strong> &lt;Q <strong class="jxr_keyword">extends</strong> IBaseExtension&lt;?, ?&gt;&gt; List&lt;IBaseExtension&lt;?, ?&gt;&gt; toBaseExtensionList(<strong class="jxr_keyword">final</strong> List&lt;Q&gt; theList) {
+<a class="jxr_linenumber" name="L1058" href="#L1058">1058</a> 		List&lt;IBaseExtension&lt;?, ?&gt;&gt; retVal = <strong class="jxr_keyword">new</strong> ArrayList&lt;IBaseExtension&lt;?, ?&gt;&gt;(theList.size());
+<a class="jxr_linenumber" name="L1059" href="#L1059">1059</a> 		retVal.addAll(theList);
+<a class="jxr_linenumber" name="L1060" href="#L1060">1060</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L1061" href="#L1061">1061</a> 	}
+<a class="jxr_linenumber" name="L1062" href="#L1062">1062</a> 
+<a class="jxr_linenumber" name="L1063" href="#L1063">1063</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeAtomLink(XMLStreamWriter theEventWriter, String theRel, <a href="../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a> theStringDt) <strong class="jxr_keyword">throws</strong> XMLStreamException {
+<a class="jxr_linenumber" name="L1064" href="#L1064">1064</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(theStringDt.getValue())) {
+<a class="jxr_linenumber" name="L1065" href="#L1065">1065</a> 			theEventWriter.writeStartElement(<span class="jxr_string">"link"</span>);
+<a class="jxr_linenumber" name="L1066" href="#L1066">1066</a> 			theEventWriter.writeAttribute(<span class="jxr_string">"rel"</span>, theRel);
+<a class="jxr_linenumber" name="L1067" href="#L1067">1067</a> 			theEventWriter.writeAttribute(<span class="jxr_string">"href"</span>, theStringDt.getValue());
+<a class="jxr_linenumber" name="L1068" href="#L1068">1068</a> 			theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L1069" href="#L1069">1069</a> 		}
+<a class="jxr_linenumber" name="L1070" href="#L1070">1070</a> 	}
+<a class="jxr_linenumber" name="L1071" href="#L1071">1071</a> 
+<a class="jxr_linenumber" name="L1072" href="#L1072">1072</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeBundleResourceLink(XMLStreamWriter theEventWriter, String theRel, <a href="../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a> theUrl) <strong class="jxr_keyword">throws</strong> XMLStreamException {
+<a class="jxr_linenumber" name="L1073" href="#L1073">1073</a> 		<strong class="jxr_keyword">if</strong> (theUrl.isEmpty() == false) {
+<a class="jxr_linenumber" name="L1074" href="#L1074">1074</a> 			theEventWriter.writeStartElement(<span class="jxr_string">"link"</span>);
+<a class="jxr_linenumber" name="L1075" href="#L1075">1075</a> 			theEventWriter.writeStartElement(<span class="jxr_string">"relation"</span>);
+<a class="jxr_linenumber" name="L1076" href="#L1076">1076</a> 			theEventWriter.writeAttribute(<span class="jxr_string">"value"</span>, theRel);
+<a class="jxr_linenumber" name="L1077" href="#L1077">1077</a> 			theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L1078" href="#L1078">1078</a> 			theEventWriter.writeStartElement(<span class="jxr_string">"url"</span>);
+<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a> 			theEventWriter.writeAttribute(<span class="jxr_string">"value"</span>, theUrl.getValue());
+<a class="jxr_linenumber" name="L1080" href="#L1080">1080</a> 			theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L1081" href="#L1081">1081</a> 			theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L1082" href="#L1082">1082</a> 		}
+<a class="jxr_linenumber" name="L1083" href="#L1083">1083</a> 	}
+<a class="jxr_linenumber" name="L1084" href="#L1084">1084</a> 
+<a class="jxr_linenumber" name="L1085" href="#L1085">1085</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeCategories(XMLStreamWriter eventWriter, <a href="../../../../ca/uhn/fhir/model/api/TagList.html">TagList</a> categories) <strong class="jxr_keyword">throws</strong> XMLStreamException {
+<a class="jxr_linenumber" name="L1086" href="#L1086">1086</a> 		<strong class="jxr_keyword">if</strong> (categories != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1087" href="#L1087">1087</a> 			<strong class="jxr_keyword">for</strong> (Tag next : categories) {
+<a class="jxr_linenumber" name="L1088" href="#L1088">1088</a> 				eventWriter.writeStartElement(<span class="jxr_string">"category"</span>);
+<a class="jxr_linenumber" name="L1089" href="#L1089">1089</a> 				eventWriter.writeAttribute(<span class="jxr_string">"term"</span>, defaultString(next.getTerm()));
+<a class="jxr_linenumber" name="L1090" href="#L1090">1090</a> 				eventWriter.writeAttribute(<span class="jxr_string">"label"</span>, defaultString(next.getLabel()));
+<a class="jxr_linenumber" name="L1091" href="#L1091">1091</a> 				eventWriter.writeAttribute(<span class="jxr_string">"scheme"</span>, defaultString(next.getScheme()));
+<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a> 				eventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L1093" href="#L1093">1093</a> 			}
+<a class="jxr_linenumber" name="L1094" href="#L1094">1094</a> 		}
+<a class="jxr_linenumber" name="L1095" href="#L1095">1095</a> 	}
+<a class="jxr_linenumber" name="L1096" href="#L1096">1096</a> 
+<a class="jxr_linenumber" name="L1097" href="#L1097">1097</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeOptionalAttribute(XMLStreamWriter theEventWriter, String theName, String theValue) <strong class="jxr_keyword">throws</strong> XMLStreamException {
+<a class="jxr_linenumber" name="L1098" href="#L1098">1098</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(theValue)) {
+<a class="jxr_linenumber" name="L1099" href="#L1099">1099</a> 			theEventWriter.writeAttribute(theName, theValue);
+<a class="jxr_linenumber" name="L1100" href="#L1100">1100</a> 		}
+<a class="jxr_linenumber" name="L1101" href="#L1101">1101</a> 	}
+<a class="jxr_linenumber" name="L1102" href="#L1102">1102</a> 
+<a class="jxr_linenumber" name="L1103" href="#L1103">1103</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeOptionalTagWithTextNode(XMLStreamWriter theEventWriter, String theTagName, <a href="../../../../ca/uhn/fhir/model/primitive/InstantDt.html">InstantDt</a> theInstantDt) <strong class="jxr_keyword">throws</strong> XMLStreamException {
+<a class="jxr_linenumber" name="L1104" href="#L1104">1104</a> 		<strong class="jxr_keyword">if</strong> (theInstantDt.getValue() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1105" href="#L1105">1105</a> 			theEventWriter.writeStartElement(theTagName);
+<a class="jxr_linenumber" name="L1106" href="#L1106">1106</a> 			theEventWriter.writeCharacters(theInstantDt.getValueAsString());
+<a class="jxr_linenumber" name="L1107" href="#L1107">1107</a> 			theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L1108" href="#L1108">1108</a> 		}
+<a class="jxr_linenumber" name="L1109" href="#L1109">1109</a> 	}
+<a class="jxr_linenumber" name="L1110" href="#L1110">1110</a> 
+<a class="jxr_linenumber" name="L1111" href="#L1111">1111</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeOptionalTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, <a href="../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a> theTextValue) <strong class="jxr_keyword">throws</strong> XMLStreamException {
+<a class="jxr_linenumber" name="L1112" href="#L1112">1112</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(theTextValue.getValue())) {
+<a class="jxr_linenumber" name="L1113" href="#L1113">1113</a> 			theEventWriter.writeStartElement(theElementName);
+<a class="jxr_linenumber" name="L1114" href="#L1114">1114</a> 			theEventWriter.writeCharacters(theTextValue.getValue());
+<a class="jxr_linenumber" name="L1115" href="#L1115">1115</a> 			theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L1116" href="#L1116">1116</a> 		}
+<a class="jxr_linenumber" name="L1117" href="#L1117">1117</a> 	}
+<a class="jxr_linenumber" name="L1118" href="#L1118">1118</a> 
+<a class="jxr_linenumber" name="L1119" href="#L1119">1119</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeOptionalTagWithValue(XMLStreamWriter theEventWriter, String theName, String theValue) <strong class="jxr_keyword">throws</strong> XMLStreamException {
+<a class="jxr_linenumber" name="L1120" href="#L1120">1120</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(theValue)) {
+<a class="jxr_linenumber" name="L1121" href="#L1121">1121</a> 			theEventWriter.writeStartElement(theName);
+<a class="jxr_linenumber" name="L1122" href="#L1122">1122</a> 			theEventWriter.writeAttribute(<span class="jxr_string">"value"</span>, theValue);
+<a class="jxr_linenumber" name="L1123" href="#L1123">1123</a> 			theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L1124" href="#L1124">1124</a> 		}
+<a class="jxr_linenumber" name="L1125" href="#L1125">1125</a> 	}
+<a class="jxr_linenumber" name="L1126" href="#L1126">1126</a> 
+<a class="jxr_linenumber" name="L1127" href="#L1127">1127</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, <a href="../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theIdDt) <strong class="jxr_keyword">throws</strong> XMLStreamException {
+<a class="jxr_linenumber" name="L1128" href="#L1128">1128</a> 		theEventWriter.writeStartElement(theElementName);
+<a class="jxr_linenumber" name="L1129" href="#L1129">1129</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(theIdDt.getValue())) {
+<a class="jxr_linenumber" name="L1130" href="#L1130">1130</a> 			theEventWriter.writeCharacters(theIdDt.getValue());
+<a class="jxr_linenumber" name="L1131" href="#L1131">1131</a> 		}
+<a class="jxr_linenumber" name="L1132" href="#L1132">1132</a> 		theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L1133" href="#L1133">1133</a> 	}
+<a class="jxr_linenumber" name="L1134" href="#L1134">1134</a> 
+<a class="jxr_linenumber" name="L1135" href="#L1135">1135</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> writeTagWithTextNode(XMLStreamWriter theEventWriter, String theElementName, <a href="../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a> theStringDt) <strong class="jxr_keyword">throws</strong> XMLStreamException {
+<a class="jxr_linenumber" name="L1136" href="#L1136">1136</a> 		theEventWriter.writeStartElement(theElementName);
+<a class="jxr_linenumber" name="L1137" href="#L1137">1137</a> 		<strong class="jxr_keyword">if</strong> (StringUtils.isNotBlank(theStringDt.getValue())) {
+<a class="jxr_linenumber" name="L1138" href="#L1138">1138</a> 			theEventWriter.writeCharacters(theStringDt.getValue());
+<a class="jxr_linenumber" name="L1139" href="#L1139">1139</a> 		}
+<a class="jxr_linenumber" name="L1140" href="#L1140">1140</a> 		theEventWriter.writeEndElement();
+<a class="jxr_linenumber" name="L1141" href="#L1141">1141</a> 	}
+<a class="jxr_linenumber" name="L1142" href="#L1142">1142</a> 
+<a class="jxr_linenumber" name="L1143" href="#L1143">1143</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

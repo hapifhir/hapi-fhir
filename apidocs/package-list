@@ -25,5 +25,8 @@ ca.uhn.fhir.rest.server.exceptions
 ca.uhn.fhir.rest.server.interceptor
 ca.uhn.fhir.store
 ca.uhn.fhir.util
+ca.uhn.fhir.util.jar
+ca.uhn.fhir.util.reflection
 ca.uhn.fhir.validation
+ca.uhn.fhir.validation.schematron
 org.hl7.fhir.instance.model.api

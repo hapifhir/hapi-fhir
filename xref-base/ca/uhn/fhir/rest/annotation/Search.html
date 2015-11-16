@@ -95,7 +95,20 @@
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  	<strong class="jxr_keyword">boolean</strong> dynamic() <strong class="jxr_keyword">default</strong> false;
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>  	
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  }
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment">	 * In a REST server, should this method be invoked even if it does not have method parameters </em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment">	 * which correspond to all of the URL parameters passed in by the client (default is &lt;code&gt;false&lt;/code&gt;).</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  <em class="jxr_javadoccomment">	 * Use this method with caution: Methods marked with a value of &lt;code&gt;true&lt;/code&gt; will</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  <em class="jxr_javadoccomment">	 * be greedy, meaning they may handle invocations you had intended to be handled by other</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_javadoccomment">	 * search methods. Such a method may be invoked as long as any method parameters</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment">	 * marked as {@link RequiredParam required} have been satisfied. If there are other methods</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment">	 * which have parameters marked as {@link OptionalParam optional} which would technically be</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">	 * a better match, either the this method or the other method might be called.</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	<strong class="jxr_keyword">boolean</strong> allowUnknownParams() <strong class="jxr_keyword">default</strong> false;
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

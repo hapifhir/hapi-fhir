@@ -42,88 +42,108 @@
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment"> */</em>
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a href="../../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> {
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  	<strong class="jxr_keyword">boolean</strong> isEmpty();
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  	<strong class="jxr_keyword">void</strong> applyTo(<a href="../../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource);
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if the ID is a local reference (in other words, it begins with the '#' character)</em>
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  	<strong class="jxr_keyword">boolean</strong> isLocal();
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment">	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.</em>
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment">	 * @see #getIdPart()</em>
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	String getValue();
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment">	 * Returns only the logical ID part of this ID. For example, given the ID</em>
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment">	 * "<a href="http://example,.com/fhir/Patient/123/_history/456" target="alexandria_uri">http://example,.com/fhir/Patient/123/_history/456</a>", this method would</em>
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment">	 * return "123".</em>
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	String getIdPart();
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if this ID contains an actual ID part. For example, the ID part is</em>
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment">	 * the '123' in the following ID: &lt;code&gt;<a href="http://example.com/fhir/Patient/123/_history/55&lt;/code&gt" target="alexandria_uri">http://example.com/fhir/Patient/123/_history/55&lt;/code&gt</a>;</em>
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  	<strong class="jxr_keyword">boolean</strong> hasIdPart();
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment">	 * Returns the server base URL if this ID contains one. For example, the base URL is</em>
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment">	 * the '<a href="http://example.com/fhir'" target="alexandria_uri">http://example.com/fhir'</a> in the following ID: &lt;code&gt;http://example.com/fhir/Patient/123/_history/55&lt;/code&gt;</em>
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	String getBaseUrl();
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  	IIdType toUnqualifiedVersionless();
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  	IIdType toVersionless();
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  	IIdType setValue(String theString);
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">boolean</strong> hasVersionIdPart();
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	String getVersionIdPart();
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	IIdType toUnqualified();
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  	<strong class="jxr_keyword">boolean</strong> hasResourceType();
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  	IIdType withResourceType(String theResName);
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  	String getResourceType();
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	IIdType withServerBase(String theServerBase, String theResourceName);
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if this ID contains an absolute URL (in other words, a URL starting with "<a href="http://" target="alexandria_uri">http://</a>" or "https://"</em>
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  	<strong class="jxr_keyword">boolean</strong> isAbsolute();
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if the {@link #getIdPart() ID part of this object} is valid according to the FHIR rules for valid IDs. </em>
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment">	 * The FHIR specification states:</em>
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">	 * &lt;code&gt;Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'), '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID or any other identifier pattern that meets these constraints.) regex: [A-Za-z0-9\-\.]{1,64}&lt;/code&gt;</em>
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	<strong class="jxr_keyword">boolean</strong> isIdPartValid();
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if the {@link #getIdPart() ID part of this object} contains</em>
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">	 * only numbers </em>
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 	<strong class="jxr_keyword">boolean</strong> isIdPartValidLong();
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 	Long getIdPartAsLong();
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 	<strong class="jxr_keyword">boolean</strong> hasBaseUrl();
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 	IIdType withVersion(String theVersion);
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	<strong class="jxr_keyword">void</strong> applyTo(<a href="../../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theResource);
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment">	 * Returns the server base URL if this ID contains one. For example, the base URL is</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment">	 * the '<a href="http://example.com/fhir'" target="alexandria_uri">http://example.com/fhir'</a> in the following ID: &lt;code&gt;http://example.com/fhir/Patient/123/_history/55&lt;/code&gt;</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  	String getBaseUrl();
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment">	 * Returns only the logical ID part of this ID. For example, given the ID</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment">	 * "<a href="http://example,.com/fhir/Patient/123/_history/456" target="alexandria_uri">http://example,.com/fhir/Patient/123/_history/456</a>", this method would</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment">	 * return "123".</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	String getIdPart();
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment">	 * Returns the ID part of this ID (e.g. in the ID <a href="http://example.com/Patient/123/_history/456" target="alexandria_uri">http://example.com/Patient/123/_history/456</a> this would be the</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment">	 * part "123") parsed as a {@link Long}.</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment">	 * @throws NumberFormatException If the value can't be parsed as a long</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  	Long getIdPartAsLong();
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  	String getResourceType();
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment">	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment">	 * @see #getIdPart()</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  	String getValue();
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  	String getVersionIdPart();
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_javadoccomment">	 * Returns the version ID part of this ID (e.g. in the ID <a href="http://example.com/Patient/123/_history/456" target="alexandria_uri">http://example.com/Patient/123/_history/456</a> this would be the</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment">	 * part "456") parsed as a {@link Long}.</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_javadoccomment">	 * @throws NumberFormatException If the value can't be parsed as a long</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  	Long getVersionIdPartAsLong();
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  	<strong class="jxr_keyword">boolean</strong> hasBaseUrl();
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if this ID contains an actual ID part. For example, the ID part is</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_javadoccomment">	 * the '123' in the following ID: &lt;code&gt;<a href="http://example.com/fhir/Patient/123/_history/55&lt;/code&gt" target="alexandria_uri">http://example.com/fhir/Patient/123/_history/55&lt;/code&gt</a>;</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  	<strong class="jxr_keyword">boolean</strong> hasIdPart();
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  	<strong class="jxr_keyword">boolean</strong> hasResourceType();
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  	<strong class="jxr_keyword">boolean</strong> hasVersionIdPart();
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if this ID contains an absolute URL (in other words, a URL starting with "<a href="http://" target="alexandria_uri">http://</a>" or "https://"</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  	<strong class="jxr_keyword">boolean</strong> isAbsolute();
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  	<strong class="jxr_keyword">boolean</strong> isEmpty();
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if the {@link #getIdPart() ID part of this object} is valid according to the FHIR rules for valid IDs. </em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment">	 * The FHIR specification states:</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment">	 * &lt;code&gt;Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'), '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID or any other identifier pattern that meets these constraints.) regex: [A-Za-z0-9\-\.]{1,64}&lt;/code&gt;</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	<strong class="jxr_keyword">boolean</strong> isIdPartValid();
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if the {@link #getIdPart() ID part of this object} contains</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_javadoccomment">	 * only numbers </em>
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 	<strong class="jxr_keyword">boolean</strong> isIdPartValidLong();
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if the ID is a local reference (in other words, it begins with the '#' character)</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	<strong class="jxr_keyword">boolean</strong> isLocal();
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> }
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment">	 * Returns &lt;code&gt;true&lt;/code&gt; if the {@link #getVersionIdPart() version ID part of this object} contains</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_javadoccomment">	 * only numbers </em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 	<strong class="jxr_keyword">boolean</strong> isVersionIdPartValidLong();
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 	IIdType setValue(String theString);
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 	IIdType toUnqualified();
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 	IIdType toUnqualifiedVersionless();
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	IIdType toVersionless();
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 	IIdType withResourceType(String theResName);
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 	
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 	IIdType withServerBase(String theServerBase, String theResourceName);
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 	IIdType withVersion(String theVersion);
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

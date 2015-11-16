@@ -25,9 +25,9 @@ under the License.
     <language>en-us</language>
     <copyright>&#169;2014 - 2015 University Health Network</copyright>
     <item>
-      <title>File: 468,
+      <title>File: 476,
              Errors: 0,
-             Warnings: 907,
+             Warnings: 915,
              Infos: 0
       </title>
             <link>http://jamesagnew.github.io/hapi-fhir//checkstyle.html</link>
@@ -116,6 +116,20 @@ under the License.
               </tr>
                           <tr>
                 <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.util.jar.DependencyLogImpl.java">ca/uhn/fhir/util/jar/DependencyLogImpl.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.server.BundleInclusionRule.java">ca/uhn/fhir/rest/server/BundleInclusionRule.java</a>
                 </td>
                 <td>
@@ -136,7 +150,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  4
+                  3
                 </td>
                 <td>
                   0
@@ -668,7 +682,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  12
+                  13
                 </td>
                 <td>
                   0
@@ -767,6 +781,20 @@ under the License.
                 </td>
                 <td>
                   2
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.util.reflection.JavaBeansBeanUtil.java">ca/uhn/fhir/util/reflection/JavaBeansBeanUtil.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  1
                 </td>
                 <td>
                   0
@@ -920,7 +948,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  3
+                  4
                 </td>
                 <td>
                   0
@@ -970,27 +998,13 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.validation.SchematronBaseValidator.java">ca/uhn/fhir/validation/SchematronBaseValidator.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.parser.JsonParser.java">ca/uhn/fhir/parser/JsonParser.java</a>
                 </td>
                 <td>
                   0
                 </td>
                 <td>
-                  1
+                  2
                 </td>
                 <td>
                   0
@@ -1046,7 +1060,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  1
+                  2
                 </td>
                 <td>
                   0
@@ -1312,7 +1326,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  6
+                  4
                 </td>
                 <td>
                   0
@@ -1732,7 +1746,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  11
+                  13
                 </td>
                 <td>
                   0
@@ -2468,27 +2482,13 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.server.Dstu1BundleFactory.java">ca/uhn/fhir/rest/server/Dstu1BundleFactory.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  8
-                </td>
-                <td>
-                  0
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.util.BeanUtils.java">ca/uhn/fhir/util/BeanUtils.java</a>
                 </td>
                 <td>
                   0
                 </td>
                 <td>
-                  1
+                  0
                 </td>
                 <td>
                   0
@@ -2572,7 +2572,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  0
+                  4
                 </td>
                 <td>
                   0
@@ -2740,7 +2740,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  10
+                  12
                 </td>
                 <td>
                   0
@@ -2992,7 +2992,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  9
+                  8
                 </td>
                 <td>
                   0
@@ -3034,7 +3034,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  0
+                  1
                 </td>
                 <td>
                   0
@@ -3253,6 +3253,20 @@ under the License.
                           <tr>
                 <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.param.ReferenceParam.java">ca/uhn/fhir/rest/param/ReferenceParam.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.method.RequestDetailsParameter.java">ca/uhn/fhir/rest/method/RequestDetailsParameter.java</a>
                 </td>
                 <td>
                   0
@@ -3678,7 +3692,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  2
+                  3
                 </td>
                 <td>
                   0
@@ -4294,7 +4308,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  13
+                  12
                 </td>
                 <td>
                   0
@@ -4322,7 +4336,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  1
+                  2
                 </td>
                 <td>
                   0
@@ -4442,6 +4456,20 @@ under the License.
               </tr>
                           <tr>
                 <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.util.reflection.IBeanUtils.java">ca/uhn/fhir/util/reflection/IBeanUtils.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException.java">ca/uhn/fhir/rest/server/exceptions/UnclassifiedServerFailureException.java</a>
                 </td>
                 <td>
@@ -4504,7 +4532,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  0
+                  4
                 </td>
                 <td>
                   0
@@ -4666,6 +4694,20 @@ under the License.
               </tr>
                           <tr>
                 <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.util.jar.IDependencyLog.java">ca/uhn/fhir/util/jar/IDependencyLog.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#org.hl7.fhir.instance.model.api.IBaseBooleanDatatype.java">org/hl7/fhir/instance/model/api/IBaseBooleanDatatype.java</a>
                 </td>
                 <td>
@@ -4695,6 +4737,20 @@ under the License.
                           <tr>
                 <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.method.ConditionalParamBinder.java">ca/uhn/fhir/rest/method/ConditionalParamBinder.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput.java">ca/uhn/fhir/rest/gclient/IOperationUntypedWithInputAndPartialOutput.java</a>
                 </td>
                 <td>
                   0
@@ -4910,7 +4966,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  4
+                  5
                 </td>
                 <td>
                   0
@@ -5436,6 +5492,20 @@ under the License.
               </tr>
                           <tr>
                 <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.util.reflection.JavaReflectBeanUtil.java">ca/uhn/fhir/util/reflection/JavaReflectBeanUtil.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.model.api.IExtension.java">ca/uhn/fhir/model/api/IExtension.java</a>
                 </td>
                 <td>
@@ -5647,6 +5717,20 @@ under the License.
                           <tr>
                 <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.param.UriAndListParam.java">ca/uhn/fhir/rest/param/UriAndListParam.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.validation.schematron.SchematronProvider.java">ca/uhn/fhir/validation/schematron/SchematronProvider.java</a>
                 </td>
                 <td>
                   0
@@ -5884,6 +5968,20 @@ under the License.
               </tr>
                           <tr>
                 <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.util.jar.DependencyLogFactory.java">ca/uhn/fhir/util/jar/DependencyLogFactory.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy.java">ca/uhn/fhir/rest/server/IncomingRequestAddressStrategy.java</a>
                 </td>
                 <td>
@@ -5891,6 +5989,20 @@ under the License.
                 </td>
                 <td>
                   1
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.validation.schematron.SchematronBaseValidator.java">ca/uhn/fhir/validation/schematron/SchematronBaseValidator.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
                 </td>
                 <td>
                   0
@@ -6114,7 +6226,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  5
+                  6
                 </td>
                 <td>
                   0
