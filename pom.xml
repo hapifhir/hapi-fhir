@@ -1389,6 +1389,7 @@
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>
 				<module>hapi-fhir-osgi-core</module>
+				<module>hapi-fhir-base-example-embedded-ws</module>
 			</modules>
 		</profile>
 		<profile>
@@ -1400,6 +1401,5 @@
 	</profiles>
 
 	<modules>
-		<module>hapi-fhir-base-example-embedded-ws</module>
 	</modules>
 </project>

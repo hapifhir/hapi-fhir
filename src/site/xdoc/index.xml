@@ -61,6 +61,48 @@
 
 		<section name="Announcements">
 			<p>
+				<b>November 15, 2015 - HAPI FHIR 1.3 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section. 
+			</p>
+			<p>
+				This release brings a number of bugfixes and a few bigger things.
+				As always, the <a href="./changes-report.html">changelog</a> has the full list
+				of changes in this version. Some changes of note include:
+			</p>
+			<ul>
+				<li>
+					FHIR DSTU2 definitions have been updated to v1.0.2 of the FHIR specification 
+					(see the <a href="./downloads.html">downloads page</a> for FHIR version support information)
+				</li>
+				<li>
+					The JPA server now uses Lucene (via Hibernate Search) as an added indexing
+					mechanism. This allows the server to support fulltext searching via the
+					<code>_content</code> and <code>_text</code> search parameters.
+				</li>
+				<li>
+					The JPA server has been converted from using Spring XML configuration to
+					using Spring Java configuration. Existing JPA server users are recommended
+					to look at the <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-jpaserver-example">hapi-fhir-jpaserver-example</a>
+					project to see how the configuration looks now.
+				</li>
+				<li>
+					A new Command-Line Tool called <a href="./doc_cli.html">hapi-fhir-cli</a>
+					has been created. This tool has a bunch of cool features, including the
+					ability to start up a fully functional FHIR server with a single command.
+				</li>
+				<li>
+					Several of HAPI's library dependencies have been upgraded to the latest version
+					(see the first entry in the <a href="./changes-report.html">changelog</a>)
+				</li>
+			</ul>
+			<p>
+				And just a reminder, if you haven't yet filled out the 
+				<a href="http://goo.gl/forms/R8Ifg2qvOY">HAPI FHIR Community Survey</a>, we
+				would really appreciate if you did so!
+			</p>
+			<!-- 
+			<p>
 				<b>September 18, 2015 - HAPI FHIR 1.2 and Community Survey</b> -
 				We are very pleased the release of HAPI FHIR 1.2. This release brings
 				support for the 
@@ -79,6 +121,7 @@
 				This 10 question survey will only take a minute, and it helps us to understand
 				who uses HAPI and what you need. Please take a moment to fill it out!
 			</p>
+			-->
 			<!--
 			<p>
 				<b>July 13, 2015 - HAPI FHIR 1.1 Released</b> - HAPI 1.1 has been released! 
