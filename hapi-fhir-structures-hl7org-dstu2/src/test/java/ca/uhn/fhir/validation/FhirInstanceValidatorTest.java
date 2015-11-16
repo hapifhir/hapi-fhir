@@ -26,7 +26,11 @@ import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -157,6 +161,13 @@ public class FhirInstanceValidatorTest {
     return retVal;
   }
 
+  @Rule
+  public TestRule watcher = new TestWatcher() {
+     protected void starting(Description description) {
+        ourLog.info("Starting test: " + description.getMethodName());
+     }
+  };
+  
   @Test
   public void testValidateRawJsonResource() {
     // @formatter:off
