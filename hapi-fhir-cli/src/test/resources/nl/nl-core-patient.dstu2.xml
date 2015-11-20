@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+    <id value="nl-core-patient"/>
+    <meta>
+        <lastUpdated value="2015-09-22T20:02:49.724+10:00"/>
+    </meta>
+    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+        <valueInteger value="5"/>
+    </extension>
+    <url value="http://fhir.nl/fhir/StructureDefinition/nl-core-patient"/>
+    <name value="nl-core-patient"/>
+    <status value="draft"/>
+    <contact>
+        <name value="HL7 Netherlands"/>
+    </contact>
+    <date value="2015-09-22T20:02:49+10:00"/>
+    <description value="National core Patient profile."/>
+    <requirements value="Tracking patient is the center of the healthcare process."/>
+    <fhirVersion value="1.0.1"/>
+    <mapping>
+        <identity value="rim"/>
+        <uri value="http://hl7.org/v3"/>
+        <name value="RIM"/>
+    </mapping>
+    <mapping>
+        <identity value="cda"/>
+        <uri value="http://hl7.org/v3/cda"/>
+        <name value="CDA (R2)"/>
+    </mapping>
+    <mapping>
+        <identity value="w5"/>
+        <uri value="http://hl7.org/fhir/w5"/>
+        <name value="W5 Mapping"/>
+    </mapping>
+    <mapping>
+        <identity value="v2"/>
+        <uri value="http://hl7.org/v2"/>
+        <name value="HL7 v2"/>
+    </mapping>
+    <mapping>
+        <identity value="loinc"/>
+        <uri value="http://loinc.org"/>
+        <name value="LOINC"/>
+    </mapping>
+    <kind value="resource"/>
+    <constrainedType value="Patient"/>
+    <abstract value="false"/>
+    <base value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+    <differential>
+        <element>
+            <path value="Patient"/>
+            <short value="Information about an individual or animal receiving health care services"/>
+            <definition value="Demographics and other administrative information about an individual or animal receiving care or other health-related services."/>
+            <alias value="SubjectOfCare Client Resident"/>
+            <min value="0"/>
+            <max value="*"/>
+            <type>
+                <code value="Patient"/>
+            </type>
+            <mapping>
+                <identity value="rim"/>
+                <map value="Patient[classCode=PAT]"/>
+            </mapping>
+            <mapping>
+                <identity value="cda"/>
+                <map value="ClinicalDocument.recordTarget.patientRole"/>
+            </mapping>
+            <mapping>
+                <identity value="w5"/>
+                <map value="administrative.individual"/>
+            </mapping>
+        </element>
+        <element>
+            <path value="Patient.address"/>
+            <short value="Addresses for the individual"/>
+            <definition value="Addresses for the individual."/>
+            <comments value="Patient may have multiple addresses with different uses or applicable periods."/>
+            <requirements value="May need to keep track of patient addresses for contacting, billing or reporting requirements and also to help with identification."/>
+            <min value="0"/>
+            <max value="*"/>
+            <type>
+                <code value="Address"/>
+                <profile value="http://fhir.nl/fhir/StructureDefinition/nl-core-address"/>
+            </type>
+            <isSummary value="true"/>
+            <mapping>
+                <identity value="v2"/>
+                <map value="PID-11"/>
+            </mapping>
+            <mapping>
+                <identity value="rim"/>
+                <map value="addr"/>
+            </mapping>
+            <mapping>
+                <identity value="cda"/>
+                <map value=".addr"/>
+            </mapping>
+        </element>
+    </differential>
+</StructureDefinition>

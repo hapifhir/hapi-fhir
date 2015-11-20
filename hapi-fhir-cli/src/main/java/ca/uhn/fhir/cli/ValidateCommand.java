@@ -6,8 +6,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.fusesource.jansi.Ansi.*;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -19,8 +24,12 @@ import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi;
 
 import com.phloc.commons.io.file.FileUtils;
+import com.sun.tools.corba.se.idl.ParameterEntry;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 import ca.uhn.fhir.rest.method.MethodUtil;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirInstanceValidator;
@@ -28,6 +37,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.ValidationSupportChain;
+import net.sf.saxon.expr.instruct.LocalParam;
 import net.sf.saxon.om.Chain;
 
 public class ValidateCommand extends BaseCommand {
@@ -57,7 +67,7 @@ public class ValidateCommand extends BaseCommand {
 		retVal.addOption("s", "sch", false, "Validate using Schematrons");
 		retVal.addOption("p", "profile", false, "Validate using Profiles (StructureDefinition / ValueSet)");
 		retVal.addOption("r", "fetch-remote", false, "Allow fetching remote resources (in other words, if a resource being validated refers to an external StructureDefinition, Questionnaire, etc. this flag allows the validator to access the internet to try and fetch this resource)");
-
+		retVal.addOption(new Option("l", "fetch-local", true, "Fetch a profile locally and use it if referenced"));
 		retVal.addOption("e", "encoding", false, "File encoding (default is UTF-8)");
 
 		return retVal;
@@ -91,9 +101,24 @@ public class ValidateCommand extends BaseCommand {
 		if (theCommandLine.hasOption("p")) {
 			FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
 			val.registerValidatorModule(instanceValidator);
-			if (theCommandLine.hasOption("r")) {
-				instanceValidator.setValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), new LoadingValidationSupport()));
+			ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport());
+			if (theCommandLine.hasOption("l")) {
+				String localProfile = theCommandLine.getOptionValue("l");
+				ourLog.info("Loading profile: {}", localProfile);
+				String input;
+				try {
+					input = IOUtils.toString(new FileReader(new File(localProfile)));
+				} catch (IOException e) {
+					throw new ParseException("Failed to load file '" + localProfile + "' - Error: " + e.toString());
+				}
+				
+				org.hl7.fhir.instance.model.StructureDefinition sd = (org.hl7.fhir.instance.model.StructureDefinition) MethodUtil.detectEncodingNoDefault(input).newParser(FhirContext.forDstu2Hl7Org()).parseResource(input);
+				instanceValidator.setStructureDefintion(sd);
 			}
+			if (theCommandLine.hasOption("r")) {
+				validationSupport.addValidationSupport(new LoadingValidationSupport());
+			}
+			instanceValidator.setValidationSupport(validationSupport);
 		}
 
 		val.setValidateAgainstStandardSchema(theCommandLine.hasOption("x"));

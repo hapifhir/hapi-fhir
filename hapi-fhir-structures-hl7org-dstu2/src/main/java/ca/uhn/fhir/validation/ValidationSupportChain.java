@@ -14,13 +14,27 @@ public class ValidationSupportChain implements IValidationSupport {
 
   private List<IValidationSupport> myChain;
 
-  public ValidationSupportChain(IValidationSupport... theValidationSupportModules) {
+  /**
+   * Constructor
+   */
+  public ValidationSupportChain() {
     myChain = new ArrayList<IValidationSupport>();
+  }
+
+  /**
+   * Constructor
+   */
+  public ValidationSupportChain(IValidationSupport... theValidationSupportModules) {
+    this();
     for (IValidationSupport next : theValidationSupportModules) {
       if (next != null) {
         myChain.add(next);
       }
     }
+  }
+
+  public void addValidationSupport(IValidationSupport theValidationSupport) {
+    myChain.add(theValidationSupport);
   }
 
   @Override

@@ -6,7 +6,12 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="1.3" date="TBD">
+		<release version="1.4" date="TBD">
+			<action type="fix">
+				Remove a dependency on Java 1.7 in 
+			</action>
+		</release>
+		<release version="1.3" date="2015-11-14">
 			<action type="add">
             Bump the version of a few dependencies to the
             latest versions (dependent HAPI modules listed in brackets):

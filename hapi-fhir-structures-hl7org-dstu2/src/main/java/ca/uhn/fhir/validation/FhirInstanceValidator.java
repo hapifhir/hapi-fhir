@@ -39,6 +39,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
   private BestPracticeWarningLevel myBestPracticeWarningLevel;
   private DocumentBuilderFactory myDocBuilderFactory;
+  private StructureDefinition myStructureDefintion;
   private IValidationSupport myValidationSupport;
 
   /**
@@ -125,6 +126,10 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
     myBestPracticeWarningLevel = theBestPracticeWarningLevel;
   }
 
+  public void setStructureDefintion(StructureDefinition theStructureDefintion) {
+    myStructureDefintion = theStructureDefintion;
+  }
+
   /**
    * Sets the {@link IValidationSupport validation support} in use by this
    * validator. Default is an instance of
@@ -164,7 +169,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
       }
 
       String resourceName = determineResourceName(document);
-      StructureDefinition profile = loadProfileOrReturnNull(messages, theCtx, resourceName);
+      StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : loadProfileOrReturnNull(messages, theCtx, resourceName);
       if (profile != null) {
         try {
           v.validate(messages, document, profile);
@@ -177,7 +182,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
       JsonObject json = gson.fromJson(theInput, JsonObject.class);
 
       String resourceName = json.get("resourceType").getAsString();
-      StructureDefinition profile = loadProfileOrReturnNull(messages, theCtx, resourceName);
+      StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : loadProfileOrReturnNull(messages, theCtx, resourceName);
       if (profile != null) {
         try {
           v.validate(messages, json, profile);
