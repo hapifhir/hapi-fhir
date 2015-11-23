@@ -23,6 +23,7 @@
 					<execution>
 						<id>check-java-api</id>
 						<phase>test</phase>
+						<inherited>true</inherited>
 						<goals>
 							<goal>check</goal>
 						</goals>
