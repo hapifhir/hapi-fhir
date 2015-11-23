@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -17,6 +16,12 @@
 	<name>HAPI FHIR - Core Library</name>
 
 	<dependencies>
+
+		<dependency>
+			    <groupId>org.antlr</groupId>
+			        <artifactId>antlr4-runtime</artifactId>
+				    <version>4.5.1-1</version>
+			    </dependency>
 
 		<!-- JSON -->
 		<dependency>
@@ -51,8 +56,7 @@
 			<groupId>org.ebaysf.web</groupId>
 			<artifactId>cors-filter</artifactId>
 			<optional>true</optional>
-			<!-- <exclusions> <exclusion> <artifactId>servlet-api</artifactId> <groupId>javax.servlet</groupId> 
-				</exclusion> </exclusions> -->
+			<!-- <exclusions> <exclusion> <artifactId>servlet-api</artifactId> <groupId>javax.servlet</groupId> </exclusion> </exclusions> -->
 		</dependency>
 
 		<!-- Only required for Schematron Validator Support -->
@@ -67,8 +71,7 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId> 
-			<version>2.11.0</version> <optional>true</optional> </dependency> -->
+		<!-- <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId> <version>2.11.0</version> <optional>true</optional> </dependency> -->
 
 		<!-- General -->
 		<dependency>
@@ -150,6 +153,19 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.antlr</groupId>
+				<artifactId>antlr4-maven-plugin</artifactId>
+				<version>4.3</version>
+				<executions>
+					<execution>
+						<id>antlr</id>
+						<goals>
+							<goal>antlr4</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>
@@ -167,13 +183,9 @@
 			<id>SITE</id>
 			<reporting>
 				<plugins>
-					<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> 
-						<reportSets> <reportSet> <reports> <report>checkstyle</report> </reports> 
-						</reportSet> </reportSets> <configuration> <linkXRef>false</linkXRef> <sourceDirectories> 
-						<sourceDirectory>hapi-fhir-base/src/main/java</sourceDirectory> </sourceDirectories> 
-						</configuration> </plugin> -->
-					<!--<plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>findbugs-maven-plugin</artifactId> 
-						<version>3.0.0</version> <configuration> </configuration> </plugin> -->
+					<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> <reportSets> <reportSet> <reports> <report>checkstyle</report> </reports> </reportSet> </reportSets> 
+						<configuration> <linkXRef>false</linkXRef> <sourceDirectories> <sourceDirectory>hapi-fhir-base/src/main/java</sourceDirectory> </sourceDirectories> </configuration> </plugin> -->
+					<!--<plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>findbugs-maven-plugin</artifactId> <version>3.0.0</version> <configuration> </configuration> </plugin> -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-jxr-plugin</artifactId>
@@ -185,16 +197,11 @@
 									<report>jxr</report>
 								</reports>
 							</reportSet>
-							<!-- <reportSet> <id>restful-server-example</id> <reports> <report>jxr</report> 
-								</reports> <configuration> <sourcePath>../restful-server-example/src/main/java</sourcePath> 
-								<destDir>${project.reporting.outputDirectory}/rse-xref</destDir> <outputDirectory>tmp</outputDirectory> 
-								<reportOutputDirectory>rse-xref</reportOutputDirectory> </configuration> 
-								</reportSet> -->
+							<!-- <reportSet> <id>restful-server-example</id> <reports> <report>jxr</report> </reports> <configuration> <sourcePath>../restful-server-example/src/main/java</sourcePath> <destDir>${project.reporting.outputDirectory}/rse-xref</destDir> 
+								<outputDirectory>tmp</outputDirectory> <reportOutputDirectory>rse-xref</reportOutputDirectory> </configuration> </reportSet> -->
 						</reportSets>
 					</plugin>
-					<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> 
-						<version>1.1</version> <configuration> <forceSite>false</forceSite> </configuration> 
-						</plugin> -->
+					<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> <version>1.1</version> <configuration> <forceSite>false</forceSite> </configuration> </plugin> -->
 
 
 					<plugin>
@@ -210,8 +217,7 @@
 						<configuration>
 							<linkXRef>false</linkXRef>
 							<configLocation>${project.basedir}/../src/checkstyle/checkstyle.xml</configLocation>
-							<!--<sourceDirectories> <sourceDirectory> ${project.basedir}/../hapi-fhir-base/src/main/java 
-								</sourceDirectory> </sourceDirectories> -->
+							<!--<sourceDirectories> <sourceDirectory> ${project.basedir}/../hapi-fhir-base/src/main/java </sourceDirectory> </sourceDirectories> -->
 						</configuration>
 					</plugin>
 
