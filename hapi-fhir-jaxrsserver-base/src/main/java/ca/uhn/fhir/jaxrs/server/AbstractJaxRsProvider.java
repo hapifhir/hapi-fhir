@@ -25,7 +25,8 @@ import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 /**
  * This is the abstract superclass for all jaxrs providers. It contains some defaults implementing
  * the IRestfulServerDefaults interface and exposes the uri and headers.
- * @author Peter Van Houte
+ * 
+ * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 

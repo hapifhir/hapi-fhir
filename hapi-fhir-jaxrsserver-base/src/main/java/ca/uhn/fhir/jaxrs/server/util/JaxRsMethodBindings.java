@@ -16,7 +16,8 @@ import ca.uhn.fhir.util.ReflectionUtil;
 
 /**
  * Class that contains the method bindings defined by a ResourceProvider
- * @author Peter Van Houte
+ * 
+ * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public class JaxRsMethodBindings {
     

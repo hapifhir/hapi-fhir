@@ -50,6 +50,8 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 /**
  * A demo JaxRs Patient Rest Provider
+ * 
+ * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 @Local
 @Path(JaxRsPatientRestProvider.PATH)

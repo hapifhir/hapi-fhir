@@ -15,7 +15,8 @@ import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 
 /**
  * An interceptor that catches the jax-rs exceptions
- * @author Peter Van Houte 
+ * 
+ * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public class JaxRsExceptionInterceptor {
 
@@ -64,6 +65,7 @@ public class JaxRsExceptionInterceptor {
 	 * @param theRequest the request
 	 * @param theException the thrown exception
 	 * @return the response describing the error
+	 * @throws IOException
 	 */
 	public Response convertExceptionIntoResponse(JaxRsRequest theRequest, JaxRsResponseException theException)
 			throws IOException {

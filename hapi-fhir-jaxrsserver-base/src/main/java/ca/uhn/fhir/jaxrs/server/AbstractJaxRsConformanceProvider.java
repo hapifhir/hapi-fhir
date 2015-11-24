@@ -42,7 +42,8 @@ import ca.uhn.fhir.util.ReflectionUtil;
 /**
  * This is the conformance provider for the jax rs servers. It requires all providers to be registered
  * during startup because the conformance profile is generated during the postconstruct phase.
- * @author Peter Van Houte
+ * 
+ * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProvider implements IResourceProvider {

@@ -6,7 +6,8 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 /**
  * A JEE wrapper exception that will not force a rollback.
- * @author Peter Van Houte
+ * 
+ * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 @ApplicationException(rollback=false)
 public class JaxRsResponseException extends BaseServerResponseException {

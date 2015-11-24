@@ -93,6 +93,7 @@
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-moxy</artifactId>
 			<version>${jersey_version}</version>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

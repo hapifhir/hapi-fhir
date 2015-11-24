@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 /**
  * This server is the abstract superclass for all resource providers. It exposes
  * a large amount of the fhir api functionality using JAXRS
- * @author Peter Van Houte
+ * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
 @Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON,
@@ -93,7 +93,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
 	 * @see <a href="https://www.hl7.org/fhir/http.html#create">https://www.hl7. org/fhir/http.html#create</a>
 	 */
 	@POST
-	public Response create(final String resource) throws Exception {
+	public Response create(final String resource) throws IOException {
 		return execute(getRequest(RequestTypeEnum.POST, RestOperationTypeEnum.CREATE).resource(resource));
 	}
 
@@ -105,7 +105,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
 	 */
 	@POST
 	@Path("/_search")
-	public Response searchWithPost() throws Exception {
+	public Response searchWithPost() throws IOException {
 		return execute(getRequest(RequestTypeEnum.POST, RestOperationTypeEnum.SEARCH_TYPE));
 	}
 
@@ -116,7 +116,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
 	 * @see <a href="https://www.hl7.org/fhir/http.html#search">https://www.hl7.org/fhir/http.html#search</a>
 	 */
 	@GET
-	public Response search() throws Exception {
+	public Response search() throws IOException {
 		return execute(getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.SEARCH_TYPE));
 	}
 
@@ -130,7 +130,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
 	 */
 	@PUT
 	@Path("/{id}")
-	public Response update(@PathParam("id") final String id, final String resource) throws Exception {
+	public Response update(@PathParam("id") final String id, final String resource) throws IOException {
 		return execute(getRequest(RequestTypeEnum.PUT, RestOperationTypeEnum.UPDATE).id(id).resource(resource));
 	}
 
@@ -143,7 +143,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
 	 */
 	@DELETE
 	@Path("/{id}")
-	public Response delete(@PathParam("id") final String id) throws Exception {
+	public Response delete(@PathParam("id") final String id) throws IOException {
 		return execute(getRequest(RequestTypeEnum.DELETE, RestOperationTypeEnum.DELETE).id(id));
 	}
 
@@ -156,7 +156,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
 	 */
 	@GET
 	@Path("/{id}")
-	public Response find(@PathParam("id") final String id) throws Exception {
+	public Response find(@PathParam("id") final String id) throws IOException {
 		return execute(getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.READ).id(id));
 	}
 
@@ -172,7 +172,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IResource> extends
 	 * @see <a href="https://www.hl7.org/fhir/operations.html">https://www.hl7.org/fhir/operations.html</a>
 	 */
 	protected Response customOperation(final String resource, RequestTypeEnum requestType, String id,
-			String operationName, RestOperationTypeEnum operationType) throws Exception {
+			String operationName, RestOperationTypeEnum operationType) throws IOException {
 		Builder request = getRequest(requestType, operationType).resource(resource).id(id);
 		return execute(request, operationName);
 	}

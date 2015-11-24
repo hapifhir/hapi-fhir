@@ -75,6 +75,7 @@ public class AbstractJaxRsResourceProviderTest {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 	private static final String PATIENT_NAME = "Van Houte";
 	private static int ourPort;
+	private static String serverBase;
 	private static Server jettyServer;
 
 	@BeforeClass
@@ -93,10 +94,10 @@ public class AbstractJaxRsResourceProviderTest {
 						TestJaxRsConformanceRestProvider.class.getCanonicalName()), ";"));
 		jettyServer.start();
 
-		final FhirContext ctx = FhirContext.forDstu2();
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/");
+        serverBase = "http://localhost:" + ourPort + "/";
+        client = ourCtx.newRestfulGenericClient(serverBase);
 		client.setEncoding(EncodingEnum.JSON);
 		client.registerInterceptor(new LoggingInterceptor(true));
 	}
@@ -392,7 +393,7 @@ public class AbstractJaxRsResourceProviderTest {
 	}
 
 	private void compareResultUrl(String url, IResource resource) {
-		assertEquals(url, resource.getId().getValueAsString().substring("http://localhost:55844".length()));
+		assertEquals(url, resource.getId().getValueAsString().substring(serverBase.length() - 1));
 	}
 
 	private <T> T withId(final T id) {

@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 /**
  * The JaxRsResponse is a jax-rs specific implementation of the RestfulResponse.
  * 
- * @author Peter Van Houte
+ * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 

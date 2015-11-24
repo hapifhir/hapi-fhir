@@ -24,7 +24,7 @@ import ca.uhn.fhir.util.UrlUtil;
 /**
  * The JaxRsRequest is a jax-rs specific implementation of the RequestDetails. 
  * 
- * @author Peter Van Houte
+ * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public class JaxRsRequest extends RequestDetails {
 
@@ -40,6 +40,12 @@ public class JaxRsRequest extends RequestDetails {
 		private String theVersion;
 		private String theCompartment;
 
+		/**
+		 * Utility Constructor
+		 * @param theServer the server
+		 * @param theRequestType the request type
+		 * @param theRestOperation the rest operation
+		 */
 		public Builder(AbstractJaxRsProvider theServer, RequestTypeEnum theRequestType,
 				RestOperationTypeEnum theRestOperation) {
 			this.theServer = theServer;
@@ -123,6 +129,13 @@ public class JaxRsRequest extends RequestDetails {
 	private HttpHeaders headers;
 	private AbstractJaxRsProvider myServer;
 
+	/**
+	 * Utility Constructor
+	 * @param server the server
+	 * @param resourceString the resource body
+	 * @param requestType the request type
+	 * @param restOperation the operation type
+	 */
 	public JaxRsRequest(AbstractJaxRsProvider server, String resourceString, RequestTypeEnum requestType,
 			RestOperationTypeEnum restOperation) {
 		this.headers = server.getHeaders();
@@ -139,6 +152,10 @@ public class JaxRsRequest extends RequestDetails {
 		return myServer;
 	}
 
+	/**
+	 * Set the server
+	 * @param theServer the server to set
+	 */
 	public void setServer(AbstractJaxRsProvider theServer) {
 		this.myServer = theServer;
 	}

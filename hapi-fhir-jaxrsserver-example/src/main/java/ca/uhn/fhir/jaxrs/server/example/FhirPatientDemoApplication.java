@@ -6,9 +6,10 @@ import javax.ws.rs.core.Application;
 /**
  * Fhir Patient Demo Application
  * 
- * @author Peter Van Houte
+ * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 @ApplicationPath(value=FhirPatientDemoApplication.PATH)
 public class FhirPatientDemoApplication extends Application {
+    /** The demo application path */
     public final static String PATH = "/jaxrs-demo";
 }
