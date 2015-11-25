@@ -300,7 +300,7 @@ public class AbstractJaxRsResourceProviderTest {
 		// prepare mock
 		Parameters resultParameters = new Parameters();
 		resultParameters.addParameter().setName("return").setResource(createPatient(1)).setValue(new StringDt("outputValue"));
-		when(mock.someCustomOperation(eq(new StringDt("myAwesomeDummyValue")))).thenReturn(resultParameters);
+		when(mock.someCustomOperation(any(IdDt.class), eq(new StringDt("myAwesomeDummyValue")))).thenReturn(resultParameters);
 		// Create the input parameters to pass to the server
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("start").setValue(new DateDt("2001-01-01"));
@@ -318,7 +318,7 @@ public class AbstractJaxRsResourceProviderTest {
 		// prepare mock
 		Parameters resultParameters = new Parameters();
 		resultParameters.addParameter().setName("return").setResource(createPatient(1)).setValue(new StringDt("outputValue"));
-		when(mock.someCustomOperation(eq(new StringDt("myAwesomeDummyValue")))).thenReturn(resultParameters);		
+		when(mock.someCustomOperation(any(IdDt.class), eq(new StringDt("myAwesomeDummyValue")))).thenReturn(resultParameters);		
 		// Create the input parameters to pass to the server
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("start").setValue(new DateDt("2001-01-01"));

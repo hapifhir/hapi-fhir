@@ -261,7 +261,7 @@ public class JaxRsPatientProviderTest {
         Parameters outParams = client
            .operation()
            .onInstance(new IdDt("Patient", "1"))
-           .named("$last")
+           .named("$firstVersion")
            .withParameters(inParams)
            //.useHttpGet() // Use HTTP GET instead of POST
            .execute();
@@ -282,7 +282,7 @@ public class JaxRsPatientProviderTest {
         Parameters outParams = client
                 .operation()
                 .onInstance(new IdDt("Patient", "1"))
-                .named("$last")
+                .named("$firstVersion")
                 .withParameters(inParams)
                 .useHttpGet() // Use HTTP GET instead of POST
                 .execute();

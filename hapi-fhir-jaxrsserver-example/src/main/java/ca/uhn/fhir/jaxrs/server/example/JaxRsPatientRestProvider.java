@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.example;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -113,7 +114,7 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 	}
 
 	@Update
-	public MethodOutcome update(@IdParam final IdDt theId, @ResourceParam final Patient patient) throws Exception {
+	public MethodOutcome update(@IdParam final IdDt theId, @ResourceParam final Patient patient) {
 		final String idPart = theId.getIdPart();
 		if (patients.containsKey(idPart)) {
 			final List<Patient> patientList = patients.get(idPart);
@@ -130,7 +131,7 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 	}
 
 	@Read
-	public Patient find(@IdParam final IdDt theId) throws InvocationTargetException {
+	public Patient find(@IdParam final IdDt theId) {
 		if (patients.containsKey(theId.getIdPart())) {
 			return getLast(patients.get(theId.getIdPart()));
 		} else {
@@ -166,21 +167,13 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 	}
 
 	@Delete
-	public MethodOutcome delete(@IdParam final IdDt theId) throws InvocationTargetException {
+	public MethodOutcome delete(@IdParam final IdDt theId) {
 		final Patient deletedPatient = find(theId);
 		patients.remove(deletedPatient.getId().getIdPart());
 		final MethodOutcome result = new MethodOutcome().setCreated(true);
 		result.setResource(deletedPatient);
 		return result;
 	}
-
-	@GET
-	@Path("/{id}/$last")
-	public Response operationLastGet(@PathParam("id") String id) throws Exception {
-		return customOperation(null, RequestTypeEnum.GET, id, "$last",
-				RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
-	}
-
 	@Search(compartmentName = "Condition")
 	public List<IResource> searchCompartment(@IdParam IdDt thePatientId) {
 		List<IResource> retVal = new ArrayList<IResource>();
@@ -190,18 +183,24 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 		return retVal;
 	}
 
-	@POST
-	@Path("/{id}/$last")
-	public Response operationLast(final String resource) throws Exception {
-		return customOperation(resource, RequestTypeEnum.POST, null, "$last",
-				RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
+	@GET
+	@Path("/{id}/$firstVersion")
+	public Response operationFirstVersionUsingGet(@PathParam("id") String id) throws IOException {
+		return customOperation(null, RequestTypeEnum.GET, id, "$firstVersion", RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE);
 	}
 
-	@Operation(name = "last", idempotent = true, returnParameters = {
+
+	@POST
+	@Path("/{id}/$firstVersion")
+	public Response operationFirstVersionUsingGet(@PathParam("id") String id, final String resource) throws Exception {
+		return customOperation(resource, RequestTypeEnum.POST, id, "$firstVersion", RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE);
+	}
+
+	@Operation(name = "firstVersion", idempotent = true, returnParameters = {
 			@OperationParam(name = "return", type = StringDt.class) })
-	public Parameters last(@OperationParam(name = "dummy") StringDt dummyInput) throws InvocationTargetException {
+	public Parameters firstVersion(@IdParam final IdDt theId, @OperationParam(name = "dummy") StringDt dummyInput) {
 		Parameters parameters = new Parameters();
-		Patient patient = find(new IdDt(counter.intValue() - 1));
+		Patient patient = find(new IdDt(theId.getResourceType(), theId.getIdPart(), "0"));
 		parameters.addParameter().setName("return").setResource(patient)
 				.setValue(new StringDt((counter - 1) + "" + "inputVariable [ " + dummyInput.getValue() + "]"));
 		return parameters;

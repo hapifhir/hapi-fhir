@@ -89,29 +89,29 @@ public class TestJaxRsMockPatientRestProvider extends AbstractJaxRsResourceProvi
 		return mock.delete(theId);
 	}
 
+    @Search(compartmentName = "Condition")
+    public List<IResource> searchCompartment(@IdParam IdDt thePatientId) {
+        return mock.searchCompartment(thePatientId);
+    }   
+	
 	@GET
 	@Path("/{id}/$someCustomOperation")
 	public Response someCustomOperationUsingGet(@PathParam("id") String id, String resource) throws Exception {
 		return customOperation(resource, RequestTypeEnum.GET, id, "$someCustomOperation",
-				RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
+				RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE);
 	}
-	
-	@Search(compartmentName = "Condition")
-	public List<IResource> searchCompartment(@IdParam IdDt thePatientId) {
-		return mock.searchCompartment(thePatientId);
-	}	
 
 	@POST
 	@Path("/{id}/$someCustomOperation")
 	public Response someCustomOperationUsingPost(@PathParam("id") String id, String resource) throws Exception {
 		return customOperation(resource, RequestTypeEnum.POST, id, "$someCustomOperation",
-				RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
+				RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE);
 	}
 
 	@Operation(name = "someCustomOperation", idempotent = true, returnParameters = {
 			@OperationParam(name = "return", type = StringDt.class) })
-	public Parameters someCustomOperation(@OperationParam(name = "dummy") StringDt dummyInput) {
-		return mock.someCustomOperation(dummyInput);
+	public Parameters someCustomOperation(@IdParam IdDt myId, @OperationParam(name = "dummy") StringDt dummyInput) {
+		return mock.someCustomOperation(myId, dummyInput);
 	}
 
 	@Override
