@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum GoalCategory {
 
         /**
-         * Goals related to the consumption of food and/or beverages
+         * Goals related to the consumption of food and/or beverages.
          */
         DIETARY, 
         /**
-         * Goals related to the personal protexction of the subject.
+         * Goals related to the personal protection of the subject.
          */
         SAFETY, 
         /**
@@ -88,8 +88,8 @@ public enum GoalCategory {
         }
         public String getDefinition() {
           switch (this) {
-            case DIETARY: return "Goals related to the consumption of food and/or beverages";
-            case SAFETY: return "Goals related to the personal protexction of the subject.";
+            case DIETARY: return "Goals related to the consumption of food and/or beverages.";
+            case SAFETY: return "Goals related to the personal protection of the subject.";
             case BEHAVIORAL: return "Goals related to the manner in which the subject acts.";
             case NURSING: return "Goals related to the practice of nursing or established by nurses.";
             case PHYSIOTHERAPY: return "Goals related to the mobility and motor capability of the subject.";

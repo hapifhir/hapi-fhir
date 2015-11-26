@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3CodingRationale {
@@ -55,6 +55,18 @@ public enum V3CodingRationale {
          */
         R, 
         /**
+         * HL7 Specified or Mandated
+         */
+        HL7, 
+        /**
+         * Both HL7 mandated and the original code (precoordination)
+         */
+        SH, 
+        /**
+         * Source (or original) code
+         */
+        SRC, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -71,6 +83,12 @@ public enum V3CodingRationale {
           return PR;
         if ("R".equals(codeString))
           return R;
+        if ("HL7".equals(codeString))
+          return HL7;
+        if ("SH".equals(codeString))
+          return SH;
+        if ("SRC".equals(codeString))
+          return SRC;
         throw new Exception("Unknown V3CodingRationale code '"+codeString+"'");
         }
         public String toCode() {
@@ -80,6 +98,9 @@ public enum V3CodingRationale {
             case P: return "P";
             case PR: return "PR";
             case R: return "R";
+            case HL7: return "HL7";
+            case SH: return "SH";
+            case SRC: return "SRC";
             default: return "?";
           }
         }
@@ -93,6 +114,9 @@ public enum V3CodingRationale {
             case P: return "Description: Post-coded from free text source</description>";
             case PR: return "Post-coded from free text source, required by the specification describing the use of the coded concept.";
             case R: return "Description: Required standard code for HL7.";
+            case HL7: return "HL7 Specified or Mandated";
+            case SH: return "Both HL7 mandated and the original code (precoordination)";
+            case SRC: return "Source (or original) code";
             default: return "?";
           }
         }
@@ -103,6 +127,9 @@ public enum V3CodingRationale {
             case P: return "post-coded";
             case PR: return "post-coded and required";
             case R: return "required";
+            case HL7: return "HL7 Specified or Mandated";
+            case SH: return "Both HL7 mandated and the original code";
+            case SRC: return "Source (or original) code";
             default: return "?";
           }
     }

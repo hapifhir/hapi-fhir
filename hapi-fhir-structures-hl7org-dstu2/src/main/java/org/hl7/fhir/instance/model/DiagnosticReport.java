@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -41,38 +41,38 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretation, and formatted representation of diagnostic reports.
+ * The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretations, and formatted representation of diagnostic reports.
  */
 @ResourceDef(name="DiagnosticReport", profile="http://hl7.org/fhir/Profile/DiagnosticReport")
 public class DiagnosticReport extends DomainResource {
 
     public enum DiagnosticReportStatus {
         /**
-         * The existence of the report is registered, but there is nothing yet available
+         * The existence of the report is registered, but there is nothing yet available.
          */
         REGISTERED, 
         /**
-         * This is a partial (e.g. initial, interim or preliminary) report: data in the report may be incomplete or unverified
+         * This is a partial (e.g. initial, interim or preliminary) report: data in the report may be incomplete or unverified.
          */
         PARTIAL, 
         /**
-         * The report is complete and verified by an authorized person
+         * The report is complete and verified by an authorized person.
          */
         FINAL, 
         /**
-         * The report has been modified subsequent to being Final, and is complete and verified by an authorized person
+         * The report has been modified subsequent to being Final, and is complete and verified by an authorized person. New content has been added, but existing content hasn't changed
          */
         CORRECTED, 
         /**
-         * The report has been modified subsequent to being Final, and is complete and verified by an authorized person. New content has been added, but existing content hasn't changed
+         * The report has been modified subsequent to being Final, and is complete and verified by an authorized person. New content has been added, but existing content hasn't changed.
          */
         APPENDED, 
         /**
-         * The report is unavailable because the measurement was not started or not completed (also sometimes called "aborted")
+         * The report is unavailable because the measurement was not started or not completed (also sometimes called "aborted").
          */
         CANCELLED, 
         /**
-         * The report has been withdrawn following previous Final release
+         * The report has been withdrawn following a previous final release.
          */
         ENTEREDINERROR, 
         /**
@@ -124,13 +124,13 @@ public class DiagnosticReport extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case REGISTERED: return "The existence of the report is registered, but there is nothing yet available";
-            case PARTIAL: return "This is a partial (e.g. initial, interim or preliminary) report: data in the report may be incomplete or unverified";
-            case FINAL: return "The report is complete and verified by an authorized person";
-            case CORRECTED: return "The report has been modified subsequent to being Final, and is complete and verified by an authorized person";
-            case APPENDED: return "The report has been modified subsequent to being Final, and is complete and verified by an authorized person. New content has been added, but existing content hasn't changed";
-            case CANCELLED: return "The report is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\")";
-            case ENTEREDINERROR: return "The report has been withdrawn following previous Final release";
+            case REGISTERED: return "The existence of the report is registered, but there is nothing yet available.";
+            case PARTIAL: return "This is a partial (e.g. initial, interim or preliminary) report: data in the report may be incomplete or unverified.";
+            case FINAL: return "The report is complete and verified by an authorized person.";
+            case CORRECTED: return "The report has been modified subsequent to being Final, and is complete and verified by an authorized person. New content has been added, but existing content hasn't changed";
+            case APPENDED: return "The report has been modified subsequent to being Final, and is complete and verified by an authorized person. New content has been added, but existing content hasn't changed.";
+            case CANCELLED: return "The report is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\").";
+            case ENTEREDINERROR: return "The report has been withdrawn following a previous final release.";
             default: return "?";
           }
         }
@@ -375,10 +375,10 @@ public class DiagnosticReport extends DomainResource {
     protected Enumeration<DiagnosticReportStatus> status;
 
     /**
-     * A code that classifies the dlinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.
+     * A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Service category", formalDefinition="A code that classifies the dlinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes." )
+    @Description(shortDefinition="Service category", formalDefinition="A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes." )
     protected CodeableConcept category;
 
     /**
@@ -511,7 +511,7 @@ public class DiagnosticReport extends DomainResource {
      * Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent.
      */
     @Child(name = "presentedForm", type = {Attachment.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Entire Report as issued", formalDefinition="Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent." )
+    @Description(shortDefinition="Entire report as issued", formalDefinition="Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent." )
     protected List<Attachment> presentedForm;
 
     private static final long serialVersionUID = 920334551L;
@@ -622,7 +622,7 @@ public class DiagnosticReport extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (A code that classifies the dlinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.)
+     * @return {@link #category} (A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.)
      */
     public CodeableConcept getCategory() { 
       if (this.category == null)
@@ -638,7 +638,7 @@ public class DiagnosticReport extends DomainResource {
     }
 
     /**
-     * @param value {@link #category} (A code that classifies the dlinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.)
+     * @param value {@link #category} (A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.)
      */
     public DiagnosticReport setCategory(CodeableConcept value) { 
       this.category = value;
@@ -1274,7 +1274,7 @@ public class DiagnosticReport extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "The local ID assigned to the report by the order filler, usually by the Information System of the diagnostic service provider.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "The status of the diagnostic report as a whole.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("category", "CodeableConcept", "A code that classifies the dlinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category));
+        childrenList.add(new Property("category", "CodeableConcept", "A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category));
         childrenList.add(new Property("code", "CodeableConcept", "A code or name that describes this diagnostic report.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "The link to the health care event (encounter) when the order was made.", 0, java.lang.Integer.MAX_VALUE, encounter));

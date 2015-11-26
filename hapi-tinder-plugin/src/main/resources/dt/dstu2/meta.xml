@@ -10,14 +10,14 @@
   <LastAuthor>Grahame</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2015-03-17T02:38:02Z</LastSaved>
-  <Version>15.00</Version>
+  <Version>14.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>16875</WindowHeight>
-  <WindowWidth>-27136</WindowWidth>
+  <WindowHeight>12975</WindowHeight>
+  <WindowWidth>24000</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <RefModeR1C1/>
@@ -697,7 +697,7 @@
     <Cell ss:StyleID="s74"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s74"><Data ss:Type="String">Version specific identifier</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s75"><Data ss:Type="String">The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted</Data><NamedCell
+    <Cell ss:StyleID="s75"><Data ss:Type="String">The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s83"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">The server assigns this value, and ignores what the client specifies, except in the case that the server is imposing version integrity on updates/deletes</Data><NamedCell
@@ -819,14 +819,15 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s74"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s74"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s74"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s74"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s74"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s74"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s74"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s74"><Data ss:Type="String">Tags applied </Data><NamedCell
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Tags</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s75"><Data ss:Type="String">Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource</Data><NamedCell
+    <Cell ss:StyleID="s74"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s74"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s74"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s74"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Tags applied to this resource</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">Tags applied to this resource. Tags are intended to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s83"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">The tags can be updated without changing the stated version of the resource.  The list of tags is a set. Uniqueness is based the system/code, and version and display are ignored</Data><NamedCell
@@ -3081,7 +3082,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>2</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>2</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -3095,12 +3096,11 @@
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>5</ActiveRow>
-     <ActiveCol>7</ActiveCol>
+     <ActiveRow>6</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -3138,7 +3138,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s96"><Data ss:Type="String">Context</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur.  E.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur; e.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s96"><Data ss:Type="String">English</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -3710,10 +3710,10 @@
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unpublished notes</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s106"/>
-    <Cell ss:StyleID="s72"/>
-    <Cell ss:StyleID="s107"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s106"><Data ss:Type="String">Tags</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Codes that represent various types of tags, commonly workflow-related; e.g. &quot;Needs review by Dr. Jones&quot;</Data></Cell>
+    <Cell ss:StyleID="s107"><Data ss:Type="String">unbound</Data></Cell>
     <Cell ss:StyleID="s107"/>
     <Cell ss:StyleID="s107"/>
     <Cell ss:StyleID="s107"/>
@@ -4178,7 +4178,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>2</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

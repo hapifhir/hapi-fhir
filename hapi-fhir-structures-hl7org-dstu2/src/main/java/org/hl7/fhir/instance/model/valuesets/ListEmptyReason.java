@@ -29,33 +29,33 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ListEmptyReason {
 
         /**
-         * Clinical judgement that there are no known items for this list after reasonable investigation. Note that this a positive statement by a clinical user, and not a default position asserted by a computer system in the lack of other information. Example uses:  * For allergies: the patient or patient's agent/guardian has asserted that he/she is not aware of any allergies (NKA - nil known allergies)  * For medications: the patient or patient's agent/guardian has asserted that the patient is known to be taking no medications  * For diagnoses, problems and procedures: the patient or patient's agent/guardian has asserted that there is no known event to record.
+         * Clinical judgment that there are no known items for this list after reasonable investigation. Note that this a positive statement by a clinical user, and not a default position asserted by a computer system in the lack of other information. Example uses:  * For allergies: the patient or patient's agent/guardian has asserted that he/she is not aware of any allergies (NKA - nil known allergies)  * For medications: the patient or patient's agent/guardian has asserted that the patient is known to be taking no medications  * For diagnoses, problems and procedures: the patient or patient's agent/guardian has asserted that there is no known event to record.
          */
         NILKNOWN, 
         /**
-         * THe investigation to find out whether there are items for this list has not occurred
+         * The investigation to find out whether there are items for this list has not occurred.
          */
         NOTASKED, 
         /**
-         * The content of the list was not provided due to privacy or confidentiality concerns. Note that it should not be assumed that this means that the particular information in question was withheld due to its contents - it can also be a policy decision
+         * The content of the list was not provided due to privacy or confidentiality concerns. Note that it should not be assumed that this means that the particular information in question was withheld due to its contents - it can also be a policy decision.
          */
         WITHHELD, 
         /**
-         * Information to populate this list cannot be obtained.  E.g. unconscious patient
+         * Information to populate this list cannot be obtained; e.g. unconscious patient.
          */
         UNAVAILABLE, 
         /**
-         * The work to populate this list has not yet begun
+         * The work to populate this list has not yet begun.
          */
         NOTSTARTED, 
         /**
-         * This list has now closed or has ceased to be relevant or useful
+         * This list has now closed or has ceased to be relevant or useful.
          */
         CLOSED, 
         /**
@@ -95,12 +95,12 @@ public enum ListEmptyReason {
         }
         public String getDefinition() {
           switch (this) {
-            case NILKNOWN: return "Clinical judgement that there are no known items for this list after reasonable investigation. Note that this a positive statement by a clinical user, and not a default position asserted by a computer system in the lack of other information. Example uses:  * For allergies: the patient or patient's agent/guardian has asserted that he/she is not aware of any allergies (NKA - nil known allergies)  * For medications: the patient or patient's agent/guardian has asserted that the patient is known to be taking no medications  * For diagnoses, problems and procedures: the patient or patient's agent/guardian has asserted that there is no known event to record.";
-            case NOTASKED: return "THe investigation to find out whether there are items for this list has not occurred";
-            case WITHHELD: return "The content of the list was not provided due to privacy or confidentiality concerns. Note that it should not be assumed that this means that the particular information in question was withheld due to its contents - it can also be a policy decision";
-            case UNAVAILABLE: return "Information to populate this list cannot be obtained.  E.g. unconscious patient";
-            case NOTSTARTED: return "The work to populate this list has not yet begun";
-            case CLOSED: return "This list has now closed or has ceased to be relevant or useful";
+            case NILKNOWN: return "Clinical judgment that there are no known items for this list after reasonable investigation. Note that this a positive statement by a clinical user, and not a default position asserted by a computer system in the lack of other information. Example uses:  * For allergies: the patient or patient's agent/guardian has asserted that he/she is not aware of any allergies (NKA - nil known allergies)  * For medications: the patient or patient's agent/guardian has asserted that the patient is known to be taking no medications  * For diagnoses, problems and procedures: the patient or patient's agent/guardian has asserted that there is no known event to record.";
+            case NOTASKED: return "The investigation to find out whether there are items for this list has not occurred.";
+            case WITHHELD: return "The content of the list was not provided due to privacy or confidentiality concerns. Note that it should not be assumed that this means that the particular information in question was withheld due to its contents - it can also be a policy decision.";
+            case UNAVAILABLE: return "Information to populate this list cannot be obtained; e.g. unconscious patient.";
+            case NOTSTARTED: return "The work to populate this list has not yet begun.";
+            case CLOSED: return "This list has now closed or has ceased to be relevant or useful.";
             default: return "?";
           }
         }

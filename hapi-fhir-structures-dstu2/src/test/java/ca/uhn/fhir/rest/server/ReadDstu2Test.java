@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -33,31 +34,35 @@ import ca.uhn.fhir.util.PortUtil;
 public class ReadDstu2Test {
 
 	private static CloseableHttpClient ourClient;
-	private static int ourPort;
-	private static Server ourServer;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
-	
-	/**
-	 * In DSTU2+ the resource ID appears in the resource body
-	 */
-	@Test
-	public void testReadXml() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadDstu2Test.class);
+	private static int ourPort;
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("p1ReadValue"));
-		assertThat(responseContent, containsString("p1ReadId"));
-	}
+	private static Server ourServer;
 
 	/**
 	 * In DSTU2+ the resource ID appears in the resource body
 	 */
 	@Test
 	public void testReadJson() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=json");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("p1ReadValue"));
+		assertThat(responseContent, containsString("p1ReadId"));
+		assertThat(responseContent, containsString("\"meta\":{\"profile\":[\"http://foo_profile\"]}"));
+	}
+
+	/**
+	 * In DSTU2+ the resource ID appears in the resource body
+	 */
+	@Test
+	public void testReadXml() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -101,18 +106,25 @@ public class ReadDstu2Test {
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
 		@Read
 		public Patient read(@IdParam IdDt theId) {
-			Patient p1 = new Patient();
+			Patient p1 = new MyPatient();
 			p1.setId("p1ReadId");
 			p1.addIdentifier().setValue("p1ReadValue");
 			return p1;
 		}
 
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
+	}
+
+	@ResourceDef(name = "Patient", profile = "http://foo_profile")
+	public static class MyPatient extends Patient {
+
+		private static final long serialVersionUID = 1L;
 
 	}
 

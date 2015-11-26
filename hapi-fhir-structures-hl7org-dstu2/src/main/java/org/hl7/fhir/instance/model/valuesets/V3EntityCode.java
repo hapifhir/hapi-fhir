@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3EntityCode {
@@ -487,6 +487,14 @@ public enum V3EntityCode {
          */
         VCCNE, 
         /**
+         * A substance whose therapeutic effect is produced by chemical action within the body.
+         */
+        _DRUGENTITY, 
+        /**
+         * Any substance or mixture of substances manufactured, sold or represented for use in: (a) the diagnosis, treatment, mitigation or prevention of a disease, disorder, abnormal physical state, or its symptoms, in human beings or animals; (b) restoring, correcting or modifying organic functions in human beings or animals.
+         */
+        _CLINICALDRUG, 
+        /**
          * Indicates types of allergy and intolerance agents which are non-drugs.  (E.g. foods, latex, etc.)
          */
         _NONDRUGAGENTENTITY, 
@@ -847,6 +855,10 @@ public enum V3EntityCode {
           return BLDPRD;
         if ("VCCNE".equals(codeString))
           return VCCNE;
+        if ("_DrugEntity".equals(codeString))
+          return _DRUGENTITY;
+        if ("_ClinicalDrug".equals(codeString))
+          return _CLINICALDRUG;
         if ("_NonDrugAgentEntity".equals(codeString))
           return _NONDRUGAGENTENTITY;
         if ("NDA01".equals(codeString))
@@ -1024,6 +1036,8 @@ public enum V3EntityCode {
             case WEST: return "WEST";
             case BLDPRD: return "BLDPRD";
             case VCCNE: return "VCCNE";
+            case _DRUGENTITY: return "_DrugEntity";
+            case _CLINICALDRUG: return "_ClinicalDrug";
             case _NONDRUGAGENTENTITY: return "_NonDrugAgentEntity";
             case NDA01: return "NDA01";
             case NDA02: return "NDA02";
@@ -1175,6 +1189,8 @@ public enum V3EntityCode {
             case WEST: return "3.8% Citrate buffered to a pH of 5.5 for Westergren Sedimentation Rate";
             case BLDPRD: return "A manufactured product that is produced from the raw blood oi a donor with the intention of using it in a recipient transfusion.";
             case VCCNE: return "A Type of medicine that creates an immune protection without the recipient experiencing the disease.";
+            case _DRUGENTITY: return "A substance whose therapeutic effect is produced by chemical action within the body.";
+            case _CLINICALDRUG: return "Any substance or mixture of substances manufactured, sold or represented for use in: (a) the diagnosis, treatment, mitigation or prevention of a disease, disorder, abnormal physical state, or its symptoms, in human beings or animals; (b) restoring, correcting or modifying organic functions in human beings or animals.";
             case _NONDRUGAGENTENTITY: return "Indicates types of allergy and intolerance agents which are non-drugs.  (E.g. foods, latex, etc.)";
             case NDA01: return "egg";
             case NDA02: return "fish";
@@ -1323,6 +1339,8 @@ public enum V3EntityCode {
             case WEST: return "Buffered Citrate";
             case BLDPRD: return "Blood Product";
             case VCCNE: return "Vaccine";
+            case _DRUGENTITY: return "DrugEntity";
+            case _CLINICALDRUG: return "ClinicalDrug";
             case _NONDRUGAGENTENTITY: return "NonDrugAgentEntity";
             case NDA01: return "egg";
             case NDA02: return "fish";

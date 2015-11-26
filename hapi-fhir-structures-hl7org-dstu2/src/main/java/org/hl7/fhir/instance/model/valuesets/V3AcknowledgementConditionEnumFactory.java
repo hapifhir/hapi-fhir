@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -45,6 +45,8 @@ public class V3AcknowledgementConditionEnumFactory implements EnumFactory<V3Ackn
       return V3AcknowledgementCondition.ER;
     if ("NE".equals(codeString))
       return V3AcknowledgementCondition.NE;
+    if ("SU".equals(codeString))
+      return V3AcknowledgementCondition.SU;
     throw new IllegalArgumentException("Unknown V3AcknowledgementCondition code '"+codeString+"'");
   }
 
@@ -55,6 +57,8 @@ public class V3AcknowledgementConditionEnumFactory implements EnumFactory<V3Ackn
       return "ER";
     if (code == V3AcknowledgementCondition.NE)
       return "NE";
+    if (code == V3AcknowledgementCondition.SU)
+      return "SU";
     return "?";
   }
 

@@ -29,21 +29,21 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum SubstanceCategory {
 
         /**
-         * A substance that causes an allergic reaction
+         * A substance that causes an allergic reaction.
          */
         ALLERGEN, 
         /**
-         * A substance that is produced by or extracted from a biological source
+         * A substance that is produced by or extracted from a biological source.
          */
         BIOLOGICAL, 
         /**
-         * A substance that comes directly from a human or an animal (e.g blood, urine, feces, tears, etc.)
+         * A substance that comes directly from a human or an animal (e.g. blood, urine, feces, tears, etc.).
          */
         BODY, 
         /**
@@ -51,7 +51,7 @@ public enum SubstanceCategory {
          */
         CHEMICAL, 
         /**
-         * A food, dietary ingredient, or dietary supplement for human or animal
+         * A food, dietary ingredient, or dietary supplement for human or animal.
          */
         FOOD, 
         /**
@@ -59,7 +59,7 @@ public enum SubstanceCategory {
          */
         DRUG, 
         /**
-         * A finished product which is not normally ingested, absorbed or injected (e.g. Steel, iron, wood, plastic and paper).
+         * A finished product which is not normally ingested, absorbed or injected (e.g. steel, iron, wood, plastic and paper).
          */
         MATERIAL, 
         /**
@@ -102,13 +102,13 @@ public enum SubstanceCategory {
         }
         public String getDefinition() {
           switch (this) {
-            case ALLERGEN: return "A substance that causes an allergic reaction";
-            case BIOLOGICAL: return "A substance that is produced by or extracted from a biological source";
-            case BODY: return "A substance that comes directly from a human or an animal (e.g blood, urine, feces, tears, etc.)";
+            case ALLERGEN: return "A substance that causes an allergic reaction.";
+            case BIOLOGICAL: return "A substance that is produced by or extracted from a biological source.";
+            case BODY: return "A substance that comes directly from a human or an animal (e.g. blood, urine, feces, tears, etc.).";
             case CHEMICAL: return "Any organic or inorganic substance of a particular molecular identity, including -- (i) any combination of such substances occurring in whole or in part as a result of a chemical reaction or occurring in nature and (ii) any element or uncombined radical (http://www.epa.gov/opptintr/import-export/pubs/importguide.pdf).";
-            case FOOD: return "A food, dietary ingredient, or dietary supplement for human or animal";
+            case FOOD: return "A food, dietary ingredient, or dietary supplement for human or animal.";
             case DRUG: return "A substance intended for use in the diagnosis, cure, mitigation, treatment, or prevention of disease in man or other animals (Federal Food Drug and Cosmetic Act).";
-            case MATERIAL: return "A finished product which is not normally ingested, absorbed or injected (e.g. Steel, iron, wood, plastic and paper).";
+            case MATERIAL: return "A finished product which is not normally ingested, absorbed or injected (e.g. steel, iron, wood, plastic and paper).";
             default: return "?";
           }
         }

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -374,10 +374,10 @@ public class Substance extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes.
+     * A code that classifies the general type of substance.  This is used  for searching, sorting and display purposes.
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="What class/type of substance this is", formalDefinition="A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes." )
+    @Description(shortDefinition="What class/type of substance this is", formalDefinition="A code that classifies the general type of substance.  This is used  for searching, sorting and display purposes." )
     protected List<CodeableConcept> category;
 
     /**
@@ -466,7 +466,7 @@ public class Substance extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes.)
+     * @return {@link #category} (A code that classifies the general type of substance.  This is used  for searching, sorting and display purposes.)
      */
     public List<CodeableConcept> getCategory() { 
       if (this.category == null)
@@ -484,7 +484,7 @@ public class Substance extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes.)
+     * @return {@link #category} (A code that classifies the general type of substance.  This is used  for searching, sorting and display purposes.)
      */
     // syntactic sugar
     public CodeableConcept addCategory() { //3
@@ -661,7 +661,7 @@ public class Substance extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Unique identifier for the substance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("category", "CodeableConcept", "A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category));
+        childrenList.add(new Property("category", "CodeableConcept", "A code that classifies the general type of substance.  This is used  for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category));
         childrenList.add(new Property("code", "CodeableConcept", "A code (or set of codes) that identify this substance.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("description", "string", "A description of the substance - its appearance, handling requirements, and other usage notes.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("instance", "", "Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.", 0, java.lang.Integer.MAX_VALUE, instance));

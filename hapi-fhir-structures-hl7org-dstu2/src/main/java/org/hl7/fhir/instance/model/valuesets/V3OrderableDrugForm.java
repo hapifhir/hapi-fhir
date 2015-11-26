@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3OrderableDrugForm {
@@ -499,7 +499,7 @@ public enum V3OrderableDrugForm {
          */
         MEDPAD, 
         /**
-         * A drug delivery system that contains an adhesived backing and that permits its ingredients to diffuse from some portion of it (e.g., the backing itself, a reservoir, the adhesive, or some other component) into the body from the external site where it is applied.
+         * A drug delivery system that contains an adhesived backing and that permits its ingredients to diffuse from some portion of it (e.g. the backing itself, a reservoir, the adhesive, or some other component) into the body from the external site where it is applied.
          */
         PATCH, 
         /**
@@ -562,6 +562,10 @@ public enum V3OrderableDrugForm {
          * 24 Hour Extended Release Capsule
          */
         ERCAP24, 
+        /**
+         * Rationale: Duplicate of code ERENTCAP. Use code ERENTCAP instead.
+         */
+        ERECCAP, 
         /**
          * A solid dosage form containing medicinal substances with or without suitable diluents.
          */
@@ -945,6 +949,8 @@ public enum V3OrderableDrugForm {
           return ERCAP12;
         if ("ERCAP24".equals(codeString))
           return ERCAP24;
+        if ("ERECCAP".equals(codeString))
+          return ERECCAP;
         if ("TAB".equals(codeString))
           return TAB;
         if ("ORTAB".equals(codeString))
@@ -1137,6 +1143,7 @@ public enum V3OrderableDrugForm {
             case ERCAP: return "ERCAP";
             case ERCAP12: return "ERCAP12";
             case ERCAP24: return "ERCAP24";
+            case ERECCAP: return "ERECCAP";
             case TAB: return "TAB";
             case ORTAB: return "ORTAB";
             case BUCTAB: return "BUCTAB";
@@ -1289,7 +1296,7 @@ public enum V3OrderableDrugForm {
             case GUM: return "A sweetened and flavored insoluble plastic material of various shapes which when chewed, releases a drug substance into the oral cavity.";
             case PAD: return "Pad";
             case MEDPAD: return "Medicated Pad";
-            case PATCH: return "A drug delivery system that contains an adhesived backing and that permits its ingredients to diffuse from some portion of it (e.g., the backing itself, a reservoir, the adhesive, or some other component) into the body from the external site where it is applied.";
+            case PATCH: return "A drug delivery system that contains an adhesived backing and that permits its ingredients to diffuse from some portion of it (e.g. the backing itself, a reservoir, the adhesive, or some other component) into the body from the external site where it is applied.";
             case TPATCH: return "Transdermal Patch";
             case TPATH16: return "16 Hour Transdermal Patch";
             case TPATH24: return "24 Hour Transdermal Patch";
@@ -1305,6 +1312,7 @@ public enum V3OrderableDrugForm {
             case ERCAP: return "A solid dosage form in which the drug is enclosed within either a hard or soft soluble container made from a suitable form of gelatin, and which releases a drug (or drugs) in such a manner to allow a reduction in dosing frequency as compared to that drug (or drugs) presented as a conventional dosage form.";
             case ERCAP12: return "12 Hour Extended Release Capsule";
             case ERCAP24: return "24 Hour Extended Release Capsule";
+            case ERECCAP: return "Rationale: Duplicate of code ERENTCAP. Use code ERENTCAP instead.";
             case TAB: return "A solid dosage form containing medicinal substances with or without suitable diluents.";
             case ORTAB: return "Oral Tablet";
             case BUCTAB: return "Buccal Tablet";
@@ -1470,6 +1478,7 @@ public enum V3OrderableDrugForm {
             case ERCAP: return "Extended Release Capsule";
             case ERCAP12: return "12 Hour Extended Release Capsule";
             case ERCAP24: return "24 Hour Extended Release Capsule";
+            case ERECCAP: return "Extended Release Enteric Coated Capsule";
             case TAB: return "Tablet";
             case ORTAB: return "Oral Tablet";
             case BUCTAB: return "Buccal Tablet";

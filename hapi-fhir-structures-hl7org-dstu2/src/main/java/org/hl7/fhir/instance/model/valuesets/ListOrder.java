@@ -29,41 +29,41 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ListOrder {
 
         /**
-         * The list was sorted by a user. The criteria the user used are not specified
+         * The list was sorted by a user. The criteria the user used are not specified.
          */
         USER, 
         /**
-         * The list was sorted by the system. The criteria the user used are not specified; define additional codes to specify a particular order (or use other defined codes)
+         * The list was sorted by the system. The criteria the user used are not specified; define additional codes to specify a particular order (or use other defined codes).
          */
         SYSTEM, 
         /**
-         * The list is sorted by the data of the event. This can be used when the list has items which are dates with past or future events
+         * The list is sorted by the data of the event. This can be used when the list has items which are dates with past or future events.
          */
         EVENTDATE, 
         /**
-         * The list is sorted by the date the item was added to the list. Note that the date added to the list is not explicit in the list itself
+         * The list is sorted by the date the item was added to the list. Note that the date added to the list is not explicit in the list itself.
          */
         ENTRYDATE, 
         /**
-         * The list is sorted by priority. The exact method in which priority has been determined is not specified
+         * The list is sorted by priority. The exact method in which priority has been determined is not specified.
          */
         PRIORITY, 
         /**
-         * The list is sorted alphabetically by an unspecified property of the items in the list
+         * The list is sorted alphabetically by an unspecified property of the items in the list.
          */
         ALPHABETIC, 
         /**
-         * The list is sorted categorically by an unspecified property of the items in the list
+         * The list is sorted categorically by an unspecified property of the items in the list.
          */
         CATEGORY, 
         /**
-         * The list is sorted by patient, with items for each patient grouped together
+         * The list is sorted by patient, with items for each patient grouped together.
          */
         PATIENT, 
         /**
@@ -109,14 +109,14 @@ public enum ListOrder {
         }
         public String getDefinition() {
           switch (this) {
-            case USER: return "The list was sorted by a user. The criteria the user used are not specified";
-            case SYSTEM: return "The list was sorted by the system. The criteria the user used are not specified; define additional codes to specify a particular order (or use other defined codes)";
-            case EVENTDATE: return "The list is sorted by the data of the event. This can be used when the list has items which are dates with past or future events";
-            case ENTRYDATE: return "The list is sorted by the date the item was added to the list. Note that the date added to the list is not explicit in the list itself";
-            case PRIORITY: return "The list is sorted by priority. The exact method in which priority has been determined is not specified";
-            case ALPHABETIC: return "The list is sorted alphabetically by an unspecified property of the items in the list";
-            case CATEGORY: return "The list is sorted categorically by an unspecified property of the items in the list";
-            case PATIENT: return "The list is sorted by patient, with items for each patient grouped together";
+            case USER: return "The list was sorted by a user. The criteria the user used are not specified.";
+            case SYSTEM: return "The list was sorted by the system. The criteria the user used are not specified; define additional codes to specify a particular order (or use other defined codes).";
+            case EVENTDATE: return "The list is sorted by the data of the event. This can be used when the list has items which are dates with past or future events.";
+            case ENTRYDATE: return "The list is sorted by the date the item was added to the list. Note that the date added to the list is not explicit in the list itself.";
+            case PRIORITY: return "The list is sorted by priority. The exact method in which priority has been determined is not specified.";
+            case ALPHABETIC: return "The list is sorted alphabetically by an unspecified property of the items in the list.";
+            case CATEGORY: return "The list is sorted categorically by an unspecified property of the items in the list.";
+            case PATIENT: return "The list is sorted by patient, with items for each patient grouped together.";
             default: return "?";
           }
         }

@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.hl7.fhir.instance.formats.IParser;
 import org.hl7.fhir.instance.formats.ParserType;
+import org.hl7.fhir.instance.model.CodeableConcept;
+import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.ConceptMap;
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.Resource;
@@ -170,7 +172,7 @@ public interface IWorkerContext {
    * @param source
    * @return
    */
-  public ValueSetExpansionOutcome expandVS(ValueSet source);
+  public ValueSetExpansionOutcome expandVS(ValueSet source, boolean cacheOk);
 
   /**
    * Value set expanion inside the internal expansion engine - used 
@@ -254,6 +256,8 @@ public interface IWorkerContext {
    * @return
    */
   public ValidationResult validateCode(String system, String code, String display, ValueSet vs);
+  public ValidationResult validateCode(Coding code, ValueSet vs);
+  public ValidationResult validateCode(CodeableConcept code, ValueSet vs);
   
   /**
    * Validation of a code - consult the terminology service 

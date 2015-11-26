@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Patient xmlns="http://hl7.org/fhir">
+  <id value="nl-core-patient-example"/>
+  <meta>
+    <profile value="http://fhir.nl/fhir/StructureDefinition/nl-core-patient"/>
+  </meta>
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <p>
+        <b>Generated Narrative with Details</b>
+      </p>
+      <p>
+        <b>id</b>: nl-core-patient-example</p>
+      <p>
+        <b>meta</b>: </p>
+      <p>
+        <b>identifier</b>: Medical record number = 654321 (usual)</p>
+      <p>
+        <b>active</b>: true</p>
+      <p>
+        <b>name</b>: Duck Donald (official)</p>
+      <p>
+        <b>gender</b>: male</p>
+      <p>
+        <b>address</b>: Woonplaats </p>
+      <p>
+        <b>photo</b>: </p>
+      <p>
+        <b>managingOrganization</b>: 
+        <a href="Organization/1">ACME Healthcare, Inc</a>
+      </p>
+    </div>
+  </text>
+  <identifier>
+    <use value="usual"/>
+    <type>
+      <coding>
+        <system value="http://hl7.org/fhir/v2/0203"/>
+        <code value="MR"/>
+      </coding>
+    </type>
+    <system value="urn:oid:0.1.2.3.4.5.6.7"/>
+    <value value="654321"/>
+  </identifier>
+  <active value="true"/>
+  <name>
+    <use value="official"/>
+    <family value="Donald"/>
+    <given value="Duck"/>
+  </name>
+  <gender value="male"/>
+  <address>
+    <city value="Woonplaats"/>
+  </address>
+  <photo>
+    <contentType value="image/gif"/>
+    <data value="R0lGODlhEwARAPcAAAAAAAAA/+9aAO+1AP/WAP/eAP/eCP/eEP/eGP/nAP/nCP/nEP/nIf/nKf/n&#xD;&#xA;Uv/nWv/vAP/vCP/vEP/vGP/vIf/vKf/vMf/vOf/vWv/vY//va//vjP/3c//3lP/3nP//tf//vf//&#xD;&#xA;////////////////////////////////////////////////////////////////////////////&#xD;&#xA;////////////////////////////////////////////////////////////////////////////&#xD;&#xA;////////////////////////////////////////////////////////////////////////////&#xD;&#xA;////////////////////////////////////////////////////////////////////////////&#xD;&#xA;////////////////////////////////////////////////////////////////////////////&#xD;&#xA;////////////////////////////////////////////////////////////////////////////&#xD;&#xA;////////////////////////////////////////////////////////////////////////////&#xD;&#xA;////////////////////////////////////////////////////////////////////////////&#xD;&#xA;////////////////////////////////////////////////////////////////////////////&#xD;&#xA;////////////////////////////////////////////////////////////////////////////&#xD;&#xA;////////////////////////////////////////////////////////////////////////////&#xD;&#xA;/////////////////////////////////////////////////////yH5BAEAAAEALAAAAAATABEA&#xD;&#xA;AAi+AAMIDDCgYMGBCBMSvMCQ4QCFCQcwDBGCA4cLDyEGECDxAoAQHjxwyKhQAMeGIUOSJJjRpIAG&#xD;&#xA;DS5wCDly4AALFlYOgHlBwwOSNydM0AmzwYGjBi8IHWoTgQYORg8QIGDAwAKhESI8HIDgwQaRDI1W&#xD;&#xA;XXAhK9MBBzZ8/XDxQoUFZC9IiCBh6wEHGz6IbNuwQoSpWxEgyLCXL8O/gAnylNlW6AUEBRIL7Og3&#xD;&#xA;KwQIiCXb9HsZQoIEUzUjNEiaNMKAAAA7"/>
+  </photo>
+  <contact>
+    <relationship>
+      <coding>
+        <system value="http://hl7.org/fhir/patient-contact-relationship"/>
+        <code value="owner"/>
+      </coding>
+    </relationship>
+    <organization>
+      <reference value="Organization/1"/>
+      <display value="Walt Disney Corporation"/>
+    </organization>
+  </contact>
+  <managingOrganization>
+    <reference value="Organization/1"/>
+    <display value="ACME Healthcare, Inc"/>
+  </managingOrganization>
+  <link>
+    <other>
+      <reference value="Patient/pat2"/>
+    </other>
+    <type value="seealso"/>
+  </link>
+</Patient>

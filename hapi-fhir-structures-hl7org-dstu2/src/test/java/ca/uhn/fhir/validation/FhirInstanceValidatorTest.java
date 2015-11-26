@@ -26,7 +26,11 @@ import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -157,6 +161,13 @@ public class FhirInstanceValidatorTest {
     return retVal;
   }
 
+  @Rule
+  public TestRule watcher = new TestWatcher() {
+     protected void starting(Description description) {
+        ourLog.info("Starting test: " + description.getMethodName());
+     }
+  };
+  
   @Test
   public void testValidateRawJsonResource() {
     // @formatter:off
@@ -306,22 +317,24 @@ public class FhirInstanceValidatorTest {
         + "   <code>\n" + "      <text value=\"No code here!\"/>\n" + "   </code>\n" + "</Observation>";
     ValidationResult output = myVal.validateWithResult(input);
     assertEquals(
-        "Coded value notvalidcode is not in value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status)",
+        "The value provided is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set",
         output.getMessages().get(0).getMessage());
   }
 
+
+  
   
   @Test
   public void testValidateResourceWithValuesetExpansion() {
     
     Patient patient = new Patient();
-    patient.addIdentifier().setSystem("http://system").setValue("12345").getType().addCoding().setSystem("foo").setCode("bar");
+    patient.addIdentifier().setSystem("http://example.com/").setValue("12345").getType().addCoding().setSystem("http://example.com/foo/bar").setCode("bar");
 
     ValidationResult output = myVal.validateWithResult(patient);
     List<SingleValidationMessage> all = logResultsAndReturnAll(output);
     assertEquals(1, all.size());
     assertEquals("/f:Patient/f:identifier/f:type", all.get(0).getLocationString());
-    assertEquals("None of the codes are in the expected value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type)", all.get(0).getMessage());
+    assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code", all.get(0).getMessage());
     assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
     patient = new Patient();
@@ -344,8 +357,7 @@ public class FhirInstanceValidatorTest {
 
     ValidationResult output = myVal.validateWithResult(input);
     List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-    assertEquals(errors.toString(), 1, errors.size());
-    assertEquals("Unable to validate code \"12345\" in code system \"http://loinc.org\"", errors.get(0).getMessage());
+    assertEquals(errors.toString(), 0, errors.size());
 
   }
 
@@ -380,9 +392,7 @@ public class FhirInstanceValidatorTest {
 
     ValidationResult output = myVal.validateWithResult(input);
     List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-    assertEquals(errors.toString(), 1, errors.size());
-    assertEquals("Unable to validate code \"1234\" in code system \"http://loinc.org\"", errors.get(0).getMessage());
-    assertEquals(ResultSeverityEnum.WARNING, errors.get(0).getSeverity());
+    assertEquals(errors.toString(), 0, errors.size());
     
     
   }

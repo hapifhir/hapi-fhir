@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized.  I.e. A collection of entities that isn't an Organization.
+ * Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.
  */
 @ResourceDef(name="Group", profile="http://hl7.org/fhir/Profile/Group")
 public class Group extends DomainResource {
@@ -198,10 +198,10 @@ public class Group extends DomainResource {
         protected BooleanType exclude;
 
         /**
-         * The period over which the characteristic is tested. E.g. the patient had an operation during the month of June.
+         * The period over which the characteristic is tested; e.g. the patient had an operation during the month of June.
          */
         @Child(name = "period", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Period over which characteristic is tested", formalDefinition="The period over which the characteristic is tested. E.g. the patient had an operation during the month of June." )
+        @Description(shortDefinition="Period over which characteristic is tested", formalDefinition="The period over which the characteristic is tested; e.g. the patient had an operation during the month of June." )
         protected Period period;
 
         private static final long serialVersionUID = -1000688967L;
@@ -364,7 +364,7 @@ public class Group extends DomainResource {
         }
 
         /**
-         * @return {@link #period} (The period over which the characteristic is tested. E.g. the patient had an operation during the month of June.)
+         * @return {@link #period} (The period over which the characteristic is tested; e.g. the patient had an operation during the month of June.)
          */
         public Period getPeriod() { 
           if (this.period == null)
@@ -380,7 +380,7 @@ public class Group extends DomainResource {
         }
 
         /**
-         * @param value {@link #period} (The period over which the characteristic is tested. E.g. the patient had an operation during the month of June.)
+         * @param value {@link #period} (The period over which the characteristic is tested; e.g. the patient had an operation during the month of June.)
          */
         public GroupCharacteristicComponent setPeriod(Period value) { 
           this.period = value;
@@ -392,7 +392,7 @@ public class Group extends DomainResource {
           childrenList.add(new Property("code", "CodeableConcept", "A code that identifies the kind of trait being asserted.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("value[x]", "CodeableConcept|boolean|Quantity|Range", "The value of the trait that holds (or does not hold - see 'exclude') for members of the group.", 0, java.lang.Integer.MAX_VALUE, value));
           childrenList.add(new Property("exclude", "boolean", "If true, indicates the characteristic is one that is NOT held by members of the group.", 0, java.lang.Integer.MAX_VALUE, exclude));
-          childrenList.add(new Property("period", "Period", "The period over which the characteristic is tested. E.g. the patient had an operation during the month of June.", 0, java.lang.Integer.MAX_VALUE, period));
+          childrenList.add(new Property("period", "Period", "The period over which the characteristic is tested; e.g. the patient had an operation during the month of June.", 0, java.lang.Integer.MAX_VALUE, period));
         }
 
       public GroupCharacteristicComponent copy() {
@@ -652,10 +652,10 @@ public class Group extends DomainResource {
     protected BooleanType actual;
 
     /**
-     * Provides a specific type of resource the group includes.  E.g. "cow", "syringe", etc.
+     * Provides a specific type of resource the group includes; e.g. "cow", "syringe", etc.
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Kind of Group members", formalDefinition="Provides a specific type of resource the group includes.  E.g. \"cow\", \"syringe\", etc." )
+    @Description(shortDefinition="Kind of Group members", formalDefinition="Provides a specific type of resource the group includes; e.g. \"cow\", \"syringe\", etc." )
     protected CodeableConcept code;
 
     /**
@@ -835,7 +835,7 @@ public class Group extends DomainResource {
     }
 
     /**
-     * @return {@link #code} (Provides a specific type of resource the group includes.  E.g. "cow", "syringe", etc.)
+     * @return {@link #code} (Provides a specific type of resource the group includes; e.g. "cow", "syringe", etc.)
      */
     public CodeableConcept getCode() { 
       if (this.code == null)
@@ -851,7 +851,7 @@ public class Group extends DomainResource {
     }
 
     /**
-     * @param value {@link #code} (Provides a specific type of resource the group includes.  E.g. "cow", "syringe", etc.)
+     * @param value {@link #code} (Provides a specific type of resource the group includes; e.g. "cow", "syringe", etc.)
      */
     public Group setCode(CodeableConcept value) { 
       this.code = value;
@@ -1037,7 +1037,7 @@ public class Group extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "A unique business identifier for this group.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("type", "code", "Identifies the broad classification of the kind of resources the group includes.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("actual", "boolean", "If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.", 0, java.lang.Integer.MAX_VALUE, actual));
-        childrenList.add(new Property("code", "CodeableConcept", "Provides a specific type of resource the group includes.  E.g. \"cow\", \"syringe\", etc.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("code", "CodeableConcept", "Provides a specific type of resource the group includes; e.g. \"cow\", \"syringe\", etc.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("name", "string", "A label assigned to the group for human identification and communication.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("quantity", "unsignedInt", "A count of the number of resource instances that are part of the group.", 0, java.lang.Integer.MAX_VALUE, quantity));
         childrenList.add(new Property("characteristic", "", "Identifies the traits shared by members of the group.", 0, java.lang.Integer.MAX_VALUE, characteristic));

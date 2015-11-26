@@ -18,7 +18,7 @@
 				<p>
 					You can get the tool by downloading it from our
 					<a href="https://github.com/jamesagnew/hapi-fhir/releases">GitHub Releases</a> page
-					(look for the archive named <code>hapi-fhir-[version]-cli.tar.bz2</code> or <code>.zip</code> on Windows).
+					(look for the archive named <code>hapi-fhir-[version]-cli.tar.bz2</code> on OSX/Linux or <code>hapi-fhir-[version]-cli.zip</code> on Windows).
 				</p>
 				<p>
 					When you have downloaded the archive (either ZIP or tar.bz2), expand it into a directory
@@ -26,6 +26,8 @@
 				</p>
 				<p>
 					You can now try the tool out by executing the following command: <code>hapi-fhir-cli</code>
+				</p>
+				<p>
 					This command should show a help screen, as shown in the screeenshot below.
 				</p>
 				<img src="./images/hapi-fhir-cli.png" alt="Basic screen shot" style="margin-left: 40px;"/>

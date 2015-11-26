@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -123,6 +123,8 @@ public class V3RoleClassEnumFactory implements EnumFactory<V3RoleClass> {
       return V3RoleClass.CAREGIVER;
     if ("PRS".equals(codeString))
       return V3RoleClass.PRS;
+    if ("SELF".equals(codeString))
+      return V3RoleClass.SELF;
     if ("_RoleClassPassive".equals(codeString))
       return V3RoleClass._ROLECLASSPASSIVE;
     if ("ACCESS".equals(codeString))
@@ -191,6 +193,8 @@ public class V3RoleClassEnumFactory implements EnumFactory<V3RoleClass> {
       return V3RoleClass.GRIC;
     if ("INST".equals(codeString))
       return V3RoleClass.INST;
+    if ("SUBS".equals(codeString))
+      return V3RoleClass.SUBS;
     if ("_RoleClassPartitive".equals(codeString))
       return V3RoleClass._ROLECLASSPARTITIVE;
     if ("CONT".equals(codeString))
@@ -247,6 +251,18 @@ public class V3RoleClassEnumFactory implements EnumFactory<V3RoleClass> {
       return V3RoleClass.ALQT;
     if ("ISLT".equals(codeString))
       return V3RoleClass.ISLT;
+    if ("CHILD".equals(codeString))
+      return V3RoleClass.CHILD;
+    if ("CRED".equals(codeString))
+      return V3RoleClass.CRED;
+    if ("NURPRAC".equals(codeString))
+      return V3RoleClass.NURPRAC;
+    if ("NURS".equals(codeString))
+      return V3RoleClass.NURS;
+    if ("PA".equals(codeString))
+      return V3RoleClass.PA;
+    if ("PHYS".equals(codeString))
+      return V3RoleClass.PHYS;
     throw new IllegalArgumentException("Unknown V3RoleClass code '"+codeString+"'");
   }
 
@@ -335,6 +351,8 @@ public class V3RoleClassEnumFactory implements EnumFactory<V3RoleClass> {
       return "CAREGIVER";
     if (code == V3RoleClass.PRS)
       return "PRS";
+    if (code == V3RoleClass.SELF)
+      return "SELF";
     if (code == V3RoleClass._ROLECLASSPASSIVE)
       return "_RoleClassPassive";
     if (code == V3RoleClass.ACCESS)
@@ -403,6 +421,8 @@ public class V3RoleClassEnumFactory implements EnumFactory<V3RoleClass> {
       return "GRIC";
     if (code == V3RoleClass.INST)
       return "INST";
+    if (code == V3RoleClass.SUBS)
+      return "SUBS";
     if (code == V3RoleClass._ROLECLASSPARTITIVE)
       return "_RoleClassPartitive";
     if (code == V3RoleClass.CONT)
@@ -459,6 +479,18 @@ public class V3RoleClassEnumFactory implements EnumFactory<V3RoleClass> {
       return "ALQT";
     if (code == V3RoleClass.ISLT)
       return "ISLT";
+    if (code == V3RoleClass.CHILD)
+      return "CHILD";
+    if (code == V3RoleClass.CRED)
+      return "CRED";
+    if (code == V3RoleClass.NURPRAC)
+      return "NURPRAC";
+    if (code == V3RoleClass.NURS)
+      return "NURS";
+    if (code == V3RoleClass.PA)
+      return "PA";
+    if (code == V3RoleClass.PHYS)
+      return "PHYS";
     return "?";
   }
 

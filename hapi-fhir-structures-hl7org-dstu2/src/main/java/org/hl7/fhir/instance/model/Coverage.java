@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * Financial instrument which may be used to pay for or reimburse for health care products and services.
+ * Financial instrument which may be used to pay for or reimburse health care products and services.
  */
 @ResourceDef(name="Coverage", profile="http://hl7.org/fhir/Profile/Coverage")
 public class Coverage extends DomainResource {

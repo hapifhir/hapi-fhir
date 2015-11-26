@@ -41,14 +41,27 @@ import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.util.ExtensionConstants;
+import net.sourceforge.cobertura.CoverageIgnore;
 
 public class JpaConformanceProviderDstu1 extends ServerConformanceProvider {
 
-	private String myImplementationDescription;
-	private IFhirSystemDao<List<IResource>> mySystemDao;
 	private volatile Conformance myCachedValue;
+	private String myImplementationDescription;
 	private RestfulServer myRestfulServer;
+	private IFhirSystemDao<List<IResource>> mySystemDao;
 
+	/**
+	 * Constructor
+	 */
+	@CoverageIgnore
+	public JpaConformanceProviderDstu1(){
+		super();
+		super.setCache(false);
+	}
+
+	/**
+	 * Constructor
+	 */
 	public JpaConformanceProviderDstu1(RestfulServer theRestfulServer, IFhirSystemDao<List<IResource>> theSystemDao) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
@@ -95,8 +108,20 @@ public class JpaConformanceProviderDstu1 extends ServerConformanceProvider {
 		return retVal;
 	}
 
+	@CoverageIgnore
 	public void setImplementationDescription(String theImplDesc) {
 		myImplementationDescription = theImplDesc;
+	}
+
+	@Override
+	public void setRestfulServer(RestfulServer theRestfulServer) {
+		this.myRestfulServer = theRestfulServer;
+		super.setRestfulServer(theRestfulServer);
+	}
+
+	@CoverageIgnore
+	public void setSystemDao(IFhirSystemDao<List<IResource>> mySystemDao) {
+		this.mySystemDao = mySystemDao;
 	}
 
 }

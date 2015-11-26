@@ -955,7 +955,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s81"><Data ss:Type="String">References to codes are very common in healthcare models</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s80"><Data ss:Type="String">Codes may be defined very casually in enumerations or code lists, up to very formal definitions such as SNOMED CT - see the V3 Core Principles for more information</Data><NamedCell
+    <Cell ss:StyleID="s80"><Data ss:Type="String">Codes may be defined very casually in enumerations or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s81"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s82"><Data ss:Type="String">CV</Data><NamedCell
@@ -3611,7 +3611,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Context</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur.  E.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur; e.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">English</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -4127,7 +4127,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Path</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element.  E.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element; e.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Description</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -5020,7 +5020,7 @@
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Event Code</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event.  E.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event; e.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Category</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -5632,7 +5632,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Filename</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file.  E.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file; e.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Profile</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font

@@ -39,13 +39,14 @@
    <groupId>ca.uhn.hapi.fhir</groupId>
    <artifactId>hapi-fhir-android</artifactId>
    <version>${project.version}</version>
+   <classifier>dstu2</classifier>
 </dependency>]]></source>
 			
 				<p>
 					Gradle users can use the following:
 				</p>
 				<source><![CDATA[dependencies {
-    compile group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-android', version: '${project.version}'
+    compile group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-android', version: '${project.version}', classifier: 'dstu2'
     }]]></source>
 			
 				<p>

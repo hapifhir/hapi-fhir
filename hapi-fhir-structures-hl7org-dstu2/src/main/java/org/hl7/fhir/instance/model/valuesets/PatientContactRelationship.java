@@ -29,13 +29,13 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum PatientContactRelationship {
 
         /**
-         * Contact for use in case of emergency
+         * Contact for use in case of emergency.
          */
         EMERGENCY, 
         /**
@@ -55,7 +55,7 @@ public enum PatientContactRelationship {
          */
         PARTNER, 
         /**
-         * Contact for matters related to the patients occupation/employment
+         * Contact for matters related to the patients occupation/employment.
          */
         WORK, 
         /**
@@ -130,12 +130,12 @@ public enum PatientContactRelationship {
         }
         public String getDefinition() {
           switch (this) {
-            case EMERGENCY: return "Contact for use in case of emergency";
+            case EMERGENCY: return "Contact for use in case of emergency.";
             case FAMILY: return "";
             case GUARDIAN: return "";
             case FRIEND: return "";
             case PARTNER: return "";
-            case WORK: return "Contact for matters related to the patients occupation/employment";
+            case WORK: return "Contact for matters related to the patients occupation/employment.";
             case CAREGIVER: return "(Non)professional caregiver";
             case AGENT: return "Contact that acts on behalf of the patient";
             case GUARANTOR: return "Contact for financial matters";

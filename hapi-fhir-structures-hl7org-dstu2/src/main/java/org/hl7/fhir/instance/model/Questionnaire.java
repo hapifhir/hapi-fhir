@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -135,47 +135,47 @@ public class Questionnaire extends DomainResource {
 
     public enum AnswerFormat {
         /**
-         * Answer is a yes/no answer
+         * Answer is a yes/no answer.
          */
         BOOLEAN, 
         /**
-         * Answer is a floating point number
+         * Answer is a floating point number.
          */
         DECIMAL, 
         /**
-         * Answer is an integer
+         * Answer is an integer.
          */
         INTEGER, 
         /**
-         * Answer is a date
+         * Answer is a date.
          */
         DATE, 
         /**
-         * Answer is a date and time
+         * Answer is a date and time.
          */
         DATETIME, 
         /**
-         * Answer is a system timestamp
+         * Answer is a system timestamp.
          */
         INSTANT, 
         /**
-         * Answer is a time (hour/minute/second) independent of date
+         * Answer is a time (hour/minute/second) independent of date.
          */
         TIME, 
         /**
-         * Answer is a short (few words to short sentence) free-text entry
+         * Answer is a short (few words to short sentence) free-text entry.
          */
         STRING, 
         /**
-         * Answer is a long (potentially multi-paragram) free-text entry (still captured as a string)
+         * Answer is a long (potentially multi-paragraph) free-text entry (still captured as a string).
          */
         TEXT, 
         /**
-         * Answer is a url (website, FTP site, etc.)
+         * Answer is a url (website, FTP site, etc.).
          */
         URL, 
         /**
-         * Answer is a Coding drawn from a list of options
+         * Answer is a Coding drawn from a list of options.
          */
         CHOICE, 
         /**
@@ -187,11 +187,11 @@ public class Questionnaire extends DomainResource {
          */
         ATTACHMENT, 
         /**
-         * Answer is a reference to another resource (practitioner, organization, etc.)
+         * Answer is a reference to another resource (practitioner, organization, etc.).
          */
         REFERENCE, 
         /**
-         * Answer is a combination of a numeric value and unit, potentially with a comparator (<, >, etc)
+         * Answer is a combination of a numeric value and unit, potentially with a comparator (<, >, etc.).
          */
         QUANTITY, 
         /**
@@ -275,21 +275,21 @@ public class Questionnaire extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case BOOLEAN: return "Answer is a yes/no answer";
-            case DECIMAL: return "Answer is a floating point number";
-            case INTEGER: return "Answer is an integer";
-            case DATE: return "Answer is a date";
-            case DATETIME: return "Answer is a date and time";
-            case INSTANT: return "Answer is a system timestamp";
-            case TIME: return "Answer is a time (hour/minute/second) independent of date";
-            case STRING: return "Answer is a short (few words to short sentence) free-text entry";
-            case TEXT: return "Answer is a long (potentially multi-paragram) free-text entry (still captured as a string)";
-            case URL: return "Answer is a url (website, FTP site, etc.)";
-            case CHOICE: return "Answer is a Coding drawn from a list of options";
+            case BOOLEAN: return "Answer is a yes/no answer.";
+            case DECIMAL: return "Answer is a floating point number.";
+            case INTEGER: return "Answer is an integer.";
+            case DATE: return "Answer is a date.";
+            case DATETIME: return "Answer is a date and time.";
+            case INSTANT: return "Answer is a system timestamp.";
+            case TIME: return "Answer is a time (hour/minute/second) independent of date.";
+            case STRING: return "Answer is a short (few words to short sentence) free-text entry.";
+            case TEXT: return "Answer is a long (potentially multi-paragraph) free-text entry (still captured as a string).";
+            case URL: return "Answer is a url (website, FTP site, etc.).";
+            case CHOICE: return "Answer is a Coding drawn from a list of options.";
             case OPENCHOICE: return "Answer is a Coding drawn from a list of options or a free-text entry.";
             case ATTACHMENT: return "Answer is binary content such as a image, PDF, etc.";
-            case REFERENCE: return "Answer is a reference to another resource (practitioner, organization, etc.)";
-            case QUANTITY: return "Answer is a combination of a numeric value and unit, potentially with a comparator (<, >, etc)";
+            case REFERENCE: return "Answer is a reference to another resource (practitioner, organization, etc.).";
+            case QUANTITY: return "Answer is a combination of a numeric value and unit, potentially with a comparator (<, >, etc.).";
             default: return "?";
           }
         }
@@ -390,10 +390,10 @@ public class Questionnaire extends DomainResource {
     @Block()
     public static class GroupComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource.
+         * An identifier that is unique within the Questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource.
          */
         @Child(name = "linkId", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="To link questionnaire with questionnaire response", formalDefinition="An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource." )
+        @Description(shortDefinition="To link questionnaire with questionnaire response", formalDefinition="An identifier that is unique within the Questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource." )
         protected StringType linkId;
 
         /**
@@ -407,7 +407,7 @@ public class Questionnaire extends DomainResource {
          * Identifies a how this group of questions is known in a particular terminology such as LOINC.
          */
         @Child(name = "concept", type = {Coding.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Concept that represents this section on a questionnaire", formalDefinition="Identifies a how this group of questions is known in a particular terminology such as LOINC." )
+        @Description(shortDefinition="Concept that represents this section in a questionnaire", formalDefinition="Identifies a how this group of questions is known in a particular terminology such as LOINC." )
         protected List<Coding> concept;
 
         /**
@@ -421,7 +421,7 @@ public class Questionnaire extends DomainResource {
          * If true, indicates that the group must be present and have required questions within it answered.  If false, the group may be skipped when answering the questionnaire.
          */
         @Child(name = "required", type = {BooleanType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Must group be included in data results?", formalDefinition="If true, indicates that the group must be present and have required questions within it answered.  If false, the group may be skipped when answering the questionnaire." )
+        @Description(shortDefinition="Whether the group must be included in data results", formalDefinition="If true, indicates that the group must be present and have required questions within it answered.  If false, the group may be skipped when answering the questionnaire." )
         protected BooleanType required;
 
         /**
@@ -455,7 +455,7 @@ public class Questionnaire extends DomainResource {
       }
 
         /**
-         * @return {@link #linkId} (An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource.). This is the underlying object with id, value and extensions. The accessor "getLinkId" gives direct access to the value
+         * @return {@link #linkId} (An identifier that is unique within the Questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource.). This is the underlying object with id, value and extensions. The accessor "getLinkId" gives direct access to the value
          */
         public StringType getLinkIdElement() { 
           if (this.linkId == null)
@@ -475,7 +475,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @param value {@link #linkId} (An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource.). This is the underlying object with id, value and extensions. The accessor "getLinkId" gives direct access to the value
+         * @param value {@link #linkId} (An identifier that is unique within the Questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource.). This is the underlying object with id, value and extensions. The accessor "getLinkId" gives direct access to the value
          */
         public GroupComponent setLinkIdElement(StringType value) { 
           this.linkId = value;
@@ -483,14 +483,14 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource.
+         * @return An identifier that is unique within the Questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource.
          */
         public String getLinkId() { 
           return this.linkId == null ? null : this.linkId.getValue();
         }
 
         /**
-         * @param value An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource.
+         * @param value An identifier that is unique within the Questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource.
          */
         public GroupComponent setLinkId(String value) { 
           if (Utilities.noString(value))
@@ -813,7 +813,7 @@ public class Questionnaire extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("linkId", "string", "An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource.", 0, java.lang.Integer.MAX_VALUE, linkId));
+          childrenList.add(new Property("linkId", "string", "An identifier that is unique within the Questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource.", 0, java.lang.Integer.MAX_VALUE, linkId));
           childrenList.add(new Property("title", "string", "The human-readable name for this section of the questionnaire.", 0, java.lang.Integer.MAX_VALUE, title));
           childrenList.add(new Property("concept", "Coding", "Identifies a how this group of questions is known in a particular terminology such as LOINC.", 0, java.lang.Integer.MAX_VALUE, concept));
           childrenList.add(new Property("text", "string", "Additional text for the group, used for display purposes.", 0, java.lang.Integer.MAX_VALUE, text));
@@ -915,25 +915,25 @@ public class Questionnaire extends DomainResource {
          * If true, indicates that the question must be answered and have required groups within it also present.  If false, the question and any contained groups may be skipped when answering the questionnaire.
          */
         @Child(name = "required", type = {BooleanType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Must question be answered in data results?", formalDefinition="If true, indicates that the question must be answered and have required groups within it also present.  If false, the question and any contained groups may be skipped when answering the questionnaire." )
+        @Description(shortDefinition="Whether the question must be answered in data results", formalDefinition="If true, indicates that the question must be answered and have required groups within it also present.  If false, the question and any contained groups may be skipped when answering the questionnaire." )
         protected BooleanType required;
 
         /**
          * If true, the question may have more than one answer.
          */
         @Child(name = "repeats", type = {BooleanType.class}, order=6, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Can question  have multiple answers?", formalDefinition="If true, the question may have more than one answer." )
+        @Description(shortDefinition="Whether the question  can have multiple answers", formalDefinition="If true, the question may have more than one answer." )
         protected BooleanType repeats;
 
         /**
-         * Reference to a valueset containing the a list of codes representing permitted answers for the question.
+         * Reference to a value set containing a list of codes representing permitted answers for the question.
          */
         @Child(name = "options", type = {ValueSet.class}, order=7, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Valueset containing permitted answers", formalDefinition="Reference to a valueset containing the a list of codes representing permitted answers for the question." )
+        @Description(shortDefinition="Valueset containing permitted answers", formalDefinition="Reference to a value set containing a list of codes representing permitted answers for the question." )
         protected Reference options;
 
         /**
-         * The actual object that is the target of the reference (Reference to a valueset containing the a list of codes representing permitted answers for the question.)
+         * The actual object that is the target of the reference (Reference to a value set containing a list of codes representing permitted answers for the question.)
          */
         protected ValueSet optionsTarget;
 
@@ -1238,7 +1238,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #options} (Reference to a valueset containing the a list of codes representing permitted answers for the question.)
+         * @return {@link #options} (Reference to a value set containing a list of codes representing permitted answers for the question.)
          */
         public Reference getOptions() { 
           if (this.options == null)
@@ -1254,7 +1254,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @param value {@link #options} (Reference to a valueset containing the a list of codes representing permitted answers for the question.)
+         * @param value {@link #options} (Reference to a value set containing a list of codes representing permitted answers for the question.)
          */
         public QuestionComponent setOptions(Reference value) { 
           this.options = value;
@@ -1262,7 +1262,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @return {@link #options} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Reference to a valueset containing the a list of codes representing permitted answers for the question.)
+         * @return {@link #options} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Reference to a value set containing a list of codes representing permitted answers for the question.)
          */
         public ValueSet getOptionsTarget() { 
           if (this.optionsTarget == null)
@@ -1274,7 +1274,7 @@ public class Questionnaire extends DomainResource {
         }
 
         /**
-         * @param value {@link #options} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Reference to a valueset containing the a list of codes representing permitted answers for the question.)
+         * @param value {@link #options} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Reference to a value set containing a list of codes representing permitted answers for the question.)
          */
         public QuestionComponent setOptionsTarget(ValueSet value) { 
           this.optionsTarget = value;
@@ -1369,7 +1369,7 @@ public class Questionnaire extends DomainResource {
           childrenList.add(new Property("type", "code", "The expected format of the answer, e.g. the type of input (string, integer) or whether a (multiple) choice is expected.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("required", "boolean", "If true, indicates that the question must be answered and have required groups within it also present.  If false, the question and any contained groups may be skipped when answering the questionnaire.", 0, java.lang.Integer.MAX_VALUE, required));
           childrenList.add(new Property("repeats", "boolean", "If true, the question may have more than one answer.", 0, java.lang.Integer.MAX_VALUE, repeats));
-          childrenList.add(new Property("options", "Reference(ValueSet)", "Reference to a valueset containing the a list of codes representing permitted answers for the question.", 0, java.lang.Integer.MAX_VALUE, options));
+          childrenList.add(new Property("options", "Reference(ValueSet)", "Reference to a value set containing a list of codes representing permitted answers for the question.", 0, java.lang.Integer.MAX_VALUE, options));
           childrenList.add(new Property("option", "Coding", "For a \"choice\" question, identifies one of the permitted answers for the question.", 0, java.lang.Integer.MAX_VALUE, option));
           childrenList.add(new Property("group", "@Questionnaire.group", "Nested group, containing nested question for this question. The order of groups within the question is relevant.", 0, java.lang.Integer.MAX_VALUE, group));
         }
@@ -1435,17 +1435,17 @@ public class Questionnaire extends DomainResource {
   }
 
     /**
-     * This records identifiers associated with this question set that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
+     * This records identifiers associated with this question set that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="External Ids for this questionnaire", formalDefinition="This records identifiers associated with this question set that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
+    @Description(shortDefinition="External identifiers for this questionnaire", formalDefinition="This records identifiers associated with this question set that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * The version number assigned by the publisher for business reasons.  It may remain the same when the resource is updated.
      */
     @Child(name = "version", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Logical id for this version of Questionnaire", formalDefinition="The version number assigned by the publisher for business reasons.  It may remain the same when the resource is updated." )
+    @Description(shortDefinition="Logical identifier for this version of Questionnaire", formalDefinition="The version number assigned by the publisher for business reasons.  It may remain the same when the resource is updated." )
     protected StringType version;
 
     /**
@@ -1509,7 +1509,7 @@ public class Questionnaire extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (This records identifiers associated with this question set that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
+     * @return {@link #identifier} (This records identifiers associated with this question set that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -1527,7 +1527,7 @@ public class Questionnaire extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (This records identifiers associated with this question set that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
+     * @return {@link #identifier} (This records identifiers associated with this question set that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -1860,7 +1860,7 @@ public class Questionnaire extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this question set that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this question set that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("version", "string", "The version number assigned by the publisher for business reasons.  It may remain the same when the resource is updated.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("status", "code", "The lifecycle status of the questionnaire as a whole.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("date", "dateTime", "The date that this questionnaire was last changed.", 0, java.lang.Integer.MAX_VALUE, date));

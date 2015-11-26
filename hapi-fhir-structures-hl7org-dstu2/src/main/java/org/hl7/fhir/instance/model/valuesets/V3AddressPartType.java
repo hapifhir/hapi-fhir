@@ -29,13 +29,13 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3AddressPartType {
 
         /**
-         * This can be a unit designator, such as apartment number, suite number, or floor. There may be several unit designators in an address (e.g., "3rd floor, Appt. 342"). This can also be a designator pointing away from the location, rather than specifying a smaller location within some larger one (e.g., Dutch "t.o." means "opposite to" for house boats located across the street facing houses).
+         * This can be a unit designator, such as apartment number, suite number, or floor. There may be several unit designators in an address (e.g. "3rd floor, Appt. 342"). This can also be a designator pointing away from the location, rather than specifying a smaller location within some larger one (e.g. Dutch "t.o." means "opposite to" for house boats located across the street facing houses).
          */
         ADL, 
         /**
@@ -95,11 +95,11 @@ public enum V3AddressPartType {
          */
         DINSTA, 
         /**
-         * A number, letter or name identifying a delivery installation.  E.g., for Station A, the delivery installation qualifier would be 'A'.
+         * A number, letter or name identifying a delivery installation; e.g. for Station A, the delivery installation qualifier would be 'A'.
          */
         DINSTQ, 
         /**
-         * Direction (e.g., N, S, W, E)
+         * Direction (e.g. N, S, W, E)
          */
         DIR, 
         /**
@@ -147,7 +147,7 @@ public enum V3AddressPartType {
          */
         UNID, 
         /**
-         * Indicates the type of specific unit contained within a building or complex.  E.g. Appartment, Floor
+         * Indicates the type of specific unit contained within a building or complex; e.g. Appartment, Floor
          */
         UNIT, 
         /**
@@ -263,7 +263,7 @@ public enum V3AddressPartType {
         }
         public String getDefinition() {
           switch (this) {
-            case ADL: return "This can be a unit designator, such as apartment number, suite number, or floor. There may be several unit designators in an address (e.g., \"3rd floor, Appt. 342\"). This can also be a designator pointing away from the location, rather than specifying a smaller location within some larger one (e.g., Dutch \"t.o.\" means \"opposite to\" for house boats located across the street facing houses).";
+            case ADL: return "This can be a unit designator, such as apartment number, suite number, or floor. There may be several unit designators in an address (e.g. \"3rd floor, Appt. 342\"). This can also be a designator pointing away from the location, rather than specifying a smaller location within some larger one (e.g. Dutch \"t.o.\" means \"opposite to\" for house boats located across the street facing houses).";
             case AL: return "Description: An address line is for either an additional locator, a delivery address or a street address.";
             case DAL: return "A delivery address line is frequently used instead of breaking out delivery mode, delivery installation, etc.  An address generally has only a delivery address line or a street address line, but not both.";
             case SAL: return "Description: A street address line is frequently used instead of breaking out build number, street name, street type, etc. An address generally has only a delivery address line or a street address line, but not both.";
@@ -278,8 +278,8 @@ public enum V3AddressPartType {
             case DEL: return "Delimiters are printed without framing white space.  If no value component is provided, the delimiter appears as a line break.";
             case DINST: return "Indicates the type of delivery installation (the facility to which the mail will be delivered prior to final shipping via the delivery mode.) Example: post office, letter carrier depot, community mail center, station, etc.";
             case DINSTA: return "The location of the delivery installation, usually a town or city, and is only required if the area is different from the municipality. Area to which mail delivery service is provided from any postal facility or service such as an individual letter carrier, rural route, or postal route.";
-            case DINSTQ: return "A number, letter or name identifying a delivery installation.  E.g., for Station A, the delivery installation qualifier would be 'A'.";
-            case DIR: return "Direction (e.g., N, S, W, E)";
+            case DINSTQ: return "A number, letter or name identifying a delivery installation; e.g. for Station A, the delivery installation qualifier would be 'A'.";
+            case DIR: return "Direction (e.g. N, S, W, E)";
             case DMOD: return "Indicates the type of service offered, method of delivery.  For example: post office box, rural route, general delivery, etc.";
             case DMODID: return "Represents the routing information such as a letter carrier route number.  It is the identifying number of the designator (the box number or rural route number).";
             case DPID: return "A value that uniquely identifies the postal address.";
@@ -291,7 +291,7 @@ public enum V3AddressPartType {
             case STR: return "street name";
             case STTYP: return "The designation given to the street.  (e.g. Street, Avenue, Crescent, etc.)";
             case UNID: return "The number or name of a specific unit contained within a building or complex, as assigned by that building or complex.";
-            case UNIT: return "Indicates the type of specific unit contained within a building or complex.  E.g. Appartment, Floor";
+            case UNIT: return "Indicates the type of specific unit contained within a building or complex; e.g. Appartment, Floor";
             case ZIP: return "A postal code designating a region defined by the postal service.";
             default: return "?";
           }

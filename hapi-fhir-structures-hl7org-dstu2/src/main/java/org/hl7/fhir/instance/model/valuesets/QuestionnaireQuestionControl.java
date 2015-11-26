@@ -29,41 +29,41 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum QuestionnaireQuestionControl {
 
         /**
-         * A control which provides a list of potential matches based on text entered into a control.  Used for large choice sets where text-matching is an appropriate discovery mechanism
+         * A control which provides a list of potential matches based on text entered into a control.  Used for large choice sets where text-matching is an appropriate discovery mechanism.
          */
         AUTOCOMPLETE, 
         /**
-         * A control where an item (or multiple items) can be selected from a list that is only displayed when the user is editing the field
+         * A control where an item (or multiple items) can be selected from a list that is only displayed when the user is editing the field.
          */
         DROPDOWN, 
         /**
-         * A control where choices are listed with a box beside them.  The box can be toggled to select or de-select a given choice.  Multiple selections may be possible
+         * A control where choices are listed with a box beside them.  The box can be toggled to select or de-select a given choice.  Multiple selections may be possible.
          */
         CHECKBOX, 
         /**
-         * A control where editing an item spawns a separate dialog box or screen permitting a user to navigate, filter or otherwise discover an appropriate match.  Useful for large choice sets where text matching is not an appropriate discovery mechanism.  Such screens must generally be tuned for the specific choice list structure
+         * A control where editing an item spawns a separate dialog box or screen permitting a user to navigate, filter or otherwise discover an appropriate match.  Useful for large choice sets where text matching is not an appropriate discovery mechanism.  Such screens must generally be tuned for the specific choice list structure.
          */
         LOOKUP, 
         /**
-         * A control where choices are listed with a button beside them.  The box can be toggled to select or de-select a given choice.  Selecting one item deselects all others
+         * A control where choices are listed with a button beside them.  The button can be toggled to select or de-select a given choice.  Selecting one item deselects all others.
          */
         RADIOBUTTON, 
         /**
-         * A control where an axis is displayed between the high and low values and the control can be visiually manipulated to select a value anywhere on the axis
+         * A control where an axis is displayed between the high and low values and the control can be visually manipulated to select a value anywhere on the axis.
          */
         SLIDER, 
         /**
-         * A control where a list of numeric or other ordered values can be scrolled through via arrows
+         * A control where a list of numeric or other ordered values can be scrolled through via arrows.
          */
         SPINNER, 
         /**
-         * A control where a user can type in their answer freely
+         * A control where a user can type in their answer freely.
          */
         TEXTBOX, 
         /**
@@ -109,14 +109,14 @@ public enum QuestionnaireQuestionControl {
         }
         public String getDefinition() {
           switch (this) {
-            case AUTOCOMPLETE: return "A control which provides a list of potential matches based on text entered into a control.  Used for large choice sets where text-matching is an appropriate discovery mechanism";
-            case DROPDOWN: return "A control where an item (or multiple items) can be selected from a list that is only displayed when the user is editing the field";
-            case CHECKBOX: return "A control where choices are listed with a box beside them.  The box can be toggled to select or de-select a given choice.  Multiple selections may be possible";
-            case LOOKUP: return "A control where editing an item spawns a separate dialog box or screen permitting a user to navigate, filter or otherwise discover an appropriate match.  Useful for large choice sets where text matching is not an appropriate discovery mechanism.  Such screens must generally be tuned for the specific choice list structure";
-            case RADIOBUTTON: return "A control where choices are listed with a button beside them.  The box can be toggled to select or de-select a given choice.  Selecting one item deselects all others";
-            case SLIDER: return "A control where an axis is displayed between the high and low values and the control can be visiually manipulated to select a value anywhere on the axis";
-            case SPINNER: return "A control where a list of numeric or other ordered values can be scrolled through via arrows";
-            case TEXTBOX: return "A control where a user can type in their answer freely";
+            case AUTOCOMPLETE: return "A control which provides a list of potential matches based on text entered into a control.  Used for large choice sets where text-matching is an appropriate discovery mechanism.";
+            case DROPDOWN: return "A control where an item (or multiple items) can be selected from a list that is only displayed when the user is editing the field.";
+            case CHECKBOX: return "A control where choices are listed with a box beside them.  The box can be toggled to select or de-select a given choice.  Multiple selections may be possible.";
+            case LOOKUP: return "A control where editing an item spawns a separate dialog box or screen permitting a user to navigate, filter or otherwise discover an appropriate match.  Useful for large choice sets where text matching is not an appropriate discovery mechanism.  Such screens must generally be tuned for the specific choice list structure.";
+            case RADIOBUTTON: return "A control where choices are listed with a button beside them.  The button can be toggled to select or de-select a given choice.  Selecting one item deselects all others.";
+            case SLIDER: return "A control where an axis is displayed between the high and low values and the control can be visually manipulated to select a value anywhere on the axis.";
+            case SPINNER: return "A control where a list of numeric or other ordered values can be scrolled through via arrows.";
+            case TEXTBOX: return "A control where a user can type in their answer freely.";
             default: return "?";
           }
         }

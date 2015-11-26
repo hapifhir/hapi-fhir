@@ -26,6 +26,7 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.Address;
+import org.hl7.fhir.instance.model.Attachment;
 import org.hl7.fhir.instance.model.Address.AddressUse;
 import org.hl7.fhir.instance.model.Address.AddressUseEnumFactory;
 import org.hl7.fhir.instance.model.Binary;
@@ -48,6 +49,7 @@ import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.MedicationStatement;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Organization;
 import org.hl7.fhir.instance.model.Patient;
@@ -1487,6 +1489,14 @@ public class XmlParserHl7OrgDstu2Test {
 		DocumentManifest actual = ourCtx.newXmlParser().parseResource(DocumentManifest.class, encoded);
 		assertEquals(1, actual.getContained().size());
 		assertEquals(1, actual.getContent().size());
+		
+		/*
+		 * If this fails, the child named "p" in DocumentManifest is missing the
+		 * type IBaseResource in its definition... This isn't being auto added right now,
+		 * need to figure out why
+		 * 
+		 * @Child(name = "p", type = {Attachment.class, IBaseResource.class}, order=1, min=1, max=1, modifier=false, summary=true)
+		 */
 		assertNotNull(actual.getContent().get(0).getPReference().getResource());
 
 	}

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -60,14 +60,14 @@ public class Basic extends DomainResource {
     protected CodeableConcept code;
 
     /**
-     * Identifies the patient, practitioner, device or any other resource that is the "focus" of this resoruce.
+     * Identifies the patient, practitioner, device or any other resource that is the "focus" of this resource.
      */
     @Child(name = "subject", type = {}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Identifies the focus of this resource", formalDefinition="Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resoruce." )
+    @Description(shortDefinition="Identifies the focus of this resource", formalDefinition="Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resource." )
     protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (Identifies the patient, practitioner, device or any other resource that is the "focus" of this resoruce.)
+     * The actual object that is the target of the reference (Identifies the patient, practitioner, device or any other resource that is the "focus" of this resource.)
      */
     protected Resource subjectTarget;
 
@@ -172,7 +172,7 @@ public class Basic extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} (Identifies the patient, practitioner, device or any other resource that is the "focus" of this resoruce.)
+     * @return {@link #subject} (Identifies the patient, practitioner, device or any other resource that is the "focus" of this resource.)
      */
     public Reference getSubject() { 
       if (this.subject == null)
@@ -188,7 +188,7 @@ public class Basic extends DomainResource {
     }
 
     /**
-     * @param value {@link #subject} (Identifies the patient, practitioner, device or any other resource that is the "focus" of this resoruce.)
+     * @param value {@link #subject} (Identifies the patient, practitioner, device or any other resource that is the "focus" of this resource.)
      */
     public Basic setSubject(Reference value) { 
       this.subject = value;
@@ -196,14 +196,14 @@ public class Basic extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies the patient, practitioner, device or any other resource that is the "focus" of this resoruce.)
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies the patient, practitioner, device or any other resource that is the "focus" of this resource.)
      */
     public Resource getSubjectTarget() { 
       return this.subjectTarget;
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies the patient, practitioner, device or any other resource that is the "focus" of this resoruce.)
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies the patient, practitioner, device or any other resource that is the "focus" of this resource.)
      */
     public Basic setSubjectTarget(Resource value) { 
       this.subjectTarget = value;
@@ -302,7 +302,7 @@ public class Basic extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Identifier assigned to the resource for business purposes, outside the context of FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("code", "CodeableConcept", "Identifies the 'type' of resource - equivalent to the resource name for other resources.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("subject", "Reference(Any)", "Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resoruce.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("subject", "Reference(Any)", "Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resource.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("author", "Reference(Practitioner|Patient|RelatedPerson)", "Indicates who was responsible for creating the resource instance.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("created", "date", "Identifies when the resource was first created.", 0, java.lang.Integer.MAX_VALUE, created));
       }

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -52,10 +52,10 @@ public class Period extends Type implements ICompositeType {
     protected DateTimeType start;
 
     /**
-     * The end of the period. If the end of the period is missing, it means that the period is ongoing. The start mey be in the past, and the end date in the future, which means that period is expected/planned to end at that time.
+     * The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.
      */
     @Child(name = "end", type = {DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="End time with inclusive boundary, if not ongoing", formalDefinition="The end of the period. If the end of the period is missing, it means that the period is ongoing. The start mey be in the past, and the end date in the future, which means that period is expected/planned to end at that time." )
+    @Description(shortDefinition="End time with inclusive boundary, if not ongoing", formalDefinition="The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time." )
     protected DateTimeType end;
 
     private static final long serialVersionUID = 649791751L;
@@ -117,7 +117,7 @@ public class Period extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #end} (The end of the period. If the end of the period is missing, it means that the period is ongoing. The start mey be in the past, and the end date in the future, which means that period is expected/planned to end at that time.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+     * @return {@link #end} (The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
      */
     public DateTimeType getEndElement() { 
       if (this.end == null)
@@ -137,7 +137,7 @@ public class Period extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #end} (The end of the period. If the end of the period is missing, it means that the period is ongoing. The start mey be in the past, and the end date in the future, which means that period is expected/planned to end at that time.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+     * @param value {@link #end} (The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
      */
     public Period setEndElement(DateTimeType value) { 
       this.end = value;
@@ -145,14 +145,14 @@ public class Period extends Type implements ICompositeType {
     }
 
     /**
-     * @return The end of the period. If the end of the period is missing, it means that the period is ongoing. The start mey be in the past, and the end date in the future, which means that period is expected/planned to end at that time.
+     * @return The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.
      */
     public Date getEnd() { 
       return this.end == null ? null : this.end.getValue();
     }
 
     /**
-     * @param value The end of the period. If the end of the period is missing, it means that the period is ongoing. The start mey be in the past, and the end date in the future, which means that period is expected/planned to end at that time.
+     * @param value The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.
      */
     public Period setEnd(Date value) { 
       if (value == null)
@@ -168,7 +168,7 @@ public class Period extends Type implements ICompositeType {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("start", "dateTime", "The start of the period. The boundary is inclusive.", 0, java.lang.Integer.MAX_VALUE, start));
-        childrenList.add(new Property("end", "dateTime", "The end of the period. If the end of the period is missing, it means that the period is ongoing. The start mey be in the past, and the end date in the future, which means that period is expected/planned to end at that time.", 0, java.lang.Integer.MAX_VALUE, end));
+        childrenList.add(new Property("end", "dateTime", "The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.", 0, java.lang.Integer.MAX_VALUE, end));
       }
 
       public Period copy() {

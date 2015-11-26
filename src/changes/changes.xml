@@ -6,7 +6,12 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="1.3" date="TBD">
+		<release version="1.4" date="TBD">
+			<action type="fix">
+				Remove a dependency on Java 1.7 in 
+			</action>
+		</release>
+		<release version="1.3" date="2015-11-14">
 			<action type="add">
             Bump the version of a few dependencies to the
             latest versions (dependent HAPI modules listed in brackets):
@@ -240,11 +245,22 @@
 				correct, but the intention is clear so we will honour them
 				just to be helpful.
 			</action>
+			<action type="fix">
+				Generated Enum types for some ValueSets did not include all
+				codes (specifically, ValueSets which defined concepts containing
+				child concepts did not result in Enum values for the child concepts)
+			</action>
 			<action type="fix" fix="253">
 				In the JPA server, order of transaction processing should be 
 				DELETE, POST, PUT, GET, and the order should not matter
 				within entries with the same verb. Thanks to Bill de Beaubien
 				for reporting!
+			</action>
+			<action type="add" fix="254">
+				Add the ability to wire JPA conformance providers
+				using Spring (basically, add default constructors
+				and setters to the conformance providers). Thanks
+				to C. Mike Bylund for the pull request!
 			</action>
 		</release>
 		<release version="1.2" date="2015-09-18">

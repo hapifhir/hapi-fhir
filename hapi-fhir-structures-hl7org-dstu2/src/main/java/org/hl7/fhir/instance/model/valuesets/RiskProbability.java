@@ -29,29 +29,29 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum RiskProbability {
 
         /**
-         * The specified outcome is exceptionally unlikely
+         * The specified outcome is exceptionally unlikely.
          */
         NEGLIGIBLE, 
         /**
-         * The specified outcome is possible but unlikely
+         * The specified outcome is possible but unlikely.
          */
         LOW, 
         /**
-         * The specified outcome has a reasonable likelihood of occurrence
+         * The specified outcome has a reasonable likelihood of occurrence.
          */
         MODERATE, 
         /**
-         * The specified outcome is more likely to occur than not
+         * The specified outcome is more likely to occur than not.
          */
         HIGH, 
         /**
-         * The specified outcome is effectively guaranteed
+         * The specified outcome is effectively guaranteed.
          */
         CERTAIN, 
         /**
@@ -88,21 +88,21 @@ public enum RiskProbability {
         }
         public String getDefinition() {
           switch (this) {
-            case NEGLIGIBLE: return "The specified outcome is exceptionally unlikely";
-            case LOW: return "The specified outcome is possible but unlikely";
-            case MODERATE: return "The specified outcome has a reasonable likelihood of occurrence";
-            case HIGH: return "The specified outcome is more likely to occur than not";
-            case CERTAIN: return "The specified outcome is effectively guaranteed";
+            case NEGLIGIBLE: return "The specified outcome is exceptionally unlikely.";
+            case LOW: return "The specified outcome is possible but unlikely.";
+            case MODERATE: return "The specified outcome has a reasonable likelihood of occurrence.";
+            case HIGH: return "The specified outcome is more likely to occur than not.";
+            case CERTAIN: return "The specified outcome is effectively guaranteed.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case NEGLIGIBLE: return "negligible likelihood";
-            case LOW: return "low likelihood";
-            case MODERATE: return "moderate likelihood";
-            case HIGH: return "high likelihood";
-            case CERTAIN: return "certain";
+            case NEGLIGIBLE: return "Negligible likelihood";
+            case LOW: return "Low likelihood";
+            case MODERATE: return "Moderate likelihood";
+            case HIGH: return "High likelihood";
+            case CERTAIN: return "Certain";
             default: return "?";
           }
     }

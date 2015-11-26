@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -48,19 +48,19 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
 
     public enum IssueSeverity {
         /**
-         * The issue caused the action to fail, and no further checking could be performed
+         * The issue caused the action to fail, and no further checking could be performed.
          */
         FATAL, 
         /**
-         * The issue is sufficiently important to cause the action to fail
+         * The issue is sufficiently important to cause the action to fail.
          */
         ERROR, 
         /**
-         * The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired
+         * The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired.
          */
         WARNING, 
         /**
-         * The issue has no relation to the degree of success of the action
+         * The issue has no relation to the degree of success of the action.
          */
         INFORMATION, 
         /**
@@ -100,10 +100,10 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
         public String getDefinition() {
           switch (this) {
-            case FATAL: return "The issue caused the action to fail, and no further checking could be performed";
-            case ERROR: return "The issue is sufficiently important to cause the action to fail";
-            case WARNING: return "The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired";
-            case INFORMATION: return "The issue has no relation to the degree of success of the action";
+            case FATAL: return "The issue caused the action to fail, and no further checking could be performed.";
+            case ERROR: return "The issue is sufficiently important to cause the action to fail.";
+            case WARNING: return "The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired.";
+            case INFORMATION: return "The issue has no relation to the degree of success of the action.";
             default: return "?";
           }
         }
@@ -148,119 +148,119 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
 
     public enum IssueType {
         /**
-         * Content invalid against the Specification or a Profile
+         * Content invalid against the specification or a profile.
          */
         INVALID, 
         /**
-         * A structural issue in the content such as wrong namespace, or unable to parse the content completely, or invalid json syntax
+         * A structural issue in the content such as wrong namespace, or unable to parse the content completely, or invalid json syntax.
          */
         STRUCTURE, 
         /**
-         * A required element is missing
+         * A required element is missing.
          */
         REQUIRED, 
         /**
-         * element value invalid
+         * An element value is invalid.
          */
         VALUE, 
         /**
-         * A content validation rule failed - e.g. a schematron rule
+         * A content validation rule failed - e.g. a schematron rule.
          */
         INVARIANT, 
         /**
-         * An authentication/authorization/permissions issueof some kind
+         * An authentication/authorization/permissions issue of some kind.
          */
         SECURITY, 
         /**
-         * the client needs to initiate an authentication process
+         * The client needs to initiate an authentication process.
          */
         LOGIN, 
         /**
-         * The user or system was not able to be authenticated (either there is no process, or the proferred token is unacceptable)
+         * The user or system was not able to be authenticated (either there is no process, or the proferred token is unacceptable).
          */
         UNKNOWN, 
         /**
-         * User session expired; a login may be required
+         * User session expired; a login may be required.
          */
         EXPIRED, 
         /**
-         * The user does not have the rights to perform this action
+         * The user does not have the rights to perform this action.
          */
         FORBIDDEN, 
         /**
-         * Some information was not or may not have been returned due to business rules, consent or privacy rules, or access permission constraints.  This information may be accessible through alternate processes
+         * Some information was not or may not have been returned due to business rules, consent or privacy rules, or access permission constraints.  This information may be accessible through alternate processes.
          */
         SUPPRESSED, 
         /**
-         * Processing issues. These are expected to be final e.g. there is no point resubmitting the same content unchanged
+         * Processing issues. These are expected to be final e.g. there is no point resubmitting the same content unchanged.
          */
         PROCESSING, 
         /**
-         * The resource or profile is not supported
+         * The resource or profile is not supported.
          */
         NOTSUPPORTED, 
         /**
-         * An attempt was made to create a duplicate record
+         * An attempt was made to create a duplicate record.
          */
         DUPLICATE, 
         /**
-         * The reference provided was not found. In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the content is not found further into the application architecture
+         * The reference provided was not found. In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the content is not found further into the application architecture.
          */
         NOTFOUND, 
         /**
-         * Provided content is too long (typically, this is a denial of service protection type of error)
+         * Provided content is too long (typically, this is a denial of service protection type of error).
          */
         TOOLONG, 
         /**
-         * The code or system could not be understood, or it was not valid in the context of a particular ValueSet
+         * The code or system could not be understood, or it was not valid in the context of a particular ValueSet.code.
          */
         CODEINVALID, 
         /**
-         * An extension was found that was not acceptable, or that could not be resolved, or a modifierExtension that was not recognised
+         * An extension was found that was not acceptable, could not be resolved, or a modifierExtension was not recognized.
          */
         EXTENSION, 
         /**
-         * The operation was stopped to protect server resources. E.g. a request for a value set expansion on all of SNOMED CT
+         * The operation was stopped to protect server resources; e.g. a request for a value set expansion on all of SNOMED CT.
          */
         TOOCOSTLY, 
         /**
-         * The content/operation failed to pass some business rule, and so could not proceed
+         * The content/operation failed to pass some business rule, and so could not proceed.
          */
         BUSINESSRULE, 
         /**
-         * content could not be accepted because of an edit conflict (i.e. version aware updates) (In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the conflict is discovered further into the application architecture)
+         * Content could not be accepted because of an edit conflict (i.e. version aware updates) (In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the conflict is discovered further into the application architecture.)
          */
         CONFLICT, 
         /**
-         * Not all data sources typically accessed could be reached, or responded in time, so the returned information may not be complete
+         * Not all data sources typically accessed could be reached, or responded in time, so the returned information may not be complete.
          */
         INCOMPLETE, 
         /**
-         * Transient processing issues. The system receiving the error may be able to resubmit the same content once an underlying issue is resolved
+         * Transient processing issues. The system receiving the error may be able to resubmit the same content once an underlying issue is resolved.
          */
         TRANSIENT, 
         /**
-         * A resource/record locking failure (usually in an underlying database)
+         * A resource/record locking failure (usually in an underlying database).
          */
         LOCKERROR, 
         /**
-         * The persistent store unavailable. E.g. the database is down for maintenance or similar
+         * The persistent store is unavailable; e.g. the database is down for maintenance or similar action.
          */
         NOSTORE, 
         /**
-         * An unexpected internal error
+         * An unexpected internal error has occurred.
          */
         EXCEPTION, 
         /**
-         * An internal timeout occurred
+         * An internal timeout has occurred.
          */
         TIMEOUT, 
         /**
-         * The system is not prepared to handle this request due to load management
+         * The system is not prepared to handle this request due to load management.
          */
         THROTTLED, 
         /**
-         * A message unrelated to the processing success of the completed operation (Examples of the latter include things like reminders of password expiry, system maintenance times, etc.)
+         * A message unrelated to the processing success of the completed operation (examples of the latter include things like reminders of password expiry, system maintenance times, etc.).
          */
         INFORMATIONAL, 
         /**
@@ -400,35 +400,35 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
         public String getDefinition() {
           switch (this) {
-            case INVALID: return "Content invalid against the Specification or a Profile";
-            case STRUCTURE: return "A structural issue in the content such as wrong namespace, or unable to parse the content completely, or invalid json syntax";
-            case REQUIRED: return "A required element is missing";
-            case VALUE: return "element value invalid";
-            case INVARIANT: return "A content validation rule failed - e.g. a schematron rule";
-            case SECURITY: return "An authentication/authorization/permissions issueof some kind";
-            case LOGIN: return "the client needs to initiate an authentication process";
-            case UNKNOWN: return "The user or system was not able to be authenticated (either there is no process, or the proferred token is unacceptable)";
-            case EXPIRED: return "User session expired; a login may be required";
-            case FORBIDDEN: return "The user does not have the rights to perform this action";
-            case SUPPRESSED: return "Some information was not or may not have been returned due to business rules, consent or privacy rules, or access permission constraints.  This information may be accessible through alternate processes";
-            case PROCESSING: return "Processing issues. These are expected to be final e.g. there is no point resubmitting the same content unchanged";
-            case NOTSUPPORTED: return "The resource or profile is not supported";
-            case DUPLICATE: return "An attempt was made to create a duplicate record";
-            case NOTFOUND: return "The reference provided was not found. In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the content is not found further into the application architecture";
-            case TOOLONG: return "Provided content is too long (typically, this is a denial of service protection type of error)";
-            case CODEINVALID: return "The code or system could not be understood, or it was not valid in the context of a particular ValueSet";
-            case EXTENSION: return "An extension was found that was not acceptable, or that could not be resolved, or a modifierExtension that was not recognised";
-            case TOOCOSTLY: return "The operation was stopped to protect server resources. E.g. a request for a value set expansion on all of SNOMED CT";
-            case BUSINESSRULE: return "The content/operation failed to pass some business rule, and so could not proceed";
-            case CONFLICT: return "content could not be accepted because of an edit conflict (i.e. version aware updates) (In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the conflict is discovered further into the application architecture)";
-            case INCOMPLETE: return "Not all data sources typically accessed could be reached, or responded in time, so the returned information may not be complete";
-            case TRANSIENT: return "Transient processing issues. The system receiving the error may be able to resubmit the same content once an underlying issue is resolved";
-            case LOCKERROR: return "A resource/record locking failure (usually in an underlying database)";
-            case NOSTORE: return "The persistent store unavailable. E.g. the database is down for maintenance or similar";
-            case EXCEPTION: return "An unexpected internal error";
-            case TIMEOUT: return "An internal timeout occurred";
-            case THROTTLED: return "The system is not prepared to handle this request due to load management";
-            case INFORMATIONAL: return "A message unrelated to the processing success of the completed operation (Examples of the latter include things like reminders of password expiry, system maintenance times, etc.)";
+            case INVALID: return "Content invalid against the specification or a profile.";
+            case STRUCTURE: return "A structural issue in the content such as wrong namespace, or unable to parse the content completely, or invalid json syntax.";
+            case REQUIRED: return "A required element is missing.";
+            case VALUE: return "An element value is invalid.";
+            case INVARIANT: return "A content validation rule failed - e.g. a schematron rule.";
+            case SECURITY: return "An authentication/authorization/permissions issue of some kind.";
+            case LOGIN: return "The client needs to initiate an authentication process.";
+            case UNKNOWN: return "The user or system was not able to be authenticated (either there is no process, or the proferred token is unacceptable).";
+            case EXPIRED: return "User session expired; a login may be required.";
+            case FORBIDDEN: return "The user does not have the rights to perform this action.";
+            case SUPPRESSED: return "Some information was not or may not have been returned due to business rules, consent or privacy rules, or access permission constraints.  This information may be accessible through alternate processes.";
+            case PROCESSING: return "Processing issues. These are expected to be final e.g. there is no point resubmitting the same content unchanged.";
+            case NOTSUPPORTED: return "The resource or profile is not supported.";
+            case DUPLICATE: return "An attempt was made to create a duplicate record.";
+            case NOTFOUND: return "The reference provided was not found. In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the content is not found further into the application architecture.";
+            case TOOLONG: return "Provided content is too long (typically, this is a denial of service protection type of error).";
+            case CODEINVALID: return "The code or system could not be understood, or it was not valid in the context of a particular ValueSet.code.";
+            case EXTENSION: return "An extension was found that was not acceptable, could not be resolved, or a modifierExtension was not recognized.";
+            case TOOCOSTLY: return "The operation was stopped to protect server resources; e.g. a request for a value set expansion on all of SNOMED CT.";
+            case BUSINESSRULE: return "The content/operation failed to pass some business rule, and so could not proceed.";
+            case CONFLICT: return "Content could not be accepted because of an edit conflict (i.e. version aware updates) (In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the conflict is discovered further into the application architecture.)";
+            case INCOMPLETE: return "Not all data sources typically accessed could be reached, or responded in time, so the returned information may not be complete.";
+            case TRANSIENT: return "Transient processing issues. The system receiving the error may be able to resubmit the same content once an underlying issue is resolved.";
+            case LOCKERROR: return "A resource/record locking failure (usually in an underlying database).";
+            case NOSTORE: return "The persistent store is unavailable; e.g. the database is down for maintenance or similar action.";
+            case EXCEPTION: return "An unexpected internal error has occurred.";
+            case TIMEOUT: return "An internal timeout has occurred.";
+            case THROTTLED: return "The system is not prepared to handle this request due to load management.";
+            case INFORMATIONAL: return "A message unrelated to the processing success of the completed operation (examples of the latter include things like reminders of password expiry, system maintenance times, etc.).";
             default: return "?";
           }
         }

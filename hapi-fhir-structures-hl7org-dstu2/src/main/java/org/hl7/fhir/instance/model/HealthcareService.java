@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * The details of a Healthcare Service available at a location.
+ * The details of a healthcare service available at a location.
  */
 @ResourceDef(name="HealthcareService", profile="http://hl7.org/fhir/Profile/HealthcareService")
 public class HealthcareService extends DomainResource {
@@ -194,14 +194,14 @@ public class HealthcareService extends DomainResource {
          * The specific type of service being delivered or performed.
          */
         @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The specific type of service being delivered or performed", formalDefinition="The specific type of service being delivered or performed." )
+        @Description(shortDefinition="Type of service delivered or performed", formalDefinition="The specific type of service being delivered or performed." )
         protected CodeableConcept type;
 
         /**
-         * Collection of Specialties handled by the Service Site. This is more of a Medical Term.
+         * Collection of specialties handled by the service site. This is more of a medical term.
          */
         @Child(name = "specialty", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Collection of Specialties handled by the Service Site. This is more of a Medical Term", formalDefinition="Collection of Specialties handled by the Service Site. This is more of a Medical Term." )
+        @Description(shortDefinition="Specialties handled by the Service Site", formalDefinition="Collection of specialties handled by the service site. This is more of a medical term." )
         protected List<CodeableConcept> specialty;
 
         private static final long serialVersionUID = 1703986174L;
@@ -246,7 +246,7 @@ public class HealthcareService extends DomainResource {
         }
 
         /**
-         * @return {@link #specialty} (Collection of Specialties handled by the Service Site. This is more of a Medical Term.)
+         * @return {@link #specialty} (Collection of specialties handled by the service site. This is more of a medical term.)
          */
         public List<CodeableConcept> getSpecialty() { 
           if (this.specialty == null)
@@ -264,7 +264,7 @@ public class HealthcareService extends DomainResource {
         }
 
         /**
-         * @return {@link #specialty} (Collection of Specialties handled by the Service Site. This is more of a Medical Term.)
+         * @return {@link #specialty} (Collection of specialties handled by the service site. This is more of a medical term.)
          */
     // syntactic sugar
         public CodeableConcept addSpecialty() { //3
@@ -288,7 +288,7 @@ public class HealthcareService extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "CodeableConcept", "The specific type of service being delivered or performed.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("specialty", "CodeableConcept", "Collection of Specialties handled by the Service Site. This is more of a Medical Term.", 0, java.lang.Integer.MAX_VALUE, specialty));
+          childrenList.add(new Property("specialty", "CodeableConcept", "Collection of specialties handled by the service site. This is more of a medical term.", 0, java.lang.Integer.MAX_VALUE, specialty));
         }
 
       public ServiceTypeComponent copy() {
@@ -333,31 +333,31 @@ public class HealthcareService extends DomainResource {
     @Block()
     public static class HealthcareServiceAvailableTimeComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Indicates which Days of the week are available between the Start and End Times.
+         * Indicates which days of the week are available between the start and end Times.
          */
         @Child(name = "daysOfWeek", type = {CodeType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="mon | tue | wed | thu | fri | sat | sun", formalDefinition="Indicates which Days of the week are available between the Start and End Times." )
+        @Description(shortDefinition="mon | tue | wed | thu | fri | sat | sun", formalDefinition="Indicates which days of the week are available between the start and end Times." )
         protected List<Enumeration<DaysOfWeek>> daysOfWeek;
 
         /**
          * Is this always available? (hence times are irrelevant) e.g. 24 hour service.
          */
         @Child(name = "allDay", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Is this always available? (hence times are irrelevant) e.g. 24 hour service", formalDefinition="Is this always available? (hence times are irrelevant) e.g. 24 hour service." )
+        @Description(shortDefinition="Always available? e.g. 24 hour service", formalDefinition="Is this always available? (hence times are irrelevant) e.g. 24 hour service." )
         protected BooleanType allDay;
 
         /**
          * The opening time of day. Note: If the AllDay flag is set, then this time is ignored.
          */
         @Child(name = "availableStartTime", type = {TimeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The opening time of day. Note: If the AllDay flag is set, then this time is ignored", formalDefinition="The opening time of day. Note: If the AllDay flag is set, then this time is ignored." )
+        @Description(shortDefinition="Opening time of day (ignored if allDay = true)", formalDefinition="The opening time of day. Note: If the AllDay flag is set, then this time is ignored." )
         protected TimeType availableStartTime;
 
         /**
          * The closing time of day. Note: If the AllDay flag is set, then this time is ignored.
          */
         @Child(name = "availableEndTime", type = {TimeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The closing time of day. Note: If the AllDay flag is set, then this time is ignored", formalDefinition="The closing time of day. Note: If the AllDay flag is set, then this time is ignored." )
+        @Description(shortDefinition="Closing time of day (ignored if allDay = true)", formalDefinition="The closing time of day. Note: If the AllDay flag is set, then this time is ignored." )
         protected TimeType availableEndTime;
 
         private static final long serialVersionUID = -2139510127L;
@@ -370,7 +370,7 @@ public class HealthcareService extends DomainResource {
       }
 
         /**
-         * @return {@link #daysOfWeek} (Indicates which Days of the week are available between the Start and End Times.)
+         * @return {@link #daysOfWeek} (Indicates which days of the week are available between the start and end Times.)
          */
         public List<Enumeration<DaysOfWeek>> getDaysOfWeek() { 
           if (this.daysOfWeek == null)
@@ -388,7 +388,7 @@ public class HealthcareService extends DomainResource {
         }
 
         /**
-         * @return {@link #daysOfWeek} (Indicates which Days of the week are available between the Start and End Times.)
+         * @return {@link #daysOfWeek} (Indicates which days of the week are available between the start and end Times.)
          */
     // syntactic sugar
         public Enumeration<DaysOfWeek> addDaysOfWeekElement() {//2 
@@ -400,7 +400,7 @@ public class HealthcareService extends DomainResource {
         }
 
         /**
-         * @param value {@link #daysOfWeek} (Indicates which Days of the week are available between the Start and End Times.)
+         * @param value {@link #daysOfWeek} (Indicates which days of the week are available between the start and end Times.)
          */
         public HealthcareServiceAvailableTimeComponent addDaysOfWeek(DaysOfWeek value) { //1
           Enumeration<DaysOfWeek> t = new Enumeration<DaysOfWeek>(new DaysOfWeekEnumFactory());
@@ -412,7 +412,7 @@ public class HealthcareService extends DomainResource {
         }
 
         /**
-         * @param value {@link #daysOfWeek} (Indicates which Days of the week are available between the Start and End Times.)
+         * @param value {@link #daysOfWeek} (Indicates which days of the week are available between the start and end Times.)
          */
         public boolean hasDaysOfWeek(DaysOfWeek value) { 
           if (this.daysOfWeek == null)
@@ -568,7 +568,7 @@ public class HealthcareService extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("daysOfWeek", "code", "Indicates which Days of the week are available between the Start and End Times.", 0, java.lang.Integer.MAX_VALUE, daysOfWeek));
+          childrenList.add(new Property("daysOfWeek", "code", "Indicates which days of the week are available between the start and end Times.", 0, java.lang.Integer.MAX_VALUE, daysOfWeek));
           childrenList.add(new Property("allDay", "boolean", "Is this always available? (hence times are irrelevant) e.g. 24 hour service.", 0, java.lang.Integer.MAX_VALUE, allDay));
           childrenList.add(new Property("availableStartTime", "time", "The opening time of day. Note: If the AllDay flag is set, then this time is ignored.", 0, java.lang.Integer.MAX_VALUE, availableStartTime));
           childrenList.add(new Property("availableEndTime", "time", "The closing time of day. Note: If the AllDay flag is set, then this time is ignored.", 0, java.lang.Integer.MAX_VALUE, availableEndTime));
@@ -624,14 +624,14 @@ public class HealthcareService extends DomainResource {
          * The reason that can be presented to the user as to why this time is not available.
          */
         @Child(name = "description", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The reason that can be presented to the user as to why this time is not available", formalDefinition="The reason that can be presented to the user as to why this time is not available." )
+        @Description(shortDefinition="Reason presented to the user explaining why time not available", formalDefinition="The reason that can be presented to the user as to why this time is not available." )
         protected StringType description;
 
         /**
          * Service is not available (seasonally or for a public holiday) from this date.
          */
         @Child(name = "during", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Service is not available (seasonally or for a public holiday) from this date", formalDefinition="Service is not available (seasonally or for a public holiday) from this date." )
+        @Description(shortDefinition="Service not availablefrom this date", formalDefinition="Service is not available (seasonally or for a public holiday) from this date." )
         protected Period during;
 
         private static final long serialVersionUID = 310849929L;
@@ -762,43 +762,43 @@ public class HealthcareService extends DomainResource {
   }
 
     /**
-     * External Identifiers for this item.
+     * External identifiers for this item.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="External Identifiers for this item", formalDefinition="External Identifiers for this item." )
+    @Description(shortDefinition="External identifiers for this item", formalDefinition="External identifiers for this item." )
     protected List<Identifier> identifier;
 
     /**
-     * The organization that provides this Healthcare Service.
+     * The organization that provides this healthcare service.
      */
     @Child(name = "providedBy", type = {Organization.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The organization that provides this Healthcare Service", formalDefinition="The organization that provides this Healthcare Service." )
+    @Description(shortDefinition="Organization that provides this service", formalDefinition="The organization that provides this healthcare service." )
     protected Reference providedBy;
 
     /**
-     * The actual object that is the target of the reference (The organization that provides this Healthcare Service.)
+     * The actual object that is the target of the reference (The organization that provides this healthcare service.)
      */
     protected Organization providedByTarget;
 
     /**
-     * Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type.
+     * Identifies the broad category of service being performed or delivered.
      */
     @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type", formalDefinition="Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type." )
+    @Description(shortDefinition="Broad category of service being performed or delivered", formalDefinition="Identifies the broad category of service being performed or delivered." )
     protected CodeableConcept serviceCategory;
 
     /**
      * A specific type of service that may be delivered or performed.
      */
     @Child(name = "serviceType", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="A specific type of service that may be delivered or performed", formalDefinition="A specific type of service that may be delivered or performed." )
+    @Description(shortDefinition="Specific service delivered or performed", formalDefinition="A specific type of service that may be delivered or performed." )
     protected List<ServiceTypeComponent> serviceType;
 
     /**
      * The location where this healthcare service may be provided.
      */
     @Child(name = "location", type = {Location.class}, order=4, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The location where this healthcare service may be provided", formalDefinition="The location where this healthcare service may be provided." )
+    @Description(shortDefinition="Location where service may be provided", formalDefinition="The location where this healthcare service may be provided." )
     protected Reference location;
 
     /**
@@ -810,14 +810,14 @@ public class HealthcareService extends DomainResource {
      * Further description of the service as it would be presented to a consumer while searching.
      */
     @Child(name = "serviceName", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Further description of the service as it would be presented to a consumer while searching", formalDefinition="Further description of the service as it would be presented to a consumer while searching." )
+    @Description(shortDefinition="Description of service as presented to a consumer while searching", formalDefinition="Further description of the service as it would be presented to a consumer while searching." )
     protected StringType serviceName;
 
     /**
      * Any additional description of the service and/or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName.
      */
     @Child(name = "comment", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Any additional description of the service and/or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName", formalDefinition="Any additional description of the service and/or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName." )
+    @Description(shortDefinition="Additional description and/or any specific issues not covered elsewhere", formalDefinition="Any additional description of the service and/or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName." )
     protected StringType comment;
 
     /**
@@ -831,21 +831,21 @@ public class HealthcareService extends DomainResource {
      * If there is a photo/symbol associated with this HealthcareService, it may be included here to facilitate quick identification of the service in a list.
      */
     @Child(name = "photo", type = {Attachment.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="If there is a photo/symbol associated with this HealthcareService, it may be included here to facilitate quick identification of the service in a list", formalDefinition="If there is a photo/symbol associated with this HealthcareService, it may be included here to facilitate quick identification of the service in a list." )
+    @Description(shortDefinition="Facilitates quick identification of the service", formalDefinition="If there is a photo/symbol associated with this HealthcareService, it may be included here to facilitate quick identification of the service in a list." )
     protected Attachment photo;
 
     /**
-     * List of contacts related to this specific healthcare service. If this is empty, then refer to the location's contacts.
+     * List of contacts related to this specific healthcare service.
      */
     @Child(name = "telecom", type = {ContactPoint.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="List of contacts related to this specific healthcare service. If this is empty, then refer to the location's contacts", formalDefinition="List of contacts related to this specific healthcare service. If this is empty, then refer to the location's contacts." )
+    @Description(shortDefinition="Contacts related to the healthcare service", formalDefinition="List of contacts related to this specific healthcare service." )
     protected List<ContactPoint> telecom;
 
     /**
      * The location(s) that this service is available to (not where the service is provided).
      */
     @Child(name = "coverageArea", type = {Location.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="The location(s) that this service is available to (not where the service is provided)", formalDefinition="The location(s) that this service is available to (not where the service is provided)." )
+    @Description(shortDefinition="Location(s) service is inteded for/available to", formalDefinition="The location(s) that this service is available to (not where the service is provided)." )
     protected List<Reference> coverageArea;
     /**
      * The actual objects that are the target of the reference (The location(s) that this service is available to (not where the service is provided).)
@@ -857,35 +857,35 @@ public class HealthcareService extends DomainResource {
      * The code(s) that detail the conditions under which the healthcare service is available/offered.
      */
     @Child(name = "serviceProvisionCode", type = {CodeableConcept.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="The code(s) that detail the conditions under which the healthcare service is available/offered", formalDefinition="The code(s) that detail the conditions under which the healthcare service is available/offered." )
+    @Description(shortDefinition="Conditions under which service is available/offered", formalDefinition="The code(s) that detail the conditions under which the healthcare service is available/offered." )
     protected List<CodeableConcept> serviceProvisionCode;
 
     /**
-     * Does this service have specific eligibility requirements that need to be met in order to use the service.
+     * Does this service have specific eligibility requirements that need to be met in order to use the service?
      */
     @Child(name = "eligibility", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Does this service have specific eligibility requirements that need to be met in order to use the service", formalDefinition="Does this service have specific eligibility requirements that need to be met in order to use the service." )
+    @Description(shortDefinition="Specific eligibility requirements required to use the service", formalDefinition="Does this service have specific eligibility requirements that need to be met in order to use the service?" )
     protected CodeableConcept eligibility;
 
     /**
-     * The description of service eligibility should, in general, not exceed one or two paragraphs. It should be sufficient for a prospective consumer to determine if they are likely to be eligible or not. Where eligibility requirements and conditions are complex, it may simply be noted that an eligibility assessment is required. Where eligibility is determined by an outside source, such as an Act of Parliament, this should be noted, preferably with a reference to a commonly available copy of the source document such as a web page.
+     * Describes the eligibility conditions for the service.
      */
     @Child(name = "eligibilityNote", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Describes the eligibility conditions for the service", formalDefinition="The description of service eligibility should, in general, not exceed one or two paragraphs. It should be sufficient for a prospective consumer to determine if they are likely to be eligible or not. Where eligibility requirements and conditions are complex, it may simply be noted that an eligibility assessment is required. Where eligibility is determined by an outside source, such as an Act of Parliament, this should be noted, preferably with a reference to a commonly available copy of the source document such as a web page." )
+    @Description(shortDefinition="Describes the eligibility conditions for the service", formalDefinition="Describes the eligibility conditions for the service." )
     protected StringType eligibilityNote;
 
     /**
      * Program Names that can be used to categorize the service.
      */
     @Child(name = "programName", type = {StringType.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Program Names that can be used to categorize the service", formalDefinition="Program Names that can be used to categorize the service." )
+    @Description(shortDefinition="Program Names that categorize the service", formalDefinition="Program Names that can be used to categorize the service." )
     protected List<StringType> programName;
 
     /**
-     * Collection of Characteristics (attributes).
+     * Collection of characteristics (attributes).
      */
     @Child(name = "characteristic", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Collection of Characteristics (attributes)", formalDefinition="Collection of Characteristics (attributes)." )
+    @Description(shortDefinition="Collection of characteristics (attributes)", formalDefinition="Collection of characteristics (attributes)." )
     protected List<CodeableConcept> characteristic;
 
     /**
@@ -899,35 +899,35 @@ public class HealthcareService extends DomainResource {
      * The public part of the 'keys' allocated to an Organization by an accredited body to support secure exchange of data over the internet. To be provided by the Organization, where available.
      */
     @Child(name = "publicKey", type = {StringType.class}, order=17, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The public part of the 'keys' allocated to an Organization by an accredited body to support secure exchange of data over the internet. To be provided by the Organization, where available", formalDefinition="The public part of the 'keys' allocated to an Organization by an accredited body to support secure exchange of data over the internet. To be provided by the Organization, where available." )
+    @Description(shortDefinition="PKI Public keys to support secure communications", formalDefinition="The public part of the 'keys' allocated to an Organization by an accredited body to support secure exchange of data over the internet. To be provided by the Organization, where available." )
     protected StringType publicKey;
 
     /**
-     * Indicates whether or not a prospective consumer will require an appointment for a particular service at a Site to be provided by the Organization. Indicates if an appointment is required for access to this service.
+     * Indicates whether or not a prospective consumer will require an appointment for a particular service at a site to be provided by the Organization. Indicates if an appointment is required for access to this service.
      */
     @Child(name = "appointmentRequired", type = {BooleanType.class}, order=18, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Indicates if an appointment is required for access to this service", formalDefinition="Indicates whether or not a prospective consumer will require an appointment for a particular service at a Site to be provided by the Organization. Indicates if an appointment is required for access to this service." )
+    @Description(shortDefinition="If an appointment is required for access to this service", formalDefinition="Indicates whether or not a prospective consumer will require an appointment for a particular service at a site to be provided by the Organization. Indicates if an appointment is required for access to this service." )
     protected BooleanType appointmentRequired;
 
     /**
-     * A Collection of times that the Service Site is available.
+     * A collection of times that the Service Site is available.
      */
     @Child(name = "availableTime", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A Collection of times that the Service Site is available", formalDefinition="A Collection of times that the Service Site is available." )
+    @Description(shortDefinition="Times the Service Site is available", formalDefinition="A collection of times that the Service Site is available." )
     protected List<HealthcareServiceAvailableTimeComponent> availableTime;
 
     /**
      * The HealthcareService is not available during this period of time due to the provided reason.
      */
     @Child(name = "notAvailable", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="The HealthcareService is not available during this period of time due to the provided reason", formalDefinition="The HealthcareService is not available during this period of time due to the provided reason." )
+    @Description(shortDefinition="Not available during this time due to provided reason", formalDefinition="The HealthcareService is not available during this period of time due to the provided reason." )
     protected List<HealthcareServiceNotAvailableComponent> notAvailable;
 
     /**
-     * A description of Site availability exceptions, e.g., public holiday availability. Succinctly describing all possible exceptions to normal Site availability as details in the Available Times and Not Available Times.
+     * A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times.
      */
     @Child(name = "availabilityExceptions", type = {StringType.class}, order=21, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="A description of Site availability exceptions, e.g., public holiday availability. Succinctly describing all possible exceptions to normal Site availability as details in the Available Times and Not Available Times", formalDefinition="A description of Site availability exceptions, e.g., public holiday availability. Succinctly describing all possible exceptions to normal Site availability as details in the Available Times and Not Available Times." )
+    @Description(shortDefinition="Description of availability exceptions", formalDefinition="A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times." )
     protected StringType availabilityExceptions;
 
     private static final long serialVersionUID = 683771126L;
@@ -948,7 +948,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (External Identifiers for this item.)
+     * @return {@link #identifier} (External identifiers for this item.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -966,7 +966,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (External Identifiers for this item.)
+     * @return {@link #identifier} (External identifiers for this item.)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -988,7 +988,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #providedBy} (The organization that provides this Healthcare Service.)
+     * @return {@link #providedBy} (The organization that provides this healthcare service.)
      */
     public Reference getProvidedBy() { 
       if (this.providedBy == null)
@@ -1004,7 +1004,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @param value {@link #providedBy} (The organization that provides this Healthcare Service.)
+     * @param value {@link #providedBy} (The organization that provides this healthcare service.)
      */
     public HealthcareService setProvidedBy(Reference value) { 
       this.providedBy = value;
@@ -1012,7 +1012,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #providedBy} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization that provides this Healthcare Service.)
+     * @return {@link #providedBy} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization that provides this healthcare service.)
      */
     public Organization getProvidedByTarget() { 
       if (this.providedByTarget == null)
@@ -1024,7 +1024,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @param value {@link #providedBy} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization that provides this Healthcare Service.)
+     * @param value {@link #providedBy} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization that provides this healthcare service.)
      */
     public HealthcareService setProvidedByTarget(Organization value) { 
       this.providedByTarget = value;
@@ -1032,7 +1032,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #serviceCategory} (Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type.)
+     * @return {@link #serviceCategory} (Identifies the broad category of service being performed or delivered.)
      */
     public CodeableConcept getServiceCategory() { 
       if (this.serviceCategory == null)
@@ -1048,7 +1048,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @param value {@link #serviceCategory} (Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type.)
+     * @param value {@link #serviceCategory} (Identifies the broad category of service being performed or delivered.)
      */
     public HealthcareService setServiceCategory(CodeableConcept value) { 
       this.serviceCategory = value;
@@ -1311,7 +1311,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #telecom} (List of contacts related to this specific healthcare service. If this is empty, then refer to the location's contacts.)
+     * @return {@link #telecom} (List of contacts related to this specific healthcare service.)
      */
     public List<ContactPoint> getTelecom() { 
       if (this.telecom == null)
@@ -1329,7 +1329,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #telecom} (List of contacts related to this specific healthcare service. If this is empty, then refer to the location's contacts.)
+     * @return {@link #telecom} (List of contacts related to this specific healthcare service.)
      */
     // syntactic sugar
     public ContactPoint addTelecom() { //3
@@ -1452,7 +1452,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #eligibility} (Does this service have specific eligibility requirements that need to be met in order to use the service.)
+     * @return {@link #eligibility} (Does this service have specific eligibility requirements that need to be met in order to use the service?)
      */
     public CodeableConcept getEligibility() { 
       if (this.eligibility == null)
@@ -1468,7 +1468,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @param value {@link #eligibility} (Does this service have specific eligibility requirements that need to be met in order to use the service.)
+     * @param value {@link #eligibility} (Does this service have specific eligibility requirements that need to be met in order to use the service?)
      */
     public HealthcareService setEligibility(CodeableConcept value) { 
       this.eligibility = value;
@@ -1476,7 +1476,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #eligibilityNote} (The description of service eligibility should, in general, not exceed one or two paragraphs. It should be sufficient for a prospective consumer to determine if they are likely to be eligible or not. Where eligibility requirements and conditions are complex, it may simply be noted that an eligibility assessment is required. Where eligibility is determined by an outside source, such as an Act of Parliament, this should be noted, preferably with a reference to a commonly available copy of the source document such as a web page.). This is the underlying object with id, value and extensions. The accessor "getEligibilityNote" gives direct access to the value
+     * @return {@link #eligibilityNote} (Describes the eligibility conditions for the service.). This is the underlying object with id, value and extensions. The accessor "getEligibilityNote" gives direct access to the value
      */
     public StringType getEligibilityNoteElement() { 
       if (this.eligibilityNote == null)
@@ -1496,7 +1496,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @param value {@link #eligibilityNote} (The description of service eligibility should, in general, not exceed one or two paragraphs. It should be sufficient for a prospective consumer to determine if they are likely to be eligible or not. Where eligibility requirements and conditions are complex, it may simply be noted that an eligibility assessment is required. Where eligibility is determined by an outside source, such as an Act of Parliament, this should be noted, preferably with a reference to a commonly available copy of the source document such as a web page.). This is the underlying object with id, value and extensions. The accessor "getEligibilityNote" gives direct access to the value
+     * @param value {@link #eligibilityNote} (Describes the eligibility conditions for the service.). This is the underlying object with id, value and extensions. The accessor "getEligibilityNote" gives direct access to the value
      */
     public HealthcareService setEligibilityNoteElement(StringType value) { 
       this.eligibilityNote = value;
@@ -1504,14 +1504,14 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return The description of service eligibility should, in general, not exceed one or two paragraphs. It should be sufficient for a prospective consumer to determine if they are likely to be eligible or not. Where eligibility requirements and conditions are complex, it may simply be noted that an eligibility assessment is required. Where eligibility is determined by an outside source, such as an Act of Parliament, this should be noted, preferably with a reference to a commonly available copy of the source document such as a web page.
+     * @return Describes the eligibility conditions for the service.
      */
     public String getEligibilityNote() { 
       return this.eligibilityNote == null ? null : this.eligibilityNote.getValue();
     }
 
     /**
-     * @param value The description of service eligibility should, in general, not exceed one or two paragraphs. It should be sufficient for a prospective consumer to determine if they are likely to be eligible or not. Where eligibility requirements and conditions are complex, it may simply be noted that an eligibility assessment is required. Where eligibility is determined by an outside source, such as an Act of Parliament, this should be noted, preferably with a reference to a commonly available copy of the source document such as a web page.
+     * @param value Describes the eligibility conditions for the service.
      */
     public HealthcareService setEligibilityNote(String value) { 
       if (Utilities.noString(value))
@@ -1579,7 +1579,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #characteristic} (Collection of Characteristics (attributes).)
+     * @return {@link #characteristic} (Collection of characteristics (attributes).)
      */
     public List<CodeableConcept> getCharacteristic() { 
       if (this.characteristic == null)
@@ -1597,7 +1597,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #characteristic} (Collection of Characteristics (attributes).)
+     * @return {@link #characteristic} (Collection of characteristics (attributes).)
      */
     // syntactic sugar
     public CodeableConcept addCharacteristic() { //3
@@ -1708,7 +1708,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #appointmentRequired} (Indicates whether or not a prospective consumer will require an appointment for a particular service at a Site to be provided by the Organization. Indicates if an appointment is required for access to this service.). This is the underlying object with id, value and extensions. The accessor "getAppointmentRequired" gives direct access to the value
+     * @return {@link #appointmentRequired} (Indicates whether or not a prospective consumer will require an appointment for a particular service at a site to be provided by the Organization. Indicates if an appointment is required for access to this service.). This is the underlying object with id, value and extensions. The accessor "getAppointmentRequired" gives direct access to the value
      */
     public BooleanType getAppointmentRequiredElement() { 
       if (this.appointmentRequired == null)
@@ -1728,7 +1728,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @param value {@link #appointmentRequired} (Indicates whether or not a prospective consumer will require an appointment for a particular service at a Site to be provided by the Organization. Indicates if an appointment is required for access to this service.). This is the underlying object with id, value and extensions. The accessor "getAppointmentRequired" gives direct access to the value
+     * @param value {@link #appointmentRequired} (Indicates whether or not a prospective consumer will require an appointment for a particular service at a site to be provided by the Organization. Indicates if an appointment is required for access to this service.). This is the underlying object with id, value and extensions. The accessor "getAppointmentRequired" gives direct access to the value
      */
     public HealthcareService setAppointmentRequiredElement(BooleanType value) { 
       this.appointmentRequired = value;
@@ -1736,14 +1736,14 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return Indicates whether or not a prospective consumer will require an appointment for a particular service at a Site to be provided by the Organization. Indicates if an appointment is required for access to this service.
+     * @return Indicates whether or not a prospective consumer will require an appointment for a particular service at a site to be provided by the Organization. Indicates if an appointment is required for access to this service.
      */
     public boolean getAppointmentRequired() { 
       return this.appointmentRequired == null || this.appointmentRequired.isEmpty() ? false : this.appointmentRequired.getValue();
     }
 
     /**
-     * @param value Indicates whether or not a prospective consumer will require an appointment for a particular service at a Site to be provided by the Organization. Indicates if an appointment is required for access to this service.
+     * @param value Indicates whether or not a prospective consumer will require an appointment for a particular service at a site to be provided by the Organization. Indicates if an appointment is required for access to this service.
      */
     public HealthcareService setAppointmentRequired(boolean value) { 
         if (this.appointmentRequired == null)
@@ -1753,7 +1753,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #availableTime} (A Collection of times that the Service Site is available.)
+     * @return {@link #availableTime} (A collection of times that the Service Site is available.)
      */
     public List<HealthcareServiceAvailableTimeComponent> getAvailableTime() { 
       if (this.availableTime == null)
@@ -1771,7 +1771,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #availableTime} (A Collection of times that the Service Site is available.)
+     * @return {@link #availableTime} (A collection of times that the Service Site is available.)
      */
     // syntactic sugar
     public HealthcareServiceAvailableTimeComponent addAvailableTime() { //3
@@ -1833,7 +1833,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return {@link #availabilityExceptions} (A description of Site availability exceptions, e.g., public holiday availability. Succinctly describing all possible exceptions to normal Site availability as details in the Available Times and Not Available Times.). This is the underlying object with id, value and extensions. The accessor "getAvailabilityExceptions" gives direct access to the value
+     * @return {@link #availabilityExceptions} (A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times.). This is the underlying object with id, value and extensions. The accessor "getAvailabilityExceptions" gives direct access to the value
      */
     public StringType getAvailabilityExceptionsElement() { 
       if (this.availabilityExceptions == null)
@@ -1853,7 +1853,7 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @param value {@link #availabilityExceptions} (A description of Site availability exceptions, e.g., public holiday availability. Succinctly describing all possible exceptions to normal Site availability as details in the Available Times and Not Available Times.). This is the underlying object with id, value and extensions. The accessor "getAvailabilityExceptions" gives direct access to the value
+     * @param value {@link #availabilityExceptions} (A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times.). This is the underlying object with id, value and extensions. The accessor "getAvailabilityExceptions" gives direct access to the value
      */
     public HealthcareService setAvailabilityExceptionsElement(StringType value) { 
       this.availabilityExceptions = value;
@@ -1861,14 +1861,14 @@ public class HealthcareService extends DomainResource {
     }
 
     /**
-     * @return A description of Site availability exceptions, e.g., public holiday availability. Succinctly describing all possible exceptions to normal Site availability as details in the Available Times and Not Available Times.
+     * @return A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times.
      */
     public String getAvailabilityExceptions() { 
       return this.availabilityExceptions == null ? null : this.availabilityExceptions.getValue();
     }
 
     /**
-     * @param value A description of Site availability exceptions, e.g., public holiday availability. Succinctly describing all possible exceptions to normal Site availability as details in the Available Times and Not Available Times.
+     * @param value A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times.
      */
     public HealthcareService setAvailabilityExceptions(String value) { 
       if (Utilities.noString(value))
@@ -1883,28 +1883,28 @@ public class HealthcareService extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "External Identifiers for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("providedBy", "Reference(Organization)", "The organization that provides this Healthcare Service.", 0, java.lang.Integer.MAX_VALUE, providedBy));
-        childrenList.add(new Property("serviceCategory", "CodeableConcept", "Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
+        childrenList.add(new Property("identifier", "Identifier", "External identifiers for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("providedBy", "Reference(Organization)", "The organization that provides this healthcare service.", 0, java.lang.Integer.MAX_VALUE, providedBy));
+        childrenList.add(new Property("serviceCategory", "CodeableConcept", "Identifies the broad category of service being performed or delivered.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
         childrenList.add(new Property("serviceType", "", "A specific type of service that may be delivered or performed.", 0, java.lang.Integer.MAX_VALUE, serviceType));
         childrenList.add(new Property("location", "Reference(Location)", "The location where this healthcare service may be provided.", 0, java.lang.Integer.MAX_VALUE, location));
         childrenList.add(new Property("serviceName", "string", "Further description of the service as it would be presented to a consumer while searching.", 0, java.lang.Integer.MAX_VALUE, serviceName));
         childrenList.add(new Property("comment", "string", "Any additional description of the service and/or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName.", 0, java.lang.Integer.MAX_VALUE, comment));
         childrenList.add(new Property("extraDetails", "string", "Extra details about the service that can't be placed in the other fields.", 0, java.lang.Integer.MAX_VALUE, extraDetails));
         childrenList.add(new Property("photo", "Attachment", "If there is a photo/symbol associated with this HealthcareService, it may be included here to facilitate quick identification of the service in a list.", 0, java.lang.Integer.MAX_VALUE, photo));
-        childrenList.add(new Property("telecom", "ContactPoint", "List of contacts related to this specific healthcare service. If this is empty, then refer to the location's contacts.", 0, java.lang.Integer.MAX_VALUE, telecom));
+        childrenList.add(new Property("telecom", "ContactPoint", "List of contacts related to this specific healthcare service.", 0, java.lang.Integer.MAX_VALUE, telecom));
         childrenList.add(new Property("coverageArea", "Reference(Location)", "The location(s) that this service is available to (not where the service is provided).", 0, java.lang.Integer.MAX_VALUE, coverageArea));
         childrenList.add(new Property("serviceProvisionCode", "CodeableConcept", "The code(s) that detail the conditions under which the healthcare service is available/offered.", 0, java.lang.Integer.MAX_VALUE, serviceProvisionCode));
-        childrenList.add(new Property("eligibility", "CodeableConcept", "Does this service have specific eligibility requirements that need to be met in order to use the service.", 0, java.lang.Integer.MAX_VALUE, eligibility));
-        childrenList.add(new Property("eligibilityNote", "string", "The description of service eligibility should, in general, not exceed one or two paragraphs. It should be sufficient for a prospective consumer to determine if they are likely to be eligible or not. Where eligibility requirements and conditions are complex, it may simply be noted that an eligibility assessment is required. Where eligibility is determined by an outside source, such as an Act of Parliament, this should be noted, preferably with a reference to a commonly available copy of the source document such as a web page.", 0, java.lang.Integer.MAX_VALUE, eligibilityNote));
+        childrenList.add(new Property("eligibility", "CodeableConcept", "Does this service have specific eligibility requirements that need to be met in order to use the service?", 0, java.lang.Integer.MAX_VALUE, eligibility));
+        childrenList.add(new Property("eligibilityNote", "string", "Describes the eligibility conditions for the service.", 0, java.lang.Integer.MAX_VALUE, eligibilityNote));
         childrenList.add(new Property("programName", "string", "Program Names that can be used to categorize the service.", 0, java.lang.Integer.MAX_VALUE, programName));
-        childrenList.add(new Property("characteristic", "CodeableConcept", "Collection of Characteristics (attributes).", 0, java.lang.Integer.MAX_VALUE, characteristic));
+        childrenList.add(new Property("characteristic", "CodeableConcept", "Collection of characteristics (attributes).", 0, java.lang.Integer.MAX_VALUE, characteristic));
         childrenList.add(new Property("referralMethod", "CodeableConcept", "Ways that the service accepts referrals, if this is not provided then it is implied that no referral is required.", 0, java.lang.Integer.MAX_VALUE, referralMethod));
         childrenList.add(new Property("publicKey", "string", "The public part of the 'keys' allocated to an Organization by an accredited body to support secure exchange of data over the internet. To be provided by the Organization, where available.", 0, java.lang.Integer.MAX_VALUE, publicKey));
-        childrenList.add(new Property("appointmentRequired", "boolean", "Indicates whether or not a prospective consumer will require an appointment for a particular service at a Site to be provided by the Organization. Indicates if an appointment is required for access to this service.", 0, java.lang.Integer.MAX_VALUE, appointmentRequired));
-        childrenList.add(new Property("availableTime", "", "A Collection of times that the Service Site is available.", 0, java.lang.Integer.MAX_VALUE, availableTime));
+        childrenList.add(new Property("appointmentRequired", "boolean", "Indicates whether or not a prospective consumer will require an appointment for a particular service at a site to be provided by the Organization. Indicates if an appointment is required for access to this service.", 0, java.lang.Integer.MAX_VALUE, appointmentRequired));
+        childrenList.add(new Property("availableTime", "", "A collection of times that the Service Site is available.", 0, java.lang.Integer.MAX_VALUE, availableTime));
         childrenList.add(new Property("notAvailable", "", "The HealthcareService is not available during this period of time due to the provided reason.", 0, java.lang.Integer.MAX_VALUE, notAvailable));
-        childrenList.add(new Property("availabilityExceptions", "string", "A description of Site availability exceptions, e.g., public holiday availability. Succinctly describing all possible exceptions to normal Site availability as details in the Available Times and Not Available Times.", 0, java.lang.Integer.MAX_VALUE, availabilityExceptions));
+        childrenList.add(new Property("availabilityExceptions", "string", "A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times.", 0, java.lang.Integer.MAX_VALUE, availabilityExceptions));
       }
 
       public HealthcareService copy() {
@@ -2031,7 +2031,7 @@ public class HealthcareService extends DomainResource {
     return ResourceType.HealthcareService;
    }
 
-  @SearchParamDefinition(name="identifier", path="HealthcareService.identifier", description="External Identifiers for this item", type="token" )
+  @SearchParamDefinition(name="identifier", path="HealthcareService.identifier", description="External identifiers for this item", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="servicecategory", path="HealthcareService.serviceCategory", description="Service Category of the Healthcare Service", type="token" )
   public static final String SP_SERVICECATEGORY = "servicecategory";

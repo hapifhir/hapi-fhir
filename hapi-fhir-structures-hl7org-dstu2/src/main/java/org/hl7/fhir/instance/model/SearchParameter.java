@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -42,30 +42,30 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * A Search Parameter that defines a named search item that can be used to search/filter on a resource.
+ * A search parameter that defines a named search item that can be used to search/filter on a resource.
  */
 @ResourceDef(name="SearchParameter", profile="http://hl7.org/fhir/Profile/SearchParameter")
 public class SearchParameter extends DomainResource {
 
     public enum XPathUsageType {
         /**
-         * The search parameter is derived directly from the selected nodes based on the type definitions
+         * The search parameter is derived directly from the selected nodes based on the type definitions.
          */
         NORMAL, 
         /**
-         * The search parameter is derived by a phonetic transform from the selected nodes
+         * The search parameter is derived by a phonetic transform from the selected nodes.
          */
         PHONETIC, 
         /**
-         * The search parameter is based on a spatial transform of the selected nodes
+         * The search parameter is based on a spatial transform of the selected nodes.
          */
         NEARBY, 
         /**
-         * The search parameter is based on a spatial transform of the selected nodes, using physical distance from the middle
+         * The search parameter is based on a spatial transform of the selected nodes, using physical distance from the middle.
          */
         DISTANCE, 
         /**
-         * The interpretation of the xpath statement is unknown (and can't be automated)
+         * The interpretation of the xpath statement is unknown (and can't be automated).
          */
         OTHER, 
         /**
@@ -109,11 +109,11 @@ public class SearchParameter extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case NORMAL: return "The search parameter is derived directly from the selected nodes based on the type definitions";
-            case PHONETIC: return "The search parameter is derived by a phonetic transform from the selected nodes";
-            case NEARBY: return "The search parameter is based on a spatial transform of the selected nodes";
-            case DISTANCE: return "The search parameter is based on a spatial transform of the selected nodes, using physical distance from the middle";
-            case OTHER: return "The interpretation of the xpath statement is unknown (and can't be automated)";
+            case NORMAL: return "The search parameter is derived directly from the selected nodes based on the type definitions.";
+            case PHONETIC: return "The search parameter is derived by a phonetic transform from the selected nodes.";
+            case NEARBY: return "The search parameter is based on a spatial transform of the selected nodes.";
+            case DISTANCE: return "The search parameter is based on a spatial transform of the selected nodes, using physical distance from the middle.";
+            case OTHER: return "The interpretation of the xpath statement is unknown (and can't be automated).";
             default: return "?";
           }
         }
@@ -324,7 +324,7 @@ public class SearchParameter extends DomainResource {
      * An absolute URL that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published.
      */
     @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Literal URL used to reference this search parameter", formalDefinition="An absolute URL that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published." )
+    @Description(shortDefinition="Absolute URL used to reference this search parameter", formalDefinition="An absolute URL that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published." )
     protected UriType url;
 
     /**
@@ -363,10 +363,10 @@ public class SearchParameter extends DomainResource {
     protected List<SearchParameterContactComponent> contact;
 
     /**
-     * The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the search parameter changes.
+     * The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.
      */
     @Child(name = "date", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Publication Date(/time)", formalDefinition="The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the search parameter changes." )
+    @Description(shortDefinition="Publication Date(/time)", formalDefinition="The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes." )
     protected DateTimeType date;
 
     /**
@@ -721,7 +721,7 @@ public class SearchParameter extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the search parameter changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -741,7 +741,7 @@ public class SearchParameter extends DomainResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the search parameter changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public SearchParameter setDateElement(DateTimeType value) { 
       this.date = value;
@@ -749,14 +749,14 @@ public class SearchParameter extends DomainResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the search parameter changes.
+     * @return The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the search parameter changes.
+     * @param value The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.
      */
     public SearchParameter setDate(Date value) { 
       if (value == null)
@@ -1158,7 +1158,7 @@ public class SearchParameter extends DomainResource {
         childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this search parameter definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the search parameter.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the search parameter changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("requirements", "string", "The Scope and Usage that this search parameter was created to meet.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("code", "code", "The code used in the URL or the parameter name in a parameters resource for this search parameter.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("base", "code", "The base resource type that this search parameter refers to.", 0, java.lang.Integer.MAX_VALUE, base));
@@ -1254,7 +1254,7 @@ public class SearchParameter extends DomainResource {
   public static final String SP_DESCRIPTION = "description";
   @SearchParamDefinition(name="type", path="SearchParameter.type", description="number | date | string | token | reference | composite | quantity | uri", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="url", path="SearchParameter.url", description="Literal URL used to reference this search parameter", type="uri" )
+  @SearchParamDefinition(name="url", path="SearchParameter.url", description="Absolute URL used to reference this search parameter", type="uri" )
   public static final String SP_URL = "url";
   @SearchParamDefinition(name="base", path="SearchParameter.base", description="The resource type this search parameter applies to", type="token" )
   public static final String SP_BASE = "base";

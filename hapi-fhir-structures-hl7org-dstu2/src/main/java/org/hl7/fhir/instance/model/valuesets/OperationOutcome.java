@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum OperationOutcome {
@@ -134,6 +134,14 @@ public enum OperationOutcome {
          * null
          */
         MSGPARAMUNKNOWN, 
+        /**
+         * null
+         */
+        MSGPARAMINVALID, 
+        /**
+         * null
+         */
+        MSGPARAMMODIFIERINVALID, 
         /**
          * null
          */
@@ -279,6 +287,10 @@ public enum OperationOutcome {
           return MSGPARAMNOREPEAT;
         if ("MSG_PARAM_UNKNOWN".equals(codeString))
           return MSGPARAMUNKNOWN;
+        if ("MSG_PARAM_INVALID".equals(codeString))
+          return MSGPARAMINVALID;
+        if ("MSG_PARAM_MODIFIER_INVALID".equals(codeString))
+          return MSGPARAMMODIFIERINVALID;
         if ("MSG_RESOURCE_EXAMPLE_PROTECTED".equals(codeString))
           return MSGRESOURCEEXAMPLEPROTECTED;
         if ("MSG_RESOURCE_ID_FAIL".equals(codeString))
@@ -352,6 +364,8 @@ public enum OperationOutcome {
             case MSGPARAMCHAINED: return "MSG_PARAM_CHAINED";
             case MSGPARAMNOREPEAT: return "MSG_PARAM_NO_REPEAT";
             case MSGPARAMUNKNOWN: return "MSG_PARAM_UNKNOWN";
+            case MSGPARAMINVALID: return "MSG_PARAM_INVALID";
+            case MSGPARAMMODIFIERINVALID: return "MSG_PARAM_MODIFIER_INVALID";
             case MSGRESOURCEEXAMPLEPROTECTED: return "MSG_RESOURCE_EXAMPLE_PROTECTED";
             case MSGRESOURCEIDFAIL: return "MSG_RESOURCE_ID_FAIL";
             case MSGRESOURCENOTALLOWED: return "MSG_RESOURCE_NOT_ALLOWED";
@@ -407,6 +421,8 @@ public enum OperationOutcome {
             case MSGPARAMCHAINED: return "";
             case MSGPARAMNOREPEAT: return "";
             case MSGPARAMUNKNOWN: return "";
+            case MSGPARAMINVALID: return "";
+            case MSGPARAMMODIFIERINVALID: return "";
             case MSGRESOURCEEXAMPLEPROTECTED: return "";
             case MSGRESOURCEIDFAIL: return "";
             case MSGRESOURCENOTALLOWED: return "";
@@ -459,6 +475,8 @@ public enum OperationOutcome {
             case MSGPARAMCHAINED: return "Unknown chained parameter name \"%s\"";
             case MSGPARAMNOREPEAT: return "Parameter \"%s\" is not allowed to repeat";
             case MSGPARAMUNKNOWN: return "Parameter \"%s\" not understood";
+            case MSGPARAMINVALID: return "Parameter \"%s\" content is invalid";
+            case MSGPARAMMODIFIERINVALID: return "Parameter \"%s\" modifier is invalid";
             case MSGRESOURCEEXAMPLEPROTECTED: return "Resources with identity \"example\" cannot be deleted (for testing/training purposes)";
             case MSGRESOURCEIDFAIL: return "unable to allocate resource id";
             case MSGRESOURCENOTALLOWED: return "Not allowed to submit a resource for this operation";

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3EntityNamePartQualifierR2 {
@@ -57,11 +57,11 @@ public enum V3EntityNamePartQualifierR2 {
          */
         CL, 
         /**
-         * Description:Indicates that a name part is just an initial.  Initials do not imply a trailing period since this would not work with non-Latin scripts.  In some languages, initials may consist of more than one letter, e.g., "Ph" could stand for "Philippe" or "Th" For "Thomas".
+         * Description:Indicates that a name part is just an initial.  Initials do not imply a trailing period since this would not work with non-Latin scripts.  In some languages, initials may consist of more than one letter, e.g. "Ph" could stand for "Philippe" or "Th" For "Thomas".
          */
         IN, 
         /**
-         * Description:For organizations a suffix indicating the legal status, e.g., "Inc.", "Co.", "AG", "GmbH", "B.V." "S.A.", "Ltd." etc.
+         * Description:For organizations a suffix indicating the legal status, e.g. "Inc.", "Co.", "AG", "GmbH", "B.V." "S.A.", "Ltd." etc.
          */
         LS, 
         /**
@@ -254,7 +254,7 @@ public enum V3EntityNamePartQualifierR2 {
          */
         AC, 
         /**
-         * Description:A honorific such as "The Right Honourable" or "Weledelgeleerde Heer".
+         * Description:A honorific such as "The Right Honorable" or "Weledelgeleerde Heer".
          */
         HON, 
         /**
@@ -369,8 +369,8 @@ public enum V3EntityNamePartQualifierR2 {
             case SP: return "Description:The name assumed from the partner in a marital relationship.  Usually the spouse's family name.  Note that no inference about gender can be made from the existence of spouse names.";
             case BR: return "Description:A name that a person was given at birth or established as a consequence of adoption. \r\n\n                        \n                           Note: This is not used for temporary names assigned at birth such as \"Baby of Smith\" a\" which is just a name with a use code of \"TEMP\".";
             case CL: return "Description:Used to indicate which of the various name parts is used when interacting with the person.";
-            case IN: return "Description:Indicates that a name part is just an initial.  Initials do not imply a trailing period since this would not work with non-Latin scripts.  In some languages, initials may consist of more than one letter, e.g., \"Ph\" could stand for \"Philippe\" or \"Th\" For \"Thomas\".";
-            case LS: return "Description:For organizations a suffix indicating the legal status, e.g., \"Inc.\", \"Co.\", \"AG\", \"GmbH\", \"B.V.\" \"S.A.\", \"Ltd.\" etc.";
+            case IN: return "Description:Indicates that a name part is just an initial.  Initials do not imply a trailing period since this would not work with non-Latin scripts.  In some languages, initials may consist of more than one letter, e.g. \"Ph\" could stand for \"Philippe\" or \"Th\" For \"Thomas\".";
+            case LS: return "Description:For organizations a suffix indicating the legal status, e.g. \"Inc.\", \"Co.\", \"AG\", \"GmbH\", \"B.V.\" \"S.A.\", \"Ltd.\" etc.";
             case MID: return "Description:Indicates that the name part is a middle name.\r\n\n                        \n                           Usage Notes: In general, the english \"middle name\" concept is all of the given names after the first. This qualifier may be used to explicitly indicate which given names are considered to be middle names. The middle name qualifier may also be used with family names. This is a Scandinavian use case, matching the concept of \"mellomnavn\",\"mellannamn\". Note that there are specific rules that indicate what names may be taken as a mellannamn in different Scandinavian countries.";
             case PFX: return "Description:A prefix has a strong association to the immediately following name part. A prefix has no implicit trailing white space (it has implicit leading white space though).";
             case PHARMACEUTICALENTITYNAMEPARTQUALIFIERS: return "Description: Medication Name Parts are a means of specifying a range of acceptable \"official\" forms of the name of a product.  They are used as patterns against which input name strings may be matched for automatic identification of products from input text reports.   While they cover the concepts held under \"doseForm\" or \"route\" or \"strength\" the name parts are not the same and do not fit into a controlled vocabulary in the same way. By specifying up to 8 name parts a much larger range of possible names can be generated.";
@@ -389,7 +389,7 @@ public enum V3EntityNamePartQualifierR2 {
             case SFX: return "Description:A suffix has a strong association to the immediately preceding name part. A suffix has no implicit leading white space (it has implicit trailing white space though).";
             case TITLESTYLES: return "Description:Extra information about the style of a title";
             case AC: return "Description:Indicates that a title like \"Dr.\", \"M.D.\" or \"Ph.D.\" is an academic title.";
-            case HON: return "Description:A honorific such as \"The Right Honourable\" or \"Weledelgeleerde Heer\".";
+            case HON: return "Description:A honorific such as \"The Right Honorable\" or \"Weledelgeleerde Heer\".";
             case NB: return "Description:A nobility title such as Sir, Count, Grafin.";
             case PR: return "Description:Primarily in the British Imperial culture people tend to have an abbreviation of their professional organization as part of their credential titles.";
             default: return "?";

@@ -16,8 +16,8 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>12975</WindowHeight>
-  <WindowWidth>24000</WindowWidth>
+  <WindowHeight>11175</WindowHeight>
+  <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>1</ActiveSheet>
@@ -1007,7 +1007,7 @@
     <Cell ss:StyleID="s80"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">Insurance or medical plan</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s81"><Data ss:Type="String">Financial instrument which may be used to pay for or reimburse for health care products and services.</Data><NamedCell
+    <Cell ss:StyleID="s81"><Data ss:Type="String">Financial instrument which may be used to pay for or reimburse health care products and services.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s82"><Data ss:Type="String">Health care programs and insurers are significant payors of health service costs</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1050,7 +1050,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-3-insurance company ID</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-3</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">A05</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1118,7 +1118,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-12-plan effective date / IN1-13-plan expiration date</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-12 / IN1-13</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1154,7 +1154,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-15-plan type</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-15</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1222,7 +1222,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-2-health plan ID</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-2</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">C02</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1258,7 +1258,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-8-group number</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-8</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">C11 (Division,Section)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1294,7 +1294,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-35-company plan code</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-35</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">C01</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1329,7 +1329,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-10-insured's group emp ID</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-10</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1364,7 +1364,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String"> - No exact V2.x equivalent concept seems to exist; instance relationship can be inferred if ( ( PID-3-patient ID list ??? IN1-49-insured's ID number ) &amp; ( ?? IN2-72-patient's relationship to insured ) )</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String"> - No exact HL7 v2 equivalent concept seems to exist; instance relationship can be inferred if ( ( PID-3 ??? IN1-49 ) &amp; ( ?? IN2-72 ) )</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">C17</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1400,7 +1400,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">No V2.x equivalent concept seems to exist</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">No HL7 v2 equivalent concept seems to exist</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">D11</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1507,7 +1507,7 @@
     <Cell ss:StyleID="s91"><Data ss:Type="String">D01 through D09</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-16, 18,  19-name of insured, address, date of birth</Data><NamedCell
+    <Cell ss:StyleID="s92"><Data ss:Type="String">IN1-16, 18,  19</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">D01 through D09</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -3865,7 +3865,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>13</TopRowBottomPane>
+   <TopRowBottomPane>14</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>8</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -3884,7 +3884,7 @@
     <Pane>
      <Number>0</Number>
      <ActiveRow>15</ActiveRow>
-     <ActiveCol>16</ActiveCol>
+     <ActiveCol>19</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -3922,7 +3922,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Context</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur.  E.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur; e.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">English</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -4447,7 +4447,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Path</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element.  E.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element; e.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s105"><Data ss:Type="String">Description</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -5341,7 +5341,7 @@
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s103"><Data ss:Type="String">Event Code</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event.  E.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event; e.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Category</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -5953,7 +5953,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Filename</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file.  E.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file; e.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Profile</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -6431,7 +6431,7 @@
     <Cell ss:StyleID="s138"/>
     <Cell ss:StyleID="s138"><Data ss:Type="String">List of authorization codes </Data></Cell>
     <Cell ss:StyleID="s138"><Data ss:Type="String">List of special authorization codes which may apply to the services being reported.</Data></Cell>
-    <Cell ss:StyleID="s138"><Data ss:Type="String">When authorizations or predeterminations have been received for services then the references should be supplied when reporting on or claiming for those services.</Data></Cell>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">When authorizations or pre-determinations have been received for services then the references should be supplied when reporting on or claiming for those services.</Data></Cell>
     <Cell ss:StyleID="s138"/>
     <Cell ss:StyleID="s138"/>
     <Cell ss:StyleID="s138"/>
@@ -6538,7 +6538,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
     <Cell ss:StyleID="s149"><Data ss:Type="String">CoverageType</Data></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">The type of insurance: public health, worker compensation; private accident, auto, private health, etc.)</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">The type of insurance: public health, worker compensation; private accident, auto, private health, etc.).</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="String">http://hl7.org/fhir/ValueSet/v3-ActCoverageTypeCode</Data></Cell>
@@ -7004,7 +7004,6 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
      <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -77,6 +77,16 @@ public class V3ActMoodEnumFactory implements EnumFactory<V3ActMood> {
       return V3ActMood.CRT;
     if ("EVN.CRT".equals(codeString))
       return V3ActMood.EVN_CRT;
+    if ("GOL.CRT".equals(codeString))
+      return V3ActMood.GOL_CRT;
+    if ("INT.CRT".equals(codeString))
+      return V3ActMood.INT_CRT;
+    if ("PRMS.CRT".equals(codeString))
+      return V3ActMood.PRMS_CRT;
+    if ("RQO.CRT".equals(codeString))
+      return V3ActMood.RQO_CRT;
+    if ("RSK.CRT".equals(codeString))
+      return V3ActMood.RSK_CRT;
     if ("EXPEC".equals(codeString))
       return V3ActMood.EXPEC;
     if ("GOL".equals(codeString))
@@ -127,6 +137,16 @@ public class V3ActMoodEnumFactory implements EnumFactory<V3ActMood> {
       return "CRT";
     if (code == V3ActMood.EVN_CRT)
       return "EVN.CRT";
+    if (code == V3ActMood.GOL_CRT)
+      return "GOL.CRT";
+    if (code == V3ActMood.INT_CRT)
+      return "INT.CRT";
+    if (code == V3ActMood.PRMS_CRT)
+      return "PRMS.CRT";
+    if (code == V3ActMood.RQO_CRT)
+      return "RQO.CRT";
+    if (code == V3ActMood.RSK_CRT)
+      return "RSK.CRT";
     if (code == V3ActMood.EXPEC)
       return "EXPEC";
     if (code == V3ActMood.GOL)

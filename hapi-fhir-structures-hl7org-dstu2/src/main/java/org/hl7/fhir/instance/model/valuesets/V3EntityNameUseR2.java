@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3EntityNameUseR2 {
@@ -47,7 +47,7 @@ public enum V3EntityNameUseR2 {
          */
         ANON, 
         /**
-         * Description:e.g .  Chief Red Cloud
+         * Description:e.g. .  Chief Red Cloud
          */
         I, 
         /**
@@ -55,7 +55,7 @@ public enum V3EntityNameUseR2 {
          */
         P, 
         /**
-         * Description:A name assumed as part of a religious vocation .  e.g .  Sister Mary Francis, Brother John
+         * Description:A name assumed as part of a religious vocation .  e.g. .  Sister Mary Francis, Brother John
          */
         R, 
         /**
@@ -67,7 +67,7 @@ public enum V3EntityNameUseR2 {
          */
         M, 
         /**
-         * Description:Identifies the different representations of a name .  The representation may affect how the name is used .  (E.g .  use of Ideographic for formal communications.)
+         * Description:Identifies the different representations of a name .  The representation may affect how the name is used .  (E.g. .  use of Ideographic for formal communications.)
          */
         NAMEREPRESENTATIONUSE, 
         /**
@@ -75,11 +75,11 @@ public enum V3EntityNameUseR2 {
          */
         ABC, 
         /**
-         * Description:Ideographic representation of name (e.g., Japanese kanji, Chinese characters)
+         * Description:Ideographic representation of name (e.g. Japanese kanji, Chinese characters)
          */
         IDE, 
         /**
-         * Description:Syllabic transcription of name (e.g., Japanese kana, Korean hangul)
+         * Description:Syllabic transcription of name (e.g. Japanese kana, Korean hangul)
          */
         SYL, 
         /**
@@ -182,15 +182,15 @@ public enum V3EntityNameUseR2 {
             case ASSUMED: return "Description:A name that a person has assumed or has been assumed to them.";
             case A: return "Description:A name used in a Professional or Business context .  Examples: Continuing to use a maiden name in a professional context, or using a stage performing name (some of these names are also pseudonyms)";
             case ANON: return "Description:Anonymous assigned name (used to protect a persons identity for privacy reasons)";
-            case I: return "Description:e.g .  Chief Red Cloud";
+            case I: return "Description:e.g. .  Chief Red Cloud";
             case P: return "Description:A non-official name by which the person is sometimes known.  (This may also be used to record informal names such as a nickname)";
-            case R: return "Description:A name assumed as part of a religious vocation .  e.g .  Sister Mary Francis, Brother John";
+            case R: return "Description:A name assumed as part of a religious vocation .  e.g. .  Sister Mary Francis, Brother John";
             case C: return "Description:Known as/conventional/the one you normally use";
             case M: return "Description:A name used prior to marriage.Note that marriage naming customs vary greatly around the world.  This name use is for use by applications that collect and store maiden names.  Though the concept of maiden name is often gender specific, the use of this term is not gender specific.  The use of this term does not imply any particular history for a person's name, nor should the maiden name be determined algorithmically";
-            case NAMEREPRESENTATIONUSE: return "Description:Identifies the different representations of a name .  The representation may affect how the name is used .  (E.g .  use of Ideographic for formal communications.)";
+            case NAMEREPRESENTATIONUSE: return "Description:Identifies the different representations of a name .  The representation may affect how the name is used .  (E.g. .  use of Ideographic for formal communications.)";
             case ABC: return "Description:Alphabetic transcription of name in latin alphabet (Japanese: romaji)";
-            case IDE: return "Description:Ideographic representation of name (e.g., Japanese kanji, Chinese characters)";
-            case SYL: return "Description:Syllabic transcription of name (e.g., Japanese kana, Korean hangul)";
+            case IDE: return "Description:Ideographic representation of name (e.g. Japanese kanji, Chinese characters)";
+            case SYL: return "Description:Syllabic transcription of name (e.g. Japanese kana, Korean hangul)";
             case OLD: return "Description:This name is no longer in use (note: Names may also carry valid time ranges .  This code is used to cover the situations where it is known that the name is no longer valid, but no particular time range for its use is known)";
             case DN: return "Description:This name should no longer be used when interacting with the person (i.e .  in addition to no longer being used, the name should not be even mentioned when interacting with the person)Note: applications are not required to compare names labeled \"Do Not Use\" and other names in order to eliminate name parts that are common between the other name and a name labeled \"Do Not Use\".";
             case OR: return "Description:The formal name as registered in an official (government) registry, but which name might not be commonly used .  May correspond to the concept of legal name";

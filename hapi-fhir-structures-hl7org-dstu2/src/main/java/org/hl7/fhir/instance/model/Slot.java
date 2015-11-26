@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -60,7 +60,7 @@ public class Slot extends DomainResource {
          */
         BUSYUNAVAILABLE, 
         /**
-         * Indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval
+         * Indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval.
          */
         BUSYTENTATIVE, 
         /**
@@ -103,7 +103,7 @@ public class Slot extends DomainResource {
             case BUSY: return "Indicates that the time interval is busy because one  or more events have been scheduled for that interval.";
             case FREE: return "Indicates that the time interval is free for scheduling.";
             case BUSYUNAVAILABLE: return "Indicates that the time interval is busy and that the interval can not be scheduled.";
-            case BUSYTENTATIVE: return "Indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval";
+            case BUSYTENTATIVE: return "Indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval.";
             default: return "?";
           }
         }

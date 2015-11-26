@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum Adjudication {
@@ -49,7 +49,7 @@ public enum Adjudication {
         /**
          * null
          */
-        DEDUCTABLE, 
+        DEDUCTIBLE, 
         /**
          * null
          */
@@ -75,8 +75,8 @@ public enum Adjudication {
           return COPAY;
         if ("eligible".equals(codeString))
           return ELIGIBLE;
-        if ("deductable".equals(codeString))
-          return DEDUCTABLE;
+        if ("deductible".equals(codeString))
+          return DEDUCTIBLE;
         if ("eligpercent".equals(codeString))
           return ELIGPERCENT;
         if ("tax".equals(codeString))
@@ -90,7 +90,7 @@ public enum Adjudication {
             case TOTAL: return "total";
             case COPAY: return "copay";
             case ELIGIBLE: return "eligible";
-            case DEDUCTABLE: return "deductable";
+            case DEDUCTIBLE: return "deductible";
             case ELIGPERCENT: return "eligpercent";
             case TAX: return "tax";
             case BENEFIT: return "benefit";
@@ -105,7 +105,7 @@ public enum Adjudication {
             case TOTAL: return "";
             case COPAY: return "";
             case ELIGIBLE: return "";
-            case DEDUCTABLE: return "";
+            case DEDUCTIBLE: return "";
             case ELIGPERCENT: return "";
             case TAX: return "";
             case BENEFIT: return "";
@@ -117,7 +117,7 @@ public enum Adjudication {
             case TOTAL: return "total";
             case COPAY: return "copay";
             case ELIGIBLE: return "eligible";
-            case DEDUCTABLE: return "deductable";
+            case DEDUCTIBLE: return "deductible";
             case ELIGPERCENT: return "eligpercent";
             case TAX: return "tax";
             case BENEFIT: return "benefit";

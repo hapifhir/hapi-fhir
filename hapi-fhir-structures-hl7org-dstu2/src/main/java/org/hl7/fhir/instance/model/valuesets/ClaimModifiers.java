@@ -29,29 +29,29 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ClaimModifiers {
 
         /**
-         * Repair of prior service or installation
+         * Repair of prior service or installation.
          */
         A, 
         /**
-         * Temporary service or installation
+         * Temporary service or installation.
          */
         B, 
         /**
-         * Treatment associated with TMJ
+         * Treatment associated with TMJ.
          */
         C, 
         /**
-         * Implant or associated with an implant
+         * Implant or associated with an implant.
          */
         E, 
         /**
-         * None
+         * None.
          */
         X, 
         /**
@@ -88,11 +88,11 @@ public enum ClaimModifiers {
         }
         public String getDefinition() {
           switch (this) {
-            case A: return "Repair of prior service or installation";
-            case B: return "Temporary service or installation";
-            case C: return "Treatment associated with TMJ";
-            case E: return "Implant or associated with an implant";
-            case X: return "None";
+            case A: return "Repair of prior service or installation.";
+            case B: return "Temporary service or installation.";
+            case C: return "Treatment associated with TMJ.";
+            case E: return "Implant or associated with an implant.";
+            case X: return "None.";
             default: return "?";
           }
         }

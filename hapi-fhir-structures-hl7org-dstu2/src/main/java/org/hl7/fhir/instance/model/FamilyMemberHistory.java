@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -49,19 +49,19 @@ public class FamilyMemberHistory extends DomainResource {
 
     public enum FamilyHistoryStatus {
         /**
-         * Some health information is known and captured, but not complete - see notes for details
+         * Some health information is known and captured, but not complete - see notes for details.
          */
         PARTIAL, 
         /**
-         * All relevant health information is known and captured
+         * All relevant health information is known and captured.
          */
         COMPLETED, 
         /**
-         * This instance should not have been part of this patient's medical record
+         * This instance should not have been part of this patient's medical record.
          */
         ENTEREDINERROR, 
         /**
-         * Health information for this individual is unavailable/unknown
+         * Health information for this individual is unavailable/unknown.
          */
         HEALTHUNKNOWN, 
         /**
@@ -101,10 +101,10 @@ public class FamilyMemberHistory extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PARTIAL: return "Some health information is known and captured, but not complete - see notes for details";
-            case COMPLETED: return "All relevant health information is known and captured";
-            case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record";
-            case HEALTHUNKNOWN: return "Health information for this individual is unavailable/unknown";
+            case PARTIAL: return "Some health information is known and captured, but not complete - see notes for details.";
+            case COMPLETED: return "All relevant health information is known and captured.";
+            case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
+            case HEALTHUNKNOWN: return "Health information for this individual is unavailable/unknown.";
             default: return "?";
           }
         }
@@ -417,10 +417,10 @@ public class FamilyMemberHistory extends DomainResource {
     protected Enumeration<FamilyHistoryStatus> status;
 
     /**
-     * This will either be a name or a description.  E.g. "Aunt Susan", "my cousin with the red hair".
+     * This will either be a name or a description; e.g. "Aunt Susan", "my cousin with the red hair".
      */
     @Child(name = "name", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The family member described", formalDefinition="This will either be a name or a description.  E.g. \"Aunt Susan\", \"my cousin with the red hair\"." )
+    @Description(shortDefinition="The family member described", formalDefinition="This will either be a name or a description; e.g. \"Aunt Susan\", \"my cousin with the red hair\"." )
     protected StringType name;
 
     /**
@@ -670,7 +670,7 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @return {@link #name} (This will either be a name or a description.  E.g. "Aunt Susan", "my cousin with the red hair".). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @return {@link #name} (This will either be a name or a description; e.g. "Aunt Susan", "my cousin with the red hair".). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public StringType getNameElement() { 
       if (this.name == null)
@@ -690,7 +690,7 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @param value {@link #name} (This will either be a name or a description.  E.g. "Aunt Susan", "my cousin with the red hair".). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @param value {@link #name} (This will either be a name or a description; e.g. "Aunt Susan", "my cousin with the red hair".). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public FamilyMemberHistory setNameElement(StringType value) { 
       this.name = value;
@@ -698,14 +698,14 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @return This will either be a name or a description.  E.g. "Aunt Susan", "my cousin with the red hair".
+     * @return This will either be a name or a description; e.g. "Aunt Susan", "my cousin with the red hair".
      */
     public String getName() { 
       return this.name == null ? null : this.name.getValue();
     }
 
     /**
-     * @param value This will either be a name or a description.  E.g. "Aunt Susan", "my cousin with the red hair".
+     * @param value This will either be a name or a description; e.g. "Aunt Susan", "my cousin with the red hair".
      */
     public FamilyMemberHistory setName(String value) { 
       if (Utilities.noString(value))
@@ -1061,7 +1061,7 @@ public class FamilyMemberHistory extends DomainResource {
         childrenList.add(new Property("patient", "Reference(Patient)", "The person who this history concerns.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("date", "dateTime", "The date (and possibly time) when the family member history was taken.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("status", "code", "A code specifying a state of a Family Member History record.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("name", "string", "This will either be a name or a description.  E.g. \"Aunt Susan\", \"my cousin with the red hair\".", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("name", "string", "This will either be a name or a description; e.g. \"Aunt Susan\", \"my cousin with the red hair\".", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("relationship", "CodeableConcept", "The type of relationship this person has to the patient (father, mother, brother etc.).", 0, java.lang.Integer.MAX_VALUE, relationship));
         childrenList.add(new Property("gender", "code", "Administrative Gender - the gender that the relative is considered to have for administration and record keeping purposes.", 0, java.lang.Integer.MAX_VALUE, gender));
         childrenList.add(new Property("born[x]", "Period|date|string", "The actual or approximate date of birth of the relative.", 0, java.lang.Integer.MAX_VALUE, born));

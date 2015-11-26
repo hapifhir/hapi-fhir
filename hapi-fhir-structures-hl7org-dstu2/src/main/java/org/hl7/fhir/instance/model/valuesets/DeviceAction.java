@@ -29,21 +29,21 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum DeviceAction {
 
         /**
-         * The device was implanted in the patient during the procedure
+         * The device was implanted in the patient during the procedure.
          */
         IMPLANTED, 
         /**
-         * The device was explanted from the patient during the procedure
+         * The device was explanted from the patient during the procedure.
          */
         EXPLANTED, 
         /**
-         * The device remains in that patient, but it's location, settings, or functionality was changed
+         * The device remains in that patient, but its location, settings, or functionality was changed.
          */
         MANIPULATED, 
         /**
@@ -74,9 +74,9 @@ public enum DeviceAction {
         }
         public String getDefinition() {
           switch (this) {
-            case IMPLANTED: return "The device was implanted in the patient during the procedure";
-            case EXPLANTED: return "The device was explanted from the patient during the procedure";
-            case MANIPULATED: return "The device remains in that patient, but it's location, settings, or functionality was changed";
+            case IMPLANTED: return "The device was implanted in the patient during the procedure.";
+            case EXPLANTED: return "The device was explanted from the patient during the procedure.";
+            case MANIPULATED: return "The device remains in that patient, but its location, settings, or functionality was changed.";
             default: return "?";
           }
         }

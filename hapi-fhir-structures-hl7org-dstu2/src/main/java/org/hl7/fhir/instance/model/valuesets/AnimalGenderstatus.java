@@ -29,21 +29,21 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum AnimalGenderstatus {
 
         /**
-         * The animal has been sterilized, castrated or otherwise made infertile
+         * The animal has been sterilized, castrated or otherwise made infertile.
          */
         NEUTERED, 
         /**
-         * The animal's reproductive organs are intact
+         * The animal's reproductive organs are intact.
          */
         INTACT, 
         /**
-         * Unable to determine whether the animal has been neutered
+         * Unable to determine whether the animal has been neutered.
          */
         UNKNOWN, 
         /**
@@ -74,9 +74,9 @@ public enum AnimalGenderstatus {
         }
         public String getDefinition() {
           switch (this) {
-            case NEUTERED: return "The animal has been sterilized, castrated or otherwise made infertile";
-            case INTACT: return "The animal's reproductive organs are intact";
-            case UNKNOWN: return "Unable to determine whether the animal has been neutered";
+            case NEUTERED: return "The animal has been sterilized, castrated or otherwise made infertile.";
+            case INTACT: return "The animal's reproductive organs are intact.";
+            case UNKNOWN: return "Unable to determine whether the animal has been neutered.";
             default: return "?";
           }
         }

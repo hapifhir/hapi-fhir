@@ -29,37 +29,37 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum EncounterDiet {
 
         /**
-         * Food without meat, poultry or seafood
+         * Food without meat, poultry or seafood.
          */
         VEGETARIAN, 
         /**
-         * Exludes dairy products
+         * Excludes dairy products.
          */
         DAIRYFREE, 
         /**
-         * Excludes ingredients containing nuts
+         * Excludes ingredients containing nuts.
          */
         NUTFREE, 
         /**
-         * Excludes ingredients containing gluten
+         * Excludes ingredients containing gluten.
          */
         GLUTENFREE, 
         /**
-         * Food without meat, poultry, seafood, eggs, dairy products and other animal-derived substances
+         * Food without meat, poultry, seafood, eggs, dairy products and other animal-derived substances.
          */
         VEGAN, 
         /**
-         * Foods that conform to Islamic law
+         * Foods that conform to Islamic law.
          */
         HALAL, 
         /**
-         * foods that conform to Jewish dietary law
+         * Foods that conform to Jewish dietary law.
          */
         KOSHER, 
         /**
@@ -102,13 +102,13 @@ public enum EncounterDiet {
         }
         public String getDefinition() {
           switch (this) {
-            case VEGETARIAN: return "Food without meat, poultry or seafood";
-            case DAIRYFREE: return "Exludes dairy products";
-            case NUTFREE: return "Excludes ingredients containing nuts";
-            case GLUTENFREE: return "Excludes ingredients containing gluten";
-            case VEGAN: return "Food without meat, poultry, seafood, eggs, dairy products and other animal-derived substances";
-            case HALAL: return "Foods that conform to Islamic law";
-            case KOSHER: return "foods that conform to Jewish dietary law";
+            case VEGETARIAN: return "Food without meat, poultry or seafood.";
+            case DAIRYFREE: return "Excludes dairy products.";
+            case NUTFREE: return "Excludes ingredients containing nuts.";
+            case GLUTENFREE: return "Excludes ingredients containing gluten.";
+            case VEGAN: return "Food without meat, poultry, seafood, eggs, dairy products and other animal-derived substances.";
+            case HALAL: return "Foods that conform to Islamic law.";
+            case KOSHER: return "Foods that conform to Jewish dietary law.";
             default: return "?";
           }
         }

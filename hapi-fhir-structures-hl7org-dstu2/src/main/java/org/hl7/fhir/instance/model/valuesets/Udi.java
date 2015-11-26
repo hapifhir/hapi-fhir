@@ -29,13 +29,13 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum Udi {
 
         /**
-         * Example DI in GS1 format
+         * Example DI in GS1 format.
          */
         _01_123456789, 
         /**
@@ -60,7 +60,7 @@ public enum Udi {
         }
         public String getDefinition() {
           switch (this) {
-            case _01_123456789: return "Example DI in GS1 format";
+            case _01_123456789: return "Example DI in GS1 format.";
             default: return "?";
           }
         }

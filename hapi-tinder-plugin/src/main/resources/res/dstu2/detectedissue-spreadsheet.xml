@@ -11,7 +11,7 @@
   <LastAuthor>Bryn</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2015-08-31T17:17:00Z</LastSaved>
-  <Version>12.00</Version>
+  <Version>15.00</Version>
  </DocumentProperties>
  <CustomDocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <WorkbookGuid dt:dt="string">c26dd4a7-2981-4f50-a70f-ca756580388c</WorkbookGuid>
@@ -20,8 +20,8 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>7305</WindowHeight>
-  <WindowWidth>20250</WindowWidth>
+  <WindowHeight>11175</WindowHeight>
+  <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>1</ActiveSheet>
@@ -1006,14 +1006,14 @@
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s78"><Data ss:Type="String">Clinical issue with action</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s80"><Data ss:Type="String">Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient.  E.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.</Data><NamedCell
+    <Cell ss:StyleID="s80"><Data ss:Type="String">Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s81"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s80"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s81"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s82"><Data ss:Type="String">Observation[classCode=ALRT, moodCode=EVN)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s82"><Data ss:Type="String">N/A</Data><NamedCell
+    <Cell ss:StyleID="s111"><Data ss:Type="String">Partial mapping from messages containing the AL1 or IAM segment, such as the ADT^A01, ADT^A08, and ADT^A60.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s83"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s82"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1049,7 +1049,8 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.participation[typeCode=SBJ].role[classCode=PAT]</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">PID-3</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1076,7 +1077,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">E.g. Drug-drug, duplicate therapy, etc.</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Issue Category, e.g. drug-drug, duplicate therapy, etc.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Identifies the general type of issue identified.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1085,7 +1086,8 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.code</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">AL1-2 / IAM-9</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1121,7 +1123,8 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.inboundRelationship[typeCode=SUBJ].source[classCode=OBS, moodCode=EVN, code=SEV].value</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">AL1-4/ IAR-2</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1151,7 +1154,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">Indicates the resource representing the current activity or proposed activity that is potentially problematic</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">There's an implicit constraint on the number of implicated resources based on DetectedIssue.type.  E.g. For drug-drug, there would be more than one.  For timing, there would typically only be one.</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">There's an implicit constraint on the number of implicated resources based on DetectedIssue.type; e.g. For drug-drug, there would be more than one.  For timing, there would typically only be one.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.outboundRelationship[typeCode=SUBJ].target[moodCode=EVN, INT]</Data><NamedCell
@@ -1189,7 +1192,8 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.text</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">AL1-5 / IAM-8</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1224,7 +1228,8 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.effectiveTime</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">ALI-6 / IAM-11</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1259,7 +1264,8 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.participation[typeCode=AUT].role[classCode=ASSIGNED]</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">IAM-14 / IAM-16</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1286,7 +1292,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Unique id for the detected issue</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Business identifier associated with the detected issuerecord</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Business identifier associated with the detected issue record</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Allows linking instances of the same detected issue found on different servers</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1294,7 +1300,8 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.id</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">IAM-7</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3692,7 +3699,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>2</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -3705,11 +3712,12 @@
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>6</ActiveRow>
-     <ActiveCol>14</ActiveCol>
+     <ActiveRow>10</ActiveRow>
+     <ActiveCol>19</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -3747,7 +3755,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Context</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur.  E.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur; e.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">English</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -4272,7 +4280,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Path</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element.  E.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element; e.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Description</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -5166,7 +5174,7 @@
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Event Code</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event.  E.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event; e.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Category</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -5778,7 +5786,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Filename</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file.  E.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file; e.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Profile</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -6258,7 +6266,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
     <Cell ss:StyleID="s145"><Data ss:Type="String">DetectedIssueCategory</Data></Cell>
-    <Cell ss:StyleID="s78"><Data ss:Type="String">Codes identifying the general type of detected issue. E.g. Drug-drug interaction, Timing issue, Duplicate therapy, etc.</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">Codes identifying the general type of detected issue; e.g. Drug-drug interaction, Timing issue, Duplicate therapy, etc.</Data></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">preferred</Data></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">valueset-detectedissue-category</Data></Cell>
@@ -6273,7 +6281,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="75">
     <Cell ss:StyleID="s146"><Data ss:Type="String">DetectedIssueMitigationAction</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Codes describing steps taken to resolve the issue or other circumstances that mitigate the risk associated with the issue.  E.g. 'added concurrent therapy', 'prior therapy documented', etc.</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Codes describing steps taken to resolve the issue or other circumstances that mitigate the risk associated with the issue; e.g. 'added concurrent therapy', 'prior therapy documented', etc.</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">preferred</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">valueset-detectedissue-mitigation-action</Data></Cell>
@@ -6288,7 +6296,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s146"><Data ss:Type="String">DetectedIssueSeverity</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Indicates the potential degree of impact of the identified issue on the patient</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Indicates the potential degree of impact of the identified issue on the patient.</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">#detectedissue-severity</Data></Cell>
@@ -6724,7 +6732,6 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>4</ActiveRow>
      <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
@@ -6792,7 +6799,7 @@
     <Cell ss:StyleID="s127"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:Index="4" ss:StyleID="s149"/>
     <Cell ss:StyleID="s114"><Data ss:Type="String">High</Data></Cell>
-    <Cell ss:StyleID="s149"><Data ss:Type="String">Indicates the issue may be life-threatening or has the potential to cause permanent injury</Data></Cell>
+    <Cell ss:StyleID="s149"><Data ss:Type="String">Indicates the issue may be life-threatening or has the potential to cause permanent injury.</Data></Cell>
     <Cell ss:StyleID="s127"/>
     <Cell ss:StyleID="s127"><Data ss:Type="String" x:Ticked="1">=ObservationValue.H</Data></Cell>
     <Cell ss:StyleID="s139"/>
@@ -6802,7 +6809,7 @@
     <Cell ss:StyleID="s130"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:Index="4" ss:StyleID="s151"/>
     <Cell ss:StyleID="s152"><Data ss:Type="String">Moderate</Data></Cell>
-    <Cell ss:StyleID="s151"><Data ss:Type="String">Indicates the issue may result in noticable adverse adverse consequences but is unlikely to be life-threatening or cause permanent injury</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">Indicates the issue may result in noticeable adverse consequences but is unlikely to be life-threatening or cause permanent injury.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s127"><Data ss:Type="String" x:Ticked="1">=ObservationValue.M</Data></Cell>
     <Cell ss:StyleID="s141"/>
@@ -6812,7 +6819,7 @@
     <Cell ss:StyleID="s130"><Data ss:Type="Number">3</Data></Cell>
     <Cell ss:Index="4" ss:StyleID="s151"/>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Low</Data></Cell>
-    <Cell ss:StyleID="s151"><Data ss:Type="String">Indicates the issue may result in some adverse consequences but is unlikely to substantially affect the situation of the subjec</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">Indicates the issue may result in some adverse consequences but is unlikely to substantially affect the situation of the subject.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s127"><Data ss:Type="String" x:Ticked="1">=ObservationValue.L</Data></Cell>
     <Cell ss:StyleID="s141"/>
@@ -7357,8 +7364,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

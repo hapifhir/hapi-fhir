@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3LocalRemoteControlState {
@@ -39,7 +39,7 @@ public enum V3LocalRemoteControlState {
          */
         L, 
         /**
-         * An equipment can be controlled by another system, e.g., LAS computer ('Remote' control state).
+         * An equipment can be controlled by another system, e.g. LAS computer ('Remote' control state).
          */
         R, 
         /**
@@ -68,7 +68,7 @@ public enum V3LocalRemoteControlState {
         public String getDefinition() {
           switch (this) {
             case L: return "An equipment can either work autonomously ('Local' control state).";
-            case R: return "An equipment can be controlled by another system, e.g., LAS computer ('Remote' control state).";
+            case R: return "An equipment can be controlled by another system, e.g. LAS computer ('Remote' control state).";
             default: return "?";
           }
         }

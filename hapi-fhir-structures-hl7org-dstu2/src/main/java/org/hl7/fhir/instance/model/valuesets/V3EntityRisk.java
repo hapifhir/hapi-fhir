@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3EntityRisk {
@@ -67,7 +67,7 @@ public enum V3EntityRisk {
          */
         BHZ, 
         /**
-         * Material is solid and sharp (e.g., cannulas).  Dispose in hard container.
+         * Material is solid and sharp (e.g. cannulas).  Dispose in hard container.
          */
         INJ, 
         /**
@@ -138,7 +138,7 @@ public enum V3EntityRisk {
             case EXP: return "Material is an explosive mixture.  Keep away from fire, sparks, and heat.";
             case INF: return "Material known to be infectious with human pathogenic microorganisms.  Those who handle this material must take precautions for their protection.";
             case BHZ: return "Material contains microorganisms that is an environmental hazard.  Must be handled with special care.";
-            case INJ: return "Material is solid and sharp (e.g., cannulas).  Dispose in hard container.";
+            case INJ: return "Material is solid and sharp (e.g. cannulas).  Dispose in hard container.";
             case POI: return "Material is poisonous to humans and/or animals.  Special care must be taken to avoid incorporation, even of small amounts.";
             case RAD: return "Material is a source for ionizing radiation and must be handled with special care to avoid injury of those who handle it and to avoid environmental hazards.";
             default: return "?";

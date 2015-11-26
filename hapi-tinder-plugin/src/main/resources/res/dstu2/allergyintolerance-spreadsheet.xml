@@ -16,11 +16,12 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>8460</WindowHeight>
-  <WindowWidth>20250</WindowWidth>
+  <WindowHeight>12975</WindowHeight>
+  <WindowWidth>24000</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>1</ActiveSheet>
+  <FirstVisibleSheet>1</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -1037,7 +1038,7 @@
     <Cell ss:StyleID="s80"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">Allergy or Intolerance (generally: Risk Of Adverse reaction to a substance)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s81"><Data ss:Type="String">Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance</Data><NamedCell
+    <Cell ss:StyleID="s81"><Data ss:Type="String">Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s82"><Data ss:Type="String">To record a clinical assessment of a propensity, or potential risk to an individual, of an adverse reaction upon future exposure to the specified substance, or class of substance.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1070,16 +1071,17 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">External Ids for this item</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">External ids for this item</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">This records identifiers associated with this allergy/intolerance concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">This records identifiers associated with this allergy/intolerance concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">.id</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">IAM-7</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1145,7 +1147,8 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">.participation[typeCode=AUT].time</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">IAM-20</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1215,7 +1218,8 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">.participation[typeCode=SBJ].role[classCode=PAT]</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">(PID-3)</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1250,7 +1254,8 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">IAM-14 (if patient) / IAM-18 (if practitioner)&#10;</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1279,14 +1284,15 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Substance, (or class) considered to be responsible for risk</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Identification of a substance, or a class of substances, that is considered to be responsible for the Adverse reaction risk</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Identification of a substance, or a class of substances, that is considered to be responsible for the adverse reaction risk</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">It is strongly recommended that Substance be coded with a terminology, where possible. For example, some terminologies used include RxNorm, Snomed CT, DM+D, NDFRT, ICD-9, IDC-10, UNI, ATC and CPT. Plain text should only be used if there is no appropriate terminology available. Additional details about a substance can be specified in the text.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">It is strongly recommended that the substance be coded with a terminology, where possible. For example, some terminologies used include RxNorm, SNOMED CT, DM+D, NDFRT, ICD-9, IDC-10, UNI, ATC and CPT. Plain text should only be used if there is no appropriate terminology available. Additional details about a substance can be specified in the text.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">AL1-3 / IAM-3&#10;</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1323,7 +1329,8 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">IAM-17</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1355,12 +1362,11 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">The default criticality value for any propensity to an Adverse Reaction should be 'Low Risk', indicating at the very least a relative contraindication to deliberate or voluntary exposure to the Substance. 'High Risk' is flagged if the clinician has identified a propensity for a more serious or potentially life-threatening reaction, such as anaphylaxis, and implies an absolute contraindication to deliberate or voluntary exposure to the substance. If this element is missing, the criticality is unknown (though it may be known elsewhere)</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">The default criticality value for any propensity to an adverse reaction should be 'Low Risk', indicating at the very least a relative contraindication to deliberate or voluntary exposure to the Substance. 'High Risk' is flagged if the clinician has identified a propensity for a more serious or potentially life-threatening reaction, such as anaphylaxis, and implies an absolute contraindication to deliberate or voluntary exposure to the substance. If this element is missing, the criticality is unknown (though it may be known elsewhere)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="21" ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1391,11 +1397,12 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">Identification of the underlying physiological mechanism for the reaction risk.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Allergic (immune-mediated) responses have been traditionally regarded as an indicator for potential escalation to significant future risk. Contemporary knowledge suggests that some reactions previously thought to be allergic (immune-mediated) are, in fact, non-immune, but in some cases can still pose a life threatening risk.  It is acknowledged that many clinicians may not be in a position to distinguish the mechanism of a particular reaction.  Often the term &quot;allergy&quot; is used rather generically and may overlap with the use of &quot;intolerance&quot; - in practice the boundaries between these two concepts may not be well-defined or understood.  This data element is included nevertheless because many legacy systems have captured this attribute.  Immunological testing may provide supporting evidence for the basis and causative substance , but no tests are 100% sensitive or specific for sensitivity to a particular substance.  If, as is commonly the case, it is unclear whether the reaction is an allergy or an intolerance, then the type element should be omitted.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Allergic (typically immune-mediated) reactions have been traditionally regarded as an indicator for potential escalation to significant future risk. Contemporary knowledge suggests that some reactions previously thought to be immune-mediated are, in fact, non-immune, but in some cases can still pose a life threatening risk. It is acknowledged that many clinicians may not be in a position to distinguish the mechanism of a particular reaction. Often the term &quot;allergy&quot; is used rather generically and may overlap with the use of &quot;intolerance&quot; - in practice the boundaries between these two concepts may not be well-defined or understood. This data element is included nevertheless, because many legacy systems have captured this attribute. Immunologic testing may provide supporting evidence for the basis of the reaction and the causative substance, but no tests are 100% sensitive or specific for sensitivity to a particular substance. If, as is commonly the case, it is unclear whether the reaction is due to an allergy or an intolerance, then the type element should be omitted from the resource.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">IAM-9</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1455,12 +1462,12 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Date(/time) of last known occurence of a reaction</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Date(/time) of last known occurrence of a reaction</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Represents the date and/or time of the last known occurence of a reaction event</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Represents the date and/or time of the last known occurrence of a reaction event</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">This date may be replicated by one of the Onset of Reaction dates. Where a textual representation of the date of last occurence is required e.g 'In Childhood, '10 years ago' the Comment element should be used.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">This date may be replicated by one of the Onset of Reaction dates. Where a textual representation of the date of last occurrence is required e.g. 'In Childhood, '10 years ago' the Comment element should be used.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1492,7 +1499,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">For example: including reason for flagging a Seriousness of 'High Risk'; and instructions related to future exposure or administration of the Substance, such as administration within an Intensive Care Unit or under corticosteroid cover. The notes should be related to an allergy or intolerance as a condition in general and not related to any particular episode of it. For episode notes and descriptions, use AllergyIntolerance.event.description and  AllergyIntolerance.event.notes.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">For example: including reason for flagging a seriousness of 'High Risk'; and instructions related to future exposure or administration of the Substance, such as administration within an Intensive Care Unit or under corticosteroid cover. The notes should be related to an allergy or intolerance as a condition in general and not related to any particular episode of it. For episode notes and descriptions, use AllergyIntolerance.event.description and  AllergyIntolerance.event.notes.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1520,7 +1527,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Adverse Reaction Events linked to exposure to substance</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Details about each Adverse Reaction Event linked to exposure to the identified Substance</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Details about each adverse reaction event linked to exposure to the identified Substance</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1557,7 +1564,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">Identification of the specific substance considered to be responsible for the Adverse Reaction event. Note: the substance for a specific reaction may be different to the substance identified as the cause of the risk, but must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite substance that includes the identified substance. It must be clinically safe to only process the AllergyIntolerance.substance and ignore the AllergyIntolerance.event.substance</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Coding of the Specific Substance with a terminology capable of triggering decision support should be used wherever possible.  The Substance field allows for the use of a specific substance or a group or class of substances, for example &quot;Penicillins&quot;. The specific Substance field could be used for Amoxycillin. Duplication is acceptable when a specific substance has been recorded in the 'Substance' field. </Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Coding of the specific substance with a terminology capable of triggering decision support should be used wherever possible.  The substance field allows for the use of a specific substance or a group or class of substances, for example &quot;Penicillins&quot;. The specific substance field could be used for Amoxycillin. Duplication is acceptable when a specific substance has been recorded in the 'substance' field. </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1589,7 +1596,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">unlikely | likely | confirmed - clinical certainty about the specific substance</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Statement about the degree of clinical certainty that the Specific Substance was the cause of the Manifestation in this reaction event</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Statement about the degree of clinical certainty that the specific substance was the cause of the manifestation in this reaction event</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1623,10 +1630,10 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Clinical symptoms/signs associated with the Event</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Clinical symptoms and/or signs that are observed or associated with the Adverse Reaction Event</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Clinical symptoms and/or signs that are observed or associated with the adverse reaction event</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Manifestation can be expressed as a single word, phrase or brief description. For example: nausea, rash or no reaction. It is preferable that Manifestation should be coded with a terminology, where possible. The values entered here may be used to display on an application screen as part of a list of adverse reactions, as recommended in the UK NHS CUI guidelines.  Terminologies commonly used include, but are not limited to, SNOMED-CT or ICD10.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Manifestation can be expressed as a single word, phrase or brief description. For example: nausea, rash or no reaction. It is preferable that manifestation should be coded with a terminology, where possible. The values entered here may be used to display on an application screen as part of a list of adverse reactions, as recommended in the UK NHS CUI guidelines.  Terminologies commonly used include, but are not limited to, SNOMED CT or ICD10.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1656,7 +1663,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Description of the event as a whole</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Text description about the Reaction as a whole, including details of the manifestation if required</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Text description about the reaction as a whole, including details of the manifestation if required</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Use the description to provide any details of a particular event of the occurred reaction such as circumstances, reaction specifics, what happened before/after. Information, related to the event, but not describing a particular care should be captured in the comment field. For example: at the age of four, the patient was given penicillin for strep throat and subsequently developed severe hives. </Data><NamedCell
@@ -1759,7 +1766,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">Identification of the route by which the subject was exposed to the substance.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Coding of the Route of Exposure with a terminology should be used wherever possible.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Coding of the route of exposure with a terminology should be used wherever possible.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1788,7 +1795,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Text about event not captured in other fields</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Additional text about the Adverse Reaction event not captured in other fields</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Additional text about the adverse reaction event not captured in other fields</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Use this field to record information indirectly related to a particular event and not captured in the description. For example: Clinical records are no longer available, recorded based on information provided to the patient by her mother and her mother is deceased.</Data><NamedCell
@@ -3820,9 +3827,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>11</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>14</LeftColumnRightPane>
+   <LeftColumnRightPane>13</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -3834,11 +3841,11 @@
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>16</ActiveCol>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>17</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -3878,7 +3885,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Context</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur.  E.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur; e.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">English</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -4352,7 +4359,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>6</TopRowBottomPane>
    <SplitVertical>2</SplitVertical>
    <LeftColumnRightPane>2</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -4365,11 +4372,12 @@
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
      <ActiveRow>29</ActiveRow>
-     <ActiveCol>3</ActiveCol>
+     <ActiveCol>4</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4406,7 +4414,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Path</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element.  E.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element; e.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Description</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -5295,7 +5303,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s102"><Data ss:Type="String">Event Code</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event.  E.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event; e.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Category</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -5893,7 +5901,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Filename</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file.  E.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file; e.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Profile</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -6298,7 +6306,7 @@
   <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="31" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s112" ss:DefaultColumnWidth="65.25"
    ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s112" ss:Width="114.75"/>
+   <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="174"/>
    <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="275.25"/>
    <Column ss:StyleID="s112" ss:Width="51"/>
    <Column ss:StyleID="s112" ss:Width="45"/>
@@ -6366,7 +6374,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
     <Cell ss:StyleID="s146"><Data ss:Type="String">AllergyIntoleranceStatus</Data></Cell>
-    <Cell ss:StyleID="s79"><Data ss:Type="String">Assertion about certainty associated with a propensity, or potential risk, of a reaction to the identified Substance</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Assertion about certainty associated with a propensity, or potential risk, of a reaction to the identified Substance.</Data></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">#allergy-intolerance-status</Data></Cell>
@@ -6380,7 +6388,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s147"><Data ss:Type="String">AllergyIntoleranceCriticality</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Estimate of the potential clinical harm, or seriousness, of a reaction to an identified Substance</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Estimate of the potential clinical harm, or seriousness, of a reaction to an identified Substance.</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">#allergy-intolerance-criticality</Data></Cell>
@@ -6395,7 +6403,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s147"><Data ss:Type="String">AllergyIntoleranceType</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Identification of the underlying physiological mechanism for a Reaction Risk</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Identification of the underlying physiological mechanism for a Reaction Risk.</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">#allergy-intolerance-type</Data></Cell>
@@ -6410,7 +6418,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s147"><Data ss:Type="String">AllergyIntoleranceCategory</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Category of an identified Substance</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Category of an identified Substance.</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">#allergy-intolerance-category</Data></Cell>
@@ -6425,7 +6433,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
     <Cell ss:StyleID="s147"><Data ss:Type="String">AllergyIntoleranceCertainty</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Statement about the degree of clinical certainty that a Specific Substance was the cause of the Manifestation in an reaction event</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Statement about the degree of clinical certainty that a Specific Substance was the cause of the Manifestation in an reaction event.</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">#reaction-event-certainty</Data></Cell>
@@ -6440,7 +6448,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s147"><Data ss:Type="String">Manifestation</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Clinical symptoms and/or signs that are observed or associated with an Adverse Reaction Event</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Clinical symptoms and/or signs that are observed or associated with an Adverse Reaction Event.</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">valueset-manifestation-codes</Data></Cell>
@@ -6455,7 +6463,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
     <Cell ss:StyleID="s147"><Data ss:Type="String">AllergyIntoleranceSeverity</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Clinical assessment of the severity of a reaction event as a whole, potentially considering multiple different manifestations</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Clinical assessment of the severity of a reaction event as a whole, potentially considering multiple different manifestations.</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">#reaction-event-severity</Data></Cell>
@@ -6470,7 +6478,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s88"><Data ss:Type="String">AllergyIntoleranceSubstance</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Type of the substance and Negation codes for reporting No Known Allergies</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Type of the substance and Negation codes for reporting no known allergies.</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">valueset-allergyintolerance-substance-code</Data></Cell>
@@ -6501,7 +6509,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s147"><Data ss:Type="String">SubstanceCode</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Type of the substance</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Codes defining the type of the substance.</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s148" ss:HRef="http://hl7.org/fhir/ValueSet/substance-code"><Data
@@ -6833,7 +6841,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>18</ActiveRow>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -6969,7 +6978,7 @@
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s155"><Data ss:Type="String">#2</Data></Cell>
     <Cell ss:StyleID="s155"><Data ss:Type="String">Entered In Error</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">The statement was entered in error and is not valid</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">The statement was entered in error and is not valid.</Data></Cell>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s131"><Data ss:Type="String">ActStatus.nullified</Data></Cell>
     <Cell ss:StyleID="s142"/>
@@ -7491,8 +7500,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>4</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -7583,7 +7591,7 @@
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"><Data ss:Type="String">Unable to determine</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">Unable to assess the potential clinical impact with the information available</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">Unable to assess the potential clinical impact with the information available.</Data></Cell>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s142"/>
@@ -8191,7 +8199,7 @@
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s157"/>
     <Cell ss:StyleID="s157"><Data ss:Type="String">Allergy</Data></Cell>
-    <Cell ss:StyleID="s157"><Data ss:Type="String">Immune-mediated hypersensitivity reaction.</Data></Cell>
+    <Cell ss:StyleID="s157"><Data ss:Type="String">A propensity for hypersensitivity reaction(s) to a substance.  These reactions are most typically type I hypersensitivity, plus other &quot;allergy-like&quot; reactions, including pseudoallergy.</Data></Cell>
     <Cell ss:StyleID="s128"/>
     <Cell ss:StyleID="s128"/>
     <Cell ss:StyleID="s140"/>
@@ -8202,7 +8210,7 @@
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"><Data ss:Type="String">Intolerance</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">Adverse reaction to a substance, not judged to be immune-mediated (non-allergic).  This can include (but is not limited to) pseudoallergic reactions, side effects, drug toxicities (eg to Gentamicin), drug-drug interactions, food-drug interactions, and drug-disease interactions.</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">A propensity for adverse reactions to a substance that is not judged to be allergic or &quot;allergy-like&quot;.  These reactions are typically (but not necessarily) non-immune.  They are to some degree idiosyncratic and/or individually specific (i.e. are not a reaction that is expected to occur with most or all patients given similar circumstances).</Data></Cell>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s142"/>
@@ -8752,8 +8760,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>5</ActiveRow>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>6</ActiveRow>
+     <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -8822,7 +8830,7 @@
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s157"/>
     <Cell ss:StyleID="s157"><Data ss:Type="String">Food</Data></Cell>
-    <Cell ss:StyleID="s157"><Data ss:Type="String">Any substance consumed to provide nutritional support for the body</Data></Cell>
+    <Cell ss:StyleID="s157"><Data ss:Type="String">Any substance consumed to provide nutritional support for the body.</Data></Cell>
     <Cell ss:StyleID="s128"/>
     <Cell ss:StyleID="s128"/>
     <Cell ss:StyleID="s140"/>
@@ -8833,7 +8841,7 @@
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"><Data ss:Type="String">Medication</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">Substances administered to achieve a physiological effect</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">Substances administered to achieve a physiological effect.</Data></Cell>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s142"/>
@@ -8844,7 +8852,7 @@
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"><Data ss:Type="String">Environment</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">Substances that are encountered in the environment</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">Substances that are encountered in the environment.</Data></Cell>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s142"/>
@@ -8855,7 +8863,7 @@
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"><Data ss:Type="String">Other</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">Other substances that are not covered by any other category</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">Other substances that are not covered by any other category.</Data></Cell>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s142"/>
@@ -9383,8 +9391,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>18</ActiveRow>
-     <ActiveCol>2</ActiveCol>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -10083,7 +10090,7 @@
     <Cell ss:StyleID="s115"/>
     <Cell ss:StyleID="s157"/>
     <Cell ss:StyleID="s157"><Data ss:Type="String">Mild</Data></Cell>
-    <Cell ss:StyleID="s157"><Data ss:Type="String">Causes mild physiological effects</Data></Cell>
+    <Cell ss:StyleID="s157"><Data ss:Type="String">Causes mild physiological effects.</Data></Cell>
     <Cell ss:StyleID="s128"/>
     <Cell ss:StyleID="s128"/>
     <Cell ss:StyleID="s140"/>
@@ -10094,7 +10101,7 @@
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"><Data ss:Type="String">Moderate</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">Causes moderate physiological effects</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">Causes moderate physiological effects.</Data></Cell>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s142"/>
@@ -10105,7 +10112,7 @@
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"><Data ss:Type="String">Severe</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">Causes severe physiological effects</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">Causes severe physiological effects.</Data></Cell>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s131"/>
     <Cell ss:StyleID="s142"/>

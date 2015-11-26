@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3ActRelationshipType {
@@ -86,7 +86,7 @@ public enum V3ActRelationshipType {
          */
         _ACTRELATIONSHIPCONDITIONAL, 
         /**
-         * A contraindication is just a negation of a reason, i.e. it gives a condition under which the action is not to be done. Both, source and target can be any kind of service; target service is in criterion mood. How the strength of a contraindication is expressed (e.g., relative, absolute) is left as an open issue. The priorityNumber attribute could be used.
+         * A contraindication is just a negation of a reason, i.e. it gives a condition under which the action is not to be done. Both, source and target can be any kind of service; target service is in criterion mood. How the strength of a contraindication is expressed (e.g. relative, absolute) is left as an open issue. The priorityNumber attribute could be used.
          */
         CIND, 
         /**
@@ -305,7 +305,7 @@ public enum V3ActRelationshipType {
          */
         SAE, 
         /**
-         * A relationship in which the source act's effective time is wholly within the target act's effective time (including end points, as defined in the act's effective times)
+         * A relationship in which the source act's effective time is wholly within the target act's effective time (including end-points, as defined in the act's effective times)
 
                         
                            UsageNote: Inverse code is SBSEAE
@@ -368,7 +368,7 @@ public enum V3ActRelationshipType {
          */
         OVERLAP, 
         /**
-         * A relationship in which the source act ends within the target act's effective time (including end points, as defined in the act's effective times)
+         * A relationship in which the source act ends within the target act's effective time (including end-points, as defined in the act's effective times)
 
                         
                            UsageNote: Inverse code is SBEEAE
@@ -389,7 +389,7 @@ public enum V3ActRelationshipType {
          */
         SBSEAS, 
         /**
-         * A relationship in which the source act starts within the target act's effective time (including end points, as defined in the act's effective times)
+         * A relationship in which the source act starts within the target act's effective time (including end-points, as defined in the act's effective times)
 
                         
                            UsageNote: Inverse code is SBSEAS
@@ -516,7 +516,7 @@ public enum V3ActRelationshipType {
          */
         COVBY, 
         /**
-         * Associates a derived Act with its input parameters. E.G., an anion-gap observation can be associated as being derived from given sodium-, (potassium-,), chloride-, and bicarbonate-observations. The narrative content (Act.text) of a source act is wholly machine-derived from the collection of target acts.
+         * Associates a derived Act with its input parameters; e.g. an anion-gap observation can be associated as being derived from given sodium-, (potassium-,), chloride-, and bicarbonate-observations. The narrative content (Act.text) of a source act is wholly machine-derived from the collection of target acts.
          */
         DRIV, 
         /**
@@ -577,7 +577,7 @@ public enum V3ActRelationshipType {
          */
         _ACTRELATIONSIPOBJECTIVE, 
         /**
-         * A desired state that a service action aims to maintain.  E.g., keep systolic blood pressure between 90 and 110 mm Hg.  Source is an intervention service.  Target must be an observation in criterion mood.
+         * A desired state that a service action aims to maintain; e.g. keep systolic blood pressure between 90 and 110 mm Hg.  Source is an intervention service.  Target must be an observation in criterion mood.
          */
         OBJC, 
         /**
@@ -664,11 +664,11 @@ public enum V3ActRelationshipType {
          */
         SCH, 
         /**
-         * The generalization relationship can be used to express categorical knowledge about services (e.g., amilorid, triamterene, and spironolactone have the common generalization potassium sparing diuretic).
+         * The generalization relationship can be used to express categorical knowledge about services (e.g. amilorid, triamterene, and spironolactone have the common generalization potassium sparing diuretic).
          */
         GEN, 
         /**
-         * A goal-evaluation links an observation (intent or actual) to a goal to indicate that the observation evaluates the goal. Given the goal and the observation, a "goal distance" (e.g., goal to observation) can be "calculated" and need not be sent explicitly.
+         * A goal-evaluation links an observation (intent or actual) to a goal to indicate that the observation evaluates the goal. Given the goal and the observation, a "goal distance" (e.g. goal to observation) can be "calculated" and need not be sent explicitly.
          */
         GEVL, 
         /**
@@ -687,7 +687,7 @@ public enum V3ActRelationshipType {
          */
         MOD, 
         /**
-         * A trigger-match links an actual service (e.g., an observation or procedure that took place) with a service in criterion mood.  For example if the trigger is "observation of pain" and pain is actually observed, and if that pain-observation caused the trigger to fire, that pain-observation can be linked with the trigger.
+         * A trigger-match links an actual service (e.g. an observation or procedure that took place) with a service in criterion mood.  For example if the trigger is "observation of pain" and pain is actually observed, and if that pain-observation caused the trigger to fire, that pain-observation can be linked with the trigger.
          */
         MTCH, 
         /**
@@ -707,7 +707,7 @@ public enum V3ActRelationshipType {
         /**
          * A relationship between a source Act that seeks to reverse or undo the action of the prior target Act.
 
-                        Example: A posted financial transaction (e.g., a debit transaction) was applied in error and must be reversed (e.g., by a credit transaction) the credit transaction is identified as an undo (or reversal) of the prior target transaction.
+                        Example: A posted financial transaction (e.g. a debit transaction) was applied in error and must be reversed (e.g. by a credit transaction) the credit transaction is identified as an undo (or reversal) of the prior target transaction.
 
                         Constraints: the "completion track" mood of the target Act must be equally or more "actual" than the source act. I.e., when the target act is EVN the source act can be EVN, or any INT. If the target act is INT, the source act can be INT.
          */
@@ -737,7 +737,7 @@ public enum V3ActRelationshipType {
          */
         XFRM, 
         /**
-         * Used to indicate that an existing service is suggesting evidence for a new observation. The assumption of support is attributed to the same actor who asserts the observation. Source must be an observation, target may be any service  (e.g., to indicate a status post).
+         * Used to indicate that an existing service is suggesting evidence for a new observation. The assumption of support is attributed to the same actor who asserts the observation. Source must be an observation, target may be any service  (e.g. to indicate a status post).
          */
         SPRT, 
         /**
@@ -798,6 +798,26 @@ public enum V3ActRelationshipType {
                            OpenIssue: The implications of negationInd on ActRelationship and the valueNegationind on Observation.
          */
         VALUE, 
+        /**
+         * curative indication
+         */
+        CURE, 
+        /**
+         * adjunct curative indication
+         */
+        CURE_ADJ, 
+        /**
+         * adjunct mitigation
+         */
+        MTGT_ADJ, 
+        /**
+         * null
+         */
+        RACT, 
+        /**
+         * null
+         */
+        SUGG, 
         /**
          * added to help the parsers
          */
@@ -1069,6 +1089,16 @@ public enum V3ActRelationshipType {
           return SUMM;
         if ("VALUE".equals(codeString))
           return VALUE;
+        if ("CURE".equals(codeString))
+          return CURE;
+        if ("CURE.ADJ".equals(codeString))
+          return CURE_ADJ;
+        if ("MTGT.ADJ".equals(codeString))
+          return MTGT_ADJ;
+        if ("RACT".equals(codeString))
+          return RACT;
+        if ("SUGG".equals(codeString))
+          return SUGG;
         throw new Exception("Unknown V3ActRelationshipType code '"+codeString+"'");
         }
         public String toCode() {
@@ -1205,6 +1235,11 @@ public enum V3ActRelationshipType {
             case QUALF: return "QUALF";
             case SUMM: return "SUMM";
             case VALUE: return "VALUE";
+            case CURE: return "CURE";
+            case CURE_ADJ: return "CURE.ADJ";
+            case MTGT_ADJ: return "MTGT.ADJ";
+            case RACT: return "RACT";
+            case SUGG: return "SUGG";
             default: return "?";
           }
         }
@@ -1223,7 +1258,7 @@ public enum V3ActRelationshipType {
             case CREDIT: return "A credit relationship ties a financial transaction (target) to an account (source). A credit, once applied (posted), may have either a positive or negative effect on the account balance, depending on the type of account. An asset account credit will decrease the account balance. A non-asset account credit will decrease the account balance.";
             case DEBIT: return "A debit relationship ties a financial transaction (target) to an account (source).  A debit, once applied (posted), may have either a positive or negative effect on the account balance, depending on the type of account.  An asset account debit will increase the account balance.  A non-asset account debit will decrease the account balance.";
             case _ACTRELATIONSHIPCONDITIONAL: return "Specifies under what circumstances (target Act) the source-Act may, must, must not or has occurred";
-            case CIND: return "A contraindication is just a negation of a reason, i.e. it gives a condition under which the action is not to be done. Both, source and target can be any kind of service; target service is in criterion mood. How the strength of a contraindication is expressed (e.g., relative, absolute) is left as an open issue. The priorityNumber attribute could be used.";
+            case CIND: return "A contraindication is just a negation of a reason, i.e. it gives a condition under which the action is not to be done. Both, source and target can be any kind of service; target service is in criterion mood. How the strength of a contraindication is expressed (e.g. relative, absolute) is left as an open issue. The priorityNumber attribute could be used.";
             case PRCN: return "A requirement to be true before a service is performed. The target can be any service in criterion mood.  For multiple pre-conditions a conjunction attribute (AND, OR, XOR) is applicable.";
             case RSON: return "Description: The reason or rationale for a service. A reason link is weaker than a trigger, it only suggests that some service may be or might have been a reason for some action, but not that this reason requires/required the action to be taken. Also, as opposed to the trigger, there is no strong timely relation between the reason and the action.  As well as providing various types of information about the rationale for a service, the RSON act relationship is routinely used between a SBADM act and an OBS act to describe the indication for use of a medication.  Child concepts may be used to describe types of indication. \r\n\n                        \n                           Discussion: In prior releases, the code \"SUGG\" (suggests) was expressed as \"an inversion of the reason link.\" That code has been retired in favor of the inversion indicator that is an attribute of ActRelationship.";
             case BLOCK: return "Definition: The source act is performed to block the effects of the target act.  This act relationship should be used when describing near miss type incidents where potential harm could have occurred, but the action described in the source act blocked the potential harmful effects of the incident actually occurring.";
@@ -1262,7 +1297,7 @@ public enum V3ActRelationshipType {
             case SBSEAE: return "The source Act contains the time of the target Act.\r\n\n                        \n                           UsageNote: Inverse code is DURING";
             case SAS: return "The source Act starts after the start of the target Act (i.e. if we say \"ActOne SAS ActTwo\", it means that ActOne starts after the start of ActTwo, therefore ActOne is the source and ActTwo is the target).\r\n\n                        \n                           UsageNote: Inverse code is SBS";
             case SAE: return "A relationship in which the source act starts after the target act ends.\r\n\n                        \n                           UsageNote: Inverse code is EBS";
-            case DURING: return "A relationship in which the source act's effective time is wholly within the target act's effective time (including end points, as defined in the act's effective times)\r\n\n                        \n                           UsageNote: Inverse code is SBSEAE";
+            case DURING: return "A relationship in which the source act's effective time is wholly within the target act's effective time (including end-points, as defined in the act's effective times)\r\n\n                        \n                           UsageNote: Inverse code is SBSEAE";
             case SASECWE: return "The source Act starts after start of the target Act, and ends with the target Act.\r\n\n                        \n                           UsageNote: Inverse code is SBSECWE";
             case EASORECWS: return "A relationship in which the source act's effective time ends after or concurrent with the start of the target act's effective time.\r\n\n                        \n                           Usage Note: Inverse code is EBSORECWS";
             case EAEORECW: return "A relationship in which the source act's effective time ends after or concurrent with the end of the target act's effective time.\r\n\n                        \n                           Usage Note: Inverse code is EBEORECW";
@@ -1271,10 +1306,10 @@ public enum V3ActRelationshipType {
             case SASORSCW: return "A relationship in which the source act's effective time starts after or concurrent with the start of the target act's effective time.\r\n\n                        \n                           Usage Note: Inverse code is SBSORSCW";
             case SBEORSCWE: return "A relationship in which the source act's effective time starts before or concurrent with the end of the target act's effective time.\r\n\n                        \n                           Usage Note: Inverse code is SAEORSCWE";
             case OVERLAP: return "A relationship in which the source act's effective time overlaps the target act's effective time in any way.\r\n\n                        \n                           UsageNote: This code is reflexive.  Therefore its inverse code is itself.";
-            case EDU: return "A relationship in which the source act ends within the target act's effective time (including end points, as defined in the act's effective times)\r\n\n                        \n                           UsageNote: Inverse code is SBEEAE";
+            case EDU: return "A relationship in which the source act ends within the target act's effective time (including end-points, as defined in the act's effective times)\r\n\n                        \n                           UsageNote: Inverse code is SBEEAE";
             case SBSEASEBE: return "The source Act contains the start of the target Act,  and ends before the end of the target Act.\r\n\n                        \n                           UsageNote: Inverse code is SASSBEEAS";
             case SBSEAS: return "The source Act contains the start of the target Act.\r\n\n                        \n                           UsageNote: Inverse code is SDU";
-            case SDU: return "A relationship in which the source act starts within the target act's effective time (including end points, as defined in the act's effective times)\r\n\n                        \n                           UsageNote: Inverse code is SBSEAS";
+            case SDU: return "A relationship in which the source act starts within the target act's effective time (including end-points, as defined in the act's effective times)\r\n\n                        \n                           UsageNote: Inverse code is SBSEAS";
             case SBE: return "The source Act starts before the end of the target Act (i.e. if we say \"ActOne SBE ActTwo\", it means that ActOne starts before the end of ActTwo, therefore ActOne is the source and ActTwo is the target).\r\n\n                        \n                           UsageNote: Inverse code is EAS";
             case EBE: return "The source Act ends before the end of the target Act (i.e. if we say \"ActOne EBE ActTwo\", it means that ActOne ends before the end of ActTwo, therefore ActOne is the source and ActTwo is the target).\r\n\n                        \n                           UsageNote: Inverse code is EAE";
             case SBSEBE: return "The source Act starts before the start of the target Act, and ends before the end of the target Act.\r\n\n                        \n                           UsageNote: Inverse code is SASEAE";
@@ -1293,7 +1328,7 @@ public enum V3ActRelationshipType {
             case DEP: return "The relationship that links to a Transportation Act (target) from another Act (source) indicating that the subject of the source Act departed from the source Act by means of the target Transportation act.";
             case PART: return "The source Act is a composite of the target Acts. The target Acts do not have an existence independent of the source Act.\r\n\n                        \n                           UsageNote: In UML 1.1, this is a \"composition\" defined as: \n                           \"A form of aggregation with strong ownership and coincident lifetime as part of the whole. Parts with non-fixed multiplicity may be created after the composite itself, but once created they live and die with it (i.e., they share lifetimes). Such parts can also be explicitly removed before the death of the composite. Composition may be recursive.\"";
             case COVBY: return "A relationship in which the source act is covered by or is under the authority of a target act.  A financial instrument such as an Invoice Element is covered by one or more specific instances of an Insurance Policy.";
-            case DRIV: return "Associates a derived Act with its input parameters. E.G., an anion-gap observation can be associated as being derived from given sodium-, (potassium-,), chloride-, and bicarbonate-observations. The narrative content (Act.text) of a source act is wholly machine-derived from the collection of target acts.";
+            case DRIV: return "Associates a derived Act with its input parameters; e.g. an anion-gap observation can be associated as being derived from given sodium-, (potassium-,), chloride-, and bicarbonate-observations. The narrative content (Act.text) of a source act is wholly machine-derived from the collection of target acts.";
             case ELNK: return "Expresses an association that links two instances of the same act over time, indicating that the instance are part of the same episode, e.g. linking two condition nodes for episode of illness; linking two encounters for episode of encounter.";
             case EVID: return "Indicates that the target Act provides evidence in support of the action represented by the source Act. The target is not a 'reason' for the source act, but rather gives supporting information on why the source act is an appropriate course of action. Possible targets might be clinical trial results, journal articles, similar successful therapies, etc.\r\n\n                        \n                           Rationale: Provides a mechanism for conveying clinical justification for non-approved or otherwise non-traditional therapies.";
             case EXACBY: return "Description:The source act is aggravated by the target act. (Example \"chest pain\" EXACBY \"exercise\")";
@@ -1306,7 +1341,7 @@ public enum V3ActRelationshipType {
             case NAME: return "Used to assign a \"name\" to a condition thread. Source is a condition node, target can be any service.";
             case OUTC: return "An observation that should follow or does actually follow as a result or consequence of a condition or action (sometimes called \"post-conditional\".) Target must be an observation as a goal, risk or any criterion. For complex outcomes a conjunction attribute (AND, OR, XOR) can be used.  An outcome link is often inverted to describe an outcome assessment.";
             case _ACTRELATIONSIPOBJECTIVE: return "The target act is a desired outcome of the source act. Source is any act (typically an intervention). Target must be an observation in criterion mood.";
-            case OBJC: return "A desired state that a service action aims to maintain.  E.g., keep systolic blood pressure between 90 and 110 mm Hg.  Source is an intervention service.  Target must be an observation in criterion mood.";
+            case OBJC: return "A desired state that a service action aims to maintain; e.g. keep systolic blood pressure between 90 and 110 mm Hg.  Source is an intervention service.  Target must be an observation in criterion mood.";
             case OBJF: return "A desired outcome that a service action aims to meet finally.  Source is any service (typically an intervention).  Target must be an observation in criterion mood.";
             case GOAL: return "A goal that one defines given a patient's health condition.  Subsequently planned actions aim to meet that goal.  Source is an observation or condition node, target must be an observation in goal mood.";
             case RISK: return "A noteworthy undesired outcome of a patient's condition that is either likely enough to become an issue or is less likely but dangerous enough to be addressed.";
@@ -1325,26 +1360,31 @@ public enum V3ActRelationshipType {
             case OCCR: return "The source act is a single occurrence of a repeatable target act. The source and target act can be in any mood on the \"completion track\" but the source act must be as far as or further along the track than the target act (i.e., the occurrence of an intent can be an event but not vice versa).";
             case OREF: return "Relates either an appointment request or an appointment to the order for the service being scheduled.";
             case SCH: return "Associates a specific time (and associated resources) with a scheduling request or other intent.";
-            case GEN: return "The generalization relationship can be used to express categorical knowledge about services (e.g., amilorid, triamterene, and spironolactone have the common generalization potassium sparing diuretic).";
-            case GEVL: return "A goal-evaluation links an observation (intent or actual) to a goal to indicate that the observation evaluates the goal. Given the goal and the observation, a \"goal distance\" (e.g., goal to observation) can be \"calculated\" and need not be sent explicitly.";
+            case GEN: return "The generalization relationship can be used to express categorical knowledge about services (e.g. amilorid, triamterene, and spironolactone have the common generalization potassium sparing diuretic).";
+            case GEVL: return "A goal-evaluation links an observation (intent or actual) to a goal to indicate that the observation evaluates the goal. Given the goal and the observation, a \"goal distance\" (e.g. goal to observation) can be \"calculated\" and need not be sent explicitly.";
             case INST: return "Used to capture the link between a potential service (\"master\" or plan) and an actual service, where the actual service instantiates the potential service. The instantiation may override the master's defaults.";
             case MOD: return "Definition: Used to link a newer version or 'snapshot' of a business object (source) to an older version or 'snapshot' of the same business object (target).\r\n\n                        \n                           Usage:The identifier of the Act should be the same for both source and target. If the identifiers are distinct, RPLC should be used instead.\r\n\n                        Name from source to target = \"modifiesPrior\"\r\n\n                        Name from target to source = \"modifiesByNew\"";
-            case MTCH: return "A trigger-match links an actual service (e.g., an observation or procedure that took place) with a service in criterion mood.  For example if the trigger is \"observation of pain\" and pain is actually observed, and if that pain-observation caused the trigger to fire, that pain-observation can be linked with the trigger.";
+            case MTCH: return "A trigger-match links an actual service (e.g. an observation or procedure that took place) with a service in criterion mood.  For example if the trigger is \"observation of pain\" and pain is actually observed, and if that pain-observation caused the trigger to fire, that pain-observation can be linked with the trigger.";
             case OPTN: return "A relationship between a source Act that provides more detailed properties to the target Act.\r\n\n                        The source act thus is a specialization of the target act, but instead of mentioning all the inherited properties it only mentions new property bindings or refinements.\r\n\n                        The typical use case is to specify certain alternative variants of one kind of Act. The priorityNumber attribute is used to weigh refinements as preferred over other alternative refinements.\r\n\n                        Example: several routing options for a drug are specified as one SubstanceAdministration for the general treatment with attached refinements for the various routing options.";
             case RCHAL: return "Description:A relationship in which the target act is carried out to determine whether an effect attributed to the source act can be recreated.";
-            case REV: return "A relationship between a source Act that seeks to reverse or undo the action of the prior target Act.\r\n\n                        Example: A posted financial transaction (e.g., a debit transaction) was applied in error and must be reversed (e.g., by a credit transaction) the credit transaction is identified as an undo (or reversal) of the prior target transaction.\r\n\n                        Constraints: the \"completion track\" mood of the target Act must be equally or more \"actual\" than the source act. I.e., when the target act is EVN the source act can be EVN, or any INT. If the target act is INT, the source act can be INT.";
+            case REV: return "A relationship between a source Act that seeks to reverse or undo the action of the prior target Act.\r\n\n                        Example: A posted financial transaction (e.g. a debit transaction) was applied in error and must be reversed (e.g. by a credit transaction) the credit transaction is identified as an undo (or reversal) of the prior target transaction.\r\n\n                        Constraints: the \"completion track\" mood of the target Act must be equally or more \"actual\" than the source act. I.e., when the target act is EVN the source act can be EVN, or any INT. If the target act is INT, the source act can be INT.";
             case RPLC: return "A replacement source act replaces an existing target act. The state of the target act being replaced becomes obselete, but the act is typically still retained in the system for historical reference.  The source and target must be of the same type.";
             case SUCC: return "Definition:  A new act that carries forward the intention of the original act, but does not completely replace it.  The status of the predecessor act must be 'completed'.  The original act is the target act and the successor is the source act.";
             case UPDT: return "A condition thread relationship specifically links condition nodes together to form a condition thread. The source is the new condition node and the target links to the most recent node of the existing condition thread.";
             case XCRPT: return "The source is an excerpt from the target.";
             case VRXCRPT: return "The source is a direct quote from the target.";
             case XFRM: return "Used when the target Act is a transformation of the source Act. (For instance, used to show that a CDA document is a transformation of a DICOM SR document.)";
-            case SPRT: return "Used to indicate that an existing service is suggesting evidence for a new observation. The assumption of support is attributed to the same actor who asserts the observation. Source must be an observation, target may be any service  (e.g., to indicate a status post).";
+            case SPRT: return "Used to indicate that an existing service is suggesting evidence for a new observation. The assumption of support is attributed to the same actor who asserts the observation. Source must be an observation, target may be any service  (e.g. to indicate a status post).";
             case SPRTBND: return "A specialization of \"has support\" (SPRT), used to relate a secondary observation to a Region of Interest on a multidimensional observation, if the ROI specifies the true boundaries of the secondary observation as opposed to only marking the approximate area.  For example, if the start and end of an ST elevation episode is visible in an EKG, this relation would indicate the ROI bounds the  \"ST elevation\" observation -- the ROI defines the true beginning and ending of the episode.  Conversely, if a ROI simply contains ST elevation, but it does not define the bounds (start and end) of the episode, the more general \"has support\" relation is used.  Likewise, if a ROI on an image defines the true bounds of a \"1st degree burn\", the relation \"has bounded support\" is used; but if the ROI only points to the approximate area of the burn, the general \"has support\" relation is used.";
             case SUBJ: return "Relates an Act to its subject Act that the first Act is primarily concerned with.\r\n\n                        Examples\r\n\n                        \n                           \n                              The first Act may be a ControlAct manipulating the subject Act \r\n\n                           \n                           \n                              The first act is a region of interest (ROI) that defines a region within the subject Act.\r\n\n                           \n                           \n                              The first act is a reporting or notification Act, that echos the subject Act for a specific new purpose.\r\n\n                           \n                        \n                        Constraints\r\n\n                        An Act may have multiple subject acts.\r\n\n                        Rationale\r\n\n                        The ActRelationshipType \"has subject\" is similar to the ParticipationType \"subject\", Acts that primarily operate on physical subjects use the Participation, those Acts that primarily operate on other Acts (other information) use the ActRelationship.";
             case QUALF: return "The target observation qualifies (refines) the semantics of the source observation.\r\n\n                        \n                           UsageNote: This is not intended to replace concept refinement and qualification via vocabulary.  It is used when there are multiple components which together provide the complete understanding of the source Act.";
             case SUMM: return "An act that contains summary values for a list or set of subordinate acts.  For example, a summary of transactions for a particular accounting period.";
             case VALUE: return "Description:Indicates that the target Act represents the result of the source observation Act.\r\n\n                        \n                           FormalConstraint: Source Act must be an Observation or specialization there-of. Source Act must not have the value attribute specified\r\n\n                        \n                           UsageNote: This relationship allows the result of an observation to be fully expressed as RIM acts as opposed to being embedded in the value attribute.  For example, sending a Document act as the result of an imaging observation, sending a list of Procedures and/or other acts as the result of a medical history observation.\r\n\n                        The valueNegationInd attribute on the source Act has the same semantics of \"negated finding\" when it applies to the target of a VALUE ActRelationship as it does to the value attribute.  On the other hand, if the ActRelationship.negationInd is true for a VALUE ActRelationship, that means the specified observation does not have the indicated value but does not imply a negated finding.  Because the semantics are extremely close, it is recommended that Observation.valueNegationInd be used, not ActRelationship.negationInd.\r\n\n                        \n                           OpenIssue: The implications of negationInd on ActRelationship and the valueNegationind on Observation.";
+            case CURE: return "curative indication";
+            case CURE_ADJ: return "adjunct curative indication";
+            case MTGT_ADJ: return "adjunct mitigation";
+            case RACT: return "";
+            case SUGG: return "";
             default: return "?";
           }
         }
@@ -1482,6 +1522,11 @@ public enum V3ActRelationshipType {
             case QUALF: return "has qualifier";
             case SUMM: return "summarized by";
             case VALUE: return "has value";
+            case CURE: return "curative indication";
+            case CURE_ADJ: return "adjunct curative indication";
+            case MTGT_ADJ: return "adjunct mitigation";
+            case RACT: return "RACT";
+            case SUGG: return "SUGG";
             default: return "?";
           }
     }

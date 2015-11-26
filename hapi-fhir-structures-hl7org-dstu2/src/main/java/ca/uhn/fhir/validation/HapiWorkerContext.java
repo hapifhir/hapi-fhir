@@ -2,11 +2,17 @@ package ca.uhn.fhir.validation;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.formats.IParser;
 import org.hl7.fhir.instance.formats.ParserType;
+import org.hl7.fhir.instance.model.CodeableConcept;
+import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.ConceptMap;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.ValueSet;
+import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
+import org.hl7.fhir.instance.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.terminologies.ValueSetExpander;
@@ -32,11 +38,6 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   @Override
   public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc) {
     return myValidationSupport.expandValueSet(myCtx, theInc);
-  }
-
-  @Override
-  public ValueSetExpansionOutcome expandVS(ValueSet theSource) {
-    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -111,14 +112,49 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(String theSystem, String theCode, String theDisplay,
-      ConceptSetComponent theVsi) {
+  public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
     throw new UnsupportedOperationException();
   }
 
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ValueSet theVs) {
-    throw new UnsupportedOperationException();
+    if (theSystem == null || StringUtils.equals(theSystem, theVs.getCodeSystem().getSystem())) {
+      for (ConceptDefinitionComponent next : theVs.getCodeSystem().getConcept()) {
+        ValidationResult retVal = validateCodeSystem(theCode, next);
+        if (retVal != null && retVal.isOk()) {
+          return retVal;
+        }
+      }
+    }
+
+    for (ConceptSetComponent nextComposeConceptSet : theVs.getCompose().getInclude()) {
+      if (StringUtils.equals(theSystem, nextComposeConceptSet.getSystem())) {
+        for (ConceptReferenceComponent nextComposeCode : nextComposeConceptSet.getConcept()) {
+          ConceptDefinitionComponent conceptDef = new ConceptDefinitionComponent();
+          conceptDef.setCode(nextComposeCode.getCode());
+          conceptDef.setDisplay(nextComposeCode.getDisplay());
+          ValidationResult retVal = validateCodeSystem(theCode, conceptDef);
+          if (retVal != null && retVal.isOk()) {
+            return retVal;
+          }
+        }
+      }
+    }
+    return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
+  }
+
+  private ValidationResult validateCodeSystem(String theCode, ConceptDefinitionComponent theConcept) {
+    if (StringUtils.equals(theCode, theConcept.getCode())) {
+      return new ValidationResult(theConcept);
+    } else {
+      for (ConceptDefinitionComponent next : theConcept.getConcept()) {
+        ValidationResult retVal = validateCodeSystem(theCode, next);
+        if (retVal != null && retVal.isOk()) {
+          return retVal;
+        }
+      }
+      return null;
+    }
   }
 
   @Override
@@ -140,5 +176,30 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   @Override
   public List<ConceptMap> findMapsForSource(String theUrl) {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public ValidationResult validateCode(Coding theCode, ValueSet theVs) {
+    String system = theCode.getSystem();
+    String code = theCode.getCode();
+    String display = theCode.getDisplay();
+    return validateCode(system, code, display, theVs);
+  }
+
+  @Override
+  public ValidationResult validateCode(CodeableConcept theCode, ValueSet theVs) {
+    for (Coding next : theCode.getCoding()) {
+      ValidationResult retVal = validateCode(next, theVs);
+      if (retVal != null && retVal.isOk()) {
+        return retVal;
+      }
+    }
+
+    return new ValidationResult(null, null);
   }
 }

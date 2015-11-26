@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum Tooth {
@@ -39,163 +39,163 @@ public enum Tooth {
          */
         _0, 
         /**
-         * Permanent teeth Maxillary right
+         * Permanent teeth Maxillary right.
          */
         _1, 
         /**
-         * Permanent teeth Maxillary Left
+         * Permanent teeth Maxillary left.
          */
         _2, 
         /**
-         * Permanent teeth Mandibular right
+         * Permanent teeth Mandibular right.
          */
         _3, 
         /**
-         * Permanent teeth Mandibular left
+         * Permanent teeth Mandibular left.
          */
         _4, 
         /**
-         * Deciduous teeth Maxillary right
+         * Deciduous teeth Maxillary right.
          */
         _5, 
         /**
-         * Deciduous teeth Maxillary Left
+         * Deciduous teeth Maxillary left.
          */
         _6, 
         /**
-         * Deciduous teeth Mandibular right
+         * Deciduous teeth Mandibular right.
          */
         _7, 
         /**
-         * Deciduous teeth Mandibular left
+         * Deciduous teeth Mandibular left.
          */
         _8, 
         /**
-         * Upper Right Tooth 1 from the central axis, permanent dentition
+         * Upper Right Tooth 1 from the central axis, permanent dentition.
          */
         _11, 
         /**
-         * Upper Right Tooth 2 from the central axis, permanent dentition
+         * Upper Right Tooth 2 from the central axis, permanent dentition.
          */
         _12, 
         /**
-         * Upper Right Tooth 3 from the central axis, permanent dentition
+         * Upper Right Tooth 3 from the central axis, permanent dentition.
          */
         _13, 
         /**
-         * Upper Right Tooth 4 from the central axis, permanent dentition
+         * Upper Right Tooth 4 from the central axis, permanent dentition.
          */
         _14, 
         /**
-         * Upper Right Tooth 5 from the central axis, permanent dentition
+         * Upper Right Tooth 5 from the central axis, permanent dentition.
          */
         _15, 
         /**
-         * Upper Right Tooth 6 from the central axis, permanent dentition
+         * Upper Right Tooth 6 from the central axis, permanent dentition.
          */
         _16, 
         /**
-         * Upper Right Tooth 7 from the central axis, permanent dentition
+         * Upper Right Tooth 7 from the central axis, permanent dentition.
          */
         _17, 
         /**
-         * Upper Right Tooth 1 from the central axis, permanent dentition
+         * Upper Right Tooth 1 from the central axis, permanent dentition.
          */
         _18, 
         /**
-         * Upper Left Tooth 1 from the central axis, permanent dentition
+         * Upper Left Tooth 1 from the central axis, permanent dentition.
          */
         _21, 
         /**
-         * Upper Left Tooth 2 from the central axis, permanent dentition
+         * Upper Left Tooth 2 from the central axis, permanent dentition.
          */
         _22, 
         /**
-         * Upper Left Tooth 3 from the central axis, permanent dentition
+         * Upper Left Tooth 3 from the central axis, permanent dentition.
          */
         _23, 
         /**
-         * Upper Left Tooth 4 from the central axis, permanent dentition
+         * Upper Left Tooth 4 from the central axis, permanent dentition.
          */
         _24, 
         /**
-         * Upper Left Tooth 5 from the central axis, permanent dentition
+         * Upper Left Tooth 5 from the central axis, permanent dentition.
          */
         _25, 
         /**
-         * Upper Left Tooth 6 from the central axis, permanent dentition
+         * Upper Left Tooth 6 from the central axis, permanent dentition.
          */
         _26, 
         /**
-         * Upper Left Tooth 7 from the central axis, permanent dentition
+         * Upper Left Tooth 7 from the central axis, permanent dentition.
          */
         _27, 
         /**
-         * Upper Left Tooth 8 from the central axis, permanent dentition
+         * Upper Left Tooth 8 from the central axis, permanent dentition.
          */
         _28, 
         /**
-         * Lower Left Tooth 1 from the central axis, permanent dentition
+         * Lower Left Tooth 1 from the central axis, permanent dentition.
          */
         _31, 
         /**
-         * Lower Left Tooth 2 from the central axis, permanent dentition
+         * Lower Left Tooth 2 from the central axis, permanent dentition.
          */
         _32, 
         /**
-         * Lower Left Tooth 3 from the central axis, permanent dentition
+         * Lower Left Tooth 3 from the central axis, permanent dentition.
          */
         _33, 
         /**
-         * Lower Left Tooth 4 from the central axis, permanent dentition
+         * Lower Left Tooth 4 from the central axis, permanent dentition.
          */
         _34, 
         /**
-         * Lower Left Tooth 5 from the central axis, permanent dentition
+         * Lower Left Tooth 5 from the central axis, permanent dentition.
          */
         _35, 
         /**
-         * Lower Left Tooth 6 from the central axis, permanent dentition
+         * Lower Left Tooth 6 from the central axis, permanent dentition.
          */
         _36, 
         /**
-         * Lower Left Tooth 7 from the central axis, permanent dentition
+         * Lower Left Tooth 7 from the central axis, permanent dentition.
          */
         _37, 
         /**
-         * Lower Left Tooth 8 from the central axis, permanent dentition
+         * Lower Left Tooth 8 from the central axis, permanent dentition.
          */
         _38, 
         /**
-         * Lower Right Tooth 1 from the central axis, permanent dentition
+         * Lower Right Tooth 1 from the central axis, permanent dentition.
          */
         _41, 
         /**
-         * Lower Right Tooth 2 from the central axis, permanent dentition
+         * Lower Right Tooth 2 from the central axis, permanent dentition.
          */
         _42, 
         /**
-         * Lower Right Tooth 3 from the central axis, permanent dentition
+         * Lower Right Tooth 3 from the central axis, permanent dentition.
          */
         _43, 
         /**
-         * Lower Right Tooth 4 from the central axis, permanent dentition
+         * Lower Right Tooth 4 from the central axis, permanent dentition.
          */
         _44, 
         /**
-         * Lower Right Tooth 5 from the central axis, permanent dentition
+         * Lower Right Tooth 5 from the central axis, permanent dentition.
          */
         _45, 
         /**
-         * Lower Right Tooth 6 from the central axis, permanent dentition
+         * Lower Right Tooth 6 from the central axis, permanent dentition.
          */
         _46, 
         /**
-         * Lower Right Tooth 7 from the central axis, permanent dentition
+         * Lower Right Tooth 7 from the central axis, permanent dentition.
          */
         _47, 
         /**
-         * Lower Right Tooth 8 from the central axis, permanent dentition
+         * Lower Right Tooth 8 from the central axis, permanent dentition.
          */
         _48, 
         /**
@@ -341,46 +341,46 @@ public enum Tooth {
         public String getDefinition() {
           switch (this) {
             case _0: return "";
-            case _1: return "Permanent teeth Maxillary right";
-            case _2: return "Permanent teeth Maxillary Left";
-            case _3: return "Permanent teeth Mandibular right";
-            case _4: return "Permanent teeth Mandibular left";
-            case _5: return "Deciduous teeth Maxillary right";
-            case _6: return "Deciduous teeth Maxillary Left";
-            case _7: return "Deciduous teeth Mandibular right";
-            case _8: return "Deciduous teeth Mandibular left";
-            case _11: return "Upper Right Tooth 1 from the central axis, permanent dentition";
-            case _12: return "Upper Right Tooth 2 from the central axis, permanent dentition";
-            case _13: return "Upper Right Tooth 3 from the central axis, permanent dentition";
-            case _14: return "Upper Right Tooth 4 from the central axis, permanent dentition";
-            case _15: return "Upper Right Tooth 5 from the central axis, permanent dentition";
-            case _16: return "Upper Right Tooth 6 from the central axis, permanent dentition";
-            case _17: return "Upper Right Tooth 7 from the central axis, permanent dentition";
-            case _18: return "Upper Right Tooth 1 from the central axis, permanent dentition";
-            case _21: return "Upper Left Tooth 1 from the central axis, permanent dentition";
-            case _22: return "Upper Left Tooth 2 from the central axis, permanent dentition";
-            case _23: return "Upper Left Tooth 3 from the central axis, permanent dentition";
-            case _24: return "Upper Left Tooth 4 from the central axis, permanent dentition";
-            case _25: return "Upper Left Tooth 5 from the central axis, permanent dentition";
-            case _26: return "Upper Left Tooth 6 from the central axis, permanent dentition";
-            case _27: return "Upper Left Tooth 7 from the central axis, permanent dentition";
-            case _28: return "Upper Left Tooth 8 from the central axis, permanent dentition";
-            case _31: return "Lower Left Tooth 1 from the central axis, permanent dentition";
-            case _32: return "Lower Left Tooth 2 from the central axis, permanent dentition";
-            case _33: return "Lower Left Tooth 3 from the central axis, permanent dentition";
-            case _34: return "Lower Left Tooth 4 from the central axis, permanent dentition";
-            case _35: return "Lower Left Tooth 5 from the central axis, permanent dentition";
-            case _36: return "Lower Left Tooth 6 from the central axis, permanent dentition";
-            case _37: return "Lower Left Tooth 7 from the central axis, permanent dentition";
-            case _38: return "Lower Left Tooth 8 from the central axis, permanent dentition";
-            case _41: return "Lower Right Tooth 1 from the central axis, permanent dentition";
-            case _42: return "Lower Right Tooth 2 from the central axis, permanent dentition";
-            case _43: return "Lower Right Tooth 3 from the central axis, permanent dentition";
-            case _44: return "Lower Right Tooth 4 from the central axis, permanent dentition";
-            case _45: return "Lower Right Tooth 5 from the central axis, permanent dentition";
-            case _46: return "Lower Right Tooth 6 from the central axis, permanent dentition";
-            case _47: return "Lower Right Tooth 7 from the central axis, permanent dentition";
-            case _48: return "Lower Right Tooth 8 from the central axis, permanent dentition";
+            case _1: return "Permanent teeth Maxillary right.";
+            case _2: return "Permanent teeth Maxillary left.";
+            case _3: return "Permanent teeth Mandibular right.";
+            case _4: return "Permanent teeth Mandibular left.";
+            case _5: return "Deciduous teeth Maxillary right.";
+            case _6: return "Deciduous teeth Maxillary left.";
+            case _7: return "Deciduous teeth Mandibular right.";
+            case _8: return "Deciduous teeth Mandibular left.";
+            case _11: return "Upper Right Tooth 1 from the central axis, permanent dentition.";
+            case _12: return "Upper Right Tooth 2 from the central axis, permanent dentition.";
+            case _13: return "Upper Right Tooth 3 from the central axis, permanent dentition.";
+            case _14: return "Upper Right Tooth 4 from the central axis, permanent dentition.";
+            case _15: return "Upper Right Tooth 5 from the central axis, permanent dentition.";
+            case _16: return "Upper Right Tooth 6 from the central axis, permanent dentition.";
+            case _17: return "Upper Right Tooth 7 from the central axis, permanent dentition.";
+            case _18: return "Upper Right Tooth 1 from the central axis, permanent dentition.";
+            case _21: return "Upper Left Tooth 1 from the central axis, permanent dentition.";
+            case _22: return "Upper Left Tooth 2 from the central axis, permanent dentition.";
+            case _23: return "Upper Left Tooth 3 from the central axis, permanent dentition.";
+            case _24: return "Upper Left Tooth 4 from the central axis, permanent dentition.";
+            case _25: return "Upper Left Tooth 5 from the central axis, permanent dentition.";
+            case _26: return "Upper Left Tooth 6 from the central axis, permanent dentition.";
+            case _27: return "Upper Left Tooth 7 from the central axis, permanent dentition.";
+            case _28: return "Upper Left Tooth 8 from the central axis, permanent dentition.";
+            case _31: return "Lower Left Tooth 1 from the central axis, permanent dentition.";
+            case _32: return "Lower Left Tooth 2 from the central axis, permanent dentition.";
+            case _33: return "Lower Left Tooth 3 from the central axis, permanent dentition.";
+            case _34: return "Lower Left Tooth 4 from the central axis, permanent dentition.";
+            case _35: return "Lower Left Tooth 5 from the central axis, permanent dentition.";
+            case _36: return "Lower Left Tooth 6 from the central axis, permanent dentition.";
+            case _37: return "Lower Left Tooth 7 from the central axis, permanent dentition.";
+            case _38: return "Lower Left Tooth 8 from the central axis, permanent dentition.";
+            case _41: return "Lower Right Tooth 1 from the central axis, permanent dentition.";
+            case _42: return "Lower Right Tooth 2 from the central axis, permanent dentition.";
+            case _43: return "Lower Right Tooth 3 from the central axis, permanent dentition.";
+            case _44: return "Lower Right Tooth 4 from the central axis, permanent dentition.";
+            case _45: return "Lower Right Tooth 5 from the central axis, permanent dentition.";
+            case _46: return "Lower Right Tooth 6 from the central axis, permanent dentition.";
+            case _47: return "Lower Right Tooth 7 from the central axis, permanent dentition.";
+            case _48: return "Lower Right Tooth 8 from the central axis, permanent dentition.";
             default: return "?";
           }
         }

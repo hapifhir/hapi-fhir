@@ -15,6 +15,8 @@ public class LoadingValidationSupport implements IValidationSupport {
 
 	private static FhirContext myCtx = FhirContext.forDstu2Hl7Org();
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupport.class);
+
 	@Override
 	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
 		return null;
@@ -24,8 +26,6 @@ public class LoadingValidationSupport implements IValidationSupport {
 	public ValueSet fetchCodeSystem(FhirContext theContext, String theSystem) {
 		return null;
 	}
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupport.class);
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {

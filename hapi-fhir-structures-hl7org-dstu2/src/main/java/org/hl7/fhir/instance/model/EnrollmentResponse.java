@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -42,16 +42,16 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * This resource provides Enrollment and plan details from the processing of an Enrollment resource.
+ * This resource provides enrollment and plan details from the processing of an Enrollment resource.
  */
 @ResourceDef(name="EnrollmentResponse", profile="http://hl7.org/fhir/Profile/EnrollmentResponse")
 public class EnrollmentResponse extends DomainResource {
 
     /**
-     * The Response Business Identifier.
+     * The Response business identifier.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Business Identifier", formalDefinition="The Response Business Identifier." )
+    @Description(shortDefinition="Business Identifier", formalDefinition="The Response business identifier." )
     protected List<Identifier> identifier;
 
     /**
@@ -147,7 +147,7 @@ public class EnrollmentResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (The Response Business Identifier.)
+     * @return {@link #identifier} (The Response business identifier.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -165,7 +165,7 @@ public class EnrollmentResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (The Response Business Identifier.)
+     * @return {@link #identifier} (The Response business identifier.)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -559,7 +559,7 @@ public class EnrollmentResponse extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "The Response Business Identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("request", "Reference(EnrollmentRequest)", "Original request resource reference.", 0, java.lang.Integer.MAX_VALUE, request));
         childrenList.add(new Property("outcome", "code", "Transaction status: error, complete.", 0, java.lang.Integer.MAX_VALUE, outcome));
         childrenList.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, java.lang.Integer.MAX_VALUE, disposition));

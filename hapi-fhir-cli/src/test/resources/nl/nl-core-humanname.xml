@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <lastUpdated value="2015-09-22T20:02:49.724+10:00" />
+  </meta>
+  <url value="http://fhir.nl/fhir/StructureDefinition/nl-core-humanname" />
+  <name value="nl-core-humanname" />
+  <status value="draft" />
+  <contact>
+    <name value="HL7 Netherlands" />
+  </contact>
+  <date value="2015-09-22T20:02:49+10:00" />
+  <description value="Base StructureDefinition for HumanName Type with additions for Dutch realm names. Dutch names break down the family into maximum of 4 parts that are important to know separately in some use cases." />
+  <requirements value="Need to be able to record names, along with notes about their use." />
+  <fhirVersion value="1.0.1" />
+  <mapping>
+    <identity value="v2" />
+    <uri value="http://hl7.org/v2" />
+    <name value="HL7 v2" />
+  </mapping>
+  <mapping>
+    <identity value="rim" />
+    <uri value="http://hl7.org/v3" />
+    <name value="RIM" />
+  </mapping>
+  <mapping>
+    <identity value="servd" />
+    <uri value="http://www.omg.org/spec/ServD/1.0/" />
+    <name value="ServD" />
+  </mapping>
+  <kind value="datatype" />
+  <constrainedType value="HumanName" />
+  <abstract value="false" />
+  <base value="http://hl7.org/fhir/StructureDefinition/HumanName" />
+  <differential>
+    <element>
+      <path value="HumanName" />
+      <short value="Name of a human - parts and usage" />
+      <definition value="A human's name with the ability to identify parts and usage." />
+      <comments value="Names may be changed, or repudiated, or people may have different names in different contexts. Names may be divided into parts of different type that have variable significance depending on context, though the division into parts does not always matter. With personal names, the different parts may or may not be imbued with some implicit meaning; various cultures associate different importance with the name parts and the degree to which systems must care about name parts around the world varies widely." />
+      <min value="0" />
+      <max value="*" />
+      <type>
+        <code value="HumanName" />
+      </type>
+      <isSummary value="true" />
+      <mapping>
+        <identity value="v2" />
+        <map value="XPN" />
+      </mapping>
+      <mapping>
+        <identity value="rim" />
+        <map value="EN (actually, PN)" />
+      </mapping>
+      <mapping>
+        <identity value="servd" />
+        <map value="ProviderName" />
+      </mapping>
+    </element>
+    <element>
+      <path value="HumanName.extension" />
+      <slicing>
+        <discriminator value="url" />
+        <rules value="openAtEnd" />
+      </slicing>
+    </element>
+    <element>
+      <path value="HumanName.extension" />
+      <name value="family-name-part1-prefix" />
+      <short value="family-name-part-prefix" />
+      <definition value="Optional Extensions Element - found in all resources." />
+      <alias value="voorvoegsel" />
+      <min value="0" />
+      <max value="1" />
+      <type>
+        <code value="Extension" />
+        <profile value="http://fhir.nl/fhir/StructureDefinition/nl-core-humanname-familyname-prefix" />
+      </type>
+    </element>
+    <element>
+      <path value="HumanName.extension" />
+      <name value="family-name-part1" />
+      <short value="family-name-part" />
+      <min value="0" />
+      <max value="1" />
+      <type>
+        <code value="Extension" />
+      </type>
+    </element>
+    <element>
+      <path value="HumanName.extension" />
+      <name value="family-name-part2-prefix" />
+      <short value="family-name-part2-prefix" />
+      <min value="0" />
+      <max value="1" />
+      <type>
+        <code value="Extension" />
+      </type>
+    </element>
+    <element>
+      <path value="HumanName.extension" />
+      <name value="family-name-part2" />
+      <short value="family-name-part2" />
+      <min value="0" />
+      <max value="1" />
+      <type>
+        <code value="Extension" />
+      </type>
+    </element>
+    <element>
+      <path value="HumanName.family" />
+      <short value="Family name (often called 'Surname')" />
+      <definition value="The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father." />
+      <comments value="For family name, hyphenated names such as &quot;Smith-Jones&quot; are a single name, but names with spaces such as &quot;Smith Jones&quot; are broken into multiple parts." />
+      <min value="0" />
+      <max value="*" />
+      <isSummary value="true" />
+    </element>
+  </differential>
+</StructureDefinition>

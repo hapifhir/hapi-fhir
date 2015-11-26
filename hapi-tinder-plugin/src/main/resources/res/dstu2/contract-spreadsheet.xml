@@ -10,7 +10,7 @@
   <LastAuthor>Grahame</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2015-06-11T11:29:45Z</LastSaved>
-  <Version>15.00</Version>
+  <Version>14.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
@@ -20,7 +20,7 @@
   <WindowWidth>19170</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>9</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -1299,7 +1299,7 @@
    <Row ss:AutoFitHeight="0" ss:Height="45">
     <Cell ss:StyleID="s86"><Data ss:Type="String">Contract.domain</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">scope of governance jurisdication</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">scope of governance jurisdiction</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1388,7 +1388,7 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">e.g., RECOV </Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">e.g. RECOV </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1421,7 +1421,7 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">e.g., JURISPOL </Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">e.g. JURISPOL </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1454,7 +1454,7 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">e.g., QUALIMP</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">e.g. QUALIMP</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1908,7 +1908,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Contract Signer Type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">Role of this Contract signer, e.g., notary, grantee.</Data><NamedCell
+    <Cell><Data ss:Type="String">Role of this Contract signer, e.g. notary, grantee.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2130,7 +2130,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Contract Term Type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Type of Contract Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g., life time maximum benefit.</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Type of Contract Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g. life time maximum benefit.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2162,7 +2162,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Contract Term Subtype</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Subtype of this Contract Provision, e.g., life time maximum payment for a contract term for specific valued item, e.g., disability payment.</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Subtype of this Contract Provision, e.g. life time maximum payment for a contract term for specific valued item, e.g. disability payment.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4818,7 +4818,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4877,7 +4876,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">Context</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur.  E.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur; e.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">English</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -5402,7 +5401,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">Path</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element.  E.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element; e.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s119"><Data ss:Type="String">Description</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -6281,7 +6280,7 @@
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s117"><Data ss:Type="String">Event Code</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event.  E.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event; e.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">Category</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -6896,7 +6895,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">Filename</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file.  E.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file; e.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">Profile</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -7425,7 +7424,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s165"><Data ss:Type="String">ContractType</Data></Cell>
-    <Cell ss:StyleID="s78"><Data ss:Type="String">List of overall contract codes</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">List of overall contract codes.</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="String">value set</Data></Cell>
     <Cell><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="String">valueset-contract-type</Data></Cell>
@@ -7440,7 +7439,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s166"><Data ss:Type="String">ContractSubtype</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed codes within the above</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed codes within the above.</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">value set</Data></Cell>
     <Cell><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">valueset-contract-subtype</Data></Cell>
@@ -7455,7 +7454,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s166"><Data ss:Type="String">ContractTermType</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed codes for the types of contract provisions</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed codes for the types of contract provisions.</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">value set</Data></Cell>
     <Cell><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">valueset-contract-term-type</Data></Cell>
@@ -7470,7 +7469,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s166"><Data ss:Type="String">ContractTermSubType</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed codes for the subtypes of contract provisions</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed codes for the subtypes of contract provisions.</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">value set</Data></Cell>
     <Cell><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">valueset-contract-term-subtype</Data></Cell>
@@ -7485,7 +7484,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s166"><Data ss:Type="String">ContractSignerType</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">List of parties who may be signing</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">List of parties who may be signing.</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">value set</Data></Cell>
     <Cell><Data ss:Type="String">preferred</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">valueset-contract-signer-type</Data></Cell>
@@ -7500,7 +7499,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s87"><Data ss:Type="String">ContractAction</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed codes for the contract action</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed codes for the contract action.</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">value set</Data></Cell>
     <Cell><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">valueset-contract-action</Data></Cell>
@@ -7515,7 +7514,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s87"><Data ss:Type="String">ContractActionReason</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed codes for the contract action reason</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed codes for the contract action reason.</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">value set</Data></Cell>
     <Cell><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s167" ss:HRef="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse"><Data
@@ -7532,7 +7531,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s87"><Data ss:Type="String">ContractActorRole</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed codes for the contract actor role</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed codes for the contract actor role.</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">value set</Data></Cell>
     <Cell><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="String">valueset-contract-actorrole</Data></Cell>
@@ -7853,6 +7852,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -7872,8 +7872,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>11</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

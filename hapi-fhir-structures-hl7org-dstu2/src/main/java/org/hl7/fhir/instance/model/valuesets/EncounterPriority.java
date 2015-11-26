@@ -29,29 +29,29 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum EncounterPriority {
 
         /**
-         * Within seconds
+         * Within seconds.
          */
         IMM, 
         /**
-         * Within 10 minutes
+         * Within 10 minutes.
          */
         EMG, 
         /**
-         * Within 30 minutes
+         * Within 30 minutes.
          */
         URG, 
         /**
-         * Within 60 minutes
+         * Within 60 minutes.
          */
         SURG, 
         /**
-         * Within 120 minutes
+         * Within 120 minutes.
          */
         NOURG, 
         /**
@@ -88,11 +88,11 @@ public enum EncounterPriority {
         }
         public String getDefinition() {
           switch (this) {
-            case IMM: return "Within seconds";
-            case EMG: return "Within 10 minutes";
-            case URG: return "Within 30 minutes";
-            case SURG: return "Within 60 minutes";
-            case NOURG: return "Within 120 minutes";
+            case IMM: return "Within seconds.";
+            case EMG: return "Within 10 minutes.";
+            case URG: return "Within 30 minutes.";
+            case SURG: return "Within 60 minutes.";
+            case NOURG: return "Within 120 minutes.";
             default: return "?";
           }
         }

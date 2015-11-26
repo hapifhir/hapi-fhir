@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ProcedureRelationshipType {
 
         /**
-         * This procedure had to be performed because of the related one
+         * This procedure had to be performed because of the related one.
          */
         CAUSEDBY, 
         /**
-         * This procedure caused the related one to be performed
+         * This procedure caused the related one to be performed.
          */
         BECAUSEOF, 
         /**
@@ -67,8 +67,8 @@ public enum ProcedureRelationshipType {
         }
         public String getDefinition() {
           switch (this) {
-            case CAUSEDBY: return "This procedure had to be performed because of the related one";
-            case BECAUSEOF: return "This procedure caused the related one to be performed";
+            case CAUSEDBY: return "This procedure had to be performed because of the related one.";
+            case BECAUSEOF: return "This procedure caused the related one to be performed.";
             default: return "?";
           }
         }

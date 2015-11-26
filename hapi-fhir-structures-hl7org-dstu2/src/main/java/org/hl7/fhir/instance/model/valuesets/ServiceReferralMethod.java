@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ServiceReferralMethod {
 
         /**
-         * Referrals may be accepted by fax
+         * Referrals may be accepted by fax.
          */
         FAX, 
         /**
-         * Referrals may be accepted over the phone from a Practitioner
+         * Referrals may be accepted over the phone from a practitioner.
          */
         PHONE, 
         /**
@@ -51,7 +51,7 @@ public enum ServiceReferralMethod {
          */
         SEMAIL, 
         /**
-         * Referrals may be accepted via regular postage (or hand delivered)
+         * Referrals may be accepted via regular postage (or hand delivered).
          */
         MAIL, 
         /**
@@ -88,11 +88,11 @@ public enum ServiceReferralMethod {
         }
         public String getDefinition() {
           switch (this) {
-            case FAX: return "Referrals may be accepted by fax";
-            case PHONE: return "Referrals may be accepted over the phone from a Practitioner";
+            case FAX: return "Referrals may be accepted by fax.";
+            case PHONE: return "Referrals may be accepted over the phone from a practitioner.";
             case ELEC: return "Referrals may be accepted via a secure messaging system. To determine the types of secure messaging systems supported, refer to the identifiers collection. Callers will need to understand the specific identifier system used to know that they are able to transmit messages.";
             case SEMAIL: return "Referrals may be accepted via a secure email. To send please enrypt with the services public key.";
-            case MAIL: return "Referrals may be accepted via regular postage (or hand delivered)";
+            case MAIL: return "Referrals may be accepted via regular postage (or hand delivered).";
             default: return "?";
           }
         }

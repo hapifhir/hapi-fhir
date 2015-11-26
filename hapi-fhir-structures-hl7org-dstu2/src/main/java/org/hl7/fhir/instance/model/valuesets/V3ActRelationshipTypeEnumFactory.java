@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -303,6 +303,16 @@ public class V3ActRelationshipTypeEnumFactory implements EnumFactory<V3ActRelati
       return V3ActRelationshipType.SUMM;
     if ("VALUE".equals(codeString))
       return V3ActRelationshipType.VALUE;
+    if ("CURE".equals(codeString))
+      return V3ActRelationshipType.CURE;
+    if ("CURE.ADJ".equals(codeString))
+      return V3ActRelationshipType.CURE_ADJ;
+    if ("MTGT.ADJ".equals(codeString))
+      return V3ActRelationshipType.MTGT_ADJ;
+    if ("RACT".equals(codeString))
+      return V3ActRelationshipType.RACT;
+    if ("SUGG".equals(codeString))
+      return V3ActRelationshipType.SUGG;
     throw new IllegalArgumentException("Unknown V3ActRelationshipType code '"+codeString+"'");
   }
 
@@ -571,6 +581,16 @@ public class V3ActRelationshipTypeEnumFactory implements EnumFactory<V3ActRelati
       return "SUMM";
     if (code == V3ActRelationshipType.VALUE)
       return "VALUE";
+    if (code == V3ActRelationshipType.CURE)
+      return "CURE";
+    if (code == V3ActRelationshipType.CURE_ADJ)
+      return "CURE.ADJ";
+    if (code == V3ActRelationshipType.MTGT_ADJ)
+      return "MTGT.ADJ";
+    if (code == V3ActRelationshipType.RACT)
+      return "RACT";
+    if (code == V3ActRelationshipType.SUGG)
+      return "SUGG";
     return "?";
   }
 

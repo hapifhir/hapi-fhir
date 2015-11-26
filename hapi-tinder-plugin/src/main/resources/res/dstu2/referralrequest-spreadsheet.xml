@@ -7,17 +7,17 @@
  xmlns:html="http://www.w3.org/TR/REC-html40">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
-  <LastAuthor>Richard J. Ettema (AEGIS.net)</LastAuthor>
+  <LastAuthor>Lloyd</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2015-08-30T22:12:51Z</LastSaved>
-  <Version>12.00</Version>
+  <LastSaved>2015-09-17T17:41:27Z</LastSaved>
+  <Version>15.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>12975</WindowHeight>
-  <WindowWidth>24000</WindowWidth>
+  <WindowHeight>11175</WindowHeight>
+  <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>1</ActiveSheet>
@@ -981,7 +981,7 @@
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s78"><Data ss:Type="String">A request for referral or transfer of care</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s80"><Data ss:Type="String">Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organisation</Data><NamedCell
+    <Cell ss:StyleID="s80"><Data ss:Type="String">Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organization.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s81"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s80"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1022,7 +1022,8 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">RF1-1</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1047,15 +1048,16 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Business Identifier</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Business identifier</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Business Id that uniquely identifies the referral/care transfer request instance</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Business identifier that uniquely identifies the referral/care transfer request instance</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">RF1-6 / RF1-11</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1089,7 +1091,8 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">RF1-7 / RF1-9?</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1108,7 +1111,8 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Y</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ReferralType</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">class</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1124,13 +1128,14 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">RF1-10</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="60">
+   <Row ss:AutoFitHeight="0" ss:Height="90">
     <Cell ss:StyleID="s86"><Data ss:Type="String">ReferralRequest.specialty</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1142,7 +1147,8 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">N</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ReferralSpecialty</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1150,14 +1156,14 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">The clinical specialty (discipline) that the referral is requested for</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Indication of the clinical domain or discipline to which the referral or transfer of care request is sent</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.  For example: Cardiology Gastroenterology Diabetology</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Examples: Cardiology Gastroenterology Diabetology</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">RF1-3</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1176,7 +1182,8 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Y</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ReferralPriority</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">grade</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1191,7 +1198,8 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">RF1-2</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1226,7 +1234,8 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">PID-3</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1255,13 +1264,14 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Requester of referral / transfer of care</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The healthcare provider or provider organization who/which initaited the referral/transfer of care request. Can also be  Patient (a self referral)</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The healthcare provider or provider organization who/which initiated the referral/transfer of care request. Can also be  Patient (a self referral)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Practitioner: PRD-2/PRD-7 where PRD-3 = RP; Organization: PRD-10 where PRD-3 = RP</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1292,11 +1302,12 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">The healthcare provider(s) or provider organization(s) who/which is to receive the referral/transfer of care request</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">There will be a primary receiver. But the request can be received by any number of &quot;copied to&quot; providers or organisations</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">There will be a primary receiver. But the request can be received by any number of &quot;copied to&quot; providers or organizations</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Practitioner: PRD-2/PRD-7 where PRD-3 = RT; Organization: PRD-10 where PRD-3 = RT</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1329,7 +1340,8 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">PV1-19</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1363,7 +1375,8 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">RF1-7 / RF1-9?</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1382,23 +1395,24 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Y</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ReferralReason</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">why</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Reason for referral / Transfer of care request</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Reason for referral / transfer of care request</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Description of clinical condition indicating why referral/transfer of care is requested</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Examples: &quot;2nd degree AV block&quot;  Oral Health example ReferralReasonCode: 01 = Pathological Anomalies 02 = Disabled (physical or mental) 03 = Complexity of Treatment 04 = Seizure Disorders 05 = Extensive Surgery 06 = Surgical Complexity 07 = Rampant decay 08 = Medical History (to provide details upon request) 09 = Temporal Mandibular Joint Anomalies 10 = Accidental Injury 11 = Anaesthesia complications (local or general) 12 = Developmental Anomalies 13 = Behavioral Management  </Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Description of clinical condition indicating why referral/transfer of care is requested.  For example:  Pathological Anomalies, Disabled (physical or mental),  Behavioral Management  </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">RF1-10</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1424,12 +1438,11 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">A textual description of the referral</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The reason gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The reason element gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">This would be a good candidate for a 'markdown' data type</Data><NamedCell
+    <Cell ss:Index="18" ss:StyleID="s88"><Data ss:Type="String">This would be a good candidate for a 'markdown' data type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1450,23 +1463,24 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Y</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">RequestedService</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">what</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">What actions are requested as part of referral?</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Actions requested as part of the referral</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The service(s) that is/are requested to be provided to the patient</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Examples: &quot;cardiac pacemaker insertion&quot;  HL7 v3 Concept domain - ReferralReasonCode examples: - Specialized medical assistance - Other care requirement </Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The service(s) that is/are requested to be provided to the patient.  For example: cardiac pacemaker insertion</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">PR1-3 / OBR-4</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1493,11 +1507,10 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Additonal information to support referral or transfer of care request</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Examples include: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1531,12 +1544,13 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">The period of time within which the services identified in the referral/transfer of care is specified or required to occur </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Use cases: (1) to indicate that the requested service is not to happen before a specified date, and saving the start date in Period.start (2) to indicate that the requested service must happen before a specified date, and saving the end date in Period.end (3) to indicate that the requested service must happen during the specified dates (&quot;start&quot; and &quot;end&quot; values).</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Use cases: (1) to indicate that the requested service is not to happen before a specified date, and saving the start date in Period.start; (2) to indicate that the requested service must happen before a specified date, and saving the end date in Period.end; (3) to indicate that the requested service must happen during the specified dates (&quot;start&quot; and &quot;end&quot; values).</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">OBR-7/OBR-8</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3719,7 +3733,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>14</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>13</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -3727,6 +3741,7 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
@@ -3734,8 +3749,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>15</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveRow>18</ActiveRow>
+     <ActiveCol>19</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -3775,7 +3790,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Context</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur.  E.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Element path at which check should occur; e.g. ResourceName.element1.element2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">English</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -4302,7 +4317,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Path</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Face="Tahoma"
-        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element.  E.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
+        x:Family="Swiss" html:Size="8" html:Color="#000000">Corresponding resource element; e.g. ResourceName.node1.node2</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s103"><Data ss:Type="String">Description</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -5212,7 +5227,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Event Code</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event.  E.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique code for the event; e.g. patient-link  </Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Category</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -5829,7 +5844,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Filename</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
-        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file.  E.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
+        html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Filename of XML example file; e.g. resource-example-file-name.xml</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><Data ss:Type="String">Profile</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
@@ -6237,7 +6252,7 @@
    <Column ss:StyleID="s111" ss:Width="114.75"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="275.25"/>
    <Column ss:StyleID="s111" ss:Width="51"/>
-   <Column ss:StyleID="s111" ss:Width="45"/>
+   <Column ss:StyleID="s111" ss:Width="79.5"/>
    <Column ss:StyleID="s111" ss:Width="146.25"/>
    <Column ss:StyleID="s111" ss:Width="173.25"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="98.25"/>
@@ -6246,7 +6261,7 @@
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="173.25"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="165.75" ss:Span="1"/>
    <Column ss:Index="13" ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="107.25"/>
-   <Row ss:AutoFitHeight="0">
+   <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Binding Name</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Unique name across all resources</Font>       </ss:Data></Comment><NamedCell
@@ -6259,7 +6274,7 @@
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">How is the set of codes defined?</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s102"><Data ss:Type="String">Example</Data><Comment
+    <Cell ss:StyleID="s102"><Data ss:Type="String">Conformance</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font
         html:Face="Tahoma" x:Family="Swiss" html:Size="8" html:Color="#000000">Y = example, blank = incomplete.  Only relevant if binding is &quot;value set&quot;</Font>       </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -6302,9 +6317,9 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s145"><Data ss:Type="String">ReferralStatus</Data></Cell>
-    <Cell ss:StyleID="s78"><Data ss:Type="String">The status of the referral</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">The status of the referral.</Data></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">code list</Data></Cell>
-    <Cell ss:StyleID="s114"/>
+    <Cell ss:StyleID="s114"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">#referralstatus</Data></Cell>
     <Cell ss:StyleID="s114"/>
     <Cell ss:StyleID="s114"/>
@@ -6315,11 +6330,71 @@
     <Cell ss:StyleID="s114"/>
     <Cell ss:StyleID="s115"/>
    </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s146"><Data ss:Type="String">RequestedService</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Codes indicating the types of services that might be requested as part of a referral.</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">example</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">http://hl7.org/fhir/ValueSet/c80-practice-codes</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ReferralType</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Codes for types of referral; e.g. consult, transfer, temporary transfer.</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">unbound</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ReferralSpecialty</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Codes indicating the types of capability the referred to service provider must have.</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">example</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">http://hl7.org/fhir/ValueSet/practitioner-specialty</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ReferralPriority</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Codes indicating the relative priority of the referral.</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">example</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">http://hl7.org/fhir/ValueSet/diagnostic-order-priority</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ReferralReason</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Codes indicating why the referral is being requested.</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">unbound</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -6660,67 +6735,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s118"/>
    </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
+   <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s121"/>
@@ -6735,7 +6750,7 @@
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s122"/>
    </Row>
-   <Row ss:AutoFitHeight="0"/>
+   <Row ss:AutoFitHeight="0" ss:Height="15.75"/>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -6838,7 +6853,7 @@
     <Cell ss:StyleID="s114"/>
     <Cell ss:StyleID="s149"/>
     <Cell ss:StyleID="s149"><Data ss:Type="String">Draft</Data></Cell>
-    <Cell ss:StyleID="s149"><Data ss:Type="String">A draft referral that has yet to be send</Data></Cell>
+    <Cell ss:StyleID="s149"><Data ss:Type="String">A draft referral that has yet to be send.</Data></Cell>
     <Cell ss:StyleID="s127"/>
     <Cell ss:StyleID="s127"/>
     <Cell ss:StyleID="s139"/>
@@ -6849,7 +6864,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"><Data ss:Type="String">Requested</Data></Cell>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The referral has been transmitted, but not yet acknowledged by the recipient</Data></Cell>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">The referral has been transmitted, but not yet acknowledged by the recipient.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"><Data ss:Type="String">For consistency, please change to &quot;requested&quot;</Data></Cell>
@@ -6860,7 +6875,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"><Data ss:Type="String">Active</Data></Cell>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The referral has been acknowledged by the recipient, and is in the process of being actioned</Data></Cell>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">The referral has been acknowledged by the recipient, and is in the process of being actioned.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"><Data ss:Type="String">For consistency, please change to &quot;in-progress&quot;</Data></Cell>
@@ -6871,7 +6886,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"><Data ss:Type="String">Cancelled</Data></Cell>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The referral has been cancelled without being completed. For example it is no longer needed</Data></Cell>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">The referral has been cancelled without being completed. For example it is no longer needed.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -6882,7 +6897,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"><Data ss:Type="String">Accepted</Data></Cell>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The recipient has agreed to deliver the care requested by the referral</Data></Cell>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">The recipient has agreed to deliver the care requested by the referral.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -6893,7 +6908,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"><Data ss:Type="String">Rejected</Data></Cell>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The recipient has declined to accept the referral</Data></Cell>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">The recipient has declined to accept the referral.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -6904,7 +6919,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"><Data ss:Type="String">Completed</Data></Cell>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The referral has been completely actioned</Data></Cell>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">The referral has been completely actioned.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7415,8 +7430,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

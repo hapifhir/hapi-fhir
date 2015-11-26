@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3EntityNameUse {
@@ -43,11 +43,11 @@ public enum V3EntityNameUse {
          */
         ABC, 
         /**
-         * Ideographic representation of name (e.g., Japanese kanji, Chinese characters)
+         * Ideographic representation of name (e.g. Japanese kanji, Chinese characters)
          */
         IDE, 
         /**
-         * Syllabic transcription of name (e.g., Japanese kana, Korean hangul)
+         * Syllabic transcription of name (e.g. Japanese kana, Korean hangul)
          */
         SYL, 
         /**
@@ -75,7 +75,7 @@ public enum V3EntityNameUse {
          */
         P, 
         /**
-         * Includes writer's pseudonym, stage name, etc
+         * Includes writer's pseudonym, stage name, etc.
          */
         A, 
         /**
@@ -162,15 +162,15 @@ public enum V3EntityNameUse {
           switch (this) {
             case _NAMEREPRESENTATIONUSE: return "Identifies the different representations of a name.  The representation may affect how the name is used.  (E.g. use of Ideographic for formal communications.)";
             case ABC: return "Alphabetic transcription of name (Japanese: romaji)";
-            case IDE: return "Ideographic representation of name (e.g., Japanese kanji, Chinese characters)";
-            case SYL: return "Syllabic transcription of name (e.g., Japanese kana, Korean hangul)";
+            case IDE: return "Ideographic representation of name (e.g. Japanese kanji, Chinese characters)";
+            case SYL: return "Syllabic transcription of name (e.g. Japanese kana, Korean hangul)";
             case ASGN: return "A name assigned to a person. Reasons some organizations assign alternate names may include not knowing the person's name, or to maintain anonymity. Some, but not necessarily all, of the name types that people call \"alias\" may fit into this category.";
             case C: return "As recorded on a license, record, certificate, etc. (only if different from legal name)";
             case I: return "e.g. Chief Red Cloud";
             case L: return "Known as/conventional/the one you use";
             case OR: return "Definition:The formal name as registered in an official (government) registry, but which name might not be commonly used. Particularly used in countries with a law system based on Napoleonic law.";
             case P: return "A self asserted name that the person is using or has used.";
-            case A: return "Includes writer's pseudonym, stage name, etc";
+            case A: return "Includes writer's pseudonym, stage name, etc.";
             case R: return "e.g. Sister Mary Francis, Brother John";
             case SRCH: return "A name intended for use in searching or matching.";
             case PHON: return "A name spelled phonetically.\r\n\n                        There are a variety of phonetic spelling algorithms. This code value does not distinguish between these.Discussion:";

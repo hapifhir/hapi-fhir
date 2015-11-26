@@ -29,29 +29,29 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ImmunizationRecommendationDateCriterion {
 
         /**
-         * Date the next dose is considered due
+         * Date the next dose is considered due.
          */
         DUE, 
         /**
-         * At the recommended date
+         * At the recommended date.
          */
         RECOMMENDED, 
         /**
-         * As early as possible
+         * As early as possible.
          */
         EARLIEST, 
         /**
-         * Date the next dose is considered overdue
+         * Date the next dose is considered overdue.
          */
         OVERDUE, 
         /**
-         * The latest date the next dose is to be given
+         * The latest date the next dose is to be given.
          */
         LATEST, 
         /**
@@ -88,21 +88,21 @@ public enum ImmunizationRecommendationDateCriterion {
         }
         public String getDefinition() {
           switch (this) {
-            case DUE: return "Date the next dose is considered due";
-            case RECOMMENDED: return "At the recommended date";
-            case EARLIEST: return "As early as possible";
-            case OVERDUE: return "Date the next dose is considered overdue";
-            case LATEST: return "The latest date the next dose is to be given";
+            case DUE: return "Date the next dose is considered due.";
+            case RECOMMENDED: return "At the recommended date.";
+            case EARLIEST: return "As early as possible.";
+            case OVERDUE: return "Date the next dose is considered overdue.";
+            case LATEST: return "The latest date the next dose is to be given.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case DUE: return "due";
-            case RECOMMENDED: return "recommended";
+            case DUE: return "Due";
+            case RECOMMENDED: return "Recommended";
             case EARLIEST: return "Earliest Date";
             case OVERDUE: return "Past Due Date";
-            case LATEST: return "latest";
+            case LATEST: return "Latest";
             default: return "?";
           }
     }

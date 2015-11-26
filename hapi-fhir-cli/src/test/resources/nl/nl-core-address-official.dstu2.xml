@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+    <id value="nl-core-address-official"/>
+    <meta>
+        <lastUpdated value="2015-09-22T20:02:49.724+10:00"/>
+    </meta>
+    <url value="http://fhir.nl/fhir/StructureDefinition/nl-address-official"/>
+    <name value="nl-core-address-official"/>
+    <status value="draft"/>
+    <contact>
+        <name value="HL7 Netherlands"/>
+    </contact>
+    <date value="2015-09-22T20:02:49+10:00"/>
+    <description value="Base StructureDefinition for Extension Type"/>
+    <requirements value="The ability to add extensions in a structured way is what keeps FHIR resources simple."/>
+    <fhirVersion value="1.0.1"/>
+    <mapping>
+        <identity value="rim"/>
+        <uri value="http://hl7.org/v3"/>
+        <name value="RIM"/>
+    </mapping>
+    <kind value="datatype"/>
+    <constrainedType value="Extension"/>
+    <abstract value="false"/>
+    <contextType value="resource"/>
+    <context value="Address"/>
+    <base value="http://hl7.org/fhir/StructureDefinition/Extension"/>
+    <differential>
+        <element>
+            <path value="Extension"/>
+            <short value="Mark an address as an 'officially registered' address."/>
+            <definition value="Mark an address as an 'officially registered' address. In Dutch context that means it is registered in the Basisregistratie persoonsgegevens (BRP)"/>
+            <min value="0"/>
+            <max value="*"/>
+            <type>
+                <code value="Element"/>
+            </type>
+            <mapping>
+                <identity value="rim"/>
+                <map value="N/A"/>
+            </mapping>
+        </element>
+        <element>
+            <path value="Extension.url"/>
+            <representation value="xmlAttr"/>
+            <short value="identifies the meaning of the extension"/>
+            <definition value="Source of the definition for the extension code - a logical name or a URL."/>
+            <comments value="The definition may point directly to a computable or human-readable definition of the extensibility codes, or it may be a logical URI as declared in some other specification. The definition should be version specific.  This will ideally be the URI for the Resource Profile defining the extension, with the code for the extension after a #."/>
+            <min value="1"/>
+            <max value="1"/>
+            <fixedUri value="http://fhir.nl/fhir/StructureDefinition/nl-address-official"/>
+            <mapping>
+                <identity value="rim"/>
+                <map value="N/A"/>
+            </mapping>
+        </element>
+        <element>
+            <path value="Extension.value[x]"/>
+            <short value="true if part of an official registry. false if it is not"/>
+            <definition value="When the value is true, this address is marked to be part of an official registry (Dutch realm: BRP). When the value is false, this address is explicitly marked as not part of an official registry."/>
+            <min value="1"/>
+            <max value="1"/>
+            <type>
+                <code value="boolean"/>
+            </type>
+            <meaningWhenMissing value="When an address is not marked explicitly as official=true|false than no information can be inferred from that."/>
+            <mapping>
+                <identity value="rim"/>
+                <map value="AD/@use[.='OR']"/>
+            </mapping>
+        </element>
+    </differential>
+</StructureDefinition>

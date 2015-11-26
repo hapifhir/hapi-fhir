@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum V3IdentifierReliability {
@@ -39,7 +39,7 @@ public enum V3IdentifierReliability {
          */
         ISS, 
         /**
-         * Description: The identifier was provided to the system that constructed the instance, but has not been verified. e.g. a Drivers  license entered manually into a system by a user.
+         * Description: The identifier was provided to the system that constructed the instance, but has not been verified; e.g. a Drivers  license entered manually into a system by a user.
          */
         UNV, 
         /**
@@ -75,7 +75,7 @@ public enum V3IdentifierReliability {
         public String getDefinition() {
           switch (this) {
             case ISS: return "Description: The identifier was issued by the system responsible for constructing the instance.";
-            case UNV: return "Description: The identifier was provided to the system that constructed the instance, but has not been verified. e.g. a Drivers  license entered manually into a system by a user.";
+            case UNV: return "Description: The identifier was provided to the system that constructed the instance, but has not been verified; e.g. a Drivers  license entered manually into a system by a user.";
             case VRF: return "Description: The identifier was not issued by the system responsible for constructing the instance, but the system that captured the id has verified the identifier with the issuing authority, or with another system that has verified the identifier.";
             default: return "?";
           }

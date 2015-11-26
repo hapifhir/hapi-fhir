@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum Additionalmaterials {
@@ -43,7 +43,7 @@ public enum Additionalmaterials {
          */
         IMAGE, 
         /**
-         * EMail
+         * Email
          */
         EMAIL, 
         /**
@@ -97,7 +97,7 @@ public enum Additionalmaterials {
           switch (this) {
             case XRAY: return "XRay";
             case IMAGE: return "Image";
-            case EMAIL: return "EMail";
+            case EMAIL: return "Email";
             case MODEL: return "Model";
             case DOCUMENT: return "Document";
             case OTHER: return "Other";

@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 
 public enum ImmunizationRecommendationStatus {
 
         /**
-         * The patient is due for their next vaccination
+         * The patient is due for their next vaccination.
          */
         DUE, 
         /**
-         * The patient is considered overdue for their next vaccination
+         * The patient is considered overdue for their next vaccination.
          */
         OVERDUE, 
         /**
@@ -67,15 +67,15 @@ public enum ImmunizationRecommendationStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case DUE: return "The patient is due for their next vaccination";
-            case OVERDUE: return "The patient is considered overdue for their next vaccination";
+            case DUE: return "The patient is due for their next vaccination.";
+            case OVERDUE: return "The patient is considered overdue for their next vaccination.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case DUE: return "due";
-            case OVERDUE: return "overdue";
+            case DUE: return "Due";
+            case OVERDUE: return "Overdue";
             default: return "?";
           }
     }

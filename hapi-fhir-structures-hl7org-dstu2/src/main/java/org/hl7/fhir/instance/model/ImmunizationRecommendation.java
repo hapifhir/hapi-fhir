@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Sep 1, 2015 19:08-0400 for FHIR v1.0.0
+// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * A patient’s point-in-time immunization and recommendation (i.e. forecasting a patient’s immunization eligibility according to a published schedule) with optional supporting justification.
+ * A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.
  */
 @ResourceDef(name="ImmunizationRecommendation", profile="http://hl7.org/fhir/Profile/ImmunizationRecommendation")
 public class ImmunizationRecommendation extends DomainResource {
@@ -77,10 +77,10 @@ public class ImmunizationRecommendation extends DomainResource {
         protected CodeableConcept forecastStatus;
 
         /**
-         * Vaccine date recommendations - e.g. earliest date to administer, latest date to administer, etc.
+         * Vaccine date recommendations.  For example, earliest date to administer, latest date to administer, etc.
          */
         @Child(name = "dateCriterion", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Dates governing proposed immunization", formalDefinition="Vaccine date recommendations - e.g. earliest date to administer, latest date to administer, etc." )
+        @Description(shortDefinition="Dates governing proposed immunization", formalDefinition="Vaccine date recommendations.  For example, earliest date to administer, latest date to administer, etc." )
         protected List<ImmunizationRecommendationRecommendationDateCriterionComponent> dateCriterion;
 
         /**
@@ -272,7 +272,7 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return {@link #dateCriterion} (Vaccine date recommendations - e.g. earliest date to administer, latest date to administer, etc.)
+         * @return {@link #dateCriterion} (Vaccine date recommendations.  For example, earliest date to administer, latest date to administer, etc.)
          */
         public List<ImmunizationRecommendationRecommendationDateCriterionComponent> getDateCriterion() { 
           if (this.dateCriterion == null)
@@ -290,7 +290,7 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return {@link #dateCriterion} (Vaccine date recommendations - e.g. earliest date to administer, latest date to administer, etc.)
+         * @return {@link #dateCriterion} (Vaccine date recommendations.  For example, earliest date to administer, latest date to administer, etc.)
          */
     // syntactic sugar
         public ImmunizationRecommendationRecommendationDateCriterionComponent addDateCriterion() { //3
@@ -451,7 +451,7 @@ public class ImmunizationRecommendation extends DomainResource {
           childrenList.add(new Property("vaccineCode", "CodeableConcept", "Vaccine that pertains to the recommendation.", 0, java.lang.Integer.MAX_VALUE, vaccineCode));
           childrenList.add(new Property("doseNumber", "positiveInt", "This indicates the next recommended dose number (e.g. dose 2 is the next recommended dose).", 0, java.lang.Integer.MAX_VALUE, doseNumber));
           childrenList.add(new Property("forecastStatus", "CodeableConcept", "Vaccine administration status.", 0, java.lang.Integer.MAX_VALUE, forecastStatus));
-          childrenList.add(new Property("dateCriterion", "", "Vaccine date recommendations - e.g. earliest date to administer, latest date to administer, etc.", 0, java.lang.Integer.MAX_VALUE, dateCriterion));
+          childrenList.add(new Property("dateCriterion", "", "Vaccine date recommendations.  For example, earliest date to administer, latest date to administer, etc.", 0, java.lang.Integer.MAX_VALUE, dateCriterion));
           childrenList.add(new Property("protocol", "", "Contains information about the protocol under which the vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, protocol));
           childrenList.add(new Property("supportingImmunization", "Reference(Immunization)", "Immunization event history that supports the status and recommendation.", 0, java.lang.Integer.MAX_VALUE, supportingImmunization));
           childrenList.add(new Property("supportingPatientInformation", "Reference(Observation|AllergyIntolerance)", "Patient Information that supports the status and recommendation.  This includes patient observations, adverse reactions and allergy/intolerance information.", 0, java.lang.Integer.MAX_VALUE, supportingPatientInformation));
@@ -519,17 +519,17 @@ public class ImmunizationRecommendation extends DomainResource {
     @Block()
     public static class ImmunizationRecommendationRecommendationDateCriterionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Date classification of recommendation - e.g. earliest date to give, latest date to give, etc.
+         * Date classification of recommendation.  For example, earliest date to give, latest date to give, etc.
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Type of date", formalDefinition="Date classification of recommendation - e.g. earliest date to give, latest date to give, etc." )
+        @Description(shortDefinition="Type of date", formalDefinition="Date classification of recommendation.  For example, earliest date to give, latest date to give, etc." )
         protected CodeableConcept code;
 
         /**
-         * Date recommendation.
+         * The date whose meaning is specified by dateCriterion.code.
          */
         @Child(name = "value", type = {DateTimeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Recommended date", formalDefinition="Date recommendation." )
+        @Description(shortDefinition="Recommended date", formalDefinition="The date whose meaning is specified by dateCriterion.code." )
         protected DateTimeType value;
 
         private static final long serialVersionUID = 1036994566L;
@@ -551,7 +551,7 @@ public class ImmunizationRecommendation extends DomainResource {
       }
 
         /**
-         * @return {@link #code} (Date classification of recommendation - e.g. earliest date to give, latest date to give, etc.)
+         * @return {@link #code} (Date classification of recommendation.  For example, earliest date to give, latest date to give, etc.)
          */
         public CodeableConcept getCode() { 
           if (this.code == null)
@@ -567,7 +567,7 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @param value {@link #code} (Date classification of recommendation - e.g. earliest date to give, latest date to give, etc.)
+         * @param value {@link #code} (Date classification of recommendation.  For example, earliest date to give, latest date to give, etc.)
          */
         public ImmunizationRecommendationRecommendationDateCriterionComponent setCode(CodeableConcept value) { 
           this.code = value;
@@ -575,7 +575,7 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (Date recommendation.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         * @return {@link #value} (The date whose meaning is specified by dateCriterion.code.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
          */
         public DateTimeType getValueElement() { 
           if (this.value == null)
@@ -595,7 +595,7 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @param value {@link #value} (Date recommendation.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         * @param value {@link #value} (The date whose meaning is specified by dateCriterion.code.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
          */
         public ImmunizationRecommendationRecommendationDateCriterionComponent setValueElement(DateTimeType value) { 
           this.value = value;
@@ -603,14 +603,14 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return Date recommendation.
+         * @return The date whose meaning is specified by dateCriterion.code.
          */
         public Date getValue() { 
           return this.value == null ? null : this.value.getValue();
         }
 
         /**
-         * @param value Date recommendation.
+         * @param value The date whose meaning is specified by dateCriterion.code.
          */
         public ImmunizationRecommendationRecommendationDateCriterionComponent setValue(Date value) { 
             if (this.value == null)
@@ -621,8 +621,8 @@ public class ImmunizationRecommendation extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("code", "CodeableConcept", "Date classification of recommendation - e.g. earliest date to give, latest date to give, etc.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("value", "dateTime", "Date recommendation.", 0, java.lang.Integer.MAX_VALUE, value));
+          childrenList.add(new Property("code", "CodeableConcept", "Date classification of recommendation.  For example, earliest date to give, latest date to give, etc.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("value", "dateTime", "The date whose meaning is specified by dateCriterion.code.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
       public ImmunizationRecommendationRecommendationDateCriterionComponent copy() {
@@ -666,7 +666,7 @@ public class ImmunizationRecommendation extends DomainResource {
          * Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.
          */
         @Child(name = "doseSequence", type = {IntegerType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Number of dose within sequence", formalDefinition="Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol." )
+        @Description(shortDefinition="Dose number within sequence", formalDefinition="Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol." )
         protected IntegerType doseSequence;
 
         /**
@@ -677,14 +677,14 @@ public class ImmunizationRecommendation extends DomainResource {
         protected StringType description;
 
         /**
-         * Indicates the authority who published the protocol?  E.g. ACIP.
+         * Indicates the authority who published the protocol.  For example, ACIP.
          */
         @Child(name = "authority", type = {Organization.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Who is responsible for protocol", formalDefinition="Indicates the authority who published the protocol?  E.g. ACIP." )
+        @Description(shortDefinition="Who is responsible for protocol", formalDefinition="Indicates the authority who published the protocol.  For example, ACIP." )
         protected Reference authority;
 
         /**
-         * The actual object that is the target of the reference (Indicates the authority who published the protocol?  E.g. ACIP.)
+         * The actual object that is the target of the reference (Indicates the authority who published the protocol.  For example, ACIP.)
          */
         protected Organization authorityTarget;
 
@@ -799,7 +799,7 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return {@link #authority} (Indicates the authority who published the protocol?  E.g. ACIP.)
+         * @return {@link #authority} (Indicates the authority who published the protocol.  For example, ACIP.)
          */
         public Reference getAuthority() { 
           if (this.authority == null)
@@ -815,7 +815,7 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @param value {@link #authority} (Indicates the authority who published the protocol?  E.g. ACIP.)
+         * @param value {@link #authority} (Indicates the authority who published the protocol.  For example, ACIP.)
          */
         public ImmunizationRecommendationRecommendationProtocolComponent setAuthority(Reference value) { 
           this.authority = value;
@@ -823,7 +823,7 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @return {@link #authority} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol?  E.g. ACIP.)
+         * @return {@link #authority} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol.  For example, ACIP.)
          */
         public Organization getAuthorityTarget() { 
           if (this.authorityTarget == null)
@@ -835,7 +835,7 @@ public class ImmunizationRecommendation extends DomainResource {
         }
 
         /**
-         * @param value {@link #authority} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol?  E.g. ACIP.)
+         * @param value {@link #authority} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates the authority who published the protocol.  For example, ACIP.)
          */
         public ImmunizationRecommendationRecommendationProtocolComponent setAuthorityTarget(Organization value) { 
           this.authorityTarget = value;
@@ -895,7 +895,7 @@ public class ImmunizationRecommendation extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("doseSequence", "integer", "Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.", 0, java.lang.Integer.MAX_VALUE, doseSequence));
           childrenList.add(new Property("description", "string", "Contains the description about the protocol under which the vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol?  E.g. ACIP.", 0, java.lang.Integer.MAX_VALUE, authority));
+          childrenList.add(new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol.  For example, ACIP.", 0, java.lang.Integer.MAX_VALUE, authority));
           childrenList.add(new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, java.lang.Integer.MAX_VALUE, series));
         }
 
@@ -1168,7 +1168,7 @@ public class ImmunizationRecommendation extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="ImmunizationRecommendation.identifier", description="Business identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="Number of dose within sequence", type="number" )
+  @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="Dose number within sequence", type="number" )
   public static final String SP_DOSESEQUENCE = "dose-sequence";
   @SearchParamDefinition(name="patient", path="ImmunizationRecommendation.patient", description="Who this profile is for", type="reference" )
   public static final String SP_PATIENT = "patient";
