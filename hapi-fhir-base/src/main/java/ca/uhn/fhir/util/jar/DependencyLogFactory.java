@@ -28,7 +28,7 @@ public class DependencyLogFactory {
 		try {
 			Class<IDependencyLog> clas = (Class<IDependencyLog>) Class.forName("ca.uhn.fhir.util.jar.DependencyLogImpl");
 			return clas.newInstance();
-		} catch (ReflectiveOperationException e) {
+		} catch (Exception e) {
 			ourLog.info("Could not log dependency.");
 			return null;
 		}

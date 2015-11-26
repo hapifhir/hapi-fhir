@@ -417,8 +417,9 @@
 							<target>SCRIPT</target>
 							<skip>${skip-hib4}</skip>
 						</configuration>
-						<!-- This needs to be uncommented in order for this plugin to work with Hibernate 4.3+ (as of hibernate4-maven-plugin version 1.0.5) <dependencies> <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-core</artifactId> 
-							<version>${hibernate_version}</version> </dependency> </dependencies> -->
+						<!-- This needs to be uncommented in order for this plugin to work with Hibernate 4.3+ (as of hibernate4-maven-plugin version 1.0.5) -->
+						<dependencies> <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-core</artifactId> 
+							<version>${hibernate_version}</version> </dependency> </dependencies>
 						<executions>
 							<execution>
 								<id>o10g</id>

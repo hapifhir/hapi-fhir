@@ -55,7 +55,7 @@ public class SchematronProvider {
 			Class<? extends IValidatorModule> cls = getSchematronValidatorClass();
 			Constructor<? extends IValidatorModule> constructor = cls.getConstructor(FhirContext.class);
 			return constructor.newInstance(myContext);
-		} catch (ReflectiveOperationException e) {
+		} catch (Exception e) {
 			throw new IllegalStateException("Cannot construct schematron validator ", e);
 		}
 	}

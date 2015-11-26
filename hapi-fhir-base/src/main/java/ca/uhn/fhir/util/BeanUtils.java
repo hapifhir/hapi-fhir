@@ -32,11 +32,11 @@ public class BeanUtils {
 		if (beanUtils == null) {
 			try {
 				beanUtils = (IBeanUtils) Class.forName("ca.uhn.fhir.util.reflection.JavaBeansBeanUtil").newInstance();
-			} catch (ReflectiveOperationException e) {
+			} catch (Exception e) {
 				try {
 					beanUtils = (IBeanUtils) Class.forName("ca.uhn.fhir.util.reflection.JavaReflectBeanUtil")
 							.newInstance();
-				} catch (ReflectiveOperationException e1) {
+				} catch (Exception e1) {
 					throw new RuntimeException("Could not resolve BeanUtil implementation");
 				}
 			}
