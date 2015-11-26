@@ -8,7 +8,15 @@
 	<body>
 		<release version="1.4" date="TBD">
 			<action type="fix">
-				Remove a dependency on Java 1.7 in 
+				Remove a dependency on a Java 1.7 class 
+				(ReflectiveOperationException) in several spots in the 
+				codebase. This dependency was accidentally introduced in
+				1.3, and animal-sniffer-plugin failed to detect it (sigh).
+			</action>
+			<action type="fix" issue="259">
+				Make IBoundCodeableConcept and IValueSetEnumBinder serializable,
+				fixing an issue when trying to serialize model classes containing
+				bound codes. Thanks to Nick Peterson for the Pull Request!
 			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">

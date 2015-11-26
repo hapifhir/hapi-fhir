@@ -202,6 +202,10 @@
 			<id>cmikeb1</id>
 			<name>C. Mike Bylund</name>
 		</developer>
+		<developer>
+			<id>nrpeterson</id>
+			<name>Nick Peterson</name>
+		</developer>
 	</developers>
 
 	<licenses>
