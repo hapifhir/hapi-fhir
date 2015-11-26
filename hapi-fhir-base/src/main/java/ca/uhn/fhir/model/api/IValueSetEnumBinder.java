@@ -21,8 +21,9 @@ package ca.uhn.fhir.model.api;
  */
 
 
+import java.io.Serializable;
 
-public interface IValueSetEnumBinder<T extends Enum<?>> {
+public interface IValueSetEnumBinder<T extends Enum<?>> extends Serializable {
 
 	T fromCodeString(String theCodeString);
 	
