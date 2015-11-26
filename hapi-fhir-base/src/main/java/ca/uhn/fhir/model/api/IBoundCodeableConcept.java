@@ -20,6 +20,8 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-public interface IBoundCodeableConcept {
+import java.io.Serializable;
+
+public interface IBoundCodeableConcept extends Serializable {
 
 }

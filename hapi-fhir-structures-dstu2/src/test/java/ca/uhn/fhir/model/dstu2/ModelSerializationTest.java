@@ -17,6 +17,7 @@ import ca.uhn.fhir.model.dstu2.composite.AddressDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.parser.IParser;
 
 public class ModelSerializationTest {
@@ -53,6 +54,21 @@ public class ModelSerializationTest {
 		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
 		assertEquals(p.encodeResourceToString(theObject), p.encodeResourceToString(obj));
 
+	}
+
+	/**
+	 * Verify that MaritalStatusCodeEnum (and, by extension, BoundCodeableConcepts in general) are serializable.
+	 * Author: Nick Peterson (nrpeterson@gmail.com)
+	 */
+	@Test
+	public void testBoundCodeableConceptSerialization() {
+		MaritalStatusCodesEnum maritalStatus = MaritalStatusCodesEnum.M;
+		byte[] bytes = SerializationUtils.serialize(maritalStatus);
+		assertTrue(bytes.length > 0);
+
+		MaritalStatusCodesEnum deserialized = SerializationUtils.deserialize(bytes);
+		assertEquals(maritalStatus.getCode(), deserialized.getCode());
+		assertEquals(maritalStatus.getSystem(), deserialized.getSystem());
 	}
 
 }
