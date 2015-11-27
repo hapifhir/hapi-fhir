@@ -37,7 +37,7 @@ import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
+public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
 	private Integer myIdParameterIndex;
 
@@ -58,7 +58,7 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 		 * We are being a bit lenient here, since technically the client is supposed to include the version in the
 		 * Content-Location header, but we allow it in the PUT URL as well..
 		 */
-		String locationHeader = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_LOCATION);
+		String locationHeader = theRequest.getHeader(Constants.HEADER_CONTENT_LOCATION);
 		IdDt id = theRequest.getId();
 		if (isNotBlank(locationHeader)) {
 			id = new IdDt(locationHeader);
@@ -69,7 +69,7 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 			}
 		}
 
-		String ifMatchValue = theRequest.getServletRequest().getHeader(Constants.HEADER_IF_MATCH);
+		String ifMatchValue = theRequest.getHeader(Constants.HEADER_IF_MATCH);
 		if (isNotBlank(ifMatchValue)) {
 			ifMatchValue = MethodUtil.parseETagValue(ifMatchValue);
 			if (id != null && id.hasVersionIdPart() == false) {

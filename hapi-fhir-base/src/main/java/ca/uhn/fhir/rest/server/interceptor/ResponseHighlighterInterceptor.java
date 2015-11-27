@@ -171,7 +171,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		/*
 		 * It's not a browser...
 		 */
-		Set<String> highestRankedAcceptValues = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theRequestDetails.getServletRequest());
+		Set<String> highestRankedAcceptValues = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theServletRequest);
 		if (highestRankedAcceptValues.contains(Constants.CT_HTML) == false) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
@@ -284,7 +284,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		/*
 		 * It's not a browser...
 		 */
-		Set<String> accept = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theRequestDetails.getServletRequest());
+		Set<String> accept = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theServletRequest);
 		if (!accept.contains(Constants.CT_HTML)) {
 			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
 		}

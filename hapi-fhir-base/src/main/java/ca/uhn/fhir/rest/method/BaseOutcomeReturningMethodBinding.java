@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Method;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,9 +42,11 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -66,24 +69,6 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				myReturnVoid = true;
 			}
 		}
-	}
-
-	private void addLocationHeader(RequestDetails theRequest, HttpServletResponse theResponse, MethodOutcome response, String headerLocation) {
-		StringBuilder b = new StringBuilder();
-		b.append(theRequest.getFhirServerBase());
-		b.append('/');
-		b.append(getResourceName());
-		b.append('/');
-		b.append(response.getId().getIdPart());
-		if (response.getId().hasVersionIdPart()) {
-			b.append("/" + Constants.PARAM_HISTORY + "/");
-			b.append(response.getId().getVersionIdPart());
-		} else if (response.getVersionId() != null && response.getVersionId().isEmpty() == false) {
-			b.append("/" + Constants.PARAM_HISTORY + "/");
-			b.append(response.getVersionId().getValue());
-		}
-		theResponse.addHeader(headerLocation, b.toString());
-		
 	}
 
 	protected abstract void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams);
@@ -137,21 +122,18 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		}
 
 	}
-
+	
 	@Override
-	public void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-		byte[] requestContents = loadRequestContents(theRequest);
-		
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 //		if (requestContainsResource()) {
 //			requestContents = parseIncomingServerResource(theRequest);
 //		} else {
 //			requestContents = null;
 //		}
 
-		Object[] params = createParametersForServerRequest(theRequest, requestContents);
+		Object[] params = createParametersForServerRequest(theRequest);
 		addParametersForServerRequest(theRequest, params);
 
-		HttpServletResponse servletResponse = theRequest.getServletResponse();
 		
 		/*
 		 * No need to catch nd handle exceptions here, we already handle them one level up
@@ -182,13 +164,16 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		IBaseResource resource = response != null ? response.getResource() : null;
 		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 			IServerInterceptor next = theServer.getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, outcome, theRequest.getServletRequest(), theRequest.getServletResponse());
+			boolean continueProcessing = next.outgoingResponse(theRequest, outcome);
 			if (!continueProcessing) {
-				return;
+				return null;
 			}
 		}
 
-		boolean allowPrefer = false;
+		return returnResponse(theRequest, response, outcome, resource);
+	}
+	
+	private int getOperationStatus(MethodOutcome response) {
 		switch (getRestOperationType()) {
 		case CREATE:
 			if (response == null) {
@@ -196,23 +181,17 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 						+ " returned null, which is not allowed for create operation");
 			}
 			if (response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
-				servletResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
+				return Constants.STATUS_HTTP_201_CREATED;
 			} else {
-				servletResponse.setStatus(Constants.STATUS_HTTP_200_OK);
+				return Constants.STATUS_HTTP_200_OK;
 			}
-			addContentLocationHeaders(theRequest, servletResponse, response);
-			allowPrefer = true;
-			break;
 
 		case UPDATE:
 			if (response == null || response.getCreated() == null || Boolean.FALSE.equals(response.getCreated())) {
-				servletResponse.setStatus(Constants.STATUS_HTTP_200_OK);
+				return Constants.STATUS_HTTP_200_OK;
 			} else {
-				servletResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
+				return Constants.STATUS_HTTP_201_CREATED;
 			}
-			addContentLocationHeaders(theRequest, servletResponse, response);
-			allowPrefer = true;
-			break;
 
 		case VALIDATE:
 		case DELETE:
@@ -221,21 +200,29 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				if (isReturnVoid() == false) {
 					throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
 				}
-				servletResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT);
+				return Constants.STATUS_HTTP_204_NO_CONTENT;
 			} else {
 				if (response.getOperationOutcome() == null) {
-					servletResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT);
+					return Constants.STATUS_HTTP_204_NO_CONTENT;
 				} else {
-					servletResponse.setStatus(Constants.STATUS_HTTP_200_OK);
+					return Constants.STATUS_HTTP_200_OK;
 				}
 			}
-
 		}
+	}
 
-		theServer.addHeadersToResponse(servletResponse);
+	private Object returnResponse(RequestDetails theRequest, MethodOutcome response, IBaseResource originalOutcome, IBaseResource resource) throws IOException {
+		boolean allowPrefer = false;
+		int operationStatus = getOperationStatus(response);
+		IBaseResource outcome = originalOutcome;
+		
+		if(EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE).contains(getRestOperationType())) {
+			allowPrefer = true;
+		}
+		
 
 		if (resource != null && allowPrefer) {
-			String prefer = theRequest.getServletRequest().getHeader(Constants.HEADER_PREFER);
+			String prefer = theRequest.getHeader(Constants.HEADER_PREFER);
 			PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(prefer);
 			if (preferReturn != null) {
 				if (preferReturn == PreferReturnEnum.REPRESENTATION) {
@@ -244,31 +231,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			}
 		} 
 		
-		if (outcome != null) {
-			EncodingEnum encoding = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
-			servletResponse.setContentType(encoding.getResourceContentType());
-			Writer writer = servletResponse.getWriter();
-			IParser parser = encoding.newParser(getContext());
-			parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(theServer, theRequest));
-			try {
-				parser.encodeResourceToWriter(outcome, writer);
-			} finally {
-				writer.close();
-			}
-		} else {
-			servletResponse.setContentType(Constants.CT_TEXT_WITH_UTF8);
-			Writer writer = servletResponse.getWriter();
-			writer.close();
-		}
-
-		// getMethod().in
-	}
-
-	private void addContentLocationHeaders(RequestDetails theRequest, HttpServletResponse servletResponse, MethodOutcome response) {
-		if (response != null && response.getId() != null) {
-			addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_LOCATION);
-			addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_CONTENT_LOCATION);
-		}
+		return theRequest.getResponse().returnResponse(ParseAction.create(outcome), operationStatus, allowPrefer, response, getResourceName());
 	}
 
 	public boolean isReturnVoid() {

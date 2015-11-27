@@ -19,8 +19,7 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,8 +58,8 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
@@ -324,7 +323,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl,
+	public void initializeBundleFromBundleProvider(IRestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl,
 			boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
 		myBase = theServerBase;
 		
@@ -387,6 +386,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType, theResult.getPublished());
 
 		if (theServer.getPagingProvider() != null) {
+//			theServerBase = theCompleteUrl.contains("?") ? theCompleteUrl.substring(0, theCompleteUrl.indexOf("?")) : theCompleteUrl;
 			int limit;
 			limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
 			limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());

@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -154,8 +155,8 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 	}
 
 	@Override
-	public void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-		Object[] params = createParametersForServerRequest(theRequest, null);
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+		Object[] params = createParametersForServerRequest(theRequest);
 
 		params[myIdParamIndex] = theRequest.getId();
 
@@ -164,7 +165,7 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 		}
 
 		IParser parser = createAppropriateParserForParsingServerRequest(theRequest);
-		Reader reader = theRequest.getServletRequest().getReader();
+		Reader reader = theRequest.getReader();
 		try {
 			TagList tagList = parser.parseTagList(reader);
 			params[myTagListParamIndex] = tagList;
@@ -175,21 +176,13 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 
 		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 			IServerInterceptor next = theServer.getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, theRequest.getServletRequest(), theRequest.getServletResponse());
+			boolean continueProcessing = next.outgoingResponse(theRequest);
 			if (!continueProcessing) {
-				return;
+				return null;
 			}
 		}
-
-		HttpServletResponse response = theRequest.getServletResponse();
-		response.setContentType(Constants.CT_TEXT);
-		response.setStatus(Constants.STATUS_HTTP_200_OK);
-		response.setCharacterEncoding(Constants.CHARSET_NAME_UTF8);
-
-		theServer.addHeadersToResponse(response);
-
-		PrintWriter writer = response.getWriter();
-		writer.close();
+		
+		return theRequest.getResponse().returnResponse(null, Constants.STATUS_HTTP_200_OK, false, null, null);
 	}
 
 	@Override

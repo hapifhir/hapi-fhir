@@ -71,7 +71,7 @@ public class ElementsParameter implements IParameter {
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		Set<String> value = getElementsValueOrNull(theRequest);
 		if (value == null || value.isEmpty()) {
 			return null;

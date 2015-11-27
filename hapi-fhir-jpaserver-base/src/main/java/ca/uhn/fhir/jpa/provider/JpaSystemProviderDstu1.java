@@ -26,16 +26,17 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class JpaSystemProviderDstu1 extends BaseJpaSystemProvider<List<IResource>> {
 
 	@Transaction
 	public List<IResource> transaction(RequestDetails theRequestDetails, @TransactionParam List<IResource> theResources) {
-		startRequest(theRequestDetails);
+		startRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
 		try {
 			return getDao().transaction(theRequestDetails, theResources);
 		} finally {
-			endRequest(theRequestDetails);
+			endRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
 		}
 	}
 

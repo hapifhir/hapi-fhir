@@ -62,10 +62,10 @@ public class InterceptorTest {
 	public void testInterceptorFires() throws Exception {
 		when(myInterceptor1.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor1.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(any(RequestDetails.class), any(IResource.class))).thenReturn(true);
 		when(myInterceptor2.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor2.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor2.outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor2.outgoingResponse(any(RequestDetails.class), any(IResource.class))).thenReturn(true);
 		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
@@ -79,8 +79,8 @@ public class InterceptorTest {
 		order.verify(myInterceptor1, times(1)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
 		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
 		
-		order.verify(myInterceptor2, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
-		order.verify(myInterceptor1, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
+		order.verify(myInterceptor2, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class));
+		order.verify(myInterceptor1, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class));
 		verifyNoMoreInteractions(myInterceptor1);
 		verifyNoMoreInteractions(myInterceptor2);
 	}

@@ -30,7 +30,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -102,38 +101,37 @@ public class ResourceParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding)
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding)
 			throws InternalErrorException, InvalidRequestException {
-		switch (myMode) {
-		case BODY:
-			try {
-				return IOUtils.toString(createRequestReader(theRequest, theRequestContents));
-			} catch (IOException e) {
-				// Shouldn't happen since we're reading from a byte array
-				throw new InternalErrorException("Failed to load request");
+			switch (myMode) { 
+				case BODY:
+					try {
+						return IOUtils.toString(createRequestReader(theRequest));
+					}
+					catch (IOException e) {
+						// Shouldn't happen since we're reading from a byte array
+						throw new InternalErrorException("Failed to load request");
+					}
+				case ENCODING:
+					return RestfulServerUtils.determineRequestEncoding(theRequest);
+				case RESOURCE:
+				default:
+					return parseResourceFromRequest(theRequest, theMethodBinding, myResourceType);
 			}
-		case ENCODING:
-			return RestfulServerUtils.determineRequestEncoding(theRequest);
-		case RESOURCE:
-			break;
-		}
-
-		IBaseResource retVal = parseResourceFromRequest(theRequest, theMethodBinding, myResourceType);
-
-		return retVal;
+//		}	    
 	}
-
-	static Reader createRequestReader(byte[] theRequestContents, Charset charset) {
-		Reader requestReader = new InputStreamReader(new ByteArrayInputStream(theRequestContents), charset);
+	
+	public static Reader createRequestReader(RequestDetails theRequest, Charset charset) {
+		Reader requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents(theRequest)), charset);
 		return requestReader;
 	}
 
-	static Reader createRequestReader(RequestDetails theRequest, byte[] theRequestContents) {
-		return createRequestReader(theRequestContents, determineRequestCharset(theRequest));
-	}
+    public static Reader createRequestReader(RequestDetails theRequest) throws IOException {
+		return createRequestReader(theRequest, determineRequestCharset(theRequest));
+	}		
 
-	static Charset determineRequestCharset(RequestDetails theRequest) {
-		String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
+	public static Charset determineRequestCharset(RequestDetails theRequest) {
+		String ct = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 
 		Charset charset = null;
 		if (isNotBlank(ct)) {
@@ -144,20 +142,21 @@ public class ResourceParameter implements IParameter {
 			charset = Charset.forName("UTF-8");
 		}
 		return charset;
-	}
-
+	}    
+	
 	@SuppressWarnings("unchecked")
-	public static <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding, Class<T> theResourceType) {
+	public static <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding,
+			Class<T> theResourceType) {
 		FhirContext ctx = theRequest.getServer().getFhirContext();
 
 		final Charset charset = determineRequestCharset(theRequest);
-		Reader requestReader = createRequestReader(theRequest.getRawRequest(), charset);
+		Reader requestReader = createRequestReader(theRequest, charset);
 
 		RestOperationTypeEnum restOperationType = theMethodBinding != null ? theMethodBinding.getRestOperationType() : null;
 
 		EncodingEnum encoding = RestfulServerUtils.determineRequestEncodingNoDefault(theRequest);
 		if (encoding == null) {
-			String ctValue = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
+			String ctValue = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 			if (ctValue != null) {
 				if (ctValue.startsWith("application/x-www-form-urlencoded")) {
 					String msg = theRequest.getServer().getFhirContext().getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getRestOperationType());
@@ -171,7 +170,7 @@ public class ResourceParameter implements IParameter {
 				String body;
 				try {
 					body = IOUtils.toString(requestReader);
-				} catch (IOException e) {
+					} catch (IOException e) {
 					// This shouldn't happen since we're reading from a byte array..
 					throw new InternalErrorException(e);
 				}
@@ -180,7 +179,7 @@ public class ResourceParameter implements IParameter {
 					String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", restOperationType);
 					throw new InvalidRequestException(msg);
 				} else {
-					requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.getRawRequest()), charset);
+					requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents(theRequest)), charset);
 				}
 			} else {
 				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, restOperationType);
@@ -203,8 +202,7 @@ public class ResourceParameter implements IParameter {
 
 		if (theRequest.getServer().getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
 			TagList tagList = new TagList();
-			for (Enumeration<String> enumeration = theRequest.getServletRequest().getHeaders(Constants.HEADER_CATEGORY); enumeration.hasMoreElements();) {
-				String nextTagComplete = enumeration.nextElement();
+			for (String nextTagComplete : theRequest.getHeaders(Constants.HEADER_CATEGORY)) {
 				MethodUtil.parseTagValue(tagList, nextTagComplete);
 			}
 			if (tagList.isEmpty() == false) {
@@ -212,23 +210,23 @@ public class ResourceParameter implements IParameter {
 			}
 		}
 		return retVal;
-	}
-
+	}	
+	
 	public static IBaseResource parseResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
 		IBaseResource retVal;
 		if (IBaseBinary.class.isAssignableFrom(theResourceType)) {
 			FhirContext ctx = theRequest.getServer().getFhirContext();
-			String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
+			String ct = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 			IBaseBinary binary = (IBaseBinary) ctx.getResourceDefinition("Binary").newInstance();
 			binary.setContentType(ct);
-			binary.setContent(theRequest.getRawRequest());
+			binary.setContent(theRequest.loadRequestContents(theRequest));
 
 			retVal = binary;
 		} else {
 			retVal = loadResourceFromRequest(theRequest, theMethodBinding, theResourceType);
 		}
 		return retVal;
-	}
+	}	
 
 	public enum Mode {
 		BODY, ENCODING, RESOURCE

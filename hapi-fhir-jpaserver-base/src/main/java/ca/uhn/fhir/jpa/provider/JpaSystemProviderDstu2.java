@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -50,6 +48,7 @@ import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class JpaSystemProviderDstu2 extends BaseJpaSystemProvider<Bundle> {
 
@@ -227,11 +226,11 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProvider<Bundle> {
 	
 	@Transaction
 	public Bundle transaction(RequestDetails theRequestDetails, @TransactionParam Bundle theResources) {
-		startRequest(theRequestDetails);
+		startRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
 		try {
 			return getDao().transaction(theRequestDetails, theResources);
 		} finally {
-			endRequest(theRequestDetails);
+			endRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
 		}
 	}
 
