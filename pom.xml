@@ -206,6 +206,10 @@
 			<id>nrpeterson</id>
 			<name>Nick Peterson</name>
 		</developer>
+		<developer>
+			<id>petervanhoute</id>
+			<name>Peter Van Houte</name>
+		</developer>
 	</developers>
 
 	<licenses>
