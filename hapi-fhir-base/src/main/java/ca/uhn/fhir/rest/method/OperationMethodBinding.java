@@ -51,7 +51,7 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -246,7 +246,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public Object invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
+	public Object invokeServer(IRestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
 		if (theRequest.getRequestType() == RequestTypeEnum.POST) {
 			// always ok
 		} else if (theRequest.getRequestType() == RequestTypeEnum.GET) {

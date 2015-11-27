@@ -12,17 +12,17 @@ import javax.servlet.http.HttpServletRequest;
 import org.junit.Before;
 
 import ca.uhn.fhir.jpa.rp.dstu2.PatientResourceProvider;
-import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public abstract class BaseJpaDstu2SystemTest extends BaseJpaDstu2Test {
-	protected RequestDetails myRequestDetails;
+	protected ServletRequestDetails myRequestDetails;
 	private RestfulServer myServer;
 
 	@SuppressWarnings("unchecked")
 	@Before
 	public void before() throws ServletException {
-		myRequestDetails = mock(RequestDetails.class);
+		myRequestDetails = mock(ServletRequestDetails.class);
 
 		if (myServer == null) {
 			myServer = new RestfulServer(myFhirCtx);

@@ -148,6 +148,26 @@ public interface IServerInterceptor {
 	 *            client.
 	 */
 	boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
+	
+    /**
+     * This method is called after the server implementation method has been called, but before any attempt to stream the response back to the client
+     * 
+     * @param theRequestDetails
+     *           A bean containing details about the request that is about to be processed, including
+     * @param theResponseObject
+     *           The actual object which is being streamed to the client as a response
+     * @param theServletRequest
+     *           The incoming request
+     * @param theServletResponse
+     *           The response. Note that interceptors may choose to provide a response (i.e. by calling {@link HttpServletResponse#getWriter()}) but in that case it is important to return
+     *           <code>false</code> to indicate that the server itself should not also provide a response.
+     * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
+     *         response normally, you must return <code>false</code>. In this case, no further processing will occur and no further interceptors will be called.
+     * @throws AuthenticationException
+     *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access attempt. If thrown, processing will stop and an HTTP 401 will be returned to the
+     *            client.
+     */	
+    boolean outgoingResponse(RequestDetails theRequest, Bundle bundle);	
 
 	/**
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the response back to the client
@@ -167,6 +187,20 @@ public interface IServerInterceptor {
 	 *            client.
 	 */
 	boolean outgoingResponse(RequestDetails theRequestDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
+	
+	   /**
+     * This method is called after the server implementation method has been called, but before any attempt to stream the response back to the client
+     * 
+     * @param theRequestDetails
+     *           A bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other FHIR-specific aspects of the
+     *           request which have been pulled out of the {@link HttpServletRequest servlet request}.
+     * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
+     *         response normally, you must return <code>false</code>. In this case, no further processing will occur and no further interceptors will be called.
+     * @throws AuthenticationException
+     *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access attempt. If thrown, processing will stop and an HTTP 401 will be returned to the
+     *            client.
+     */
+    boolean outgoingResponse(RequestDetails theRequestDetails);	
 
 	/**
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the response back to the client
@@ -189,6 +223,22 @@ public interface IServerInterceptor {
 	 */
 	boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 			throws AuthenticationException;
+	
+    /**
+     * This method is called after the server implementation method has been called, but before any attempt to stream the response back to the client
+     * 
+     * @param theRequestDetails
+     *           A bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other FHIR-specific aspects of the
+     *           request which have been pulled out of the {@link HttpServletRequest servlet request}.
+     * @param theResponseObject
+     *           The actual object which is being streamed to the client as a response
+     * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
+     *         response normally, you must return <code>false</code>. In this case, no further processing will occur and no further interceptors will be called.
+     * @throws AuthenticationException
+     *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access attempt. If thrown, processing will stop and an HTTP 401 will be returned to the
+     *            client.
+     */	
+    boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject);	
 
 	/**
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the response back to the client
@@ -210,6 +260,22 @@ public interface IServerInterceptor {
 	 *            client.
 	 */
 	boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
+
+	   /**
+     * This method is called after the server implementation method has been called, but before any attempt to stream the response back to the client
+     * 
+     * @param theRequestDetails
+     *           A bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other FHIR-specific aspects of the
+     *           request which have been pulled out of the {@link HttpServletRequest servlet request}.
+     * @param theResponseObject
+     *           The actual object which is being streamed to the client as a response
+     * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
+     *         response normally, you must return <code>false</code>. In this case, no further processing will occur and no further interceptors will be called.
+     * @throws AuthenticationException
+     *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access attempt. If thrown, processing will stop and an HTTP 401 will be returned to the
+     *            client.
+     */
+    boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject);	
 
 	/**
 	 * This method is called upon any exception being thrown within the server's request processing code. This includes any exceptions thrown within resource provider methods (e.g. {@link Search} and

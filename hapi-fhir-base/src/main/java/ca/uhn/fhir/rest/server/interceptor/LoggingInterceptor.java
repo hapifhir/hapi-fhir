@@ -269,7 +269,7 @@ public class LoggingInterceptor extends InterceptorAdapter {
 			} else if (theKey.startsWith("remoteAddr")) {
 				return StringUtils.defaultString(myRequest.getRemoteAddr());
 			} else if (theKey.equals("responseEncodingNoDefault")) {
-				EncodingEnum encoding = RestfulServerUtils.determineResponseEncodingNoDefault(myRequest, myRequestDetails.getServer().getDefaultResponseEncoding());
+				EncodingEnum encoding = RestfulServerUtils.determineResponseEncodingNoDefault(myRequestDetails, myRequestDetails.getServer().getDefaultResponseEncoding());
 				if (encoding != null) {
 					return encoding.name();
 				} else {

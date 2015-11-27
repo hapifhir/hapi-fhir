@@ -31,6 +31,7 @@ import org.jboss.logging.MDC;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class BaseJpaProvider {
 
@@ -45,7 +46,7 @@ public class BaseJpaProvider {
 		MDC.remove(REMOTE_UA);
 	}
 
-	public void endRequest(RequestDetails theRequest) {
+	public void endRequest(ServletRequestDetails theRequest) {
 		endRequest(theRequest.getServletRequest());
 	}
 
@@ -92,7 +93,7 @@ public class BaseJpaProvider {
 
 	}
 
-	public void startRequest(RequestDetails theRequest) {
+	public void startRequest(ServletRequestDetails theRequest) {
 		startRequest(theRequest.getServletRequest());
 	}
 

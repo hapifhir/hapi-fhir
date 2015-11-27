@@ -1,5 +1,10 @@
 package ca.uhn.fhir.rest.method;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -25,37 +30,31 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.IRestfulResponse;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 
-public class RequestDetails {
+public abstract class RequestDetails {
 
-	private Map<String, ArrayList<String>> myHeaders = new HashMap<String, ArrayList<String>>();
+	private byte[] myRequestContents;	
 	private String myCompartmentName;
 	private String myCompleteUrl;
 	private String myFhirServerBase;
 	private IdDt myId;
 	private String myOperation;
 	private Map<String, String[]> myParameters;
-	private byte[] myRawRequest;
 	private String myRequestPath;
 	private RequestTypeEnum myRequestType;
 	private String myResourceName;
 	private boolean myRespondGzip;
 	private RestOperationTypeEnum myRestOperationType;
 	private String mySecondaryOperation;
-	private RestfulServer myServer;
-	private HttpServletRequest myServletRequest;
-	private HttpServletResponse myServletResponse;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
-
+	private IRestfulResponse myResponse;
+	
 	public String getCompartmentName() {
 		return myCompartmentName;
 	}
@@ -64,6 +63,10 @@ public class RequestDetails {
 		return myCompleteUrl;
 	}
 
+	/**
+	 * The fhir server base url, independant of the query being executed
+	 * @return the fhir server base url
+	 */
 	public String getFhirServerBase() {
 		return myFhirServerBase;
 	}
@@ -78,10 +81,6 @@ public class RequestDetails {
 
 	public Map<String, String[]> getParameters() {
 		return myParameters;
-	}
-
-	public byte[] getRawRequest() {
-		return myRawRequest;
 	}
 
 	/**
@@ -110,17 +109,7 @@ public class RequestDetails {
 		return mySecondaryOperation;
 	}
 
-	public RestfulServer getServer() {
-		return myServer;
-	}
-
-	public HttpServletRequest getServletRequest() {
-		return myServletRequest;
-	}
-
-	public HttpServletResponse getServletResponse() {
-		return myServletResponse;
-	}
+	public abstract IRestfulServerDefaults getServer();
 
 	public Map<String, List<String>> getUnqualifiedToQualifiedNames() {
 		return myUnqualifiedToQualifiedNames;
@@ -178,10 +167,6 @@ public class RequestDetails {
 
 	}
 
-	public void setRawRequest(byte[] theRawRequest) {
-		myRawRequest = theRawRequest;
-	}
-
 	public void setRequestPath(String theRequestPath) {
 		assert theRequestPath.length() == 0 || theRequestPath.charAt(0) != '/';
 		myRequestPath = theRequestPath;
@@ -207,46 +192,66 @@ public class RequestDetails {
 		mySecondaryOperation = theSecondaryOperation;
 	}
 
-	public void setServer(RestfulServer theServer) {
-		myServer = theServer;
-	}
+    public IRestfulResponse getResponse() {
+        return myResponse;
+    }
 
-	public void setServletRequest(HttpServletRequest theRequest) {
-		myServletRequest = theRequest;
-	}
+    public void setResponse(IRestfulResponse theResponse) {
+        this.myResponse = theResponse;
+    }
 
-	public void setServletResponse(HttpServletResponse theServletResponse) {
-		myServletResponse = theServletResponse;
-	}
-
-	public static RequestDetails withResourceAndParams(String theResourceName, RequestTypeEnum theRequestType, Set<String> theParamNames) {
-		RequestDetails retVal = new RequestDetails();
-		retVal.setResourceName(theResourceName);
-		retVal.setRequestType(theRequestType);
-		Map<String, String[]> paramNames = new HashMap<String, String[]>();
-		for (String next : theParamNames) {
-			paramNames.put(next, new String[0]);
+    public abstract String getHeader(String name);
+    
+	public final byte[] loadRequestContents(RequestDetails theRequest) {
+		if (myRequestContents == null) {
+			myRequestContents = getByteStreamRequestContents();
 		}
-		retVal.setParameters(paramNames);
-		return retVal;
+		return myRequestContents;
 	}
 
-	public void addHeader(String theName, String theValue) {
-		String lowerCase = theName.toLowerCase();
-		ArrayList<String> list = myHeaders.get(lowerCase);
-		if (list == null) {
-			list = new ArrayList<String>();
-			myHeaders.put(lowerCase, list);
-		}
-		list.add(theValue);
-	}
+	protected abstract byte[] getByteStreamRequestContents();    
 
-	public String getFirstHeader(String theName) {
-		ArrayList<String> list = myHeaders.get(theName.toLowerCase());
-		if (list == null || list.isEmpty()) {
-			return null;
-		}
-		return list.get(0);
-	}
+    public abstract List<String> getHeaders(String name);
+
+    /**
+     * Retrieves the body of the request as character data using
+     * a <code>BufferedReader</code>.  The reader translates the character
+     * data according to the character encoding used on the body.
+     * Either this method or {@link #getInputStream} may be called to read the
+     * body, not both.
+     * 
+     * @return a <code>Reader</code> containing the body of the request 
+     *
+     * @exception UnsupportedEncodingException  if the character set encoding
+     * used is not supported and the text cannot be decoded
+     *
+     * @exception IllegalStateException if {@link #getInputStream} method
+     * has been called on this request
+     *
+     * @exception IOException if an input or output exception occurred
+     *
+     * @see javax.servlet.http.HttpServletRequest#getInputStream
+     */    
+    public abstract Reader getReader() throws IOException;
+
+    /**
+     * Retrieves the body of the request as binary data.  
+     * Either this method or {@link #getReader} may be called to 
+     * read the body, not both.
+     *
+     * @return a {@link InputStream} object containing
+     * the body of the request
+     *
+     * @exception IllegalStateException if the {@link #getReader} method
+     * has already been called for this request
+     *
+     * @exception IOException if an input or output exception occurred
+     */
+    public abstract InputStream getInputStream() throws IOException;
+
+    /**
+     * Returns the server base URL (with no trailing '/') for a given request
+     */    
+    public abstract String getServerBaseForRequest();
 
 }

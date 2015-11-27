@@ -21,14 +21,11 @@ package ca.uhn.fhir.rest.method;
  */
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -44,10 +41,8 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -168,8 +163,8 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 	}
 
 	@Override
-	public void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-		Object[] params = createParametersForServerRequest(theRequest, null);
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+		Object[] params = createParametersForServerRequest(theRequest);
 
 		if (myIdParamIndex != null) {
 			params[myIdParamIndex] = theRequest.getId();
@@ -182,29 +177,13 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 
 		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 			IServerInterceptor next = theServer.getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, resp, theRequest.getServletRequest(), theRequest.getServletResponse());
+			boolean continueProcessing = next.outgoingResponse(theRequest, resp);
 			if (!continueProcessing) {
-				return;
+				return null;
 			}
 		}
 
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
-
-		HttpServletResponse response = theRequest.getServletResponse();
-		response.setContentType(responseEncoding.getResourceContentType());
-		response.setStatus(Constants.STATUS_HTTP_200_OK);
-		response.setCharacterEncoding(Constants.CHARSET_NAME_UTF8);
-
-		theServer.addHeadersToResponse(response);
-
-		IParser parser = responseEncoding.newParser(getContext());
-		parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(theServer, theRequest));
-		PrintWriter writer = response.getWriter();
-		try {
-			parser.encodeTagListToWriter(resp, writer);
-		} finally {
-			writer.close();
-		}
+		return theRequest.getResponse().returnResponse(ParseAction.create(resp), Constants.STATUS_HTTP_200_OK, false, null, null);
 	}
 
 }

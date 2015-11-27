@@ -55,6 +55,12 @@
 			<artifactId>phloc-commons</artifactId>
 		</dependency>
 
+		<dependency>
+         <groupId>javax.servlet</groupId>
+         <artifactId>javax.servlet-api</artifactId>
+         <scope>provided</scope>
+      </dependency>
+
 		<!-- Don't force OSGi users to use a newer version of SLF4j than we need -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

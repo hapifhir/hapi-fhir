@@ -55,6 +55,7 @@ import com.google.common.collect.ArrayListMultimap;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
+import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -84,6 +85,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.UrlUtil.UrlParts;
@@ -119,7 +121,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 					subRequestBundle.setType(BundleTypeEnum.TRANSACTION);
 					subRequestBundle.addEntry(nextRequestEntry);
 
-					Bundle subResponseBundle = transaction(theRequestDetails, subRequestBundle, "Batch sub-request");
+					Bundle subResponseBundle = transaction((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
 					return subResponseBundle;
 				}
 			};
@@ -242,11 +244,11 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 
 		String actionName = "Transaction";
-		return transaction(theRequestDetails, theRequest, actionName);
+		return transaction((ServletRequestDetails) theRequestDetails, theRequest, actionName);
 	}
 
 	@SuppressWarnings("unchecked")
-	private Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest, String theActionName) {
+	private Bundle transaction(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName) {
 		BundleTypeEnum transactionType = theRequest.getTypeElement().getValueAsEnum();
 		if (transactionType == BundleTypeEnum.BATCH) {
 			return batch(theRequestDetails, theRequest);
@@ -491,7 +493,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 			Integer originalOrder = originalRequestOrder.get(nextReqEntry);
 			Entry nextRespEntry = response.getEntry().get(originalOrder);
 
-			RequestDetails requestDetails = new RequestDetails();
+			ServletSubRequestDetails requestDetails = new ServletSubRequestDetails();
 			requestDetails.setServletRequest(theRequestDetails.getServletRequest());
 			requestDetails.setRequestType(RequestTypeEnum.GET);
 			requestDetails.setServer(theRequestDetails.getServer());

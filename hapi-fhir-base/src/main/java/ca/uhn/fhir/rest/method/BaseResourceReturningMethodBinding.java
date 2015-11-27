@@ -35,8 +35,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -55,8 +53,8 @@ import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -234,9 +232,10 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	}
 
 	@Override
-	public void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 
-		byte[] requestContents = loadRequestContents(theRequest);
+//		byte[] requestContents = loadRequestContents(theRequest);
+		byte[] requestContents = null;
 
 		final ResourceOrDstu1Bundle responseObject = invokeServer(theServer, theRequest, requestContents);
 
@@ -245,19 +244,20 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			
 			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = theServer.getInterceptors().get(i);
-				boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getResource(), theRequest.getServletRequest(), theRequest.getServletResponse());
+				boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getResource());
 				if (!continueProcessing) {
-					return;
+					return null;
 				}
 			}
 			
 			boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-			HttpServletResponse response = theRequest.getServletResponse();
-			RestfulServerUtils.streamResponseAsResource(theServer, response, responseObject.getResource(), prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(),
-					isAddContentLocationHeader(), theRequest);
+			
+			return theRequest.getResponse().streamResponseAsResource(responseObject.getResource(), prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(),
+					isAddContentLocationHeader());
+			
 		} else {
 			// Is this request coming from a browser
-			String uaHeader = theRequest.getServletRequest().getHeader("user-agent");
+			String uaHeader = theRequest.getHeader("user-agent");
 			boolean requestIsBrowser = false;
 			if (uaHeader != null && uaHeader.contains("Mozilla")) {
 				requestIsBrowser = true;
@@ -265,26 +265,24 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			
 			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = theServer.getInterceptors().get(i);
-				boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getDstu1Bundle(), theRequest.getServletRequest(), theRequest.getServletResponse());
+				boolean continueProcessing = next.outgoingResponse(theRequest, responseObject.getDstu1Bundle());
 				if (!continueProcessing) {
 					ourLog.debug("Interceptor {} returned false, not continuing processing");
-					return;
+					return null;
 				}
 			}
 
-			HttpServletResponse response = theRequest.getServletResponse();
-			RestfulServerUtils.streamResponseAsBundle(theServer, response, responseObject.getDstu1Bundle(), theRequest.getFhirServerBase(), summaryMode, theRequest.isRespondGzip(), requestIsBrowser,
-					theRequest);
+			return theRequest.getResponse().streamResponseAsBundle(responseObject.getDstu1Bundle(), summaryMode, theRequest.isRespondGzip(), requestIsBrowser);
 		}
 	}
 
-	public ResourceOrDstu1Bundle invokeServer(RestfulServer theServer, RequestDetails theRequest, byte[] requestContents) {
+	public ResourceOrDstu1Bundle invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, byte[] requestContents) {
 		// Method params
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
 			IParameter param = getParameters().get(i);
 			if (param != null) {
-				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, requestContents, this);
+				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, this);
 			}
 		}
 
@@ -300,7 +298,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			/*
 			 * Figure out the self-link for this request
 			 */
-			String serverBase = theServer.getServerBaseForRequest(theRequest.getServletRequest());
+			String serverBase = theRequest.getServerBaseForRequest();
 			String linkSelf;
 			StringBuilder b = new StringBuilder();
 			b.append(serverBase);
@@ -349,6 +347,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 				responseObject = new ResourceOrDstu1Bundle(resource);
 				break;
+				
 			} else {
 				Set<Include> includes = getRequestIncludesFromParams(params);
 
@@ -356,14 +355,20 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				if (count == null) {
 					count = result.preferredPageSize();
 				}
-
+				
+				Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
+				if (offsetI == null || offsetI < 0) {
+					offsetI = 0;
+				}
+				int start = Math.max(0, Math.min(offsetI, result.size() - 1));
+				
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 
-				EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest(), theServer.getDefaultResponseEncoding());
+				EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
 				EncodingEnum linkEncoding = theRequest.getParameters().containsKey(Constants.PARAM_FORMAT) ? responseEncoding : null;
 
 				boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-				bundleFactory.initializeBundleFromBundleProvider(theServer, result, linkEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, 0, count, null, getResponseBundleType(), includes);
+				bundleFactory.initializeBundleFromBundleProvider(theServer, result, linkEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, start, count, null, getResponseBundleType(), includes);
 				Bundle bundle = bundleFactory.getDstu1Bundle();
 				if (bundle != null) {
 					responseObject = new ResourceOrDstu1Bundle(bundle);
@@ -393,7 +398,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		return responseObject;
 	}
 
-	public abstract Object invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
+	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
 
 	/**
 	 * Should the response include a Content-Location header. Search method bunding (and any others?) may override this to disable the content-location, since it doesn't make sense

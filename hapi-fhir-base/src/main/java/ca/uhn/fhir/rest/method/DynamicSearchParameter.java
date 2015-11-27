@@ -67,7 +67,7 @@ public class DynamicSearchParameter implements IParameter {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		SearchParameterMap retVal = new SearchParameterMap();
 
 		for (String next : theRequest.getParameters().keySet()) {
