@@ -33,6 +33,13 @@
 				disabled using a RestfulServer configuration setting). A new client interceptor has been added
 				which compresses outgoing content from the client.
 			</action>
+			<action type="fix">
+				JPA server transaction attempted to validate resources twice each,
+				with one of these times being before anything had been committed to the
+				database. This meant that if a transaction contained both a Questionnaire
+				and a QuestionnaireResponse, it would fail because the QuestionnaireResponse
+				validator wouldn't be able to find the questionnaire. This is now corrected.
+			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.dao.dstu2;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyString;
@@ -30,6 +30,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
@@ -450,6 +451,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		}
 	}
 
+	@Test
 	public void testTransactionCreateWithDuplicateMatchUrl02() {
 		String methodName = "testTransactionCreateWithDuplicateMatchUrl02";
 		Bundle request = new Bundle();

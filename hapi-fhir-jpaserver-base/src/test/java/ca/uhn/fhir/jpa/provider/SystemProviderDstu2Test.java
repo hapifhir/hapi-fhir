@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.BaseJpaDstu2Test;
+import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.rp.dstu2.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu2.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu2.PatientResourceProvider;

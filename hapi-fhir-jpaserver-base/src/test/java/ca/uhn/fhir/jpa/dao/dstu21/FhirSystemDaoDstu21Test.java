@@ -17,6 +17,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -451,6 +452,7 @@ public class FhirSystemDaoDstu21Test extends BaseJpaDstu21SystemTest {
 		}
 	}
 
+	@Test
 	public void testTransactionCreateWithDuplicateMatchUrl02() {
 		String methodName = "testTransactionCreateWithDuplicateMatchUrl02";
 		Bundle request = new Bundle();
@@ -471,6 +473,34 @@ public class FhirSystemDaoDstu21Test extends BaseJpaDstu21SystemTest {
 			assertEquals(e.getMessage(), "Unable to process Transaction - Request would cause multiple resources to match URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl02\". Does transaction request contain duplicates?");
 		}
 	}
+
+	@Test
+	public void testTransactionCreateWithPutUsingUrl() {
+		String methodName = "testTransactionCreateWithPutUsingUrl";
+		Bundle request = new Bundle();
+		request.setType(BundleTypeEnum.TRANSACTION);
+
+		Observation o = new Observation();
+		o.getSubject().setReference("Patient/" + methodName);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerbEnum.PUT).setUrl("Observation/a" + methodName);
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.PUT).setUrl("Patient/" + methodName);
+
+		mySystemDao.transaction(myRequestDetails, request);
+		
+		myObservationDao.read(new IdDt("Observation/a" + methodName));
+		myPatientDao.read(new IdDt("Patient/" + methodName));
+	}
+
+	@Test
+	public void testTransactionCreateWithPutUsingUrl2() throws Exception {
+		String req = IOUtils.toString(FhirSystemDaoDstu21Test.class.getResourceAsStream("/bundle-dstu21.xml"));
+		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, req);
+		mySystemDao.transaction(myRequestDetails, request);
+	}
+
 
 	@Test
 	public void testTransactionCreateWithInvalidMatchUrl() {

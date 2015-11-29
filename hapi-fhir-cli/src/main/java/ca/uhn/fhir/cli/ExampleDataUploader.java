@@ -78,9 +78,9 @@ public class ExampleDataUploader extends BaseCommand {
 		opt.setRequired(false);
 		options.addOption(opt);
 
-		opt = new Option("c", "cache", true, "Store a copy of the downloaded example pack on the local disk using a file of the given name. Use this file instead of fetching it from the internet if the file already exists.");
-		opt.setRequired(false);
-		options.addOption(opt);
+//		opt = new Option("c", "cache", true, "Store a copy of the downloaded example pack on the local disk using a file of the given name. Use this file instead of fetching it from the internet if the file already exists.");
+//		opt.setRequired(false);
+//		options.addOption(opt);
 
 		return options;
 	}

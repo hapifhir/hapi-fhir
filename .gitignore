@@ -15,6 +15,7 @@ nohup.out
 *.orig
 tmp.txt
 *.hprof
+tmp.txt
 
 # Vagrant stuff.
 .vagrant

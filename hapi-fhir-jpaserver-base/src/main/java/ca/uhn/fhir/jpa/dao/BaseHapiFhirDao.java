@@ -1242,7 +1242,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		 * This should be the very first thing..
 		 */
 		if (theResource != null) {
-			validateResourceForStorage((T) theResource, theEntity);
+			if (thePerformIndexing) {
+				validateResourceForStorage((T) theResource, theEntity);
+			}
 			String resourceType = myContext.getResourceDefinition(theResource).getName();
 			if (isNotBlank(theEntity.getResourceType()) && !theEntity.getResourceType().equals(resourceType)) {
 				throw new UnprocessableEntityException("Existing resource ID[" + theEntity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + theEntity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
