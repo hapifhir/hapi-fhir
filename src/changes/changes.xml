@@ -24,6 +24,9 @@
 				on the existing REST server into a JAX-RS (Jersey) environment.
 				Thanks to Peter Van Houte from Agfa for the amazing work!
 			</action>
+			<action type="add">
+				CLI now supports writing to file:// URL for 'upload-examples' command
+			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">

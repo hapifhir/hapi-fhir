@@ -1,0 +1,2834 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <id value="consentdirective"/>
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">to do</div>
+  </text>
+  <url value="http://hl7.org/fhir/StructureDefinition/consentdirective"/>
+  <name value="Consent Directive"/>
+  <status value="draft"/>
+  <publisher value="Health Level Seven International (Community Based Collaborative Care)"/>
+  <contact>
+    <telecom>
+      <system value="other"/>
+      <value value="http://hl7.org/special/committees/Security"/>
+    </telecom>
+  </contact>
+  <date value="2014-01-31"/>
+  <description value="Consent Directive"/>
+  <mapping>
+    <identity value="v2"/>
+    <uri value="http://hl7.org/v2"/>
+    <name value="HL7 v2"/>
+  </mapping>
+  <kind value="resource"/>
+  <constrainedType value="Contract"/>
+  <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/Contract"/>
+  <snapshot>
+    <element>
+      <path value="Contract"/>
+      <name value="ConsentDirective"/>
+      <short value="Consent Directive"/>
+      <definition value="A record of a healthcare consumer’s privacy policy, which is in accordance with governing jurisdictional and organization privacy policies that grant or withhold consent:   • To one or more identified entities in a defined role   • To perform one or more operations (e.g., collect, access, use, disclose, amend, or delete)   • On an instance or type of individually identifiable health information [IIHI]  • For a purpose such as treatment, payment, operations, research, public health, quality measures, health status evaluation by third parties, or marketing   • Under certain conditions, e.g., when unconscious   • For specified time period, e.g., effective and expiration dates   • In certain context, e.g., in an emergency   A consent directive is an instance of governing jurisdictional and organization privacy policies, which may or may not be backed up by a signed document (paper or electronic). [HITSP TP30]."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Contract"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="FinancialContract"/>
+      </mapping>
+      <mapping>
+        <identity value="w5"/>
+        <map value="financial.other"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.id"/>
+      <short value="Logical id of this artifact"/>
+      <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.id"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="id"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="Contract.meta"/>
+      <short value="Metadata about the resource"/>
+      <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.meta"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Meta"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="Contract.implicitRules"/>
+      <short value="A set of rules under which this content was created"/>
+      <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.implicitRules"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="uri"/>
+      </type>
+      <isModifier value="true"/>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="Contract.language"/>
+      <short value="Language of the resource content"/>
+      <definition value="The base language in which the resource is written."/>
+      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.language"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="code"/>
+      </type>
+      <binding>
+        <strength value="required"/>
+        <description value="A human language"/>
+        <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+      </binding>
+    </element>
+    <element>
+      <path value="Contract.text"/>
+      <short value="Text summary of the resource, for human interpretation"/>
+      <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+      <alias value="narrative"/>
+      <alias value="html"/>
+      <alias value="xhtml"/>
+      <alias value="display"/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.text"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Narrative"/>
+      </type>
+      <condition value="dom-1"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="Act.text?"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.contained"/>
+      <short value="Contained, inline Resources"/>
+      <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+      <alias value="inline resources"/>
+      <alias value="anonymous resources"/>
+      <alias value="contained resources"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.contained"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Resource"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.extension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.modifierExtension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.identifier"/>
+      <name value="ConsentDirective.identifier"/>
+      <short value="Consent Directive identifier"/>
+      <definition value="Unique identifier for this Consent Directive."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.identifier"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Identifier"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="FinancialContract id"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.issued"/>
+      <name value="ConsentDirective.issued"/>
+      <short value="When this Consent Directive was issued"/>
+      <definition value="Date and time when this Consent Directive was executed and became effective."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.issued"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="FinancialContract effectiveTime"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.applies"/>
+      <name value="ConsentDirective.applies"/>
+      <short value="Effective time"/>
+      <definition value="Time period during which this Consent Directive is in effect."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.applies"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Period"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="FinancialContract activityTime"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.subject"/>
+      <name value="ConsentDirective.subject"/>
+      <short value="Subject of this Consent Directive"/>
+      <definition value="Patient information and actions taken on that information that are governed by this Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.subject"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="Role"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.authority"/>
+      <name value="ConsentDirective.authority"/>
+      <short value="Authority under which this Consent Directive has standing"/>
+      <definition value="A formally recognized grouping of people, principals, organizations, or jurisdictions with legal standing to promulgate, administer, and enforce privacy policies and applicable Consent Directives."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.authority"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="Role Scoper"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.domain"/>
+      <name value="ConsentDirective.domain"/>
+      <short value="Domain in which this Consent Directive applies"/>
+      <definition value="Recognized governance framework or system operating with a circumscribed scope in accordance with specified principles, policies, processes or procedures for managing rights, actions, or behaviors of parties or principals relative to privacy protection and control of the collection, access, use and disclosure of resources."/>
+      <alias value="scope of governance jurisdication"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.domain"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.type"/>
+      <name value="ConsentDirective.type"/>
+      <short value="Consent Directive Type"/>
+      <definition value="Specific type of patient privacy Consent Directive reflecting the range of patient discretion over granting of rights to patient information and actions that may be taken on that information.  E.g., Opt-in, opt-out, Share All (such as authorization to disclose to payer for payment purposes or benefit eligibility), Share Partial(such as Title 38 Section 7332 and 42 CFR Part 2), Implied Consent, such as a HIPAA Notice of Privacy Practices."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.type"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="example"/>
+        <description value="List of overall contract codes"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/contract-type"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="rim"/>
+        <map value="CNTRCT"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.subType"/>
+      <name value="ConsentDirective.subType"/>
+      <short value="Consent Directive Subtype"/>
+      <definition value="A specialized type of an overarching or more general Consent Directive, such as a patient&#39;s right to opt-out of a Patient Directory under HIPAA or a multiparty 42 CFR Part 2 consent used in a health information exchange context by a Qualified Service Organization."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.subType"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="example"/>
+        <description value="Detailed codes within the above"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/contract-subtype"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="rim"/>
+        <map value="e.g., RECOV"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.action"/>
+      <name value="ConsentDirective.action"/>
+      <short value="Consent Directive Action"/>
+      <definition value="Action stipulated by this Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.action"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <strength value="example"/>
+        <description value="Detailed codes for the contract action"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/contract-action"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="rim"/>
+        <map value="e.g., JURISPOL"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.actionReason"/>
+      <name value="ConsentDirective.actionReason"/>
+      <short value="Consent Directive Action Reason"/>
+      <definition value="Reason for action stipulated by this Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.actionReason"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <strength value="example"/>
+        <description value="Detailed codes for the contract action reason"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="rim"/>
+        <map value="e.g., QUALIMP"/>
+      </mapping>
+    </element>
+    <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Actor"/>
+      </extension>
+      <path value="Contract.actor"/>
+      <name value="ConsentDirective.actor"/>
+      <short value="Consent Directive Actor"/>
+      <definition value="List of Consent Directive actors."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.actor"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="BackboneElement"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.actor.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.actor.id"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.actor.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.actor.extension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.actor.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.actor.modifierExtension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.actor.entity"/>
+      <name value="ConsentDirective.actor.entity"/>
+      <short value="Consent Directive Actor Type"/>
+      <definition value="Who or what actors are assigned roles in this Consent Directive."/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.actor.entity"/>
+        <min value="1"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Contract"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Group"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Substance"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.actor.role"/>
+      <name value="ConsentDirective.actor.role"/>
+      <short value="Consent Directive Actor Role"/>
+      <definition value="Role type of actors assigned roles in this Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.actor.role"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <strength value="example"/>
+        <description value="Detailed codes for the contract actor role"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/contract-actorrole"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ValuedItem"/>
+      </extension>
+      <path value="Contract.valuedItem"/>
+      <name value="ConsentDirective.valuedItem"/>
+      <short value="Contract Valued Item"/>
+      <definition value="Contract Valued Item List."/>
+      <min value="0"/>
+      <max value="0"/>
+      <base>
+        <path value="Contract.valuedItem"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="BackboneElement"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedItem classCode INVE"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.valuedItem.id"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.valuedItem.extension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.valuedItem.modifierExtension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.entity[x]"/>
+      <name value="ConsentDirective.valuedItem.entity[x]"/>
+      <short value="Contract Valued Item Type"/>
+      <definition value="Specific type of Contract Valued Item that may be priced."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.valuedItem.entity[x]"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedItem code"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.identifier"/>
+      <name value="ConsentDirective.valuedItem.identifier"/>
+      <short value="Contract Valued Item Identifier"/>
+      <definition value="Identifies a Contract Valued Item instance."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.valuedItem.identifier"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Identifier"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedItem id"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.effectiveTime"/>
+      <name value="ConsentDirective.valuedItem.effectiveTime"/>
+      <short value="Contract Valued Item Effective Time"/>
+      <definition value="Indicates the time during which this Contract ValuedItem information is effective."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.valuedItem.effectiveTime"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedItem                effectiveTime"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.quantity"/>
+      <name value="ConsentDirective.valuedItem.quantity"/>
+      <short value="Count of Contract Valued Items"/>
+      <definition value="Specifies the units by which the Contract Valued Item is measured or counted, and quantifies the countable or measurable Contract Valued Item instances."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.valuedItem.quantity"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedItem unitQuantity"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.unitPrice"/>
+      <name value="ConsentDirective.valuedItem.unitprice"/>
+      <short value="Contract Valued Item fee, charge, or cost."/>
+      <definition value="A Contract Valued Item unit valuation measure."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.valuedItem.unitPrice"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedItem unitPriceAmt"/>
+      </mapping>
+      <mapping>
+        <identity value="v2"/>
+        <map value="F12"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.factor"/>
+      <name value="ConsentDirective.valuedItem.factor"/>
+      <short value="Contract Valued Item Price Scaling Factor"/>
+      <definition value="A real number that represents a multiplier used in determining the overall value of the Contract Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.valuedItem.factor"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="decimal"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedItem factorNumber"/>
+      </mapping>
+      <mapping>
+        <identity value="v2"/>
+        <map value="F13/F14"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.points"/>
+      <name value="ConsentDirective.valuedItem.points"/>
+      <short value="Contract Valued Item Difficulty Scaling Factor"/>
+      <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Valued Item delivered. The concept of Points allows for assignment of point values for a Contract Valued Item, such that a monetary amount can be assigned to each point."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.valuedItem.points"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="decimal"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedItem pointNumber"/>
+      </mapping>
+      <mapping>
+        <identity value="v2"/>
+        <map value="F13/F14"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.net"/>
+      <name value="ConsentDirective.valuedItem.net"/>
+      <short value="Total Contract Valued Item Value"/>
+      <definition value="Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.valuedItem.net"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedItem netAmt"/>
+      </mapping>
+      <mapping>
+        <identity value="v2"/>
+        <map value="F13/F14"/>
+      </mapping>
+    </element>
+    <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Signatory"/>
+      </extension>
+      <path value="Contract.signer"/>
+      <name value="ConsentDirective.signer"/>
+      <short value="Consent Directive Signer"/>
+      <definition value="Party signing this Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.signer"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="BackboneElement"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.signer.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.signer.id"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.signer.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.signer.extension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.signer.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.signer.modifierExtension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.signer.type"/>
+      <name value="ConsentDirective.signer.type"/>
+      <short value="Consent Directive Signer Type"/>
+      <definition value="Role of this Consent Directive signer, e.g., patient who is Consent Directive Grantee, the Substitute Decision Maker such as a person with Power of Attorney to whom the patient has granted or delegated rights to execute a Consent Directive on the patient&#39;s behalf, a notary public or witness."/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.signer.type"/>
+        <min value="1"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Coding"/>
+      </type>
+      <binding>
+        <strength value="preferred"/>
+        <description value="List of parties who may be signing"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/contract-signer-type"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="Contract.signer.party"/>
+      <name value="ConsentDirective.signer.party"/>
+      <short value="Consent Directive Signatory party"/>
+      <definition value="Party which is a signatory to this Consent Directive."/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.signer.party"/>
+        <min value="1"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.signer.signature"/>
+      <name value="ConsentDirective.signer.signature"/>
+      <short value="Consent Directive Documentation Signature"/>
+      <definition value="Legally binding Consent Directive DSIG signature contents in Base64."/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.signer.signature"/>
+        <min value="1"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="string"/>
+      </type>
+    </element>
+    <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Term"/>
+      </extension>
+      <path value="Contract.term"/>
+      <name value="ConsentDirective.term"/>
+      <short value="Consent Directive Term List"/>
+      <definition value="One or more Consent DirectiveProvisions, which may be related and conveyed as a group, and may contain nested groups."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.term"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="BackboneElement"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.id"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.term.extension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.term.modifierExtension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.identifier"/>
+      <name value="ConsentDirective.term.identifier"/>
+      <short value="Consent Directive Term identifier"/>
+      <definition value="Unique identifier for this particular Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.identifier"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Identifier"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="Contract.term.issued"/>
+      <name value="ConsentDirective.term.issued"/>
+      <short value="Consent Directive Term Issue Date Time"/>
+      <definition value="When this Consent Directive Provision was issued."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.issued"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="Contract.term.applies"/>
+      <name value="ConsentDirective.term.applies"/>
+      <short value="Consent Directive Term Effective Time"/>
+      <definition value="Relevant time or time-period when this Consent Directive Provision is applicable."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.applies"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Period"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="Contract.term.type"/>
+      <name value="ConsentDirective.term.type"/>
+      <short value="Consent Directive Term Type"/>
+      <definition value="Type of Consent Directive Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g., life time maximum benefit."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.type"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <strength value="example"/>
+        <description value="Detailed codes for the types of contract provisions"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/contract-term-type"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="Contract.term.subType"/>
+      <name value="ConsentDirective.term.subType"/>
+      <short value="Consent Directive Term Subtype"/>
+      <definition value="Subtype of this Consent Directive Provision, e.g., life time maximum payment for a contract term for specific valued item, e.g., disability payment."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.subType"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <strength value="example"/>
+        <description value="Detailed codes for the subtypes of contract provisions"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/contract-term-subtype"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="Contract.term.subject"/>
+      <name value="ConsentDirective.term.subject"/>
+      <short value="Subject  of this Consent Directive Term"/>
+      <definition value="Who or what this Consent Directive Provision is about."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.subject"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.action"/>
+      <name value="ConsentDirective.term.action"/>
+      <short value="Consent Directive Term Action"/>
+      <definition value="Action stipulated by this Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.term.action"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <strength value="example"/>
+        <description value="Detailed codes for the contract action"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/contract-action"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="Contract.term.actionReason"/>
+      <name value="ConsentDirective.term.actionReason"/>
+      <short value="Consent Directive Term Action Reason"/>
+      <definition value="Reason or purpose for the action stipulated by this Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.term.actionReason"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <strength value="example"/>
+        <description value="Detailed codes for the contract action reason"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="TermActor"/>
+      </extension>
+      <path value="Contract.term.actor"/>
+      <name value="ConsentDirective.term.actor"/>
+      <short value="Consent Directive  Term Actor List"/>
+      <definition value="List of actors participating in this Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.term.actor"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="BackboneElement"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.actor.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.actor.id"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.actor.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.term.actor.extension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.actor.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.term.actor.modifierExtension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.actor.entity"/>
+      <name value="ConsentDirective.term.actor.entity"/>
+      <short value="Consent Directive Term Actor"/>
+      <definition value="The actor assigned a role in this Consent Directive Provision."/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.actor.entity"/>
+        <min value="1"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Contract"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Group"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Substance"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.actor.role"/>
+      <name value="ConsentDirective.term.actor.role"/>
+      <short value="Consent Directive Term Actor Role"/>
+      <definition value="Role played by the actor assigned this role in this Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.term.actor.role"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <strength value="example"/>
+        <description value="Detailed codes for the contract actor role"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/contract-actorrole"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
+      <path value="Contract.term.text"/>
+      <name value="ConsentDirective.term.text"/>
+      <short value="Human readable Consent Directive term text"/>
+      <definition value="Human readable form of this Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.text"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="string"/>
+      </type>
+    </element>
+    <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="TermValuedItem"/>
+      </extension>
+      <path value="Contract.term.valuedItem"/>
+      <name value="ConsentDirective.term.valuedItem"/>
+      <short value="Contract Term Valued Item"/>
+      <definition value="Contract Provision Valued Item List."/>
+      <min value="0"/>
+      <max value="0"/>
+      <base>
+        <path value="Contract.term.valuedItem"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="BackboneElement"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedUnitItem classCode INVE"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.valuedItem.id"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.term.valuedItem.extension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.term.valuedItem.modifierExtension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.entity[x]"/>
+      <name value="ConsentDirective.term.valuedItem.entity[x]"/>
+      <short value="Contract Term Valued Item Type"/>
+      <definition value="Specific type of Contract Provision Valued Item that may be priced."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.valuedItem.entity[x]"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedUnitItem code"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.identifier"/>
+      <name value="ConsentDirective.term.valuedItem."/>
+      <short value="Contract Term Valued Item Identifier"/>
+      <definition value="Identifies a Contract Provision Valued Item instance."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.valuedItem.identifier"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Identifier"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedUnitItem id"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.effectiveTime"/>
+      <name value="ConsentDirective.term.valuedItem.effectiveTime"/>
+      <short value="Contract Term Valued Item Effective Time"/>
+      <definition value="Indicates the time during which this Contract Term ValuedItem information is effective."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.valuedItem.effectiveTime"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedUnitItem effectiveTime"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.quantity"/>
+      <name value="ConsentDirective.term.valuedItem.quantity"/>
+      <short value="Contract Term Valued Item Count"/>
+      <definition value="Specifies the units by which the Contract Provision Valued Item is measured or counted, and quantifies the countable or measurable Contract Term Valued Item instances."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.valuedItem.quantity"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedUnitItem unitQuantity"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.unitPrice"/>
+      <name value="ConsentDirective.term.valuedItem.unitPrice"/>
+      <short value="Contract Term Valued Item fee, charge, or cost."/>
+      <definition value="A Contract Provision Valued Item unit valuation measure."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.valuedItem.unitPrice"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedUnitItem unitPriceAmt"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.factor"/>
+      <name value="ConsentDirective.term.valuedItem.factor"/>
+      <short value="Contract Term Valued Item Price Scaling Factor"/>
+      <definition value="A real number that represents a multiplier used in determining the overall value of the Contract Provision Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.valuedItem.factor"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="decimal"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedUnitItem factorNumber"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.points"/>
+      <name value="ConsentDirective.term.valuedItem.points"/>
+      <short value="Contract Term Valued Item Difficulty Scaling Factor"/>
+      <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Provision Valued Item delivered. The concept of Points allows for assignment of point values for a Contract Provision Valued Item, such that a monetary amount can be assigned to each point."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.valuedItem.points"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="decimal"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="COCT_RM440000UV09 ValuedUnitItem pointNumber"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.net"/>
+      <name value="ConsentDirective.term.valuedItem.net"/>
+      <short value="Total Contract Term Valued Item Value"/>
+      <definition value="Expresses the product of the Contract Provision Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.term.valuedItem.net"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.group"/>
+      <name value="ConsentDirective.term.group"/>
+      <short value="Nested Consent DirectiveTerm Group"/>
+      <definition value="Nested group of Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.term.group"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <nameReference value="term"/>
+    </element>
+    <element>
+      <path value="Contract.binding[x]"/>
+      <name value="ConsentDirective.binding[x]"/>
+      <short value="Binding Consent Directive"/>
+      <definition value="Legally binding onsent Directive Provision.  This is the signed and legally recognized representation of the Consent Directive. that is considered the &quot;source of truth&quot;, which would be the basis for legal action related to enforcement of the onsent Directive Provision."/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.binding[x]"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Attachment"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Composition"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"/>
+      </type>
+    </element>
+    <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="FriendlyLanguage"/>
+      </extension>
+      <path value="Contract.friendly"/>
+      <name value="ConsentDirective.friendly"/>
+      <short value="Consent Directive Friendly Language"/>
+      <definition value="The &quot;patient friendly language&quot; versionof the Consent Directive in whole or in parts. &quot;Patient friendly language&quot; means the representation of the  Consent Directive and  Consent Directive Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the  Consent Directive understand the roles, actions, obligations, responsibilities, and implication of the agreement."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.friendly"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="BackboneElement"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.friendly.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.friendly.id"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.friendly.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.friendly.extension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.friendly.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.friendly.modifierExtension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.friendly.content[x]"/>
+      <name value="ConsentDirective.friendly.content[x]"/>
+      <short value="Easily comprehended representation of this Consent Directive"/>
+      <definition value="Human readable rendering of this  Consent Directive in a format and representation intended to enhance comprehension and ensure understandability."/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.friendly.content[x]"/>
+        <min value="1"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Attachment"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Composition"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"/>
+      </type>
+    </element>
+    <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="LegalLanguage"/>
+      </extension>
+      <path value="Contract.legal"/>
+      <name value="ConsentDirective.legal"/>
+      <short value="Consent Directive Legal Language"/>
+      <definition value="List of Legal expressions or representations of this  Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.legal"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="BackboneElement"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.legal.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.legal.id"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.legal.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.legal.extension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.legal.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.legal.modifierExtension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.legal.content[x]"/>
+      <name value="ConsentDirective.legal.content[x]"/>
+      <short value="Consent Directive Legal Text"/>
+      <definition value="Legal  Consent Directive text in human renderable form."/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.legal.content[x]"/>
+        <min value="1"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Attachment"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Composition"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"/>
+      </type>
+    </element>
+    <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ComputableLanguage"/>
+      </extension>
+      <path value="Contract.rule"/>
+      <name value="ConsentDirective.rule"/>
+      <short value="Computable Consent Directive Language"/>
+      <definition value="List of Computable Policy Rule Language Representations of this  Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.rule"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="BackboneElement"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.rule.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.rule.id"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.rule.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.rule.extension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.rule.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Contract.rule.modifierExtension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.rule.content[x]"/>
+      <name value="ConsentDirective.rule.content[x]"/>
+      <short value="Computable Consent Directive Rules"/>
+      <definition value="Computable Consent Directive conveyed using a policy rule language (e.g. XACML, DKAL, SecPal)."/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Contract.rule.content[x]"/>
+        <min value="1"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Attachment"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+      </type>
+    </element>
+  </snapshot>
+  <differential>
+    <element>
+      <path value="Contract"/>
+      <name value="ConsentDirective"/>
+      <short value="Consent Directive"/>
+      <definition value="A record of a healthcare consumer’s privacy policy, which is in accordance with governing jurisdictional and organization privacy policies that grant or withhold consent:   • To one or more identified entities in a defined role   • To perform one or more operations (e.g., collect, access, use, disclose, amend, or delete)   • On an instance or type of individually identifiable health information [IIHI]  • For a purpose such as treatment, payment, operations, research, public health, quality measures, health status evaluation by third parties, or marketing   • Under certain conditions, e.g., when unconscious   • For specified time period, e.g., effective and expiration dates   • In certain context, e.g., in an emergency   A consent directive is an instance of governing jurisdictional and organization privacy policies, which may or may not be backed up by a signed document (paper or electronic). [HITSP TP30]."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Contract"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.identifier"/>
+      <name value="ConsentDirective.identifier"/>
+      <short value="Consent Directive identifier"/>
+      <definition value="Unique identifier for this Consent Directive."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Identifier"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.issued"/>
+      <name value="ConsentDirective.issued"/>
+      <short value="When this Consent Directive was issued"/>
+      <definition value="Date and time when this Consent Directive was executed and became effective."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="dateTime"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.applies"/>
+      <name value="ConsentDirective.applies"/>
+      <short value="Effective time"/>
+      <definition value="Time period during which this Consent Directive is in effect."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Period"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.subject"/>
+      <name value="ConsentDirective.subject"/>
+      <short value="Subject of this Consent Directive"/>
+      <definition value="Patient information and actions taken on that information that are governed by this Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.authority"/>
+      <name value="ConsentDirective.authority"/>
+      <short value="Authority under which this Consent Directive has standing"/>
+      <definition value="A formally recognized grouping of people, principals, organizations, or jurisdictions with legal standing to promulgate, administer, and enforce privacy policies and applicable Consent Directives."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.domain"/>
+      <name value="ConsentDirective.domain"/>
+      <short value="Domain in which this Consent Directive applies"/>
+      <definition value="Recognized governance framework or system operating with a circumscribed scope in accordance with specified principles, policies, processes or procedures for managing rights, actions, or behaviors of parties or principals relative to privacy protection and control of the collection, access, use and disclosure of resources."/>
+      <alias value="scope of governance jurisdication"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.type"/>
+      <name value="ConsentDirective.type"/>
+      <short value="Consent Directive Type"/>
+      <definition value="Specific type of patient privacy Consent Directive reflecting the range of patient discretion over granting of rights to patient information and actions that may be taken on that information.  E.g., Opt-in, opt-out, Share All (such as authorization to disclose to payer for payment purposes or benefit eligibility), Share Partial(such as Title 38 Section 7332 and 42 CFR Part 2), Implied Consent, such as a HIPAA Notice of Privacy Practices."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.subType"/>
+      <name value="ConsentDirective.subType"/>
+      <short value="Consent Directive Subtype"/>
+      <definition value="A specialized type of an overarching or more general Consent Directive, such as a patient&#39;s right to opt-out of a Patient Directory under HIPAA or a multiparty 42 CFR Part 2 consent used in a health information exchange context by a Qualified Service Organization."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.action"/>
+      <name value="ConsentDirective.action"/>
+      <short value="Consent Directive Action"/>
+      <definition value="Action stipulated by this Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.actionReason"/>
+      <name value="ConsentDirective.actionReason"/>
+      <short value="Consent Directive Action Reason"/>
+      <definition value="Reason for action stipulated by this Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.actor"/>
+      <name value="ConsentDirective.actor"/>
+      <short value="Consent Directive Actor"/>
+      <definition value="List of Consent Directive actors."/>
+      <min value="0"/>
+      <max value="*"/>
+    </element>
+    <element>
+      <path value="Contract.actor.entity"/>
+      <name value="ConsentDirective.actor.entity"/>
+      <short value="Consent Directive Actor Type"/>
+      <definition value="Who or what actors are assigned roles in this Consent Directive."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Contract"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Group"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Substance"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.actor.role"/>
+      <name value="ConsentDirective.actor.role"/>
+      <short value="Consent Directive Actor Role"/>
+      <definition value="Role type of actors assigned roles in this Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.valuedItem"/>
+      <name value="ConsentDirective.valuedItem"/>
+      <short value="Contract Valued Item"/>
+      <definition value="Contract Valued Item List."/>
+      <min value="0"/>
+      <max value="0"/>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.entity[x]"/>
+      <name value="ConsentDirective.valuedItem.entity[x]"/>
+      <short value="Contract Valued Item Type"/>
+      <definition value="Specific type of Contract Valued Item that may be priced."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.identifier"/>
+      <name value="ConsentDirective.valuedItem.identifier"/>
+      <short value="Contract Valued Item Identifier"/>
+      <definition value="Identifies a Contract Valued Item instance."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Identifier"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.effectiveTime"/>
+      <name value="ConsentDirective.valuedItem.effectiveTime"/>
+      <short value="Contract Valued Item Effective Time"/>
+      <definition value="Indicates the time during which this Contract ValuedItem information is effective."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="dateTime"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.quantity"/>
+      <name value="ConsentDirective.valuedItem.quantity"/>
+      <short value="Count of Contract Valued Items"/>
+      <definition value="Specifies the units by which the Contract Valued Item is measured or counted, and quantifies the countable or measurable Contract Valued Item instances."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.unitPrice"/>
+      <name value="ConsentDirective.valuedItem.unitprice"/>
+      <short value="Contract Valued Item fee, charge, or cost."/>
+      <definition value="A Contract Valued Item unit valuation measure."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="F12"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.factor"/>
+      <name value="ConsentDirective.valuedItem.factor"/>
+      <short value="Contract Valued Item Price Scaling Factor"/>
+      <definition value="A real number that represents a multiplier used in determining the overall value of the Contract Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="decimal"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="F13/F14"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.points"/>
+      <name value="ConsentDirective.valuedItem.points"/>
+      <short value="Contract Valued Item Difficulty Scaling Factor"/>
+      <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Valued Item delivered. The concept of Points allows for assignment of point values for a Contract Valued Item, such that a monetary amount can be assigned to each point."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="decimal"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="F13/F14"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.valuedItem.net"/>
+      <name value="ConsentDirective.valuedItem.net"/>
+      <short value="Total Contract Valued Item Value"/>
+      <definition value="Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="F13/F14"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Contract.signer"/>
+      <name value="ConsentDirective.signer"/>
+      <short value="Consent Directive Signer"/>
+      <definition value="Party signing this Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+    </element>
+    <element>
+      <path value="Contract.signer.type"/>
+      <name value="ConsentDirective.signer.type"/>
+      <short value="Consent Directive Signer Type"/>
+      <definition value="Role of this Consent Directive signer, e.g., patient who is Consent Directive Grantee, the Substitute Decision Maker such as a person with Power of Attorney to whom the patient has granted or delegated rights to execute a Consent Directive on the patient&#39;s behalf, a notary public or witness."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="Coding"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.signer.party"/>
+      <name value="ConsentDirective.signer.party"/>
+      <short value="Consent Directive Signatory party"/>
+      <definition value="Party which is a signatory to this Consent Directive."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.signer.signature"/>
+      <name value="ConsentDirective.signer.signature"/>
+      <short value="Consent Directive Documentation Signature"/>
+      <definition value="Legally binding Consent Directive DSIG signature contents in Base64."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="string"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term"/>
+      <name value="ConsentDirective.term"/>
+      <short value="Consent Directive Term List"/>
+      <definition value="One or more Consent DirectiveProvisions, which may be related and conveyed as a group, and may contain nested groups."/>
+      <min value="0"/>
+      <max value="*"/>
+    </element>
+    <element>
+      <path value="Contract.term.identifier"/>
+      <name value="ConsentDirective.term.identifier"/>
+      <short value="Consent Directive Term identifier"/>
+      <definition value="Unique identifier for this particular Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Identifier"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.issued"/>
+      <name value="ConsentDirective.term.issued"/>
+      <short value="Consent Directive Term Issue Date Time"/>
+      <definition value="When this Consent Directive Provision was issued."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="dateTime"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.applies"/>
+      <name value="ConsentDirective.term.applies"/>
+      <short value="Consent Directive Term Effective Time"/>
+      <definition value="Relevant time or time-period when this Consent Directive Provision is applicable."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Period"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.type"/>
+      <name value="ConsentDirective.term.type"/>
+      <short value="Consent Directive Term Type"/>
+      <definition value="Type of Consent Directive Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g., life time maximum benefit."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.subType"/>
+      <name value="ConsentDirective.term.subType"/>
+      <short value="Consent Directive Term Subtype"/>
+      <definition value="Subtype of this Consent Directive Provision, e.g., life time maximum payment for a contract term for specific valued item, e.g., disability payment."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.subject"/>
+      <name value="ConsentDirective.term.subject"/>
+      <short value="Subject  of this Consent Directive Term"/>
+      <definition value="Who or what this Consent Directive Provision is about."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.action"/>
+      <name value="ConsentDirective.term.action"/>
+      <short value="Consent Directive Term Action"/>
+      <definition value="Action stipulated by this Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.actionReason"/>
+      <name value="ConsentDirective.term.actionReason"/>
+      <short value="Consent Directive Term Action Reason"/>
+      <definition value="Reason or purpose for the action stipulated by this Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.actor"/>
+      <name value="ConsentDirective.term.actor"/>
+      <short value="Consent Directive  Term Actor List"/>
+      <definition value="List of actors participating in this Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="*"/>
+    </element>
+    <element>
+      <path value="Contract.term.actor.entity"/>
+      <name value="ConsentDirective.term.actor.entity"/>
+      <short value="Consent Directive Term Actor"/>
+      <definition value="The actor assigned a role in this Consent Directive Provision."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Contract"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Group"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Location"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/RelatedPerson"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Substance"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.actor.role"/>
+      <name value="ConsentDirective.term.actor.role"/>
+      <short value="Consent Directive Term Actor Role"/>
+      <definition value="Role played by the actor assigned this role in this Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.text"/>
+      <name value="ConsentDirective.term.text"/>
+      <short value="Human readable Consent Directive term text"/>
+      <definition value="Human readable form of this Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="string"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem"/>
+      <name value="ConsentDirective.term.valuedItem"/>
+      <short value="Contract Term Valued Item"/>
+      <definition value="Contract Provision Valued Item List."/>
+      <min value="0"/>
+      <max value="0"/>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.entity[x]"/>
+      <name value="ConsentDirective.term.valuedItem.entity[x]"/>
+      <short value="Contract Term Valued Item Type"/>
+      <definition value="Specific type of Contract Provision Valued Item that may be priced."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.identifier"/>
+      <name value="ConsentDirective.term.valuedItem."/>
+      <short value="Contract Term Valued Item Identifier"/>
+      <definition value="Identifies a Contract Provision Valued Item instance."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Identifier"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.effectiveTime"/>
+      <name value="ConsentDirective.term.valuedItem.effectiveTime"/>
+      <short value="Contract Term Valued Item Effective Time"/>
+      <definition value="Indicates the time during which this Contract Term ValuedItem information is effective."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="dateTime"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.quantity"/>
+      <name value="ConsentDirective.term.valuedItem.quantity"/>
+      <short value="Contract Term Valued Item Count"/>
+      <definition value="Specifies the units by which the Contract Provision Valued Item is measured or counted, and quantifies the countable or measurable Contract Term Valued Item instances."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.unitPrice"/>
+      <name value="ConsentDirective.term.valuedItem.unitPrice"/>
+      <short value="Contract Term Valued Item fee, charge, or cost."/>
+      <definition value="A Contract Provision Valued Item unit valuation measure."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.factor"/>
+      <name value="ConsentDirective.term.valuedItem.factor"/>
+      <short value="Contract Term Valued Item Price Scaling Factor"/>
+      <definition value="A real number that represents a multiplier used in determining the overall value of the Contract Provision Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="decimal"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.points"/>
+      <name value="ConsentDirective.term.valuedItem.points"/>
+      <short value="Contract Term Valued Item Difficulty Scaling Factor"/>
+      <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Provision Valued Item delivered. The concept of Points allows for assignment of point values for a Contract Provision Valued Item, such that a monetary amount can be assigned to each point."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="decimal"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.valuedItem.net"/>
+      <name value="ConsentDirective.term.valuedItem.net"/>
+      <short value="Total Contract Term Valued Item Value"/>
+      <definition value="Expresses the product of the Contract Provision Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.term.group"/>
+      <name value="ConsentDirective.term.group"/>
+      <short value="Nested Consent DirectiveTerm Group"/>
+      <definition value="Nested group of Consent Directive Provision."/>
+      <min value="0"/>
+      <max value="*"/>
+      <nameReference value="ConsentDirective.term"/>
+    </element>
+    <element>
+      <path value="Contract.binding[x]"/>
+      <name value="ConsentDirective.binding[x]"/>
+      <short value="Binding Consent Directive"/>
+      <definition value="Legally binding onsent Directive Provision.  This is the signed and legally recognized representation of the Consent Directive. that is considered the &quot;source of truth&quot;, which would be the basis for legal action related to enforcement of the onsent Directive Provision."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="Attachment"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Composition"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.friendly"/>
+      <name value="ConsentDirective.friendly"/>
+      <short value="Consent Directive Friendly Language"/>
+      <definition value="The &quot;patient friendly language&quot; versionof the Consent Directive in whole or in parts. &quot;Patient friendly language&quot; means the representation of the  Consent Directive and  Consent Directive Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the  Consent Directive understand the roles, actions, obligations, responsibilities, and implication of the agreement."/>
+      <min value="0"/>
+      <max value="*"/>
+    </element>
+    <element>
+      <path value="Contract.friendly.content[x]"/>
+      <name value="ConsentDirective.friendly.content[x]"/>
+      <short value="Easily comprehended representation of this Consent Directive"/>
+      <definition value="Human readable rendering of this  Consent Directive in a format and representation intended to enhance comprehension and ensure understandability."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="Attachment"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Composition"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.legal"/>
+      <name value="ConsentDirective.legal"/>
+      <short value="Consent Directive Legal Language"/>
+      <definition value="List of Legal expressions or representations of this  Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+    </element>
+    <element>
+      <path value="Contract.legal.content[x]"/>
+      <name value="ConsentDirective.legal.content[x]"/>
+      <short value="Consent Directive Legal Text"/>
+      <definition value="Legal  Consent Directive text in human renderable form."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="Attachment"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Composition"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"/>
+      </type>
+    </element>
+    <element>
+      <path value="Contract.rule"/>
+      <name value="ConsentDirective.rule"/>
+      <short value="Computable Consent Directive Language"/>
+      <definition value="List of Computable Policy Rule Language Representations of this  Consent Directive."/>
+      <min value="0"/>
+      <max value="*"/>
+    </element>
+    <element>
+      <path value="Contract.rule.content[x]"/>
+      <name value="ConsentDirective.rule.content[x]"/>
+      <short value="Computable Consent Directive Rules"/>
+      <definition value="Computable Consent Directive conveyed using a policy rule language (e.g. XACML, DKAL, SecPal)."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="Attachment"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/DocumentReference"/>
+      </type>
+    </element>
+  </differential>
+</StructureDefinition>

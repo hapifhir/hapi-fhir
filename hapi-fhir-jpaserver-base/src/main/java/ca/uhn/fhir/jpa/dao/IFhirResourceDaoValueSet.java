@@ -23,24 +23,21 @@ package ca.uhn.fhir.jpa.dao;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
-public interface IFhirResourceDaoValueSet<T extends IBaseResource> extends IFhirResourceDao<T> {
+public interface IFhirResourceDaoValueSet<T extends IBaseResource, CD, CC> extends IFhirResourceDao<T> {
 
-	ValueSet expand(IIdType theId, String theFilter);
+	T expand(IIdType theId, String theFilter);
 
-	ValueSet expand(ValueSet theSource, String theFilter);
+	T expand(T theSource, String theFilter);
 
-	ValueSet expandByIdentifier(String theUri, String theFilter);
+	T expandByIdentifier(String theUri, String theFilter);
 
-	LookupCodeResult lookupCode(CodeDt theCode, UriDt theSystem, CodingDt theCoding);
+	LookupCodeResult lookupCode(CodeDt theCode, UriDt theSystem, CD theCoding);
 
-	ValidateCodeResult validateCode(UriDt theValueSetIdentifier, IIdType theId, CodeDt theCode, UriDt theSystem, StringDt theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept);
+	ValidateCodeResult validateCode(UriDt theValueSetIdentifier, IIdType theId, CodeDt theCode, UriDt theSystem, StringDt theDisplay, CD theCoding, CC theCodeableConcept);
 
 	public class LookupCodeResult {
 		private String myCodeDisplay;

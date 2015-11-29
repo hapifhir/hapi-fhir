@@ -33,16 +33,16 @@ import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
-public class BaseJpaSystemProvider<T> extends BaseJpaProvider {
+public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider {
 
-	private IFhirSystemDao<T> myDao;
+	private IFhirSystemDao<T, MT> myDao;
 
 	public BaseJpaSystemProvider() {
 		// nothing
 	}
 
 	@Required
-	public void setDao(IFhirSystemDao<T> theDao) {
+	public void setDao(IFhirSystemDao<T, MT> theDao) {
 		myDao = theDao;
 	}
 
@@ -56,7 +56,7 @@ public class BaseJpaSystemProvider<T> extends BaseJpaProvider {
 		}
 	}
 
-	protected IFhirSystemDao<T> getDao() {
+	protected IFhirSystemDao<T, MT> getDao() {
 		return myDao;
 	}
 

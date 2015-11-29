@@ -51,7 +51,7 @@ public abstract class BaseHasResource {
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
 
-	@Column(name = "RES_VERSION", nullable = true, length = 5)
+	@Column(name = "RES_VERSION", nullable = true, length = 7)
 	@Enumerated(EnumType.STRING)
 	private FhirVersionEnum myFhirVersion;
 

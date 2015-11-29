@@ -1,0 +1,1 @@
+cat tmp.yxy | sort | sed "s/=.*//" | sed "s/^/<baseResourceName>/" | sed "s/\$/<\/baseResourceName>/"

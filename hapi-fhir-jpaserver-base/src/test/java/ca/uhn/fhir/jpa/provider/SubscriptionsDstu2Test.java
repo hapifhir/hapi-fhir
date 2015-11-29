@@ -20,7 +20,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Before;
 import org.junit.Test;
 
-import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptor;
+import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -53,7 +53,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 	public void beforeCreateInterceptor() {
 		super.beforeCreateInterceptor();
 
-		SubscriptionsRequireManualActivationInterceptor interceptor = new SubscriptionsRequireManualActivationInterceptor();
+		SubscriptionsRequireManualActivationInterceptorDstu2 interceptor = new SubscriptionsRequireManualActivationInterceptorDstu2();
 		interceptor.setDao(mySubscriptionDao);
 		myDaoConfig.getInterceptors().add(interceptor);
 	}

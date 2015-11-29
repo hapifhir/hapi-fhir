@@ -43,6 +43,7 @@ import ca.uhn.fhir.context.FhirContext;
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 public class BaseConfig implements SchedulingConfigurer {
 
+	private static FhirContext ourFhirContextDstu21;
 	private static FhirContext ourFhirContextDstu2;
 	private static FhirContext ourFhirContextDstu1;
 	private static FhirContext ourFhirContextDstu2Hl7Org;
@@ -68,6 +69,15 @@ public class BaseConfig implements SchedulingConfigurer {
 			ourFhirContextDstu2 = FhirContext.forDstu2();
 		}
 		return ourFhirContextDstu2;
+	}
+
+	@Bean(name = "myFhirContextDstu21")
+	@Lazy
+	public FhirContext fhirContextDstu21() {
+		if (ourFhirContextDstu21 == null) {
+			ourFhirContextDstu21 = FhirContext.forDstu2_1();
+		}
+		return ourFhirContextDstu21;
 	}
 
 	@Bean(name = "myFhirContextDstu1")

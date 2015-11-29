@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.Map;
 
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
@@ -32,7 +31,7 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
  * @param <T>
  *           The bundle type
  */
-public interface IFhirSystemDao<T> extends IDao {
+public interface IFhirSystemDao<T, MT> extends IDao {
 
 	/**
 	 * Use with caution! This deletes everything!!
@@ -55,7 +54,7 @@ public interface IFhirSystemDao<T> extends IDao {
 	/**
 	 * Not supported for DSTU1
 	 */
-	MetaDt metaGetOperation();
+	MT metaGetOperation();
 
 	int performReindexingPass(Integer theCount);
 

@@ -40,6 +40,7 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Location;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -55,7 +56,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu1Test.class);
 	private static IFhirResourceDao<Observation> ourObservationDao;
 	private static IFhirResourceDao<Patient> ourPatientDao;
-	private static IFhirSystemDao<List<IResource>> ourSystemDao;
+	private static IFhirSystemDao<List<IResource>, MetaDt> ourSystemDao;
 	private RequestDetails myRequestDetails;
 
 	@Test

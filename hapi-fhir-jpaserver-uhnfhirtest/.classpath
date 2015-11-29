@@ -33,5 +33,9 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/hapi-fhir-jpaserver-base"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hapi-fhir-structures-dstu"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hapi-fhir-structures-dstu2"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hapi-fhir-structures-dstu2.1"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

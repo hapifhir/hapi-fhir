@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -36,7 +37,6 @@ import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -97,22 +97,22 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Not supported in DSTU1!
 	 */
-	MetaDt metaAddOperation(IIdType theId1, MetaDt theMetaAdd);
+	<MT extends IBaseMetaType> MT metaAddOperation(IIdType theId1, MT theMetaAdd);
 
 	/**
 	 * Not supported in DSTU1!
 	 */
-	MetaDt metaDeleteOperation(IIdType theId1, MetaDt theMetaDel);
+	<MT extends IBaseMetaType> MT metaDeleteOperation(IIdType theId1, MT theMetaDel);
 
 	/**
 	 * Not supported in DSTU1!
 	 */
-	MetaDt metaGetOperation();
+	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType);
 
 	/**
 	 * Not supported in DSTU1!
 	 */
-	MetaDt metaGetOperation(IIdType theId);
+	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId);
 
 	Set<Long> processMatchUrl(String theMatchUrl);
 

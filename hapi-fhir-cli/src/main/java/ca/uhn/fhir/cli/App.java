@@ -19,6 +19,8 @@ import org.fusesource.jansi.Ansi.Color;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.LoggerFactory;
 
+import com.phloc.commons.io.file.FileUtils;
+
 import ca.uhn.fhir.util.VersionUtil;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
@@ -112,6 +114,8 @@ public class App {
 		System.out.flush();
 		System.out.println("------------------------------------------------------------");
 		System.out.println("\ud83d\udd25 " + ansi().bold() + "HAPI FHIR" + ansi().boldOff() + " " + VersionUtil.getVersion() + " - Command Line Tool");
+		System.out.println("------------------------------------------------------------");
+		System.out.println("Max configured JVM memory (Xmx): " + FileUtils.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
 		System.out.println("------------------------------------------------------------");
 	}
 

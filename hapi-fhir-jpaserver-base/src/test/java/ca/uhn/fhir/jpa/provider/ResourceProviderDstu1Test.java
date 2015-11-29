@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -544,7 +545,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 
-		IFhirSystemDao<List<IResource>> systemDao = ourAppCtx.getBean(IFhirSystemDao.class);
+		IFhirSystemDao<List<IResource>, MetaDt> systemDao = ourAppCtx.getBean(IFhirSystemDao.class);
 		JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(restServer, systemDao);
 		confProvider.setImplementationDescription("THIS IS THE DESC");
 		restServer.setServerConformanceProvider(confProvider);

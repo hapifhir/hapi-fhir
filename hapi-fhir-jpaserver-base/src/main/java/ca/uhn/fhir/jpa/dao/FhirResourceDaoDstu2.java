@@ -66,13 +66,11 @@ import net.sourceforge.cobertura.CoverageIgnore;
 
 public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResourceDao<T> {
 
-	/**
-	 * TODO: set this to required after the next release
-	 */
-	@Autowired(required = false)
+	@Autowired()
 	@Qualifier("myJpaValidationSupportDstu2")
 	private IValidationSupport myJpaValidationSupport;
 
+	
 	@Override
 	protected List<Object> getIncludeValues(FhirTerser theTerser, Include theInclude, IBaseResource theResource, RuntimeResourceDefinition theResourceDef) {
 		List<Object> values;
@@ -139,7 +137,7 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 
 		if (result.isSuccessful()) {
 			MethodOutcome retVal = new MethodOutcome();
-			retVal.setOperationOutcome((OperationOutcome) result.toOperationOutcome());
+			retVal.setOperationOutcome(result.toOperationOutcome());
 			return retVal;
 		} else {
 			throw new PreconditionFailedException("Validation failed", result.toOperationOutcome());

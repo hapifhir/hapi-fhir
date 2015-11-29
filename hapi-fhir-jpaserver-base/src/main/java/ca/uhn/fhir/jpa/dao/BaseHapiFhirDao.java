@@ -105,7 +105,6 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.BaseResource;
-import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -138,9 +137,9 @@ import net.sourceforge.cobertura.CoverageIgnore;
 
 public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
-	static final String OO_SEVERITY_ERROR = "error";
-	static final String OO_SEVERITY_INFO = "information";
-	static final String OO_SEVERITY_WARN = "warning";
+	public static final String OO_SEVERITY_ERROR = "error";
+	public static final String OO_SEVERITY_INFO = "information";
+	public static final String OO_SEVERITY_WARN = "warning";
 
 	/**
 	 * These are parameters which are supported by {@link BaseHapiFhirResourceDao#searchForIds(Map)}
@@ -1035,33 +1034,36 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
-	protected MetaDt toMetaDt(Collection<TagDefinition> tagDefinitions) {
-		MetaDt retVal = new MetaDt();
-		for (TagDefinition next : tagDefinitions) {
-			switch (next.getTagType()) {
-			case PROFILE:
-				retVal.addProfile(next.getCode());
-				break;
-			case SECURITY_LABEL:
-				retVal.addSecurity().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
-				break;
-			case TAG:
-				retVal.addTag().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
-				break;
-			}
-		}
-		return retVal;
-	}
+//	protected MetaDt toMetaDt(Collection<TagDefinition> tagDefinitions) {
+//		MetaDt retVal = new MetaDt();
+//		for (TagDefinition next : tagDefinitions) {
+//			switch (next.getTagType()) {
+//			case PROFILE:
+//				retVal.addProfile(next.getCode());
+//				break;
+//			case SECURITY_LABEL:
+//				retVal.addSecurity().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+//				break;
+//			case TAG:
+//				retVal.addTag().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+//				break;
+//			}
+//		}
+//		return retVal;
+//	}
 
 	@Autowired
 	public void setContext(FhirContext theContext) {
 		myContext = theContext;
 		switch (myContext.getVersion().getVersion()) {
+		case DSTU1:
+			mySearchParamExtractor = new SearchParamExtractorDstu1(theContext);
+			break;
 		case DSTU2:
 			mySearchParamExtractor = new SearchParamExtractorDstu2(theContext);
 			break;
-		case DSTU1:
-			mySearchParamExtractor = new SearchParamExtractorDstu1(theContext);
+		case DSTU2_1:
+			mySearchParamExtractor = new SearchParamExtractorDstu21(theContext);
 			break;
 		case DSTU2_HL7ORG:
 		case DEV:

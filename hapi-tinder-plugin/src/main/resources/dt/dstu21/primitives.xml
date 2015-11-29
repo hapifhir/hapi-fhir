@@ -1,0 +1,324 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Grahame</Author>
+  <LastAuthor>Grahame</LastAuthor>
+  <Created>2012-03-21T19:16:26Z</Created>
+  <LastSaved>2015-03-30T11:54:36Z</LastSaved>
+  <Version>15.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>12975</WindowHeight>
+  <WindowWidth>24000</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>0</WindowTopY>
+  <RefModeR1C1/>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s65">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s66">
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s67">
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s68">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s69">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Imports">
+  <Names>
+   <NamedRange ss:Name="boolean" ss:RefersTo="=Imports!R2C1"/>
+  </Names>
+  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="11" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="66.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="177"/>
+   <Column ss:AutoFitWidth="0" ss:Width="362.25"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="117" ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="181.5"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="183.75"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Span="1"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Data Type</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">Schema</Data></Cell>
+    <Cell><Data ss:Type="String">Json</Data></Cell>
+    <Cell><Data ss:Type="String">RegEx</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">v3</Data></Cell>
+    <Cell><Data ss:Type="String">v2</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">boolean</Data><NamedCell ss:Name="boolean"/></Cell>
+    <Cell><Data ss:Type="String">Value of &quot;true&quot; or &quot;false&quot;</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">boolean</Data></Cell>
+    <Cell><Data ss:Type="String">true | false</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">BL</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">integer</Data></Cell>
+    <Cell><Data ss:Type="String">A whole number</Data></Cell>
+    <Cell><Data ss:Type="String">32 bit number; for values larger than this, use decimal</Data></Cell>
+    <Cell><Data ss:Type="String">int</Data></Cell>
+    <Cell><Data ss:Type="String">number</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">-?([0]|([1-9][0-9]*))</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">INT</Data></Cell>
+    <Cell><Data ss:Type="String">~NM/~SI</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">decimal</Data></Cell>
+    <Cell><Data ss:Type="String">A rational number with implicit precision</Data></Cell>
+    <Cell><Data ss:Type="String">Do not use a IEEE type floating point type, instead use something that works like a true decimal, with inbuilt precision (e.g. Java BigInteger)</Data></Cell>
+    <Cell><Data ss:Type="String">decimal</Data></Cell>
+    <Cell><Data ss:Type="String">number</Data></Cell>
+    <Cell><Data ss:Type="String">-?([0]|([1-9][0-9]*))(\.[0-9]+)?</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">REAL</Data></Cell>
+    <Cell><Data ss:Type="String">~NM</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">base64Binary</Data></Cell>
+    <Cell><Data ss:Type="String">A stream of bytes</Data></Cell>
+    <Cell><Data ss:Type="String">A stream of bytes, base64 encoded</Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">base64Binary</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">BIN</Data></Cell>
+    <Cell><Data ss:Type="String">~ED</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">instant</Data></Cell>
+    <Cell><Data ss:Type="String">An instant in time - known at least to the second</Data></Cell>
+    <Cell><Data ss:Type="String">Note: This is intended for precisely observed times, typically system logs etc., and not human-reported times - for them, see date and dateTime below. Time zone is always required</Data></Cell>
+    <Cell><Data ss:Type="String">dateTime</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">TS</Data></Cell>
+    <Cell><Data ss:Type="String">DTM</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">A sequence of Unicode characters</Data></Cell>
+    <Cell><Data ss:Type="String">Note that FHIR strings may not exceed 1MB in size</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">ST</Data></Cell>
+    <Cell><Data ss:Type="String">ST</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">uri</Data></Cell>
+    <Cell><Data ss:Type="String">String of characters used to identify a name or a resource</Data></Cell>
+    <Cell><Data ss:Type="String">see http://en.wikipedia.org/wiki/Uniform_resource_identifier</Data></Cell>
+    <Cell><Data ss:Type="String">anyURI</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">URL</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="59.25" ss:StyleID="s62">
+    <Cell><Data ss:Type="String">date</Data></Cell>
+    <Cell ss:StyleID="s66"><ss:Data ss:Type="String"
+      xmlns="http://www.w3.org/TR/REC-html40"><Font html:Color="#000000">A date or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  </Font><B><Font
+        html:Color="#000000">Dates SHALL be valid dates.</Font><Font>       </Font></B><Font>      </Font></ss:Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">xs:gYear, xs:gYearMonth, xs:date</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1]))?)?</Data></Cell>
+    <Cell><Data ss:Type="String">Could get fancy and check legal days/month or even leap years, but not worth it.</Data></Cell>
+    <Cell><Data ss:Type="String">TS</Data></Cell>
+    <Cell><Data ss:Type="String">DT</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="109.5" ss:StyleID="s62">
+    <Cell><Data ss:Type="String">dateTime</Data></Cell>
+    <Cell ss:StyleID="s67"><ss:Data ss:Type="String"
+      xmlns="http://www.w3.org/TR/REC-html40">       <Font html:Color="#000000">A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.  </Font><Font>       </Font><B>        <Font
+        html:Color="#000000">Dates SHALL be valid dates.</Font><Font>       </Font></B><Font>      </Font></ss:Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">xs:gYear, xs:gYearMonth, xs:date, xs:dateTime</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">TS</Data></Cell>
+    <Cell><Data ss:Type="String">DTM</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="100.5" ss:StyleID="s68">
+    <Cell><Data ss:Type="String">time</Data></Cell>
+    <Cell><Data ss:Type="String">A time during the day, with no date specified </Data></Cell>
+    <Cell ss:Index="4" ss:StyleID="s69"><Data ss:Type="String">time</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String" x:Ticked="1">([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?</Data></Cell>
+    <Cell ss:StyleID="s69"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">n/a</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">TM</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-1</HorizontalResolution>
+    <VerticalResolution>-1</VerticalResolution>
+   </Print>
+   <Selected/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>8</ActiveRow>
+     <ActiveCol>2</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Patterns">
+  <Names>
+   <NamedRange ss:Name="code" ss:RefersTo="=Patterns!R2C1"/>
+   <NamedRange ss:Name="date" ss:RefersTo="=Imports!R9C1"/>
+   <NamedRange ss:Name="dateTime" ss:RefersTo="=Imports!R10C1"/>
+   <NamedRange ss:Name="id" ss:RefersTo="=Patterns!R5C1"/>
+   <NamedRange ss:Name="oid" ss:RefersTo="=Patterns!R3C1"/>
+   <NamedRange ss:Name="uuid" ss:RefersTo="=Patterns!R4C1"/>
+  </Names>
+  <Table ss:ExpandedColumnCount="8" ss:ExpandedRowCount="8" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s62" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="74.25"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="233.25"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="142.5" ss:Span="3"/>
+   <Column ss:Index="7" ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="199.5"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="108"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Data Type</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">Base</Data></Cell>
+    <Cell><Data ss:Type="String">Schema</Data></Cell>
+    <Cell><Data ss:Type="String">Json</Data></Cell>
+    <Cell><Data ss:Type="String">RegEx</Data></Cell>
+    <Cell><Data ss:Type="String">Regex Comments</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">code</Data><NamedCell ss:Name="code"/></Cell>
+    <Cell><Data ss:Type="String">A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">xs:token</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">[^\s]+([\s][^\s]+)*</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.25">
+    <Cell><Data ss:Type="String">oid</Data><NamedCell ss:Name="oid"/></Cell>
+    <Cell><Data ss:Type="String">An oid represented as a URI</Data></Cell>
+    <Cell><Data ss:Type="String">RFC 3001. See also ISO/IEC 8824:1990 €</Data></Cell>
+    <Cell><Data ss:Type="String">uri</Data></Cell>
+    <Cell><Data ss:Type="String">xs:anyURI+</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">urn:oid:(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="47.25">
+    <Cell><Data ss:Type="String">uuid</Data><NamedCell ss:Name="uuid"/></Cell>
+    <Cell><Data ss:Type="String">A UUID, represented as a URI</Data></Cell>
+    <Cell><Data ss:Type="String">See The Open Group, CDE 1.1 Remote Procedure Call specification, Appendix A.</Data></Cell>
+    <Cell><Data ss:Type="String">uri</Data></Cell>
+    <Cell><Data ss:Type="String">xs:anyURI+</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="105">
+    <Cell><Data ss:Type="String">id</Data><NamedCell ss:Name="id"/></Cell>
+    <Cell><Data ss:Type="String">Any combination of letters, numerals, &quot;-&quot; and &quot;.&quot;, with a length limit of 64 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Ids are case-insensitive.</Data></Cell>
+    <Cell><Data ss:Type="String">RFC 4122</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">xs:string+</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">[A-Za-z0-9\-\.]{1,64}</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">unsignedInt</Data></Cell>
+    <Cell><Data ss:Type="String">An integer with a value that is not negative (e.g. &gt;= 0)</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">integer</Data></Cell>
+    <Cell><Data ss:Type="String">xs:nonNegativeInteger </Data></Cell>
+    <Cell><Data ss:Type="String">number</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">[0]|([1-9][0-9]*)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">positiveInt</Data></Cell>
+    <Cell><Data ss:Type="String">An integer with a value that is positive (e.g. &gt;0)</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">integer</Data></Cell>
+    <Cell><Data ss:Type="String">xs:positiveInteger</Data></Cell>
+    <Cell><Data ss:Type="String">number</Data></Cell>
+    <Cell><Data ss:Type="String">[1-9][0-9]*</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">markdown</Data></Cell>
+    <Cell><Data ss:Type="String">A string that may contain markdown syntax for optional processing by a mark down presentation engine</Data></Cell>
+    <Cell><Data ss:Type="String">Systems are not required to have markdown support, and there is considerable variation in markdown syntax, so the text should be readable without markdown processing. The preferred markdown syntax is described here: http://daringfireball.net/projects/markdown/syntax (and tests here: http://daringfireball.net/projects/downloads/MarkdownTest_1.0.zip) </Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">xs:string</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>4</ActiveRow>
+     <ActiveCol>5</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

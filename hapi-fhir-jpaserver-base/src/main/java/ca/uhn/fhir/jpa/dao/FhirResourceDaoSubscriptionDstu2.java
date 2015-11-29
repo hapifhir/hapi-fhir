@@ -85,7 +85,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		subscriptionEntity.setSubscriptionResource(theEntity);
 		subscriptionEntity.setNextCheck(theEntity.getPublished().getValue());
 		subscriptionEntity.setMostRecentMatch(theEntity.getPublished().getValue());
-		subscriptionEntity.setStatus(theSubscription.getStatusElement().getValueAsEnum());
+		subscriptionEntity.setStatus(theSubscription.getStatusElement().getValue());
 		myEntityManager.persist(subscriptionEntity);
 	}
 
@@ -125,7 +125,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 
 		// SubscriptionCandidateResource
 
-		Collection<Long> subscriptions = mySubscriptionTableDao.finsSubscriptionsWhichNeedToBeChecked(SubscriptionStatusEnum.ACTIVE, new Date());
+		Collection<Long> subscriptions = mySubscriptionTableDao.findSubscriptionsWhichNeedToBeChecked(SubscriptionStatusEnum.ACTIVE.getCode(), new Date());
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -273,7 +273,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 		} else {
 			Query q = myEntityManager.createNamedQuery("Q_HFJ_SUBSCRIPTION_SET_STATUS");
 			q.setParameter("res_id", resourceId);
-			q.setParameter("status", resource.getStatusElement().getValueAsEnum());
+			q.setParameter("status", resource.getStatusElement().getValue());
 			if (q.executeUpdate() > 0) {
 				ourLog.info("Updated subscription status for subscription {} to {}", resourceId, resource.getStatusElement().getValueAsEnum());
 			} else {

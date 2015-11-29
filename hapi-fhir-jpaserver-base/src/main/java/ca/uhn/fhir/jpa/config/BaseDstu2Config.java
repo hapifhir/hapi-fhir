@@ -30,6 +30,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.FhirSearchDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.ISearchDao;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 
 @Configuration
 @EnableTransactionManagement
@@ -42,7 +43,7 @@ public class BaseDstu2Config extends BaseConfig {
 	}
 
 	@Bean(name = "mySystemDaoDstu2", autowire = Autowire.BY_NAME)
-	public IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle> systemDaoDstu2() {
+	public IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle, MetaDt> systemDaoDstu2() {
 		ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2 retVal = new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2();
 		return retVal;
 	}

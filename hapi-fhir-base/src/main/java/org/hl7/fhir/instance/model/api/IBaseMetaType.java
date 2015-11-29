@@ -21,15 +21,28 @@ package org.hl7.fhir.instance.model.api;
  */
 
 import java.util.Date;
+import java.util.List;
 
 public interface IBaseMetaType extends ICompositeType {
 
-	IBaseCoding addTag();
+	IBaseMetaType addProfile(String theProfile);
 
-	IBaseMetaType setLastUpdated(Date theHeaderDateValue);
+	IBaseCoding addSecurity();
+
+	IBaseCoding addTag();
 
 	Date getLastUpdated();
 
+	List<? extends IPrimitiveType<String>> getProfile();
+
+	List<? extends IBaseCoding> getSecurity();
+
+	List<? extends IBaseCoding> getTag();
+
 	String getVersionId();
+
+	IBaseMetaType setLastUpdated(Date theHeaderDateValue);
 	
+	IBaseMetaType setVersionId(String theVersionId);
+
 }

@@ -11,9 +11,7 @@
 	<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
 	<packaging>jar</packaging>
 
-	<url>http://jamesagnew.github.io/hapi-fhir/</url>
-
-	<name>HAPI FHIR - Validation Resources</name>
+	<name>HAPI FHIR - Validation Resources (DSTU2)</name>
 
 	<build>
 		<resources>

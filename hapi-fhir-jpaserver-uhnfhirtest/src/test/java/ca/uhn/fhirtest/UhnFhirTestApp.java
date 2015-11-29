@@ -1,13 +1,9 @@
 package ca.uhn.fhirtest;
 
-import java.util.List;
-
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -29,9 +25,12 @@ public class UhnFhirTestApp {
 		//		new File("target/testdb").mkdirs();
 		System.setProperty("fhir.db.location", "./target/testdb");
 		System.setProperty("fhir.db.location.dstu2", "./target/testdb_dstu2");
+		System.setProperty("fhir.db.location.dstu21", "./target/testdb_dstu21");
 		System.setProperty("fhir.lucene.location.dstu2", "./target/testlucene_dstu2");
+		System.setProperty("fhir.lucene.location.dstu21", "./target/testlucene_dstu21");
 		System.setProperty("fhir.baseurl.dstu1", base.replace("Dstu2", "Dstu1"));
 		System.setProperty("fhir.baseurl.dstu2", base);
+		System.setProperty("fhir.baseurl.dstu21", base.replace("Dstu2", "Dstu21"));
 		
 		Server server = new Server(myPort);
 

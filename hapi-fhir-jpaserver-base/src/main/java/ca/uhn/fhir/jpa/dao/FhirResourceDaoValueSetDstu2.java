@@ -58,7 +58,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.ValidationSupportChain;
 
-public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>implements IFhirResourceDaoValueSet<ValueSet> {
+public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>implements IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> {
 
 	@Autowired
 	private IJpaValidationSupport myJpaValidationSupport;

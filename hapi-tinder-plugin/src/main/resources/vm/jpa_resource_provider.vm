@@ -6,7 +6,7 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 
 #if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers'))
-import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider${className}Dstu2;
+import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider${className}${versionCapitalized};
 #else
 import ca.uhn.fhir.jpa.provider.JpaResourceProvider${versionCapitalized};
 #end 

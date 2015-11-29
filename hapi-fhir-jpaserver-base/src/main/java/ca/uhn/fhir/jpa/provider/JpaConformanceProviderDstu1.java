@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
 import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -48,7 +49,7 @@ public class JpaConformanceProviderDstu1 extends ServerConformanceProvider {
 	private volatile Conformance myCachedValue;
 	private String myImplementationDescription;
 	private RestfulServer myRestfulServer;
-	private IFhirSystemDao<List<IResource>> mySystemDao;
+	private IFhirSystemDao<List<IResource>, ca.uhn.fhir.model.dstu2.composite.MetaDt> mySystemDao;
 
 	/**
 	 * Constructor
@@ -62,7 +63,7 @@ public class JpaConformanceProviderDstu1 extends ServerConformanceProvider {
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderDstu1(RestfulServer theRestfulServer, IFhirSystemDao<List<IResource>> theSystemDao) {
+	public JpaConformanceProviderDstu1(RestfulServer theRestfulServer, IFhirSystemDao<List<IResource>, ca.uhn.fhir.model.dstu2.composite.MetaDt> theSystemDao) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
@@ -120,7 +121,7 @@ public class JpaConformanceProviderDstu1 extends ServerConformanceProvider {
 	}
 
 	@CoverageIgnore
-	public void setSystemDao(IFhirSystemDao<List<IResource>> mySystemDao) {
+	public void setSystemDao(IFhirSystemDao<List<IResource>, MetaDt> mySystemDao) {
 		this.mySystemDao = mySystemDao;
 	}
 

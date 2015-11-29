@@ -26,18 +26,18 @@ import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 
 public class BaseJpaPlainProvider extends BaseJpaProvider {
 
-	private IFhirSystemDao<?> myDao;
+	private IFhirSystemDao<?,?> myDao;
 
 	public BaseJpaPlainProvider() {
 		// nothing
 	}
 
 	@Required
-	public void setDao(IFhirSystemDao<?> theDao) {
+	public void setDao(IFhirSystemDao<?,?> theDao) {
 		myDao = theDao;
 	}
 
-	public IFhirSystemDao<?> getDao() {
+	public IFhirSystemDao<?,?> getDao() {
 		return myDao;
 	}
 

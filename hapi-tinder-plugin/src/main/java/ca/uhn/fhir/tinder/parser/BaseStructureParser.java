@@ -421,7 +421,7 @@ public abstract class BaseStructureParser {
 		ctx.put("hash", "#");
 		ctx.put("imports", imports);
 		ctx.put("profile", theResource.getProfile());
-		ctx.put("version", myVersion);
+		ctx.put("version", myVersion.replace(".", ""));
 		ctx.put("versionEnumName", determineVersionEnum().name());
 		ctx.put("id", StringUtils.defaultString(theResource.getId()));
 		if (theResource.getDeclaringClassNameComplete() != null) {
@@ -528,7 +528,7 @@ public abstract class BaseStructureParser {
 				VelocityContext ctx = new VelocityContext();
 				ctx.put("nameToResourceClass", myNameToResourceClass);
 				ctx.put("nameToDatatypeClass", myNameToDatatypeClass);
-				ctx.put("version", myVersion);
+				ctx.put("version", myVersion.replace(".", ""));
 				ctx.put("versionEnumName", determineVersionEnum().name());
 				ctx.put("esc", new EscapeTool());
 				
@@ -561,6 +561,8 @@ public abstract class BaseStructureParser {
 			versionEnum = FhirVersionEnum.DSTU1;
 		} else if ("dstu2".equals(myVersion)) {
 			versionEnum = FhirVersionEnum.DSTU2;
+		} else if ("dstu21".equals(myVersion)) {
+			versionEnum = FhirVersionEnum.DSTU2_1;
 		} else if ("dev".equals(myVersion)) {
 			versionEnum = FhirVersionEnum.DEV;
 		} else {

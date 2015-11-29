@@ -44,6 +44,9 @@ import ca.uhn.fhir.jpa.entity.SubscriptionFlaggedResource;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.ConceptMap;
 import ca.uhn.fhir.model.dstu2.resource.Device;
@@ -152,7 +155,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected IFhirResourceDao<Substance> mySubstanceDao;
 	@Autowired
 	@Qualifier("mySystemDaoDstu2")
-	protected IFhirSystemDao<Bundle> mySystemDao;
+	protected IFhirSystemDao<Bundle, MetaDt> mySystemDao;
 	@Autowired
 	@Qualifier("mySystemProviderDstu2")
 	protected JpaSystemProviderDstu2 mySystemProvider;
@@ -160,12 +163,19 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("myValueSetDaoDstu2")
-	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> myValueSetDao;
 
 	@Before
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
 		myDaoConfig.setInterceptors(myInterceptor);
+	}
+
+	@Before
+	public void beforeResetConfig() {
+		myDaoConfig.setHardSearchLimit(1000);
+		myDaoConfig.setHardTagListLimit(1000);
+		myDaoConfig.setIncludeLimit(2000);
 	}
 
 	@Before

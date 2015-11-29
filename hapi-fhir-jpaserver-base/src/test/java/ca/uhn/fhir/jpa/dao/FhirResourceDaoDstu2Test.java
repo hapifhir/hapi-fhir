@@ -1094,6 +1094,14 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	public void testHistoryOverMultiplePages() throws Exception {
 		String methodName = "testHistoryOverMultiplePages";
 
+		/*
+		for (int i = 0; i < 1000; i++) {
+			Patient patient = new Patient();
+			patient.addName().addFamily(methodName + "__" + i);
+			myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		*/
+		
 		Patient patient = new Patient();
 		patient.addName().addFamily(methodName);
 		IIdType id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
@@ -1181,30 +1189,32 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		// By instance
 		history = myPatientDao.history(id, null);
-		assertEquals(fullSize + 1, history.size());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
+		assertEquals(log(history), fullSize + 1, history.size());
 
 		// By type
 		history = myPatientDao.history(null);
-		assertEquals(fullSize + 1, history.size());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
+		ourLog.info(log(history));
+		ourLog.info("Want {} but got {}", fullSize + 1, history.size());
+		assertEquals(log(history), fullSize + 1, history.size()); // fails?
 
 		// By server
 		history = mySystemDao.history(null);
-		assertEquals(fullSize + 1, history.size());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
+		assertEquals(log(history), fullSize + 1, history.size());
 
 		/*
 		 * With since date
@@ -1212,31 +1222,39 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		// By instance
 		history = myPatientDao.history(id, middleDate);
-		assertEquals(halfSize, history.size());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
+		assertEquals(halfSize, history.size());
 
 		// By type
 		history = myPatientDao.history(middleDate);
-		assertEquals(halfSize, history.size());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
+		assertEquals(halfSize, history.size());
 
 		// By server
 		history = mySystemDao.history(middleDate);
-		assertEquals(halfSize, history.size());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
+		assertEquals(halfSize, history.size());
 
+	}
+
+	private String log(IBundleProvider theHistory) {
+		StringBuilder b =new StringBuilder(theHistory.size() + " results: ");
+		for (IBaseResource next : theHistory.getResources(0, theHistory.size())) {
+			b.append("\n ").append(next.getIdElement().toUnqualified().getValue());
+		}
+		return b.toString();
 	}
 
 	@Test
@@ -1399,7 +1417,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		 * Meta Read on Version
 		 */
 
-		meta = myPatientDao.metaGetOperation(id.withVersion("1"));
+		meta = myPatientDao.metaGetOperation(MetaDt.class, id.withVersion("1"));
 		assertEquals(1, meta.getProfile().size());
 		assertEquals(1, meta.getSecurity().size());
 		assertEquals(1, meta.getTag().size());
@@ -1410,7 +1428,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		/*
 		 * Meta-read on Version 2
 		 */
-		meta = myPatientDao.metaGetOperation(id.withVersion("2"));
+		meta = myPatientDao.metaGetOperation(MetaDt.class, id.withVersion("2"));
 		assertEquals(2, meta.getProfile().size());
 		assertEquals(2, meta.getSecurity().size());
 		assertEquals(2, meta.getTag().size());
@@ -1418,7 +1436,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		/*
 		 * Meta-read on latest version
 		 */
-		meta = myPatientDao.metaGetOperation(id.toVersionless());
+		meta = myPatientDao.metaGetOperation(MetaDt.class, id.toVersionless());
 		assertEquals(2, meta.getProfile().size());
 		assertEquals(2, meta.getSecurity().size());
 		assertEquals(2, meta.getTag().size());
@@ -1441,7 +1459,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		 * Meta Read on Version
 		 */
 
-		meta = myPatientDao.metaGetOperation(id.withVersion("1"));
+		meta = myPatientDao.metaGetOperation(MetaDt.class, id.withVersion("1"));
 		assertEquals(2, meta.getProfile().size());
 		assertEquals(2, meta.getSecurity().size());
 		assertEquals(2, meta.getTag().size());
@@ -1933,7 +1951,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		MetaDt meta;
 
-		meta = myPatientDao.metaGetOperation();
+		meta = myPatientDao.metaGetOperation(MetaDt.class);
 		List<CodingDt> published = meta.getTag();
 		assertEquals(2, published.size());
 		assertEquals(null, published.get(0).getSystem());
@@ -1955,7 +1973,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
 
-		meta = myPatientDao.metaGetOperation(id2);
+		meta = myPatientDao.metaGetOperation(MetaDt.class, id2);
 		published = meta.getTag();
 		assertEquals(1, published.size());
 		assertEquals("http://foo", published.get(0).getSystem());
@@ -1978,7 +1996,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			myPatientDao.metaDeleteOperation(id1, metaDel);
 		}
 
-		meta = myPatientDao.metaGetOperation();
+		meta = myPatientDao.metaGetOperation(MetaDt.class);
 		published = meta.getTag();
 		assertEquals(1, published.size());
 		assertEquals("http://foo", published.get(0).getSystem());
@@ -2056,7 +2074,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		MetaDt meta;
 
-		meta = myPatientDao.metaGetOperation();
+		meta = myPatientDao.metaGetOperation(MetaDt.class);
 		List<CodingDt> published = meta.getTag();
 		assertEquals(2, published.size());
 		assertEquals(null, published.get(0).getSystem());
@@ -2078,7 +2096,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
 
-		meta = myPatientDao.metaGetOperation(id2);
+		meta = myPatientDao.metaGetOperation(MetaDt.class, id2);
 		published = meta.getTag();
 		assertEquals(1, published.size());
 		assertEquals("http://foo", published.get(0).getSystem());
@@ -2097,7 +2115,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myPatientDao.removeTag(id1, TagTypeEnum.SECURITY_LABEL, "seclabel:sys:1", "seclabel:code:1");
 		myPatientDao.removeTag(id1, TagTypeEnum.PROFILE, BaseHapiFhirDao.NS_JPA_PROFILE, "http://profile/1");
 
-		meta = myPatientDao.metaGetOperation();
+		meta = myPatientDao.metaGetOperation(MetaDt.class);
 		published = meta.getTag();
 		assertEquals(1, published.size());
 		assertEquals("http://foo", published.get(0).getSystem());

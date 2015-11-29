@@ -22,10 +22,16 @@ package org.hl7.fhir.instance.model.api;
 
 public interface IBaseCoding {
 
-	IBaseCoding setSystem(String theScheme);
+	String getCode();
+
+	String getDisplay();
+
+	String getSystem();
 
 	IBaseCoding setCode(String theTerm);
 
 	IBaseCoding setDisplay(String theLabel);
+
+	IBaseCoding setSystem(String theScheme);
 
 }

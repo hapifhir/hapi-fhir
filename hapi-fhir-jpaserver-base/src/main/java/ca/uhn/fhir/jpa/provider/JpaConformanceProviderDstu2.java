@@ -30,6 +30,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
@@ -51,7 +52,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	private DaoConfig myDaoConfig;
 	private String myImplementationDescription;
 	private RestfulServer myRestfulServer;
-	private IFhirSystemDao<Bundle> mySystemDao;
+	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
 
 	/**
 	 * Constructor
@@ -65,7 +66,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderDstu2(RestfulServer theRestfulServer, IFhirSystemDao<Bundle> theSystemDao, DaoConfig theDaoConfig) {
+	public JpaConformanceProviderDstu2(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, MetaDt> theSystemDao, DaoConfig theDaoConfig) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
@@ -134,7 +135,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	}
 
 	@CoverageIgnore
-	public void setSystemDao(IFhirSystemDao<Bundle> mySystemDao) {
+	public void setSystemDao(IFhirSystemDao<Bundle, MetaDt> mySystemDao) {
 		this.mySystemDao = mySystemDao;
 	}
 }

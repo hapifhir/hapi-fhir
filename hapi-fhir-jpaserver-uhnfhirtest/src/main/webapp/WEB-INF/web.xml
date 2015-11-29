@@ -15,8 +15,6 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
 			ca.uhn.fhirtest.config.DbServerConfig
-			ca.uhn.fhirtest.config.TestDstu2Config
-			ca.uhn.fhir.jpa.config.WebsocketDstu2Config
 		</param-value>
 	</context-param>
 	
@@ -76,7 +74,7 @@
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (DSTU1 Resources)</param-value>
+			<param-value>UHN Test Server (DSTU 1 Resources)</param-value>
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
@@ -90,11 +88,25 @@
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (DSTU2 Resources)</param-value>
+			<param-value>UHN Test Server (DSTU 2 Resources)</param-value>
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
 			<param-value>DSTU2</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
+		<servlet-name>fhirServletDstu21</servlet-name>
+		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
+		<init-param>
+			<param-name>ImplementationDescription</param-name>
+			<param-value>UHN Test Server (DSTU 2.1 Resources)</param-value>
+		</init-param>
+		<init-param>
+			<param-name>FhirVersion</param-name>
+			<param-value>DSTU21</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
@@ -114,6 +126,11 @@
 		<url-pattern>/baseDstu2/*</url-pattern>
 	</servlet-mapping>
 	
+	<servlet-mapping>
+		<servlet-name>fhirServletDstu21</servlet-name>
+		<url-pattern>/baseDstu2.1/*</url-pattern>
+	</servlet-mapping>
+
 	<servlet-mapping>
 		<servlet-name>fhirServletDstu2</servlet-name>
 		<url-pattern>/baseDev/*</url-pattern>

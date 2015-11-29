@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Primary;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 
 @Configuration
 public class BaseDstu1Config extends BaseConfig {
@@ -40,7 +41,7 @@ public class BaseDstu1Config extends BaseConfig {
 	}
 
 	@Bean(name = "mySystemDaoDstu1", autowire = Autowire.BY_NAME)
-	public ca.uhn.fhir.jpa.dao.IFhirSystemDao<List<IResource>> fhirSystemDaoDstu1() {
+	public ca.uhn.fhir.jpa.dao.IFhirSystemDao<List<IResource>, MetaDt> fhirSystemDaoDstu1() {
 		ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu1 retVal = new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu1();
 		return retVal;
 	}

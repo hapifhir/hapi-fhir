@@ -50,11 +50,11 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
-public class JpaSystemProviderDstu2 extends BaseJpaSystemProvider<Bundle> {
+public class JpaSystemProviderDstu2 extends BaseJpaSystemProvider<Bundle, MetaDt> {
 
 	@Autowired()
 	@Qualifier("mySystemDaoDstu2")
-	private IFhirSystemDao<Bundle> mySystemDao;
+	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
 
 	@Autowired
 	private ISearchDao mySearchDao;

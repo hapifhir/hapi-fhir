@@ -128,13 +128,13 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		assertNotNull(table);
 		assertNotNull(table.getNextCheck());
 		assertEquals(table.getNextCheck(), table.getSubscriptionResource().getPublished().getValue());
-		assertEquals(SubscriptionStatusEnum.REQUESTED, myEntityManager.find(SubscriptionTable.class, table.getId()).getStatus());
+		assertEquals(SubscriptionStatusEnum.REQUESTED.getCode(), myEntityManager.find(SubscriptionTable.class, table.getId()).getStatus());
 		assertEquals(SubscriptionStatusEnum.REQUESTED, mySubscriptionDao.read(id).getStatusElement().getValueAsEnum());
 
 		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
 		mySubscriptionDao.update(subs);
 
-		assertEquals(SubscriptionStatusEnum.ACTIVE, myEntityManager.find(SubscriptionTable.class, table.getId()).getStatus());
+		assertEquals(SubscriptionStatusEnum.ACTIVE.getCode(), myEntityManager.find(SubscriptionTable.class, table.getId()).getStatus());
 		assertEquals(SubscriptionStatusEnum.ACTIVE, mySubscriptionDao.read(id).getStatusElement().getValueAsEnum());
 
 		mySubscriptionDao.delete(id);
@@ -152,7 +152,7 @@ public class FhirResourceDaoDstu2SubscriptionTest extends BaseJpaDstu2Test {
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		mySubscriptionDao.update(subs);
 
-		assertEquals(SubscriptionStatusEnum.REQUESTED, myEntityManager.createQuery("SELECT t FROM SubscriptionTable t WHERE t.myResId = " + id.getIdPart(), SubscriptionTable.class).getSingleResult().getStatus());
+		assertEquals(SubscriptionStatusEnum.REQUESTED.getCode(), myEntityManager.createQuery("SELECT t FROM SubscriptionTable t WHERE t.myResId = " + id.getIdPart(), SubscriptionTable.class).getSingleResult().getStatus());
 		assertEquals(SubscriptionStatusEnum.REQUESTED, mySubscriptionDao.read(id).getStatusElement().getValueAsEnum());
 	}
 

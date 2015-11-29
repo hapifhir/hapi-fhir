@@ -50,7 +50,7 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 
-public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>> {
+public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>, MetaDt> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu1.class);
 
 	@Override

@@ -40,9 +40,12 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -69,15 +72,13 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -168,11 +169,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return doCreate(theResource, theIfNoneExist, thePerformIndexing, new Date());
 	}
 
-	protected IBaseOperationOutcome createErrorOperationOutcome(String theMessage) {
+	public IBaseOperationOutcome createErrorOperationOutcome(String theMessage) {
 		return createOperationOutcome(OO_SEVERITY_ERROR, theMessage);
 	}
 
-	protected IBaseOperationOutcome createInfoOperationOutcome(String theMessage) {
+	public IBaseOperationOutcome createInfoOperationOutcome(String theMessage) {
 		return createOperationOutcome(OO_SEVERITY_INFO, theMessage);
 	}
 
@@ -502,7 +503,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	}
 
 	@Override
-	public MetaDt metaAddOperation(IIdType theResourceId, MetaDt theMetaAdd) {
+	public <MT extends IBaseMetaType> MT metaAddOperation(IIdType theResourceId, MT theMetaAdd) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theResourceId, getResourceName());
 		notifyInterceptors(RestOperationTypeEnum.META_ADD, requestDetails);
@@ -541,7 +542,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		myEntityManager.merge(entity);
 		ourLog.info("Processed metaAddOperation on {} in {}ms", new Object[] { theResourceId, w.getMillisAndRestart() });
 
-		return metaGetOperation(theResourceId);
+		@SuppressWarnings("unchecked")
+		MT retVal = (MT) metaGetOperation(theMetaAdd.getClass(), theResourceId);
+		return retVal;
 	}
 
 	// @Override
@@ -627,7 +630,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	// }
 
 	@Override
-	public MetaDt metaDeleteOperation(IIdType theResourceId, MetaDt theMetaDel) {
+	public <MT extends IBaseMetaType> MT metaDeleteOperation(IIdType theResourceId, MT theMetaDel) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theResourceId, getResourceName());
 		notifyInterceptors(RestOperationTypeEnum.META_DELETE, requestDetails);
@@ -662,11 +665,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		ourLog.info("Processed metaDeleteOperation on {} in {}ms", new Object[] { theResourceId.getValue(), w.getMillisAndRestart() });
 
-		return metaGetOperation(theResourceId);
+		@SuppressWarnings("unchecked")
+		MT retVal = (MT)metaGetOperation(theMetaDel.getClass(), theResourceId);
+		return retVal;
 	}
 
 	@Override
-	public MetaDt metaGetOperation() {
+	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(null, getResourceName());
 		notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
@@ -676,13 +681,36 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		q.setParameter("res_type", myResourceName);
 		List<TagDefinition> tagDefinitions = q.getResultList();
 
-		MetaDt retVal = super.toMetaDt(tagDefinitions);
+		MT retVal = toMetaDt(theType, tagDefinitions);
 
+		return retVal;
+	}
+	
+	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {
+		MT retVal;
+		try {
+			retVal = theType.newInstance();
+		} catch (Exception e) {
+			throw new InternalErrorException("Failed to instantiate " + theType.getName(), e);
+		}
+		for (TagDefinition next : tagDefinitions) {
+			switch (next.getTagType()) {
+			case PROFILE:
+				retVal.addProfile(next.getCode());
+				break;
+			case SECURITY_LABEL:
+				retVal.addSecurity().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+				break;
+			case TAG:
+				retVal.addTag().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+				break;
+			}
+		}
 		return retVal;
 	}
 
 	@Override
-	public MetaDt metaGetOperation(IIdType theId) {
+	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, getResourceName());
 		notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
@@ -692,9 +720,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		for (BaseTag next : entity.getTags()) {
 			tagDefs.add(next.getTag());
 		}
-		MetaDt retVal = super.toMetaDt(tagDefs);
+		MT retVal = toMetaDt(theType, tagDefs);
 
-		retVal.setLastUpdated(entity.getUpdated());
+		retVal.setLastUpdated(entity.getUpdatedDate());
 		retVal.setVersionId(Long.toString(entity.getVersion()));
 
 		return retVal;
@@ -934,16 +962,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return retVal;
 	}
 
-	private ArrayList<TagDefinition> toTagList(MetaDt theMeta) {
+	private ArrayList<TagDefinition> toTagList(IBaseMetaType theMeta) {
 		ArrayList<TagDefinition> retVal = new ArrayList<TagDefinition>();
 
-		for (CodingDt next : theMeta.getTag()) {
+		for (IBaseCoding next : theMeta.getTag()) {
 			retVal.add(new TagDefinition(TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay()));
 		}
-		for (CodingDt next : theMeta.getSecurity()) {
+		for (IBaseCoding next : theMeta.getSecurity()) {
 			retVal.add(new TagDefinition(TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay()));
 		}
-		for (UriDt next : theMeta.getProfile()) {
+		for (IPrimitiveType<String> next : theMeta.getProfile()) {
 			retVal.add(new TagDefinition(TagTypeEnum.PROFILE, BaseHapiFhirDao.NS_JPA_PROFILE, next.getValue(), null));
 		}
 
