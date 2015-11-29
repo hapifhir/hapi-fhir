@@ -106,6 +106,7 @@ public class ValueSetGenerator {
 		if (version.equals("dstu21")) {
 			name = "/org/hl7/fhir/instance/model/dstu21/valueset/valuesets.xml";
 		}
+		ourLog.info("Loading valuesets from: {}", name);
 		String vs = IOUtils.toString(ValueSetGenerator.class.getResourceAsStream(name));
 		if ("dstu".equals(myVersion)) {
 			Bundle bundle = newXmlParser.parseBundle(vs);
