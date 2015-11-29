@@ -1,5 +1,28 @@
 package ca.uhn.fhir.rest.server.servlet;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
+/*
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 - 2015 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -9,17 +32,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.tools.ant.taskdefs.GUnzip;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.BaseMethodBinding.IRequestReader;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -72,6 +99,16 @@ public class ServletRequestDetails extends RequestDetails {
 		try {
 			InputStream inputStream = reader.getInputStream(this);
 			requestContents = IOUtils.toByteArray(inputStream);
+			
+			if (myServer.isUncompressIncomingContents()) {
+				String contentEncoding = myServletRequest.getHeader(Constants.HEADER_CONTENT_ENCODING);
+				if ("gzip".equals(contentEncoding)) {
+					ourLog.debug("Uncompressing (GZip) incoming content");
+					GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(requestContents));
+					requestContents = IOUtils.toByteArray(gis);
+				}
+			}
+			
 			return requestContents;
 		} catch (IOException e) {
 			ourLog.error("Could not load request resource", e);

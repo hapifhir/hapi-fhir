@@ -39,7 +39,7 @@ import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 
 public abstract class RequestDetails {
 
-	private byte[] myRequestContents;	
+	private byte[] myRequestContents;
 	private String myCompartmentName;
 	private String myCompleteUrl;
 	private String myFhirServerBase;
@@ -54,7 +54,7 @@ public abstract class RequestDetails {
 	private String mySecondaryOperation;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
 	private IRestfulResponse myResponse;
-	
+
 	public String getCompartmentName() {
 		return myCompartmentName;
 	}
@@ -65,6 +65,7 @@ public abstract class RequestDetails {
 
 	/**
 	 * The fhir server base url, independant of the query being executed
+	 * 
 	 * @return the fhir server base url
 	 */
 	public String getFhirServerBase() {
@@ -192,66 +193,64 @@ public abstract class RequestDetails {
 		mySecondaryOperation = theSecondaryOperation;
 	}
 
-    public IRestfulResponse getResponse() {
-        return myResponse;
-    }
+	public IRestfulResponse getResponse() {
+		return myResponse;
+	}
 
-    public void setResponse(IRestfulResponse theResponse) {
-        this.myResponse = theResponse;
-    }
+	public void setResponse(IRestfulResponse theResponse) {
+		this.myResponse = theResponse;
+	}
 
-    public abstract String getHeader(String name);
-    
-	public final byte[] loadRequestContents(RequestDetails theRequest) {
+	public abstract String getHeader(String name);
+
+	public final byte[] loadRequestContents() {
 		if (myRequestContents == null) {
 			myRequestContents = getByteStreamRequestContents();
 		}
 		return myRequestContents;
 	}
 
-	protected abstract byte[] getByteStreamRequestContents();    
+	protected abstract byte[] getByteStreamRequestContents();
 
-    public abstract List<String> getHeaders(String name);
+	public abstract List<String> getHeaders(String name);
 
-    /**
-     * Retrieves the body of the request as character data using
-     * a <code>BufferedReader</code>.  The reader translates the character
-     * data according to the character encoding used on the body.
-     * Either this method or {@link #getInputStream} may be called to read the
-     * body, not both.
-     * 
-     * @return a <code>Reader</code> containing the body of the request 
-     *
-     * @exception UnsupportedEncodingException  if the character set encoding
-     * used is not supported and the text cannot be decoded
-     *
-     * @exception IllegalStateException if {@link #getInputStream} method
-     * has been called on this request
-     *
-     * @exception IOException if an input or output exception occurred
-     *
-     * @see javax.servlet.http.HttpServletRequest#getInputStream
-     */    
-    public abstract Reader getReader() throws IOException;
+	/**
+	 * Retrieves the body of the request as character data using a <code>BufferedReader</code>. The reader translates the
+	 * character data according to the character encoding used on the body. Either this method or {@link #getInputStream}
+	 * may be called to read the body, not both.
+	 * 
+	 * @return a <code>Reader</code> containing the body of the request
+	 *
+	 * @exception UnsupportedEncodingException
+	 *               if the character set encoding used is not supported and the text cannot be decoded
+	 *
+	 * @exception IllegalStateException
+	 *               if {@link #getInputStream} method has been called on this request
+	 *
+	 * @exception IOException
+	 *               if an input or output exception occurred
+	 *
+	 * @see javax.servlet.http.HttpServletRequest#getInputStream
+	 */
+	public abstract Reader getReader() throws IOException;
 
-    /**
-     * Retrieves the body of the request as binary data.  
-     * Either this method or {@link #getReader} may be called to 
-     * read the body, not both.
-     *
-     * @return a {@link InputStream} object containing
-     * the body of the request
-     *
-     * @exception IllegalStateException if the {@link #getReader} method
-     * has already been called for this request
-     *
-     * @exception IOException if an input or output exception occurred
-     */
-    public abstract InputStream getInputStream() throws IOException;
+	/**
+	 * Retrieves the body of the request as binary data. Either this method or {@link #getReader} may be called to read
+	 * the body, not both.
+	 *
+	 * @return a {@link InputStream} object containing the body of the request
+	 *
+	 * @exception IllegalStateException
+	 *               if the {@link #getReader} method has already been called for this request
+	 *
+	 * @exception IOException
+	 *               if an input or output exception occurred
+	 */
+	public abstract InputStream getInputStream() throws IOException;
 
-    /**
-     * Returns the server base URL (with no trailing '/') for a given request
-     */    
-    public abstract String getServerBaseForRequest();
+	/**
+	 * Returns the server base URL (with no trailing '/') for a given request
+	 */
+	public abstract String getServerBaseForRequest();
 
 }

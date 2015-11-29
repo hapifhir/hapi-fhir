@@ -7,7 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
-import java.net.URL;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,21 +25,24 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.fusesource.jansi.Ansi;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import com.phloc.commons.io.file.FileUtils;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryRequest;
-import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
-import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.GZipContentInterceptor;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 public class ExampleDataUploader extends BaseCommand {
@@ -72,6 +75,10 @@ public class ExampleDataUploader extends BaseCommand {
 		options.addOption(opt);
 
 		opt = new Option("l", "limit", true, "Sets a limit to the number of resources the uploader will try to upload");
+		opt.setRequired(false);
+		options.addOption(opt);
+
+		opt = new Option("c", "cache", true, "Store a copy of the downloaded example pack on the local disk using a file of the given name. Use this file instead of fetching it from the internet if the file already exists.");
 		opt.setRequired(false);
 		options.addOption(opt);
 
@@ -121,8 +128,8 @@ public class ExampleDataUploader extends BaseCommand {
 		}
 		Bundle bundle = new Bundle();
 		{
-
-			byte[] inputBytes = IOUtils.toByteArray(result.getEntity().getContent());
+			byte[] inputBytes = readStreamFromInternet(result);
+			
 			IOUtils.closeQuietly(result.getEntity().getContent());
 
 			ourLog.info("Successfully Loaded example pack ({} bytes)", inputBytes.length);
@@ -163,26 +170,23 @@ public class ExampleDataUploader extends BaseCommand {
 				}
 				ourLog.info("Found example {} - {} - {} chars", nextEntry.getName(), parsed.getClass().getSimpleName(), exampleString.length());
 
-				if (parsed instanceof Bundle) {
-					Bundle b = (Bundle) parsed;
-					if (b.getTypeElement().getValueAsEnum() != BundleTypeEnum.DOCUMENT) {
-						continue;
-					}
+				if (ctx.getResourceDefinition(parsed).getName().equals("Bundle")) {
+					BaseRuntimeChildDefinition entryChildDef = ctx.getResourceDefinition(parsed).getChildByName("entry");
+					BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
 
-					for (Entry nextEntry1 : b.getEntry()) {
-						if (nextEntry1.getResource() == null) {
+					for (IBase nextEntry1 : entryChildDef.getAccessor().getValues(parsed)) {
+						List<IBase> resources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry1);
+						if (resources == null) {
 							continue;
 						}
-						if (nextEntry1.getResource() instanceof Bundle) {
-							continue;
+						for (IBase nextResource : resources) {
+							if (!ctx.getResourceDefinition(parsed).getName().equals("Bundle") && ctx.getResourceDefinition(parsed).getName().equals("SearchParameter")) {
+								bundle.addEntry().setRequest(new EntryRequest().setMethod(HTTPVerbEnum.POST)).setResource((IResource) nextResource);
+							}
 						}
-						if (nextEntry1.getResource() instanceof SearchParameter) {
-							continue;
-						}
-						bundle.addEntry().setRequest(new EntryRequest().setMethod(HTTPVerbEnum.POST)).setResource(nextEntry1.getResource());
 					}
 				} else {
-					if (parsed instanceof SearchParameter) {
+					if (ctx.getResourceDefinition(parsed).getName().equals("SearchParameter")) {
 						continue;
 					}
 					bundle.addEntry().setRequest(new EntryRequest().setMethod(HTTPVerbEnum.POST)).setResource((IResource) parsed);
@@ -242,6 +246,7 @@ public class ExampleDataUploader extends BaseCommand {
 					}
 					next.getRequest().setMethod(HTTPVerbEnum.PUT);
 					next.getRequest().setUrl(nextId);
+					next.getResource().setId("");
 					renames.put(originalId, nextId);
 				}
 			}
@@ -302,6 +307,7 @@ public class ExampleDataUploader extends BaseCommand {
 			ourLog.info("Uploading bundle to server: " + targetServer);
 
 			IGenericClient fhirClient = newClient(ctx, targetServer);
+			fhirClient.registerInterceptor(new GZipContentInterceptor());
 
 			long start = System.currentTimeMillis();
 			;
@@ -310,6 +316,42 @@ public class ExampleDataUploader extends BaseCommand {
 
 			ourLog.info("Finished uploading bundle to server (took {} ms)", delay);
 		}
+	}
+
+	private byte[] readStreamFromInternet(CloseableHttpResponse result) throws IOException {
+		byte[] inputBytes;
+		{
+		long maxLength = result.getEntity().getContentLength();
+		int nextLog = -1;
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		int nRead;
+		byte[] data = new byte[16384];
+		while ((nRead = result.getEntity().getContent().read(data, 0, data.length)) != -1) {
+		  buffer.write(data, 0, nRead);
+		  if (buffer.size() > nextLog) {
+			  System.err.print("\r" + Ansi.ansi().eraseLine());
+			  System.err.print(FileUtils.getFileSizeDisplay(buffer.size(), 1));
+			  if (maxLength > 0) {
+				  System.err.print(" [");
+				  int stars = (int)(50.0f * ((float)buffer.size() / (float)maxLength));
+				  for (int i = 0; i < stars; i++) {
+					  System.err.print("*");
+				  }
+				  for (int i = stars; i < 50; i++) {
+					  System.err.print(" ");
+				  }
+				  System.err.print("]");
+			  }
+			  System.err.flush();
+			  nextLog += 100000;
+		  }
+		}
+		buffer.flush();
+		inputBytes = buffer.toByteArray();
+		}
+		System.err.println();
+		System.err.flush();
+		return inputBytes;
 	}
 
 }

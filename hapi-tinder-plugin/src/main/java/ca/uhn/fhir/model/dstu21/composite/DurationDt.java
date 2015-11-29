@@ -1,8 +1,11 @@
-package ca.uhn.fhir.rest.method;
+package ca.uhn.fhir.model.dstu21.composite;
+
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.dstu21.composite.QuantityDt;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
  * Copyright (C) 2014 - 2015 University Health Network
  * %%
@@ -20,6 +23,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-public interface IRestfulHeader {
+@DatatypeDef(name="DurationDt") 
+public class DurationDt extends QuantityDt  {
 
 }

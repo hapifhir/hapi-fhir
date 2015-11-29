@@ -27,6 +27,12 @@
 			<action type="add">
 				CLI now supports writing to file:// URL for 'upload-examples' command
 			</action>
+			<action type="add">
+				GZipped content is now supported for client-to-server uploads (create, update, transaction, etc.).
+				The server will not automatically detect compressed incoming content and decompress it (this can be
+				disabled using a RestfulServer configuration setting). A new client interceptor has been added
+				which compresses outgoing content from the client.
+			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">

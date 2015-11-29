@@ -122,7 +122,7 @@ public class ResourceParameter implements IParameter {
 	}
 	
 	public static Reader createRequestReader(RequestDetails theRequest, Charset charset) {
-		Reader requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents(theRequest)), charset);
+		Reader requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents()), charset);
 		return requestReader;
 	}
 
@@ -179,7 +179,7 @@ public class ResourceParameter implements IParameter {
 					String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", restOperationType);
 					throw new InvalidRequestException(msg);
 				} else {
-					requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents(theRequest)), charset);
+					requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents()), charset);
 				}
 			} else {
 				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, restOperationType);
@@ -219,7 +219,7 @@ public class ResourceParameter implements IParameter {
 			String ct = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 			IBaseBinary binary = (IBaseBinary) ctx.getResourceDefinition("Binary").newInstance();
 			binary.setContentType(ct);
-			binary.setContent(theRequest.loadRequestContents(theRequest));
+			binary.setContent(theRequest.loadRequestContents());
 
 			retVal = binary;
 		} else {

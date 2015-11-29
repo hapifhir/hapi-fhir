@@ -82,6 +82,22 @@
 			
 			</subsection>
 
+			<subsection name="Performance: GZip Outgoing Request Bodies">
+			
+				<p>
+					The <code>GZipContentInterceptor</code> compresses outgoing contents.
+					With this interceptor, if the client is transmitting resources to the server
+					(e.g. for a create, update, transaction, etc.) the content will be GZipped
+					before transmission to the server.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="cookie" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
+				</macro>
+			
+			</subsection>
+
 		</section>
 
 	</body>
