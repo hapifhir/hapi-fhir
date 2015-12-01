@@ -41,7 +41,21 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 
 	ISort<T> sort();
 
+	/**
+	 * Specifies the <code>_count</code> parameter, which indicates to the server how many resources should be returned
+	 * on a single page.
+	 * 
+	 * @deprecated This parameter is badly named, since FHIR calls this parameter "_count" and not "_limit". Use {@link #count(int)} instead (it also sets the _count parameter)
+	 */
 	IQuery<T> limitTo(int theLimitTo);
+
+	/**
+	 * Specifies the <code>_count</code> parameter, which indicates to the server how many resources should be returned
+	 * on a single page.
+	 * 
+	 * @since 1.4
+	 */
+	IQuery<T> count(int theCount);
 
 	/**
 	 * Match only resources where the resource has the given tag. This parameter corresponds to

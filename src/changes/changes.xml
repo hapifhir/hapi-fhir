@@ -40,6 +40,12 @@
 				and a QuestionnaireResponse, it would fail because the QuestionnaireResponse
 				validator wouldn't be able to find the questionnaire. This is now corrected.
 			</action>
+			<action type="add">
+				Add a new method to the generic/fluent client for searching: 
+				<![CDATA[<code>.count(int)</code><br/>]]>
+				This replaces the existing ".limitTo(int)" method which has
+				now been deprocated because it was badly named and undocumented.
+			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">

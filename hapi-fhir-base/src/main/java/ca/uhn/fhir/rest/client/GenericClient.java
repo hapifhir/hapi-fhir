@@ -1854,6 +1854,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public IQuery limitTo(int theLimitTo) {
+			return count(theLimitTo);
+		}
+
+		@Override
+		public IQuery count(int theLimitTo) {
 			if (theLimitTo > 0) {
 				myParamLimit = theLimitTo;
 			} else {
