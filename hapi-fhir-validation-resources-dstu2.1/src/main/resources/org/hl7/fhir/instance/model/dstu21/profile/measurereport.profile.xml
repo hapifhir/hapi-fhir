@@ -18,6 +18,7 @@
   </contact>
   <date value="2014-01-31"/>
   <description value="A set of resources composed into a single coherent clinical statement with clinical attestation"/>
+  <fhirVersion value="1.0.2"/>
   <kind value="resource"/>
   <constrainedType value="Composition"/>
   <abstract value="false"/>
@@ -55,7 +56,7 @@
     <element>
       <path value="Composition.id"/>
       <short value="Logical id of this artifact"/>
-      <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+      <definition value="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes."/>
       <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
@@ -89,7 +90,7 @@
       <path value="Composition.implicitRules"/>
       <short value="A set of rules under which this content was created"/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However, the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -120,7 +121,7 @@
       </type>
       <binding>
         <strength value="required"/>
-        <description value="A human language"/>
+        <description value="A human language."/>
         <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
       </binding>
     </element>
@@ -280,7 +281,7 @@
       <path value="Composition.type"/>
       <short value="Kind of composition (LOINC if possible)"/>
       <definition value="Specifies the particular kind of composition (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the composition."/>
-      <comments value="For Composition type, LOINC is ubiquitious and strongly endorsed by the HL7. Most implementation guides will require a specific LOINC code, or use LOINC as an extensible binding."/>
+      <comments value="For Composition type, LOINC is ubiquitous and strongly endorsed by HL7. Most implementation guides will require a specific LOINC code, or use LOINC as an extensible binding."/>
       <requirements value="Key metadata element describing the composition, used in searching/filtering."/>
       <min value="1"/>
       <max value="1"/>
@@ -295,7 +296,7 @@
       <isSummary value="true"/>
       <binding>
         <strength value="preferred"/>
-        <description value="Type of a composition"/>
+        <description value="Type of a composition."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/doc-typecodes"/>
         </valueSetReference>
@@ -332,7 +333,7 @@
       <isSummary value="true"/>
       <binding>
         <strength value="example"/>
-        <description value="High-level kind of a clinical document at a macro level"/>
+        <description value="High-level kind of a clinical document at a macro level."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/doc-classcodes"/>
         </valueSetReference>
@@ -381,7 +382,7 @@
       <definition value="The workflow/clinical status of this composition. The status is a marker for the clinical standing of the document."/>
       <comments value="If a composition is marked as withdrawn, the compositions/documents in the series, or data from the composition or document series, should never be displayed to a user without being clearly marked as untrustworthy. The flag &quot;withdrawn&quot; is why this element is labeled as a modifier of other elements. 
 
-Some reporting work flows require that the original narrative of a final document never be altered; instead, only new narrative can be added. The composition resource has no explicit status for explicitly reporting this business rule hass been . This would be handled by an extension if required."/>
+Some reporting work flows require that the original narrative of a final document never be altered; instead, only new narrative can be added. The composition resource has no explicit status for explicitly noting whether this business rule is in effect. This would be handled by an extension if required."/>
       <requirements value="Need to be able to mark interim, amended, or withdrawn compositions or documents."/>
       <min value="1"/>
       <max value="1"/>
@@ -397,7 +398,7 @@ Some reporting work flows require that the original narrative of a final documen
       <isSummary value="true"/>
       <binding>
         <strength value="required"/>
-        <description value="The workflow/clinical status of the composition"/>
+        <description value="The workflow/clinical status of the composition."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/composition-status"/>
         </valueSetReference>
@@ -434,7 +435,7 @@ Some reporting work flows require that the original narrative of a final documen
       <isSummary value="true"/>
       <binding>
         <strength value="required"/>
-        <description value="Codes specifying the level of confidentiality of the composition"/>
+        <description value="Codes specifying the level of confidentiality of the composition."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/v3-Confidentiality"/>
         </valueSetReference>
@@ -634,7 +635,7 @@ Some reporting work flows require that the original narrative of a final documen
       <short value="personal | professional | legal | official"/>
       <definition value="The type of attestation the authenticator offers."/>
       <comments value="Use more than one code where a single attester has more than one mode (professional and legal are often paired)."/>
-      <requirements value="Indicates the level of officialness of the attestation."/>
+      <requirements value="Indicates the level of authority of the attestation."/>
       <min value="1"/>
       <max value="*"/>
       <base>
@@ -648,7 +649,7 @@ Some reporting work flows require that the original narrative of a final documen
       <isSummary value="true"/>
       <binding>
         <strength value="required"/>
-        <description value="The way in which a person authenticated a composition"/>
+        <description value="The way in which a person authenticated a composition."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/composition-attestation-mode"/>
         </valueSetReference>
@@ -729,7 +730,7 @@ Some reporting work flows require that the original narrative of a final documen
       <path value="Composition.custodian"/>
       <short value="Org which maintains the composition"/>
       <definition value="Identifies the organization or group who is responsible for ongoing maintenance of and access to the composition/document information."/>
-      <comments value="This is useful when documents are derived from a composition - provides guidance for how to get the latest version of the document. This is optional because knowing this is sometimes not known by the authoring system, and can be inferred by context. However it&#39;s important that this information be known when working with a derived document, so providing a custodian is encouraged."/>
+      <comments value="This is useful when documents are derived from a composition - provides guidance for how to get the latest version of the document. This is optional because this is sometimes not known by the authoring system, and can be inferred by context. However it is important that this information be known when working with a derived document, so providing a custodian is encouraged."/>
       <requirements value="Identifies where to go to find the current version, where to report issues, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -849,7 +850,7 @@ Some reporting work flows require that the original narrative of a final documen
       <path value="Composition.event.code"/>
       <short value="Code(s) that apply to the event being documented"/>
       <definition value="This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a &quot;History and Physical Report&quot; in which the procedure being documented is necessarily a &quot;History and Physical&quot; act."/>
-      <comments value="An event can further specialize the act inherent in the typeCode, such as where it is simply &quot;Procedure Report&quot; and the procedure was a &quot;colonoscopy&quot;. If one or more eventCodes are included, they SHALL NOT conflict with the values inherent in the classCode, practiceSettingCode or typeCode, as such a conflict would create an ambiguous situation. This short list of codes is provided to be used as ???key words??? for certain types of queries."/>
+      <comments value="An event can further specialize the act inherent in the typeCode, such as where it is simply &quot;Procedure Report&quot; and the procedure was a &quot;colonoscopy&quot;. If one or more eventCodes are included, they SHALL NOT conflict with the values inherent in the classCode, practiceSettingCode or typeCode, as such a conflict would create an ambiguous situation. This short list of codes is provided to be used as key words for certain types of queries."/>
       <min value="0"/>
       <max value="0"/>
       <base>
@@ -864,7 +865,7 @@ Some reporting work flows require that the original narrative of a final documen
       <isSummary value="true"/>
       <binding>
         <strength value="example"/>
-        <description value="This list of codes represents the main clinical acts being documented"/>
+        <description value="This list of codes represents the main clinical acts being documented."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/v3-ActCode"/>
         </valueSetReference>
@@ -931,7 +932,7 @@ Some reporting work flows require that the original narrative of a final documen
     </element>
     <element>
       <path value="Composition.encounter"/>
-      <short value="Context of the conposition"/>
+      <short value="Context of the composition"/>
       <definition value="Describes the clinical encounter or type of care this documentation is associated with."/>
       <requirements value="Provides context for the composition and supports searching."/>
       <min value="0"/>
@@ -965,6 +966,7 @@ Some reporting work flows require that the original narrative of a final documen
         <valueString value="Section"/>
       </extension>
       <path value="Composition.section"/>
+      <name value="section"/>
       <short value="Composition is broken into sections"/>
       <definition value="The root of the contents that make up the composition."/>
       <min value="0"/>
@@ -978,12 +980,18 @@ Some reporting work flows require that the original narrative of a final documen
         <code value="BackboneElement"/>
       </type>
       <constraint>
+        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
+          <valueString value="text or entry or section"/>
+        </extension>
         <key value="cmp-1"/>
         <severity value="error"/>
         <human value="A section must at least one of text, entries, or sub-sections"/>
         <xpath value="exists(f:text) or exists(f:entry) or exists(f:section)"/>
       </constraint>
       <constraint>
+        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
+          <valueString value="emptyReason.empty() or entry.empty()"/>
+        </extension>
         <key value="cmp-2"/>
         <severity value="error"/>
         <human value="A section can only have an emptyReason if it is empty"/>
@@ -1110,7 +1118,7 @@ Some reporting work flows require that the original narrative of a final documen
       </type>
       <binding>
         <strength value="example"/>
-        <description value="Classification of a section of a composition / document"/>
+        <description value="Classification of a section of a composition/document."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/doc-section-codes"/>
         </valueSetReference>
@@ -1168,7 +1176,7 @@ Some reporting work flows require that the original narrative of a final documen
       <isSummary value="true"/>
       <binding>
         <strength value="required"/>
-        <description value="The processing mode that applies to this section"/>
+        <description value="The processing mode that applies to this section."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/list-mode"/>
         </valueSetReference>
@@ -1188,8 +1196,8 @@ Some reporting work flows require that the original narrative of a final documen
     </element>
     <element>
       <path value="Composition.section.orderedBy"/>
-      <short value="What order the section entries are in"/>
-      <definition value="What order applies to the items in the section entries."/>
+      <short value="Order of section entries"/>
+      <definition value="Specifies the order applied to the items in the section entries."/>
       <comments value="Applications SHOULD render ordered lists in the order provided, but MAY allow users to re-order based on their own preferences as well. If there is no order specified, the order is unknown, though there may still be some order."/>
       <requirements value="Important for presentation and rendering.  Lists may be sorted to place more important information first or to group related entries."/>
       <min value="0"/>
@@ -1204,7 +1212,7 @@ Some reporting work flows require that the original narrative of a final documen
       </type>
       <binding>
         <strength value="preferred"/>
-        <description value="What order applies to the items in the entry"/>
+        <description value="What order applies to the items in the entry."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/list-order"/>
         </valueSetReference>
@@ -1263,7 +1271,7 @@ Some reporting work flows require that the original narrative of a final documen
       <condition value="cmp-2"/>
       <binding>
         <strength value="preferred"/>
-        <description value="If a section is empty, why it is empty"/>
+        <description value="If a section is empty, why it is empty."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/list-empty-reason"/>
         </valueSetReference>
@@ -1537,7 +1545,7 @@ Some reporting work flows require that the original narrative of a final documen
     </element>
     <element>
       <path value="Composition.encounter"/>
-      <short value="Context of the conposition"/>
+      <short value="Context of the composition"/>
       <definition value="Describes the clinical encounter or type of care this documentation is associated with."/>
       <min value="0"/>
       <max value="0"/>

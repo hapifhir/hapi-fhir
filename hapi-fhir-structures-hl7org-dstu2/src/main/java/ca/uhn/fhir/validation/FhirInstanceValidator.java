@@ -151,6 +151,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
     }
 
     v.setBestPracticeWarningLevel(myBestPracticeWarningLevel);
+    v.setAnyExtensionsAllowed(true);
 
     List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
 
@@ -231,7 +232,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
       return null;
     }
 
-    String profileCpName = "/org/hl7/fhir/instance/model/profile/" + theResourceName.toLowerCase() + ".profile.xml";
+    String profileClasspath = theCtx.getVersion().getPathToSchemaDefinitions().replace("/schema", "/profile");
+    String profileCpName = profileClasspath + '/' + theResourceName.toLowerCase() + ".profile.xml";
     String profileText;
     try {
       InputStream inputStream = FhirInstanceValidator.class.getResourceAsStream(profileCpName);

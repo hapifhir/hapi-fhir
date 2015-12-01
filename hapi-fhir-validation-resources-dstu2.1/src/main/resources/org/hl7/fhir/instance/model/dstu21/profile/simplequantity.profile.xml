@@ -25,8 +25,9 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-09-01T19:08:30-04:00"/>
+  <date value="2015-12-01T11:05:39-05:00"/>
   <description value="A fixed quantity (no comparator)"/>
+  <fhirVersion value="1.0.2"/>
   <kind value="datatype"/>
   <constrainedType value="Quantity"/>
   <abstract value="false"/>
@@ -38,8 +39,8 @@
       <short value="A fixed quantity (no comparator)"/>
       <definition value="The comparator is not used on a SimpleQuantity"/>
       <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
-      <min value="1"/>
-      <max value="1"/>
+      <min value="0"/>
+      <max value="*"/>
       <base>
         <path value="Quantity"/>
         <min value="0"/>
@@ -49,12 +50,18 @@
         <code value="Quantity"/>
       </type>
       <constraint>
+        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
+          <valueString value="code.empty() or system"/>
+        </extension>
         <key value="qty-3"/>
         <severity value="error"/>
-        <human value="If a code for the units is present, the system SHALL also be present"/>
+        <human value="If a code for the unit is present, the system SHALL also be present"/>
         <xpath value="not(exists(f:code)) or exists(f:system)"/>
       </constraint>
       <constraint>
+        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
+          <valueString value="comparator.empty()"/>
+        </extension>
         <key value="sqty-1"/>
         <severity value="error"/>
         <human value="The comparator is not used on a SimpleQuantity"/>
@@ -159,7 +166,7 @@
       <isSummary value="true"/>
       <binding>
         <strength value="required"/>
-        <description value="How the Quantity should be understood and represented"/>
+        <description value="How the Quantity should be understood and represented."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/quantity-comparator"/>
         </valueSetReference>
@@ -176,8 +183,8 @@
     <element>
       <path value="Quantity.unit"/>
       <short value="Unit representation"/>
-      <definition value="A human-readable form of the units."/>
-      <requirements value="There are many representations for units and in many contexts, particular representations are fixed and required. I.e. mcg for micrograms."/>
+      <definition value="A human-readable form of the unit."/>
+      <requirements value="There are many representations for units of measure and in many contexts, particular representations are fixed and required. I.e. mcg for micrograms."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -191,7 +198,7 @@
       <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
-        <map value="(see OBX.6 etc) / CQ.2"/>
+        <map value="(see OBX.6 etc.) / CQ.2"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -217,7 +224,7 @@
       <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
-        <map value="(see OBX.6 etc) / CQ.2"/>
+        <map value="(see OBX.6 etc.) / CQ.2"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -227,9 +234,9 @@
     <element>
       <path value="Quantity.code"/>
       <short value="Coded form of the unit"/>
-      <definition value="A computer processable form of the units in some unit representation system."/>
+      <definition value="A computer processable form of the unit in some unit representation system."/>
       <comments value="The preferred system is UCUM, but SNOMED CT can also be used (for customary units) or ISO 4217 for currency.  The context of use may additionally require a code from a particular system."/>
-      <requirements value="Need a computable form of the units that is fixed across all forms. UCUM provides this for quantities, but SNOMED CT provides many units of interest."/>
+      <requirements value="Need a computable form of the unit that is fixed across all forms. UCUM provides this for quantities, but SNOMED CT provides many units of interest."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -243,7 +250,7 @@
       <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
-        <map value="(see OBX.6 etc) / CQ.2"/>
+        <map value="(see OBX.6 etc.) / CQ.2"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -257,12 +264,15 @@
       <name value="SimpleQuantity"/>
       <short value="A fixed quantity (no comparator)"/>
       <definition value="The comparator is not used on a SimpleQuantity"/>
-      <min value="1"/>
-      <max value="1"/>
+      <min value="0"/>
+      <max value="*"/>
       <type>
         <code value="Quantity"/>
       </type>
       <constraint>
+        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
+          <valueString value="comparator.empty()"/>
+        </extension>
         <key value="sqty-1"/>
         <severity value="error"/>
         <human value="The comparator is not used on a SimpleQuantity"/>

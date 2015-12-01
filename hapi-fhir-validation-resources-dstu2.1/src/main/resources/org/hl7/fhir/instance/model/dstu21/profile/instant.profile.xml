@@ -16,8 +16,9 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-09-01T19:08:30-04:00"/>
+  <date value="2015-12-01T11:05:39-05:00"/>
   <description value="Base StructureDefinition for instant Type: An instant in time - known at least to the second"/>
+  <fhirVersion value="1.0.2"/>
   <kind value="datatype"/>
   <abstract value="false"/>
   <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
@@ -26,7 +27,7 @@
       <path value="instant"/>
       <short value="Primitive Type instant"/>
       <definition value="An instant in time - known at least to the second"/>
-      <comments value="Note: This is intended for precisely observed times, typically system logs etc, and not human-reported times - for them, see date and dateTime below. Time zone is always required"/>
+      <comments value="Note: This is intended for precisely observed times, typically system logs etc., and not human-reported times - for them, see date and dateTime below. Time zone is always required"/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -62,10 +63,6 @@
         <code value="Extension"/>
       </type>
     </element>
-  <!-- Note: the primitive value does not have an assigned type
-        The actual value domain is assumed to be known by magic by
-        reading the spec and from the name of the primitive type -->
-  <!-- Schema Type: dateTime -->
     <element>
       <path value="instant.value"/>
       <representation value="xmlAttr"/>
@@ -73,6 +70,19 @@
       <definition value="The actual value"/>
       <min value="0"/>
       <max value="1"/>
+    <!-- Note: primitive values do not have an assigned type
+      e.g. this is compiler magic
+      XML and JSON types provided by extension -->
+      <type>
+        <code>
+          <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
+            <valueString value="string"/>
+          </extension>
+          <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type">
+            <valueString value="dateTime"/>
+          </extension>
+        </code>
+      </type>
     </element>
   </snapshot>
   <differential>
@@ -80,17 +90,13 @@
       <path value="instant"/>
       <short value="Primitive Type instant"/>
       <definition value="An instant in time - known at least to the second"/>
-      <comments value="Note: This is intended for precisely observed times, typically system logs etc, and not human-reported times - for them, see date and dateTime below. Time zone is always required"/>
+      <comments value="Note: This is intended for precisely observed times, typically system logs etc., and not human-reported times - for them, see date and dateTime below. Time zone is always required"/>
       <min value="0"/>
       <max value="*"/>
       <type>
         <code value="Element"/>
       </type>
     </element>
-  <!-- Note: the primitive value does not have an assigned type
-      The actual value domain is assumed to be known by magic by
-      reading the spec and from the name of the primitive type -->
-  <!-- Schema Type: dateTime -->
     <element>
       <path value="instant.value"/>
       <representation value="xmlAttr"/>
@@ -98,6 +104,19 @@
       <definition value="Primitive value for instant"/>
       <min value="0"/>
       <max value="1"/>
+    <!-- Note: primitive values do not have an assigned type
+      e.g. this is compiler magic
+      XML and JSON types provided by extension -->
+      <type>
+        <code>
+          <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
+            <valueString value="string"/>
+          </extension>
+          <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type">
+            <valueString value="dateTime"/>
+          </extension>
+        </code>
+      </type>
     </element>
   </differential>
 </StructureDefinition>

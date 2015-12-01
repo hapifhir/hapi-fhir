@@ -21,19 +21,19 @@
     <sch:rule context="//f:Conformance">
       <sch:assert test="not(parent::f:contained and f:contained)">dom-2: If the resource is contained in another resource, it SHALL NOT contain nested Resources</sch:assert>
       <sch:assert test="not(parent::f:contained and f:text)">dom-1: If the resource is contained in another resource, it SHALL NOT contain any narrative</sch:assert>
-      <sch:assert test="not(exists(f:contained/f:meta/f:versionId)) and not(exists(f:contained/f:meta/f:lastUpdated))">dom-4: If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated</sch:assert>
+      <sch:assert test="not(exists(f:contained/*/f:meta/f:versionId)) and not(exists(f:contained/*/f:meta/f:lastUpdated))">dom-4: If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated</sch:assert>
       <sch:assert test="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))">dom-3: If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource</sch:assert>
       <sch:assert test="count(f:rest)=count(distinct-values(f:rest/f:mode/@value))">cnf-8: There can only be one REST declaration per mode</sch:assert>
-      <sch:assert test="count(f:document[f:mode='producer'])=count(distinct-values(f:document[f:mode='producer']/f:profile/@value)) and count(f:document[f:mode='consumer'])=count(distinct-values(f:document[f:mode='consumer']/f:profile/@value))">cnf-7: The set of documents must be unique by the combination of profile &amp; mode</sch:assert>
+      <sch:assert test="count(f:document[f:mode/@value='producer'])=count(distinct-values(f:document[f:mode/@value='producer']/f:profile/f:reference/@value)) and count(f:document[f:mode/@value='consumer'])=count(distinct-values(f:document[f:mode/@value='consumer']/f:profile/f:reference/@value))">cnf-7: The set of documents must be unique by the combination of profile &amp; mode</sch:assert>
       <sch:assert test="count(f:software | f:implementation | f:description) &gt; 0">cnf-2: A Conformance statement SHALL have at least one of description, software, or implementation</sch:assert>
-      <sch:assert test="exists(f:messaging/f:endpoint) = (f:kind/@value = 'instance')">cnf-3: Messaging end point is required (and is only permitted) when statement is for an implementation</sch:assert>
-      <sch:assert test="exists(f:rest) or exists(f:messaging) or exists(f:document)">cnf-1: A Conformance statement SHALL have at least one of rest, messaging or document</sch:assert>
+      <sch:assert test="not(exists(f:messaging/f:endpoint)) or f:kind/@value = 'instance'">cnf-3: Messaging end-point is required (and is only permitted) when statement is for an implementation</sch:assert>
+      <sch:assert test="exists(f:rest) or exists(f:messaging) or exists(f:document)">cnf-1: A Conformance statement SHALL have at least one of REST, messaging or document</sch:assert>
       <sch:assert test="not(exists(f:software) or exists(f:implementation)) or (f:kind/@value != 'requirements')">cnf-14: Conformance statements of kind 'requirements' do not have software or implementation elements</sch:assert>
       <sch:assert test="not(exists(f:implementation)) or (f:kind/@value != 'capability')">cnf-15: Conformance statements of kind 'software' do not have implementation elements</sch:assert>
     </sch:rule>
-    <sch:rule context="//f:Conformance/f:text/f:div">
+    <sch:rule context="//f:Conformance/f:text/h:div">
       <sch:assert test="not(descendant-or-self::*/@*[not(name(.)=('abbr', 'accesskey', 'align', 'alt', 'axis', 'bgcolor', 'border', 'cellhalign', 'cellpadding', 'cellspacing', 'cellvalign', 'char', 'charoff', 'charset', 'cite', 'class', 'colspan', 'compact', 'coords', 'dir', 'frame', 'headers', 'height', 'href', 'hreflang', 'hspace', 'id', 'lang', 'longdesc', 'name', 'nowrap', 'rel', 'rev', 'rowspan', 'rules', 'scope', 'shape', 'span', 'src', 'start', 'style', 'summary', 'tabindex', 'title', 'type', 'valign', 'value', 'vspace', 'width'))])">txt-3: The narrative SHALL contain only the basic html formatting attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, &lt;a&gt; elements (either name or href), images and internally contained style attributes</sch:assert>
-      <sch:assert test="not(descendant-or-self::*[not(local-name(.)=('a', 'abbr', 'acronym', 'b', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'colgroup', 'dd', 'dfn', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var'))])">txt-1: The narrative SHALL contain only the basic html formatting elements described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, &lt;a&gt; elements (either name or href), images and internally contained style attributes</sch:assert>
+      <sch:assert test="not(descendant-or-self::*[not(local-name(.)=('a', 'abbr', 'acronym', 'b', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'dd', 'dfn', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var'))])">txt-1: The narrative SHALL contain only the basic html formatting elements described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, &lt;a&gt; elements (either name or href), images and internally contained style attributes</sch:assert>
       <sch:assert test="descendant::text()[normalize-space(.)!=''] or descendant::h:img[@src]">txt-2: The narrative SHALL have some non-whitespace content</sch:assert>
     </sch:rule>
     <sch:rule context="//f:Conformance/f:contact/f:telecom">
@@ -47,10 +47,8 @@
     </sch:rule>
     <sch:rule context="//f:Conformance/f:rest">
       <sch:assert test="count(f:resource)=count(distinct-values(f:resource/f:type/@value))">cnf-9: A given resource can only be described once per RESTful mode</sch:assert>
-      <sch:assert test="count(f:query)=count(distinct-values(f:query/f:name/@value))">cnf-10: A given query can only be described once per RESTful mode</sch:assert>
     </sch:rule>
     <sch:rule context="//f:Conformance/f:rest/f:resource">
-      <sch:assert test="count(f:operation)=count(distinct-values(f:operation/f:code/@value))">cnf-11: Operation codes must be unique in the context of a resource</sch:assert>
       <sch:assert test="count(f:searchParam)=count(distinct-values(f:searchParam/f:name/@value))">cnf-12: Search parameter names must be unique in the context of a resource</sch:assert>
     </sch:rule>
     <sch:rule context="//f:Conformance/f:rest/f:resource/f:profile">

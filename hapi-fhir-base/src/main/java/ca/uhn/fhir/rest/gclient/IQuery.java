@@ -47,6 +47,7 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	 * 
 	 * @deprecated This parameter is badly named, since FHIR calls this parameter "_count" and not "_limit". Use {@link #count(int)} instead (it also sets the _count parameter)
 	 */
+	@Deprecated
 	IQuery<T> limitTo(int theLimitTo);
 
 	/**

@@ -7,6 +7,8 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 
@@ -240,6 +242,20 @@ public class FhirResourceDaoDstu21ValidateTest extends BaseJpaDstu21Test {
 			fail("Can't find VS: " + name);
 		}
 		return retVal;
+	}
+	
+	@Test
+	public void testValidateNewQuestionnaireFormat() throws Exception {
+		String input =IOUtils.toString(FhirResourceDaoDstu21ValidateTest.class.getResourceAsStream("/questionnaire_dstu21.xml"));
+		try {
+		MethodOutcome results = myQuestionnaireDao.validate(null, null, input, EncodingEnum.XML, ValidationModeEnum.UPDATE, null);
+		OperationOutcome oo = (OperationOutcome) results.getOperationOutcome();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		} catch (PreconditionFailedException e) {
+			// this is a failure of the test
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			throw e;
+		}
 	}
 
 }

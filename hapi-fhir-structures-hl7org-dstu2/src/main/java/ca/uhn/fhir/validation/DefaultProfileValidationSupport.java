@@ -34,12 +34,13 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   @Override
   public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
     if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
-      return (T) FhirInstanceValidator.loadProfileOrReturnNull(null, FhirInstanceValidator.getHl7OrgDstu2Ctx(theContext), theUri.substring("http://hl7.org/fhir/StructureDefinition/".length()));
+      return (T) FhirInstanceValidator.loadProfileOrReturnNull(null, theContext, theUri.substring("http://hl7.org/fhir/StructureDefinition/".length()));
     }
     if (theUri.startsWith("http://hl7.org/fhir/ValueSet/")) {
       Map<String, ValueSet> defaultValueSets = myDefaultValueSets;
       if (defaultValueSets == null) {
-        InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/valuesets.xml");
+        String path = theContext.getVersion().getPathToSchemaDefinitions().replace("/schema", "/valueset") + "/valuesets.xml";
+        InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(path);
         if (valuesetText == null) {
           return null;
         }

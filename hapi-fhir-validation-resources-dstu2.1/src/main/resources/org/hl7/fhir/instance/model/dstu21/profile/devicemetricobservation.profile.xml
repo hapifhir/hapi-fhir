@@ -18,6 +18,7 @@
   </contact>
   <date value="2014-11-17"/>
   <description value="This profile describes the direct or derived, qualitative or quantitative physiological measurement, setting, or calculation data produced by a medical device or a device component."/>
+  <fhirVersion value="1.0.2"/>
   <kind value="resource"/>
   <constrainedType value="Observation"/>
   <abstract value="false"/>
@@ -28,7 +29,7 @@
       <name value="DeviceMetricObservation"/>
       <short value="Measurements and simple assertions"/>
       <definition value="Measurements and simple assertions made about a patient, device or other subject."/>
-      <comments value="Used for simple observations such as device measurements, laboratory atomic results, vital signs, height, weight, smoking status, comments, etc.  Other resources are used to provide context for observations such as Lab reports, etc."/>
+      <comments value="Used for simple observations such as device measurements, laboratory atomic results, vital signs, height, weight, smoking status, comments, etc.  Other resources are used to provide context for observations such as lab reports, etc."/>
       <alias value="Vital Signs"/>
       <alias value="Measurement"/>
       <alias value="Results"/>
@@ -44,15 +45,21 @@
         <code value="Observation"/>
       </type>
       <constraint>
+        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
+          <valueString value="component.where(code = $context.code).empty()"/>
+        </extension>
         <key value="obs-7"/>
         <severity value="error"/>
-        <human value="Component code Shall not be same as observation code"/>
-        <xpath value="not(exists(f:component.code/@value)) or (f:code/@value !=  f:component/f:code/@value)"/>
+        <human value="Component code SHALL not be same as observation code"/>
+        <xpath value="not(exists(f:component/f:code)) or count(for $coding in f:code/f:coding return parent::*/f:component/f:code/f:coding[f:code/@value=$coding/f:code/@value and f:system/@value=$coding/f:system/@value])=0"/>
       </constraint>
       <constraint>
+        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
+          <valueString value="dataAbsentReason.empty() or value[x].empty()"/>
+        </extension>
         <key value="obs-6"/>
         <severity value="error"/>
-        <human value="Shall only be present if Observation.value[x] is not present"/>
+        <human value="dataAbsentReason SHALL only be present if Observation.value[x] is not present"/>
         <xpath value="not(exists(f:dataAbsentReason)) or (not(exists(*[starts-with(local-name(.), &#39;value&#39;)])))"/>
       </constraint>
       <mapping>
@@ -71,7 +78,7 @@
     <element>
       <path value="Observation.id"/>
       <short value="Logical id of this artifact"/>
-      <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+      <definition value="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes."/>
       <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
@@ -105,7 +112,7 @@
       <path value="Observation.implicitRules"/>
       <short value="A set of rules under which this content was created"/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However, the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -136,7 +143,7 @@
       </type>
       <binding>
         <strength value="required"/>
-        <description value="A human language"/>
+        <description value="A human language."/>
         <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
       </binding>
     </element>
@@ -269,7 +276,7 @@
       <path value="Observation.status"/>
       <short value="registered | preliminary | final | amended +"/>
       <definition value="The status of the result value."/>
-      <requirements value="Need to track the status of individual results - some results are finalised before the whole report is finalised."/>
+      <requirements value="Need to track the status of individual results. Some results are finalized before the whole report is finalized."/>
       <min value="1"/>
       <max value="1"/>
       <base>
@@ -285,14 +292,14 @@
       <isSummary value="true"/>
       <binding>
         <strength value="required"/>
-        <description value="Codes providing the status of an observation"/>
+        <description value="Codes providing the status of an observation."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/observation-status"/>
         </valueSetReference>
       </binding>
       <mapping>
         <identity value="v2"/>
-        <map value="OBX-11-observation result status"/>
+        <map value="OBX-11"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -306,7 +313,7 @@
     <element>
       <path value="Observation.category"/>
       <short value="Classification of  type of observation"/>
-      <definition value="A code that classifies the the general type of observation being made.  This is used  for searching, sorting and display purposes."/>
+      <definition value="A code that classifies the general type of observation being made.  This is used  for searching, sorting and display purposes."/>
       <comments value="The level of granularity is defined by the category concepts in the value set.   More fine-grained filtering can be performed using the metadata and/or terminology hierarchy in Observation.code."/>
       <min value="0"/>
       <max value="1"/>
@@ -320,7 +327,7 @@
       </type>
       <binding>
         <strength value="example"/>
-        <description value="Codes for high level observation categories"/>
+        <description value="Codes for high level observation categories ."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/observation-category"/>
         </valueSetReference>
@@ -353,14 +360,14 @@
       <isSummary value="true"/>
       <binding>
         <strength value="example"/>
-        <description value="Codes identifying names of simple observations"/>
+        <description value="Codes identifying names of simple observations."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/observation-codes"/>
         </valueSetReference>
       </binding>
       <mapping>
         <identity value="v2"/>
-        <map value="OBX-3-observation identifier"/>
+        <map value="OBX-3"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -396,7 +403,7 @@
       <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
-        <map value="PID-3-patient ID list"/>
+        <map value="PID-3"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -410,7 +417,7 @@
     <element>
       <path value="Observation.encounter"/>
       <short value="Healthcare event during which this observation is made"/>
-      <definition value="The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made."/>
+      <definition value="The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made."/>
       <requirements value="For some observations it may be important to know the link between an observation and a particular encounter."/>
       <min value="0"/>
       <max value="0"/>
@@ -439,7 +446,7 @@
     </element>
     <element>
       <path value="Observation.effectiveDateTime"/>
-      <short value="Clinically Relevant time/time-period for observation"/>
+      <short value="Clinically relevant time/time-period for observation"/>
       <definition value="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the &quot;physiologically relevant time&quot;. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself."/>
       <comments value="At least a date should be present unless this observation is a historical report."/>
       <requirements value="Knowing when an observation was deemed true is important to its relevance as well as determining trends."/>
@@ -457,7 +464,7 @@
       <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
-        <map value="OBX-14-date/time of the observation, and/or OBX-19 after v2.4  (depends on who observation made)"/>
+        <map value="OBX-14, and/or OBX-19 after v2.4  (depends on who observation made)"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -529,7 +536,7 @@
       <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
-        <map value="OBX.15 / (Practitioner)  OBX-16-responsible observer,  PRT-5-participation person:PRT-4-participation=&#39;RO&#39; /  (Device)  OBX-18-equipment instance identifier , PRT-10-participation device:PRT-4-participation=&#39;EQUIP&#39; / (Organization)  OBX-23-performing organization name,  PRT-8-participation organization:PRT-4-participation=&#39;PO&#39;"/>
+        <map value="OBX.15 / (Practitioner)  OBX-16,  PRT-5:PRT-4=&#39;RO&#39; /  (Device)  OBX-18 , PRT-10:PRT-4=&#39;EQUIP&#39; / (Organization)  OBX-23,  PRT-8:PRT-4=&#39;PO&#39;"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -544,10 +551,10 @@
       <path value="Observation.value[x]"/>
       <short value="Actual result"/>
       <definition value="The information determined as a result of making the observation, if the information has a simple value."/>
-      <comments value="Normally, an observation will have either a value or a set of related observations. A few observations (e.g. apgar store) may have both a value and related observations (for an apgar score, the observations from which the measure is derived). If a value is present, the datatype for this element should be determined by Observation.code. This element has a variable name depending on the type as follows: valueQuantity, valueCodeableConcept, valueString, valueRange, valueRatio, valueSampledData, valueAttachment, valueTime, valueDateTime, or valuePeriod. (The name format is &quot;&#39;value&#39; + the type name&quot; with a capital on the first letter of the type).If the data element is usually coded or if the type associated with the Observation.value defines a coded value, use CodeableConcept instead of string datatype even if the value is uncoded text.  A value set is bound to the ValueCodeableConcept element.  For boolean values use valueCodeableConcept and select codes from [HL7 Version 2 Table 0136](v2/0136/index.html). These &quot;yes/no&quot; concepts can be mapped to the display name &quot;true/false&quot; or other mutually exclusive terms that may be needed.   For further discussion and examples see the  [notes section](observation.html#4.20.4) below."/>
+      <comments value="Normally, an observation will have either a value or a set of related observations. A few observations (e.g. Apgar score) may have both a value and related observations (for an Apgar score, the observations from which the measure is derived). If a value is present, the datatype for this element should be determined by Observation.code. This element has a variable name depending on the type as follows: valueQuantity, valueCodeableConcept, valueString, valueRange, valueRatio, valueSampledData, valueAttachment, valueTime, valueDateTime, or valuePeriod. (The name format is &quot;&#39;value&#39; + the type name&quot; with a capital on the first letter of the type).If the data element is usually coded or if the type associated with the Observation.value defines a coded value, use CodeableConcept instead of string datatype even if the value is uncoded text.  A value set is bound to the ValueCodeableConcept element.  For boolean values use valueCodeableConcept and select codes from [HL7 Version 2 Table 0136](v2/0136/index.html). These &quot;yes/no&quot; concepts can be mapped to the display name &quot;true/false&quot; or other mutually exclusive terms that may be needed.   For further discussion and examples see the  [notes section](observation.html#4.20.4) below."/>
       <requirements value="An observation exists to have a value, though it may not if it is in error, or it represents a group of observations."/>
       <min value="0"/>
-      <max value="*"/>
+      <max value="1"/>
       <base>
         <path value="Observation.value[x]"/>
         <min value="0"/>
@@ -614,7 +621,7 @@
       <mustSupport value="false"/>
       <binding>
         <strength value="extensible"/>
-        <description value="Codes specifying why the result (Observation.value[x]) is missing"/>
+        <description value="Codes specifying why the result (Observation.value[x]) is missing."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/observation-valueabsentreason"/>
         </valueSetReference>
@@ -647,14 +654,14 @@
       <mustSupport value="false"/>
       <binding>
         <strength value="extensible"/>
-        <description value="Codes identifying interpretations of observations"/>
+        <description value="Codes identifying interpretations of observations."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/observation-interpretation"/>
         </valueSetReference>
       </binding>
       <mapping>
         <identity value="v2"/>
-        <map value="OBX-8-interpretation codes"/>
+        <map value="OBX-8"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -689,8 +696,8 @@
     <element>
       <path value="Observation.bodySite"/>
       <short value="Observed body part"/>
-      <definition value="Indicates the site on the subject&#39;s body where the observation was made ( i.e. the target site)."/>
-      <comments value="Only used if not implicit in code found in Observation.code.  If the use case requires BodySite to be be handled as a separate resource instead of an inline coded element ( e.g. to identify and track separately) then use the standard extension[ body-site-instance](extension-body-site-instance.html)."/>
+      <definition value="Indicates the site on the subject&#39;s body where the observation was made (i.e. the target site)."/>
+      <comments value="Only used if not implicit in code found in Observation.code.  If the use case requires BodySite to be handled as a separate resource instead of an inline coded element (e.g. to identify and track separately) then use the standard extension[ body-site-instance](extension-body-site-instance.html)."/>
       <requirements value="Knowing where the observation is made is important for tracking if multiple sites are possible."/>
       <min value="0"/>
       <max value="1"/>
@@ -702,16 +709,17 @@
       <type>
         <code value="CodeableConcept"/>
       </type>
+      <mustSupport value="true"/>
       <binding>
         <strength value="example"/>
-        <description value="Codes describing anatomical locations. May include laterality"/>
+        <description value="Codes describing anatomical locations. May include laterality."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/body-site"/>
         </valueSetReference>
       </binding>
       <mapping>
         <identity value="v2"/>
-        <map value="OBX-20-observation site"/>
+        <map value="OBX-20"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -723,7 +731,7 @@
       <short value="How it was done"/>
       <definition value="Indicates the mechanism used to perform the observation."/>
       <comments value="Only used if not implicit in code for Observation.code."/>
-      <requirements value="In some cases, method can impact results and is thus for determining whether results can be compared or determining significance of results."/>
+      <requirements value="In some cases, method can impact results and is thus used for determining whether results can be compared or determining significance of results."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -737,14 +745,14 @@
       <mustSupport value="true"/>
       <binding>
         <strength value="example"/>
-        <description value="Methods for simple observations"/>
+        <description value="Methods for simple observations."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/observation-methods"/>
         </valueSetReference>
       </binding>
       <mapping>
         <identity value="v2"/>
-        <map value="OBX-17-observation method"/>
+        <map value="OBX-17"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -805,6 +813,7 @@
     </element>
     <element>
       <path value="Observation.referenceRange"/>
+      <name value="referenceRange"/>
       <short value="Provides guide for interpretation"/>
       <definition value="Guidance on how to interpret the value by comparison to a normal or recommended range."/>
       <comments value="Most observations only have one generic reference range. Systems MAY choose to restrict to only supplying the relevant reference range based on knowledge about the patient (e.g. specific to the patient&#39;s age, gender, weight and other factors), but this may not be possible or appropriate. Whenever more than one reference range is supplied, the differences between them SHOULD be provided in the reference range and/or age properties."/>
@@ -820,6 +829,9 @@
         <code value="BackboneElement"/>
       </type>
       <constraint>
+        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
+          <valueString value="low or high or text"/>
+        </extension>
         <key value="obs-3"/>
         <severity value="error"/>
         <human value="Must have at least a low or a high or text"/>
@@ -904,7 +916,7 @@
     <element>
       <path value="Observation.referenceRange.low"/>
       <short value="Low Range, if relevant"/>
-      <definition value="The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is &gt;=5 - &lt;=9).   If the low bound is omitted,  it is assumed to be meaningless. (e.g. reference range is &lt;=2.3)."/>
+      <definition value="The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is &gt;=5 - &lt;=9).   If the low bound is omitted,  it is assumed to be meaningless (e.g. reference range is &lt;=2.3)."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -919,7 +931,7 @@
       <condition value="obs-3"/>
       <mapping>
         <identity value="v2"/>
-        <map value="OBX-7-references range"/>
+        <map value="OBX-7"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -929,7 +941,7 @@
     <element>
       <path value="Observation.referenceRange.high"/>
       <short value="High Range, if relevant"/>
-      <definition value="The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is &gt;=5 - &lt;=9).   If the high bound is omitted,  it is assumed to be meaningless. (e.g. reference range is &gt;= 2.3)."/>
+      <definition value="The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is &gt;=5 - &lt;=9).   If the high bound is omitted,  it is assumed to be meaningless (e.g. reference range is &gt;= 2.3)."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -944,7 +956,7 @@
       <condition value="obs-3"/>
       <mapping>
         <identity value="v2"/>
-        <map value="OBX-7-references range"/>
+        <map value="OBX-7"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -969,14 +981,14 @@
       </type>
       <binding>
         <strength value="example"/>
-        <description value="Code for the meaning of a reference range"/>
+        <description value="Code for the meaning of a reference range."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/referencerange-meaning"/>
         </valueSetReference>
       </binding>
       <mapping>
         <identity value="v2"/>
-        <map value="OBX-10-nature of abnormal test?"/>
+        <map value="OBX-10?"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -1019,7 +1031,7 @@
       </type>
       <mapping>
         <identity value="v2"/>
-        <map value="OBX-7-references range"/>
+        <map value="OBX-7"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -1029,9 +1041,9 @@
     <element>
       <path value="Observation.related"/>
       <short value="Resource related to this observation"/>
-      <definition value="A  reference to another resource ( usally another Observation but could  also be a QuestionnaireAnswer) whose relationship is defined by the relationship type code."/>
+      <definition value="A  reference to another resource (usually another Observation but could  also be a QuestionnaireAnswer) whose relationship is defined by the relationship type code."/>
       <comments value="For a discussion on the ways Observations can assembled in groups together see [Notes below](observation.html#4.20.4)."/>
-      <requirements value="Normally, an observation will have either a value or a set of related observations. A few observations (e.g. apgar store) may have both a value and a set of related observations or sometimes QuestionnaireResponse  from which the measure is derived."/>
+      <requirements value="Normally, an observation will have either a value or a set of related observations. A few observations (e.g. Apgar score) may have both a value and a set of related observations or sometimes QuestionnaireResponse  from which the measure is derived."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -1138,7 +1150,7 @@
       <mustSupport value="true"/>
       <binding>
         <strength value="required"/>
-        <description value="Codes specifying how two observations are related"/>
+        <description value="Codes specifying how two observations are related."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/observation-relationshiptypes"/>
         </valueSetReference>
@@ -1155,8 +1167,8 @@
     <element>
       <path value="Observation.related.target"/>
       <short value="Resource that is related to this one"/>
-      <definition value="A reference to the observation or questionnaireanswer that is related to this observation."/>
-      <min value="0"/>
+      <definition value="A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation."/>
+      <min value="1"/>
       <max value="1"/>
       <base>
         <path value="Observation.related.target"/>
@@ -1176,9 +1188,9 @@
     <element>
       <path value="Observation.component"/>
       <short value="Component results"/>
-      <definition value="Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations."/>
+      <definition value="Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations."/>
       <comments value="For a discussion on the ways Observations can assembled in groups together see [Notes below](observation.html#4.20.4)."/>
-      <requirements value="Component observations share the same attributes in the Observation resource as the primary observation and are always treated a part of a single observation ( they are not seperable).   However, the reference range for the primary observation value is not inherited by the component values and is required when appropriate for each component observation."/>
+      <requirements value="Component observations share the same attributes in the Observation resource as the primary observation and are always treated a part of a single observation (they are not separable).   However, the reference range for the primary observation value is not inherited by the component values and is required when appropriate for each component observation."/>
       <min value="0"/>
       <max value="*"/>
       <base>
@@ -1190,6 +1202,10 @@
         <code value="BackboneElement"/>
       </type>
       <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="containment by OBX-4?"/>
+      </mapping>
       <mapping>
         <identity value="rim"/>
         <map value="outBoundRelationship[typeCode=COMP]"/>
@@ -1280,14 +1296,14 @@
       <isSummary value="true"/>
       <binding>
         <strength value="example"/>
-        <description value="Codes identifying names of simple observations"/>
+        <description value="Codes identifying names of simple observations."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/observation-codes"/>
         </valueSetReference>
       </binding>
       <mapping>
         <identity value="v2"/>
-        <map value="OBX-3-observation identifier"/>
+        <map value="OBX-3"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -1302,7 +1318,7 @@
       <path value="Observation.component.value[x]"/>
       <short value="Actual component result"/>
       <definition value="The information determined as a result of making the observation, if the information has a simple value."/>
-      <comments value="Normally, an observation will have either a value or a set of related observations. A few observations (e.g. apgar store) may have both a value and related observations (for an apgar score, the observations from which the measure is derived). If a value is present, the datatype for this element should be determined by Observation.code. A CodeableConcept with just a text would be used instead of a string if the field was usually coded, or if the type associated with the Observation.code defines a coded value.   For boolean values use valueCodeableConcept and select codes from &lt;http://hl7.org/fhir/ValueSet/v2-0136&gt; (These &quot;yes/no&quot; concepts can be mapped to the display name &quot;true/false&quot; or other mutually exclusive terms that may be needed&quot;).  The element, Observation.value[x], has a variable name depending on the type as follows: valueQuantity, valueCodeableConcept, valueRatio, valueChoice, valuePeriod, valueSampleData, or valueString (The name format is &quot;&#39;value&#39; + the type name&quot; with a capital on the first letter of the type)."/>
+      <comments value="Normally, an observation will have either a value or a set of related observations. A few observations (e.g. Apgar score) may have both a value and related observations (for an Apgar score, the observations from which the measure is derived). If a value is present, the datatype for this element should be determined by Observation.code. A CodeableConcept with just a text would be used instead of a string if the field was usually coded, or if the type associated with the Observation.code defines a coded value.   For boolean values use valueCodeableConcept and select codes from &lt;http://hl7.org/fhir/ValueSet/v2-0136&gt; (These &quot;yes/no&quot; concepts can be mapped to the display name &quot;true/false&quot; or other mutually exclusive terms that may be needed&quot;).  The element, Observation.value[x], has a variable name depending on the type as follows: valueQuantity, valueCodeableConcept, valueRatio, valueChoice, valuePeriod, valueSampleData, or valueString (The name format is &quot;&#39;value&#39; + the type name&quot; with a capital on the first letter of the type)."/>
       <requirements value="An observation exists to have a value, though it may not if it is in error, or it represents a group of observations."/>
       <min value="0"/>
       <max value="1"/>
@@ -1370,7 +1386,7 @@
       <condition value="obs-6"/>
       <binding>
         <strength value="extensible"/>
-        <description value="Codes specifying why the result (Observation.value[x]) is missing"/>
+        <description value="Codes specifying why the result (Observation.value[x]) is missing."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/observation-valueabsentreason"/>
         </valueSetReference>
@@ -1386,7 +1402,7 @@
     </element>
     <element>
       <path value="Observation.component.referenceRange"/>
-      <short value="Provides guide for interpretation ofcomponent result"/>
+      <short value="Provides guide for interpretation of component result"/>
       <definition value="Guidance on how to interpret the value by comparison to a normal or recommended range."/>
       <comments value="Most observations only have one generic reference range. Systems MAY choose to restrict to only supplying the relevant reference range based on knowledge about the patient (e.g. specific to the patient&#39;s age, gender, weight and other factors), but this may not be possible or appropriate. Whenever more than one reference range is supplied, the differences between them SHOULD be provided in the reference range and/or age properties."/>
       <requirements value="Knowing what values are considered &quot;normal&quot; can help evaluate the significance of a particular result. Need to be able to provide multiple reference ranges for different contexts."/>
@@ -1417,15 +1433,6 @@
       <type>
         <code value="Observation"/>
       </type>
-    </element>
-    <element>
-      <path value="Observation.bodySite[x]"/>
-      <min value="0"/>
-      <max value="1"/>
-      <type>
-        <code value="CodeableConcept"/>
-      </type>
-      <mustSupport value="true"/>
     </element>
     <element>
       <path value="Observation.identifier"/>
@@ -1499,7 +1506,7 @@
     <element>
       <path value="Observation.value[x]"/>
       <min value="0"/>
-      <max value="*"/>
+      <max value="1"/>
       <type>
         <code value="Quantity"/>
       </type>
@@ -1560,6 +1567,15 @@
       <mustSupport value="false"/>
     </element>
     <element>
+      <path value="Observation.bodySite"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <mustSupport value="true"/>
+    </element>
+    <element>
       <path value="Observation.method"/>
       <min value="0"/>
       <max value="1"/>
@@ -1611,7 +1627,7 @@
     </element>
     <element>
       <path value="Observation.related.target"/>
-      <min value="0"/>
+      <min value="1"/>
       <max value="1"/>
       <type>
         <code value="Reference"/>

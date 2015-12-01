@@ -18,6 +18,7 @@
   </contact>
   <date value="2012-06-24"/>
   <description value="SubmissionSet"/>
+  <fhirVersion value="1.0.2"/>
   <kind value="resource"/>
   <constrainedType value="DocumentManifest"/>
   <abstract value="false"/>
@@ -51,7 +52,7 @@
     <element>
       <path value="DocumentManifest.id"/>
       <short value="Logical id of this artifact"/>
-      <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
+      <definition value="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes."/>
       <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
@@ -85,7 +86,7 @@
       <path value="DocumentManifest.implicitRules"/>
       <short value="A set of rules under which this content was created"/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However, the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -116,7 +117,7 @@
       </type>
       <binding>
         <strength value="required"/>
-        <description value="A human language"/>
+        <description value="A human language."/>
         <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
       </binding>
     </element>
@@ -215,9 +216,9 @@
     </element>
     <element>
       <path value="DocumentManifest.masterIdentifier"/>
-      <short value="Unique Identifier for the set of documents"/>
-      <definition value="A single identifier that uniquely identifies this manifest. Principally used to refer to the manifest in non-FHIR contexts."/>
-      <min value="0"/>
+      <short value="SubmissionSet.uniqueId"/>
+      <definition value="A globally unique identifier for the SubmissionSet assigned by the creating entity."/>
+      <min value="1"/>
       <max value="1"/>
       <base>
         <path value="DocumentManifest.masterIdentifier"/>
@@ -243,10 +244,10 @@
     </element>
     <element>
       <path value="DocumentManifest.identifier"/>
-      <short value="SubmissionSet.uniqueId"/>
-      <definition value="A globally unique identifier for the SubmissionSet assigned by the creating entity."/>
-      <min value="1"/>
-      <max value="1"/>
+      <short value="Other identifiers for the manifest"/>
+      <definition value="Other identifiers associated with the document manifest, including version independent  identifiers."/>
+      <min value="0"/>
+      <max value="*"/>
       <base>
         <path value="DocumentManifest.identifier"/>
         <min value="0"/>
@@ -277,8 +278,8 @@
       <path value="DocumentManifest.subject"/>
       <short value="SubmissionSet.patientId"/>
       <definition value="the subject of care whose longitudinal record is being reflected in this SubmissionSet."/>
-      <min value="1"/>
-      <max value="*"/>
+      <min value="0"/>
+      <max value="1"/>
       <base>
         <path value="DocumentManifest.subject"/>
         <min value="0"/>
@@ -306,7 +307,7 @@
       <path value="DocumentManifest.recipient"/>
       <short value="SubmissionSet.intendedRecipient "/>
       <definition value="The organization(s) or person(s) for whom the SubmissionSet is intended."/>
-      <comments value="How the recipient receives the document set or is notified of it is up to the implementation. This element is just a statement of intent. If the recipient is a person, and it’s not known whether the person is a patient or a practitioner, RelatedPerson would be the default choice."/>
+      <comments value="How the recipient receives the document set or is notified of it is up to the implementation. This element is just a statement of intent. If the recipient is a person, and it is not known whether the person is a patient or a practitioner, RelatedPerson would be the default choice."/>
       <min value="0"/>
       <max value="*"/>
       <base>
@@ -357,7 +358,7 @@
       <isSummary value="true"/>
       <binding>
         <strength value="preferred"/>
-        <description value="Precice type of clinical document"/>
+        <description value="Precise type of clinical document."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/c80-doc-typecodes"/>
         </valueSetReference>
@@ -480,7 +481,7 @@
       <isSummary value="true"/>
       <binding>
         <strength value="required"/>
-        <description value="The status of the document reference"/>
+        <description value="The status of the document reference."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/document-reference-status"/>
         </valueSetReference>
@@ -614,7 +615,7 @@
       <path value="DocumentManifest.content.p[x]"/>
       <short value="Contents of this set of documents"/>
       <definition value="The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed."/>
-      <comments value="The intended focus of the DocumentManifest is for the reference to target either DocumentReference or Media Resources, and most implementation guides will restrict to these resources. The reference is to any to support EN 13606 usage, where an extract is DocumentManifest that references  List and Composition resources."/>
+      <comments value="The intended focus of the DocumentManifest is for the reference to target either DocumentReference or Media Resources, and most implementation guides will restrict to these resources. The reference is to &quot;Any&quot; to support EN 13606 usage, where an extract is DocumentManifest that references  List and Composition resources."/>
       <min value="1"/>
       <max value="1"/>
       <base>
@@ -729,8 +730,8 @@
     <element>
       <path value="DocumentManifest.related.identifier"/>
       <short value="Identifiers of things that are related"/>
-      <definition value="Related identifier to this DocumentManifest. If both id and ref are present they shall refer to the same thing."/>
-      <comments value="Order numbers, accession numbers, XDW workflow numbers."/>
+      <definition value="Related identifier to this DocumentManifest.  For example, Order numbers, accession numbers, XDW workflow numbers."/>
+      <comments value="If both identifier and ref elements are present they shall refer to the same thing."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -746,8 +747,8 @@
     <element>
       <path value="DocumentManifest.related.ref"/>
       <short value="Related Resource"/>
-      <definition value="Related Resource to this DocumentManifest. If both id and ref are present they shall refer to the same thing."/>
-      <comments value="Order, DiagnosticOrder,  Procedure, EligibilityRequest, etc."/>
+      <definition value="Related Resource to this DocumentManifest. For example, Order, DiagnosticOrder,  Procedure, EligibilityRequest, etc."/>
+      <comments value="If both identifier and ref elements are present they shall refer to the same thing."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -775,42 +776,16 @@
       </type>
     </element>
     <element>
-      <path value="DocumentManifest.confidentiality"/>
-      <short value="SubmissionSet.confidentialityCode"/>
-      <definition value="A code specifying the level of confidentiality of this set of Documents."/>
-      <min value="0"/>
-      <max value="0"/>
-      <type>
-        <code value="CodeableConcept"/>
-      </type>
-    </element>
-    <element>
-      <path value="DocumentManifest.supersedes"/>
-      <short value="todo"/>
-      <definition value="If this document manifest replaces another."/>
-      <min value="0"/>
-      <max value="1"/>
-      <type>
-        <code value="Reference"/>
-        <profile value="http://hl7.org/fhir/StructureDefinition/DocumentManifest"/>
-      </type>
-    </element>
-    <element>
-      <path value="DocumentManifest.identifier"/>
+      <path value="DocumentManifest.masterIdentifier"/>
       <short value="SubmissionSet.uniqueId"/>
       <definition value="A globally unique identifier for the SubmissionSet assigned by the creating entity."/>
       <min value="1"/>
       <max value="1"/>
-      <type>
-        <code value="Identifier"/>
-      </type>
     </element>
     <element>
       <path value="DocumentManifest.subject"/>
       <short value="SubmissionSet.patientId"/>
       <definition value="the subject of care whose longitudinal record is being reflected in this SubmissionSet."/>
-      <min value="1"/>
-      <max value="*"/>
       <type>
         <code value="Reference"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
@@ -820,8 +795,6 @@
       <path value="DocumentManifest.recipient"/>
       <short value="SubmissionSet.intendedRecipient "/>
       <definition value="The organization(s) or person(s) for whom the SubmissionSet is intended."/>
-      <min value="0"/>
-      <max value="*"/>
       <type>
         <code value="Reference"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
@@ -839,8 +812,6 @@
       <path value="DocumentManifest.type"/>
       <short value="SubmissionSet.contentTypeCode"/>
       <definition value="The code specifying the type of clinical activity that resulted in placing the documents in this SubmissionSet."/>
-      <min value="0"/>
-      <max value="1"/>
       <type>
         <code value="CodeableConcept"/>
       </type>
@@ -864,8 +835,6 @@
       <path value="DocumentManifest.created"/>
       <short value="SubmissionSet.submissionTime"/>
       <definition value="Point in time at the creating entity when the SubmissionSet was created."/>
-      <min value="0"/>
-      <max value="1"/>
       <type>
         <code value="dateTime"/>
       </type>
@@ -874,8 +843,6 @@
       <path value="DocumentManifest.source"/>
       <short value="SubmissionSet.sourceId"/>
       <definition value="OID identifying the instance of the creating entity that contributed the SubmissionSet."/>
-      <min value="0"/>
-      <max value="1"/>
       <type>
         <code value="uri"/>
       </type>
@@ -884,14 +851,12 @@
       <path value="DocumentManifest.status"/>
       <short value="SubmissionSet.availabilityStatus"/>
       <definition value="The lifecycle status of the SubmissionSet."/>
-      <min value="1"/>
-      <max value="1"/>
       <type>
         <code value="code"/>
       </type>
       <binding>
         <strength value="required"/>
-        <description value="The status of the document reference"/>
+        <description value="The status of the document reference."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/document-reference-status"/>
         </valueSetReference>
@@ -901,8 +866,6 @@
       <path value="DocumentManifest.description"/>
       <short value="SubmissionSet.title"/>
       <definition value="Human-readable description of the source document. This is sometimes known as the &quot;title&quot;."/>
-      <min value="0"/>
-      <max value="1"/>
       <type>
         <code value="string"/>
       </type>
@@ -911,8 +874,6 @@
       <path value="DocumentManifest.content"/>
       <short value="SubmissionSet.documentEntry"/>
       <definition value="The list of resources that describe the parts of this document reference. Usually, these would be document references, but direct references to binary attachments and images are also allowed."/>
-      <min value="1"/>
-      <max value="*"/>
     </element>
   </differential>
 </StructureDefinition>

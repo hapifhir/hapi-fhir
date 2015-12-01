@@ -25,8 +25,9 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-09-01T19:08:30-04:00"/>
+  <date value="2015-12-01T11:05:39-05:00"/>
   <description value="An amount of money. With regard to precision, see [Decimal Precision](datatypes.html#precision)"/>
+  <fhirVersion value="1.0.2"/>
   <kind value="datatype"/>
   <constrainedType value="Quantity"/>
   <abstract value="false"/>
@@ -38,8 +39,8 @@
       <short value="An amount of money. With regard to precision, see [Decimal Precision](datatypes.html#precision)"/>
       <definition value="There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:iso:std:iso:4217&quot; - currency)."/>
       <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
-      <min value="1"/>
-      <max value="1"/>
+      <min value="0"/>
+      <max value="*"/>
       <base>
         <path value="Quantity"/>
         <min value="0"/>
@@ -49,12 +50,18 @@
         <code value="Quantity"/>
       </type>
       <constraint>
+        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
+          <valueString value="code.empty() or system"/>
+        </extension>
         <key value="qty-3"/>
         <severity value="error"/>
-        <human value="If a code for the units is present, the system SHALL also be present"/>
+        <human value="If a code for the unit is present, the system SHALL also be present"/>
         <xpath value="not(exists(f:code)) or exists(f:system)"/>
       </constraint>
       <constraint>
+        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
+          <valueString value="(code or value.empty()) and (system.empty() or system = &#39;urn:iso:std:iso:4217&#39;)"/>
+        </extension>
         <key value="mny-1"/>
         <severity value="error"/>
         <human value="There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:iso:std:iso:4217&quot; - currency)."/>
@@ -141,7 +148,7 @@
     <element>
       <path value="Quantity.comparator"/>
       <short value="&lt; | &lt;= | &gt;= | &gt; - how to understand the value"/>
-      <definition value="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is &quot;&lt;&quot; , then the real value is &lt; stated value."/>
+      <definition value="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues; e.g. if the comparator is &quot;&lt;&quot; , then the real value is &lt; stated value."/>
       <comments value="This is labeled as &quot;Is Modifier&quot; because the comparator modifies the interpretation of the value significantly. If there is no comparator, then there is no modification of the value."/>
       <requirements value="Need a framework for handling measures where the value is &lt;5ug/L or &gt;400mg/L due to the limitations of measuring methodology."/>
       <min value="0"/>
@@ -159,7 +166,7 @@
       <isSummary value="true"/>
       <binding>
         <strength value="required"/>
-        <description value="How the Quantity should be understood and represented"/>
+        <description value="How the Quantity should be understood and represented."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/quantity-comparator"/>
         </valueSetReference>
@@ -176,8 +183,8 @@
     <element>
       <path value="Quantity.unit"/>
       <short value="Unit representation"/>
-      <definition value="A human-readable form of the units."/>
-      <requirements value="There are many representations for units and in many contexts, particular representations are fixed and required. I.e. mcg for micrograms."/>
+      <definition value="A human-readable form of the unit."/>
+      <requirements value="There are many representations for units of measure and in many contexts, particular representations are fixed and required. I.e. mcg for micrograms."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -191,7 +198,7 @@
       <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
-        <map value="(see OBX.6 etc) / CQ.2"/>
+        <map value="(see OBX.6 etc.) / CQ.2"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -217,7 +224,7 @@
       <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
-        <map value="(see OBX.6 etc) / CQ.2"/>
+        <map value="(see OBX.6 etc.) / CQ.2"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -227,9 +234,9 @@
     <element>
       <path value="Quantity.code"/>
       <short value="Coded form of the unit"/>
-      <definition value="A computer processable form of the units in some unit representation system."/>
+      <definition value="A computer processable form of the unit in some unit representation system."/>
       <comments value="The preferred system is UCUM, but SNOMED CT can also be used (for customary units) or ISO 4217 for currency.  The context of use may additionally require a code from a particular system."/>
-      <requirements value="Need a computable form of the units that is fixed across all forms. UCUM provides this for quantities, but SNOMED CT provides many units of interest."/>
+      <requirements value="Need a computable form of the unit that is fixed across all forms. UCUM provides this for quantities, but SNOMED CT provides many units of interest."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -243,7 +250,7 @@
       <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
-        <map value="(see OBX.6 etc) / CQ.2"/>
+        <map value="(see OBX.6 etc.) / CQ.2"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -257,12 +264,15 @@
       <name value="Money"/>
       <short value="An amount of money. With regard to precision, see [Decimal Precision](datatypes.html#precision)"/>
       <definition value="There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:iso:std:iso:4217&quot; - currency)."/>
-      <min value="1"/>
-      <max value="1"/>
+      <min value="0"/>
+      <max value="*"/>
       <type>
         <code value="Quantity"/>
       </type>
       <constraint>
+        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
+          <valueString value="(code or value.empty()) and (system.empty() or system = &#39;urn:iso:std:iso:4217&#39;)"/>
+        </extension>
         <key value="mny-1"/>
         <severity value="error"/>
         <human value="There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:iso:std:iso:4217&quot; - currency)."/>
