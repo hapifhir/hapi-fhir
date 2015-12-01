@@ -386,7 +386,6 @@ public class Dstu21BundleFactory implements IVersionSpecificBundleFactory {
 		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType, theResult.getPublished());
 
 		if (theServer.getPagingProvider() != null) {
-//			theServerBase = theCompleteUrl.contains("?") ? theCompleteUrl.substring(0, theCompleteUrl.indexOf("?")) : theCompleteUrl;
 			int limit;
 			limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
 			limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
