@@ -82,7 +82,7 @@ public class LoggingInterceptorTest {
 			public boolean matches(final Object argument) {
 				String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();
 				System.out.println("Verifying: " + formattedMessage);
-				return formattedMessage.contains("Content-Type: application/xml+fhir; charset=UTF-8");
+				return formattedMessage.replace("; ", ";").replace("UTF", "utf").contains("Content-Type: application/xml+fhir;charset=utf-8");
 			}
 		}));
 	}

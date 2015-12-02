@@ -41,7 +41,7 @@ public class AcceptHeaderTest {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replace(" ", "").replace("UTF", "utf"));
 	}
 	
 	@Test
@@ -51,7 +51,7 @@ public class AcceptHeaderTest {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replace(" ", "").replace("UTF", "utf"));
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class AcceptHeaderTest {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replace(" ", "").replace("UTF", "utf"));
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class AcceptHeaderTest {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replace(" ", "").replace("UTF", "utf"));
 
 		// Now with spaces
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
@@ -79,7 +79,7 @@ public class AcceptHeaderTest {
 		status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replace(" ", "").replace("UTF", "utf"));
 	}
 
 	@AfterClass

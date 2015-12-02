@@ -57,7 +57,7 @@ public class SummaryParamTest {
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getEntity().getContentType().getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent, not(containsString("<Bundle")));
 		assertThat(responseContent, (containsString("<Patien")));
 		assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
@@ -75,7 +75,7 @@ public class SummaryParamTest {
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_HTML_WITH_UTF8, status.getEntity().getContentType().getValue());
+		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent, not(containsString("<Bundle")));
 		assertThat(responseContent, not(containsString("<Patien")));
 		assertEquals("<div>THE DIV</div>", responseContent);
@@ -93,7 +93,7 @@ public class SummaryParamTest {
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getEntity().getContentType().getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent, not(containsString("<Bundle")));
 		assertThat(responseContent, (containsString("<Patien")));
 		assertThat(responseContent, not(containsString("<div>THE DIV</div>")));

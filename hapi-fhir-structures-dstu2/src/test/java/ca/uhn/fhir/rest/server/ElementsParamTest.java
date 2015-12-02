@@ -56,7 +56,7 @@ public class ElementsParamTest {
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getEntity().getContentType().getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent, not(containsString("<Bundle")));
 		assertThat(responseContent, (containsString("<Patien")));
 		assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
@@ -74,7 +74,7 @@ public class ElementsParamTest {
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getEntity().getContentType().getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent, not(containsString("<Bundle")));
 		assertThat(responseContent, (containsString("<Patien")));
 		assertThat(responseContent, not(containsString("<div>THE DIV</div>")));

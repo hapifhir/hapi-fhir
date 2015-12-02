@@ -237,7 +237,7 @@
 		<apache_httpcore_version>4.4</apache_httpcore_version>
 		<derby_version>10.12.1.1</derby_version>
 		<jersey_version>2.22.1</jersey_version>
-		<jetty_version>9.3.6.v20151106</jetty_version> 
+		<jetty_version>9.2.14.v20151106</jetty_version> 
 		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this version with caution! Also note that if 
 			you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration for that plugin... -->
 		<hibernate_version>5.0.3.Final</hibernate_version>

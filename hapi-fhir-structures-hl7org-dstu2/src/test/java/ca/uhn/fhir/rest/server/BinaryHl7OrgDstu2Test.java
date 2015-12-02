@@ -141,7 +141,7 @@ public class BinaryHl7OrgDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_JSON + "; charset=UTF-8", status.getFirstHeader("content-type").getValue());
+		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
 
 		ourLog.info(responseContent);
 
@@ -159,7 +159,7 @@ public class BinaryHl7OrgDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + "; charset=UTF-8", status.getFirstHeader("content-type").getValue());
+		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
 
 		ourLog.info(responseContent);
 

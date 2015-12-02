@@ -219,7 +219,7 @@ public class CreateTest {
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Organization/001", status.getFirstHeader("location").getValue());
-		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), StringContains.containsString("UTF-8"));
+		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), StringContains.containsStringIgnoringCase("utf-8"));
 
 		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"","\"value\":\"001"));
 		assertEquals(EncodingEnum.JSON, ourLastEncoding);
