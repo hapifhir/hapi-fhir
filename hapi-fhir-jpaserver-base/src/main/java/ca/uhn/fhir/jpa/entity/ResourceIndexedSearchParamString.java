@@ -32,15 +32,79 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+import org.apache.lucene.analysis.core.StopFilterFactory;
+import org.apache.lucene.analysis.miscellaneous.WordDelimiterFilterFactory;
+import org.apache.lucene.analysis.ngram.EdgeNGramFilterFactory;
+import org.apache.lucene.analysis.ngram.NGramFilterFactory;
+import org.apache.lucene.analysis.pattern.PatternTokenizerFactory;
+import org.apache.lucene.analysis.phonetic.PhoneticFilterFactory;
+import org.apache.lucene.analysis.snowball.SnowballPorterFilterFactory;
+import org.apache.lucene.analysis.standard.StandardFilterFactory;
+import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
+import org.hibernate.search.annotations.Analyze;
+import org.hibernate.search.annotations.Analyzer;
+import org.hibernate.search.annotations.AnalyzerDef;
+import org.hibernate.search.annotations.AnalyzerDefs;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Fields;
+import org.hibernate.search.annotations.Parameter;
+import org.hibernate.search.annotations.Store;
+import org.hibernate.search.annotations.TokenFilterDef;
+import org.hibernate.search.annotations.TokenizerDef;
 
+//@formatter:off
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_STRING"/* , indexes= {@Index(name="IDX_SP_STRING", columnList="SP_VALUE_NORMALIZED")} */)
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_STRING", indexes = { 
 		@org.hibernate.annotations.Index(name = "IDX_SP_STRING", columnNames = { "RES_TYPE", "SP_NAME", "SP_VALUE_NORMALIZED" }) 
 })
+@AnalyzerDefs({
+	@AnalyzerDef(name = "autocompleteEdgeAnalyzer",
+		tokenizer = @TokenizerDef(factory = PatternTokenizerFactory.class, params= {
+			@Parameter(name="pattern", value="(.*)"),
+			@Parameter(name="group", value="1")
+		}),
+		filters = {
+			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
+			@TokenFilterDef(factory = StopFilterFactory.class),
+			@TokenFilterDef(factory = EdgeNGramFilterFactory.class, params = {
+				@Parameter(name = "minGramSize", value = "3"),
+				@Parameter(name = "maxGramSize", value = "50") 
+			}), 
+		}),
+	@AnalyzerDef(name = "autocompletePhoneticAnalyzer",
+		tokenizer = @TokenizerDef(factory=StandardTokenizerFactory.class),
+		filters = {
+			@TokenFilterDef(factory=StandardFilterFactory.class),
+			@TokenFilterDef(factory=StopFilterFactory.class),
+			@TokenFilterDef(factory=PhoneticFilterFactory.class, params = {
+				@Parameter(name="encoder", value="DoubleMetaphone")
+			}),
+			@TokenFilterDef(factory=SnowballPorterFilterFactory.class, params = {
+				@Parameter(name="language", value="English") 
+			})
+		}),
+	@AnalyzerDef(name = "autocompleteNGramAnalyzer",
+		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
+		filters = {
+			@TokenFilterDef(factory = WordDelimiterFilterFactory.class),
+			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
+			@TokenFilterDef(factory = NGramFilterFactory.class, params = {
+				@Parameter(name = "minGramSize", value = "3"),
+				@Parameter(name = "maxGramSize", value = "20") 
+			}),
+		}),
+	@AnalyzerDef(name = "standardAnalyzer",
+		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
+		filters = {
+			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
+		}) // Def
+	}
+)
+//@formatter:on
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	/*
@@ -51,6 +115,12 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	private static final long serialVersionUID = 1L;
 
 	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)
+	@Fields({
+		@Field(name = "myValueText", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
+		@Field(name = "myValueTextEdgeNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteEdgeAnalyzer")),
+		@Field(name = "myValueTextNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteNGramAnalyzer")),
+		@Field(name = "myValueTextPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
+	})
 	private String myValueExact;
 
 	@Column(name = "SP_VALUE_NORMALIZED", length = MAX_LENGTH, nullable = true)

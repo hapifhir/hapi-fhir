@@ -6,7 +6,7 @@ jdk:
   - oraclejdk8
 env:
   global:
-    - MAVEN_OPTS="-XX:MaxPermSize=512m -Xmx2g"
+    - MAVEN_OPTS="-Xmx1500m"
 
 cache:
   directories:

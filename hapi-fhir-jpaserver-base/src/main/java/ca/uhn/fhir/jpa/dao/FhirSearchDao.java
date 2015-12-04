@@ -36,7 +36,6 @@ import javax.persistence.PersistenceContextType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.Token;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.highlight.Formatter;
 import org.apache.lucene.search.highlight.Highlighter;
@@ -53,11 +52,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -68,11 +69,11 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 
-	private void addTextSearch(QueryBuilder qb, BooleanJunction<?> bool, List<List<? extends IQueryParameterType>> contentAndTerms, String field) {
-		if (contentAndTerms == null) {
+	private void addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction<?> theBoolean, List<List<? extends IQueryParameterType>> theTerms, String theFieldName) {
+		if (theTerms == null) {
 			return;
 		}
-		for (List<? extends IQueryParameterType> nextAnd : contentAndTerms) {
+		for (List<? extends IQueryParameterType> nextAnd : theTerms) {
 			Set<String> terms = new HashSet<String>();
 			for (IQueryParameterType nextOr : nextAnd) {
 				StringParam nextOrString = (StringParam) nextOr;
@@ -83,21 +84,46 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 			}
 			if (terms.isEmpty() == false) {
 				String joinedTerms = StringUtils.join(terms, ' ');
-				bool.must(qb.keyword().onField(field).matching(joinedTerms).createQuery());
+				theBoolean.must(theQueryBuilder.keyword().onField(theFieldName).matching(joinedTerms).createQuery());
 			}
 		}
 	}
 
 	private List<Long> doSearch(String theResourceName, SearchParameterMap theParams, Long theReferencingPid) {
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+		
+		/*
+		 * Handle textual params
+		 */
+		for (String nextParamName : theParams.keySet()) {
+			for (List<? extends IQueryParameterType> nextAndList : theParams.get(nextParamName)) {
+				for (Iterator<? extends IQueryParameterType> orIterator = nextAndList.iterator(); orIterator.hasNext(); ) {
+					IQueryParameterType nextParam = orIterator.next();
+					if (nextParam instanceof TokenParam) {
+						TokenParam nextTokenParam = (TokenParam)nextParam;
+						if (nextTokenParam.isText()) {
+							QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceIndexedSearchParamString.class).get();
+							BooleanJunction<?> bool = qb.bool();
 
+							bool.must(qb.keyword().onField("myParamsString").matching(nextTokenParam.getValue()).createQuery());
+						}
+					}
+				}
+			}
+		}
+		
 		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
-
 		BooleanJunction<?> bool = qb.bool();
 
+		/*
+		 * Handle _content parameter (resource body content)
+		 */
 		List<List<? extends IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 		addTextSearch(qb, bool, contentAndTerms, "myContentText");
 
+		/*
+		 * Handle _text parameter (resource narrative content) 
+		 */
 		List<List<? extends IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
 		addTextSearch(qb, bool, textAndTerms, "myNarrativeText");
 
