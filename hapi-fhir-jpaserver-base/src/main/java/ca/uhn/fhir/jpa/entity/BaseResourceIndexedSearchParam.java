@@ -47,20 +47,19 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	private Long myId;
 
 	@Field
-	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable=false)
+	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable = false)
 	private String myParamName;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "RES_ID", referencedColumnName="RES_ID")
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID")
 	@ContainedIn
 	private ResourceTable myResource;
 
-	@Field(store=Store.YES)
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourcePid;
 
-	@Field(store=Store.YES)
-	@Column(name = "RES_TYPE", nullable=false)
+	@Field()
+	@Column(name = "RES_TYPE", nullable = false)
 	private String myResourceType;
 
 	protected Long getId() {
@@ -73,6 +72,10 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 
 	public ResourceTable getResource() {
 		return myResource;
+	}
+
+	public Long getResourcePid() {
+		return myResourcePid;
 	}
 
 	public void setParamName(String theName) {

@@ -201,4 +201,5 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append("value", getValueNormalized());
 		return b.build();
 	}
+
 }

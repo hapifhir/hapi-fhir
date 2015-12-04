@@ -37,6 +37,18 @@ public class StringParameterTest {
 	private static Server ourServer;
 
 	@Test
+	public void testContains() {
+		StringParam sp = new StringParam("VAL");
+		sp.setContains(true);
+		assertEquals(":contains", sp.getQueryParameterQualifier());
+		
+		sp = new StringParam("VAL");
+		sp.setValueAsQueryToken(":contains", "VAL");
+		assertEquals(true, sp.isContains());
+		assertEquals("VAL", sp.getValue());
+	}
+	
+	@Test
 	public void testRawString() throws Exception {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?plain=aaa");

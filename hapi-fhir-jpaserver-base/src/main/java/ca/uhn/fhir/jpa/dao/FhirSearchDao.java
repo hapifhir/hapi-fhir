@@ -101,7 +101,7 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 			for (List<? extends IQueryParameterType> nextAndList : theParams.get(nextParamName)) {
 				for (Iterator<? extends IQueryParameterType> orIterator = nextAndList.iterator(); orIterator.hasNext();) {
 					IQueryParameterType nextParam = orIterator.next();
-					if (nextParam instanceof TokenParam && false) {
+					if (nextParam instanceof TokenParam) {
 						TokenParam nextTokenParam = (TokenParam) nextParam;
 						if (nextTokenParam.isText()) {
 							orIterator.remove();
@@ -112,27 +112,26 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 							if (isNotBlank(theResourceName)) {
 								bool.must(qb.keyword().onField("myResourceType").matching(theResourceName).createQuery());
 							}
-							
+//							
 							//@formatter:off
+							String value = nextTokenParam.getValue().toLowerCase();
 							Query textQuery = qb
 									.phrase()
 									.withSlop(2)
 									.onField("myValueText").boostedTo(4.0f)
 									.andField("myValueTextEdgeNGram").boostedTo(2.0f)
-									.andField("myValueTextNGram").boostedTo(1.0f)
-									.sentence(nextTokenParam.getValue().toLowerCase()).createQuery();
+//									.andField("myValueTextNGram").boostedTo(1.0f)
+									.sentence(value).createQuery();
 							bool.must(textQuery);
 							//@formatter:on
 							
-							FullTextQuery ftq = em.createFullTextQuery(bool.createQuery(), ResourceTable.class);
-							ftq.setProjection("myResourcePid");
+							FullTextQuery ftq = em.createFullTextQuery(bool.createQuery(), ResourceIndexedSearchParamString.class);
 
 							List<?> resultList = ftq.getResultList();
 							pids = new ArrayList<Long>();
 							for (Object next : resultList) {
-								Object[] nextAsArray = (Object[]) next;
-								Long nextValue = (Long) nextAsArray[0];
-								pids.add(nextValue);
+								ResourceIndexedSearchParamString nextAsArray = (ResourceIndexedSearchParamString) next;
+								pids.add(nextAsArray.getResourcePid());
 							}
 						}
 					}

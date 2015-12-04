@@ -38,12 +38,12 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu21SearchFtTest.class);
 
 	@Test
-	@Ignore
 	public void testCodeTextSearch() {
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(ObservationStatusEnum.FINAL);
 		obs1.setValue(new QuantityDt(123));
+		obs1.setComments("obs1");
 		IIdType id1 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 		
 		Observation obs2 = new Observation();
@@ -55,10 +55,43 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		SearchParameterMap map;
 		
 		map = new SearchParameterMap();
-		map.add(Observation.SP_CODE, new TokenParam(null, "Systolic").setText(true));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id1, id2));
-		
+		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setText(true));
+		assertThat(toUnqualifiedVersionlessIds(myObservationDao.search(map)), containsInAnyOrder(id1, id2));
+
+		map = new SearchParameterMap();
+		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setText(true));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), empty());
+
+		map = new SearchParameterMap();
+		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setText(true));
+		map.add(Constants.PARAM_CONTENT, new StringParam("obs1"));
+		assertThat(toUnqualifiedVersionlessIds(myObservationDao.search(map)), containsInAnyOrder(id1));
+
 	}
+
+	@Test
+	@Ignore
+	public void testStringTextSearch() {
+		Observation obs1 = new Observation();
+		obs1.getCode().setText("AAAAA");
+		obs1.setValue(new StringDt("Systolic Blood Pressure"));
+		obs1.setStatus(ObservationStatusEnum.FINAL);
+		IIdType id1 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
+		
+		Observation obs2 = new Observation();
+		obs1.getCode().setText("AAAAA");
+		obs1.setValue(new StringDt("Diastolic Blood Pressure"));
+		obs2.setStatus(ObservationStatusEnum.FINAL);
+		IIdType id2 = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
+		
+		SearchParameterMap map;
+		
+		map = new SearchParameterMap();
+		map.add(Observation.SP_VALUE_STRING, new StringParam("sure").setContains(true));
+		assertThat(toUnqualifiedVersionlessIds(myObservationDao.search(map)), containsInAnyOrder(id1, id2));
+
+	}
+
 	
 	@Test
 	public void testSuggestIgnoresBase64Content() {

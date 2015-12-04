@@ -191,6 +191,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	public void beforeFlushFT() {
 		FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
 		ftem.purgeAll(ResourceTable.class);
+		ftem.purgeAll(ResourceIndexedSearchParamString.class);
 		ftem.flushToIndexes();
 
 		myDaoConfig.setSchedulingDisabled(true);

@@ -19,8 +19,7 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -34,6 +33,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 
 	private boolean myExact;
 	private String myValue;
+	private boolean myContains;
 
 	public StringParam() {
 	}
@@ -51,6 +51,8 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	String doGetQueryParameterQualifier() {
 		if (isExact()) {
 			return Constants.PARAMQUALIFIER_STRING_EXACT;
+		} else if (isContains()) {
+			return Constants.PARAMQUALIFIER_STRING_CONTAINS;
 		} else {
 			return null;
 		}
@@ -67,6 +69,11 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 			setExact(true);
 		} else {
 			setExact(false);
+		}
+		if (Constants.PARAMQUALIFIER_STRING_CONTAINS.equals(theQualifier)) {
+			setContains(true);
+		} else {
+			setContains(false);
 		}
 		myValue = ParameterUtil.unescape(theValue);
 	}
@@ -91,12 +98,25 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 		return myExact;
 	}
 
-	public void setExact(boolean theExact) {
+	public StringParam setExact(boolean theExact) {
 		myExact = theExact;
+		if (myExact) {
+			setContains(false);
+			setMissing(null);
+		}
+		return this;
 	}
 
-	public void setValue(String theValue) {
+	/**
+	 * String parameter modifier <code>:contains</code>
+	 */
+	public boolean isContains() {
+		return myContains;
+	}
+
+	public StringParam setValue(String theValue) {
 		myValue = theValue;
+		return this;
 	}
 
 	@Override
@@ -106,10 +126,25 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 		if (myExact) {
 			builder.append("exact", myExact);
 		}
+		if (myContains) {
+			builder.append("contains", myContains);
+		}
 		if (getMissing() != null) {
 			builder.append("missing", getMissing().booleanValue());
 		}
 		return builder.toString();
+	}
+
+	/**
+	 * String parameter modifier <code>:contains</code>
+	 */
+	public StringParam setContains(boolean theContains) {
+		myContains = theContains;
+		if (myContains) {
+			setExact(false);
+			setMissing(null);
+		}
+		return this;
 	}
 
 }
