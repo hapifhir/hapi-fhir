@@ -49,6 +49,7 @@ import org.hibernate.search.annotations.AnalyzerDefs;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Fields;
+import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.Parameter;
 import org.hibernate.search.annotations.Store;
 import org.hibernate.search.annotations.TokenFilterDef;
@@ -61,49 +62,50 @@ import org.hibernate.search.annotations.TokenizerDef;
 @org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_STRING", indexes = { 
 		@org.hibernate.annotations.Index(name = "IDX_SP_STRING", columnNames = { "RES_TYPE", "SP_NAME", "SP_VALUE_NORMALIZED" }) 
 })
-@AnalyzerDefs({
-	@AnalyzerDef(name = "autocompleteEdgeAnalyzer",
-		tokenizer = @TokenizerDef(factory = PatternTokenizerFactory.class, params= {
-			@Parameter(name="pattern", value="(.*)"),
-			@Parameter(name="group", value="1")
-		}),
-		filters = {
-			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
-			@TokenFilterDef(factory = StopFilterFactory.class),
-			@TokenFilterDef(factory = EdgeNGramFilterFactory.class, params = {
-				@Parameter(name = "minGramSize", value = "3"),
-				@Parameter(name = "maxGramSize", value = "50") 
-			}), 
-		}),
-	@AnalyzerDef(name = "autocompletePhoneticAnalyzer",
-		tokenizer = @TokenizerDef(factory=StandardTokenizerFactory.class),
-		filters = {
-			@TokenFilterDef(factory=StandardFilterFactory.class),
-			@TokenFilterDef(factory=StopFilterFactory.class),
-			@TokenFilterDef(factory=PhoneticFilterFactory.class, params = {
-				@Parameter(name="encoder", value="DoubleMetaphone")
-			}),
-			@TokenFilterDef(factory=SnowballPorterFilterFactory.class, params = {
-				@Parameter(name="language", value="English") 
-			})
-		}),
-	@AnalyzerDef(name = "autocompleteNGramAnalyzer",
-		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
-		filters = {
-			@TokenFilterDef(factory = WordDelimiterFilterFactory.class),
-			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
-			@TokenFilterDef(factory = NGramFilterFactory.class, params = {
-				@Parameter(name = "minGramSize", value = "3"),
-				@Parameter(name = "maxGramSize", value = "20") 
-			}),
-		}),
-	@AnalyzerDef(name = "standardAnalyzer",
-		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
-		filters = {
-			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
-		}) // Def
-	}
-)
+@Indexed()
+//@AnalyzerDefs({
+//	@AnalyzerDef(name = "autocompleteEdgeAnalyzer",
+//		tokenizer = @TokenizerDef(factory = PatternTokenizerFactory.class, params= {
+//			@Parameter(name="pattern", value="(.*)"),
+//			@Parameter(name="group", value="1")
+//		}),
+//		filters = {
+//			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
+//			@TokenFilterDef(factory = StopFilterFactory.class),
+//			@TokenFilterDef(factory = EdgeNGramFilterFactory.class, params = {
+//				@Parameter(name = "minGramSize", value = "3"),
+//				@Parameter(name = "maxGramSize", value = "50") 
+//			}), 
+//		}),
+//	@AnalyzerDef(name = "autocompletePhoneticAnalyzer",
+//		tokenizer = @TokenizerDef(factory=StandardTokenizerFactory.class),
+//		filters = {
+//			@TokenFilterDef(factory=StandardFilterFactory.class),
+//			@TokenFilterDef(factory=StopFilterFactory.class),
+//			@TokenFilterDef(factory=PhoneticFilterFactory.class, params = {
+//				@Parameter(name="encoder", value="DoubleMetaphone")
+//			}),
+//			@TokenFilterDef(factory=SnowballPorterFilterFactory.class, params = {
+//				@Parameter(name="language", value="English") 
+//			})
+//		}),
+//	@AnalyzerDef(name = "autocompleteNGramAnalyzer",
+//		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
+//		filters = {
+//			@TokenFilterDef(factory = WordDelimiterFilterFactory.class),
+//			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
+//			@TokenFilterDef(factory = NGramFilterFactory.class, params = {
+//				@Parameter(name = "minGramSize", value = "3"),
+//				@Parameter(name = "maxGramSize", value = "20") 
+//			}),
+//		}),
+//	@AnalyzerDef(name = "standardAnalyzer",
+//		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
+//		filters = {
+//			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
+//		}) // Def
+//	}
+//)
 //@formatter:on
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 

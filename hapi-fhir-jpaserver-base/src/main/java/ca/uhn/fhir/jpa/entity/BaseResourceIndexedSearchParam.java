@@ -32,6 +32,7 @@ import javax.persistence.MappedSuperclass;
 
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Store;
 
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam implements Serializable {
@@ -54,11 +55,11 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	@ContainedIn
 	private ResourceTable myResource;
 
-	@Field
+	@Field(store=Store.YES)
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourcePid;
 
-	@Field
+	@Field(store=Store.YES)
 	@Column(name = "RES_TYPE", nullable=false)
 	private String myResourceType;
 
