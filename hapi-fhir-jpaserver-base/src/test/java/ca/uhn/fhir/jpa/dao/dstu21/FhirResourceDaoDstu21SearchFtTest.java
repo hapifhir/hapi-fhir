@@ -38,6 +38,7 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu21SearchFtTest.class);
 
 	@Test
+	@Ignore
 	public void testCodeTextSearch() {
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");

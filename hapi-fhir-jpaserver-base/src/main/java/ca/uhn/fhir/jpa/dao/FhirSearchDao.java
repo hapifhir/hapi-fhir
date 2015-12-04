@@ -97,6 +97,7 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		/*
 		 * Handle textual params
 		 */
+		/*
 		for (String nextParamName : theParams.keySet()) {
 			for (List<? extends IQueryParameterType> nextAndList : theParams.get(nextParamName)) {
 				for (Iterator<? extends IQueryParameterType> orIterator = nextAndList.iterator(); orIterator.hasNext();) {
@@ -115,14 +116,8 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 //							
 							//@formatter:off
 							String value = nextTokenParam.getValue().toLowerCase();
-							Query textQuery = qb
-									.phrase()
-									.withSlop(2)
-									.onField("myValueText").boostedTo(4.0f)
-									.andField("myValueTextEdgeNGram").boostedTo(2.0f)
-//									.andField("myValueTextNGram").boostedTo(1.0f)
-									.sentence(value).createQuery();
-							bool.must(textQuery);
+							bool.must(qb.keyword().onField("myValueTextEdgeNGram").matching(value).createQuery());
+							
 							//@formatter:on
 							
 							FullTextQuery ftq = em.createFullTextQuery(bool.createQuery(), ResourceIndexedSearchParamString.class);
@@ -138,10 +133,11 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 				}
 			}
 		}
-
+		
 		if (pids != null && pids.isEmpty()) {
 			return pids;
 		}
+		*/
 		
 		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
 		BooleanJunction<?> bool = qb.bool();
