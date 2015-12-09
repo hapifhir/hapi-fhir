@@ -55,7 +55,7 @@ public class ServerProfileProvider implements IResourceProvider {
 	
 	@Read()
 	public StructureDefinition getProfileById(HttpServletRequest theRequest, @IdParam IdDt theId) {
-		RuntimeResourceDefinition retVal = myContext.getResourceDefinitionById(theId.getValue());
+		RuntimeResourceDefinition retVal = myContext.getResourceDefinitionById(theId.getIdPart());
 		if (retVal==null) {
 			return null;
 		}
