@@ -36,7 +36,6 @@ import javax.persistence.PersistenceContextType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.Token;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.highlight.Formatter;
 import org.apache.lucene.search.highlight.Highlighter;
@@ -53,11 +52,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -68,11 +69,11 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 
-	private void addTextSearch(QueryBuilder qb, BooleanJunction<?> bool, List<List<? extends IQueryParameterType>> contentAndTerms, String field) {
-		if (contentAndTerms == null) {
+	private void addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction<?> theBoolean, List<List<? extends IQueryParameterType>> theTerms, String theFieldName) {
+		if (theTerms == null) {
 			return;
 		}
-		for (List<? extends IQueryParameterType> nextAnd : contentAndTerms) {
+		for (List<? extends IQueryParameterType> nextAnd : theTerms) {
 			Set<String> terms = new HashSet<String>();
 			for (IQueryParameterType nextOr : nextAnd) {
 				StringParam nextOrString = (StringParam) nextOr;
@@ -83,7 +84,7 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 			}
 			if (terms.isEmpty() == false) {
 				String joinedTerms = StringUtils.join(terms, ' ');
-				bool.must(qb.keyword().onField(field).matching(joinedTerms).createQuery());
+				theBoolean.must(theQueryBuilder.keyword().onField(theFieldName).matching(joinedTerms).createQuery());
 			}
 		}
 	}
@@ -91,13 +92,65 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 	private List<Long> doSearch(String theResourceName, SearchParameterMap theParams, Long theReferencingPid) {
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 
-		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
+		List<Long> pids = null;
+		
+		/*
+		 * Handle textual params
+		 */
+		/*
+		for (String nextParamName : theParams.keySet()) {
+			for (List<? extends IQueryParameterType> nextAndList : theParams.get(nextParamName)) {
+				for (Iterator<? extends IQueryParameterType> orIterator = nextAndList.iterator(); orIterator.hasNext();) {
+					IQueryParameterType nextParam = orIterator.next();
+					if (nextParam instanceof TokenParam) {
+						TokenParam nextTokenParam = (TokenParam) nextParam;
+						if (nextTokenParam.isText()) {
+							orIterator.remove();
+							QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceIndexedSearchParamString.class).get();
+							BooleanJunction<?> bool = qb.bool();
 
+							bool.must(qb.keyword().onField("myParamName").matching(nextParamName).createQuery());
+							if (isNotBlank(theResourceName)) {
+								bool.must(qb.keyword().onField("myResourceType").matching(theResourceName).createQuery());
+							}
+//							
+							//@formatter:off
+							String value = nextTokenParam.getValue().toLowerCase();
+							bool.must(qb.keyword().onField("myValueTextEdgeNGram").matching(value).createQuery());
+							
+							//@formatter:on
+							
+							FullTextQuery ftq = em.createFullTextQuery(bool.createQuery(), ResourceIndexedSearchParamString.class);
+
+							List<?> resultList = ftq.getResultList();
+							pids = new ArrayList<Long>();
+							for (Object next : resultList) {
+								ResourceIndexedSearchParamString nextAsArray = (ResourceIndexedSearchParamString) next;
+								pids.add(nextAsArray.getResourcePid());
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		if (pids != null && pids.isEmpty()) {
+			return pids;
+		}
+		*/
+		
+		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
 		BooleanJunction<?> bool = qb.bool();
 
+		/*
+		 * Handle _content parameter (resource body content)
+		 */
 		List<List<? extends IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 		addTextSearch(qb, bool, contentAndTerms, "myContentText");
 
+		/*
+		 * Handle _text parameter (resource narrative content)
+		 */
 		List<List<? extends IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
 		addTextSearch(qb, bool, textAndTerms, "myNarrativeText");
 
@@ -106,7 +159,7 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		}
 
 		if (bool.isEmpty()) {
-			return null;
+			return pids;
 		}
 
 		if (isNotBlank(theResourceName)) {
@@ -122,11 +175,13 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		// execute search
 		List<?> result = jpaQuery.getResultList();
 
+		HashSet<Long> pidsSet = pids != null ? new HashSet<Long>(pids) : null;
+		
 		ArrayList<Long> retVal = new ArrayList<Long>();
 		for (Object object : result) {
 			Object[] nextArray = (Object[]) object;
 			Long next = (Long) nextArray[0];
-			if (next != null) {
+			if (next != null && (pidsSet == null || pidsSet.contains(next))) {
 				retVal.add(next);
 			}
 		}
@@ -162,16 +217,16 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		Validate.notBlank(theContext, "theContext must be provided");
 		Validate.notBlank(theSearchParam, "theSearchParam must be provided");
 		Validate.notBlank(theText, "theSearchParam must be provided");
-		
+
 		long start = System.currentTimeMillis();
-		
+
 		String[] contextParts = StringUtils.split(theContext, '/');
 		if (contextParts.length != 3 || "Patient".equals(contextParts[0]) == false || "$everything".equals(contextParts[2]) == false) {
 			throw new InvalidRequestException("Invalid context: " + theContext);
 		}
 		IdDt contextId = new IdDt(contextParts[0], contextParts[1]);
 		Long pid = BaseHapiFhirDao.translateForcedIdToPid(contextId, myEntityManager);
-		
+
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 
 		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
@@ -210,7 +265,7 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 
 				formatter.setAnalyzer("myContentTextPhonetic");
 				highlighter.getBestFragments(analyzer.tokenStream("myContentTextPhonetic", nextValue), nextValue, 10);
-				
+
 				formatter.setAnalyzer("myContentTextNGram");
 				highlighter.getBestFragments(analyzer.tokenStream("myContentTextNGram", nextValue), nextValue, 10);
 
@@ -218,14 +273,14 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 				formatter.setAnalyzer("myContentTextEdgeNGram");
 				highlighter.getBestFragments(analyzer.tokenStream("myContentTextEdgeNGram", nextValue), nextValue, 10);
 
-//				formatter.setAnalyzer("myContentText");
-//				highlighter.getBestFragments(analyzer.tokenStream("myContentText", nextValue), nextValue, 10);
-//				formatter.setAnalyzer("myContentTextNGram");
-//				highlighter.getBestFragments(analyzer.tokenStream("myContentTextNGram", nextValue), nextValue, 10);
-//				formatter.setAnalyzer("myContentTextEdgeNGram");
-//				highlighter.getBestFragments(analyzer.tokenStream("myContentTextEdgeNGram", nextValue), nextValue, 10);
-//				formatter.setAnalyzer("myContentTextPhonetic");
-//				highlighter.getBestFragments(analyzer.tokenStream("myContentTextPhonetic", nextValue), nextValue, 10);
+				// formatter.setAnalyzer("myContentText");
+				// highlighter.getBestFragments(analyzer.tokenStream("myContentText", nextValue), nextValue, 10);
+				// formatter.setAnalyzer("myContentTextNGram");
+				// highlighter.getBestFragments(analyzer.tokenStream("myContentTextNGram", nextValue), nextValue, 10);
+				// formatter.setAnalyzer("myContentTextEdgeNGram");
+				// highlighter.getBestFragments(analyzer.tokenStream("myContentTextEdgeNGram", nextValue), nextValue, 10);
+				// formatter.setAnalyzer("myContentTextPhonetic");
+				// highlighter.getBestFragments(analyzer.tokenStream("myContentTextPhonetic", nextValue), nextValue, 10);
 			} catch (Exception e) {
 				throw new InternalErrorException(e);
 			}
@@ -233,18 +288,18 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		}
 
 		Collections.sort(suggestions);
-		
+
 		Set<String> terms = Sets.newHashSet();
-		for (Iterator<Suggestion> iter = suggestions.iterator(); iter.hasNext(); ) {
+		for (Iterator<Suggestion> iter = suggestions.iterator(); iter.hasNext();) {
 			String nextTerm = iter.next().getTerm().toLowerCase();
 			if (!terms.add(nextTerm)) {
 				iter.remove();
 			}
 		}
-		
-		long delay = System.currentTimeMillis()- start;
-		ourLog.info("Provided {} suggestions for term {} in {} ms", new Object[] {terms.size(), theText, delay});
-		
+
+		long delay = System.currentTimeMillis() - start;
+		ourLog.info("Provided {} suggestions for term {} in {} ms", new Object[] { terms.size(), theText, delay });
+
 		return suggestions;
 	}
 
@@ -292,12 +347,12 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		public void setFindPhrasesWith() {
 			myPartialMatchPhrases = new ArrayList<String>();
 			myPartialMatchScores = new ArrayList<Float>();
-			
+
 			for (Suggestion next : mySuggestions) {
 				myPartialMatchPhrases.add(' ' + next.myTerm);
 				myPartialMatchScores.add(next.myScore);
 			}
-			
+
 			myPartialMatchPhrases.add(myOriginalSearch);
 			myPartialMatchScores.add(1.0f);
 		}
@@ -308,7 +363,7 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 
 		@Override
 		public String highlightTerm(String theOriginalText, TokenGroup theTokenGroup) {
-			ourLog.debug("{} Found {} with score {}", new Object[] {myAnalyzer, theOriginalText, theTokenGroup.getTotalScore()});
+			ourLog.debug("{} Found {} with score {}", new Object[] { myAnalyzer, theOriginalText, theTokenGroup.getTotalScore() });
 			if (theTokenGroup.getTotalScore() > 0) {
 				float score = theTokenGroup.getTotalScore();
 				if (theOriginalText.equalsIgnoreCase(myOriginalSearch)) {
@@ -324,7 +379,7 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 					}
 				}
 			}
-			
+
 			return null;
 		}
 

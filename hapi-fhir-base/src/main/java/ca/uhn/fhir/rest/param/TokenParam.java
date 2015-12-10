@@ -38,7 +38,11 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	private boolean myText;
 	private String myValue;
 
+	/**
+	 * Constructor
+	 */
 	public TokenParam() {
+		super();
 	}
 
 	/**
@@ -143,16 +147,19 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		return myText;
 	}
 
-	public void setSystem(String theSystem) {
+	public TokenParam setSystem(String theSystem) {
 		mySystem = theSystem;
+		return this;
 	}
 
-	public void setText(boolean theText) {
+	public TokenParam setText(boolean theText) {
 		myText = theText;
+		return this;
 	}
 
-	public void setValue(String theValue) {
+	public TokenParam setValue(String theValue) {
 		myValue = theValue;
+		return this;
 	}
 
 	@Override

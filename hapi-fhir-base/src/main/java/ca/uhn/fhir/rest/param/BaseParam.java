@@ -40,7 +40,7 @@ abstract class BaseParam implements IQueryParameterType {
 
 	@Override
 	public final String getQueryParameterQualifier() {
-		if (myMissing != null) {
+		if (myMissing != null && myMissing.booleanValue()) {
 			return Constants.PARAMQUALIFIER_MISSING;
 		}
 		return doGetQueryParameterQualifier();

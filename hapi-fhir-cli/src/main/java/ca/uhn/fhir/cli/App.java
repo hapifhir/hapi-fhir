@@ -15,6 +15,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.Ansi.Color;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.LoggerFactory;
@@ -157,6 +158,13 @@ public class App {
 				command = nextCommand;
 				break;
 			}
+		}
+
+		if (command == null) {
+			System.out.println("Unrecognized command: " + ansi().bold().fg(Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE));
+			System.out.println();
+			logUsage();
+			return;
 		}
 
 		Options options = command.getOptions();
