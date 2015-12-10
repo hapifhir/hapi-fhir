@@ -4230,7 +4230,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s91"><Data ss:Type="String">Immunization</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">If immunization was administered (wasNotGiven=false) then explanation.reasonNotGiven SHALL be absent.</Data></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">(wasNotGiven = 'true').not() or explanation.reasonNotGiven.empty()</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">(wasNotGiven = 'true') or explanation.reasonNotGiven.empty()</Data></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">not(f:wasNotGiven/@value=false() and exists(f:explanation/f:reasonNotGiven))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">

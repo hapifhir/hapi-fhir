@@ -10,17 +10,17 @@
   <LastAuthor>Lloyd</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2015-11-12T22:48:14Z</LastSaved>
-  <Version>12.00</Version>
+  <Version>15.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
   <WindowHeight>12975</WindowHeight>
-  <WindowWidth>16215</WindowWidth>
-  <WindowTopX>13245</WindowTopX>
-  <WindowTopY>-60</WindowTopY>
-  <ActiveSheet>10</ActiveSheet>
+  <WindowWidth>28800</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>0</WindowTopY>
+  <ActiveSheet>2</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -3784,9 +3784,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>13</ActiveRow>
-     <ActiveCol>0</ActiveCol>
-     <RangeSelection>R14</RangeSelection>
+     <ActiveRow>15</ActiveRow>
+     <ActiveCol>13</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -3849,7 +3848,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s83"><Data ss:Type="String">Group items must have nested items, display items cannot have nested items</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">(type='group' and item.empty()) or (type='display' and item.empty().not())</Data><NamedCell
+    <Cell ss:StyleID="s83"><Data ss:Type="String">(type='group' implies item.empty().not()) and (type.log('type')='display' implies item.log('item').empty())</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">not((f:type/@value='group' and not(f:item)) or (f:type/@value='display' and f:item))</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -4305,6 +4304,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4324,7 +4324,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>0</ActiveRow>
+     <ActiveRow>2</ActiveRow>
      <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>
@@ -8124,7 +8124,6 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>

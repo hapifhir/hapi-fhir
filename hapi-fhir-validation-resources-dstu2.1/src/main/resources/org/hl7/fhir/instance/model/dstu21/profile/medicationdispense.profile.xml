@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="MedicationDispense"/>
   <meta>
-    <lastUpdated value="2015-12-01T11:05:39.051-05:00"/>
+    <lastUpdated value="2015-12-05T08:35:35.779-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -808,9 +808,9 @@ Specifically if &#39;boolean&#39; datatype is selected, then the following logic
       <value value="http://www.hl7.org/Special/committees/medication/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-05T08:35:35-05:00"/>
   <description value="Base StructureDefinition for MedicationDispense Resource"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.1.0"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
@@ -841,7 +841,7 @@ Specifically if &#39;boolean&#39; datatype is selected, then the following logic
       </type>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="whenHandedOver.empty() or whenPrepare.empty() or whenHandedOver &lt; whenPrepared"/>
+          <valueString value="whenHandedOver.empty() or whenPrepared.empty() or whenHandedOver &gt;= whenPrepared"/>
         </extension>
         <key value="mdd-1"/>
         <severity value="error"/>
@@ -1697,7 +1697,7 @@ Specifically if &#39;boolean&#39; datatype is selected, then the following logic
       </type>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="whenHandedOver.empty() or whenPrepare.empty() or whenHandedOver &lt; whenPrepared"/>
+          <valueString value="whenHandedOver.empty() or whenPrepared.empty() or whenHandedOver &gt;= whenPrepared"/>
         </extension>
         <key value="mdd-1"/>
         <severity value="error"/>

@@ -107,9 +107,9 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-05T08:35:35-05:00"/>
   <description value="Base StructureDefinition for Reference Type"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.1.0"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
@@ -130,7 +130,7 @@
       </type>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="reference.startsWith(&quot;#&quot;).not() or ($context.reference.substring(1) in $resource.contained)"/>
+          <valueString value="reference.startsWith(&quot;#&quot;).not() or ($context.reference.substring(1).log(&quot;url&quot;) in $resource.contained.id.log(&quot;ids&quot;))"/>
         </extension>
         <key value="ref-1"/>
         <severity value="error"/>
@@ -221,7 +221,7 @@
       </type>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="reference.startsWith(&quot;#&quot;).not() or ($context.reference.substring(1) in $resource.contained)"/>
+          <valueString value="reference.startsWith(&quot;#&quot;).not() or ($context.reference.substring(1).log(&quot;url&quot;) in $resource.contained.id.log(&quot;ids&quot;))"/>
         </extension>
         <key value="ref-1"/>
         <severity value="error"/>

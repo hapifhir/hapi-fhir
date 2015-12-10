@@ -16,9 +16,9 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-05T08:35:35-05:00"/>
   <description value="Base StructureDefinition for date Type: A date or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  Dates SHALL be valid dates."/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.1.0"/>
   <kind value="datatype"/>
   <abstract value="false"/>
   <base value="http://hl7.org/fhir/StructureDefinition/Element"/>

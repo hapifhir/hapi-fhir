@@ -92,8 +92,8 @@
     <SheetIndex>10</SheetIndex>
    </Xct>
   </SupBook>
-  <WindowHeight>16575</WindowHeight>
-  <WindowWidth>-27136</WindowWidth>
+  <WindowHeight>12975</WindowHeight>
+  <WindowWidth>24000</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>2</ActiveSheet>
@@ -4458,7 +4458,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition</Data></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">If the structure describes a base Resource or Type, the URL has to start with &quot;http://hl7.org/fhir/StructureDefinition/&quot; and the tail must match the id</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">constrainedType or url = 'http://hl7.org/fhir/StuctureDefinition/'+id</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">constrainedType or url = 'http://hl7.org/fhir/StructureDefinition/'+id</Data></Cell>
     <Cell ss:StyleID="s110"><Data ss:Type="String">exists(f:constrainedType) or f:url/@value=concat('http://hl7.org/fhir/StructureDefinition/', f:id/@value)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
@@ -4498,7 +4498,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">If there's a constrained type, its content must match the path name in the first element of a snapshot</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">constrainedType.empty() or snapshot.element.first.path = constrainedType</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">constrainedType.empty() or snapshot.element.first().path = constrainedType</Data></Cell>
     <Cell ss:StyleID="s109"><Data ss:Type="String">not(exists(f:constrainedType)) or not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
@@ -4508,18 +4508,17 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">element.base cannot appear if there is no base on the structure definition</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">snapshot.element.base.empty() xor base</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">snapshot.element.base implies base</Data></Cell>
     <Cell ss:StyleID="s109"><Data ss:Type="String">f:base or not(exists(f:snapshot/f:element/f:base) or exists(f:differential/f:element/f:base))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s108"><Data ss:Type="Number">13</Data><NamedCell
-      ss:Name="Invariantids"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Ensure that element.base appears if there's a constrained type on the structure definition</Data></Cell>
+    <Cell ss:StyleID="s108"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">element.base must appear if there is a base on the structure definition</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">snapshot.element.base.empty() xor base</Data></Cell>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">not(f:constrainedType) or not(f:snapshot/f:element[not(f:base)])</Data></Cell>
+    <Cell ss:StyleID="s90"/>
+    <Cell ss:StyleID="s90"/>
+    <Cell ss:StyleID="s90"/>
+    <Cell ss:StyleID="s90"/>
+    <Cell ss:StyleID="s109"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s108"><NamedCell ss:Name="Invariantids"/></Cell>
@@ -4856,7 +4855,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>2</SplitVertical>
-   <LeftColumnRightPane>2</LeftColumnRightPane>
+   <LeftColumnRightPane>3</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -4864,14 +4863,15 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>2</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>8</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveRow>12</ActiveRow>
+     <ActiveCol>1</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

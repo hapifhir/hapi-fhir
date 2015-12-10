@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Questionnaire"/>
   <meta>
-    <lastUpdated value="2015-12-01T11:05:39.051-05:00"/>
+    <lastUpdated value="2015-12-05T08:35:35.779-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -466,10 +466,10 @@
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-05T08:35:35-05:00"/>
   <description value="Base StructureDefinition for Questionnaire Resource"/>
   <requirements value="To support structured, hierarchical registration of data gathered using digital forms and other questionnaires."/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.1.0"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
@@ -876,7 +876,7 @@
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="(type=&#39;group&#39; and item.empty()) or (type=&#39;display&#39; and item.empty().not())"/>
+          <valueString value="(type=&#39;group&#39; implies item.empty().not()) and (type.log(&#39;type&#39;)=&#39;display&#39; implies item.log(&#39;item&#39;).empty())"/>
         </extension>
         <key value="que-1"/>
         <severity value="error"/>
@@ -1375,7 +1375,7 @@
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="(type=&#39;group&#39; and item.empty()) or (type=&#39;display&#39; and item.empty().not())"/>
+          <valueString value="(type=&#39;group&#39; implies item.empty().not()) and (type.log(&#39;type&#39;)=&#39;display&#39; implies item.log(&#39;item&#39;).empty())"/>
         </extension>
         <key value="que-1"/>
         <severity value="error"/>

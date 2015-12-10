@@ -27,9 +27,9 @@
   POSSIBILITY OF SUCH DAMAGE.
   
 
-  Generated on Tue, Dec 1, 2015 11:05-0500 for FHIR v1.0.2 
+  Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0 
 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0.2">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.1.0">
   <!-- Note: When using this schema with some tools, it may also be necessary to declare xmlns:xml="http://www.w3.org/XML/1998/namespace", however this causes performance issues with other tools and thus is not in the base schemas. -->
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
   <xs:import namespace="http://www.w3.org/1999/xhtml" schemaLocation="fhir-xhtml.xsd"/>
@@ -9217,11 +9217,113 @@
               <xs:documentation xml:lang="en">A reference to a ModuleMetadata resource describing the metadata for the decision support service module.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="moduleDefinition" minOccurs="1" maxOccurs="1" type="Reference">
+          <xs:element name="parameter" type="DecisionSupportServiceModule.Parameter" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
-              <xs:documentation xml:lang="en">A reference to a ModuleDefinition resource describing the data requirements for the service module.</xs:documentation>
+              <xs:documentation xml:lang="en">Parameters to the module.</xs:documentation>
            </xs:annotation>
           </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="DecisionSupportServiceModule.Parameter">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The DecisionSupportServiceModule resource describes decision support functionality that is available as a service.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="name" minOccurs="1" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The name of the parameter.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="use" minOccurs="1" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Whether the parameter is input or output for the module.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="documentation" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A brief description of the parameter.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of the parameter.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="profile" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The profile of the parameter, if any.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="mustSupport" minOccurs="0" maxOccurs="unbounded" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="codeFilter" type="DecisionSupportServiceModule.CodeFilter" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Code filters for the required data, if any.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="dateFilter" type="DecisionSupportServiceModule.DateFilter" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Date filters for the required data, if any.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="DecisionSupportServiceModule.CodeFilter">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The DecisionSupportServiceModule resource describes decision support functionality that is available as a service.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="path" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="0" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The valueset for the code filter. The valueSet or codeableConcept elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="valueSetString" type="string"/>
+            <xs:element name="valueSetReference" type="Reference"/>
+          </xs:choice>
+          <xs:element name="codeableConcept" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The codeable concept for the code filter. Only one of valueSet or codeableConcept may be specified. If codeableConcepts are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codeable concepts.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="DecisionSupportServiceModule.DateFilter">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The DecisionSupportServiceModule resource describes decision support functionality that is available as a service.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="path" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="0" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="valueDateTime" type="dateTime"/>
+            <xs:element name="valuePeriod" type="Period"/>
+          </xs:choice>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -14111,7 +14213,7 @@ Not to be used when the patient is currently at the location</xs:documentation>
           </xs:element>
           <xs:element name="fhirVersion" minOccurs="0" maxOccurs="1" type="id">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.2 for this version.</xs:documentation>
+              <xs:documentation xml:lang="en">The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.1.0 for this version.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="dependency" type="ImplementationGuide.Dependency" minOccurs="0" maxOccurs="unbounded">
@@ -22017,7 +22119,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           </xs:element>
           <xs:element name="fhirVersion" minOccurs="0" maxOccurs="1" type="id">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.2 for this version.</xs:documentation>
+              <xs:documentation xml:lang="en">The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.1.0 for this version.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="mapping" type="StructureDefinition.Mapping" minOccurs="0" maxOccurs="unbounded">
@@ -22785,6 +22887,16 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
               <xs:documentation xml:lang="en">The required capability must exist and are assumed to function correctly on the FHIR server being tested.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="origin" type="TestScript.Origin" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An abstract server used in operations within this test script in the origin element.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="destination" type="TestScript.Destination" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An abstract server used in operations within this test script in the destination element.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="multiserver" minOccurs="0" maxOccurs="1" type="boolean">
             <xs:annotation>
               <xs:documentation xml:lang="en">If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.</xs:documentation>
@@ -22909,6 +23021,11 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
               <xs:documentation xml:lang="en">Description of the capabilities that this test script is requiring the server to support.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="origin" minOccurs="0" maxOccurs="unbounded" type="integer">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Which origin server these requirements apply to.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="destination" minOccurs="0" maxOccurs="1" type="integer">
             <xs:annotation>
               <xs:documentation xml:lang="en">Which server these requirements apply to.</xs:documentation>
@@ -22922,6 +23039,48 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           <xs:element name="conformance" minOccurs="1" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation xml:lang="en">Minimum conformance required of server for test script to execute successfully.   If server does not meet at a minimum the reference conformance definition, then all tests in this script are skipped.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="TestScript.Origin">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="index" minOccurs="1" maxOccurs="1" type="integer">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="profile" minOccurs="1" maxOccurs="1" type="ProfileOriginType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of profile the server supports.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="TestScript.Destination">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="index" minOccurs="1" maxOccurs="1" type="integer">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="profile" minOccurs="1" maxOccurs="1" type="ProfileDestinationType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of profile the server supports.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -23066,12 +23225,17 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           </xs:element>
           <xs:element name="destination" minOccurs="0" maxOccurs="1" type="integer">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Which server to perform the operation on.</xs:documentation>
+              <xs:documentation xml:lang="en">The server where the request message is destined for.  Must be one of the server numbers listed in TestScript.destination section.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="encodeRequestUrl" minOccurs="0" maxOccurs="1" type="boolean">
             <xs:annotation>
               <xs:documentation xml:lang="en">Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="origin" minOccurs="0" maxOccurs="1" type="integer">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The server where the request message originates from.  Must be one of the server numbers listed in TestScript.origin section.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="params" minOccurs="0" maxOccurs="1" type="string">
@@ -23314,6 +23478,31 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+  <xs:simpleType name="ProfileOriginType-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="FHIR-DSTU2-Client">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">General DSTU2 client initiating against a DSTU2 Server.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="FHIR-DSTU2-SDC-FormFiller">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">DSTU2 client that serves as an SDC-FormFiller.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ProfileOriginType">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The type of origin profile the server supports.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="ProfileOriginType-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
   <xs:simpleType name="ContentType-list">
     <xs:restriction base="xs:string">
       <xs:enumeration value="xml">
@@ -23501,6 +23690,41 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     <xs:complexContent>
       <xs:extension base="Element">
         <xs:attribute name="value" type="AssertionResponseTypes-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ProfileDestinationType-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="FHIR-DSTU2-Server">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">General DSTU2 server.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="FHIR-DSTU2-SDC-FormManager">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">DSTU2 server that serves as an SDC-FormManager.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="FHIR-DSTU2-SDC-FormReceiver">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">DSTU2 server that serves as an SDC-FormReceiver.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="FHIR-DSTU2-SDC-FormProcessor">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">DSTU2 server that serves as an SDC-FormProcessor.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ProfileDestinationType">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The type of destination profile the server supports.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="ProfileDestinationType-list" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

@@ -51,9 +51,8 @@ public @interface ResourceDef {
 	String id() default "";
 	
 	/**
-	 * The URL indicating the profile for this resource definition, if known. If this value is set
-	 * on a custom profile definition class in a server, the profile is assumed to be external to
-	 * the server, so the server will not export a profile for it.
+	 * The URL indicating the profile for this resource definition. If specified, this URL will be
+	 * automatically added to the meta tag when the resource is serialized.
 	 */
 	String profile() default "";
 	

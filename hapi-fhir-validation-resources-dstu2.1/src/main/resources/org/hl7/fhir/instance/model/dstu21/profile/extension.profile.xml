@@ -96,10 +96,10 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-05T08:35:35-05:00"/>
   <description value="Base StructureDefinition for Extension Type"/>
   <requirements value="The ability to add extensions in a structured way is what keeps FHIR resources simple."/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.1.0"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>

@@ -2,9 +2,6 @@
 
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Parameters"/>
-  <meta>
-    <lastUpdated value="2015-12-01T11:05:39.051-05:00"/>
-  </meta>
   <text>
     <status value="generated"/>
     <div xmlns="http://www.w3.org/1999/xhtml">
@@ -174,9 +171,9 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-05T11:08:43-05:00"/>
   <description value="Base StructureDefinition for Parameters Resource"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.1.0"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>

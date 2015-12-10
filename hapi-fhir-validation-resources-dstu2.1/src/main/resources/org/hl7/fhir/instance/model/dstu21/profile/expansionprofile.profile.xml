@@ -2,9 +2,6 @@
 
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="ExpansionProfile"/>
-  <meta>
-    <lastUpdated value="2015-12-01T11:05:39.051-05:00"/>
-  </meta>
   <text>
     <status value="generated"/>
     <div xmlns="http://www.w3.org/1999/xhtml">
@@ -38,17 +35,12 @@
             <span title="ExpansionProfile : Resource to define constraints on the Expansion of a FHIR ValueSet.">ExpansionProfile</span>
             <a name="ExpansionProfile"> </a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
-            <span title="This element has or is affected by some invariants">I</span>
-          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
             <a href="domainresource.html">DomainResource</a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Defines behaviour and contraints on the ValueSet Expansion operation
-            <br/>
-            <span style="font-style: italic" title="exp-5">SHALL have at least one of– codeSystems.include– codeSystems.exclude– includeDesignations (as true)– excludeNested– excludeNotForUI– excludePostCoordinated– displayLanguage– limitedExpansion</span>
-          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Defines behaviour and contraints on the ValueSet Expansion operation</td>
         </tr>
 
         <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
@@ -826,9 +818,9 @@
       <value value="http://www.hl7.org/Special/committees/Vocab/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-05T11:08:43-05:00"/>
   <description value="Base StructureDefinition for ExpansionProfile Resource"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.1.0"/>
   <mapping>
     <identity value="w5"/>
     <uri value="http://hl7.org/fhir/w5"/>
@@ -853,15 +845,6 @@
       <type>
         <code value="DomainResource"/>
       </type>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="codeSystem.include.empty().not() or codeSystem.exclude.empty().not() or includeDesignations = true or excludeNested.empty().not() or excludeNotForUI.empty().not() or excludePostCoordinated.empty().not() or displayLanguage.empty().not() or limitedExpansion.empty().not()"/>
-        </extension>
-        <key value="exp-5"/>
-        <severity value="error"/>
-        <human value="SHALL have at least one of– codeSystems.include– codeSystems.exclude– includeDesignations (as true)– excludeNested– excludeNotForUI– excludePostCoordinated– displayLanguage– limitedExpansion"/>
-        <xpath value="exists(f:codeSystems.include) or exists(f:codeSystems.exclude) or (exists(f:includeDesignations) and f:includeDesignations=&#39;true&#39;) orexists(f:excludeNested) orexists(f:codeSystem.excludeNotForUI) orexists(f:codeSystem.excludePostCoordinated) orexists(f:codeSystem.displayLanguage) orexists(f:codeSystem.limitedExpansion)"/>
-      </constraint>
       <mapping>
         <identity value="w5"/>
         <map value="conformance.terminology"/>
@@ -2084,15 +2067,6 @@
       <type>
         <code value="DomainResource"/>
       </type>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="codeSystem.include.empty().not() or codeSystem.exclude.empty().not() or includeDesignations = true or excludeNested.empty().not() or excludeNotForUI.empty().not() or excludePostCoordinated.empty().not() or displayLanguage.empty().not() or limitedExpansion.empty().not()"/>
-        </extension>
-        <key value="exp-5"/>
-        <severity value="error"/>
-        <human value="SHALL have at least one of– codeSystems.include– codeSystems.exclude– includeDesignations (as true)– excludeNested– excludeNotForUI– excludePostCoordinated– displayLanguage– limitedExpansion"/>
-        <xpath value="exists(f:codeSystems.include) or exists(f:codeSystems.exclude) or (exists(f:includeDesignations) and f:includeDesignations=&#39;true&#39;) orexists(f:excludeNested) orexists(f:codeSystem.excludeNotForUI) orexists(f:codeSystem.excludePostCoordinated) orexists(f:codeSystem.displayLanguage) orexists(f:codeSystem.limitedExpansion)"/>
-      </constraint>
       <mapping>
         <identity value="w5"/>
         <map value="conformance.terminology"/>

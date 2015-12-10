@@ -1137,9 +1137,9 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-05T08:35:35-05:00"/>
   <description value="Base StructureDefinition for ElementDefinition Type"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.1.0"/>
   <mapping>
     <identity value="dex"/>
     <uri value="http://wiki.ihe.net/index.php?title=Data_Element_Exchange"/>
@@ -1180,7 +1180,7 @@
       </type>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="min.empty() or max.empty() or (max = &quot;*&quot;) or (min &lt; max)"/>
+          <valueString value="min.empty() or max.empty() or (max = &quot;*&quot;) or (min &lt;= max.asInteger())"/>
         </extension>
         <key value="eld-2"/>
         <severity value="error"/>
@@ -3270,7 +3270,7 @@ Note that an element that has the property IsModifier is not necessarily a &quot
       </type>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="min.empty() or max.empty() or (max = &quot;*&quot;) or (min &lt; max)"/>
+          <valueString value="min.empty() or max.empty() or (max = &quot;*&quot;) or (min &lt;= max.asInteger())"/>
         </extension>
         <key value="eld-2"/>
         <severity value="error"/>

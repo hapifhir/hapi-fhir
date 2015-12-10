@@ -3980,7 +3980,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">error</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Bundle</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">total only when a search or history</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">total or (type = ' searchset') or (type = 'history')</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">total.empty() or (type = 'searchset') or (type = 'history')</Data></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">not(f:total) or (f:type/@value = 'searchset') or (f:type/@value = 'history')</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
@@ -4040,7 +4040,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">error</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Bundle</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">FullUrl must be unique in a bundle, or else entries with the same fullUrl must have different meta.versionId</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">entry.distinct(fullUrl,resource.meta.versionId)</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">entry.where(fullUrl).distinct(fullUrl,resource.meta.versionId)</Data></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">count(for $entry in f:entry[f:resource] return $entry[count(parent::f:Bundle/f:entry[f:fullUrl/@value=$entry/f:fullUrl/@value and ((not(f:resource/*/f:meta/f:versionId/@value) and not($entry/f:resource/*/f:meta/f:versionId/@value)) or f:resource/*/f:meta/f:versionId/@value=$entry/f:resource/*/f:meta/f:versionId/@value)])!=1])=0</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">

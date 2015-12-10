@@ -3817,7 +3817,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">Timing.repeat</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Either frequency or when can exist, not both</Data></Cell>
     <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">(period.empty() and frequency.empty()) xor when.empty()</Data></Cell>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">((period or frequency) and when).not()</Data></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">not((f:period or f:frequency) and f:when)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">

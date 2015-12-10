@@ -18,7 +18,7 @@
   </contact>
   <date value="2012-06-24"/>
   <description value="XDSDocumentEntry"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.1.0"/>
   <kind value="resource"/>
   <constrainedType value="DocumentReference"/>
   <abstract value="false"/>
