@@ -3,8 +3,6 @@ package ca.uhn.fhir.rest.gclient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.model.api.IResource;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -27,7 +25,7 @@ import ca.uhn.fhir.model.api.IResource;
 
 public interface IDelete {
 
-	IDeleteTyped resource(IResource theResource);
+	IDeleteTyped resource(IBaseResource theResource);
 	
 	IDeleteTyped resourceById(IIdType theId);
 	
