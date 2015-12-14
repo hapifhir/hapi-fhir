@@ -34,5 +34,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/hapi-fhir-base"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hapi-fhir-structures-hl7org-dstu2.1"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

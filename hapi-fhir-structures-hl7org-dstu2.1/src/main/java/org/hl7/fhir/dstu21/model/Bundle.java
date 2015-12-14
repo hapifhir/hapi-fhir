@@ -1,5 +1,7 @@
 package org.hl7.fhir.dstu21.model;
 
+import java.math.BigDecimal;
+
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -30,18 +32,20 @@ package org.hl7.fhir.dstu21.model;
 */
 
 // Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
-
-import java.math.*;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.utilities.Utilities;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+
+import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.Block;
-import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.exceptions.FHIRException;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * A container for a collection of resources.
  */
@@ -723,6 +727,55 @@ public class Bundle extends Resource implements IBaseBundle {
           return false;
         }
 
+        /**
+         * Returns the {@link #getLink() link} which matches a given {@link BundleLinkComponent#getRelation() relation}. 
+         * If no link is found which matches the given relation, returns <code>null</code>. If more than one
+         * link is found which matches the given relation, returns the first matching BundleLinkComponent.
+         * 
+         * @param theRelation
+         *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle#LINK_SELF} and {@link IBaseBundle#LINK_NEXT}.
+         * @return Returns a matching BundleLinkComponent, or <code>null</code>
+         * @see IBaseBundle#LINK_NEXT
+         * @see IBaseBundle#LINK_PREV
+         * @see IBaseBundle#LINK_SELF
+         */
+        public BundleLinkComponent getLink(String theRelation) {
+          org.apache.commons.lang3.Validate.notBlank(theRelation, "theRelation may not be null or empty");
+          for (BundleLinkComponent next : getLink()) {
+            if (theRelation.equals(next.getRelation())) {
+              return next;
+            }
+          }
+          return null;
+        }
+
+        /**
+         * Returns the {@link #getLink() link} which matches a given {@link BundleLinkComponent#getRelation() relation}. 
+         * If no link is found which matches the given relation, creates a new BundleLinkComponent with the
+         * given relation and adds it to this Bundle. If more than one
+         * link is found which matches the given relation, returns the first matching BundleLinkComponent.
+         * 
+         * @param theRelation
+         *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle#LINK_SELF} and {@link IBaseBundle#LINK_NEXT}.
+         * @return Returns a matching BundleLinkComponent, or <code>null</code>
+         * @see IBaseBundle#LINK_NEXT
+         * @see IBaseBundle#LINK_PREV
+         * @see IBaseBundle#LINK_SELF
+         */
+        public BundleLinkComponent getLinkOrCreate(String theRelation) {
+          org.apache.commons.lang3.Validate.notBlank(theRelation, "theRelation may not be null or empty");
+          for (BundleLinkComponent next : getLink()) {
+            if (theRelation.equals(next.getRelation())) {
+              return next;
+            }
+          }
+          BundleLinkComponent retVal = new BundleLinkComponent();
+          retVal.setRelation(theRelation);
+          getLink().add(retVal);
+          return retVal;
+        }
+
+        
         /**
          * @return {@link #link} (A series of links that provide context to this entry.)
          */

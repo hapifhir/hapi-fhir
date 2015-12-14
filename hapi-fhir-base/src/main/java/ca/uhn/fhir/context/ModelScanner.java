@@ -608,7 +608,7 @@ class ModelScanner {
 				RuntimeChildResourceBlockDefinition def = new RuntimeChildResourceBlockDefinition(next, childAnnotation, descriptionAnnotation, elementName, blockDef);
 				orderMap.put(order, def);
 
-			} else if (IDatatype.class.equals(nextElementType) || IElement.class.equals(nextElementType) || "org.hl7.fhir.instance.model.Type".equals(nextElementType.getName()) || IBaseDatatype.class.equals(nextElementType)) {
+			} else if (IDatatype.class.equals(nextElementType) || IElement.class.equals(nextElementType) || "Type".equals(nextElementType.getSimpleName()) || IBaseDatatype.class.equals(nextElementType)) {
 
 				RuntimeChildAny def = new RuntimeChildAny(next, elementName, childAnnotation, descriptionAnnotation);
 				orderMap.put(order, def);

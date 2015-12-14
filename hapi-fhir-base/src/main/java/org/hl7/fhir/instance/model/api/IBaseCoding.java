@@ -20,7 +20,7 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-public interface IBaseCoding {
+public interface IBaseCoding extends IBase {
 
 	String getCode();
 

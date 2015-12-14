@@ -43,6 +43,7 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		// should use RuntimeChildAny
 		assert Modifier.isInterface(theDatatype.getModifiers()) == false : "Type of " + theDatatype + " shouldn't be here";
+		assert Modifier.isAbstract(theDatatype.getModifiers()) == false : "Type of " + theDatatype + " shouldn't be here";
 		myDatatype = theDatatype;
 	}
 

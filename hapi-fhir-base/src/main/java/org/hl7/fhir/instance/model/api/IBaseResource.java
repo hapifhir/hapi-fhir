@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.model.api;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IElement;
 
 /*
  * #%L
@@ -29,12 +31,14 @@ package org.hl7.fhir.instance.model.api;
  * the second are HAPI's Resource structures, e.g. 
  * <code>ca.uhn.fhir.model.dstu.resource.Patient</code>)
  */
-public interface IBaseResource extends IBase {
+public interface IBaseResource extends IBase, IElement {
 
 	IIdType getIdElement();
 	
 	IBaseResource setId(String theId);
 
 	IBaseResource setId(IIdType theId);
+
+	FhirVersionEnum getStructureFhirVersionEnum();
 
 }

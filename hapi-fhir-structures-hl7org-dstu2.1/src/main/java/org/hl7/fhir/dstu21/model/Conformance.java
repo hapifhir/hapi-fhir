@@ -30,18 +30,24 @@ package org.hl7.fhir.dstu21.model;
 */
 
 // Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
-
+import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatus;
+import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatusEnumFactory;
+import org.hl7.fhir.dstu21.model.Enumerations.SearchParamType;
+import org.hl7.fhir.dstu21.model.Enumerations.SearchParamTypeEnumFactory;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.dstu21.model.Enumerations.*;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+
+import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.Block;
-import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.exceptions.FHIRException;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
  */

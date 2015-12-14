@@ -124,8 +124,6 @@ public class FhirContext {
 			myVersion = FhirVersionEnum.DSTU2.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU2_HL7ORG.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU2_HL7ORG.getVersionImplementation();
-		} else if (FhirVersionEnum.DEV.isPresentOnClasspath()) {
-			myVersion = FhirVersionEnum.DEV.getVersionImplementation();
 		} else {
 			throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructures"));
 		}
@@ -483,7 +481,7 @@ public class FhirContext {
 		myParserErrorHandler = theParserErrorHandler;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "cast" })
 	private List<Class<? extends IElement>> toElementList(Collection<Class<? extends IBaseResource>> theResourceTypes) {
 		if (theResourceTypes == null) {
 			return null;
@@ -493,16 +491,6 @@ public class FhirContext {
 			resTypes.add((Class<? extends IElement>) next);
 		}
 		return resTypes;
-	}
-
-	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DEV}
-	 * 
-	 * @deprecated Support for DEV resources will be removed, you should use DSTU2 resources instead 
-	 */
-	@Deprecated
-	public static FhirContext forDev() {
-		return new FhirContext(FhirVersionEnum.DEV);
 	}
 
 	/**

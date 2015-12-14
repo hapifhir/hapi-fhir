@@ -30,16 +30,16 @@ package org.hl7.fhir.dstu21.model;
 */
 
 // Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
+import java.util.List;
 
-import java.util.*;
-
-import org.hl7.fhir.utilities.Utilities;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Block;
-import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.utilities.Utilities;
+
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 /**
  * A reference to a code defined by a terminology system.
  */
@@ -83,14 +83,38 @@ public class Coding extends Type implements IBaseCoding, ICompositeType {
 
     private static final long serialVersionUID = -1417514061L;
 
-  /*
+  /**
    * Constructor
    */
     public Coding() {
       super();
     }
 
-    /**
+      /**
+       * Constructor
+       * 
+       * @param theSystem The code system
+       * @param theCode The code
+       */
+      public Coding(String theSystem, String theCode) {
+        setSystem(theSystem);
+        setCode(theCode);
+      }
+
+      /**
+       * Constructor
+       * 
+       * @param theSystem The code system
+       * @param theCode The code
+       * @param theDisplay The human reasable display value
+       */
+      public Coding(String theSystem, String theCode, String theDisplay) {
+        setSystem(theSystem);
+        setCode(theCode);
+        setDisplay(theDisplay);
+      }
+
+      /**
      * @return {@link #system} (The identification of the code system that defines the meaning of the symbol in the code.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
      */
     public UriType getSystemElement() { 

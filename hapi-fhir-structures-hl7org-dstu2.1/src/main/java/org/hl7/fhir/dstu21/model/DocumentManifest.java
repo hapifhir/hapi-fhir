@@ -30,18 +30,22 @@ package org.hl7.fhir.dstu21.model;
 */
 
 // Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
-
+import org.hl7.fhir.dstu21.model.Enumerations.DocumentReferenceStatus;
+import org.hl7.fhir.dstu21.model.Enumerations.DocumentReferenceStatusEnumFactory;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.dstu21.model.Enumerations.*;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+
+import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.Block;
-import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.exceptions.FHIRException;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * A manifest that defines a set of documents.
  */
@@ -53,7 +57,7 @@ public class DocumentManifest extends DomainResource {
         /**
          * The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed.
          */
-        @Child(name = "p", type = {Attachment.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "p", type = {Attachment.class, IBaseResource.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Contents of this set of documents", formalDefinition="The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed." )
         protected Type p;
 

@@ -58,11 +58,8 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		
 		try {
 			IBaseResource instance = theClass.newInstance();
-			if (instance instanceof IAnyResource) {
-				myStructureVersion = FhirVersionEnum.DSTU2_HL7ORG;
-			} else {
-				myStructureVersion = ((IResource)instance).getStructureFhirVersionEnum();
-			}
+			myStructureVersion = instance.getStructureFhirVersionEnum();
+			assert myStructureVersion != null;
 		} catch (Exception e) {
 			throw new ConfigurationException(myContext.getLocalizer().getMessage(getClass(), "nonInstantiableType", theClass.getName(), e.toString()), e);
 		}

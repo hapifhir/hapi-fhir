@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
@@ -159,6 +160,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		public void put(IResource theResource, BundleEntryTransactionMethodEnum theObject) {
 			theResource.getResourceMetadata().put(ENTRY_TRANSACTION_METHOD, theObject);
 		}
+		
 	};
 
 	/**
@@ -444,7 +446,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		return result;
 	}
 
-	private String name() {
+	public String name() {
 		return myValue;
 	}
 

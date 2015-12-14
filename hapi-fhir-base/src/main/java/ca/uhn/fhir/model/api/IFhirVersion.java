@@ -30,7 +30,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
@@ -54,7 +53,7 @@ public interface IFhirVersion {
 
 	Class<?> getContainedType();
 
-	BaseCodingDt newCodingDt();
+	IBase newCodingDt();
 
 	IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext);
 

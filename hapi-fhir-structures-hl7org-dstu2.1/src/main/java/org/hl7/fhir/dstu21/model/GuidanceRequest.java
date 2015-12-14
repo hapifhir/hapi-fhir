@@ -30,17 +30,14 @@ package org.hl7.fhir.dstu21.model;
 */
 
 // Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.exceptions.FHIRException;
 
-import org.hl7.fhir.dstu21.model.Enumerations.*;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.Block;
-import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.exceptions.FHIRException;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 /**
  * A guidance request is a request to evaluate a particular knowledge module focused on decision support, providing information relevant to decision support such as workflow and user context.
  */

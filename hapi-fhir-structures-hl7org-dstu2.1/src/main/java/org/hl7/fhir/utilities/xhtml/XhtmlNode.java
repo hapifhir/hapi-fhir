@@ -28,14 +28,18 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 package org.hl7.fhir.utilities.xhtml;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//@DatatypeDef()
-public class XhtmlNode {
+import org.hl7.fhir.instance.model.api.IBaseXhtml;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+
+@DatatypeDef(name="xhtml")
+public class XhtmlNode implements IBaseXhtml {
 
   public static final String NBSP = Character.toString((char)0xa0);
   
@@ -347,5 +351,16 @@ public class XhtmlNode {
       }
     return null;
   }
+
+	@Override
+	public String getValue() {
+		return getValueAsString();
+	}
+	
+	@Override
+	public IPrimitiveType<String> setValue(String theValue) throws IllegalArgumentException {
+		setValueAsString(theValue);
+		return this;
+	}
 
 }
