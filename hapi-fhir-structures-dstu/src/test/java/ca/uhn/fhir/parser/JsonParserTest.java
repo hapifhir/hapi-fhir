@@ -1341,7 +1341,7 @@ public class JsonParserTest {
 
 		ourLog.info("Expected: {}", exp);
 		ourLog.info("Actual  : {}", act);
-		assertEquals(exp, act);
+		assertEquals("\nExpected: " + exp + "\nActual  : " + act, exp, act);
 
 	}
 
