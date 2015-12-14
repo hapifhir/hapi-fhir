@@ -1322,7 +1322,7 @@ public class SearchBuilder {
 	 * 
 	 * @param theLastUpdated
 	 */
-	private HashSet<Long> loadReverseIncludes(Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode, EverythingModeEnum theEverythingModeEnum, DateRangeParam theLastUpdated) {
+	private HashSet<Long> loadReverseIncludes(Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode, DateRangeParam theLastUpdated) {
 		if (theMatches.size() == 0) {
 			return new HashSet<Long>();
 		}
@@ -1595,7 +1595,7 @@ public class SearchBuilder {
 		final Set<Long> revIncludedPids;
 		if (theParams.getEverythingMode() == null) {
 			if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty() == false) {
-				revIncludedPids = loadReverseIncludes(pids, theParams.getRevIncludes(), true, null, lu);
+				revIncludedPids = loadReverseIncludes(pids, theParams.getRevIncludes(), true, lu);
 			} else {
 				revIncludedPids = new HashSet<Long>();
 			}
@@ -1623,7 +1623,7 @@ public class SearchBuilder {
 
 						// Load includes
 						pidsSubList = new ArrayList<Long>(pidsSubList);
-						revIncludedPids.addAll(loadReverseIncludes(pidsSubList, theParams.getIncludes(), false, null, theParams.getLastUpdated()));
+						revIncludedPids.addAll(loadReverseIncludes(pidsSubList, theParams.getIncludes(), false, theParams.getLastUpdated()));
 
 						// Execute the query and make sure we return distinct results
 						List<IBaseResource> resources = new ArrayList<IBaseResource>();

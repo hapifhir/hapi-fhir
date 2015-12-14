@@ -7,6 +7,16 @@
 	</properties>
 	<body>
 		<release version="1.4" date="TBD">
+			<action type="add">
+            Bump the version of a few dependencies to the
+            latest versions (dependent HAPI modules listed in brackets):
+            <![CDATA[
+               <ul>
+                  <li>Hibernate (JPA, Web Tester): 5.0.3 -&gt; 5.0.5</li>
+                  <li>Springframework (JPA, Web Tester): 4.2.2 -&gt; 4.2.3</li>
+               </ul>
+            ]]>
+			</action>
 			<action type="fix">
 				Remove a dependency on a Java 1.7 class 
 				(ReflectiveOperationException) in several spots in the 
