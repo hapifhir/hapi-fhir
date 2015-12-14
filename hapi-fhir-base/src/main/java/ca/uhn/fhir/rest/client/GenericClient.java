@@ -853,10 +853,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IDeleteTyped resource(IResource theResource) {
+		public IDeleteTyped resource(IBaseResource theResource) {
 			Validate.notNull(theResource, "theResource can not be null");
-			IdDt id = theResource.getId();
-			Validate.notNull(id, "theResource.getId() can not be null");
+			IIdType id = theResource.getIdElement();
+			Validate.notNull(id, "theResource.getIdElement() can not be null");
 			if (id.hasResourceType() == false || id.hasIdPart() == false) {
 				throw new IllegalArgumentException("theResource.getId() must contain a resource type and logical ID at a minimum (e.g. Patient/1234), found: " + id.getValue());
 			}
