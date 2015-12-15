@@ -82,6 +82,7 @@ import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.ICodedDatatype;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
@@ -193,6 +194,11 @@ class ModelScanner {
 
 		myVersionTypes = scanVersionPropertyFile(theDatatypes, resourceTypes, myVersion);
 
+		// FIXME: remove
+		if (myVersionTypes.contains(CodeDt.class) == false) {
+			throw new ConfigurationException("Did not request CodeDt: " + new TreeSet<Class<?>>(myVersionTypes));
+		}
+		
 		// toScan.add(DateDt.class);
 		// toScan.add(CodeDt.class);
 		// toScan.add(DecimalDt.class);
