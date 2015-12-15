@@ -97,7 +97,7 @@ public class FhirResourceDaoDstu21<T extends IResource> extends BaseHapiFhirReso
 			return new MethodOutcome(new IdDt(theId.getValue()), oo);
 		}
 
-		FhirValidator validator = getContext().newValidator();
+		FhirValidator validator = getFhirContext().newValidator();
 
 		FhirInstanceValidator val = new FhirInstanceValidator();
 		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);

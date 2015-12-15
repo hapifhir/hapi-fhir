@@ -28,8 +28,10 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.dao.IFhirResourceDao;
+import ca.uhn.fhir.dao.IFhirSystemDao;
+import ca.uhn.fhir.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.config.TestDstu1Config;
-import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;

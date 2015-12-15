@@ -26,15 +26,16 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.dao.IFhirResourceDao;
+import ca.uhn.fhir.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.dao.IFhirResourceDaoSubscription;
+import ca.uhn.fhir.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.dao.IFhirSystemDao;
+import ca.uhn.fhir.dao.ISearchDao;
 import ca.uhn.fhir.jpa.config.TestDstu21Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSubscription;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.ISearchDao;
+import ca.uhn.fhir.jpa.dao.JpaDaoFactory;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
@@ -52,7 +53,6 @@ import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.SubscriptionFlaggedResource;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
-import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu21;
 import ca.uhn.fhir.model.dstu21.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu21.composite.CodingDt;
 import ca.uhn.fhir.model.dstu21.composite.MetaDt;
@@ -80,10 +80,11 @@ import ca.uhn.fhir.model.dstu21.resource.ValueSet;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.provider.impl.SystemProviderDstu21;
 
 //@formatter:off
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes= {TestDstu21Config.class, ca.uhn.fhir.jpa.config.WebsocketDstu2Config.class})
+@ContextConfiguration(classes= {TestDstu21Config.class, ca.uhn.fhir.provider.config.BaseJavaConfigDstu21.class, ca.uhn.fhir.jpa.config.WebsocketDstu2Config.class})
 //@formatter:on
 public abstract class BaseJpaDstu21Test extends BaseJpaTest {
 
@@ -167,12 +168,15 @@ public abstract class BaseJpaDstu21Test extends BaseJpaTest {
 	protected IFhirSystemDao<Bundle, MetaDt> mySystemDao;
 	@Autowired
 	@Qualifier("mySystemProviderDstu21")
-	protected JpaSystemProviderDstu21 mySystemProvider;
+	protected SystemProviderDstu21 mySystemProvider;
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("myValueSetDaoDstu21")
 	protected IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> myValueSetDao;
+	@Autowired
+	@Qualifier("myDaoFactoryDstu21")
+	protected JpaDaoFactory myDaoFactory;
 
 	@Before
 	public void beforeCreateInterceptor() {

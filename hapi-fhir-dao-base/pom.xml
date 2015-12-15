@@ -1,0 +1,98 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-deployable-pom</artifactId>
+		<version>1.4-SNAPSHOT</version>
+		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
+	</parent>
+
+	<artifactId>hapi-fhir-dao-base</artifactId>
+	<packaging>bundle</packaging>
+
+	<url>http://jamesagnew.github.io/hapi-fhir/</url>
+
+	<name>HAPI FHIR - DAO Interfaces</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>1.4-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<_nouses>true</_nouses>
+						<_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
+						<Import-Package>
+							!ca.uhn.fhir.dao*,
+							ca.uhn.fhir.context;version="1.4.0",
+                            ca.uhn.fhir.model.api;version="1.4.0",
+                            ca.uhn.fhir.model.primitive;version="1.4.0",
+                            ca.uhn.fhir.rest.api;version="1.4.0",
+                            ca.uhn.fhir.rest.method;version="1.4.0",
+                            ca.uhn.fhir.rest.param;version="1.4.0",
+                            ca.uhn.fhir.rest.server;version="1.4.0",
+                            ca.uhn.fhir.rest.server.exceptions;version="1.4.0",
+                            javax.servlet;-remove-attribute:=version,
+                            javax.servlet.http;-remove-attribute:=version,
+                            org.apache.commons.lang3.builder;-remove-attribute:=version,
+                            org.hl7.fhir.instance.model.api;version="1.4.0"
+						</Import-Package>
+						<Export-Package>
+							ca.uhn.fhir.dao;version="1.4.0",
+                            ca.uhn.fhir.entity;version="1.4.0"
+						</Export-Package>
+					</instructions>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>bundle</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<phase>integration-test</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+	</build>
+
+
+
+
+
+</project>

@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
 
-import ca.uhn.fhir.jpa.rp.dstu21.PatientResourceProvider;
+import ca.uhn.fhir.provider.dstu21.PatientResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
@@ -28,7 +28,7 @@ public abstract class BaseJpaDstu21SystemTest extends BaseJpaDstu21Test {
 			myServer = new RestfulServer(myFhirCtx);
 
 			PatientResourceProvider patientRp = new PatientResourceProvider();
-			patientRp.setDao(myPatientDao);
+			patientRp.setResourceDaoFactory(myDaoFactory);
 			myServer.setResourceProviders(patientRp);
 			myServer.init(mock(ServletConfig.class));
 		}

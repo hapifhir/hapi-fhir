@@ -24,14 +24,16 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import ca.uhn.fhir.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
 
 public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<SearchParameter>implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
+	// TODO don't directly wire this.. get from super class
 	@Autowired
-	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
+	private IJpaFhirSystemDao<Bundle, MetaDt> mySystemDao;
 	
 	/**
 	 * This method is called once per minute to perform any required re-indexing. During most passes this will

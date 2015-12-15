@@ -1,0 +1,62 @@
+package ${configPackageBase};
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import javax.persistence.EntityManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.dao.IFhirResourceDao;
+import ca.uhn.fhir.dao.IFhirSystemDao;
+
+@Configuration
+public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jpa.config.Base${versionCapitalized}Config {
+
+	@Bean(name="myResourceDaos${versionCapitalized}")
+	public List<IFhirResourceDao<?>> resourceDaos${versionCapitalized}() {
+		List<IFhirResourceDao<?>> retVal = new ArrayList<IFhirResourceDao<?>>();
+#foreach ( $res in $resources )
+		retVal.add(dao${res.declaringClassNameComplete}${versionCapitalized}());
+#end
+		return retVal;
+	}
+
+#foreach ( $res in $resources )
+	@Bean(name="my${res.name}Dao${versionCapitalized}", autowire=Autowire.BY_NAME)
+	@Lazy
+	public IFhirResourceDao<ca.uhn.fhir.model.${version}.resource.${res.declaringClassNameComplete}> dao${res.declaringClassNameComplete}${versionCapitalized}() {
+		ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}<ca.uhn.fhir.model.${version}.resource.${res.declaringClassNameComplete}> retVal;
+#if ( ${versionCapitalized} != 'Dstu1' && ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter'))
+		retVal = new ca.uhn.fhir.jpa.dao.FhirResourceDao${res.name}${versionCapitalized}();
+#else
+		retVal = new ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}<ca.uhn.fhir.model.${version}.resource.${res.declaringClassNameComplete}>();
+#end
+		retVal.setResourceType(ca.uhn.fhir.model.${version}.resource.${res.declaringClassNameComplete}.class);
+		retVal.setContext(fhirContext${versionCapitalized}());
+		retVal.setDaoFactory(fhirDaoFactory${versionCapitalized}());
+		return retVal;
+	}
+
+#end
+
+
+
+	
+	
+}

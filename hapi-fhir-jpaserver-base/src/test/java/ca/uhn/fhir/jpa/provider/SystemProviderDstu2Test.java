@@ -30,9 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
-import ca.uhn.fhir.jpa.rp.dstu2.ObservationResourceProvider;
-import ca.uhn.fhir.jpa.rp.dstu2.OrganizationResourceProvider;
-import ca.uhn.fhir.jpa.rp.dstu2.PatientResourceProvider;
+import ca.uhn.fhir.provider.dstu2.ObservationResourceProvider;
+import ca.uhn.fhir.provider.dstu2.OrganizationResourceProvider;
+import ca.uhn.fhir.provider.dstu2.PatientResourceProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -66,16 +66,16 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	public void beforeStartServer() throws Exception {
 		if (myRestServer == null) {
 			PatientResourceProvider patientRp = new PatientResourceProvider();
-			patientRp.setDao(myPatientDao);
+			patientRp.setResourceDaoFactory(myDaoFactory);
 
 			QuestionnaireResourceProviderDstu2 questionnaireRp = new QuestionnaireResourceProviderDstu2();
-			questionnaireRp.setDao(myQuestionnaireDao);
+			questionnaireRp.setResourceDaoFactory(myDaoFactory);
 
 			ObservationResourceProvider observationRp = new ObservationResourceProvider();
-			observationRp.setDao(myObservationDao);
+			observationRp.setResourceDaoFactory(myDaoFactory);
 
 			OrganizationResourceProvider organizationRp = new OrganizationResourceProvider();
-			organizationRp.setDao(myOrganizationDao);
+			organizationRp.setResourceDaoFactory(myDaoFactory);
 
 			RestfulServer restServer = new RestfulServer(ourCtx);
 			restServer.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(10));

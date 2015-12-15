@@ -31,10 +31,11 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import ca.uhn.fhir.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.IJpaFhirSystemDao;
 import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -99,7 +100,7 @@ public class FhirSystemDaoDstu21Test extends BaseJpaDstu21SystemTest {
 		});
 		assertEquals(null, entity.getIndexStatus());
 
-		mySystemDao.performReindexingPass(null);
+		((IJpaFhirSystemDao<Bundle, MetaDt>)mySystemDao).performReindexingPass(null);
 
 		entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
 			@Override
@@ -110,7 +111,7 @@ public class FhirSystemDaoDstu21Test extends BaseJpaDstu21SystemTest {
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());
 
 		// Just make sure this doesn't cause a choke
-		mySystemDao.performReindexingPass(100000);
+		((IJpaFhirSystemDao<Bundle, MetaDt>)mySystemDao).performReindexingPass(100000);
 
 		// Try making the resource unparseable
 
@@ -132,7 +133,7 @@ public class FhirSystemDaoDstu21Test extends BaseJpaDstu21SystemTest {
 			}
 		});
 
-		mySystemDao.performReindexingPass(null);
+		((IJpaFhirSystemDao<Bundle, MetaDt>)mySystemDao).performReindexingPass(null);
 
 		entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
 			@Override

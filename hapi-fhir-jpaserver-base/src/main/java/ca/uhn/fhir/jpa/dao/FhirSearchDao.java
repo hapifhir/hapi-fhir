@@ -52,6 +52,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import ca.uhn.fhir.dao.IDaoFactory;
+import ca.uhn.fhir.dao.ISearchDao;
+import ca.uhn.fhir.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -69,6 +72,12 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 
+	@Override
+	public void setDaoFactory (IDaoFactory myDaoFactory) {
+		super.setDaoFactory(myDaoFactory);
+		((JpaDaoFactory)myDaoFactory).setSearchDao(this);
+	}
+	
 	private void addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction<?> theBoolean, List<List<? extends IQueryParameterType>> theTerms, String theFieldName) {
 		if (theTerms == null) {
 			return;
@@ -213,7 +222,7 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 	}
 
 	@Override
-	public List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText) {
+	public List<ISuggestion> suggestKeywords(String theContext, String theSearchParam, String theText) {
 		Validate.notBlank(theContext, "theContext must be provided");
 		Validate.notBlank(theSearchParam, "theSearchParam must be provided");
 		Validate.notBlank(theText, "theSearchParam must be provided");
@@ -252,7 +261,7 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		ftq.setMaxResults(20);
 
 		List<?> resultList = ftq.getResultList();
-		List<Suggestion> suggestions = Lists.newArrayList();
+		List<ISuggestion> suggestions = Lists.newArrayList();
 		for (Object next : resultList) {
 			Object[] nextAsArray = (Object[]) next;
 			String nextValue = (String) nextAsArray[0];
@@ -290,7 +299,7 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		Collections.sort(suggestions);
 
 		Set<String> terms = Sets.newHashSet();
-		for (Iterator<Suggestion> iter = suggestions.iterator(); iter.hasNext();) {
+		for (Iterator<ISuggestion> iter = suggestions.iterator(); iter.hasNext();) {
 			String nextTerm = iter.next().getTerm().toLowerCase();
 			if (!terms.add(nextTerm)) {
 				iter.remove();
@@ -303,7 +312,7 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		return suggestions;
 	}
 
-	public static class Suggestion implements Comparable<Suggestion> {
+	public static class Suggestion implements Comparable<ISuggestion>, ISuggestion {
 		public Suggestion(String theTerm, float theScore) {
 			myTerm = theTerm;
 			myScore = theScore;
@@ -321,8 +330,8 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 		private float myScore;
 
 		@Override
-		public int compareTo(Suggestion theO) {
-			return Float.compare(theO.myScore, myScore);
+		public int compareTo(ISuggestion theO) {
+			return Float.compare(theO.getScore(), myScore);
 		}
 
 		@Override
@@ -333,13 +342,13 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 
 	public class MySuggestionFormatter implements Formatter {
 
-		private List<Suggestion> mySuggestions;
+		private List<ISuggestion> mySuggestions;
 		private String myAnalyzer;
 		private ArrayList<String> myPartialMatchPhrases;
 		private ArrayList<Float> myPartialMatchScores;
 		private String myOriginalSearch;
 
-		public MySuggestionFormatter(String theOriginalSearch, List<Suggestion> theSuggestions) {
+		public MySuggestionFormatter(String theOriginalSearch, List<ISuggestion> theSuggestions) {
 			myOriginalSearch = theOriginalSearch;
 			mySuggestions = theSuggestions;
 		}
@@ -348,9 +357,9 @@ public class FhirSearchDao extends BaseHapiFhirDao<IBaseResource> implements ISe
 			myPartialMatchPhrases = new ArrayList<String>();
 			myPartialMatchScores = new ArrayList<Float>();
 
-			for (Suggestion next : mySuggestions) {
-				myPartialMatchPhrases.add(' ' + next.myTerm);
-				myPartialMatchScores.add(next.myScore);
+			for (ISuggestion next : mySuggestions) {
+				myPartialMatchPhrases.add(' ' + next.getTerm());
+				myPartialMatchScores.add(next.getScore());
 			}
 
 			myPartialMatchPhrases.add(myOriginalSearch);

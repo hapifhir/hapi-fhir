@@ -28,11 +28,14 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.dao.IDaoFactory;
+import ca.uhn.fhir.dao.IFhirResourceDao;
+import ca.uhn.fhir.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.TestDstu1Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu1;
+import ca.uhn.fhir.jpa.dao.JpaDaoFactory;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
@@ -63,6 +66,9 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.provider.config.BaseJavaConfigDstu1;
+import ca.uhn.fhir.provider.impl.ConformanceProviderDstu1;
+import ca.uhn.fhir.provider.impl.SystemProviderDstu1;
 
 public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
@@ -529,7 +535,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		
 		ourServerBase = "http://localhost:" + port + "/fhir/context";
 
-		ourAppCtx = new AnnotationConfigApplicationContext(TestDstu1Config.class);
+		ourAppCtx = new AnnotationConfigApplicationContext(TestDstu1Config.class, BaseJavaConfigDstu1.class);
 
 		ourDaoConfig = (DaoConfig) ourAppCtx.getBean(DaoConfig.class);
 
@@ -540,13 +546,14 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
-		JpaSystemProviderDstu1 systemProv = ourAppCtx.getBean(JpaSystemProviderDstu1.class, "mySystemProviderDstu1");
+		SystemProviderDstu1 systemProv = ourAppCtx.getBean(SystemProviderDstu1.class, "mySystemProviderDstu1");
 		restServer.setPlainProviders(systemProv);
 
 		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
+		
+		JpaDaoFactory daoFactory = ourAppCtx.getBean(JpaDaoFactory.class, "myDaoFactoryDstu1");
 
-		IFhirSystemDao<List<IResource>, MetaDt> systemDao = ourAppCtx.getBean(IFhirSystemDao.class);
-		JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(restServer, systemDao);
+		ConformanceProviderDstu1 confProvider = new ConformanceProviderDstu1(restServer, daoFactory);
 		confProvider.setImplementationDescription("THIS IS THE DESC");
 		restServer.setServerConformanceProvider(confProvider);
 

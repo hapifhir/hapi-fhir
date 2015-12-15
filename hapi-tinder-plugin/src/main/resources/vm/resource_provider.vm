@@ -1,0 +1,162 @@
+
+package ${packageBase};
+
+import java.util.*;
+
+import org.apache.commons.lang3.StringUtils;
+
+#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers'))
+import ca.uhn.fhir.provider.impl.BaseResourceProvider${className}${versionCapitalized};
+#else
+import ca.uhn.fhir.provider.impl.ResourceProvider${versionCapitalized};
+#end 
+import ca.uhn.fhir.dao.SearchParameterMap;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.${version}.composite.*;
+import ca.uhn.fhir.model.${version}.resource.*;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.api.SortSpec;
+// import ca.uhn.fhir.model.dstu.resource.Binary;
+// import ca.uhn.fhir.model.dstu2.resource.Bundle;
+// import ca.uhn.fhir.model.api.Bundle;
+
+public class ${className}ResourceProvider extends 
+## We have specialized base classes for RPs that handle certain resource types. These
+## RPs implement type specific operations 
+#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers'))
+	BaseResourceProvider${className}${versionCapitalized}
+#else
+	ResourceProvider${versionCapitalized}<${className}>
+#end 
+	{
+
+	@Override
+	public Class<? extends IResource> getResourceType() {
+		return ${className}.class;
+	}
+
+	@Search()
+	public ca.uhn.fhir.rest.server.IBundleProvider search(
+			javax.servlet.http.HttpServletRequest theServletRequest,
+	
+			@Description(shortDefinition="The resource identity")
+			@OptionalParam(name="_id")
+			StringAndListParam theId, 
+
+			@Description(shortDefinition="The resource language")
+			@OptionalParam(name="_language")
+			StringAndListParam theResourceLanguage, 
+
+			@Description(shortDefinition="Search the contents of the resource's data using a fulltext search")
+			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_CONTENT)
+			StringAndListParam theFtContent, 
+
+			@Description(shortDefinition="Search the contents of the resource's narrative using a fulltext search")
+			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_TEXT)
+			StringAndListParam theFtText, 
+
+			@Description(shortDefinition="Search for resources which have the given tag")
+			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_TAG)
+			TokenAndListParam theSearchForTag, 
+
+			@Description(shortDefinition="Search for resources which have the given security labels")
+			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_SECURITY)
+			TokenAndListParam theSearchForSecurity, 
+  
+			@Description(shortDefinition="Search for resources which have the given profile")
+			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_PROFILE)
+			UriAndListParam theSearchForProfile, 
+
+#foreach ( $param in $searchParams ) #{if}(true) #{end} 
+
+			@Description(shortDefinition="${param.description}")
+#if (${param.type} == 'string' )
+			@OptionalParam(name="${param.name}")
+			StringAndListParam the${param.nameCapitalized}, 
+#elseif (${param.type} == 'token' )
+			@OptionalParam(name="${param.name}")
+			TokenAndListParam the${param.nameCapitalized}, 
+#elseif (${param.type} == 'date' )
+			@OptionalParam(name="${param.name}")
+			DateRangeParam the${param.nameCapitalized}, 
+#elseif (${param.type} == 'uri' )
+			@OptionalParam(name="${param.name}")
+			UriAndListParam the${param.nameCapitalized}, 
+#elseif (${param.type} == 'quantity' )
+			@OptionalParam(name="${param.name}")
+			QuantityAndListParam the${param.nameCapitalized}, 
+#elseif (${param.type} == 'number' )
+			@OptionalParam(name="${param.name}")
+			NumberAndListParam the${param.nameCapitalized}, 
+#elseif (${param.type} == 'reference' )
+			@OptionalParam(name="${param.name}", targetTypes={ #{foreach}($nextType in ${param.targetTypes}) ${nextType}.class #{if}($foreach.hasNext), #{end} #{end} } )
+			ReferenceAndListParam the${param.nameCapitalized}, 
+#elseif (${param.type} == 'composite' )
+			@OptionalParam(name="${param.name}", compositeTypes= { ${param.compositeTypes[0]}Param.class, ${param.compositeTypes[1]}Param.class })
+			CompositeAndListParam<${param.compositeTypes[0]}Param, ${param.compositeTypes[1]}Param> the${param.nameCapitalized},
+#end
+#end	
+
+#if ( $version != 'dstu' )
+			@IncludeParam(reverse=true)
+			Set<Include> theRevIncludes,
+			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
+			@OptionalParam(name="_lastUpdated")
+			DateRangeParam theLastUpdated, 
+#end
+
+			@IncludeParam(allow= {
+#foreach ( $param in $searchParamsReference )
+#set ( $haveMore = $foreach.hasNext )
+#if ( $version == 'dstu' )
+	#foreach ( $include in $param.paths )
+				"${include.path}" #{if}($foreach.hasNext || $haveMore), #{end}
+	#end
+#else
+	#foreach ( $include in $includes )
+				"${include.path}" #{if}($foreach.hasNext || $haveMore), #{end}
+	#end
+#end				 
+#end
+				#{if}($searchParamsReference.empty == false), #{end}"*"
+			}) 
+			Set<Include> theIncludes,
+			
+			@Sort 
+			SortSpec theSort,
+			
+			@Count
+			Integer theCount
+	) {
+		startRequest(theServletRequest);
+		try {
+			SearchParameterMap paramMap = new SearchParameterMap();
+			paramMap.add("_id", theId);
+			paramMap.add("_language", theResourceLanguage);
+			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_CONTENT, theFtContent);
+			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_TEXT, theFtText);
+			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_TAG, theSearchForTag);
+			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_SECURITY, theSearchForSecurity);
+			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_PROFILE, theSearchForProfile);
+#foreach ( $param in $searchParams ) 
+			paramMap.add("${param.name}", the${param.nameCapitalized});
+#end
+#if ( $version != 'dstu' )
+			paramMap.setRevIncludes(theRevIncludes);
+			paramMap.setLastUpdated(theLastUpdated);
+#end
+			paramMap.setIncludes(theIncludes);
+			paramMap.setSort(theSort);
+			paramMap.setCount(theCount);
+
+			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
+			return retVal;
+		} finally {
+			endRequest(theServletRequest);
+		}
+	}
+
+}

@@ -20,50 +20,98 @@ package ca.uhn.fhir.jpa.config;
  * #L%
  */
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.dao.IDaoFactory;
+import ca.uhn.fhir.dao.IFhirResourceDao;
+import ca.uhn.fhir.dao.IFhirSystemDao;
+import ca.uhn.fhir.dao.ISearchDao;
 import ca.uhn.fhir.jpa.dao.FhirSearchDao;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.ISearchDao;
+import ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu21;
+import ca.uhn.fhir.jpa.dao.IJpaFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.JpaDaoFactory;
+import ca.uhn.fhir.model.dstu21.composite.MetaDt;
+import ca.uhn.fhir.model.dstu21.resource.Bundle;
 
 @Configuration
 @EnableTransactionManagement
 public class BaseDstu21Config extends BaseConfig {
+
+	private static FhirContext ourFhirContextDstu21;
+	private static FhirContext ourFhirContextDstu2Hl7Org;
+
+	@Bean(name = "myFhirContextDstu21")
+	@Lazy
+	public FhirContext fhirContextDstu21() {
+		if (ourFhirContextDstu21 == null) {
+			ourFhirContextDstu21 = FhirContext.forDstu2_1();
+		}
+		return ourFhirContextDstu21;
+	}
+
+	@Bean(name = "myFhirContextDstu2Hl7Org")
+	@Lazy
+	public FhirContext fhirContextDstu2Hl7Org() {
+		if (ourFhirContextDstu2Hl7Org == null) {
+			ourFhirContextDstu2Hl7Org = FhirContext.forDstu2Hl7Org();
+		}
+		return ourFhirContextDstu2Hl7Org;
+	}
 
 	@Bean
 	@Primary
 	public FhirContext defaultFhirContext() {
 		return fhirContextDstu21();
 	}
-
-	@Bean(name = "mySystemDaoDstu21", autowire = Autowire.BY_NAME)
-	public IFhirSystemDao<ca.uhn.fhir.model.dstu21.resource.Bundle, ca.uhn.fhir.model.dstu21.composite.MetaDt> systemDaoDstu21() {
-		ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu21 retVal = new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu21();
-		return retVal;
+	
+	private static JpaDaoFactory myDaoFactoryDstu21 = null;
+	
+	@Bean(name="myDaoFactoryDstu21")
+	public IDaoFactory fhirDaoFactoryDstu21() {
+		if (null == myDaoFactoryDstu21) {
+			myDaoFactoryDstu21 = new JpaDaoFactory();
+			myDaoFactoryDstu21.setFhirContext(defaultFhirContext());
+		}
+		return myDaoFactoryDstu21;
 	}
 
-	@Bean(name = "mySystemProviderDstu21")
-	public ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu21 systemProviderDstu2() {
-		ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu21 retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu21();
-		retVal.setDao(systemDaoDstu21());
-		return retVal;
+	private static IJpaFhirSystemDao<Bundle, MetaDt> mySystemDaoDstu21 = null;
+	
+	@Bean(name = "mySystemDaoDstu21", autowire = Autowire.BY_NAME)
+	public IJpaFhirSystemDao<Bundle, MetaDt> fhirSystemDaoDstu21() {
+		if (null == mySystemDaoDstu21) {
+			mySystemDaoDstu21 = new FhirSystemDaoDstu21();
+			((FhirSystemDaoDstu21)mySystemDaoDstu21).setContext(defaultFhirContext());
+			((FhirSystemDaoDstu21)mySystemDaoDstu21).setDaoFactory(fhirDaoFactoryDstu21());
+		}
+		return mySystemDaoDstu21;
+	}
+
+	private static FhirSearchDao mySearchDaoDstu21 = null;
+
+	@Bean(name="mySearchDaoDstu21", autowire = Autowire.BY_NAME)
+	public ISearchDao fhirSearchDaoDstu21() {
+		if (null == mySearchDaoDstu21) { 
+			mySearchDaoDstu21 = new FhirSearchDao();
+			mySearchDaoDstu21.setContext(defaultFhirContext());
+			mySearchDaoDstu21.setDaoFactory(fhirDaoFactoryDstu21());
+		}
+		return mySearchDaoDstu21;
 	}
 
 	@Bean(name = "myJpaValidationSupportDstu21", autowire = Autowire.BY_NAME)
-	public ca.uhn.fhir.jpa.dao.IJpaValidationSupport jpaValidationSupportDstu2() {
+	public ca.uhn.fhir.jpa.dao.IJpaValidationSupport jpaValidationSupportDstu21() {
 		ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu21 retVal = new ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu21();
 		return retVal;
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public ISearchDao searchDao() {
-		FhirSearchDao searchDao = new FhirSearchDao();
-		return searchDao;
 	}
 
 }
