@@ -520,8 +520,11 @@ public class XmlParserDstu21Test {
 
 	/**
 	 * Test for #233
+	 * 
+	 * This was rolled back after a conversation with grahame
 	 */
 	@Test
+	@Ignore
 	public void testEncodeAndParseProfiledDatatype() {
 		MedicationOrder mo = new MedicationOrder();
 		mo.addDosageInstruction().getTiming().getRepeat().setBounds(new DurationDt().setCode("code"));

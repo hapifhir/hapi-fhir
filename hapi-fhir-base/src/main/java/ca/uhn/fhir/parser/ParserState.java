@@ -1732,11 +1732,9 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> target = myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildByName(theLocalPart);
 			if (target == null) {
-				//FIXME: fix this
-				throw new DataFormatException("Unknown " + theLocalPart + " - Valid names are: " + new TreeSet<String>(myContext.getRuntimeChildUndeclaredExtensionDefinition().getValidChildNames()));
-//				myErrorHandler.unknownElement(null, theLocalPart);
-//				push(new SwallowChildrenWholeState(getPreResourceState()));
-//				return;
+				myErrorHandler.unknownElement(null, theLocalPart);
+				push(new SwallowChildrenWholeState(getPreResourceState()));
+				return;
 			}
 
 			switch (target.getChildType()) {

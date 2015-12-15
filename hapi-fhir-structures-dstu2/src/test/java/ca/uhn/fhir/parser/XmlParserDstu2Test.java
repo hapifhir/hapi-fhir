@@ -32,6 +32,7 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -581,8 +582,11 @@ public class XmlParserDstu2Test {
 
 	/**
 	 * See #216 - Profiled datatypes should use their unprofiled parent type as the choice[x] name
+	 * 
+	 * Disabled because we reverted this change after a conversation with Grahame
 	 */
 	@Test
+	@Ignore
 	public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
 		IParser xmlParser = ourCtx.newXmlParser();
 
