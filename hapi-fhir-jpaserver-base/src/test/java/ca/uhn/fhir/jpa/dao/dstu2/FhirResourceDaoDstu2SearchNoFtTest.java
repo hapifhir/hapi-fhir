@@ -1438,7 +1438,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			Organization org = new Organization();
 			org.getNameElement().setValue(methodName + "_O1");
 			org.setPartOf(new ResourceReferenceDt(parentOrgId));
-			IIdType orgId = myOrganizationDao.create(org).getId();
+			orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
 
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
