@@ -178,7 +178,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 					 * type.
 					 */
 					if (!qualifiedName.startsWith("ca.uhn.fhir.model")) {
-						if (!qualifiedName.startsWith("org.hl7.fhir.instance.model")) {
+						if (!qualifiedName.startsWith("org.hl7.fhir")) {
 							continue;
 						}
 					}

@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
@@ -1731,9 +1732,10 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> target = myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildByName(theLocalPart);
 			if (target == null) {
-				myErrorHandler.unknownElement(null, theLocalPart);
-				push(new SwallowChildrenWholeState(getPreResourceState()));
-				return;
+				throw new DataFormatException("Unknown " + theLocalPart + " - Valid names are: " + new TreeSet<String>(myContext.getRuntimeChildUndeclaredExtensionDefinition().getValidChildNames()));
+//				myErrorHandler.unknownElement(null, theLocalPart);
+//				push(new SwallowChildrenWholeState(getPreResourceState()));
+//				return;
 			}
 
 			switch (target.getChildType()) {
