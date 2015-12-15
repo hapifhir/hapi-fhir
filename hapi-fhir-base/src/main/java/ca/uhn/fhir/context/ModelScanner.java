@@ -48,6 +48,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -197,7 +198,11 @@ class ModelScanner {
 
 		// FIXME: remove
 		if (myVersionTypes.contains(CodeDt.class) == false) {
-			throw new ConfigurationException("Did not request CodeDt: " + myVersionTypes);
+			try {
+				throw new ConfigurationException("Did not request CodeDt1: " + myVersionTypes + "\ndatatypes: " + theDatatypes + "\n\n" + IOUtils.toString(myVersion.getVersionImplementation().getFhirVersionPropertiesFile()));
+			} catch (IOException e) {
+				throw new ConfigurationException("FAILED: " + e.toString());
+			}
 		}
 		
 		// toScan.add(DateDt.class);

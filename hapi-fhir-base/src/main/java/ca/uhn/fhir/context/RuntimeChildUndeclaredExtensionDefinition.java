@@ -157,7 +157,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 		// FIXME: remove
 		if (theClassToElementDefinitions.containsKey(CodeDt.class) == false) {
-			throw new ConfigurationException("Did not request CodeDt: " + (theClassToElementDefinitions.keySet()));
+			throw new ConfigurationException("Did not request CodeDt2: " + (theClassToElementDefinitions.keySet()));
 		}
 
 //		for (theContext.get)
