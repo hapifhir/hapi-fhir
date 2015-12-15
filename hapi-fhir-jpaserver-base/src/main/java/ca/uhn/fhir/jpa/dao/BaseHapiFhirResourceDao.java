@@ -33,10 +33,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
@@ -99,9 +96,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 //	@Autowired
 //	private DaoConfig myDaoConfig;
-
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
 
 	// TODO -- maybe use the one in the super class
 	@Autowired

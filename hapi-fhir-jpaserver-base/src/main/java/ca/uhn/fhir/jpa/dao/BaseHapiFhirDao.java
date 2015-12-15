@@ -78,7 +78,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.dao.IDao;
 import ca.uhn.fhir.dao.IDaoContext;
 import ca.uhn.fhir.dao.IDaoFactory;
-import ca.uhn.fhir.dao.IFhirResourceDao;
 import ca.uhn.fhir.dao.SearchParameterMap;
 import ca.uhn.fhir.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
@@ -1087,13 +1086,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return retVal;
 	}
 
-	protected IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation) {
-		RuntimeResourceDefinition type = myContext.getResourceDefinition(theEntity.getResourceType());
+	public IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation) {
+		RuntimeResourceDefinition type = getFhirContext().getResourceDefinition(theEntity.getResourceType());
 		return toResource(type.getImplementingClass(), theEntity, theForHistoryOperation);
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation) {
+	public <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation) {
 		String resourceText = null;
 		switch (theEntity.getEncoding()) {
 		case JSON:

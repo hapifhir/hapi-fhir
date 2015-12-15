@@ -1430,8 +1430,10 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		{
 			Organization org = new Organization();
 			org.getNameElement().setValue(methodName + "_O1Parent");
-			parentOrgId = myOrganizationDao.create(org).getId();
+			parentOrgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
 		}
+		IIdType orgId;
+		IIdType patientId;
 		{
 			Organization org = new Organization();
 			org.getNameElement().setValue(methodName + "_O1");
@@ -1442,15 +1444,31 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			patient.addName().addFamily("Tester_" + methodName + "_P1").addGiven("Joe");
 			patient.getManagingOrganization().setReference(orgId);
-			myPatientDao.create(patient);
+			patient.addCareProvider().setReference(orgId);
+			patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 		}
+		IIdType practId2;
+		{
+			Practitioner pract = new Practitioner();
+			pract.getName().addFamily(methodName + "_PRACT1");
+			practId2 = myPractitionerDao.create(pract).getId().toUnqualifiedVersionless();
+		}
+		IIdType patientId2;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
 			patient.addName().addFamily("Tester_" + methodName + "_P2").addGiven("John");
-			myPatientDao.create(patient);
+			patient.addCareProvider().setReference(practId2);
+			patientId2 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 		}
 
+		{
+			// Typed include
+			SearchParameterMap params = new SearchParameterMap();
+			params.addInclude(Patient.INCLUDE_CAREPROVIDER.withType("Practitioner"));
+			List<IIdType> ids = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+			assertThat(ids, containsInAnyOrder(patientId, patientId2, practId2));
+		}
 		{
 			// No includes
 			SearchParameterMap params = new SearchParameterMap();
@@ -1526,6 +1544,13 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			List<IResource> patients = toList(search);
 			assertEquals(1, patients.size());
 			assertEquals(Patient.class, patients.get(0).getClass());
+		}
+		{
+			// Untyped include
+			SearchParameterMap params = new SearchParameterMap();
+			params.addInclude(Patient.INCLUDE_CAREPROVIDER);
+			List<IIdType> ids = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+			assertThat(ids, containsInAnyOrder(orgId, patientId, patientId2, practId2));
 		}
 	}
 
