@@ -65,6 +65,12 @@
 				remains committed to supporting JDK 6+ in the compiled library, but these
 				days it can only be built using JDK 8. Thanks to joelsch for the PR!
 			</action>
+			<action type="fix">
+				When serializing a value[x] field, if the value type was a profiled type (e.g. markdown is a 
+				profile of string) HAPI 1.3 would use the base type in the element name, e.g.
+				valueString instead of valueMarkdown. After discussion with Grahame, this appears to
+				be incorrect behaviour so it has been fixed.
+			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">
