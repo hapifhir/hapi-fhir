@@ -465,6 +465,7 @@
 						</Import-Package>
 						<Export-Package>
 							ca.uhn.fhir.provider;version="1.4.0",
+							ca.uhn.fhir.provider.config;version="1.4.0",
                             ca.uhn.fhir.provider.dstu;version="1.4.0",
                             ca.uhn.fhir.provider.dstu2;version="1.4.0",
                             ca.uhn.fhir.provider.dstu21;version="1.4.0",
