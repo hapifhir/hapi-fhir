@@ -71,6 +71,11 @@
 				valueString instead of valueMarkdown. After discussion with Grahame, this appears to
 				be incorrect behaviour so it has been fixed.
 			</action>
+			<action type="add" issue="240">
+				Support target parameter type in _include / _revinclude values, e.g.
+				_include=Patient:careProvider:Organization. Thanks to Joe Portner
+				for reporting!
+			<action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">

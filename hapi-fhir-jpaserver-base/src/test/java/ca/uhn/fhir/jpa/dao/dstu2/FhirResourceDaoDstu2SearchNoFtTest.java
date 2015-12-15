@@ -1463,6 +1463,13 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		}
 
 		{
+			// Typed include
+			SearchParameterMap params = new SearchParameterMap();
+			params.addInclude(Patient.INCLUDE_CAREPROVIDER.withType("Practitioner"));
+			List<IIdType> ids = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+			assertThat(ids, containsInAnyOrder(patientId, patientId2, practId2));
+		}
+		{
 			// No includes
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringDt("Tester_" + methodName + "_P1"));
@@ -1544,13 +1551,6 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			params.addInclude(Patient.INCLUDE_CAREPROVIDER);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 			assertThat(ids, containsInAnyOrder(orgId, patientId, patientId2, practId2));
-		}
-		{
-//			// Typed include
-//			SearchParameterMap params = new SearchParameterMap();
-//			params.addInclude(Patient.INCLUDE_CAREPROVIDER.withType("Practitioner"));
-//			List<IIdType> ids = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-//			assertThat(ids, containsInAnyOrder(patientId, patientId2, practId2));
 		}
 	}
 
