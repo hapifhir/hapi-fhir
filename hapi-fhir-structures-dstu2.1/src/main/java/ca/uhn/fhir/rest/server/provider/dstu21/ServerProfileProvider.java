@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server.provider.dstu21;
 
 /*
  * #%L
- * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
+ * HAPI FHIR Structures - DSTU2.1 (FHIR v1.1.x)
  * %%
  * Copyright (C) 2014 - 2015 University Health Network
  * %%
@@ -55,7 +55,7 @@ public class ServerProfileProvider implements IResourceProvider {
 	
 	@Read()
 	public StructureDefinition getProfileById(HttpServletRequest theRequest, @IdParam IdDt theId) {
-		RuntimeResourceDefinition retVal = myContext.getResourceDefinitionById(theId.getValue());
+		RuntimeResourceDefinition retVal = myContext.getResourceDefinitionById(theId.getIdPart());
 		if (retVal==null) {
 			return null;
 		}

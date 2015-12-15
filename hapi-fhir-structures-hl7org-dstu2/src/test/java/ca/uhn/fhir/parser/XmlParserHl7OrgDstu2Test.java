@@ -26,7 +26,6 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.Address;
-import org.hl7.fhir.instance.model.Attachment;
 import org.hl7.fhir.instance.model.Address.AddressUse;
 import org.hl7.fhir.instance.model.Address.AddressUseEnumFactory;
 import org.hl7.fhir.instance.model.Binary;
@@ -49,7 +48,6 @@ import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.MedicationStatement;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Organization;
 import org.hl7.fhir.instance.model.Patient;
@@ -62,6 +60,7 @@ import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -91,8 +90,11 @@ public class XmlParserHl7OrgDstu2Test {
 
 	 /**
    * See #216 - Profiled datatypes should use their unprofiled parent type as the choice[x] name
+   * 
+   * Disabled after conversation with Grahame 
    */
   @Test
+  @Ignore
   public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
     IParser xmlParser = ourCtx.newXmlParser();
 

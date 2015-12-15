@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -1322,7 +1324,7 @@ public class SearchBuilder {
 	 * 
 	 * @param theLastUpdated
 	 */
-	private HashSet<Long> loadReverseIncludes(Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode, EverythingModeEnum theEverythingModeEnum, DateRangeParam theLastUpdated) {
+	private HashSet<Long> loadReverseIncludes(Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode, DateRangeParam theLastUpdated) {
 		if (theMatches.size() == 0) {
 			return new HashSet<Long>();
 		}
@@ -1378,19 +1380,18 @@ public class SearchBuilder {
 					if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 						paths = Collections.singletonList(nextInclude.getValue());
 					} else {
-						int colonIdx = nextInclude.getValue().indexOf(':');
-						if (colonIdx < 2) {
+						String resType = nextInclude.getParamType();
+						if (isBlank(resType)) {
 							continue;
 						}
-						String resType = nextInclude.getValue().substring(0, colonIdx);
 						RuntimeResourceDefinition def = myContext.getResourceDefinition(resType);
 						if (def == null) {
 							ourLog.warn("Unknown resource type in include/revinclude=" + nextInclude.getValue());
 							continue;
 						}
 
-						String paramName = nextInclude.getValue().substring(colonIdx + 1);
-						RuntimeSearchParam param = def.getSearchParam(paramName);
+						String paramName = nextInclude.getParamName();
+						RuntimeSearchParam param = isNotBlank(paramName) ? def.getSearchParam(paramName) : null;
 						if (param == null) {
 							ourLog.warn("Unknown param name in include/revinclude=" + nextInclude.getValue());
 							continue;
@@ -1399,11 +1400,20 @@ public class SearchBuilder {
 						paths = param.getPathsSplit();
 					}
 
+					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {
-						String sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
+						String sql;
+						if (targetResourceType != null) {
+							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
+						} else {
+							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
+						}
 						TypedQuery<ResourceLink> q = myEntityManager.createQuery(sql, ResourceLink.class);
 						q.setParameter("src_path", nextPath);
 						q.setParameter("target_pids", nextRoundMatches);
+						if (targetResourceType != null) {
+							q.setParameter("target_resource_type", targetResourceType);
+						}
 						List<ResourceLink> results = q.getResultList();
 						for (ResourceLink resourceLink : results) {
 							if (theReverseMode) {
@@ -1595,7 +1605,7 @@ public class SearchBuilder {
 		final Set<Long> revIncludedPids;
 		if (theParams.getEverythingMode() == null) {
 			if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty() == false) {
-				revIncludedPids = loadReverseIncludes(pids, theParams.getRevIncludes(), true, null, lu);
+				revIncludedPids = loadReverseIncludes(pids, theParams.getRevIncludes(), true, lu);
 			} else {
 				revIncludedPids = new HashSet<Long>();
 			}
@@ -1623,7 +1633,7 @@ public class SearchBuilder {
 
 						// Load includes
 						pidsSubList = new ArrayList<Long>(pidsSubList);
-						revIncludedPids.addAll(loadReverseIncludes(pidsSubList, theParams.getIncludes(), false, null, theParams.getLastUpdated()));
+						revIncludedPids.addAll(loadReverseIncludes(pidsSubList, theParams.getIncludes(), false, theParams.getLastUpdated()));
 
 						// Execute the query and make sure we return distinct results
 						List<IBaseResource> resources = new ArrayList<IBaseResource>();

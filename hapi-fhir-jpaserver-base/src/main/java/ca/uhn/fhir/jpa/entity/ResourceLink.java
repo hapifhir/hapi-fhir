@@ -36,6 +36,7 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.search.annotations.Field;
 
 @Entity
@@ -64,6 +65,11 @@ public class ResourceLink implements Serializable {
 	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
 	private Long mySourceResourcePid;
 
+	@Column(name = "SOURCE_RESOURCE_TYPE", nullable=false, length=ResourceTable.RESTYPE_LEN)
+	@ColumnDefault("''") // TODO: remove this (it's only here for simplifying upgrades of 1.3 -> 1.4)
+	@Field()
+	private String mySourceResourceType;
+
 	@ManyToOne(optional = false, fetch=FetchType.LAZY)
 	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false)
 	private ResourceTable myTargetResource;
@@ -71,18 +77,21 @@ public class ResourceLink implements Serializable {
 	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
 	@Field()
 	private Long myTargetResourcePid;
-	
+
+	@Column(name = "TARGET_RESOURCE_TYPE", nullable=false, length=ResourceTable.RESTYPE_LEN)
+	@ColumnDefault("''") // TODO: remove this (it's only here for simplifying upgrades of 1.3 -> 1.4)
+	@Field()
+	private String myTargetResourceType;
+
 	public ResourceLink() {
 		super();
 	}
 
 	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, ResourceTable theTargetResource) {
 		super();
-		mySourcePath = theSourcePath;
-		mySourceResource = theSourceResource;
-		mySourceResourcePid = theSourceResource.getId();
-		myTargetResource = theTargetResource;
-		myTargetResourcePid = theTargetResource.getId();
+		setSourcePath(theSourcePath);
+		setSourceResource(theSourceResource);
+		setTargetResource(theTargetResource);
 	}
 
 	@Override
@@ -140,12 +149,14 @@ public class ResourceLink implements Serializable {
 	public void setSourceResource(ResourceTable theSourceResource) {
 		mySourceResource = theSourceResource;
 		mySourceResourcePid = theSourceResource.getId();
+		mySourceResourceType = theSourceResource.getResourceType();
 	}
 
 	public void setTargetResource(ResourceTable theTargetResource) {
 		Validate.notNull(theTargetResource);
 		myTargetResource = theTargetResource;
 		myTargetResourcePid = theTargetResource.getId();
+		myTargetResourceType = theTargetResource.getResourceType();
 	}
 
 	@Override

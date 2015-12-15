@@ -68,7 +68,9 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 			for (ClassInfo classInfo : tlc) {
 				DatatypeDef def = Class.forName(classInfo.getName()).getAnnotation(DatatypeDef.class);
 				if (def != null) {
-					getNameToDatatypeClass().put(def.name(), classInfo.getName());
+					if (classInfo.getName().contains("Bound") == false) {
+						getNameToDatatypeClass().put(def.name(), classInfo.getName());
+					}
 				}
 			}
 		} catch (IOException e) {
@@ -82,7 +84,9 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 			for (ClassInfo classInfo : tlc) {
 				DatatypeDef def = Class.forName(classInfo.getName()).getAnnotation(DatatypeDef.class);
 				if (def != null) {
-					getNameToDatatypeClass().put(def.name(), classInfo.getName());
+					if (classInfo.getName().contains("Bound") == false) {
+						getNameToDatatypeClass().put(def.name(), classInfo.getName());
+					}
 				}
 			}
 		} catch (IOException e) {

@@ -32,6 +32,7 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -68,6 +69,7 @@ import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.MedicationStatement;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.AddressUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
@@ -84,6 +86,7 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.MarkdownDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -93,6 +96,46 @@ public class XmlParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserDstu2Test.class);
 
+	@Test
+	public void testChoiceTypeWithProfiledType() {
+		//@formatter:off
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+			"        <extension url=\"http://example.com\">\n" + 
+			"          <valueMarkdown value=\"THIS IS MARKDOWN\"/>\n" + 
+			"        </extension>\n" + 
+			"</Patient>";
+		//@formatter:on
+		
+		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, input);
+		assertEquals(1, parsed.getUndeclaredExtensions().size());
+		ExtensionDt ext = parsed.getUndeclaredExtensions().get(0);
+		assertEquals("http://example.com", ext.getUrl());
+		assertEquals("THIS IS MARKDOWN", ((MarkdownDt)ext.getValue()).getValue());
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
+		assertThat(encoded, containsString("<valueMarkdown value=\"THIS IS MARKDOWN\"/>"));
+	}
+	
+	
+	@Test
+	public void testChoiceTypeWithProfiledType2() {
+		Parameters par = new Parameters();
+		par.addParameter().setValue((StringDt)new StringDt().setValue("ST"));
+		par.addParameter().setValue((MarkdownDt)new MarkdownDt().setValue("MD"));
+		
+		String str = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(par);
+		ourLog.info(str);
+		
+		assertThat(str, stringContainsInOrder("<valueString value=\"ST\"/>", "<valueMarkdown value=\"MD\"/>"));
+		
+		par = ourCtx.newXmlParser().parseResource(Parameters.class, str);
+		assertEquals(2, par.getParameter().size());
+		assertEquals(StringDt.class, par.getParameter().get(0).getValue().getClass());
+		assertEquals(MarkdownDt.class, par.getParameter().get(1).getValue().getClass());
+	}
+	
+	
+	
 	@Test
 	public void testBundleWithBinary() {
 		//@formatter:off
@@ -522,7 +565,7 @@ public class XmlParserDstu2Test {
 	}
 
 	/**
-	 * Test for #233
+	 * Test for #233 - This was reversed after a conversation with Grahame
 	 */
 	@Test
 	public void testEncodeAndParseProfiledDatatype() {
@@ -530,7 +573,7 @@ public class XmlParserDstu2Test {
 		mo.addDosageInstruction().getTiming().getRepeat().setBounds(new DurationDt().setCode("code"));
 		String out = ourCtx.newXmlParser().encodeResourceToString(mo);
 		ourLog.info(out);
-		assertThat(out, containsString("</boundsQuantity>"));
+		assertThat(out, containsString("</boundsDuration>"));
 
 		mo = ourCtx.newXmlParser().parseResource(MedicationOrder.class, out);
 		DurationDt duration = (DurationDt) mo.getDosageInstruction().get(0).getTiming().getRepeat().getBounds();
@@ -539,8 +582,11 @@ public class XmlParserDstu2Test {
 
 	/**
 	 * See #216 - Profiled datatypes should use their unprofiled parent type as the choice[x] name
+	 * 
+	 * Disabled because we reverted this change after a conversation with Grahame
 	 */
 	@Test
+	@Ignore
 	public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
 		IParser xmlParser = ourCtx.newXmlParser();
 
@@ -550,7 +596,7 @@ public class XmlParserDstu2Test {
 		assertEquals("1", q.getValueElement().getValueAsString());
 
 		String output = xmlParser.encodeResourceToString(ms);
-		assertThat(output, containsString("<quantityQuantity><value value=\"1\"/></quantityQuantity>"));
+		assertThat(output, containsString("<quantitySimpleQuantity><value value=\"1\"/></quantitySimpleQuantity>"));
 	}
 
 	@Test
