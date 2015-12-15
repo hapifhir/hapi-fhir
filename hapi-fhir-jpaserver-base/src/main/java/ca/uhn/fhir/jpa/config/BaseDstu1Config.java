@@ -22,35 +22,67 @@ package ca.uhn.fhir.jpa.config;
 
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.dao.IDaoFactory;
+import ca.uhn.fhir.dao.IFhirResourceDao;
+import ca.uhn.fhir.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu1;
+import ca.uhn.fhir.jpa.dao.IJpaFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.JpaDaoFactory;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 
 @Configuration
 public class BaseDstu1Config extends BaseConfig {
 
+	private static FhirContext ourFhirContextDstu1;
+
+	@Bean(name = "myFhirContextDstu1")
+	@Lazy
+	public FhirContext fhirContextDstu1() {
+		if (ourFhirContextDstu1 == null) {
+			ourFhirContextDstu1 = FhirContext.forDstu1();
+		}
+		return ourFhirContextDstu1;
+	}
+	
 	@Bean
 	@Primary
 	public FhirContext defaultFhirContext() {
 		return fhirContextDstu1();
 	}
-
-	@Bean(name = "mySystemDaoDstu1", autowire = Autowire.BY_NAME)
-	public ca.uhn.fhir.jpa.dao.IFhirSystemDao<List<IResource>, MetaDt> fhirSystemDaoDstu1() {
-		ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu1 retVal = new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu1();
-		return retVal;
+	
+	private static JpaDaoFactory myDaoFactoryDstu1 = null;
+	
+	@Bean(name="myDaoFactoryDstu1")
+	public IDaoFactory fhirDaoFactoryDstu1() {
+		if (null == myDaoFactoryDstu1) {
+			myDaoFactoryDstu1 = new JpaDaoFactory();
+			myDaoFactoryDstu1.setFhirContext(defaultFhirContext());
+		}
+		return myDaoFactoryDstu1;
 	}
 
-	@Bean(name = "mySystemProviderDstu1")
-	public ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1 systemDaoDstu1() {
-		ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1 retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1();
-		retVal.setDao(fhirSystemDaoDstu1());
-		return retVal;
+	private static IJpaFhirSystemDao<List<IResource>, MetaDt> mySystemDaoDstu1 = null;
+	
+	@Bean(name = "mySystemDaoDstu1", autowire = Autowire.BY_NAME)
+	public IJpaFhirSystemDao<List<IResource>, MetaDt> fhirSystemDaoDstu1() {
+		if (null == mySystemDaoDstu1) {
+			mySystemDaoDstu1 = new FhirSystemDaoDstu1();
+			((FhirSystemDaoDstu1)mySystemDaoDstu1).setContext(defaultFhirContext());
+			((FhirSystemDaoDstu1)mySystemDaoDstu1).setDaoFactory(fhirDaoFactoryDstu1());
+		}
+		return mySystemDaoDstu1;
 	}
 
 }

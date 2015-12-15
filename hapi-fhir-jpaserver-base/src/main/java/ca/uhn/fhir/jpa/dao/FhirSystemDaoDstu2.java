@@ -53,6 +53,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import com.google.common.collect.ArrayListMultimap;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
@@ -170,7 +171,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	private String extractTransactionUrlOrThrowException(Entry nextEntry, HTTPVerbEnum verb) {
 		String url = nextEntry.getRequest().getUrl();
 		if (isBlank(url)) {
-			throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionMissingUrl", verb.name()));
+			throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionMissingUrl", verb.name()));
 		}
 		return url;
 	}
@@ -184,7 +185,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	 * TODO: This isn't the most efficient way of doing this.. hopefully we can come up with something better in the future.
 	 */
 	private IBaseResource filterNestedBundle(RequestDetails theRequestDetails, IBaseResource theResource) {
-		IParser p = getContext().newJsonParser();
+		IParser p = getFhirContext().newJsonParser();
 		RestfulServerUtils.configureResponseParser(theRequestDetails, p);
 		return p.parseResource(theResource.getClass(), p.encodeResourceToString(theResource));
 	}
@@ -192,7 +193,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	private IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IResource> theClass) {
 		IFhirResourceDao<? extends IResource> retVal = getDao(theClass);
 		if (retVal == null) {
-			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + getContext().getResourceDefinition(theClass).getName());
+			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + getFhirContext().getResourceDefinition(theClass).getName());
 		}
 		return retVal;
 	}
@@ -231,25 +232,25 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	}
 
 	
-	private ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> toDao(UrlParts theParts, String theVerb, String theUrl) {
+	private IJpaFhirResourceDao<? extends IBaseResource> toDao(UrlParts theParts, String theVerb, String theUrl) {
 		RuntimeResourceDefinition resType;
 		try {
-			resType = getContext().getResourceDefinition(theParts.getResourceType());
+			resType = getFhirContext().getResourceDefinition(theParts.getResourceType());
 		} catch (DataFormatException e) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
+			String msg = getFhirContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
 			throw new InvalidRequestException(msg);
 		}
-		IFhirResourceDao<? extends IBaseResource> dao = null;
+		IJpaFhirResourceDao<? extends IBaseResource> dao = null;
 		if (resType != null) {
 			dao = getDao(resType.getImplementingClass());
 		}
 		if (dao == null) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
+			String msg = getFhirContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
 			throw new InvalidRequestException(msg);
 		}
 
 		// if (theParts.getResourceId() == null && theParts.getParams() == null) {
-		// String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
+		// String msg = getFhirContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
 		// throw new InvalidRequestException(msg);
 		// }
 
@@ -353,12 +354,12 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				 */
 				if (isPlaceholder(nextResourceId)) {
 					if (!allIds.add(nextResourceId)) {
-						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextResourceId));
+						throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextResourceId));
 					}
 				} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart()) {
 					IdDt nextId = nextResourceId.toUnqualifiedVersionless();
 					if (!allIds.add(nextId)) {
-						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextId));
+						throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextId));
 					}
 				}
 
@@ -366,10 +367,10 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 			HTTPVerbEnum verb = nextReqEntry.getRequest().getMethodElement().getValueAsEnum();
 			if (verb == null) {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextReqEntry.getRequest().getMethod()));
+				throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextReqEntry.getRequest().getMethod()));
 			}
 
-			String resourceType = res != null ? getContext().getResourceDefinition(res).getName() : null;
+			String resourceType = res != null ? getFhirContext().getResourceDefinition(res).getName() : null;
 			Entry nextRespEntry = response.getEntry().get(originalRequestOrder.get(nextReqEntry));
 
 			switch (verb) {
@@ -379,7 +380,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 				res.setId((String) null);
 				DaoMethodOutcome outcome;
-				outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false);
+				outcome = (DaoMethodOutcome)resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false);
 				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
 				break;
 			}
@@ -387,7 +388,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				// DELETE
 				String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
 				UrlParts parts = UrlUtil.parseUrl(url);
-				ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb.getCode(), url);
+				IJpaFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb.getCode(), url);
 				int status = Constants.STATUS_HTTP_204_NO_CONTENT;
 				if (parts.getResourceId() != null) {
 					ResourceTable deleted = dao.delete(new IdDt(parts.getResourceType(), parts.getResourceId()), deleteConflicts);
@@ -419,10 +420,10 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				UrlParts parts = UrlUtil.parseUrl(url);
 				if (isNotBlank(parts.getResourceId())) {
 					res.setId(new IdDt(parts.getResourceType(), parts.getResourceId()));
-					outcome = resourceDao.update(res, null, false);
+					outcome = (DaoMethodOutcome)resourceDao.update(res, null, false);
 				} else {
 					res.setId((String) null);
-					outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false);
+					outcome = (DaoMethodOutcome)resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false);
 				}
 
 				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
@@ -450,7 +451,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		 * Perform ID substitutions and then index each resource we have saved
 		 */
 
-		FhirTerser terser = getContext().newTerser();
+		FhirTerser terser = getFhirContext().newTerser();
 		for (DaoMethodOutcome nextOutcome : idToPersistedOutcome.values()) {
 			IResource nextResource = (IResource) nextOutcome.getResource();
 			if (nextResource == null) {

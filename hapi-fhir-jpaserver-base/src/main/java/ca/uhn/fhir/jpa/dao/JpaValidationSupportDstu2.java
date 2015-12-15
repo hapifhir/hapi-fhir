@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 

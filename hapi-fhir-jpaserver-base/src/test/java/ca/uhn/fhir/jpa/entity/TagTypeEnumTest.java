@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import ca.uhn.fhir.entity.TagTypeEnum;
+
 public class TagTypeEnumTest {
 
 	@Test

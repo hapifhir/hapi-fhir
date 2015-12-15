@@ -24,7 +24,9 @@ import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
-import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.dao.IFhirResourceDaoEncounter;
+import ca.uhn.fhir.dao.SearchParameterMap;
+import ca.uhn.fhir.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.primitive.IdDt;

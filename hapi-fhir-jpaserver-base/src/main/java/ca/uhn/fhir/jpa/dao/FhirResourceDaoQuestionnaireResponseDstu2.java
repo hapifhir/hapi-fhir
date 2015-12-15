@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
@@ -82,10 +83,10 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 		module.setResourceLoader(new JpaResourceLoader());
 		val.registerValidatorModule(module);
 
-		ValidationResult result = val.validateWithResult(myRefImplCtx.newJsonParser().parseResource(getContext().newJsonParser().encodeResourceToString(qa)));
+		ValidationResult result = val.validateWithResult(myRefImplCtx.newJsonParser().parseResource(getFhirContext().newJsonParser().encodeResourceToString(qa)));
 		if (!result.isSuccessful()) {
-			IBaseOperationOutcome oo = getContext().newJsonParser().parseResource(OperationOutcome.class, myRefImplCtx.newJsonParser().encodeResourceToString(result.toOperationOutcome()));
-			throw new UnprocessableEntityException(getContext(), oo);
+			IBaseOperationOutcome oo = getFhirContext().newJsonParser().parseResource(OperationOutcome.class, myRefImplCtx.newJsonParser().encodeResourceToString(result.toOperationOutcome()));
+			throw new UnprocessableEntityException(getFhirContext(), oo);
 		}
 	}
 
@@ -101,7 +102,7 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 			if ("ValueSet".equals(theType.getSimpleName())) {
 				IFhirResourceDao<ValueSet> dao = getDao(ValueSet.class);
 				ValueSet in = dao.read(theId);
-				String encoded = getContext().newJsonParser().encodeResourceToString(in);
+				String encoded = getFhirContext().newJsonParser().encodeResourceToString(in);
 
 				// TODO: this is temporary until structures-dstu2 catches up to structures-hl7org.dstu2
 				encoded = encoded.replace("\"define\"", "\"codeSystem\"");
@@ -110,7 +111,7 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 			} else if ("Questionnaire".equals(theType.getSimpleName())) {
 				IFhirResourceDao<Questionnaire> dao = getDao(Questionnaire.class);
 				Questionnaire vs = dao.read(theId);
-				return myRefImplCtx.newJsonParser().parseResource(theType, getContext().newJsonParser().encodeResourceToString(vs));
+				return myRefImplCtx.newJsonParser().parseResource(theType, getFhirContext().newJsonParser().encodeResourceToString(vs));
 			} else {
 				// Should not happen, validator will only ask for these two
 				throw new IllegalStateException("Unexpected request to load resource of type " + theType);

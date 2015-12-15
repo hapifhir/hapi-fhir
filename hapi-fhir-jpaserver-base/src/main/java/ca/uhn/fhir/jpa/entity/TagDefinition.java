@@ -38,6 +38,7 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import ca.uhn.fhir.entity.TagTypeEnum;
 import ca.uhn.fhir.model.api.Tag;
 
 //@formatter:on

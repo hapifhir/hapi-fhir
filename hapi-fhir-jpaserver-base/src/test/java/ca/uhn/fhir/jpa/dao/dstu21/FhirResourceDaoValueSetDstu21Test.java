@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
+import ca.uhn.fhir.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.model.dstu21.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu21.composite.CodingDt;
 import ca.uhn.fhir.model.dstu21.resource.ValueSet;

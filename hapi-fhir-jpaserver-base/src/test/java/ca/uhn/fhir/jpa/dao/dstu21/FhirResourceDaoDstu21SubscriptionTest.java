@@ -25,10 +25,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.IJpaFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionFlaggedResourceDataDao;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
+import ca.uhn.fhir.model.dstu21.composite.MetaDt;
+import ca.uhn.fhir.model.dstu21.resource.Bundle;
 import ca.uhn.fhir.model.dstu21.resource.Observation;
 import ca.uhn.fhir.model.dstu21.resource.Patient;
 import ca.uhn.fhir.model.dstu21.resource.Subscription;
@@ -381,7 +384,7 @@ public class FhirResourceDaoDstu21SubscriptionTest extends BaseJpaDstu21Test {
 		 */
 		
 		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(100);
+		((IJpaFhirSystemDao<Bundle, MetaDt>)mySystemDao).performReindexingPass(100);
 
 		assertEquals(0, mySubscriptionDao.pollForNewUndeliveredResources());
 

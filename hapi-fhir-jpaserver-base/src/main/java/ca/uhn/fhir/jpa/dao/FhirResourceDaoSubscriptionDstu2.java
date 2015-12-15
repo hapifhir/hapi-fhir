@@ -45,6 +45,10 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.dao.IDao;
+import ca.uhn.fhir.dao.IFhirResourceDao;
+import ca.uhn.fhir.dao.IFhirResourceDaoSubscription;
+import ca.uhn.fhir.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionFlaggedResourceDataDao;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
@@ -301,7 +305,7 @@ public class FhirResourceDaoSubscriptionDstu2 extends FhirResourceDaoDstu2<Subsc
 
 		RuntimeResourceDefinition resDef;
 		try {
-			resDef = getContext().getResourceDefinition(resType);
+			resDef = getFhirContext().getResourceDefinition(resType);
 		} catch (DataFormatException e) {
 			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resType);
 		}
