@@ -155,18 +155,8 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		myDatatypeToAttributeName = new HashMap<Class<? extends IBase>, String>();
 		myDatatypeToDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 
-		// FIXME: remove
-		if (theClassToElementDefinitions.containsKey(CodeDt.class) == false) {
-			throw new ConfigurationException("Did not request CodeDt2: " + (theClassToElementDefinitions.keySet()));
-		}
-
-//		for (theContext.get)
-		
 		for (BaseRuntimeElementDefinition<?> next : theClassToElementDefinitions.values()) {
 			if (next instanceof IRuntimeDatatypeDefinition) {
-				// if (next.getName().equals("CodeableConcept")) {
-				// System.out.println();
-				// }
 
 				myDatatypeToDefinition.put(next.getImplementingClass(), next);
 
@@ -204,12 +194,6 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 		myAttributeNameToDefinition = datatypeAttributeNameToDefinition;
 
-
-//		for (Entry<String, BaseRuntimeElementDefinition<?>> next : myAttributeNameToDefinition.entrySet()) {
-//			@SuppressWarnings("unchecked")
-//			Class<? extends IDatatype> type = (Class<? extends IDatatype>) next.getValue().getImplementingClass();
-//			myDatatypeToDefinition.put(type, next.getValue());
-//		}
 
 		/*
 		 * Resource reference - The correct name is 'valueReference' in DSTU2 and 'valueResource' in DSTU1

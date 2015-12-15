@@ -34,7 +34,6 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -48,7 +47,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -84,7 +82,6 @@ import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.ICodedDatatype;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
@@ -195,15 +192,6 @@ class ModelScanner {
 		Map<String, Class<? extends IBaseResource>> resourceTypes = myNameToResourceType;
 
 		myVersionTypes = scanVersionPropertyFile(theDatatypes, resourceTypes, myVersion);
-
-		// FIXME: remove
-		if (myVersionTypes.contains(CodeDt.class) == false) {
-			try {
-				throw new ConfigurationException("Did not request CodeDt1: " + myVersionTypes + "\ndatatypes: " + theDatatypes + "\n\n" + IOUtils.toString(myVersion.getVersionImplementation().getFhirVersionPropertiesFile()));
-			} catch (IOException e) {
-				throw new ConfigurationException("FAILED: " + e.toString());
-			}
-		}
 		
 		// toScan.add(DateDt.class);
 		// toScan.add(CodeDt.class);

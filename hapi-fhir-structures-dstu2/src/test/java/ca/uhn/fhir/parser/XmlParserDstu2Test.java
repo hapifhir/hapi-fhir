@@ -564,7 +564,7 @@ public class XmlParserDstu2Test {
 	}
 
 	/**
-	 * Test for #233
+	 * Test for #233 - This was reversed after a conversation with Grahame
 	 */
 	@Test
 	public void testEncodeAndParseProfiledDatatype() {
@@ -572,7 +572,7 @@ public class XmlParserDstu2Test {
 		mo.addDosageInstruction().getTiming().getRepeat().setBounds(new DurationDt().setCode("code"));
 		String out = ourCtx.newXmlParser().encodeResourceToString(mo);
 		ourLog.info(out);
-		assertThat(out, containsString("</boundsQuantity>"));
+		assertThat(out, containsString("</boundsDuration>"));
 
 		mo = ourCtx.newXmlParser().parseResource(MedicationOrder.class, out);
 		DurationDt duration = (DurationDt) mo.getDosageInstruction().get(0).getTiming().getRepeat().getBounds();
@@ -592,7 +592,7 @@ public class XmlParserDstu2Test {
 		assertEquals("1", q.getValueElement().getValueAsString());
 
 		String output = xmlParser.encodeResourceToString(ms);
-		assertThat(output, containsString("<quantityQuantity><value value=\"1\"/></quantityQuantity>"));
+		assertThat(output, containsString("<quantitySimpleQuantity><value value=\"1\"/></quantitySimpleQuantity>"));
 	}
 
 	@Test
