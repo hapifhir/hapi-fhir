@@ -42,6 +42,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import ca.uhn.fhir.dao.IDaoFactory;
+import ca.uhn.fhir.dao.IFhirResourceDao;
+import ca.uhn.fhir.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.ReindexFailureException;
 import ca.uhn.fhir.jpa.util.StopWatch;
@@ -53,12 +56,19 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
-public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T, MT> {
+public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBaseResource> implements IJpaFhirSystemDao<T, MT> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
 
+	// TODO -- use tx manager from super class
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+
+	@Override
+	public void setDaoFactory (IDaoFactory myDaoFactory) {
+		super.setDaoFactory(myDaoFactory);
+		((JpaDaoFactory)myDaoFactory).setSystemDao(this);
+	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
@@ -100,7 +110,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 						final IBaseResource resource = toResource(resourceTable, false);
 
 						@SuppressWarnings("rawtypes")
-						final IFhirResourceDao dao = getDao(resource.getClass());
+						final IJpaFhirResourceDao dao = getDao(resource.getClass());
 
 						dao.reindex(resource, resourceTable);
 					} catch (Exception e) {

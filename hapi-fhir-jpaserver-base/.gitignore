@@ -132,3 +132,4 @@ local.properties
 /target/
 /target/
 /target/
+/ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString/

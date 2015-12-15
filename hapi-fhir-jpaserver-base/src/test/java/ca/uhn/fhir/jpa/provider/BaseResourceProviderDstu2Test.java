@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.provider.impl.ConformanceProviderDstu2;
 
 public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
@@ -97,7 +98,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	
 			restServer.setPlainProviders(mySystemProvider);
 	
-			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(restServer, mySystemDao, myDaoConfig);
+			ConformanceProviderDstu2 confProvider = new ConformanceProviderDstu2(restServer, myDaoFactory, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			restServer.setServerConformanceProvider(confProvider);
 	

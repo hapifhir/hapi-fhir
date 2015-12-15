@@ -28,37 +28,19 @@ import org.apache.commons.lang3.time.DateUtils;
  * #L%
  */
 
+import ca.uhn.fhir.dao.BaseDaoConfig;
 import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
-public class DaoConfig {
+public class DaoConfig extends BaseDaoConfig {
 
-	private boolean myAllowMultipleDelete;
-	private int myHardSearchLimit = 1000;
-	private int myHardTagListLimit = 1000;
-	private int myIncludeLimit = 2000;
 	private List<IServerInterceptor> myInterceptors;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 	private boolean mySchedulingDisabled;
 	private boolean mySubscriptionEnabled;
 	private long mySubscriptionPollDelay = 1000;
 	private Long mySubscriptionPurgeInactiveAfterMillis;
-
-	/**
-	 * See {@link #setIncludeLimit(int)}
-	 */
-	public int getHardSearchLimit() {
-		return myHardSearchLimit;
-	}
-
-	public int getHardTagListLimit() {
-		return myHardTagListLimit;
-	}
-
-	public int getIncludeLimit() {
-		return myIncludeLimit;
-	}
 
 	/**
 	 * Returns the interceptors which will be notified of operations.
@@ -84,10 +66,6 @@ public class DaoConfig {
 		return mySubscriptionPurgeInactiveAfterMillis;
 	}
 
-	public boolean isAllowMultipleDelete() {
-		return myAllowMultipleDelete;
-	}
-
 	public boolean isSchedulingDisabled() {
 		return mySchedulingDisabled;
 	}
@@ -97,27 +75,6 @@ public class DaoConfig {
 	 */
 	public boolean isSubscriptionEnabled() {
 		return mySubscriptionEnabled;
-	}
-
-	public void setAllowMultipleDelete(boolean theAllowMultipleDelete) {
-		myAllowMultipleDelete = theAllowMultipleDelete;
-	}
-
-	public void setHardSearchLimit(int theHardSearchLimit) {
-		myHardSearchLimit = theHardSearchLimit;
-	}
-
-	public void setHardTagListLimit(int theHardTagListLimit) {
-		myHardTagListLimit = theHardTagListLimit;
-	}
-
-	/**
-	 * This is the maximum number of resources that will be added to a single page of returned resources. Because of
-	 * includes with wildcards and other possibilities it is possible for a client to make requests that include very
-	 * large amounts of data, so this hard limit can be imposed to prevent runaway requests.
-	 */
-	public void setIncludeLimit(int theIncludeLimit) {
-		myIncludeLimit = theIncludeLimit;
 	}
 
 	/**

@@ -1,0 +1,38 @@
+package ${configPackageBase};
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+
+import ca.uhn.fhir.provider.IResourceProvider;
+import ca.uhn.fhir.provider.config.Base${versionCapitalized}Config;
+
+@Configuration
+public abstract class BaseJavaConfig${versionCapitalized} extends Base${versionCapitalized}Config {
+
+	@Bean(name="myResourceProviders${versionCapitalized}")
+	public List<IResourceProvider<?>> resourceProviders${versionCapitalized}() {
+		List<IResourceProvider<?>> retVal = new ArrayList<IResourceProvider<?>>();
+#foreach ( $res in $resources )
+		retVal.add(rp${res.declaringClassNameComplete}${versionCapitalized}());
+#end
+		return retVal;
+	}
+
+#foreach ( $res in $resources )
+	@Bean(name="my${res.declaringClassNameComplete}Rp${versionCapitalized}")
+	@Lazy
+	public ca.uhn.fhir.provider.${version}.${res.declaringClassNameComplete}ResourceProvider rp${res.declaringClassNameComplete}${versionCapitalized}() {
+		ca.uhn.fhir.provider.${version}.${res.declaringClassNameComplete}ResourceProvider retVal;
+		retVal = new ca.uhn.fhir.provider.${version}.${res.declaringClassNameComplete}ResourceProvider();
+		retVal.setResourceType(ca.uhn.fhir.model.${version}.resource.${res.declaringClassNameComplete}.class);
+		retVal.setResourceDaoFactory(fhirDaoFactory());
+		return retVal;
+	}
+
+#end
+
+}

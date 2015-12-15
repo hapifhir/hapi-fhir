@@ -26,7 +26,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.dao.SearchParameterMap;
+import ca.uhn.fhir.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu21.resource.Patient;
 import ca.uhn.fhir.model.primitive.UnsignedIntDt;
@@ -60,7 +62,7 @@ public class FhirResourceDaoPatientDstu21 extends FhirResourceDaoDstu21<Patient>
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
 		
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this);
+		SearchBuilder builder = new SearchBuilder(getFhirContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this);
 		builder.setType(getResourceType(), getResourceName());
 		return builder.search(paramMap);
 	}
