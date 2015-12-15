@@ -34,6 +34,7 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -196,7 +197,7 @@ class ModelScanner {
 
 		// FIXME: remove
 		if (myVersionTypes.contains(CodeDt.class) == false) {
-			throw new ConfigurationException("Did not request CodeDt: " + new TreeSet<Class<?>>(myVersionTypes));
+			throw new ConfigurationException("Did not request CodeDt: " + myVersionTypes);
 		}
 		
 		// toScan.add(DateDt.class);
