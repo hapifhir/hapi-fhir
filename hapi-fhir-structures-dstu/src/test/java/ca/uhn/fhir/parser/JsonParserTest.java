@@ -1317,7 +1317,9 @@ public class JsonParserTest {
 	public void testSimpleResourceEncode() throws IOException {
 
 		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
-		Patient obs = ourCtx.newXmlParser().parseResource(Patient.class, xmlString);
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		Patient obs = parser.parseResource(Patient.class, xmlString);
 
 		List<ExtensionDt> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getUndeclaredExtensions();
 		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
@@ -1376,8 +1378,7 @@ public class JsonParserTest {
 
 		ourLog.info("Expected: {}", exp);
 		ourLog.info("Actual  : {}", act);
-		assertEquals(exp, act);
-
+		assertEquals("\nExpected: " + exp + "\nActual  : " + act, exp, act);
 	}
 
 	@Test
