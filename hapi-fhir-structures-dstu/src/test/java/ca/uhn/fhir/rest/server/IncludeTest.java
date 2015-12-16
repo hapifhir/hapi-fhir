@@ -1,7 +1,10 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,56 +54,21 @@ import ca.uhn.fhir.util.PortUtil;
 public class IncludeTest {
 
 	private static CloseableHttpClient ourClient;
+	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IncludeTest.class);
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx;
 
 	@Test
-	public void testNoIncludes() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello");
+	public void testBadInclude() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo&_include=baz");
 		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.size());
-
-		Patient p = bundle.getResources(Patient.class).get(0);
-		assertEquals(0, p.getName().size());
-		assertEquals("Hello", p.getId().getIdPart());
-	}
-
-	@Test
-	public void testOneInclude() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.size());
-
-		Patient p = bundle.getResources(Patient.class).get(0);
-		assertEquals(1, p.getName().size());
-		assertEquals("Hello", p.getId().getIdPart());
-		assertEquals("foo", p.getName().get(0).getFamilyFirstRep().getValue());
-	}
-
-	// @Test
-	public void testMixedContainedAndNonContained() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?_query=stitchedInclude&_pretty=true");
-		HttpResponse status = ourClient.execute(httpGet);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(4, bundle.size());
+		assertThat(responseContent, containsString("Invalid _include parameter value"));
 	}
 
 	@Test
@@ -119,6 +87,32 @@ public class IncludeTest {
 		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
+
+		Patient p1 = (Patient) bundle.toListOfResources().get(0);
+		assertEquals(0, p1.getContained().getContainedResources().size());
+
+		Patient p2 = (Patient) bundle.toListOfResources().get(1);
+		assertEquals(0, p2.getContained().getContainedResources().size());
+
+	}
+
+	@Test
+	public void testIIncludedResourcesNonContainedInDeclaredExtension() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=declaredExtInclude&_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+
+		ourLog.info(responseContent);
+
+		assertEquals(4, bundle.size());
+		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
+		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
+		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
+		assertEquals(new IdDt("Organization/o2"), bundle.toListOfResources().get(3).getId().toUnqualifiedVersionless());
 
 		Patient p1 = (Patient) bundle.toListOfResources().get(0);
 		assertEquals(0, p1.getContained().getContainedResources().size());
@@ -179,29 +173,81 @@ public class IncludeTest {
 	}
 
 	@Test
-	public void testIIncludedResourcesNonContainedInDeclaredExtension() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=declaredExtInclude&_pretty=true");
+	public void testIncludeWithType() {
+		assertEquals("Patient:careProvider:Practitioner", new Include("Patient:careProvider", true).withType("Practitioner").getValue());
+		assertEquals(true, new Include("Patient:careProvider", true).withType("Practitioner").isRecurse());
+		assertEquals(false, new Include("Patient:careProvider:Organization", true).withType("Practitioner").isLocked());
+		assertEquals("Practitioner", new Include("Patient:careProvider", true).withType("Practitioner").getParamTargetType());
+		assertEquals(null, new Include("Patient:careProvider", true).getParamTargetType());
+
+		assertEquals("Patient:careProvider:Practitioner", new Include("Patient:careProvider:Organization", true).withType("Practitioner").getValue());
+		assertEquals(true, new Include("Patient:careProvider:Organization", true).toLocked().withType("Practitioner").isLocked());
+
+		try {
+			new Include("").withType("Patient");
+			fail();
+		} catch (IllegalStateException e) {
+			// good
+		}
+		try {
+			new Include("Patient").withType("Patient");
+			fail();
+		} catch (IllegalStateException e) {
+			// good
+		}
+		try {
+			new Include("Patient:").withType("Patient");
+			fail();
+		} catch (IllegalStateException e) {
+			// good
+		}
+	}
+
+	// @Test
+	public void testMixedContainedAndNonContained() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?_query=stitchedInclude&_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info(responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(4, bundle.size());
+	}
+
+	@Test
+	public void testNoIncludes() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.size());
 
-		ourLog.info(responseContent);
+		Patient p = bundle.getResources(Patient.class).get(0);
+		assertEquals(0, p.getName().size());
+		assertEquals("Hello", p.getId().getIdPart());
+	}
 
-		assertEquals(4, bundle.size());
-		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Organization/o2"), bundle.toListOfResources().get(3).getId().toUnqualifiedVersionless());
+	@Test
+	public void testOneInclude() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		Patient p1 = (Patient) bundle.toListOfResources().get(0);
-		assertEquals(0, p1.getContained().getContainedResources().size());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.size());
 
-		Patient p2 = (Patient) bundle.toListOfResources().get(1);
-		assertEquals(0, p2.getContained().getContainedResources().size());
-
+		Patient p = bundle.getResources(Patient.class).get(0);
+		assertEquals(1, p.getName().size());
+		assertEquals("Hello", p.getId().getIdPart());
+		assertEquals("foo", p.getName().get(0).getFamilyFirstRep().getValue());
 	}
 
 	@Test
@@ -224,18 +270,6 @@ public class IncludeTest {
 		values.add(p.getName().get(1).getFamilyFirstRep().getValue());
 		assertThat(values, containsInAnyOrder("foo", "bar"));
 
-	}
-
-	@Test
-	public void testBadInclude() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo&_include=baz");
-		HttpResponse status = ourClient.execute(httpGet);
-		assertEquals(400, status.getStatusLine().getStatusCode());
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info(responseContent);
-		assertThat(responseContent, containsString("Invalid _include parameter value"));
 	}
 
 	@AfterClass
@@ -268,27 +302,20 @@ public class IncludeTest {
 
 	}
 
-	@ResourceDef(name = "Patient")
-	public static class ExtPatient extends Patient {
-		@Child(name = "secondOrg")
-		@Extension(url = "http://foo#secondOrg", definedLocally = false, isModifier = false)
-		private ResourceReferenceDt mySecondOrg;
+	public static void main(String[] args) {
 
-		@Override
-		public boolean isEmpty() {
-			return super.isEmpty() && ElementUtil.isEmpty(mySecondOrg);
-		}
+		Organization org = new Organization();
+		org.setId("Organization/65546");
+		org.getName().setValue("Contained Test Organization");
 
-		public ResourceReferenceDt getSecondOrg() {
-			if (mySecondOrg == null) {
-				mySecondOrg = new ResourceReferenceDt();
-			}
-			return mySecondOrg;
-		}
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier("urn:mrns", "253345");
+		patient.getManagingOrganization().setResource(patient);
 
-		public void setSecondOrg(ResourceReferenceDt theSecondOrg) {
-			mySecondOrg = theSecondOrg;
-		}
+		System.out.println(FhirContext.forDstu1().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		patient.getManagingOrganization().getReference();
 
 	}
 
@@ -345,11 +372,10 @@ public class IncludeTest {
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
-		@Search(queryName = "normalInclude")
-		public List<Patient> normalInclude() {
+		@Search(queryName = "containedInclude")
+		public List<Patient> containedInclude() {
 			Organization o1 = new Organization();
 			o1.getName().setValue("o1");
-			o1.setId("o1");
 
 			Patient p1 = new Patient();
 			p1.setId("p1");
@@ -360,25 +386,6 @@ public class IncludeTest {
 			p2.setId("p2");
 			p2.addIdentifier().setLabel("p2");
 			p2.getManagingOrganization().setResource(o1);
-
-			return Arrays.asList(p1, p2);
-		}
-
-		@Search(queryName = "extInclude")
-		public List<Patient> extInclude() {
-			Organization o1 = new Organization();
-			o1.getName().setValue("o1");
-			o1.setId("o1");
-
-			Patient p1 = new Patient();
-			p1.setId("p1");
-			p1.addIdentifier().setLabel("p1");
-			p1.addUndeclaredExtension(false, "http://foo", new ResourceReferenceDt(o1));
-
-			Patient p2 = new Patient();
-			p2.setId("p2");
-			p2.addIdentifier().setLabel("p2");
-			p2.addUndeclaredExtension(false, "http://foo", new ResourceReferenceDt(o1));
 
 			return Arrays.asList(p1, p2);
 		}
@@ -407,20 +414,21 @@ public class IncludeTest {
 			return Arrays.asList(p1, p2);
 		}
 
-		@Search(queryName = "containedInclude")
-		public List<Patient> containedInclude() {
+		@Search(queryName = "extInclude")
+		public List<Patient> extInclude() {
 			Organization o1 = new Organization();
 			o1.getName().setValue("o1");
+			o1.setId("o1");
 
 			Patient p1 = new Patient();
 			p1.setId("p1");
 			p1.addIdentifier().setLabel("p1");
-			p1.getManagingOrganization().setResource(o1);
+			p1.addUndeclaredExtension(false, "http://foo", new ResourceReferenceDt(o1));
 
 			Patient p2 = new Patient();
 			p2.setId("p2");
 			p2.addIdentifier().setLabel("p2");
-			p2.getManagingOrganization().setResource(o1);
+			p2.addUndeclaredExtension(false, "http://foo", new ResourceReferenceDt(o1));
 
 			return Arrays.asList(p1, p2);
 		}
@@ -449,22 +457,48 @@ public class IncludeTest {
 			return Patient.class;
 		}
 
+		@Search(queryName = "normalInclude")
+		public List<Patient> normalInclude() {
+			Organization o1 = new Organization();
+			o1.getName().setValue("o1");
+			o1.setId("o1");
+
+			Patient p1 = new Patient();
+			p1.setId("p1");
+			p1.addIdentifier().setLabel("p1");
+			p1.getManagingOrganization().setResource(o1);
+
+			Patient p2 = new Patient();
+			p2.setId("p2");
+			p2.addIdentifier().setLabel("p2");
+			p2.getManagingOrganization().setResource(o1);
+
+			return Arrays.asList(p1, p2);
+		}
+
 	}
 
-	public static void main(String[] args) {
+	@ResourceDef(name = "Patient")
+	public static class ExtPatient extends Patient {
+		@Child(name = "secondOrg")
+		@Extension(url = "http://foo#secondOrg", definedLocally = false, isModifier = false)
+		private ResourceReferenceDt mySecondOrg;
 
-		Organization org = new Organization();
-		org.setId("Organization/65546");
-		org.getName().setValue("Contained Test Organization");
+		public ResourceReferenceDt getSecondOrg() {
+			if (mySecondOrg == null) {
+				mySecondOrg = new ResourceReferenceDt();
+			}
+			return mySecondOrg;
+		}
 
-		Patient patient = new Patient();
-		patient.setId("Patient/1333");
-		patient.addIdentifier("urn:mrns", "253345");
-		patient.getManagingOrganization().setResource(patient);
+		@Override
+		public boolean isEmpty() {
+			return super.isEmpty() && ElementUtil.isEmpty(mySecondOrg);
+		}
 
-		System.out.println(FhirContext.forDstu1().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
-
-		patient.getManagingOrganization().getReference();
+		public void setSecondOrg(ResourceReferenceDt theSecondOrg) {
+			mySecondOrg = theSecondOrg;
+		}
 
 	}
 

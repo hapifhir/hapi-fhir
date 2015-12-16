@@ -192,7 +192,7 @@ class ModelScanner {
 		Map<String, Class<? extends IBaseResource>> resourceTypes = myNameToResourceType;
 
 		myVersionTypes = scanVersionPropertyFile(theDatatypes, resourceTypes, myVersion);
-
+		
 		// toScan.add(DateDt.class);
 		// toScan.add(CodeDt.class);
 		// toScan.add(DecimalDt.class);

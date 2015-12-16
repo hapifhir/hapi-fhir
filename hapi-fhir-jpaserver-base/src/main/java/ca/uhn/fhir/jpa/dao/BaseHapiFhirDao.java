@@ -1079,13 +1079,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return retVal;
 	}
 
-	protected IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation) {
+	@Override
+	public IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation) {
 		RuntimeResourceDefinition type = myContext.getResourceDefinition(theEntity.getResourceType());
 		return toResource(type.getImplementingClass(), theEntity, theForHistoryOperation);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
-	protected <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation) {
+	public <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation) {
 		String resourceText = null;
 		switch (theEntity.getEncoding()) {
 		case JSON:

@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 
@@ -39,6 +42,10 @@ public interface IDao {
 			theResource.getResourceMetadata().put(RESOURCE_PID, theObject);
 		}
 	};
+
+	IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation);
+
+	<R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation);
 
 	
 }
