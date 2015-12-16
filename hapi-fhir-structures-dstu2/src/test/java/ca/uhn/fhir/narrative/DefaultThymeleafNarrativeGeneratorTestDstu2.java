@@ -9,6 +9,7 @@ import java.util.Date;
 
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -195,6 +196,7 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 	}
 
 	@Test
+	@Ignore
 	public void testGenerateMedicationPrescription() {
 		MedicationOrder mp = new MedicationOrder();
 		mp.setId("12345");

@@ -20,9 +20,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONSerializer;
-
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
@@ -30,7 +27,6 @@ import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -68,6 +64,7 @@ import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
 import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
@@ -76,6 +73,8 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
 
 public class JsonParserTest {
 	private static FhirContext ourCtx;
@@ -1318,11 +1317,14 @@ public class JsonParserTest {
 	public void testSimpleResourceEncode() throws IOException {
 
 		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
-		Patient obs = ourCtx.newXmlParser().parseResource(Patient.class, xmlString);
+		IParser parser = ourCtx.newXmlParser();
+		parser.setParserErrorHandler(new StrictErrorHandler());
+		Patient obs = parser.parseResource(Patient.class, xmlString);
 
 		List<ExtensionDt> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getUndeclaredExtensions();
 		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
+		assertEquals("VV", ((CodeDt)undeclaredExtension.getValue()).getValue());
 
 		ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
 
@@ -1376,8 +1378,7 @@ public class JsonParserTest {
 
 		ourLog.info("Expected: {}", exp);
 		ourLog.info("Actual  : {}", act);
-		assertEquals(exp, act);
-
+		assertEquals("\nExpected: " + exp + "\nActual  : " + act, exp, act);
 	}
 
 	@Test
