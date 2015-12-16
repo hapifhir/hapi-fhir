@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 
 @Configuration
 @EnableTransactionManagement()
@@ -93,6 +94,15 @@ public class FhirServerConfig extends BaseJavaConfigDstu2 {
 				"Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${operationName} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}] ResponseEncoding[${responseEncodingNoDefault}]");
 		retVal.setLogExceptions(true);
 		retVal.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
+		return retVal;
+	}
+
+	/**
+	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
+	 */
+	@Bean(autowire = Autowire.BY_TYPE)
+	public IServerInterceptor responseHighlighterInterceptor() {
+		ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
 		return retVal;
 	}
 
