@@ -14,8 +14,12 @@ import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.*;
+#if ( $isRi )
+import org.hl7.fhir.${version}.model.*;
+#else
 import ca.uhn.fhir.model.${version}.composite.*;
-import ca.uhn.fhir.model.${version}.resource.*;
+import ca.uhn.fhir.model.${version}.resource.*; //
+#end
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -34,7 +38,7 @@ public class ${className}ResourceProvider extends
 	{
 
 	@Override
-	public Class<? extends IResource> getResourceType() {
+	public Class<${className}> getResourceType() {
 		return ${className}.class;
 	}
 
@@ -128,7 +132,7 @@ public class ${className}ResourceProvider extends
 			@Sort 
 			SortSpec theSort,
 			
-			@Count
+			@ca.uhn.fhir.rest.annotation.Count
 			Integer theCount
 	) {
 		startRequest(theServletRequest);

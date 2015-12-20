@@ -552,7 +552,7 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 
 			List<? extends IBase> values = nextChild.getAccessor().getValues(theNextValue);
-			values = super.preProcessValues(nextChild, values);
+			values = super.preProcessValues(nextChild, theResource, values);
 
 			if (values == null || values.isEmpty()) {
 				continue;

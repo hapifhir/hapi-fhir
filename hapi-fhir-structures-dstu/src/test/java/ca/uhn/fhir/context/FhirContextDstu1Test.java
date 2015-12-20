@@ -36,10 +36,10 @@ public class FhirContextDstu1Test {
 	@Test
 	public void testUnknownVersion() {
 		try {
-			new FhirContext(FhirVersionEnum.DEV);
+			new FhirContext(FhirVersionEnum.DSTU2);
 			fail();
 		} catch (IllegalStateException e) {
-			assertThat(e.getMessage(), containsString("Could not find the HAPI-FHIR structure JAR on the classpath for version DEV"));
+			assertThat(e.getMessage(), containsString("Could not find the HAPI-FHIR structure JAR on the classpath for version DSTU2"));
 		}
 	}
 

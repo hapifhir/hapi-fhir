@@ -62,10 +62,12 @@ public abstract class BaseStructureParser {
 	private String myPackageBase;
 	protected List<BaseRootType> myResources = new ArrayList<BaseRootType>();
 	private String myVersion;
+	private boolean myIsRi;
 
 	public BaseStructureParser(String theVersion, String theBaseDir) {
 		myVersion = theVersion;
 		myBaseDir = theBaseDir;
+		myIsRi = myVersion.equals("dstu21");
 	}
 
 	public String getVersion() {
@@ -111,8 +113,7 @@ public abstract class BaseStructureParser {
 		theStructureParser.myNameToDatatypeClass.putAll(myNameToDatatypeClass);
 	}
 
-	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations,
-			Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
+	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations, Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
 		for (Annotation next : theAnnotations) {
 			if (theClass.equals(next.annotationType())) {
 				return (ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter) next;
@@ -122,8 +123,8 @@ public abstract class BaseStructureParser {
 	}
 
 	/**
-	 * Example: Encounter has an internal block class named "Location", but it also has a reference to the Location resource type, so we need to use the fully qualified name for that resource
-	 * reference
+	 * Example: Encounter has an internal block class named "Location", but it also has a reference to the Location
+	 * resource type, so we need to use the fully qualified name for that resource reference
 	 */
 	private void fixResourceReferenceClassNames(BaseElement theNext, String thePackageBase) {
 		for (BaseElement next : theNext.getChildren()) {
@@ -211,16 +212,34 @@ public abstract class BaseStructureParser {
 
 	private String doScanForImportNamesAndReturnFqn(String theNextType) throws MojoFailureException {
 		String nextType = Resource.correctName(theNextType);
-		
+
+		if (myIsRi) {
+			String unqualifiedTypeName = theNextType;
+			if (theNextType.endsWith("Dt")) {
+				unqualifiedTypeName = theNextType.substring(0, theNextType.length() - 2);
+				try {
+					return Class.forName("org.hl7.fhir.dstu21.model." + unqualifiedTypeName + "Type").getName();
+				} catch (ClassNotFoundException e1) {
+					// not found
+				}
+			}
+			
+			try {
+				return Class.forName("org.hl7.fhir.dstu21.model." + unqualifiedTypeName).getName();
+			} catch (ClassNotFoundException e) {
+				// not found
+			}
+		}
+
 		if ("Any".equals(nextType)) {
 			return (IResource.class.getCanonicalName());
 		}
 		if ("ExtensionDt".equals(nextType)) {
 			return (ExtensionDt.class.getCanonicalName());
 		}
-//		if ("ResourceReferenceDt".equals(theNextType)) {
-//			return "ca.uhn.fhir.model." + myVersion + ".composite." + ResourceReferenceDt.class.getSimpleName();
-//		}
+		// if ("ResourceReferenceDt".equals(theNextType)) {
+		// return "ca.uhn.fhir.model." + myVersion + ".composite." + ResourceReferenceDt.class.getSimpleName();
+		// }
 		if ("ResourceDt".equals(nextType)) {
 			return IResource.class.getCanonicalName();
 		}
@@ -442,10 +461,11 @@ public abstract class BaseStructureParser {
 		ctx.put("searchParamsWithoutComposite", (theResource.getSearchParametersWithoutComposite()));
 		ctx.put("includes", (theResource.getIncludes()));
 		ctx.put("esc", new EscapeTool());
+		ctx.put("isRi", determineVersionEnum().isRi());
 
 		String capitalize = WordUtils.capitalize(myVersion);
 		if ("Dstu".equals(capitalize)) {
-			capitalize="Dstu1";
+			capitalize = "Dstu1";
 		}
 		ctx.put("versionCapitalized", capitalize);
 
@@ -515,10 +535,10 @@ public abstract class BaseStructureParser {
 		}
 
 		if (theResourceOutputDirectory != null) {
-			
+
 			// Binary is manually generated but should still go in the list
 			myNameToResourceClass.put("Binary", thePackageBase + ".resource.Binary");
-			
+
 			try {
 				File versionFile = new File(theResourceOutputDirectory, "fhirversion.properties");
 				OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(versionFile, false), "UTF-8");
@@ -531,13 +551,13 @@ public abstract class BaseStructureParser {
 				ctx.put("version", myVersion.replace(".", ""));
 				ctx.put("versionEnumName", determineVersionEnum().name());
 				ctx.put("esc", new EscapeTool());
-				
+				ctx.put("isRi", determineVersionEnum().isRi());
+
 				String capitalize = WordUtils.capitalize(myVersion);
 				if ("Dstu".equals(capitalize)) {
-					capitalize="Dstu1";
+					capitalize = "Dstu1";
 				}
 				ctx.put("versionCapitalized", capitalize);
-				
 
 				VelocityEngine v = new VelocityEngine();
 				v.setProperty("resource.loader", "cp");
@@ -557,16 +577,15 @@ public abstract class BaseStructureParser {
 
 	protected FhirVersionEnum determineVersionEnum() throws MojoFailureException {
 		FhirVersionEnum versionEnum = null;
-		if ("dstu".equals(myVersion)) {
+		String version = myVersion;
+		if ("dstu".equals(version)) {
 			versionEnum = FhirVersionEnum.DSTU1;
-		} else if ("dstu2".equals(myVersion)) {
+		} else if ("dstu2".equals(version)) {
 			versionEnum = FhirVersionEnum.DSTU2;
-		} else if ("dstu21".equals(myVersion)) {
+		} else if ("dstu21".equals(version)) {
 			versionEnum = FhirVersionEnum.DSTU2_1;
-		} else if ("dev".equals(myVersion)) {
-			versionEnum = FhirVersionEnum.DEV;
 		} else {
-			throw new MojoFailureException("Unknown version: " + myVersion);
+			throw new MojoFailureException("Unknown version: " + version);
 		}
 		return versionEnum;
 	}

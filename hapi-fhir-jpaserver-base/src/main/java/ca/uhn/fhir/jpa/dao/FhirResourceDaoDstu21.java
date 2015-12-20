@@ -26,6 +26,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.OperationOutcome;
+import org.hl7.fhir.dstu21.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.dstu21.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -41,9 +46,6 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.dstu21.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu21.valueset.IssueSeverityEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -62,7 +64,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.ValidationSupportChain;
 import net.sourceforge.cobertura.CoverageIgnore;
 
-public class FhirResourceDaoDstu21<T extends IResource> extends BaseHapiFhirResourceDao<T> {
+public class FhirResourceDaoDstu21<T extends IAnyResource> extends BaseHapiFhirResourceDao<T> {
 
 	@Autowired()
 	@Qualifier("myJpaValidationSupportDstu21")
@@ -90,8 +92,9 @@ public class FhirResourceDaoDstu21<T extends IResource> extends BaseHapiFhirReso
 	@Override
 	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage) {
 		OperationOutcome oo = new OperationOutcome();
-		oo.getIssueFirstRep().getSeverityElement().setValue(theSeverity);
-		oo.getIssueFirstRep().getDiagnosticsElement().setValue(theMessage);
+		OperationOutcomeIssueComponent issue = oo.addIssue();
+		issue.getSeverityElement().setValueAsString(theSeverity);
+		issue.setDiagnostics(theMessage);
 		return oo;
 	}
 
@@ -113,8 +116,8 @@ public class FhirResourceDaoDstu21<T extends IResource> extends BaseHapiFhirReso
 			validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 				
 			OperationOutcome oo = new OperationOutcome();
-			oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Ok to delete");
-			return new MethodOutcome(new IdDt(theId.getValue()), oo);
+			oo.addIssue().setSeverity(IssueSeverity.INFORMATION).setDiagnostics("Ok to delete");
+			return new MethodOutcome(new IdType(theId.getValue()), oo);
 		}
 
 		FhirValidator validator = getContext().newValidator();

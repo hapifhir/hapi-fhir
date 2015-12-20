@@ -24,9 +24,10 @@ import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hl7.fhir.dstu21.model.Encounter;
+
 import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu21.resource.Encounter;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UnsignedIntDt;
 import ca.uhn.fhir.rest.api.SortSpec;

@@ -8,9 +8,7 @@ public class FhirVersionEnumTest {
 
 	@Test
 	public void testIsNewerThan() {
-		assertTrue(FhirVersionEnum.DEV.isNewerThan(FhirVersionEnum.DSTU1));
-		assertFalse(FhirVersionEnum.DSTU1.isNewerThan(FhirVersionEnum.DEV));		
-		assertFalse(FhirVersionEnum.DEV.isNewerThan(FhirVersionEnum.DEV));		
+		assertFalse(FhirVersionEnum.DSTU1.isNewerThan(FhirVersionEnum.DSTU2));		
 	}
 	
 }

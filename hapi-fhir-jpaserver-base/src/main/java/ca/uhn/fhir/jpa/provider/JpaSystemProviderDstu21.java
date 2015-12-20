@@ -28,6 +28,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.model.DecimalType;
+import org.hl7.fhir.dstu21.model.IntegerType;
+import org.hl7.fhir.dstu21.model.Meta;
+import org.hl7.fhir.dstu21.model.Parameters;
+import org.hl7.fhir.dstu21.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.dstu21.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -35,13 +42,7 @@ import ca.uhn.fhir.jpa.dao.FhirSearchDao.Suggestion;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.ISearchDao;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.dstu21.composite.MetaDt;
-import ca.uhn.fhir.model.dstu21.resource.Bundle;
-import ca.uhn.fhir.model.dstu21.resource.Parameters;
-import ca.uhn.fhir.model.dstu21.resource.Parameters.Parameter;
-import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
@@ -50,11 +51,11 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
-public class JpaSystemProviderDstu21 extends BaseJpaSystemProvider<Bundle, MetaDt> {
+public class JpaSystemProviderDstu21 extends BaseJpaSystemProvider<Bundle, Meta> {
 
 	@Autowired()
 	@Qualifier("mySystemDaoDstu21")
-	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
+	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
 	@Autowired
 	private ISearchDao mySearchDao;
@@ -163,7 +164,7 @@ public class JpaSystemProviderDstu21 extends BaseJpaSystemProvider<Bundle, MetaD
 		Map<String, Long> counts = mySystemDao.getResourceCounts();
 		counts = new TreeMap<String, Long>(counts);
 		for (Entry<String, Long> nextEntry : counts.entrySet()) {
-			retVal.addParameter().setName(new StringDt(nextEntry.getKey())).setValue(new IntegerDt(nextEntry.getValue().intValue()));
+			retVal.addParameter().setName((nextEntry.getKey())).setValue(new IntegerType(nextEntry.getValue().intValue()));
 		}
 		
 		return retVal;
@@ -178,13 +179,13 @@ public class JpaSystemProviderDstu21 extends BaseJpaSystemProvider<Bundle, MetaD
 		int count = mySystemDao.markAllResourcesForReindexing();
 		
 		Parameters retVal = new Parameters();
-		retVal.addParameter().setName("count").setValue(new IntegerDt(count));
+		retVal.addParameter().setName("count").setValue(new IntegerType(count));
 		return retVal;
 	}
 
 	//@formatter:off
 	@Operation(name="$meta", idempotent=true, returnParameters= {
-		@OperationParam(name="return", type=MetaDt.class)
+		@OperationParam(name="return", type=Meta.class)
 	})
 	//@formatter:on
 	public Parameters meta() {
@@ -216,8 +217,8 @@ public class JpaSystemProviderDstu21 extends BaseJpaSystemProvider<Bundle, MetaD
 		for (Suggestion next : keywords) {
 			//@formatter:off
 			retVal.addParameter()
-					.addPart(new Parameter().setName("keyword").setValue(new StringDt(next.getTerm())))
-					.addPart(new Parameter().setName("score").setValue(new DecimalDt(next.getScore())));
+					.addPart(new ParametersParameterComponent().setName("keyword").setValue(new StringType(next.getTerm())))
+					.addPart(new ParametersParameterComponent().setName("score").setValue(new DecimalType(next.getScore())));
 			//@formatter:on
 		}
 

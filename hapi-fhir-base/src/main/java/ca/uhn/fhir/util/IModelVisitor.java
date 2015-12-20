@@ -23,6 +23,7 @@ package ca.uhn.fhir.util;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -52,6 +53,4 @@ public interface IModelVisitor {
 	 */
 	void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt);
 
-	
-	
 }

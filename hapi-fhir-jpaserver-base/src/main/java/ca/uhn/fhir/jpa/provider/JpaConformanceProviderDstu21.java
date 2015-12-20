@@ -25,34 +25,34 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.model.CodeType;
+import org.hl7.fhir.dstu21.model.Conformance;
+import org.hl7.fhir.dstu21.model.Conformance.ConditionalDeleteStatus;
+import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestComponent;
+import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestResourceComponent;
+import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestResourceSearchParamComponent;
+import org.hl7.fhir.dstu21.model.DecimalType;
+import org.hl7.fhir.dstu21.model.Enumerations.SearchParamType;
+import org.hl7.fhir.dstu21.model.Extension;
+import org.hl7.fhir.dstu21.model.Meta;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.model.dstu21.composite.MetaDt;
-import ca.uhn.fhir.model.dstu21.resource.Bundle;
-import ca.uhn.fhir.model.dstu21.resource.Conformance;
-import ca.uhn.fhir.model.dstu21.resource.Conformance.Rest;
-import ca.uhn.fhir.model.dstu21.resource.Conformance.RestResource;
-import ca.uhn.fhir.model.dstu21.resource.Conformance.RestResourceSearchParam;
-import ca.uhn.fhir.model.dstu21.valueset.ConditionalDeleteStatusEnum;
-import ca.uhn.fhir.model.dstu21.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu21.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.provider.dstu21.ServerConformanceProvider;
 import ca.uhn.fhir.util.ExtensionConstants;
 import net.sourceforge.cobertura.CoverageIgnore;
 
-public class JpaConformanceProviderDstu21 extends ServerConformanceProvider {
+public class JpaConformanceProviderDstu21 extends org.hl7.fhir.dstu21.hapi.rest.server.ServerConformanceProvider {
 
 	private volatile Conformance myCachedValue;
 	private DaoConfig myDaoConfig;
 	private String myImplementationDescription;
 	private RestfulServer myRestfulServer;
-	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
+	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
 	/**
 	 * Constructor
@@ -66,7 +66,7 @@ public class JpaConformanceProviderDstu21 extends ServerConformanceProvider {
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderDstu21(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, MetaDt> theSystemDao, DaoConfig theDaoConfig) {
+	public JpaConformanceProviderDstu21(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
@@ -83,26 +83,26 @@ public class JpaConformanceProviderDstu21 extends ServerConformanceProvider {
 		FhirContext ctx = myRestfulServer.getFhirContext();
 
 		retVal = super.getServerConformance(theRequest);
-		for (Rest nextRest : retVal.getRest()) {
+		for (ConformanceRestComponent nextRest : retVal.getRest()) {
 
-			for (RestResource nextResource : nextRest.getResource()) {
+			for (ConformanceRestResourceComponent nextResource : nextRest.getResource()) {
 
-				ConditionalDeleteStatusEnum conditionalDelete = nextResource.getConditionalDeleteElement().getValueAsEnum();
-				if (conditionalDelete == ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED && myDaoConfig.isAllowMultipleDelete() == false) {
-					nextResource.setConditionalDelete(ConditionalDeleteStatusEnum.SINGLE_DELETES_SUPPORTED);
+				ConditionalDeleteStatus conditionalDelete = nextResource.getConditionalDelete();
+				if (conditionalDelete == ConditionalDeleteStatus.MULTIPLE && myDaoConfig.isAllowMultipleDelete() == false) {
+					nextResource.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
 				}
 
 				// Add resource counts
 				Long count = counts.get(nextResource.getTypeElement().getValueAsString());
 				if (count != null) {
-					nextResource.addUndeclaredExtension(false, ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalDt(count));
+					nextResource.addExtension(new Extension(ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalType(count)));
 				}
 
 				// Add chained params
-				for (RestResourceSearchParam nextParam : nextResource.getSearchParam()) {
-					if (nextParam.getTypeElement().getValueAsEnum() == SearchParamTypeEnum.REFERENCE) {
-						List<BoundCodeDt<ResourceTypeEnum>> targets = nextParam.getTarget();
-						for (BoundCodeDt<ResourceTypeEnum> next : targets) {
+				for (ConformanceRestResourceSearchParamComponent nextParam : nextResource.getSearchParam()) {
+					if (nextParam.getType() == SearchParamType.REFERENCE) {
+						List<CodeType> targets = nextParam.getTarget();
+						for (CodeType next : targets) {
 							RuntimeResourceDefinition def = ctx.getResourceDefinition(next.getValue());
 							for (RuntimeSearchParam nextChainedParam : def.getSearchParams()) {
 								nextParam.addChain(nextChainedParam.getName());
@@ -135,7 +135,7 @@ public class JpaConformanceProviderDstu21 extends ServerConformanceProvider {
 	}
 
 	@CoverageIgnore
-	public void setSystemDao(IFhirSystemDao<Bundle, MetaDt> mySystemDao) {
+	public void setSystemDao(IFhirSystemDao<Bundle, Meta> mySystemDao) {
 		this.mySystemDao = mySystemDao;
 	}
 }

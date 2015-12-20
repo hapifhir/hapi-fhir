@@ -30,8 +30,12 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -68,6 +72,21 @@ public class FhirTerser {
 				addUndeclaredExtensions(nextExt, theDefinition, theChildDefinition, theCallback);
 			}
 		}
+		
+		if (theElement instanceof IBaseHasExtensions) {
+			for (IBaseExtension<?, ?> nextExt : ((IBaseHasExtensions)theElement).getExtension()) {
+				theCallback.acceptElement(nextExt.getValue(), null, theChildDefinition, theDefinition);
+				addUndeclaredExtensions(nextExt, theDefinition, theChildDefinition, theCallback);
+			}
+		}
+		
+		if (theElement instanceof IBaseHasModifierExtensions) {
+			for (IBaseExtension<?, ?> nextExt : ((IBaseHasModifierExtensions)theElement).getModifierExtension()) {
+				theCallback.acceptElement(nextExt.getValue(), null, theChildDefinition, theDefinition);
+				addUndeclaredExtensions(nextExt, theDefinition, theChildDefinition, theCallback);
+			}
+		}
+
 	}
 
 	/**

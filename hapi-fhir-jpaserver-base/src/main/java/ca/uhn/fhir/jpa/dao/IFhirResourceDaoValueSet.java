@@ -22,10 +22,9 @@ package ca.uhn.fhir.jpa.dao;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 
 public interface IFhirResourceDaoValueSet<T extends IBaseResource, CD, CC> extends IFhirResourceDao<T> {
 
@@ -35,9 +34,9 @@ public interface IFhirResourceDaoValueSet<T extends IBaseResource, CD, CC> exten
 
 	T expandByIdentifier(String theUri, String theFilter);
 
-	LookupCodeResult lookupCode(CodeDt theCode, UriDt theSystem, CD theCoding);
+	LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CD theCoding);
 
-	ValidateCodeResult validateCode(UriDt theValueSetIdentifier, IIdType theId, CodeDt theCode, UriDt theSystem, StringDt theDisplay, CD theCoding, CC theCodeableConcept);
+	ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CD theCoding, CC theCodeableConcept);
 
 	public class LookupCodeResult {
 		private String myCodeDisplay;

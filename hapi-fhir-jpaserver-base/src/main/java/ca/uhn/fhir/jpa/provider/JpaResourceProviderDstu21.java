@@ -22,8 +22,9 @@ package ca.uhn.fhir.jpa.provider;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hl7.fhir.instance.model.api.IAnyResource;
+
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -41,7 +42,7 @@ import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class JpaResourceProviderDstu21<T extends IResource> extends BaseJpaResourceProvider<T> {
+public class JpaResourceProviderDstu21<T extends IAnyResource> extends BaseJpaResourceProvider<T> {
 
 	public static final String OPERATION_NAME_META = "$meta";
 	public static final String OPERATION_NAME_META_DELETE = "$meta-delete";

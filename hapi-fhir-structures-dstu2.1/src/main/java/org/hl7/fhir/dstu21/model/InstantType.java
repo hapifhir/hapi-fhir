@@ -29,14 +29,14 @@ POSSIBILITY OF SUCH DAMAGE.
 /**
  * 
  */
-package org.hl7.fhir.instance.model;
+package org.hl7.fhir.dstu21.model;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.zip.DataFormatException;
 
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /**
  * Represents a FHIR instant datatype. Valid precisions values for this type are:
@@ -217,4 +217,7 @@ public class InstantType extends BaseDateTimeType {
 		return retVal;
 	}
 
+	public String fhirType() {
+		return "instant";
+	}
 }

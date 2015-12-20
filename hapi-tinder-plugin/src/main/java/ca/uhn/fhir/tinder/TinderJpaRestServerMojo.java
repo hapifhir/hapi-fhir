@@ -74,8 +74,6 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			fhirContext = FhirContext.forDstu2();
 		} else if ("dstu21".equals(version)) {
 			fhirContext = FhirContext.forDstu2_1();
-		} else if ("dev".equals(version)) {
-			fhirContext = FhirContext.forDev();
 		} else {
 			throw new MojoFailureException("Unknown version configured: " + version);
 		}
@@ -213,7 +211,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 		TinderJpaRestServerMojo mojo = new TinderJpaRestServerMojo();
 		mojo.myProject = new MavenProject();
-		mojo.version = "dstu2";
+		mojo.version = "dstu21";
 		mojo.packageBase = "ca.uhn.test";
 		mojo.configPackageBase = "ca.uhn.test";
 //		mojo.baseResourceNames = new ArrayList<String>(Collections.singletonList("observation"));

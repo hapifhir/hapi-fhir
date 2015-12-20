@@ -30,6 +30,8 @@ import java.util.List;
 import javax.persistence.Query;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.dstu21.model.Subscription;
+import org.hl7.fhir.dstu21.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +55,7 @@ import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu21.resource.Subscription;
-import ca.uhn.fhir.model.dstu21.valueset.SubscriptionStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -85,7 +86,7 @@ public class FhirResourceDaoSubscriptionDstu21 extends FhirResourceDaoDstu21<Sub
 		subscriptionEntity.setSubscriptionResource(theEntity);
 		subscriptionEntity.setNextCheck(theEntity.getPublished().getValue());
 		subscriptionEntity.setMostRecentMatch(theEntity.getPublished().getValue());
-		subscriptionEntity.setStatus(theSubscription.getStatusElement().getValue());
+		subscriptionEntity.setStatus(theSubscription.getStatusElement().getValueAsString());
 		myEntityManager.persist(subscriptionEntity);
 	}
 
@@ -157,7 +158,7 @@ public class FhirResourceDaoSubscriptionDstu21 extends FhirResourceDaoDstu21<Sub
 			return 0;
 		}
 
-		ourLog.debug("Subscription {} search from {} to {}", new Object[] { subscription.getId().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end)) });
+		ourLog.debug("Subscription {} search from {} to {}", new Object[] { subscription.getIdElement().getIdPart(), new InstantDt(new Date(start)), new InstantDt(new Date(end)) });
 
 		DateRangeParam range = new DateRangeParam();
 		range.setLowerBound(new DateParam(QuantityCompararatorEnum.GREATERTHAN, start));
@@ -170,7 +171,7 @@ public class FhirResourceDaoSubscriptionDstu21 extends FhirResourceDaoDstu21<Sub
 			return 0;
 		}
 
-		ourLog.info("Found {} new results for Subscription {}", results.size(), subscription.getId().getIdPart());
+		ourLog.info("Found {} new results for Subscription {}", results.size(), subscription.getIdElement().getIdPart());
 
 		List<SubscriptionFlaggedResource> flags = new ArrayList<SubscriptionFlaggedResource>();
 		Date mostRecentMatch = null;
@@ -200,7 +201,7 @@ public class FhirResourceDaoSubscriptionDstu21 extends FhirResourceDaoDstu21<Sub
 
 		mySubscriptionFlaggedResourceDataDao.save(flags);
 
-		ourLog.debug("Updating most recent match for subcription {} to {}", subscription.getId().getIdPart(), new InstantDt(mostRecentMatch));
+		ourLog.debug("Updating most recent match for subcription {} to {}", subscription.getIdElement().getIdPart(), new InstantDt(mostRecentMatch));
 		
 		theSubscriptionTable.setMostRecentMatch(mostRecentMatch);
 		mySubscriptionTableDao.save(theSubscriptionTable);
@@ -258,7 +259,7 @@ public class FhirResourceDaoSubscriptionDstu21 extends FhirResourceDaoDstu21<Sub
 	}
 
 	@Override
-	protected ResourceTable updateEntity(IResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
+	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
 			Date theUpdateTime) {
 		ResourceTable retVal = super.updateEntity(theResource, theEntity, theUpdateHistory, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime);
 
@@ -275,7 +276,7 @@ public class FhirResourceDaoSubscriptionDstu21 extends FhirResourceDaoDstu21<Sub
 			q.setParameter("res_id", resourceId);
 			q.setParameter("status", resource.getStatusElement().getValue());
 			if (q.executeUpdate() > 0) {
-				ourLog.info("Updated subscription status for subscription {} to {}", resourceId, resource.getStatusElement().getValueAsEnum());
+				ourLog.info("Updated subscription status for subscription {} to {}", resourceId, resource.getStatus());
 			} else {
 				createSubscriptionTable(retVal, resource);
 			}
@@ -323,7 +324,7 @@ public class FhirResourceDaoSubscriptionDstu21 extends FhirResourceDaoDstu21<Sub
 			throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
 		}
 
-		SubscriptionStatusEnum status = theResource.getStatusElement().getValueAsEnum();
+		SubscriptionStatus status = theResource.getStatus();
 		if (status == null) {
 			throw new UnprocessableEntityException("Subscription.status must be populated on this server");
 		}

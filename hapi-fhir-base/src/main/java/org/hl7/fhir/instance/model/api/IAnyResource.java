@@ -1,7 +1,5 @@
 package org.hl7.fhir.instance.model.api;
 
-import java.util.HashMap;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -26,12 +24,16 @@ public interface IAnyResource extends IBaseResource {
 
 	String getId();
 
+	@Override
 	IIdType getIdElement();
+
+	IPrimitiveType<String> getLanguageElement();
 
 	IBaseMetaType getMeta();
 
 	public Object getUserData(String name);
 
+	@Override
 	IAnyResource setId(String theId);
 
 	public void setUserData(String name, Object value);

@@ -3,6 +3,9 @@ package ca.uhn.fhir.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.dstu21.model.DateTimeType;
+import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.Quantity;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -10,9 +13,6 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu21.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu21.resource.Patient;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.ElementUtil;
 
@@ -29,15 +29,15 @@ public class CustomTypeTest {
 
 		patient.addIdentifier().setSystem("urn:system").setValue("1234");
 		patient.addName().addFamily("Rossi").addGiven("Mario");
-		patient.setInsulinLevel(new QuantityDt());
-		patient.setGlucoseLevel(new QuantityDt());
-		patient.setHbA1c(new QuantityDt());
-		patient.setBloodPressure(new QuantityDt());
-		patient.setCholesterol(new QuantityDt());
+		patient.setInsulinLevel(new Quantity());
+		patient.setGlucoseLevel(new Quantity());
+		patient.setHbA1c(new Quantity());
+		patient.setBloodPressure(new Quantity());
+		patient.setCholesterol(new Quantity());
 		patient.setWeight(new StringDt("80 kg"));
 		patient.setWeight(new StringDt("185 cm"));
-		patient.setCheckDates(new ArrayList<DateTimeDt>());
-		patient.getCheckDates().add(new DateTimeDt("2014-01-26T11:11:11"));
+		patient.setCheckDates(new ArrayList<DateTimeType>());
+		patient.getCheckDates().add(new DateTimeType("2014-01-26T11:11:11"));
 
 		IParser p = ctx.newXmlParser().setPrettyPrint(true);
 		String messageString = p.encodeResourceToString(patient);
@@ -54,29 +54,29 @@ public class CustomTypeTest {
 		@Child(name = "bloodPressure") // once every 3 month. The average target is 130/80 mmHg or less
 		@Extension(url = "http://example.com/BloodPressure", definedLocally = false, isModifier = false)
 		@Description(shortDefinition = "The value of the patient's blood pressure")
-		private QuantityDt myBloodPressure;
+		private Quantity myBloodPressure;
 
 		// Dates of periodic tests
 		@Child(name = "CheckDates", max = Child.MAX_UNLIMITED)
 		@Extension(url = "http://example.com/diabetes2", definedLocally = false, isModifier = true)
 		@Description(shortDefinition = "Dates of periodic tests")
-		private List<DateTimeDt> myCheckDates;
+		private List<DateTimeType> myCheckDates;
 
 		@Child(name = "cholesterol") // once a year. The target is triglycerides =< 2 mmol/l e cholesterol =< 4 mmol/l
 		@Extension(url = "http://example.com/Cholesterol", definedLocally = false, isModifier = false)
 		@Description(shortDefinition = "The value of the patient's cholesterol")
-		private QuantityDt myCholesterol;
+		private Quantity myCholesterol;
 
 		@Child(name = "glucoseLevel") // fingerprick test
 		@Extension(url = "http://example.com/Glucose", definedLocally = false, isModifier = false)
 		@Description(shortDefinition = "The value of the patient's blood glucose")
-		private QuantityDt myGlucoseLevel;
+		private Quantity myGlucoseLevel;
 
 		// Periodic Tests
 		@Child(name = "hbA1c") // once every 6 month. The average target is 53 mmol/mol (or 7%) or less.
 		@Extension(url = "http://example.com/HbA1c", definedLocally = false, isModifier = false)
 		@Description(shortDefinition = "The value of the patient's glucose")
-		private QuantityDt myHbA1c;
+		private Quantity myHbA1c;
 
 		@Child(name = "Height")
 		@Extension(url = "http://example.com/Height", definedLocally = false, isModifier = false)
@@ -86,7 +86,7 @@ public class CustomTypeTest {
 		@Child(name = "insulinLevel") // Normal range is [43,208] pmol/l
 		@Extension(url = "http://example.com/Insuline", definedLocally = false, isModifier = false)
 		@Description(shortDefinition = "The value of the patient's insulin")
-		private QuantityDt myInsulinLevel;
+		private Quantity myInsulinLevel;
 
 		// Other parameters
 		@Child(name = "weight")
@@ -94,9 +94,9 @@ public class CustomTypeTest {
 		@Description(shortDefinition = "The patient's weight in Kg")
 		private StringDt myWeight;
 
-		public QuantityDt Cholesterol() {
+		public Quantity Cholesterol() {
 			if (myCholesterol == null) {
-				myCholesterol = new QuantityDt();
+				myCholesterol = new Quantity();
 			}
 			myCholesterol.getValue();
 			myCholesterol.getSystem();
@@ -105,9 +105,9 @@ public class CustomTypeTest {
 			return myCholesterol;
 		}
 
-		public QuantityDt getBloodPressure() {
+		public Quantity getBloodPressure() {
 			if (myBloodPressure == null) {
-				myBloodPressure = new QuantityDt();
+				myBloodPressure = new Quantity();
 			}
 			myBloodPressure.getValue();
 			myBloodPressure.getSystem();
@@ -116,16 +116,16 @@ public class CustomTypeTest {
 			return myBloodPressure;
 		}
 
-		public List<DateTimeDt> getCheckDates() {
+		public List<DateTimeType> getCheckDates() {
 			if (myCheckDates == null) {
-				myCheckDates = new ArrayList<DateTimeDt>();
+				myCheckDates = new ArrayList<DateTimeType>();
 			}
 			return myCheckDates;
 		}
 
-		public QuantityDt getGlucoseLevel() {
+		public Quantity getGlucoseLevel() {
 			if (myGlucoseLevel == null) {
-				myGlucoseLevel = new QuantityDt();
+				myGlucoseLevel = new Quantity();
 			}
 			myGlucoseLevel.getValue();
 			myGlucoseLevel.getSystem();
@@ -134,9 +134,9 @@ public class CustomTypeTest {
 			return myGlucoseLevel;
 		}
 
-		public QuantityDt getHbA1c() {
+		public Quantity getHbA1c() {
 			if (myHbA1c == null) {
-				myHbA1c = new QuantityDt();
+				myHbA1c = new Quantity();
 			}
 			myHbA1c.getValue();
 			myHbA1c.getSystem();
@@ -152,9 +152,9 @@ public class CustomTypeTest {
 			return myHeight;
 		}
 
-		public QuantityDt getInsulinLevel() {
+		public Quantity getInsulinLevel() {
 			if (myInsulinLevel == null) {
-				myInsulinLevel = new QuantityDt();
+				myInsulinLevel = new Quantity();
 			}
 			myInsulinLevel.getValue();
 			myInsulinLevel.getSystem();
@@ -175,33 +175,33 @@ public class CustomTypeTest {
 			return super.isEmpty() && ElementUtil.isEmpty(myInsulinLevel, myGlucoseLevel, myHbA1c, myBloodPressure, myCholesterol, myWeight, myHeight, myCheckDates);
 		}
 
-		public void setBloodPressure(QuantityDt bloodPressure) {
+		public void setBloodPressure(Quantity bloodPressure) {
 			myBloodPressure = bloodPressure;
 			myBloodPressure.setValue(110);
 			myBloodPressure.setSystem("http://unitsofmeasure.org");
 			myBloodPressure.setCode("mmHg");
 		}
 
-		public void setCheckDates(List<DateTimeDt> theCheckDates) {
+		public void setCheckDates(List<DateTimeType> theCheckDates) {
 			myCheckDates = theCheckDates;
-			myCheckDates.add(new DateTimeDt("2010-01-02"));
+			myCheckDates.add(new DateTimeType("2010-01-02"));
 		}
 
-		public void setCholesterol(QuantityDt cholesterol) {
+		public void setCholesterol(Quantity cholesterol) {
 			myCholesterol = cholesterol;
 			myCholesterol.setValue(2);
 			myCholesterol.setSystem("http://unitsofmeasure.org");
 			myCholesterol.setCode("mmol/l");
 		}
 
-		public void setGlucoseLevel(QuantityDt glucoseLevel) {
+		public void setGlucoseLevel(Quantity glucoseLevel) {
 			myGlucoseLevel = glucoseLevel;
 			myGlucoseLevel.setValue(95);
 			myGlucoseLevel.setSystem("http://unitsofmeasure.org");
 			myGlucoseLevel.setCode("mg/dl");
 		}
 
-		public void setHbA1c(QuantityDt hba1c) {
+		public void setHbA1c(Quantity hba1c) {
 			myHbA1c = hba1c;
 			myHbA1c.setValue(48);
 			myHbA1c.setSystem("http://unitsofmeasure.org");
@@ -213,7 +213,7 @@ public class CustomTypeTest {
 		}
 
 		// Setter/Getter methods
-		public void setInsulinLevel(QuantityDt insulinLevel) {
+		public void setInsulinLevel(Quantity insulinLevel) {
 			myInsulinLevel = insulinLevel;
 			myInsulinLevel.setValue(125);
 			myInsulinLevel.setSystem("http://unitsofmeasure.org");

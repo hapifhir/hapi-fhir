@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
+import org.hl7.fhir.dstu21.model.Encounter;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -22,7 +24,6 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoEncounter;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.dstu21.resource.Encounter;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
