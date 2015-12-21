@@ -1,0 +1,102 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:ctx="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:osgi="http://www.eclipse.org/gemini/blueprint/schema/blueprint"
+       xmlns:osgix="http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  							http://www.springframework.org/schema/beans/spring-beans.xsd
+							http://www.springframework.org/schema/context
+							http://www.springframework.org/schema/context/spring-context.xsd  							
+  							http://www.springframework.org/schema/util 
+  							http://www.springframework.org/schema/util/spring-util-2.0.xsd  
+							http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium
+							http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium/gemini-blueprint-compendium.xsd   							
+  							http://www.eclipse.org/gemini/blueprint/schema/blueprint
+  							http://www.eclipse.org/gemini/blueprint/schema/blueprint/gemini-blueprint.xsd">
+
+
+	<!--  ++=================================++
+	      ||    F H I R   C O N T E X T S    ||
+	      ++=================================++ 
+	-->
+	<osgi:service ref="myFhirContextDstu1" interface="ca.uhn.fhir.context.IFhirContext">
+		<osgi:service-properties>
+			<entry key="name" value="hapi.fhir.context.dstu1"/>
+			<entry key="structure" value="DSTU1"/>
+		</osgi:service-properties>
+	</osgi:service>
+	
+	<osgi:service ref="myFhirContextDstu2" interface="ca.uhn.fhir.context.IFhirContext">
+		<osgi:service-properties>
+			<entry key="name" value="hapi.fhir.context.dstu2"/>
+			<entry key="structure" value="DSTU2"/>
+		</osgi:service-properties>
+	</osgi:service>
+	
+	<osgi:service ref="myFhirContextDstu2Hl7Org" interface="ca.uhn.fhir.context.IFhirContext">
+		<osgi:service-properties>
+			<entry key="name" value="hapi.fhir.context.hl7org"/>
+			<entry key="structure" value="HL7ORG"/>
+		</osgi:service-properties>
+	</osgi:service>
+	
+	<bean id="myFhirContextDstu1" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu1"/>
+	<bean id="myFhirContextDstu2" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu2"/>
+	<bean id="myFhirContextDstu2Hl7Org" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu2Hl7Org"/>
+
+
+	<!--  ++=======================================++
+	      ||    S Y S T E M   P R O V I D E R S    ||
+	      ++=======================================++ 
+	-->
+	<osgi:service ref="mySystemProviderDstu1" interface="ca.uhn.fhir.providers.ISystemProvider">
+		<osgi:service-properties>
+			<entry key="name" value="hapi.fhir.system,provider.dstu1"/>
+			<entry key="structure" value="DSTU1"/>
+		</osgi:service-properties>
+	</osgi:service>
+	
+	<osgi:service ref="mySystemProviderDstu2" interface="ca.uhn.fhir.providers.ISystemProvider">
+		<osgi:service-properties>
+			<entry key="name" value="hapi.fhir.system,provider.dstu2"/>
+			<entry key="structure" value="DSTU2"/>
+		</osgi:service-properties>
+	</osgi:service>
+	
+	<bean id="mySystemProviderDstu1" class="ca.uhn.fhir.jpa.provider.impl.SystemProviderDstu1">
+		<property name="context" ref="myFhirContextDstu1"/>
+		<property name="systemDaoFactory" ref="myDaoFactory"/>
+	</bean>
+	
+	<bean id="mySystemProviderDstu2" class="ca.uhn.fhir.jpa.provider.impl.SystemProviderDstu2">
+		<property name="context" ref="myFhirContextDstu2"/>
+		<property name="systemDaoFactory" ref="myDaoFactory"/>
+	</bean>
+	
+	<util:list id="mySystemProviders">
+		<ref bean="mySystemProviderDstu1" />
+		<ref bean="mySystemProviderDstu2" />
+	</util:list>
+
+	<osgi:reference id="myDaoFactory" interface="ca.uhn.fhir.dao.IDaoFactory" />
+
+
+	<!--  ++=======================================++
+	      ||    P R O V I D E R   B U N D L E S    ||
+	      ++=======================================++ 
+	-->
+	
+	<bean id="mySystemProvidersBundle" class="ca.uhn.fhir.osgi.SimpleFhirProviderBundle">
+		<property name="providers" ref="mySystemProviders" />
+	</bean>
+	
+	<bean id="myResourceProvidersBundleDstu1" class="ca.uhn.fhir.osgi.SimpleFhirProviderBundle">
+		<property name="providers" ref="myResourceProvidersDstu1" />
+	</bean>
+	
+	<bean id="myResourceProvidersBundleDstu2" class="ca.uhn.fhir.osgi.SimpleFhirProviderBundle">
+		<property name="providers" ref="myResourceProvidersDstu2" />
+	</bean>
+	
+</beans>

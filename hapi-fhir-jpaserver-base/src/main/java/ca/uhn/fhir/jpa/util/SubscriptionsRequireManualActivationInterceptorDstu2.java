@@ -22,12 +22,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
+
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import ca.uhn.fhir.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.FhirResourceDaoSubscriptionDstu2;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;

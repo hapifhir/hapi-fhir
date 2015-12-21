@@ -17,8 +17,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import ca.uhn.fhir.jpa.dao.FhirSearchDao.Suggestion;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.dao.ISearchDao.ISuggestion;
+import ca.uhn.fhir.dao.SearchParameterMap;
 import ca.uhn.fhir.model.dstu21.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu21.resource.Device;
 import ca.uhn.fhir.model.dstu21.resource.Media;
@@ -109,7 +109,7 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		myMediaDao.create(med);
 		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(med));
 		
-		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "press");
+		List<ISuggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "press");
 		ourLog.info("Found: " + output);
 		assertEquals(2, output.size());
 		assertEquals("Pressure", output.get(0).getTerm());
@@ -168,7 +168,7 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		obs2.getCode().setText("ZXCVBNMZZ");
 		myObservationDao.create(obs2);
 
-		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXCVBNM");
+		List<ISuggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXCVBNM");
 		ourLog.info("Found: " + output);
 		assertEquals(4, output.size());
 		assertEquals("ZXCVBNM", output.get(0).getTerm());
