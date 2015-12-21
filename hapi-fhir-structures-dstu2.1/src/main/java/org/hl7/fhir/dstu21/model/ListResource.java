@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A set of information summarized from a list of other resources.
  */
@@ -147,6 +145,9 @@ public class ListResource extends DomainResource {
         return "entered-in-error";
       return "?";
       }
+    public String toSystem(ListStatus code) {
+      return code.getSystem();
+      }
     }
 
     public enum ListMode {
@@ -247,6 +248,9 @@ public class ListResource extends DomainResource {
         return "changes";
       return "?";
       }
+    public String toSystem(ListMode code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -286,14 +290,14 @@ public class ListResource extends DomainResource {
 
         private static final long serialVersionUID = -758164425L;
 
-    /*
+    /**
      * Constructor
      */
       public ListEntryComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ListEntryComponent(Reference item) {
@@ -651,14 +655,14 @@ public class ListResource extends DomainResource {
 
     private static final long serialVersionUID = 1819128642L;
 
-  /*
+  /**
    * Constructor
    */
     public ListResource() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public ListResource(Enumeration<ListStatus> status, Enumeration<ListMode> mode) {
@@ -1356,20 +1360,50 @@ public class ListResource extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="item", path="List.entry.item", description="Actual entry", type="reference" )
   public static final String SP_ITEM = "item";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ListResource:item</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ITEM = new ca.uhn.fhir.model.api.Include("ListResource:item").toLocked();
+
   @SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="Why list is empty", type="token" )
-  public static final String SP_EMPTYREASON = "empty-reason";
+  public static final String SP_EMPTY_REASON = "empty-reason";
   @SearchParamDefinition(name="code", path="List.code", description="What the purpose of this list is", type="token" )
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="notes", path="List.note", description="Comments about the list", type="string" )
   public static final String SP_NOTES = "notes";
   @SearchParamDefinition(name="subject", path="List.subject", description="If all resources have the same subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ListResource:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("ListResource:subject").toLocked();
+
   @SearchParamDefinition(name="patient", path="List.subject", description="If all resources have the same subject", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ListResource:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ListResource:patient").toLocked();
+
   @SearchParamDefinition(name="source", path="List.source", description="Who and/or what defined the list contents (aka Author)", type="reference" )
   public static final String SP_SOURCE = "source";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ListResource:source</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SOURCE = new ca.uhn.fhir.model.api.Include("ListResource:source").toLocked();
+
   @SearchParamDefinition(name="encounter", path="List.encounter", description="Context in which list created", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ListResource:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("ListResource:encounter").toLocked();
+
   @SearchParamDefinition(name="title", path="List.title", description="Descriptive name for the list", type="string" )
   public static final String SP_TITLE = "title";
   @SearchParamDefinition(name="status", path="List.status", description="current | retired | entered-in-error", type="token" )

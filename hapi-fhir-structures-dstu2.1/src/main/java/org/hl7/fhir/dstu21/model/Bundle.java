@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu21.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,21 +29,19 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
+import java.util.*;
+
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A container for a collection of resources.
  */
@@ -246,6 +242,9 @@ public class Bundle extends Resource implements IBaseBundle {
         return "collection";
       return "?";
       }
+    public String toSystem(BundleType code) {
+      return code.getSystem();
+      }
     }
 
     public enum SearchEntryMode {
@@ -345,6 +344,9 @@ public class Bundle extends Resource implements IBaseBundle {
       if (code == SearchEntryMode.OUTCOME)
         return "outcome";
       return "?";
+      }
+    public String toSystem(SearchEntryMode code) {
+      return code.getSystem();
       }
     }
 
@@ -462,6 +464,9 @@ public class Bundle extends Resource implements IBaseBundle {
         return "DELETE";
       return "?";
       }
+    public String toSystem(HTTPVerb code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -482,14 +487,14 @@ public class Bundle extends Resource implements IBaseBundle {
 
         private static final long serialVersionUID = -1010386066L;
 
-    /*
+    /**
      * Constructor
      */
       public BundleLinkComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public BundleLinkComponent(StringType relation, UriType url) {
@@ -702,7 +707,7 @@ public class Bundle extends Resource implements IBaseBundle {
 
         private static final long serialVersionUID = 517783054L;
 
-    /*
+    /**
      * Constructor
      */
       public BundleEntryComponent() {
@@ -727,55 +732,6 @@ public class Bundle extends Resource implements IBaseBundle {
           return false;
         }
 
-        /**
-         * Returns the {@link #getLink() link} which matches a given {@link BundleLinkComponent#getRelation() relation}. 
-         * If no link is found which matches the given relation, returns <code>null</code>. If more than one
-         * link is found which matches the given relation, returns the first matching BundleLinkComponent.
-         * 
-         * @param theRelation
-         *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle#LINK_SELF} and {@link IBaseBundle#LINK_NEXT}.
-         * @return Returns a matching BundleLinkComponent, or <code>null</code>
-         * @see IBaseBundle#LINK_NEXT
-         * @see IBaseBundle#LINK_PREV
-         * @see IBaseBundle#LINK_SELF
-         */
-        public BundleLinkComponent getLink(String theRelation) {
-          org.apache.commons.lang3.Validate.notBlank(theRelation, "theRelation may not be null or empty");
-          for (BundleLinkComponent next : getLink()) {
-            if (theRelation.equals(next.getRelation())) {
-              return next;
-            }
-          }
-          return null;
-        }
-
-        /**
-         * Returns the {@link #getLink() link} which matches a given {@link BundleLinkComponent#getRelation() relation}. 
-         * If no link is found which matches the given relation, creates a new BundleLinkComponent with the
-         * given relation and adds it to this Bundle. If more than one
-         * link is found which matches the given relation, returns the first matching BundleLinkComponent.
-         * 
-         * @param theRelation
-         *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle#LINK_SELF} and {@link IBaseBundle#LINK_NEXT}.
-         * @return Returns a matching BundleLinkComponent, or <code>null</code>
-         * @see IBaseBundle#LINK_NEXT
-         * @see IBaseBundle#LINK_PREV
-         * @see IBaseBundle#LINK_SELF
-         */
-        public BundleLinkComponent getLinkOrCreate(String theRelation) {
-          org.apache.commons.lang3.Validate.notBlank(theRelation, "theRelation may not be null or empty");
-          for (BundleLinkComponent next : getLink()) {
-            if (theRelation.equals(next.getRelation())) {
-              return next;
-            }
-          }
-          BundleLinkComponent retVal = new BundleLinkComponent();
-          retVal.setRelation(theRelation);
-          getLink().add(retVal);
-          return retVal;
-        }
-
-        
         /**
          * @return {@link #link} (A series of links that provide context to this entry.)
          */
@@ -938,6 +894,53 @@ public class Bundle extends Resource implements IBaseBundle {
           return this;
         }
 
+ /**
+   * Returns the {@link #getLink() link} which matches a given {@link BundleLinkComponent#getRelation() relation}. 
+   * If no link is found which matches the given relation, returns <code>null</code>. If more than one
+   * link is found which matches the given relation, returns the first matching BundleLinkComponent.
+   * 
+   * @param theRelation
+   *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle#LINK_SELF} and {@link IBaseBundle#LINK_NEXT}.
+   * @return Returns a matching BundleLinkComponent, or <code>null</code>
+   * @see IBaseBundle#LINK_NEXT
+   * @see IBaseBundle#LINK_PREV
+   * @see IBaseBundle#LINK_SELF
+   */
+  public BundleLinkComponent getLink(String theRelation) {
+    org.apache.commons.lang3.Validate.notBlank(theRelation, "theRelation may not be null or empty");
+    for (BundleLinkComponent next : getLink()) {
+      if (theRelation.equals(next.getRelation())) {
+        return next;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Returns the {@link #getLink() link} which matches a given {@link BundleLinkComponent#getRelation() relation}. 
+   * If no link is found which matches the given relation, creates a new BundleLinkComponent with the
+   * given relation and adds it to this Bundle. If more than one
+   * link is found which matches the given relation, returns the first matching BundleLinkComponent.
+   * 
+   * @param theRelation
+   *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle#LINK_SELF} and {@link IBaseBundle#LINK_NEXT}.
+   * @return Returns a matching BundleLinkComponent, or <code>null</code>
+   * @see IBaseBundle#LINK_NEXT
+   * @see IBaseBundle#LINK_PREV
+   * @see IBaseBundle#LINK_SELF
+   */
+  public BundleLinkComponent getLinkOrCreate(String theRelation) {
+    org.apache.commons.lang3.Validate.notBlank(theRelation, "theRelation may not be null or empty");
+    for (BundleLinkComponent next : getLink()) {
+      if (theRelation.equals(next.getRelation())) {
+        return next;
+      }
+    }
+    BundleLinkComponent retVal = new BundleLinkComponent();
+    retVal.setRelation(theRelation);
+    getLink().add(retVal);
+    return retVal;
+  }
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("link", "@Bundle.link", "A series of links that provide context to this entry.", 0, java.lang.Integer.MAX_VALUE, link));
@@ -1062,7 +1065,7 @@ public class Bundle extends Resource implements IBaseBundle {
 
         private static final long serialVersionUID = 837739866L;
 
-    /*
+    /**
      * Constructor
      */
       public BundleEntrySearchComponent() {
@@ -1299,14 +1302,14 @@ public class Bundle extends Resource implements IBaseBundle {
 
         private static final long serialVersionUID = -1349769744L;
 
-    /*
+    /**
      * Constructor
      */
       public BundleEntryRequestComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public BundleEntryRequestComponent(Enumeration<HTTPVerb> method, UriType url) {
@@ -1735,14 +1738,14 @@ public class Bundle extends Resource implements IBaseBundle {
 
         private static final long serialVersionUID = -1526413234L;
 
-    /*
+    /**
      * Constructor
      */
       public BundleEntryResponseComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public BundleEntryResponseComponent(StringType status) {
@@ -2063,14 +2066,14 @@ public class Bundle extends Resource implements IBaseBundle {
 
     private static final long serialVersionUID = -2041954721L;
 
-  /*
+  /**
    * Constructor
    */
     public Bundle() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Bundle(Enumeration<BundleType> type) {
@@ -2428,10 +2431,22 @@ public class Bundle extends Resource implements IBaseBundle {
 
   @SearchParamDefinition(name="composition", path="Bundle.entry.resource.item(0)", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents", type="reference" )
   public static final String SP_COMPOSITION = "composition";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Bundle:composition</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_COMPOSITION = new ca.uhn.fhir.model.api.Include("Bundle:composition").toLocked();
+
   @SearchParamDefinition(name="type", path="Bundle.type", description="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="message", path="Bundle.entry.resource.item(0)", description="The first resource in the bundle, if the bundle type is \"message\" - this is a message header, and this parameter provides access to search its contents", type="reference" )
   public static final String SP_MESSAGE = "message";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Bundle:message</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_MESSAGE = new ca.uhn.fhir.model.api.Include("Bundle:message").toLocked();
+
 
 }
 

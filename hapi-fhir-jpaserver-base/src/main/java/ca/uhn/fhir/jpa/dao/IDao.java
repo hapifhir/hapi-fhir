@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.dao;
 
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupportingAnyResource;
 
 /*
  * #%L
@@ -28,7 +30,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 
 public interface IDao {
 
-	public static final ResourceMetadataKeyEnum<Long> RESOURCE_PID = new ResourceMetadataKeyEnum<Long>("RESOURCE_PID") {
+	public static final ResourceMetadataKeySupportingAnyResource<Long, Long> RESOURCE_PID = new ResourceMetadataKeySupportingAnyResource<Long, Long>("RESOURCE_PID") {
 
 		private static final long serialVersionUID = 1L;
 
@@ -40,6 +42,16 @@ public interface IDao {
 		@Override
 		public void put(IResource theResource, Long theObject) {
 			theResource.getResourceMetadata().put(RESOURCE_PID, theObject);
+		}
+
+		@Override
+		public Long get(IAnyResource theResource) {
+			return (Long) theResource.getUserData(RESOURCE_PID.name());
+		}
+
+		@Override
+		public void put(IAnyResource theResource, Long theObject) {
+			theResource.setUserData(RESOURCE_PID.name(), theObject);
 		}
 	};
 

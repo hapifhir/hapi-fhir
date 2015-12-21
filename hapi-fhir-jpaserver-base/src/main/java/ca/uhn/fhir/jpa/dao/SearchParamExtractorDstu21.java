@@ -34,18 +34,28 @@ import javax.measure.unit.Unit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.dstu21.model.Address;
 import org.hl7.fhir.dstu21.model.BaseDateTimeType;
+import org.hl7.fhir.dstu21.model.CodeableConcept;
+import org.hl7.fhir.dstu21.model.Coding;
+import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestSecurityComponent;
 import org.hl7.fhir.dstu21.model.ContactPoint;
 import org.hl7.fhir.dstu21.model.Duration;
 import org.hl7.fhir.dstu21.model.Enumeration;
 import org.hl7.fhir.dstu21.model.HumanName;
+import org.hl7.fhir.dstu21.model.Identifier;
 import org.hl7.fhir.dstu21.model.IntegerType;
+import org.hl7.fhir.dstu21.model.Location.LocationPositionComponent;
+import org.hl7.fhir.dstu21.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.dstu21.model.Period;
 import org.hl7.fhir.dstu21.model.Quantity;
 import org.hl7.fhir.dstu21.model.Questionnaire;
+import org.hl7.fhir.dstu21.model.StringType;
 import org.hl7.fhir.dstu21.model.UriType;
+import org.hl7.fhir.dstu21.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -60,9 +70,6 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 
 public class SearchParamExtractorDstu21 extends BaseSearchParamExtractor implements ISearchParamExtractor {
@@ -184,7 +191,7 @@ public class SearchParamExtractorDstu21 extends BaseSearchParamExtractor impleme
 			}
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
-				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
+				if (nextObject == null || ((IBase) nextObject).isEmpty()) {
 					continue;
 				}
 
@@ -284,7 +291,7 @@ public class SearchParamExtractorDstu21 extends BaseSearchParamExtractor impleme
 			}
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
-				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
+				if (nextObject == null || ((IBase) nextObject).isEmpty()) {
 					continue;
 				}
 
@@ -357,8 +364,8 @@ public class SearchParamExtractorDstu21 extends BaseSearchParamExtractor impleme
 					multiType = true;
 				}
 
-				if (nextObject instanceof IPrimitiveDatatype<?>) {
-					IPrimitiveDatatype<?> nextValue = (IPrimitiveDatatype<?>) nextObject;
+				if (nextObject instanceof IPrimitiveType<?>) {
+					IPrimitiveType<?> nextValue = (IPrimitiveType<?>) nextObject;
 					String searchTerm = nextValue.getValueAsString();
 					addSearchTerm(theEntity, retVal, resourceName, searchTerm);
 				} else {
@@ -446,13 +453,13 @@ public class SearchParamExtractorDstu21 extends BaseSearchParamExtractor impleme
 			for (Object nextObject : extractValues(nextPath, theResource)) {
 
 				// Patient:language
-				if (nextObject instanceof Patient.Communication) {
-					Communication nextValue = (Patient.Communication) nextObject;
+				if (nextObject instanceof PatientCommunicationComponent) {
+					PatientCommunicationComponent nextValue = (PatientCommunicationComponent) nextObject;
 					nextObject = nextValue.getLanguage();
 				}
 
-				if (nextObject instanceof IdentifierDt) {
-					IdentifierDt nextValue = (IdentifierDt) nextObject;
+				if (nextObject instanceof Identifier) {
+					Identifier nextValue = (Identifier) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
@@ -479,16 +486,16 @@ public class SearchParamExtractorDstu21 extends BaseSearchParamExtractor impleme
 					}
 					systems.add(nextValue.getSystemElement().getValueAsString());
 					codes.add(nextValue.getValueElement().getValue());
-				} else if (nextObject instanceof Enumeration>) {
-					Enumeration obj = (Enumeration) nextObject;
+				} else if (nextObject instanceof Enumeration<?>) {
+					Enumeration<?> obj = (Enumeration<?>) nextObject;
 					String system = extractSystem(obj);
-					String code = obj.getValue();
+					String code = obj.getValueAsString();
 					if (isNotBlank(code)) {
 						systems.add(system);
 						codes.add(code);
 					}
-				} else if (nextObject instanceof IPrimitiveDatatype<?>) {
-					IPrimitiveDatatype<?> nextValue = (IPrimitiveDatatype<?>) nextObject;
+				} else if (nextObject instanceof IPrimitiveType<?>) {
+					IPrimitiveType<?> nextValue = (IPrimitiveType<?>) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
@@ -498,24 +505,24 @@ public class SearchParamExtractorDstu21 extends BaseSearchParamExtractor impleme
 						systems.add(null);
 					}
 					codes.add(nextValue.getValueAsString());
-				} else if (nextObject instanceof CodingDt) {
-					CodingDt nextValue = (CodingDt) nextObject;
+				} else if (nextObject instanceof Coding) {
+					Coding nextValue = (Coding) nextObject;
 					extractTokensFromCoding(systems, codes, theEntity, retVal, nextSpDef, nextValue);
-				} else if (nextObject instanceof CodeableConceptDt) {
-					CodeableConceptDt nextCC = (CodeableConceptDt) nextObject;
+				} else if (nextObject instanceof CodeableConcept) {
+					CodeableConcept nextCC = (CodeableConcept) nextObject;
 					if (!nextCC.getTextElement().isEmpty()) {
 						addStringParam(theEntity, retVal, nextSpDef, nextCC.getTextElement().getValue());
 					}
 
 					extractTokensFromCodeableConcept(systems, codes, nextCC, theEntity, retVal, nextSpDef);
-				} else if (nextObject instanceof RestSecurity) {
+				} else if (nextObject instanceof ConformanceRestSecurityComponent) {
 					// Conformance.security search param points to something kind of useless right now - This should probably
 					// be fixed.
-					RestSecurity sec = (RestSecurity) nextObject;
-					for (BoundCodeableConceptDt<RestfulSecurityServiceEnum> nextCC : sec.getService()) {
+					ConformanceRestSecurityComponent sec = (ConformanceRestSecurityComponent) nextObject;
+					for (CodeableConcept nextCC : sec.getService()) {
 						extractTokensFromCodeableConcept(systems, codes, nextCC, theEntity, retVal, nextSpDef);
 					}
-				} else if (nextObject instanceof Location.Position) {
+				} else if (nextObject instanceof LocationPositionComponent) {
 					ourLog.warn("Position search not currently supported, not indexing location");
 					continue;
 				} else {
@@ -578,7 +585,7 @@ public class SearchParamExtractorDstu21 extends BaseSearchParamExtractor impleme
 			}
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
-				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
+				if (nextObject == null || ((IBase) nextObject).isEmpty()) {
 					continue;
 				}
 
@@ -613,13 +620,13 @@ public class SearchParamExtractorDstu21 extends BaseSearchParamExtractor impleme
 		return retVal;
 	}
 
-	private void extractTokensFromCodeableConcept(List<String> theSystems, List<String> theCodes, CodeableConceptDt theCodeableConcept, ResourceTable theEntity, Set<BaseResourceIndexedSearchParam> theListToPopulate, RuntimeSearchParam theParameterDef) {
-		for (CodingDt nextCoding : theCodeableConcept.getCoding()) {
+	private void extractTokensFromCodeableConcept(List<String> theSystems, List<String> theCodes, CodeableConcept theCodeableConcept, ResourceTable theEntity, Set<BaseResourceIndexedSearchParam> theListToPopulate, RuntimeSearchParam theParameterDef) {
+		for (Coding nextCoding : theCodeableConcept.getCoding()) {
 			extractTokensFromCoding(theSystems, theCodes, theEntity, theListToPopulate, theParameterDef, nextCoding);
 		}
 	}
 
-	private void extractTokensFromCoding(List<String> theSystems, List<String> theCodes, ResourceTable theEntity, Set<BaseResourceIndexedSearchParam> theListToPopulate, RuntimeSearchParam theParameterDef, CodingDt nextCoding) {
+	private void extractTokensFromCoding(List<String> theSystems, List<String> theCodes, ResourceTable theEntity, Set<BaseResourceIndexedSearchParam> theListToPopulate, RuntimeSearchParam theParameterDef, Coding nextCoding) {
 		if (nextCoding != null && !nextCoding.isEmpty()) {
 
 			String nextSystem = nextCoding.getSystemElement().getValueAsString();
@@ -636,10 +643,9 @@ public class SearchParamExtractorDstu21 extends BaseSearchParamExtractor impleme
 		}
 	}
 
-	private static <T extends Enum<?>> String extractSystem(BoundCodeDt<T> theBoundCode) {
-		if (theBoundCode.getValueAsEnum() != null) {
-			IValueSetEnumBinder<T> binder = theBoundCode.getBinder();
-			return binder.toSystemString(theBoundCode.getValueAsEnum());
+	private static <T extends Enum<?>> String extractSystem(Enumeration<T> theBoundCode) {
+		if (theBoundCode.getValue() != null) {
+			return theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
 		}
 		return null;
 	}

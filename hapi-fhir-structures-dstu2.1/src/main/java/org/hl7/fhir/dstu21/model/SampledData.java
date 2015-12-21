@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu21.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,15 +29,18 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import java.util.*;
 
+import java.math.*;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.
  */
@@ -97,14 +98,14 @@ public class SampledData extends Type implements ICompositeType {
 
     private static final long serialVersionUID = -1763278368L;
 
-  /*
+  /**
    * Constructor
    */
     public SampledData() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public SampledData(SimpleQuantity origin, DecimalType period, PositiveIntType dimensions, StringType data) {

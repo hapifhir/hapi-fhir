@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.
  */
@@ -178,6 +177,9 @@ public class MedicationAdministration extends DomainResource {
         return "stopped";
       return "?";
       }
+    public String toSystem(MedicationAdministrationStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -226,7 +228,7 @@ public class MedicationAdministration extends DomainResource {
 
         private static final long serialVersionUID = -1772198879L;
 
-    /*
+    /**
      * Constructor
      */
       public MedicationAdministrationDosageComponent() {
@@ -681,14 +683,14 @@ public class MedicationAdministration extends DomainResource {
 
     private static final long serialVersionUID = -669616345L;
 
-  /*
+  /**
    * Constructor
    */
     public MedicationAdministration() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public MedicationAdministration(Enumeration<MedicationAdministrationStatus> status, Reference patient, Type effectiveTime, Type medication) {
@@ -1512,18 +1514,54 @@ public class MedicationAdministration extends DomainResource {
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="prescription", path="MedicationAdministration.prescription", description="The identity of a prescription to list administrations from", type="reference" )
   public static final String SP_PRESCRIPTION = "prescription";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationAdministration:prescription</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PRESCRIPTION = new ca.uhn.fhir.model.api.Include("MedicationAdministration:prescription").toLocked();
+
   @SearchParamDefinition(name="effectivetime", path="MedicationAdministration.effectiveTime[x]", description="Date administration happened (or did not happen)", type="date" )
   public static final String SP_EFFECTIVETIME = "effectivetime";
   @SearchParamDefinition(name="practitioner", path="MedicationAdministration.practitioner", description="Who administered substance", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationAdministration:practitioner</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PRACTITIONER = new ca.uhn.fhir.model.api.Include("MedicationAdministration:practitioner").toLocked();
+
   @SearchParamDefinition(name="patient", path="MedicationAdministration.patient", description="The identity of a patient to list administrations  for", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationAdministration:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("MedicationAdministration:patient").toLocked();
+
   @SearchParamDefinition(name="medication", path="MedicationAdministration.medicationReference", description="Return administrations of this medication resource", type="reference" )
   public static final String SP_MEDICATION = "medication";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationAdministration:medication</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_MEDICATION = new ca.uhn.fhir.model.api.Include("MedicationAdministration:medication").toLocked();
+
   @SearchParamDefinition(name="encounter", path="MedicationAdministration.encounter", description="Return administrations that share this encounter", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationAdministration:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("MedicationAdministration:encounter").toLocked();
+
   @SearchParamDefinition(name="device", path="MedicationAdministration.device", description="Return administrations with this administration device identity", type="reference" )
   public static final String SP_DEVICE = "device";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationAdministration:device</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DEVICE = new ca.uhn.fhir.model.api.Include("MedicationAdministration:device").toLocked();
+
   @SearchParamDefinition(name="notgiven", path="MedicationAdministration.wasNotGiven", description="Administrations that were not made", type="token" )
   public static final String SP_NOTGIVEN = "notgiven";
   @SearchParamDefinition(name="status", path="MedicationAdministration.status", description="MedicationAdministration event status (for example one of active/paused/completed/nullified)", type="token" )

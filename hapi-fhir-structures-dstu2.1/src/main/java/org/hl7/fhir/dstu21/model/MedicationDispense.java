@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.
  */
@@ -179,6 +177,9 @@ public class MedicationDispense extends DomainResource {
         return "stopped";
       return "?";
       }
+    public String toSystem(MedicationDispenseStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -257,7 +258,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
 
         private static final long serialVersionUID = -1470136646L;
 
-    /*
+    /**
      * Constructor
      */
       public MedicationDispenseDosageInstructionComponent() {
@@ -806,14 +807,14 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
 
         private static final long serialVersionUID = 1218245830L;
 
-    /*
+    /**
      * Constructor
      */
       public MedicationDispenseSubstitutionComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public MedicationDispenseSubstitutionComponent(CodeableConcept type) {
@@ -1170,14 +1171,14 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
 
     private static final long serialVersionUID = -2071218407L;
 
-  /*
+  /**
    * Constructor
    */
     public MedicationDispense() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public MedicationDispense(Type medication) {
@@ -2044,12 +2045,36 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="receiver", path="MedicationDispense.receiver", description="Who collected the medication", type="reference" )
   public static final String SP_RECEIVER = "receiver";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationDispense:receiver</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RECEIVER = new ca.uhn.fhir.model.api.Include("MedicationDispense:receiver").toLocked();
+
   @SearchParamDefinition(name="destination", path="MedicationDispense.destination", description="Return dispenses that should be sent to a specific destination", type="reference" )
   public static final String SP_DESTINATION = "destination";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationDispense:destination</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DESTINATION = new ca.uhn.fhir.model.api.Include("MedicationDispense:destination").toLocked();
+
   @SearchParamDefinition(name="medication", path="MedicationDispense.medicationReference", description="Return dispenses of this medicine resource", type="reference" )
   public static final String SP_MEDICATION = "medication";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationDispense:medication</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_MEDICATION = new ca.uhn.fhir.model.api.Include("MedicationDispense:medication").toLocked();
+
   @SearchParamDefinition(name="responsibleparty", path="MedicationDispense.substitution.responsibleParty", description="Return all dispenses with the specified responsible party", type="reference" )
   public static final String SP_RESPONSIBLEPARTY = "responsibleparty";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationDispense:responsibleparty</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RESPONSIBLEPARTY = new ca.uhn.fhir.model.api.Include("MedicationDispense:responsibleparty").toLocked();
+
   @SearchParamDefinition(name="type", path="MedicationDispense.type", description="Return all dispenses of a specific type", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="whenhandedover", path="MedicationDispense.whenHandedOver", description="Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)", type="date" )
@@ -2058,10 +2083,28 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
   public static final String SP_WHENPREPARED = "whenprepared";
   @SearchParamDefinition(name="dispenser", path="MedicationDispense.dispenser", description="Return all dispenses performed by a specific individual", type="reference" )
   public static final String SP_DISPENSER = "dispenser";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationDispense:dispenser</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DISPENSER = new ca.uhn.fhir.model.api.Include("MedicationDispense:dispenser").toLocked();
+
   @SearchParamDefinition(name="prescription", path="MedicationDispense.authorizingPrescription", description="The identity of a prescription to list dispenses from", type="reference" )
   public static final String SP_PRESCRIPTION = "prescription";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationDispense:prescription</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PRESCRIPTION = new ca.uhn.fhir.model.api.Include("MedicationDispense:prescription").toLocked();
+
   @SearchParamDefinition(name="patient", path="MedicationDispense.patient", description="The identity of a patient to list dispenses  for", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationDispense:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("MedicationDispense:patient").toLocked();
+
   @SearchParamDefinition(name="status", path="MedicationDispense.status", description="Status of the dispense", type="token" )
   public static final String SP_STATUS = "status";
 

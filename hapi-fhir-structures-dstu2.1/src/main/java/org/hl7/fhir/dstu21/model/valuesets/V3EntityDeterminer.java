@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model.valuesets;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;

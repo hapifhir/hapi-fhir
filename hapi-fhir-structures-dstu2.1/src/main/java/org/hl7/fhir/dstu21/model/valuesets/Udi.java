@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model.valuesets;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,9 +37,9 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum Udi {
 
         /**
-         * Example DI in GS1 format.
+         * GUDID (FDA) US Repository
          */
-        _01_123456789, 
+        GUDID, 
         /**
          * added to help the parsers
          */
@@ -47,13 +47,13 @@ public enum Udi {
         public static Udi fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("{01}123456789".equals(codeString))
-          return _01_123456789;
+        if ("gudid".equals(codeString))
+          return GUDID;
         throw new FHIRException("Unknown Udi code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case _01_123456789: return "{01}123456789";
+            case GUDID: return "gudid";
             default: return "?";
           }
         }
@@ -62,13 +62,13 @@ public enum Udi {
         }
         public String getDefinition() {
           switch (this) {
-            case _01_123456789: return "Example DI in GS1 format.";
+            case GUDID: return "GUDID (FDA) US Repository";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case _01_123456789: return "{01}123456789";
+            case GUDID: return "GUDID (FDA)";
             default: return "?";
           }
     }

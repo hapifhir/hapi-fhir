@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The Measure resource provides the definition of a quality measure.
  */
@@ -241,6 +241,9 @@ public class Measure extends DomainResource {
         return "measure-score";
       return "?";
       }
+    public String toSystem(MeasurePopulationType code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -275,14 +278,14 @@ public class Measure extends DomainResource {
 
         private static final long serialVersionUID = 1825597517L;
 
-    /*
+    /**
      * Constructor
      */
       public MeasurePopulationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public MeasurePopulationComponent(Enumeration<MeasurePopulationType> type, StringType criteria) {
@@ -625,7 +628,7 @@ public class Measure extends DomainResource {
 
     private static final long serialVersionUID = -1534387963L;
 
-  /*
+  /**
    * Constructor
    */
     public Measure() {

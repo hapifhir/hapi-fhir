@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes the intended objective(s) for a patient, group or organization care, for example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.
  */
@@ -242,6 +241,9 @@ public class Goal extends DomainResource {
         return "cancelled";
       return "?";
       }
+    public String toSystem(GoalStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -255,7 +257,7 @@ public class Goal extends DomainResource {
 
         private static final long serialVersionUID = 1994317639L;
 
-    /*
+    /**
      * Constructor
      */
       public GoalOutcomeComponent() {
@@ -487,14 +489,14 @@ public class Goal extends DomainResource {
 
     private static final long serialVersionUID = 2029459056L;
 
-  /*
+  /**
    * Constructor
    */
     public Goal() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Goal(StringType description, Enumeration<GoalStatus> status) {
@@ -1273,8 +1275,20 @@ public class Goal extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="patient", path="Goal.subject", description="Who this goal is intended for", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Goal:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Goal:patient").toLocked();
+
   @SearchParamDefinition(name="subject", path="Goal.subject", description="Who this goal is intended for", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Goal:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Goal:subject").toLocked();
+
   @SearchParamDefinition(name="targetdate", path="Goal.targetDate", description="Reach goal on or before", type="date" )
   public static final String SP_TARGETDATE = "targetdate";
   @SearchParamDefinition(name="category", path="Goal.category", description="E.g. Treatment, dietary, behavioral, etc.", type="token" )

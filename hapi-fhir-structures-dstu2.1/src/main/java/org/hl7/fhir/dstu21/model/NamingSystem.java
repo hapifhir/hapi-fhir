@@ -29,22 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a "System" used within the Identifier and Coding data types.
  */
@@ -148,6 +145,9 @@ public class NamingSystem extends DomainResource {
       if (code == NamingSystemType.ROOT)
         return "root";
       return "?";
+      }
+    public String toSystem(NamingSystemType code) {
+      return code.getSystem();
       }
     }
 
@@ -265,6 +265,9 @@ public class NamingSystem extends DomainResource {
         return "other";
       return "?";
       }
+    public String toSystem(NamingSystemIdentifierType code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -285,7 +288,7 @@ public class NamingSystem extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
-    /*
+    /**
      * Constructor
      */
       public NamingSystemContactComponent() {
@@ -485,14 +488,14 @@ public class NamingSystem extends DomainResource {
 
         private static final long serialVersionUID = -193711840L;
 
-    /*
+    /**
      * Constructor
      */
       public NamingSystemUniqueIdComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public NamingSystemUniqueIdComponent(Enumeration<NamingSystemIdentifierType> type, StringType value) {
@@ -843,14 +846,14 @@ public class NamingSystem extends DomainResource {
 
     private static final long serialVersionUID = -1337110053L;
 
-  /*
+  /**
    * Constructor
    */
     public NamingSystem() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public NamingSystem(StringType name, Enumeration<ConformanceResourceStatus> status, Enumeration<NamingSystemType> kind, DateTimeType date) {
@@ -1610,7 +1613,7 @@ public class NamingSystem extends DomainResource {
   @SearchParamDefinition(name="type", path="NamingSystem.type", description="e.g. driver,  provider,  patient, bank etc.", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="id-type", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token" )
-  public static final String SP_IDTYPE = "id-type";
+  public static final String SP_ID_TYPE = "id-type";
   @SearchParamDefinition(name="responsible", path="NamingSystem.responsible", description="Who maintains system namespace?", type="string" )
   public static final String SP_RESPONSIBLE = "responsible";
   @SearchParamDefinition(name="contact", path="NamingSystem.contact.name", description="Name of a individual to contact", type="string" )
@@ -1626,7 +1629,13 @@ public class NamingSystem extends DomainResource {
   @SearchParamDefinition(name="value", path="NamingSystem.uniqueId.value", description="The unique identifier", type="string" )
   public static final String SP_VALUE = "value";
   @SearchParamDefinition(name="replaced-by", path="NamingSystem.replacedBy", description="Use this instead", type="reference" )
-  public static final String SP_REPLACEDBY = "replaced-by";
+  public static final String SP_REPLACED_BY = "replaced-by";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>NamingSystem:replaced-by</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REPLACED_BY = new ca.uhn.fhir.model.api.Include("NamingSystem:replaced-by").toLocked();
+
   @SearchParamDefinition(name="status", path="NamingSystem.status", description="draft | active | retired", type="token" )
   public static final String SP_STATUS = "status";
 

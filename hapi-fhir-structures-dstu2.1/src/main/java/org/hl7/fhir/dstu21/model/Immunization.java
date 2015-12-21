@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.
  */
@@ -67,7 +65,7 @@ public class Immunization extends DomainResource {
 
         private static final long serialVersionUID = -539821866L;
 
-    /*
+    /**
      * Constructor
      */
       public ImmunizationExplanationComponent() {
@@ -261,7 +259,7 @@ public class Immunization extends DomainResource {
 
         private static final long serialVersionUID = -1297668556L;
 
-    /*
+    /**
      * Constructor
      */
       public ImmunizationReactionComponent() {
@@ -548,14 +546,14 @@ public class Immunization extends DomainResource {
 
         private static final long serialVersionUID = 386814037L;
 
-    /*
+    /**
      * Constructor
      */
       public ImmunizationVaccinationProtocolComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ImmunizationVaccinationProtocolComponent(PositiveIntType doseSequence, CodeableConcept doseStatus) {
@@ -1186,14 +1184,14 @@ public class Immunization extends DomainResource {
 
     private static final long serialVersionUID = 898786200L;
 
-  /*
+  /**
    * Constructor
    */
     public Immunization() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Immunization(CodeType status, CodeableConcept vaccineCode, Reference patient, BooleanType wasNotGiven, BooleanType reported) {
@@ -2287,32 +2285,68 @@ public class Immunization extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="requester", path="Immunization.requester", description="The practitioner who ordered the vaccination", type="reference" )
   public static final String SP_REQUESTER = "requester";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Immunization:requester</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTER = new ca.uhn.fhir.model.api.Include("Immunization:requester").toLocked();
+
   @SearchParamDefinition(name="identifier", path="Immunization.identifier", description="Business identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="reason", path="Immunization.explanation.reason", description="Why immunization occurred", type="token" )
   public static final String SP_REASON = "reason";
   @SearchParamDefinition(name="performer", path="Immunization.performer", description="The practitioner who administered the vaccination", type="reference" )
   public static final String SP_PERFORMER = "performer";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Immunization:performer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PERFORMER = new ca.uhn.fhir.model.api.Include("Immunization:performer").toLocked();
+
   @SearchParamDefinition(name="reaction", path="Immunization.reaction.detail", description="Additional information on reaction", type="reference" )
   public static final String SP_REACTION = "reaction";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Immunization:reaction</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REACTION = new ca.uhn.fhir.model.api.Include("Immunization:reaction").toLocked();
+
   @SearchParamDefinition(name="lot-number", path="Immunization.lotNumber", description="Vaccine Lot Number", type="string" )
-  public static final String SP_LOTNUMBER = "lot-number";
+  public static final String SP_LOT_NUMBER = "lot-number";
   @SearchParamDefinition(name="notgiven", path="Immunization.wasNotGiven", description="Administrations which were not given", type="token" )
   public static final String SP_NOTGIVEN = "notgiven";
   @SearchParamDefinition(name="manufacturer", path="Immunization.manufacturer", description="Vaccine Manufacturer", type="reference" )
   public static final String SP_MANUFACTURER = "manufacturer";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Immunization:manufacturer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_MANUFACTURER = new ca.uhn.fhir.model.api.Include("Immunization:manufacturer").toLocked();
+
   @SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="Dose number within series", type="number" )
-  public static final String SP_DOSESEQUENCE = "dose-sequence";
+  public static final String SP_DOSE_SEQUENCE = "dose-sequence";
   @SearchParamDefinition(name="patient", path="Immunization.patient", description="The patient for the vaccination record", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Immunization:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Immunization:patient").toLocked();
+
   @SearchParamDefinition(name="vaccine-code", path="Immunization.vaccineCode", description="Vaccine Product Administered", type="token" )
-  public static final String SP_VACCINECODE = "vaccine-code";
+  public static final String SP_VACCINE_CODE = "vaccine-code";
   @SearchParamDefinition(name="reason-not-given", path="Immunization.explanation.reasonNotGiven", description="Explanation of reason vaccination was not administered", type="token" )
-  public static final String SP_REASONNOTGIVEN = "reason-not-given";
+  public static final String SP_REASON_NOT_GIVEN = "reason-not-given";
   @SearchParamDefinition(name="location", path="Immunization.location", description="The service delivery location or facility in which the vaccine was / was to be administered", type="reference" )
   public static final String SP_LOCATION = "location";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Immunization:location</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("Immunization:location").toLocked();
+
   @SearchParamDefinition(name="reaction-date", path="Immunization.reaction.date", description="When reaction started", type="date" )
-  public static final String SP_REACTIONDATE = "reaction-date";
+  public static final String SP_REACTION_DATE = "reaction-date";
   @SearchParamDefinition(name="status", path="Immunization.status", description="Immunization event status", type="token" )
   public static final String SP_STATUS = "status";
 

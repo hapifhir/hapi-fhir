@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Record of delivery of what is supplied.
  */
@@ -143,6 +144,9 @@ public class SupplyDelivery extends DomainResource {
       if (code == SupplyDeliveryStatus.ABANDONED)
         return "abandoned";
       return "?";
+      }
+    public String toSystem(SupplyDeliveryStatus code) {
+      return code.getSystem();
       }
     }
 
@@ -250,7 +254,7 @@ public class SupplyDelivery extends DomainResource {
 
     private static final long serialVersionUID = -1520129707L;
 
-  /*
+  /**
    * Constructor
    */
     public SupplyDelivery() {
@@ -843,10 +847,28 @@ public class SupplyDelivery extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="receiver", path="SupplyDelivery.receiver", description="Who collected the Supply", type="reference" )
   public static final String SP_RECEIVER = "receiver";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>SupplyDelivery:receiver</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RECEIVER = new ca.uhn.fhir.model.api.Include("SupplyDelivery:receiver").toLocked();
+
   @SearchParamDefinition(name="patient", path="SupplyDelivery.patient", description="Patient for whom the item is supplied", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>SupplyDelivery:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("SupplyDelivery:patient").toLocked();
+
   @SearchParamDefinition(name="supplier", path="SupplyDelivery.supplier", description="Dispenser", type="reference" )
   public static final String SP_SUPPLIER = "supplier";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>SupplyDelivery:supplier</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUPPLIER = new ca.uhn.fhir.model.api.Include("SupplyDelivery:supplier").toLocked();
+
   @SearchParamDefinition(name="status", path="SupplyDelivery.status", description="in-progress | completed | abandoned", type="token" )
   public static final String SP_STATUS = "status";
 

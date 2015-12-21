@@ -29,16 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Prospective warnings of potential issues when providing care to the patient.
  */
@@ -143,6 +145,9 @@ public class Flag extends DomainResource {
         return "entered-in-error";
       return "?";
       }
+    public String toSystem(FlagStatus code) {
+      return code.getSystem();
+      }
     }
 
     /**
@@ -218,14 +223,14 @@ public class Flag extends DomainResource {
 
     private static final long serialVersionUID = 701147751L;
 
-  /*
+  /**
    * Constructor
    */
     public Flag() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Flag(Enumeration<FlagStatus> status, Reference subject, CodeableConcept code) {
@@ -649,12 +654,36 @@ public class Flag extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="subject", path="Flag.subject", description="The identity of a subject to list flags for", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Flag:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Flag:subject").toLocked();
+
   @SearchParamDefinition(name="patient", path="Flag.subject", description="The identity of a subject to list flags for", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Flag:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Flag:patient").toLocked();
+
   @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference" )
   public static final String SP_AUTHOR = "author";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Flag:author</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("Flag:author").toLocked();
+
   @SearchParamDefinition(name="encounter", path="Flag.encounter", description="Alert relevant during encounter", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Flag:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("Flag:encounter").toLocked();
+
 
 }
 

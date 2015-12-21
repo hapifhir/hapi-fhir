@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource is primarily used for the identification and definition of a medication. It covers the ingredients and the packaging for a medication.
  */
@@ -74,7 +72,7 @@ public class Medication extends DomainResource {
 
         private static final long serialVersionUID = 1132853671L;
 
-    /*
+    /**
      * Constructor
      */
       public MedicationProductComponent() {
@@ -293,14 +291,14 @@ public class Medication extends DomainResource {
 
         private static final long serialVersionUID = -1217232889L;
 
-    /*
+    /**
      * Constructor
      */
       public MedicationProductIngredientComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public MedicationProductIngredientComponent(Reference item) {
@@ -459,7 +457,7 @@ public class Medication extends DomainResource {
 
         private static final long serialVersionUID = 1982738755L;
 
-    /*
+    /**
      * Constructor
      */
       public MedicationProductBatchComponent() {
@@ -652,7 +650,7 @@ public class Medication extends DomainResource {
 
         private static final long serialVersionUID = 503772472L;
 
-    /*
+    /**
      * Constructor
      */
       public MedicationPackageComponent() {
@@ -819,14 +817,14 @@ public class Medication extends DomainResource {
 
         private static final long serialVersionUID = -1150048030L;
 
-    /*
+    /**
      * Constructor
      */
       public MedicationPackageContentComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public MedicationPackageContentComponent(Reference item) {
@@ -1014,7 +1012,7 @@ public class Medication extends DomainResource {
 
     private static final long serialVersionUID = 859308699L;
 
-  /*
+  /**
    * Constructor
    */
     public Medication() {
@@ -1290,12 +1288,30 @@ public class Medication extends DomainResource {
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="ingredient", path="Medication.product.ingredient.item", description="The product contained", type="reference" )
   public static final String SP_INGREDIENT = "ingredient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Medication:ingredient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_INGREDIENT = new ca.uhn.fhir.model.api.Include("Medication:ingredient").toLocked();
+
   @SearchParamDefinition(name="form", path="Medication.product.form", description="powder | tablets | carton +", type="token" )
   public static final String SP_FORM = "form";
   @SearchParamDefinition(name="content", path="Medication.package.content.item", description="A product in the package", type="reference" )
   public static final String SP_CONTENT = "content";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Medication:content</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTENT = new ca.uhn.fhir.model.api.Include("Medication:content").toLocked();
+
   @SearchParamDefinition(name="manufacturer", path="Medication.manufacturer", description="Manufacturer of the item", type="reference" )
   public static final String SP_MANUFACTURER = "manufacturer";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Medication:manufacturer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_MANUFACTURER = new ca.uhn.fhir.model.api.Include("Medication:manufacturer").toLocked();
+
 
 }
 

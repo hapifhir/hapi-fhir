@@ -29,22 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions, and constraints on resources and data types.
  */
@@ -148,6 +145,9 @@ public class StructureDefinition extends DomainResource {
       if (code == StructureDefinitionKind.LOGICAL)
         return "logical";
       return "?";
+      }
+    public String toSystem(StructureDefinitionKind code) {
+      return code.getSystem();
       }
     }
 
@@ -265,6 +265,9 @@ public class StructureDefinition extends DomainResource {
         return "extension";
       return "?";
       }
+    public String toSystem(ExtensionContext code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -285,7 +288,7 @@ public class StructureDefinition extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
-    /*
+    /**
      * Constructor
      */
       public StructureDefinitionContactComponent() {
@@ -485,14 +488,14 @@ public class StructureDefinition extends DomainResource {
 
         private static final long serialVersionUID = 299630820L;
 
-    /*
+    /**
      * Constructor
      */
       public StructureDefinitionMappingComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public StructureDefinitionMappingComponent(IdType identity) {
@@ -787,7 +790,7 @@ public class StructureDefinition extends DomainResource {
 
         private static final long serialVersionUID = 53896641L;
 
-    /*
+    /**
      * Constructor
      */
       public StructureDefinitionSnapshotComponent() {
@@ -909,7 +912,7 @@ public class StructureDefinition extends DomainResource {
 
         private static final long serialVersionUID = 53896641L;
 
-    /*
+    /**
      * Constructor
      */
       public StructureDefinitionDifferentialComponent() {
@@ -1126,10 +1129,10 @@ public class StructureDefinition extends DomainResource {
     protected List<Coding> code;
 
     /**
-     * The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.1.0 for this version.
+     * The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.2.0 for this version.
      */
     @Child(name = "fhirVersion", type = {IdType.class}, order=15, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="FHIR Version this StructureDefinition targets", formalDefinition="The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.1.0 for this version." )
+    @Description(shortDefinition="FHIR Version this StructureDefinition targets", formalDefinition="The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.2.0 for this version." )
     protected IdType fhirVersion;
 
     /**
@@ -1197,14 +1200,14 @@ public class StructureDefinition extends DomainResource {
 
     private static final long serialVersionUID = -580779569L;
 
-  /*
+  /**
    * Constructor
    */
     public StructureDefinition() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public StructureDefinition(UriType url, StringType name, Enumeration<ConformanceResourceStatus> status, Enumeration<StructureDefinitionKind> kind, BooleanType abstract_) {
@@ -1900,7 +1903,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #fhirVersion} (The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.1.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @return {@link #fhirVersion} (The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.2.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
     public IdType getFhirVersionElement() { 
       if (this.fhirVersion == null)
@@ -1920,7 +1923,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #fhirVersion} (The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.1.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @param value {@link #fhirVersion} (The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.2.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
     public StructureDefinition setFhirVersionElement(IdType value) { 
       this.fhirVersion = value;
@@ -1928,14 +1931,14 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.1.0 for this version.
+     * @return The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.2.0 for this version.
      */
     public String getFhirVersion() { 
       return this.fhirVersion == null ? null : this.fhirVersion.getValue();
     }
 
     /**
-     * @param value The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.1.0 for this version.
+     * @param value The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.2.0 for this version.
      */
     public StructureDefinition setFhirVersion(String value) { 
       if (Utilities.noString(value))
@@ -2344,7 +2347,7 @@ public class StructureDefinition extends DomainResource {
         childrenList.add(new Property("requirements", "string", "Explains why this structure definition is needed and why it's been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the structure definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("code", "Coding", "A set of terms from external terminologies that may be used to assist with indexing and searching of templates.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.1.0 for this version.", 0, java.lang.Integer.MAX_VALUE, fhirVersion));
+        childrenList.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.2.0 for this version.", 0, java.lang.Integer.MAX_VALUE, fhirVersion));
         childrenList.add(new Property("mapping", "", "An external specification that the content is mapped to.", 0, java.lang.Integer.MAX_VALUE, mapping));
         childrenList.add(new Property("kind", "code", "Defines the kind of structure that this definition is describing.", 0, java.lang.Integer.MAX_VALUE, kind));
         childrenList.add(new Property("constrainedType", "code", "The type of type that is being constrained - a data type, an extension, a resource, including abstract ones. If this field is present, it indicates that the structure definition is a constraint. If it is not present, then the structure definition is the definition of a base structure.", 0, java.lang.Integer.MAX_VALUE, constrainedType));
@@ -2621,6 +2624,12 @@ public class StructureDefinition extends DomainResource {
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="valueset", path="StructureDefinition.snapshot.element.binding.valueSet[x]", description="A vocabulary binding reference", type="reference" )
   public static final String SP_VALUESET = "valueset";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>StructureDefinition:valueset</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_VALUESET = new ca.uhn.fhir.model.api.Include("StructureDefinition:valueset").toLocked();
+
   @SearchParamDefinition(name="kind", path="StructureDefinition.kind", description="datatype | resource | logical", type="token" )
   public static final String SP_KIND = "kind";
   @SearchParamDefinition(name="display", path="StructureDefinition.display", description="Use this name when displaying the value", type="string" )
@@ -2630,7 +2639,7 @@ public class StructureDefinition extends DomainResource {
   @SearchParamDefinition(name="experimental", path="StructureDefinition.experimental", description="If for testing purposes, not real usage", type="token" )
   public static final String SP_EXPERIMENTAL = "experimental";
   @SearchParamDefinition(name="context-type", path="StructureDefinition.contextType", description="resource | datatype | mapping | extension", type="token" )
-  public static final String SP_CONTEXTTYPE = "context-type";
+  public static final String SP_CONTEXT_TYPE = "context-type";
   @SearchParamDefinition(name="abstract", path="StructureDefinition.abstract", description="Whether the structure is abstract", type="token" )
   public static final String SP_ABSTRACT = "abstract";
   @SearchParamDefinition(name="type", path="StructureDefinition.constrainedType", description="Any datatype or resource, including abstract ones", type="token" )
@@ -2642,13 +2651,13 @@ public class StructureDefinition extends DomainResource {
   @SearchParamDefinition(name="path", path="StructureDefinition.snapshot.element.path|StructureDefinition.differential.element.path", description="A path that is constrained in the profile", type="token" )
   public static final String SP_PATH = "path";
   @SearchParamDefinition(name="ext-context", path="StructureDefinition.context", description="Where the extension can be used in instances", type="string" )
-  public static final String SP_EXTCONTEXT = "ext-context";
+  public static final String SP_EXT_CONTEXT = "ext-context";
   @SearchParamDefinition(name="name", path="StructureDefinition.name", description="Name of the profile", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="context", path="StructureDefinition.useContext", description="A use context assigned to the structure", type="token" )
   public static final String SP_CONTEXT = "context";
   @SearchParamDefinition(name="base-path", path="StructureDefinition.snapshot.element.base.path|StructureDefinition.differential.element.base.path", description="Path that identifies the base element", type="token" )
-  public static final String SP_BASEPATH = "base-path";
+  public static final String SP_BASE_PATH = "base-path";
   @SearchParamDefinition(name="publisher", path="StructureDefinition.publisher", description="Name of the publisher of the profile", type="string" )
   public static final String SP_PUBLISHER = "publisher";
   @SearchParamDefinition(name="status", path="StructureDefinition.status", description="The current status of the profile", type="token" )

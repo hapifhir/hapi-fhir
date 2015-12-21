@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A collection of error, warning or information messages that result from a system action.
  */
@@ -161,6 +160,9 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       if (code == IssueSeverity.INFORMATION)
         return "information";
       return "?";
+      }
+    public String toSystem(IssueSeverity code) {
+      return code.getSystem();
       }
     }
 
@@ -678,6 +680,9 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         return "informational";
       return "?";
       }
+    public String toSystem(IssueType code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -719,14 +724,14 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
 
         private static final long serialVersionUID = 930165515L;
 
-    /*
+    /**
      * Constructor
      */
       public OperationOutcomeIssueComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public OperationOutcomeIssueComponent(Enumeration<IssueSeverity> severity, Enumeration<IssueType> code) {
@@ -1058,7 +1063,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
 
     private static final long serialVersionUID = -152150052L;
 
-  /*
+  /**
    * Constructor
    */
     public OperationOutcome() {

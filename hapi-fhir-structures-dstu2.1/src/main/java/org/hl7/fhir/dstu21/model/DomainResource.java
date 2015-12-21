@@ -29,17 +29,17 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
-import org.hl7.fhir.instance.model.api.IDomainResource;
+import java.util.*;
 
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A resource that includes narrative, extensions, and contained resources.
  */
@@ -75,7 +75,7 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
 
     private static final long serialVersionUID = -970285559L;
 
-  /*
+  /**
    * Constructor
    */
     public DomainResource() {
@@ -125,25 +125,8 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
     }
 
     /**
-     * Returns an unmodifiable list containing all extensions on this element which
-     * match the given URL.
-     *
-     * @param theUrl The URL. Must not be blank or null.
-     * @return an unmodifiable list containing all extensions on this element which
-     * match the given URL
+     * @return {@link #contained} (These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope.)
      */
-    public List<Extension> getExtensionsByUrl(String theUrl) {
-      org.apache.commons.lang3.Validate.notBlank(theUrl, "theUrl must not be blank or null");
-      ArrayList<Extension> retVal = new ArrayList<Extension>();
-      for (Extension next : getExtension()) {
-        if (theUrl.equals(next.getUrl())) {
-          retVal.add(next);
-        }
-      }
-      return java.util.Collections.unmodifiableList(retVal);
-    }
-    
-    
     /**
      * @return {@link #extension} (May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.)
      */
@@ -222,6 +205,36 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
         this.modifierExtension = new ArrayList<Extension>();
       this.modifierExtension.add(t);
       return this;
+    }
+
+    /**
+     * Returns a list of extensions from this element which have the given URL. Note that
+     * this list may not be modified (you can not add or remove elements from it)
+     */
+    public List<Extension> getExtensionsByUrl(String theUrl) {
+      org.apache.commons.lang3.Validate.notBlank(theUrl, "theUrl must be provided with a value");
+      ArrayList<Extension> retVal = new ArrayList<Extension>();
+      for (Extension next : getExtension()) {
+        if (theUrl.equals(next.getUrl())) {
+          retVal.add(next);
+        }
+      }
+      return Collections.unmodifiableList(retVal);
+    }
+
+    /**
+     * Returns a list of modifier extensions from this element which have the given URL. Note that
+     * this list may not be modified (you can not add or remove elements from it)
+     */
+    public List<Extension> getModifierExtensionsByUrl(String theUrl) {
+      org.apache.commons.lang3.Validate.notBlank(theUrl, "theUrl must be provided with a value");
+      ArrayList<Extension> retVal = new ArrayList<Extension>();
+      for (Extension next : getModifierExtension()) {
+        if (theUrl.equals(next.getUrl())) {
+          retVal.add(next);
+        }
+      }
+      return Collections.unmodifiableList(retVal);
     }
 
       protected void listChildren(List<Property> childrenList) {

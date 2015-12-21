@@ -66,7 +66,7 @@ public class UriType extends PrimitiveType<String> {
 
 	@Override
 	public UriType copy() {
-		return new UriType(getValueAsString());
+		return new UriType(getValue());
 	}
 
 	@Override

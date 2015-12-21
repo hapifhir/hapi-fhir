@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.
  */
@@ -194,6 +193,9 @@ public class Group extends DomainResource {
         return "substance";
       return "?";
       }
+    public String toSystem(GroupType code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -228,14 +230,14 @@ public class Group extends DomainResource {
 
         private static final long serialVersionUID = -1000688967L;
 
-    /*
+    /**
      * Constructor
      */
       public GroupCharacteristicComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public GroupCharacteristicComponent(CodeableConcept code, Type value, BooleanType exclude) {
@@ -537,14 +539,14 @@ public class Group extends DomainResource {
 
         private static final long serialVersionUID = -333869055L;
 
-    /*
+    /**
      * Constructor
      */
       public GroupMemberComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public GroupMemberComponent(Reference entity) {
@@ -796,14 +798,14 @@ public class Group extends DomainResource {
 
     private static final long serialVersionUID = 1401345819L;
 
-  /*
+  /**
    * Constructor
    */
     public Group() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Group(Enumeration<GroupType> type, BooleanType actual) {
@@ -1280,11 +1282,17 @@ public class Group extends DomainResource {
   @SearchParamDefinition(name="identifier", path="Group.identifier", description="Unique id", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="characteristic-value", path="", description="A composite of both characteristic and value", type="composite" )
-  public static final String SP_CHARACTERISTICVALUE = "characteristic-value";
+  public static final String SP_CHARACTERISTIC_VALUE = "characteristic-value";
   @SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained", type="token" )
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="member", path="Group.member.entity", description="Reference to the group member", type="reference" )
   public static final String SP_MEMBER = "member";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Group:member</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_MEMBER = new ca.uhn.fhir.model.api.Include("Group:member").toLocked();
+
   @SearchParamDefinition(name="exclude", path="Group.characteristic.exclude", description="Group includes or excludes", type="token" )
   public static final String SP_EXCLUDE = "exclude";
   @SearchParamDefinition(name="type", path="Group.type", description="The type of resources the group contains", type="token" )

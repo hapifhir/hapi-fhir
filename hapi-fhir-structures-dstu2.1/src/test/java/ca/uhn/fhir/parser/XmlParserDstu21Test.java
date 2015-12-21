@@ -717,7 +717,7 @@ public class XmlParserDstu21Test {
 		
 		MedicationOrder medicationPrescript = new MedicationOrder();
 		String nameDisp = "MedRef";
-		CodeableConcept codeDt = new CodeableConcept().addCoding(new Coding("urn:sys", "code1"));
+		CodeableConcept codeDt = new CodeableConcept().addCoding(new Coding("urn:sys", "code1", null));
 		
 		// Adding medication to Contained.
 		Medication medResource = new Medication();
@@ -752,7 +752,7 @@ public class XmlParserDstu21Test {
 		MedicationOrder medicationPrescript = new MedicationOrder();
 		
 		String medId = "123";
-		CodeableConcept codeDt = new CodeableConcept().addCoding(new Coding("urn:sys", "code1"));
+		CodeableConcept codeDt = new CodeableConcept().addCoding(new Coding("urn:sys", "code1", null));
 
 		// Adding medication to Contained.
 		Medication medResource = new Medication();

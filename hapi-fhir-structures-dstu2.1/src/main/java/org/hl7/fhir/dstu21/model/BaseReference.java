@@ -17,7 +17,7 @@ public abstract class BaseReference extends Type implements IBaseReference, ICom
     	setReference(theReference);
 	}
 
-    public BaseReference(IdType theReference) {
+    public BaseReference(IIdType theReference) {
     	if (theReference != null) {
     		setReference(theReference.getValue());
     	} else {

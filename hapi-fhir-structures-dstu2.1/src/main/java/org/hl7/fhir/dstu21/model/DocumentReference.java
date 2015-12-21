@@ -29,22 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.DocumentReferenceStatus;
-import org.hl7.fhir.dstu21.model.Enumerations.DocumentReferenceStatusEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A reference to a document .
  */
@@ -165,6 +162,9 @@ public class DocumentReference extends DomainResource {
         return "appends";
       return "?";
       }
+    public String toSystem(DocumentRelationshipType code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -190,14 +190,14 @@ public class DocumentReference extends DomainResource {
 
         private static final long serialVersionUID = -347257495L;
 
-    /*
+    /**
      * Constructor
      */
       public DocumentReferenceRelatesToComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public DocumentReferenceRelatesToComponent(Enumeration<DocumentRelationshipType> code, Reference target) {
@@ -382,14 +382,14 @@ public class DocumentReference extends DomainResource {
 
         private static final long serialVersionUID = -1412643085L;
 
-    /*
+    /**
      * Constructor
      */
       public DocumentReferenceContentComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public DocumentReferenceContentComponent(Attachment attachment) {
@@ -597,7 +597,7 @@ public class DocumentReference extends DomainResource {
 
         private static final long serialVersionUID = 994799273L;
 
-    /*
+    /**
      * Constructor
      */
       public DocumentReferenceContextComponent() {
@@ -988,7 +988,7 @@ public class DocumentReference extends DomainResource {
 
         private static final long serialVersionUID = -1670123330L;
 
-    /*
+    /**
      * Constructor
      */
       public DocumentReferenceContextRelatedComponent() {
@@ -1269,14 +1269,14 @@ public class DocumentReference extends DomainResource {
 
     private static final long serialVersionUID = -1009325322L;
 
-  /*
+  /**
    * Constructor
    */
     public DocumentReference() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public DocumentReference(CodeableConcept type, InstantType indexed, Enumeration<DocumentReferenceStatus> status) {
@@ -2149,6 +2149,12 @@ public class DocumentReference extends DomainResource {
   public static final String SP_SECURITYLABEL = "securitylabel";
   @SearchParamDefinition(name="subject", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentReference:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("DocumentReference:subject").toLocked();
+
   @SearchParamDefinition(name="description", path="DocumentReference.description", description="Human-readable description (title)", type="string" )
   public static final String SP_DESCRIPTION = "description";
   @SearchParamDefinition(name="language", path="DocumentReference.content.attachment.language", description="Human language of the content (BCP-47)", type="token" )
@@ -2161,6 +2167,12 @@ public class DocumentReference extends DomainResource {
   public static final String SP_SETTING = "setting";
   @SearchParamDefinition(name="patient", path="DocumentReference.subject", description="Who/what is the subject of the document", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentReference:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("DocumentReference:patient").toLocked();
+
   @SearchParamDefinition(name="relationship", path="", description="Combination of relation and relatesTo", type="composite" )
   public static final String SP_RELATIONSHIP = "relationship";
   @SearchParamDefinition(name="event", path="DocumentReference.context.event", description="Main Clinical Acts Documented", type="token" )
@@ -2169,30 +2181,66 @@ public class DocumentReference extends DomainResource {
   public static final String SP_CLASS = "class";
   @SearchParamDefinition(name="authenticator", path="DocumentReference.authenticator", description="Who/what authenticated the document", type="reference" )
   public static final String SP_AUTHENTICATOR = "authenticator";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentReference:authenticator</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHENTICATOR = new ca.uhn.fhir.model.api.Include("DocumentReference:authenticator").toLocked();
+
   @SearchParamDefinition(name="identifier", path="DocumentReference.masterIdentifier|DocumentReference.identifier", description="Master Version Specific Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="period", path="DocumentReference.context.period", description="Time of service that is being documented", type="date" )
   public static final String SP_PERIOD = "period";
   @SearchParamDefinition(name="related-id", path="DocumentReference.context.related.identifier", description="Identifier of related objects or events", type="token" )
-  public static final String SP_RELATEDID = "related-id";
+  public static final String SP_RELATED_ID = "related-id";
   @SearchParamDefinition(name="custodian", path="DocumentReference.custodian", description="Organization which maintains the document", type="reference" )
   public static final String SP_CUSTODIAN = "custodian";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentReference:custodian</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CUSTODIAN = new ca.uhn.fhir.model.api.Include("DocumentReference:custodian").toLocked();
+
   @SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="When this document reference created", type="date" )
   public static final String SP_INDEXED = "indexed";
   @SearchParamDefinition(name="author", path="DocumentReference.author", description="Who and/or what authored the document", type="reference" )
   public static final String SP_AUTHOR = "author";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentReference:author</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("DocumentReference:author").toLocked();
+
   @SearchParamDefinition(name="created", path="DocumentReference.created", description="Document creation time", type="date" )
   public static final String SP_CREATED = "created";
   @SearchParamDefinition(name="format", path="DocumentReference.content.format", description="Format/content rules for the document", type="token" )
   public static final String SP_FORMAT = "format";
   @SearchParamDefinition(name="encounter", path="DocumentReference.context.encounter", description="Context of the document  content", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentReference:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("DocumentReference:encounter").toLocked();
+
   @SearchParamDefinition(name="related-ref", path="DocumentReference.context.related.ref", description="Related Resource", type="reference" )
-  public static final String SP_RELATEDREF = "related-ref";
+  public static final String SP_RELATED_REF = "related-ref";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentReference:related-ref</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RELATED_REF = new ca.uhn.fhir.model.api.Include("DocumentReference:related-ref").toLocked();
+
   @SearchParamDefinition(name="location", path="DocumentReference.content.attachment.url", description="Uri where the data can be found", type="uri" )
   public static final String SP_LOCATION = "location";
   @SearchParamDefinition(name="relatesto", path="DocumentReference.relatesTo.target", description="Target of the relationship", type="reference" )
   public static final String SP_RELATESTO = "relatesto";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentReference:relatesto</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RELATESTO = new ca.uhn.fhir.model.api.Include("DocumentReference:relatesto").toLocked();
+
   @SearchParamDefinition(name="facility", path="DocumentReference.context.facilityType", description="Kind of facility where patient was seen", type="token" )
   public static final String SP_FACILITY = "facility";
   @SearchParamDefinition(name="status", path="DocumentReference.status", description="current | superseded | entered-in-error", type="token" )

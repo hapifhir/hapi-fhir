@@ -38,7 +38,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 /**
  * Primitive type "boolean" in FHIR "true" or "false"
  */
-@DatatypeDef(name="boolean")
+@DatatypeDef(name = "boolean")
 public class BooleanType extends PrimitiveType<Boolean> implements IBaseBooleanDatatype {
 
 	private static final long serialVersionUID = 3L;
@@ -59,7 +59,34 @@ public class BooleanType extends PrimitiveType<Boolean> implements IBaseBooleanD
 
 	public BooleanType(String value) {
 		super();
-		setValueAsString(value);  
+		setValueAsString(value);
+	}
+
+	/**
+	 * Returns the value of this type as a primitive boolean.
+	 * 
+	 * @return Returns the value of this type as a primitive boolean.
+	 * @throws NullPointerException
+	 *            If the value is not set
+	 */
+	public boolean booleanValue() {
+		return getValue().booleanValue();
+	}
+
+	public BooleanType copy() {
+		return new BooleanType(getValue());
+	}
+
+	protected String encode(Boolean theValue) {
+		if (Boolean.TRUE.equals(theValue)) {
+			return "true";
+		} else {
+			return "false";
+		}
+	}
+
+	public String fhirType() {
+		return "boolean";
 	}
 
 	protected Boolean parse(String theValue) {
@@ -71,20 +98,5 @@ public class BooleanType extends PrimitiveType<Boolean> implements IBaseBooleanD
 		} else {
 			throw new IllegalArgumentException("Invalid boolean string: '" + theValue + "'");
 		}
-	}
-
-	protected String encode(Boolean theValue) {
-		if (Boolean.TRUE.equals(theValue)) {
-			return "true";
-		} else {
-			return "false";
-		}
-	}
-	
-	public BooleanType copy() {
-		return new BooleanType(getValueAsString());
- 	}
-	public String fhirType() {
-		return "boolean";		
 	}
 }

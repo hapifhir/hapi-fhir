@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A container for slot(s) of time that may be available for booking appointments.
  */
@@ -88,14 +89,14 @@ public class Schedule extends DomainResource {
 
     private static final long serialVersionUID = 158030926L;
 
-  /*
+  /**
    * Constructor
    */
     public Schedule() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Schedule(Reference actor) {
@@ -406,6 +407,12 @@ public class Schedule extends DomainResource {
 
   @SearchParamDefinition(name="actor", path="Schedule.actor", description="The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for", type="reference" )
   public static final String SP_ACTOR = "actor";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Schedule:actor</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ACTOR = new ca.uhn.fhir.model.api.Include("Schedule:actor").toLocked();
+
   @SearchParamDefinition(name="date", path="Schedule.planningHorizon", description="Search for Schedule resources that have a period that contains this date specified", type="date" )
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="Schedule.identifier", description="A Schedule Identifier", type="token" )

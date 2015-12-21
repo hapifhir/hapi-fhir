@@ -29,22 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGenderEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Significant health events and conditions for a person related to the patient relevant in the context of care for the patient.
  */
@@ -165,6 +162,9 @@ public class FamilyMemberHistory extends DomainResource {
         return "health-unknown";
       return "?";
       }
+    public String toSystem(FamilyHistoryStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -199,14 +199,14 @@ public class FamilyMemberHistory extends DomainResource {
 
         private static final long serialVersionUID = -1221569121L;
 
-    /*
+    /**
      * Constructor
      */
       public FamilyMemberHistoryConditionComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public FamilyMemberHistoryConditionComponent(CodeableConcept code) {
@@ -547,14 +547,14 @@ public class FamilyMemberHistory extends DomainResource {
 
     private static final long serialVersionUID = -1799103041L;
 
-  /*
+  /**
    * Constructor
    */
     public FamilyMemberHistory() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public FamilyMemberHistory(Reference patient, Enumeration<FamilyHistoryStatus> status, CodeableConcept relationship) {
@@ -1337,6 +1337,12 @@ public class FamilyMemberHistory extends DomainResource {
   public static final String SP_GENDER = "gender";
   @SearchParamDefinition(name="patient", path="FamilyMemberHistory.patient", description="The identity of a subject to list family member history items for", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>FamilyMemberHistory:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("FamilyMemberHistory:patient").toLocked();
+
   @SearchParamDefinition(name="relationship", path="FamilyMemberHistory.relationship", description="A search by a relationship type", type="token" )
   public static final String SP_RELATIONSHIP = "relationship";
 

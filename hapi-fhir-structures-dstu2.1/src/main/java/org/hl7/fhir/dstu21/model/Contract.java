@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu21.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,20 +29,19 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A formal agreement between parties regarding the conduct of business, exchange of information or other matters.
  */
@@ -74,14 +71,14 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = 1371245689L;
 
-    /*
+    /**
      * Constructor
      */
       public ActorComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ActorComponent(Reference entity) {
@@ -301,7 +298,7 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = 1782449516L;
 
-    /*
+    /**
      * Constructor
      */
       public ValuedItemComponent() {
@@ -786,14 +783,14 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = -1870392043L;
 
-    /*
+    /**
      * Constructor
      */
       public SignatoryComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public SignatoryComponent(Coding type, Reference party, StringType signature) {
@@ -1082,7 +1079,7 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = -1137577465L;
 
-    /*
+    /**
      * Constructor
      */
       public TermComponent() {
@@ -1715,14 +1712,14 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = 1371245689L;
 
-    /*
+    /**
      * Constructor
      */
       public TermActorComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public TermActorComponent(Reference entity) {
@@ -1942,7 +1939,7 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = 1782449516L;
 
-    /*
+    /**
      * Constructor
      */
       public TermValuedItemComponent() {
@@ -2408,14 +2405,14 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = -1763459053L;
 
-    /*
+    /**
      * Constructor
      */
       public FriendlyLanguageComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public FriendlyLanguageComponent(Type content) {
@@ -2544,14 +2541,14 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = -1763459053L;
 
-    /*
+    /**
      * Constructor
      */
       public LegalLanguageComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public LegalLanguageComponent(Type content) {
@@ -2680,14 +2677,14 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = -1763459053L;
 
-    /*
+    /**
      * Constructor
      */
       public ComputableLanguageComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ComputableLanguageComponent(Type content) {
@@ -2948,7 +2945,7 @@ public class Contract extends DomainResource {
 
     private static final long serialVersionUID = -1785608373L;
 
-  /*
+  /**
    * Constructor
    */
     public Contract() {
@@ -3952,14 +3949,38 @@ public class Contract extends DomainResource {
 
   @SearchParamDefinition(name="actor", path="Contract.actor.entity", description="Contract Actor Type", type="reference" )
   public static final String SP_ACTOR = "actor";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Contract:actor</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ACTOR = new ca.uhn.fhir.model.api.Include("Contract:actor").toLocked();
+
   @SearchParamDefinition(name="identifier", path="Contract.identifier", description="The identity of the contract", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="subject", path="Contract.subject", description="The identity of the target of the contract", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Contract:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Contract:subject").toLocked();
+
   @SearchParamDefinition(name="patient", path="Contract.subject", description="The identity of the target of the contract (if a patient)", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Contract:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Contract:patient").toLocked();
+
   @SearchParamDefinition(name="signer", path="Contract.signer.party", description="Contract Signatory Party", type="reference" )
   public static final String SP_SIGNER = "signer";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Contract:signer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SIGNER = new ca.uhn.fhir.model.api.Include("Contract:signer").toLocked();
+
 
 }
 

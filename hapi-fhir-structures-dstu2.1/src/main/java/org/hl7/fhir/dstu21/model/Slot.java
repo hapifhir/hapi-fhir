@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A slot of time on a schedule that may be available for booking appointments.
  */
@@ -161,6 +161,9 @@ public class Slot extends DomainResource {
         return "busy-tentative";
       return "?";
       }
+    public String toSystem(SlotStatus code) {
+      return code.getSystem();
+      }
     }
 
     /**
@@ -226,14 +229,14 @@ public class Slot extends DomainResource {
 
     private static final long serialVersionUID = 1984269299L;
 
-  /*
+  /**
    * Constructor
    */
     public Slot() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Slot(Reference schedule, Enumeration<SlotStatus> freeBusyType, InstantType start, InstantType end) {
@@ -711,14 +714,20 @@ public class Slot extends DomainResource {
 
   @SearchParamDefinition(name="schedule", path="Slot.schedule", description="The Schedule Resource that we are seeking a slot within", type="reference" )
   public static final String SP_SCHEDULE = "schedule";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Slot:schedule</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SCHEDULE = new ca.uhn.fhir.model.api.Include("Slot:schedule").toLocked();
+
   @SearchParamDefinition(name="identifier", path="Slot.identifier", description="A Slot Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="start", path="Slot.start", description="Appointment date/time.", type="date" )
   public static final String SP_START = "start";
   @SearchParamDefinition(name="slot-type", path="Slot.type", description="The type of appointments that can be booked into the slot", type="token" )
-  public static final String SP_SLOTTYPE = "slot-type";
+  public static final String SP_SLOT_TYPE = "slot-type";
   @SearchParamDefinition(name="fb-type", path="Slot.freeBusyType", description="The free/busy status of the appointment", type="token" )
-  public static final String SP_FBTYPE = "fb-type";
+  public static final String SP_FB_TYPE = "fb-type";
 
 }
 

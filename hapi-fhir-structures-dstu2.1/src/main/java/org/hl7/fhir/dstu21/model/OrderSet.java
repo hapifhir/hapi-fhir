@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource allows for the definition of an order set as a sharable, consumable, and executable artifact in support of clinical decision support.
  */
@@ -161,6 +161,9 @@ public class OrderSet extends DomainResource {
         return "related-person";
       return "?";
       }
+    public String toSystem(OrderSetParticipantType code) {
+      return code.getSystem();
+      }
     }
 
     public enum OrderSetItemType {
@@ -277,6 +280,9 @@ public class OrderSet extends DomainResource {
         return "fire-event";
       return "?";
       }
+    public String toSystem(OrderSetItemType code) {
+      return code.getSystem();
+      }
     }
 
     public enum OrderSetItemGroupingBehavior {
@@ -376,6 +382,9 @@ public class OrderSet extends DomainResource {
       if (code == OrderSetItemGroupingBehavior.SENTENCEGROUP)
         return "sentence-group";
       return "?";
+      }
+    public String toSystem(OrderSetItemGroupingBehavior code) {
+      return code.getSystem();
       }
     }
 
@@ -525,6 +534,9 @@ public class OrderSet extends DomainResource {
         return "one-or-more";
       return "?";
       }
+    public String toSystem(OrderSetItemSelectionBehavior code) {
+      return code.getSystem();
+      }
     }
 
     public enum OrderSetItemRequiredBehavior {
@@ -625,6 +637,9 @@ public class OrderSet extends DomainResource {
         return "must-unless-documented";
       return "?";
       }
+    public String toSystem(OrderSetItemRequiredBehavior code) {
+      return code.getSystem();
+      }
     }
 
     public enum OrderSetItemPrecheckBehavior {
@@ -709,6 +724,9 @@ public class OrderSet extends DomainResource {
         return "no";
       return "?";
       }
+    public String toSystem(OrderSetItemPrecheckBehavior code) {
+      return code.getSystem();
+      }
     }
 
     public enum OrderSetItemCardinalityBehavior {
@@ -792,6 +810,9 @@ public class OrderSet extends DomainResource {
       if (code == OrderSetItemCardinalityBehavior.MULTIPLE)
         return "multiple";
       return "?";
+      }
+    public String toSystem(OrderSetItemCardinalityBehavior code) {
+      return code.getSystem();
       }
     }
 
@@ -930,7 +951,7 @@ public class OrderSet extends DomainResource {
 
         private static final long serialVersionUID = -357042086L;
 
-    /*
+    /**
      * Constructor
      */
       public OrderSetItemComponent() {
@@ -1986,14 +2007,14 @@ public class OrderSet extends DomainResource {
 
         private static final long serialVersionUID = -252690483L;
 
-    /*
+    /**
      * Constructor
      */
       public OrderSetItemCustomizationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public OrderSetItemCustomizationComponent(StringType path, StringType expression) {
@@ -2207,7 +2228,7 @@ public class OrderSet extends DomainResource {
 
     private static final long serialVersionUID = -1392358630L;
 
-  /*
+  /**
    * Constructor
    */
     public OrderSet() {

@@ -29,20 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.
  */
@@ -163,6 +162,9 @@ public class ProcessRequest extends DomainResource {
         return "status";
       return "?";
       }
+    public String toSystem(ActionList code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -176,14 +178,14 @@ public class ProcessRequest extends DomainResource {
 
         private static final long serialVersionUID = -1598360600L;
 
-    /*
+    /**
      * Constructor
      */
       public ItemsComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ItemsComponent(IntegerType sequenceLinkId) {
@@ -435,14 +437,14 @@ public class ProcessRequest extends DomainResource {
 
     private static final long serialVersionUID = -1332331220L;
 
-  /*
+  /**
    * Constructor
    */
     public ProcessRequest() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public ProcessRequest(Enumeration<ActionList> action) {
@@ -1321,8 +1323,20 @@ public class ProcessRequest extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="provider", path="ProcessRequest.provider", description="The provider who regenerated this request", type="reference" )
   public static final String SP_PROVIDER = "provider";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ProcessRequest:provider</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROVIDER = new ca.uhn.fhir.model.api.Include("ProcessRequest:provider").toLocked();
+
   @SearchParamDefinition(name="organization", path="ProcessRequest.organization", description="The organization who generated this request", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ProcessRequest:organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("ProcessRequest:organization").toLocked();
+
   @SearchParamDefinition(name="action", path="ProcessRequest.action", description="The action requested by this resource", type="token" )
   public static final String SP_ACTION = "action";
 

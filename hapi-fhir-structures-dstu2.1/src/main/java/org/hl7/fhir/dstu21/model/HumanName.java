@@ -29,17 +29,17 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A human's name with the ability to identify parts and usage.
  */
@@ -208,6 +208,9 @@ public class HumanName extends Type implements ICompositeType {
         return "maiden";
       return "?";
       }
+    public String toSystem(NameUse code) {
+      return code.getSystem();
+      }
     }
 
     /**
@@ -261,7 +264,7 @@ public class HumanName extends Type implements ICompositeType {
 
     private static final long serialVersionUID = -210174642L;
 
-  /*
+  /**
    * Constructor
    */
     public HumanName() {
@@ -606,6 +609,80 @@ public class HumanName extends Type implements ICompositeType {
       return this;
     }
 
+ /**
+   * Returns all repetitions of {@link #getFamily() family name} as a space separated string
+   * 
+   * @see DatatypeUtil#joinStringsSpaceSeparated(List)
+   */
+  public String getFamilyAsSingleString() {
+    return joinStringsSpaceSeparated(getFamily());
+  }
+
+  /**
+   * Returns all repetitions of {@link #getGiven() given name} as a space separated string
+   * 
+   * @see DatatypeUtil#joinStringsSpaceSeparated(List)
+   */
+  public String getGivenAsSingleString() {
+    return joinStringsSpaceSeparated(getGiven());
+  }
+
+  /**
+   * Returns all repetitions of {@link #getPrefix() prefix name} as a space separated string
+   * 
+   * @see DatatypeUtil#joinStringsSpaceSeparated(List)
+   */
+  public String getPrefixAsSingleString() {
+    return joinStringsSpaceSeparated(getPrefix());
+  }
+
+  /**
+   * Returns all repetitions of {@link #getSuffix() suffix} as a space separated string
+   * 
+   * @see DatatypeUtil#joinStringsSpaceSeparated(List)
+   */
+  public String getSuffixAsSingleString() {
+    return joinStringsSpaceSeparated(getSuffix());
+  }
+
+  /**
+   * Returns all of the components of the name (prefix, given, family, suffix) as a single string with a single spaced
+   * string separating each part.
+   * <p>
+   * If none of the parts are populated, returns the {@link #getTextElement() text} element value instead.
+   * </p>
+   */
+  public String getNameAsSingleString() {
+    List<StringType> nameParts = new ArrayList<StringType>();
+    nameParts.addAll(getPrefix());
+    nameParts.addAll(getGiven());
+    nameParts.addAll(getFamily());
+    nameParts.addAll(getSuffix());
+    if (nameParts.size() > 0) {
+      return joinStringsSpaceSeparated(nameParts);
+    } else {
+      return getTextElement().getValue();
+    }
+  }
+
+  /**
+   * Joins a list of strings with a single space (' ') between each string
+   * 
+   * TODO: replace with call to ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated when HAPI upgrades to 1.4
+   */
+  private static String joinStringsSpaceSeparated(List<? extends IPrimitiveType<String>> theStrings) {
+    StringBuilder b = new StringBuilder();
+    for (IPrimitiveType<String> next : theStrings) {
+      if (next.isEmpty()) {
+        continue;
+      }
+      if (b.length() > 0) {
+        b.append(' ');
+      }
+      b.append(next.getValue());
+    }
+    return b.toString();
+  }
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("use", "code", "Identifies the purpose for this name.", 0, java.lang.Integer.MAX_VALUE, use));

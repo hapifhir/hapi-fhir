@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The details of a healthcare service available at a location.
  */
@@ -210,6 +209,9 @@ public class HealthcareService extends DomainResource {
         return "sun";
       return "?";
       }
+    public String toSystem(DaysOfWeek code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -230,14 +232,14 @@ public class HealthcareService extends DomainResource {
 
         private static final long serialVersionUID = 1703986174L;
 
-    /*
+    /**
      * Constructor
      */
       public ServiceTypeComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ServiceTypeComponent(CodeableConcept type) {
@@ -414,7 +416,7 @@ public class HealthcareService extends DomainResource {
 
         private static final long serialVersionUID = -2139510127L;
 
-    /*
+    /**
      * Constructor
      */
       public HealthcareServiceAvailableTimeComponent() {
@@ -725,14 +727,14 @@ public class HealthcareService extends DomainResource {
 
         private static final long serialVersionUID = 310849929L;
 
-    /*
+    /**
      * Constructor
      */
       public HealthcareServiceNotAvailableComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public HealthcareServiceNotAvailableComponent(StringType description) {
@@ -1049,14 +1051,14 @@ public class HealthcareService extends DomainResource {
 
     private static final long serialVersionUID = 683771126L;
 
-  /*
+  /**
    * Constructor
    */
     public HealthcareService() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public HealthcareService(Reference location) {
@@ -2288,12 +2290,24 @@ public class HealthcareService extends DomainResource {
   public static final String SP_SERVICETYPE = "servicetype";
   @SearchParamDefinition(name="organization", path="HealthcareService.providedBy", description="The organization that provides this Healthcare Service", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>HealthcareService:organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("HealthcareService:organization").toLocked();
+
   @SearchParamDefinition(name="name", path="HealthcareService.serviceName", description="A portion of the Healthcare service name", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="programname", path="HealthcareService.programName", description="One of the Program Names serviced by this HealthcareService", type="string" )
   public static final String SP_PROGRAMNAME = "programname";
   @SearchParamDefinition(name="location", path="HealthcareService.location", description="The location of the Healthcare Service", type="reference" )
   public static final String SP_LOCATION = "location";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>HealthcareService:location</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("HealthcareService:location").toLocked();
+
   @SearchParamDefinition(name="characteristic", path="HealthcareService.characteristic", description="One of the HealthcareService's characteristics", type="token" )
   public static final String SP_CHARACTERISTIC = "characteristic";
 

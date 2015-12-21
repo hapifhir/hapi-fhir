@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.
  */
@@ -119,14 +117,14 @@ public class ImmunizationRecommendation extends DomainResource {
 
         private static final long serialVersionUID = 1501347482L;
 
-    /*
+    /**
      * Constructor
      */
       public ImmunizationRecommendationRecommendationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ImmunizationRecommendationRecommendationComponent(DateTimeType date, CodeableConcept vaccineCode, CodeableConcept forecastStatus) {
@@ -597,14 +595,14 @@ public class ImmunizationRecommendation extends DomainResource {
 
         private static final long serialVersionUID = 1036994566L;
 
-    /*
+    /**
      * Constructor
      */
       public ImmunizationRecommendationRecommendationDateCriterionComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ImmunizationRecommendationRecommendationDateCriterionComponent(CodeableConcept code, DateTimeType value) {
@@ -788,7 +786,7 @@ public class ImmunizationRecommendation extends DomainResource {
 
         private static final long serialVersionUID = -512702014L;
 
-    /*
+    /**
      * Constructor
      */
       public ImmunizationRecommendationRecommendationProtocolComponent() {
@@ -1095,14 +1093,14 @@ public class ImmunizationRecommendation extends DomainResource {
 
     private static final long serialVersionUID = 641058495L;
 
-  /*
+  /**
    * Constructor
    */
     public ImmunizationRecommendation() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public ImmunizationRecommendation(Reference patient) {
@@ -1331,17 +1329,35 @@ public class ImmunizationRecommendation extends DomainResource {
   @SearchParamDefinition(name="identifier", path="ImmunizationRecommendation.identifier", description="Business identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="Dose number within sequence", type="number" )
-  public static final String SP_DOSESEQUENCE = "dose-sequence";
+  public static final String SP_DOSE_SEQUENCE = "dose-sequence";
   @SearchParamDefinition(name="patient", path="ImmunizationRecommendation.patient", description="Who this profile is for", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ImmunizationRecommendation:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ImmunizationRecommendation:patient").toLocked();
+
   @SearchParamDefinition(name="vaccine-type", path="ImmunizationRecommendation.recommendation.vaccineCode", description="Vaccine recommendation applies to", type="token" )
-  public static final String SP_VACCINETYPE = "vaccine-type";
+  public static final String SP_VACCINE_TYPE = "vaccine-type";
   @SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="Recommended dose number", type="number" )
-  public static final String SP_DOSENUMBER = "dose-number";
+  public static final String SP_DOSE_NUMBER = "dose-number";
   @SearchParamDefinition(name="information", path="ImmunizationRecommendation.recommendation.supportingPatientInformation", description="Patient observations supporting recommendation", type="reference" )
   public static final String SP_INFORMATION = "information";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ImmunizationRecommendation:information</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_INFORMATION = new ca.uhn.fhir.model.api.Include("ImmunizationRecommendation:information").toLocked();
+
   @SearchParamDefinition(name="support", path="ImmunizationRecommendation.recommendation.supportingImmunization", description="Past immunizations supporting recommendation", type="reference" )
   public static final String SP_SUPPORT = "support";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ImmunizationRecommendation:support</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUPPORT = new ca.uhn.fhir.model.api.Include("ImmunizationRecommendation:support").toLocked();
+
   @SearchParamDefinition(name="status", path="ImmunizationRecommendation.recommendation.forecastStatus", description="Vaccine administration status", type="token" )
   public static final String SP_STATUS = "status";
 

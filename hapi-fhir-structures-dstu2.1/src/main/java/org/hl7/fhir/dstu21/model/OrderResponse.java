@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A response to an order.
  */
@@ -241,6 +241,9 @@ public class OrderResponse extends DomainResource {
         return "completed";
       return "?";
       }
+    public String toSystem(OrderStatus code) {
+      return code.getSystem();
+      }
     }
 
     /**
@@ -309,14 +312,14 @@ public class OrderResponse extends DomainResource {
 
     private static final long serialVersionUID = -856633109L;
 
-  /*
+  /**
    * Constructor
    */
     public OrderResponse() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public OrderResponse(Reference request, Enumeration<OrderStatus> orderStatus) {
@@ -769,14 +772,32 @@ public class OrderResponse extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="request", path="OrderResponse.request", description="The order that this is a response to", type="reference" )
   public static final String SP_REQUEST = "request";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>OrderResponse:request</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST = new ca.uhn.fhir.model.api.Include("OrderResponse:request").toLocked();
+
   @SearchParamDefinition(name="identifier", path="OrderResponse.identifier", description="Identifiers assigned to this order by the orderer or by the receiver", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="code", path="OrderResponse.orderStatus", description="pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed", type="token" )
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="fulfillment", path="OrderResponse.fulfillment", description="Details of the outcome of performing the order", type="reference" )
   public static final String SP_FULFILLMENT = "fulfillment";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>OrderResponse:fulfillment</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_FULFILLMENT = new ca.uhn.fhir.model.api.Include("OrderResponse:fulfillment").toLocked();
+
   @SearchParamDefinition(name="who", path="OrderResponse.who", description="Who made the response", type="reference" )
   public static final String SP_WHO = "who";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>OrderResponse:who</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_WHO = new ca.uhn.fhir.model.api.Include("OrderResponse:who").toLocked();
+
 
 }
 

@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.
  */
@@ -179,6 +177,9 @@ public class CarePlan extends DomainResource {
         return "cancelled";
       return "?";
       }
+    public String toSystem(CarePlanStatus code) {
+      return code.getSystem();
+      }
     }
 
     public enum CarePlanRelationship {
@@ -278,6 +279,9 @@ public class CarePlan extends DomainResource {
       if (code == CarePlanRelationship.FULFILLS)
         return "fulfills";
       return "?";
+      }
+    public String toSystem(CarePlanRelationship code) {
+      return code.getSystem();
       }
     }
 
@@ -427,6 +431,9 @@ public class CarePlan extends DomainResource {
         return "cancelled";
       return "?";
       }
+    public String toSystem(CarePlanActivityStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -452,14 +459,14 @@ public class CarePlan extends DomainResource {
 
         private static final long serialVersionUID = 1875598050L;
 
-    /*
+    /**
      * Constructor
      */
       public CarePlanRelatedPlanComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public CarePlanRelatedPlanComponent(Reference plan) {
@@ -652,7 +659,7 @@ public class CarePlan extends DomainResource {
 
         private static final long serialVersionUID = -466811117L;
 
-    /*
+    /**
      * Constructor
      */
       public CarePlanParticipantComponent() {
@@ -834,7 +841,7 @@ public class CarePlan extends DomainResource {
 
         private static final long serialVersionUID = 40181608L;
 
-    /*
+    /**
      * Constructor
      */
       public CarePlanActivityComponent() {
@@ -1215,14 +1222,14 @@ public class CarePlan extends DomainResource {
 
         private static final long serialVersionUID = -1763965702L;
 
-    /*
+    /**
      * Constructor
      */
       public CarePlanActivityDetailComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public CarePlanActivityDetailComponent(BooleanType prohibited) {
@@ -2202,14 +2209,14 @@ public class CarePlan extends DomainResource {
 
     private static final long serialVersionUID = -307500543L;
 
-  /*
+  /**
    * Constructor
    */
     public CarePlan() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public CarePlan(Enumeration<CarePlanStatus> status) {
@@ -3138,24 +3145,72 @@ public class CarePlan extends DomainResource {
   public static final String SP_ACTIVITYDATE = "activitydate";
   @SearchParamDefinition(name="activityreference", path="CarePlan.activity.reference", description="Activity details defined in specific resource", type="reference" )
   public static final String SP_ACTIVITYREFERENCE = "activityreference";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CarePlan:activityreference</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ACTIVITYREFERENCE = new ca.uhn.fhir.model.api.Include("CarePlan:activityreference").toLocked();
+
   @SearchParamDefinition(name="performer", path="CarePlan.activity.detail.performer", description="Matches if the practitioner is listed as a performer in any of the \"simple\" activities.  (For performers of the detailed activities, chain through the activitydetail search parameter.)", type="reference" )
   public static final String SP_PERFORMER = "performer";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CarePlan:performer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PERFORMER = new ca.uhn.fhir.model.api.Include("CarePlan:performer").toLocked();
+
   @SearchParamDefinition(name="goal", path="CarePlan.goal", description="Desired outcome of plan", type="reference" )
   public static final String SP_GOAL = "goal";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CarePlan:goal</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_GOAL = new ca.uhn.fhir.model.api.Include("CarePlan:goal").toLocked();
+
   @SearchParamDefinition(name="subject", path="CarePlan.subject", description="Who care plan is for", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CarePlan:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("CarePlan:subject").toLocked();
+
   @SearchParamDefinition(name="relatedcode", path="CarePlan.relatedPlan.code", description="includes | replaces | fulfills", type="token" )
   public static final String SP_RELATEDCODE = "relatedcode";
   @SearchParamDefinition(name="participant", path="CarePlan.participant.member", description="Who is involved", type="reference" )
   public static final String SP_PARTICIPANT = "participant";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CarePlan:participant</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PARTICIPANT = new ca.uhn.fhir.model.api.Include("CarePlan:participant").toLocked();
+
   @SearchParamDefinition(name="relatedplan", path="CarePlan.relatedPlan.plan", description="Plan relationship exists with", type="reference" )
   public static final String SP_RELATEDPLAN = "relatedplan";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CarePlan:relatedplan</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RELATEDPLAN = new ca.uhn.fhir.model.api.Include("CarePlan:relatedplan").toLocked();
+
   @SearchParamDefinition(name="condition", path="CarePlan.addresses", description="Health issues this plan addresses", type="reference" )
   public static final String SP_CONDITION = "condition";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CarePlan:condition</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONDITION = new ca.uhn.fhir.model.api.Include("CarePlan:condition").toLocked();
+
   @SearchParamDefinition(name="related", path="", description="A combination of the type of relationship and the related plan", type="composite" )
   public static final String SP_RELATED = "related";
   @SearchParamDefinition(name="patient", path="CarePlan.subject", description="Who care plan is for", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CarePlan:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("CarePlan:patient").toLocked();
+
 
 }
 

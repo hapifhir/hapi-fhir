@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of a request for a medication, substance or device used in the healthcare setting.
  */
@@ -162,6 +161,9 @@ public class SupplyRequest extends DomainResource {
         return "cancelled";
       return "?";
       }
+    public String toSystem(SupplyRequestStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -182,7 +184,7 @@ public class SupplyRequest extends DomainResource {
 
         private static final long serialVersionUID = 307115287L;
 
-    /*
+    /**
      * Constructor
      */
       public SupplyRequestWhenComponent() {
@@ -399,7 +401,7 @@ public class SupplyRequest extends DomainResource {
 
     private static final long serialVersionUID = 1649766198L;
 
-  /*
+  /**
    * Constructor
    */
     public SupplyRequest() {
@@ -963,10 +965,28 @@ public class SupplyRequest extends DomainResource {
   public static final String SP_KIND = "kind";
   @SearchParamDefinition(name="patient", path="SupplyRequest.patient", description="Patient for whom the item is supplied", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>SupplyRequest:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("SupplyRequest:patient").toLocked();
+
   @SearchParamDefinition(name="supplier", path="SupplyRequest.supplier", description="Who is intended to fulfill the request", type="reference" )
   public static final String SP_SUPPLIER = "supplier";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>SupplyRequest:supplier</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUPPLIER = new ca.uhn.fhir.model.api.Include("SupplyRequest:supplier").toLocked();
+
   @SearchParamDefinition(name="source", path="SupplyRequest.source", description="Who initiated this order", type="reference" )
   public static final String SP_SOURCE = "source";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>SupplyRequest:source</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SOURCE = new ca.uhn.fhir.model.api.Include("SupplyRequest:source").toLocked();
+
   @SearchParamDefinition(name="status", path="SupplyRequest.status", description="requested | completed | failed | cancelled", type="token" )
   public static final String SP_STATUS = "status";
 

@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretations, and formatted representation of diagnostic reports.
  */
@@ -211,6 +209,9 @@ public class DiagnosticReport extends DomainResource {
         return "entered-in-error";
       return "?";
       }
+    public String toSystem(DiagnosticReportStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -236,14 +237,14 @@ public class DiagnosticReport extends DomainResource {
 
         private static final long serialVersionUID = 935791940L;
 
-    /*
+    /**
      * Constructor
      */
       public DiagnosticReportImageComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public DiagnosticReportImageComponent(Reference link) {
@@ -569,14 +570,14 @@ public class DiagnosticReport extends DomainResource {
 
     private static final long serialVersionUID = 920334551L;
 
-  /*
+  /**
    * Constructor
    */
     public DiagnosticReport() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public DiagnosticReport(Enumeration<DiagnosticReportStatus> status, CodeableConcept code, Reference subject, Type effective, InstantType issued, Reference performer) {
@@ -1563,24 +1564,72 @@ public class DiagnosticReport extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="image", path="DiagnosticReport.image.link", description="A reference to the image source.", type="reference" )
   public static final String SP_IMAGE = "image";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticReport:image</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_IMAGE = new ca.uhn.fhir.model.api.Include("DiagnosticReport:image").toLocked();
+
   @SearchParamDefinition(name="request", path="DiagnosticReport.request", description="Reference to the test or procedure request.", type="reference" )
   public static final String SP_REQUEST = "request";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticReport:request</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST = new ca.uhn.fhir.model.api.Include("DiagnosticReport:request").toLocked();
+
   @SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)", type="reference" )
   public static final String SP_PERFORMER = "performer";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticReport:performer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PERFORMER = new ca.uhn.fhir.model.api.Include("DiagnosticReport:performer").toLocked();
+
   @SearchParamDefinition(name="code", path="DiagnosticReport.code", description="The code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result", type="token" )
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="subject", path="DiagnosticReport.subject", description="The subject of the report", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticReport:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("DiagnosticReport:subject").toLocked();
+
   @SearchParamDefinition(name="diagnosis", path="DiagnosticReport.codedDiagnosis", description="A coded diagnosis on the report", type="token" )
   public static final String SP_DIAGNOSIS = "diagnosis";
   @SearchParamDefinition(name="encounter", path="DiagnosticReport.encounter", description="The Encounter when the order was made", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticReport:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("DiagnosticReport:encounter").toLocked();
+
   @SearchParamDefinition(name="result", path="DiagnosticReport.result", description="Link to an atomic result (observation resource)", type="reference" )
   public static final String SP_RESULT = "result";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticReport:result</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RESULT = new ca.uhn.fhir.model.api.Include("DiagnosticReport:result").toLocked();
+
   @SearchParamDefinition(name="patient", path="DiagnosticReport.subject", description="The subject of the report if a patient", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticReport:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("DiagnosticReport:patient").toLocked();
+
   @SearchParamDefinition(name="specimen", path="DiagnosticReport.specimen", description="The specimen details", type="reference" )
   public static final String SP_SPECIMEN = "specimen";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticReport:specimen</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SPECIMEN = new ca.uhn.fhir.model.api.Include("DiagnosticReport:specimen").toLocked();
+
   @SearchParamDefinition(name="issued", path="DiagnosticReport.issued", description="When the report was issued", type="date" )
   public static final String SP_ISSUED = "issued";
   @SearchParamDefinition(name="category", path="DiagnosticReport.category", description="Which diagnostic discipline/department created the report", type="token" )

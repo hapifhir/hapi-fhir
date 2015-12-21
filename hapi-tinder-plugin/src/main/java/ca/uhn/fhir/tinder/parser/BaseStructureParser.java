@@ -576,8 +576,11 @@ public abstract class BaseStructureParser {
 	}
 
 	protected FhirVersionEnum determineVersionEnum() throws MojoFailureException {
-		FhirVersionEnum versionEnum = null;
-		String version = myVersion;
+		return determineVersionEnum(myVersion);
+	}
+
+	public static FhirVersionEnum determineVersionEnum(String version) throws MojoFailureException {
+		FhirVersionEnum versionEnum;
 		if ("dstu".equals(version)) {
 			versionEnum = FhirVersionEnum.DSTU1;
 		} else if ("dstu2".equals(version)) {

@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.
  */
@@ -163,6 +161,9 @@ public class Provenance extends DomainResource {
         return "source";
       return "?";
       }
+    public String toSystem(ProvenanceEntityRole code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -202,14 +203,14 @@ public class Provenance extends DomainResource {
 
         private static final long serialVersionUID = 1792758952L;
 
-    /*
+    /**
      * Constructor
      */
       public ProvenanceAgentComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ProvenanceAgentComponent(Coding role) {
@@ -453,14 +454,14 @@ public class Provenance extends DomainResource {
 
         private static final long serialVersionUID = 794181198L;
 
-    /*
+    /**
      * Constructor
      */
       public ProvenanceAgentRelatedAgentComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ProvenanceAgentRelatedAgentComponent(CodeableConcept type, UriType target) {
@@ -646,14 +647,14 @@ public class Provenance extends DomainResource {
 
         private static final long serialVersionUID = 1533729633L;
 
-    /*
+    /**
      * Constructor
      */
       public ProvenanceEntityComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ProvenanceEntityComponent(Enumeration<ProvenanceEntityRole> role, Coding type, UriType reference) {
@@ -973,16 +974,16 @@ public class Provenance extends DomainResource {
     /**
      * The reason that the activity was taking place.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "reason", type = {Coding.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Reason the activity is occurring", formalDefinition="The reason that the activity was taking place." )
-    protected List<CodeableConcept> reason;
+    protected List<Coding> reason;
 
     /**
      * An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.
      */
-    @Child(name = "activity", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "activity", type = {Coding.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Activity that occurred", formalDefinition="An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities." )
-    protected CodeableConcept activity;
+    protected Coding activity;
 
     /**
      * Where the activity occurred, if relevant.
@@ -1006,7 +1007,7 @@ public class Provenance extends DomainResource {
     /**
      * An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility.
      */
-    @Child(name = "agent", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "agent", type = {}, order=7, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Agents involved in creating resource", formalDefinition="An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility." )
     protected List<ProvenanceAgentComponent> agent;
 
@@ -1024,16 +1025,16 @@ public class Provenance extends DomainResource {
     @Description(shortDefinition="Signature on target", formalDefinition="A digital signature on the target Reference(s). The signer should match a Provenance.agent. The purpose of the signature is indicated." )
     protected List<Signature> signature;
 
-    private static final long serialVersionUID = -1053458671L;
+    private static final long serialVersionUID = -436783145L;
 
-  /*
+  /**
    * Constructor
    */
     public Provenance() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Provenance(InstantType recorded) {
@@ -1162,16 +1163,16 @@ public class Provenance extends DomainResource {
     /**
      * @return {@link #reason} (The reason that the activity was taking place.)
      */
-    public List<CodeableConcept> getReason() { 
+    public List<Coding> getReason() { 
       if (this.reason == null)
-        this.reason = new ArrayList<CodeableConcept>();
+        this.reason = new ArrayList<Coding>();
       return this.reason;
     }
 
     public boolean hasReason() { 
       if (this.reason == null)
         return false;
-      for (CodeableConcept item : this.reason)
+      for (Coding item : this.reason)
         if (!item.isEmpty())
           return true;
       return false;
@@ -1181,20 +1182,20 @@ public class Provenance extends DomainResource {
      * @return {@link #reason} (The reason that the activity was taking place.)
      */
     // syntactic sugar
-    public CodeableConcept addReason() { //3
-      CodeableConcept t = new CodeableConcept();
+    public Coding addReason() { //3
+      Coding t = new Coding();
       if (this.reason == null)
-        this.reason = new ArrayList<CodeableConcept>();
+        this.reason = new ArrayList<Coding>();
       this.reason.add(t);
       return t;
     }
 
     // syntactic sugar
-    public Provenance addReason(CodeableConcept t) { //3
+    public Provenance addReason(Coding t) { //3
       if (t == null)
         return this;
       if (this.reason == null)
-        this.reason = new ArrayList<CodeableConcept>();
+        this.reason = new ArrayList<Coding>();
       this.reason.add(t);
       return this;
     }
@@ -1202,12 +1203,12 @@ public class Provenance extends DomainResource {
     /**
      * @return {@link #activity} (An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.)
      */
-    public CodeableConcept getActivity() { 
+    public Coding getActivity() { 
       if (this.activity == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Provenance.activity");
         else if (Configuration.doAutoCreate())
-          this.activity = new CodeableConcept(); // cc
+          this.activity = new Coding(); // cc
       return this.activity;
     }
 
@@ -1218,7 +1219,7 @@ public class Provenance extends DomainResource {
     /**
      * @param value {@link #activity} (An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.)
      */
-    public Provenance setActivity(CodeableConcept value) { 
+    public Provenance setActivity(Coding value) { 
       this.activity = value;
       return this;
     }
@@ -1446,8 +1447,8 @@ public class Provenance extends DomainResource {
         childrenList.add(new Property("target", "Reference(Any)", "The Reference(s) that were generated or updated by  the activity described in this resource. A provenance can point to more than one target if multiple resources were created/updated by the same activity.", 0, java.lang.Integer.MAX_VALUE, target));
         childrenList.add(new Property("period", "Period", "The period during which the activity occurred.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("recorded", "instant", "The instant of time at which the activity was recorded.", 0, java.lang.Integer.MAX_VALUE, recorded));
-        childrenList.add(new Property("reason", "CodeableConcept", "The reason that the activity was taking place.", 0, java.lang.Integer.MAX_VALUE, reason));
-        childrenList.add(new Property("activity", "CodeableConcept", "An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.", 0, java.lang.Integer.MAX_VALUE, activity));
+        childrenList.add(new Property("reason", "Coding", "The reason that the activity was taking place.", 0, java.lang.Integer.MAX_VALUE, reason));
+        childrenList.add(new Property("activity", "Coding", "An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.", 0, java.lang.Integer.MAX_VALUE, activity));
         childrenList.add(new Property("location", "Reference(Location)", "Where the activity occurred, if relevant.", 0, java.lang.Integer.MAX_VALUE, location));
         childrenList.add(new Property("policy", "uri", "Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc.", 0, java.lang.Integer.MAX_VALUE, policy));
         childrenList.add(new Property("agent", "", "An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility.", 0, java.lang.Integer.MAX_VALUE, agent));
@@ -1464,9 +1465,9 @@ public class Provenance extends DomainResource {
         else if (name.equals("recorded"))
           this.recorded = castToInstant(value); // InstantType
         else if (name.equals("reason"))
-          this.getReason().add(castToCodeableConcept(value));
+          this.getReason().add(castToCoding(value));
         else if (name.equals("activity"))
-          this.activity = castToCodeableConcept(value); // CodeableConcept
+          this.activity = castToCoding(value); // Coding
         else if (name.equals("location"))
           this.location = castToReference(value); // Reference
         else if (name.equals("policy"))
@@ -1497,7 +1498,7 @@ public class Provenance extends DomainResource {
           return addReason();
         }
         else if (name.equals("activity")) {
-          this.activity = new CodeableConcept();
+          this.activity = new Coding();
           return this.activity;
         }
         else if (name.equals("location")) {
@@ -1536,8 +1537,8 @@ public class Provenance extends DomainResource {
         dst.period = period == null ? null : period.copy();
         dst.recorded = recorded == null ? null : recorded.copy();
         if (reason != null) {
-          dst.reason = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : reason)
+          dst.reason = new ArrayList<Coding>();
+          for (Coding i : reason)
             dst.reason.add(i.copy());
         };
         dst.activity = activity == null ? null : activity.copy();
@@ -1608,22 +1609,46 @@ public class Provenance extends DomainResource {
   public static final String SP_SIGTYPE = "sigtype";
   @SearchParamDefinition(name="agent", path="Provenance.agent.actor", description="Individual, device or organization playing role", type="reference" )
   public static final String SP_AGENT = "agent";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Provenance:agent</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_AGENT = new ca.uhn.fhir.model.api.Include("Provenance:agent").toLocked();
+
   @SearchParamDefinition(name="entitytype", path="Provenance.entity.type", description="The type of resource in this entity", type="token" )
   public static final String SP_ENTITYTYPE = "entitytype";
   @SearchParamDefinition(name="patient", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Provenance:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Provenance:patient").toLocked();
+
   @SearchParamDefinition(name="start", path="Provenance.period.start", description="Starting time with inclusive boundary", type="date" )
   public static final String SP_START = "start";
   @SearchParamDefinition(name="end", path="Provenance.period.end", description="End time with inclusive boundary, if not ongoing", type="date" )
   public static final String SP_END = "end";
   @SearchParamDefinition(name="location", path="Provenance.location", description="Where the activity occurred, if relevant", type="reference" )
   public static final String SP_LOCATION = "location";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Provenance:location</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("Provenance:location").toLocked();
+
   @SearchParamDefinition(name="userid", path="Provenance.agent.userId", description="Authorization-system identifier for the agent", type="token" )
   public static final String SP_USERID = "userid";
   @SearchParamDefinition(name="entity", path="Provenance.entity.reference", description="Identity of entity", type="uri" )
   public static final String SP_ENTITY = "entity";
   @SearchParamDefinition(name="target", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference" )
   public static final String SP_TARGET = "target";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Provenance:target</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_TARGET = new ca.uhn.fhir.model.api.Include("Provenance:target").toLocked();
+
 
 }
 

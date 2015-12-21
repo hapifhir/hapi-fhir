@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A request to convey information; e.g. the CDS system proposes that an alert be sent to a responsible provider, the CDS system proposes that the public health agency be notified about a reportable condition.
  */
@@ -258,6 +257,9 @@ public class CommunicationRequest extends DomainResource {
         return "failed";
       return "?";
       }
+    public String toSystem(CommunicationRequestStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -271,14 +273,14 @@ public class CommunicationRequest extends DomainResource {
 
         private static final long serialVersionUID = -1763459053L;
 
-    /*
+    /**
      * Constructor
      */
       public CommunicationRequestPayloadComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public CommunicationRequestPayloadComponent(Type content) {
@@ -538,7 +540,7 @@ public class CommunicationRequest extends DomainResource {
 
     private static final long serialVersionUID = 146906020L;
 
-  /*
+  /**
    * Constructor
    */
     public CommunicationRequest() {
@@ -1311,24 +1313,60 @@ public class CommunicationRequest extends DomainResource {
 
   @SearchParamDefinition(name="requester", path="CommunicationRequest.requester", description="An individual who requested a communication", type="reference" )
   public static final String SP_REQUESTER = "requester";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CommunicationRequest:requester</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTER = new ca.uhn.fhir.model.api.Include("CommunicationRequest:requester").toLocked();
+
   @SearchParamDefinition(name="identifier", path="CommunicationRequest.identifier", description="Unique identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="subject", path="CommunicationRequest.subject", description="Focus of message", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CommunicationRequest:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("CommunicationRequest:subject").toLocked();
+
   @SearchParamDefinition(name="medium", path="CommunicationRequest.medium", description="A channel of communication", type="token" )
   public static final String SP_MEDIUM = "medium";
   @SearchParamDefinition(name="encounter", path="CommunicationRequest.encounter", description="Encounter leading to message", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CommunicationRequest:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("CommunicationRequest:encounter").toLocked();
+
   @SearchParamDefinition(name="priority", path="CommunicationRequest.priority", description="Message urgency", type="token" )
   public static final String SP_PRIORITY = "priority";
   @SearchParamDefinition(name="requested", path="CommunicationRequest.requestedOn", description="When ordered or proposed", type="date" )
   public static final String SP_REQUESTED = "requested";
   @SearchParamDefinition(name="sender", path="CommunicationRequest.sender", description="Message sender", type="reference" )
   public static final String SP_SENDER = "sender";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CommunicationRequest:sender</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SENDER = new ca.uhn.fhir.model.api.Include("CommunicationRequest:sender").toLocked();
+
   @SearchParamDefinition(name="patient", path="CommunicationRequest.subject", description="Focus of message", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CommunicationRequest:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("CommunicationRequest:patient").toLocked();
+
   @SearchParamDefinition(name="recipient", path="CommunicationRequest.recipient", description="Message recipient", type="reference" )
   public static final String SP_RECIPIENT = "recipient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CommunicationRequest:recipient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RECIPIENT = new ca.uhn.fhir.model.api.Include("CommunicationRequest:recipient").toLocked();
+
   @SearchParamDefinition(name="time", path="CommunicationRequest.scheduledDateTime", description="When scheduled", type="date" )
   public static final String SP_TIME = "time";
   @SearchParamDefinition(name="category", path="CommunicationRequest.category", description="Message category", type="token" )

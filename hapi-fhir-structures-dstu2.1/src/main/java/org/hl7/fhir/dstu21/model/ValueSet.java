@@ -29,22 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A value set specifies a set of codes drawn from one or more code systems.
  */
@@ -197,6 +194,9 @@ public class ValueSet extends DomainResource {
         return "not-in";
       return "?";
       }
+    public String toSystem(FilterOperator code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -217,7 +217,7 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
-    /*
+    /**
      * Constructor
      */
       public ValueSetContactComponent() {
@@ -417,14 +417,14 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -1109401192L;
 
-    /*
+    /**
      * Constructor
      */
       public ValueSetCodeSystemComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ValueSetCodeSystemComponent(UriType system) {
@@ -746,14 +746,14 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -318560292L;
 
-    /*
+    /**
      * Constructor
      */
       public ConceptDefinitionComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConceptDefinitionComponent(CodeType code) {
@@ -1163,14 +1163,14 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = 1515662414L;
 
-    /*
+    /**
      * Constructor
      */
       public ConceptDefinitionDesignationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConceptDefinitionDesignationComponent(StringType value) {
@@ -1398,7 +1398,7 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -703166694L;
 
-    /*
+    /**
      * Constructor
      */
       public ValueSetComposeComponent() {
@@ -1659,14 +1659,14 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -196054471L;
 
-    /*
+    /**
      * Constructor
      */
       public ConceptSetComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConceptSetComponent(UriType system) {
@@ -1964,14 +1964,14 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -1513912691L;
 
-    /*
+    /**
      * Constructor
      */
       public ConceptReferenceComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConceptReferenceComponent(CodeType code) {
@@ -2218,14 +2218,14 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = 1985515000L;
 
-    /*
+    /**
      * Constructor
      */
       public ConceptSetFilterComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConceptSetFilterComponent(CodeType property, Enumeration<FilterOperator> op, CodeType value) {
@@ -2493,14 +2493,14 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -43471993L;
 
-    /*
+    /**
      * Constructor
      */
       public ValueSetExpansionComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ValueSetExpansionComponent(UriType identifier, DateTimeType timestamp) {
@@ -2895,14 +2895,14 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = 1172641169L;
 
-    /*
+    /**
      * Constructor
      */
       public ValueSetExpansionParameterComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ValueSetExpansionParameterComponent(StringType name) {
@@ -3187,7 +3187,7 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -2038349483L;
 
-    /*
+    /**
      * Constructor
      */
       public ValueSetExpansionContainsComponent() {
@@ -3714,14 +3714,14 @@ public class ValueSet extends DomainResource {
 
     private static final long serialVersionUID = -467533312L;
 
-  /*
+  /**
    * Constructor
    */
     public ValueSet() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public ValueSet(Enumeration<ConformanceResourceStatus> status) {

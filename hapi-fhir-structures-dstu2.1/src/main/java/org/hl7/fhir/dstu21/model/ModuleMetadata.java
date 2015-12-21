@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The ModuleMetadata resource defines the common metadata elements used by quality improvement artifacts. This information includes descriptive and topical metadata to enable repository searches, as well as governance and evidentiary support information.
  */
@@ -178,6 +177,9 @@ public class ModuleMetadata extends DomainResource {
         return "order-set";
       return "?";
       }
+    public String toSystem(ModuleMetadataType code) {
+      return code.getSystem();
+      }
     }
 
     public enum ModuleMetadataStatus {
@@ -293,6 +295,9 @@ public class ModuleMetadata extends DomainResource {
       if (code == ModuleMetadataStatus.INACTIVE)
         return "inactive";
       return "?";
+      }
+    public String toSystem(ModuleMetadataStatus code) {
+      return code.getSystem();
       }
     }
 
@@ -458,6 +463,9 @@ public class ModuleMetadata extends DomainResource {
         return "clinical-venue";
       return "?";
       }
+    public String toSystem(ModuleMetadataFocusType code) {
+      return code.getSystem();
+      }
     }
 
     public enum ModuleMetadataContributorType {
@@ -573,6 +581,9 @@ public class ModuleMetadata extends DomainResource {
       if (code == ModuleMetadataContributorType.ENDORSER)
         return "endorser";
       return "?";
+      }
+    public String toSystem(ModuleMetadataContributorType code) {
+      return code.getSystem();
       }
     }
 
@@ -722,6 +733,9 @@ public class ModuleMetadata extends DomainResource {
         return "derived-from";
       return "?";
       }
+    public String toSystem(ModuleMetadataResourceType code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -749,14 +763,14 @@ public class ModuleMetadata extends DomainResource {
 
         private static final long serialVersionUID = 701599845L;
 
-    /*
+    /**
      * Constructor
      */
       public ModuleMetadataCoverageComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ModuleMetadataCoverageComponent(Enumeration<ModuleMetadataFocusType> focus) {
@@ -982,14 +996,14 @@ public class ModuleMetadata extends DomainResource {
 
         private static final long serialVersionUID = -652221921L;
 
-    /*
+    /**
      * Constructor
      */
       public ModuleMetadataContributorComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ModuleMetadataContributorComponent(Enumeration<ModuleMetadataContributorType> type, Reference party) {
@@ -1183,14 +1197,14 @@ public class ModuleMetadata extends DomainResource {
 
         private static final long serialVersionUID = -1094264249L;
 
-    /*
+    /**
      * Constructor
      */
       public ModuleMetadataRelatedResourceComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ModuleMetadataRelatedResourceComponent(Enumeration<ModuleMetadataResourceType> type) {
@@ -1596,14 +1610,14 @@ public class ModuleMetadata extends DomainResource {
 
     private static final long serialVersionUID = -1125568771L;
 
-  /*
+  /**
    * Constructor
    */
     public ModuleMetadata() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public ModuleMetadata(Enumeration<ModuleMetadataType> type, Enumeration<ModuleMetadataStatus> status) {
@@ -2699,6 +2713,20 @@ public class ModuleMetadata extends DomainResource {
     return ResourceType.ModuleMetadata;
    }
 
+  @SearchParamDefinition(name="identifier", path="ModuleMetadata.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="topic", path="ModuleMetadata.topic", description="Topics associated with the module", type="token" )
+  public static final String SP_TOPIC = "topic";
+  @SearchParamDefinition(name="description", path="ModuleMetadata.description", description="Text search against the description", type="string" )
+  public static final String SP_DESCRIPTION = "description";
+  @SearchParamDefinition(name="keyword", path="ModuleMetadata.keyword", description="Keywords associated with the module", type="string" )
+  public static final String SP_KEYWORD = "keyword";
+  @SearchParamDefinition(name="title", path="ModuleMetadata.title", description="Text search against the title", type="string" )
+  public static final String SP_TITLE = "title";
+  @SearchParamDefinition(name="version", path="ModuleMetadata.version", description="Version of the module (e.g. 1.0.0)", type="string" )
+  public static final String SP_VERSION = "version";
+  @SearchParamDefinition(name="status", path="ModuleMetadata.status", description="Status of the module", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

@@ -57,10 +57,10 @@ import org.hl7.fhir.dstu21.model.OperationDefinition.OperationDefinitionParamete
 import org.hl7.fhir.dstu21.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.dstu21.model.ResourceType;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
@@ -436,7 +436,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				if (nextParameter.getParamType() != null) {
 					param.getTypeElement().setValueAsString(nextParameter.getParamType().getCode());
 				}
-				for (Class<? extends IResource> nextTarget : nextParameter.getDeclaredTypes()) {
+				for (Class<? extends IBaseResource> nextTarget : nextParameter.getDeclaredTypes()) {
 					RuntimeResourceDefinition targetDef = myServerConfiguration.getFhirContext().getResourceDefinition(nextTarget);
 					if (targetDef != null) {
 						ResourceType code;

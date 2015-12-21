@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The DecisionSupportServiceModule resource describes decision support functionality that is available as a service.
  */
@@ -52,8 +52,8 @@ public class DecisionSupportServiceModule extends DomainResource {
         /**
          * The name of the parameter.
          */
-        @Child(name = "name", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="", formalDefinition="The name of the parameter." )
+        @Child(name = "name", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Parameter name", formalDefinition="The name of the parameter." )
         protected CodeType name;
 
         /**
@@ -64,10 +64,10 @@ public class DecisionSupportServiceModule extends DomainResource {
         protected CodeType use;
 
         /**
-         * A brief description of the parameter.
+         * A brief discussion of what the parameter is for and how it is used by the module.
          */
         @Child(name = "documentation", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="", formalDefinition="A brief description of the parameter." )
+        @Description(shortDefinition="A brief description of the parameter", formalDefinition="A brief discussion of what the parameter is for and how it is used by the module." )
         protected StringType documentation;
 
         /**
@@ -78,14 +78,14 @@ public class DecisionSupportServiceModule extends DomainResource {
         protected CodeType type;
 
         /**
-         * The profile of the parameter, if any.
+         * If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.
          */
         @Child(name = "profile", type = {StructureDefinition.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="", formalDefinition="The profile of the parameter, if any." )
+        @Description(shortDefinition="The profile of the parameter, any", formalDefinition="If specified, this indicates a profile that the input data must conform to, or that the output data will conform to." )
         protected Reference profile;
 
         /**
-         * The actual object that is the target of the reference (The profile of the parameter, if any.)
+         * The actual object that is the target of the reference (If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.)
          */
         protected StructureDefinition profileTarget;
 
@@ -97,34 +97,33 @@ public class DecisionSupportServiceModule extends DomainResource {
         protected List<StringType> mustSupport;
 
         /**
-         * Code filters for the required data, if any.
+         * Indicates that incoming data for this parameter is expected to match the given code filter. In other words, every instance should have a value for the path element that comes from the specified value set (or list of concepts).
          */
         @Child(name = "codeFilter", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="", formalDefinition="Code filters for the required data, if any." )
+        @Description(shortDefinition="Code filters for the required data, if any", formalDefinition="Indicates that incoming data for this parameter is expected to match the given code filter. In other words, every instance should have a value for the path element that comes from the specified value set (or list of concepts)." )
         protected List<DecisionSupportServiceModuleParameterCodeFilterComponent> codeFilter;
 
         /**
-         * Date filters for the required data, if any.
+         * Indicates that incoming data for this parameter is expected to match the given date filter. In other words, every instance should have a value for the path element that is equal to the given datetime (or within the given Period).
          */
         @Child(name = "dateFilter", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="", formalDefinition="Date filters for the required data, if any." )
+        @Description(shortDefinition="Date filters for the required data, if any", formalDefinition="Indicates that incoming data for this parameter is expected to match the given date filter. In other words, every instance should have a value for the path element that is equal to the given datetime (or within the given Period)." )
         protected List<DecisionSupportServiceModuleParameterDateFilterComponent> dateFilter;
 
         private static final long serialVersionUID = 484857813L;
 
-    /*
+    /**
      * Constructor
      */
       public DecisionSupportServiceModuleParameterComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
-      public DecisionSupportServiceModuleParameterComponent(CodeType name, CodeType use, CodeType type) {
+      public DecisionSupportServiceModuleParameterComponent(CodeType use, CodeType type) {
         super();
-        this.name = name;
         this.use = use;
         this.type = type;
       }
@@ -168,9 +167,13 @@ public class DecisionSupportServiceModule extends DomainResource {
          * @param value The name of the parameter.
          */
         public DecisionSupportServiceModuleParameterComponent setName(String value) { 
+          if (Utilities.noString(value))
+            this.name = null;
+          else {
             if (this.name == null)
               this.name = new CodeType();
             this.name.setValue(value);
+          }
           return this;
         }
 
@@ -220,7 +223,7 @@ public class DecisionSupportServiceModule extends DomainResource {
         }
 
         /**
-         * @return {@link #documentation} (A brief description of the parameter.). This is the underlying object with id, value and extensions. The accessor "getDocumentation" gives direct access to the value
+         * @return {@link #documentation} (A brief discussion of what the parameter is for and how it is used by the module.). This is the underlying object with id, value and extensions. The accessor "getDocumentation" gives direct access to the value
          */
         public StringType getDocumentationElement() { 
           if (this.documentation == null)
@@ -240,7 +243,7 @@ public class DecisionSupportServiceModule extends DomainResource {
         }
 
         /**
-         * @param value {@link #documentation} (A brief description of the parameter.). This is the underlying object with id, value and extensions. The accessor "getDocumentation" gives direct access to the value
+         * @param value {@link #documentation} (A brief discussion of what the parameter is for and how it is used by the module.). This is the underlying object with id, value and extensions. The accessor "getDocumentation" gives direct access to the value
          */
         public DecisionSupportServiceModuleParameterComponent setDocumentationElement(StringType value) { 
           this.documentation = value;
@@ -248,14 +251,14 @@ public class DecisionSupportServiceModule extends DomainResource {
         }
 
         /**
-         * @return A brief description of the parameter.
+         * @return A brief discussion of what the parameter is for and how it is used by the module.
          */
         public String getDocumentation() { 
           return this.documentation == null ? null : this.documentation.getValue();
         }
 
         /**
-         * @param value A brief description of the parameter.
+         * @param value A brief discussion of what the parameter is for and how it is used by the module.
          */
         public DecisionSupportServiceModuleParameterComponent setDocumentation(String value) { 
           if (Utilities.noString(value))
@@ -314,7 +317,7 @@ public class DecisionSupportServiceModule extends DomainResource {
         }
 
         /**
-         * @return {@link #profile} (The profile of the parameter, if any.)
+         * @return {@link #profile} (If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.)
          */
         public Reference getProfile() { 
           if (this.profile == null)
@@ -330,7 +333,7 @@ public class DecisionSupportServiceModule extends DomainResource {
         }
 
         /**
-         * @param value {@link #profile} (The profile of the parameter, if any.)
+         * @param value {@link #profile} (If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.)
          */
         public DecisionSupportServiceModuleParameterComponent setProfile(Reference value) { 
           this.profile = value;
@@ -338,7 +341,7 @@ public class DecisionSupportServiceModule extends DomainResource {
         }
 
         /**
-         * @return {@link #profile} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The profile of the parameter, if any.)
+         * @return {@link #profile} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.)
          */
         public StructureDefinition getProfileTarget() { 
           if (this.profileTarget == null)
@@ -350,7 +353,7 @@ public class DecisionSupportServiceModule extends DomainResource {
         }
 
         /**
-         * @param value {@link #profile} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The profile of the parameter, if any.)
+         * @param value {@link #profile} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.)
          */
         public DecisionSupportServiceModuleParameterComponent setProfileTarget(StructureDefinition value) { 
           this.profileTarget = value;
@@ -412,7 +415,7 @@ public class DecisionSupportServiceModule extends DomainResource {
         }
 
         /**
-         * @return {@link #codeFilter} (Code filters for the required data, if any.)
+         * @return {@link #codeFilter} (Indicates that incoming data for this parameter is expected to match the given code filter. In other words, every instance should have a value for the path element that comes from the specified value set (or list of concepts).)
          */
         public List<DecisionSupportServiceModuleParameterCodeFilterComponent> getCodeFilter() { 
           if (this.codeFilter == null)
@@ -430,7 +433,7 @@ public class DecisionSupportServiceModule extends DomainResource {
         }
 
         /**
-         * @return {@link #codeFilter} (Code filters for the required data, if any.)
+         * @return {@link #codeFilter} (Indicates that incoming data for this parameter is expected to match the given code filter. In other words, every instance should have a value for the path element that comes from the specified value set (or list of concepts).)
          */
     // syntactic sugar
         public DecisionSupportServiceModuleParameterCodeFilterComponent addCodeFilter() { //3
@@ -452,7 +455,7 @@ public class DecisionSupportServiceModule extends DomainResource {
         }
 
         /**
-         * @return {@link #dateFilter} (Date filters for the required data, if any.)
+         * @return {@link #dateFilter} (Indicates that incoming data for this parameter is expected to match the given date filter. In other words, every instance should have a value for the path element that is equal to the given datetime (or within the given Period).)
          */
         public List<DecisionSupportServiceModuleParameterDateFilterComponent> getDateFilter() { 
           if (this.dateFilter == null)
@@ -470,7 +473,7 @@ public class DecisionSupportServiceModule extends DomainResource {
         }
 
         /**
-         * @return {@link #dateFilter} (Date filters for the required data, if any.)
+         * @return {@link #dateFilter} (Indicates that incoming data for this parameter is expected to match the given date filter. In other words, every instance should have a value for the path element that is equal to the given datetime (or within the given Period).)
          */
     // syntactic sugar
         public DecisionSupportServiceModuleParameterDateFilterComponent addDateFilter() { //3
@@ -495,12 +498,12 @@ public class DecisionSupportServiceModule extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("name", "code", "The name of the parameter.", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("use", "code", "Whether the parameter is input or output for the module.", 0, java.lang.Integer.MAX_VALUE, use));
-          childrenList.add(new Property("documentation", "string", "A brief description of the parameter.", 0, java.lang.Integer.MAX_VALUE, documentation));
+          childrenList.add(new Property("documentation", "string", "A brief discussion of what the parameter is for and how it is used by the module.", 0, java.lang.Integer.MAX_VALUE, documentation));
           childrenList.add(new Property("type", "code", "The type of the parameter.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("profile", "Reference(StructureDefinition)", "The profile of the parameter, if any.", 0, java.lang.Integer.MAX_VALUE, profile));
+          childrenList.add(new Property("profile", "Reference(StructureDefinition)", "If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.", 0, java.lang.Integer.MAX_VALUE, profile));
           childrenList.add(new Property("mustSupport", "string", "Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available.", 0, java.lang.Integer.MAX_VALUE, mustSupport));
-          childrenList.add(new Property("codeFilter", "", "Code filters for the required data, if any.", 0, java.lang.Integer.MAX_VALUE, codeFilter));
-          childrenList.add(new Property("dateFilter", "", "Date filters for the required data, if any.", 0, java.lang.Integer.MAX_VALUE, dateFilter));
+          childrenList.add(new Property("codeFilter", "", "Indicates that incoming data for this parameter is expected to match the given code filter. In other words, every instance should have a value for the path element that comes from the specified value set (or list of concepts).", 0, java.lang.Integer.MAX_VALUE, codeFilter));
+          childrenList.add(new Property("dateFilter", "", "Indicates that incoming data for this parameter is expected to match the given date filter. In other words, every instance should have a value for the path element that is equal to the given datetime (or within the given Period).", 0, java.lang.Integer.MAX_VALUE, dateFilter));
         }
 
       @Override
@@ -632,7 +635,7 @@ public class DecisionSupportServiceModule extends DomainResource {
         /**
          * The valueset for the code filter. The valueSet or codeableConcept elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.
          */
-        @Child(name = "valueSet", type = {StringType.class, ValueSet.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "valueSet", type = {UriType.class, ValueSet.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The valueset for the code filter", formalDefinition="The valueset for the code filter. The valueSet or codeableConcept elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset." )
         protected Type valueSet;
 
@@ -645,14 +648,14 @@ public class DecisionSupportServiceModule extends DomainResource {
 
         private static final long serialVersionUID = -666343535L;
 
-    /*
+    /**
      * Constructor
      */
       public DecisionSupportServiceModuleParameterCodeFilterComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public DecisionSupportServiceModuleParameterCodeFilterComponent(StringType path) {
@@ -715,14 +718,14 @@ public class DecisionSupportServiceModule extends DomainResource {
         /**
          * @return {@link #valueSet} (The valueset for the code filter. The valueSet or codeableConcept elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.)
          */
-        public StringType getValueSetStringType() throws FHIRException { 
-          if (!(this.valueSet instanceof StringType))
-            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.valueSet.getClass().getName()+" was encountered");
-          return (StringType) this.valueSet;
+        public UriType getValueSetUriType() throws FHIRException { 
+          if (!(this.valueSet instanceof UriType))
+            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.valueSet.getClass().getName()+" was encountered");
+          return (UriType) this.valueSet;
         }
 
-        public boolean hasValueSetStringType() { 
-          return this.valueSet instanceof StringType;
+        public boolean hasValueSetUriType() { 
+          return this.valueSet instanceof UriType;
         }
 
         /**
@@ -793,7 +796,7 @@ public class DecisionSupportServiceModule extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("path", "string", "The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.", 0, java.lang.Integer.MAX_VALUE, path));
-          childrenList.add(new Property("valueSet[x]", "string|Reference(ValueSet)", "The valueset for the code filter. The valueSet or codeableConcept elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, java.lang.Integer.MAX_VALUE, valueSet));
+          childrenList.add(new Property("valueSet[x]", "uri|Reference(ValueSet)", "The valueset for the code filter. The valueSet or codeableConcept elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, java.lang.Integer.MAX_VALUE, valueSet));
           childrenList.add(new Property("codeableConcept", "CodeableConcept", "The codeable concept for the code filter. Only one of valueSet or codeableConcept may be specified. If codeableConcepts are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codeable concepts.", 0, java.lang.Integer.MAX_VALUE, codeableConcept));
         }
 
@@ -814,8 +817,8 @@ public class DecisionSupportServiceModule extends DomainResource {
         if (name.equals("path")) {
           throw new FHIRException("Cannot call addChild on a primitive type DecisionSupportServiceModule.path");
         }
-        else if (name.equals("valueSetString")) {
-          this.valueSet = new StringType();
+        else if (name.equals("valueSetUri")) {
+          this.valueSet = new UriType();
           return this.valueSet;
         }
         else if (name.equals("valueSetReference")) {
@@ -893,14 +896,14 @@ public class DecisionSupportServiceModule extends DomainResource {
 
         private static final long serialVersionUID = 1791957163L;
 
-    /*
+    /**
      * Constructor
      */
       public DecisionSupportServiceModuleParameterDateFilterComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public DecisionSupportServiceModuleParameterDateFilterComponent(StringType path) {
@@ -1098,15 +1101,15 @@ public class DecisionSupportServiceModule extends DomainResource {
     protected ModuleMetadata moduleMetadataTarget;
 
     /**
-     * Parameters to the module.
+     * The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.
      */
     @Child(name = "parameter", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="", formalDefinition="Parameters to the module." )
+    @Description(shortDefinition="Parameters to the module", formalDefinition="The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse." )
     protected List<DecisionSupportServiceModuleParameterComponent> parameter;
 
     private static final long serialVersionUID = 1535823227L;
 
-  /*
+  /**
    * Constructor
    */
     public DecisionSupportServiceModule() {
@@ -1247,7 +1250,7 @@ public class DecisionSupportServiceModule extends DomainResource {
     }
 
     /**
-     * @return {@link #parameter} (Parameters to the module.)
+     * @return {@link #parameter} (The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.)
      */
     public List<DecisionSupportServiceModuleParameterComponent> getParameter() { 
       if (this.parameter == null)
@@ -1265,7 +1268,7 @@ public class DecisionSupportServiceModule extends DomainResource {
     }
 
     /**
-     * @return {@link #parameter} (Parameters to the module.)
+     * @return {@link #parameter} (The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.)
      */
     // syntactic sugar
     public DecisionSupportServiceModuleParameterComponent addParameter() { //3
@@ -1291,7 +1294,7 @@ public class DecisionSupportServiceModule extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "A logical identifier for the module such as the CMS or NQF identifiers for a measure artifact.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("version", "string", "The version of the module, if any. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge modules, refer to the Decision Support Service specification.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("moduleMetadata", "Reference(ModuleMetadata)", "A reference to a ModuleMetadata resource describing the metadata for the decision support service module.", 0, java.lang.Integer.MAX_VALUE, moduleMetadata));
-        childrenList.add(new Property("parameter", "", "Parameters to the module.", 0, java.lang.Integer.MAX_VALUE, parameter));
+        childrenList.add(new Property("parameter", "", "The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.", 0, java.lang.Integer.MAX_VALUE, parameter));
       }
 
       @Override

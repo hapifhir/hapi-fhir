@@ -37,6 +37,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
+import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -178,11 +179,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public DaoMethodOutcome delete(IIdType theId) {
 		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
 		StopWatch w = new StopWatch();
-		
+
 		ResourceTable savedEntity = delete(theId, deleteConflicts);
 
 		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
-		
+
 		ourLog.info("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return toMethodOutcome(savedEntity, null);
 	}
@@ -221,9 +222,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
 
 		List<ResourceTable> deletedResources = deleteByUrl(theUrl, deleteConflicts);
-		
+
 		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
-		
+
 		if (deletedResources.isEmpty()) {
 			throw new ResourceNotFoundException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "unableToDeleteNotFound", theUrl));
 		}
@@ -245,7 +246,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		for (Long pid : resource) {
 			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
 			retVal.add(entity);
-			
+
 			validateOkToDelete(deleteConflicts, entity);
 
 			// Notify interceptors
@@ -265,7 +266,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 
 		}
-		
+
 		return retVal;
 	}
 
@@ -390,7 +391,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			BaseHasResource entity = readEntity(theId.toVersionless(), false);
 			validateResourceType(entity);
 			currentTmp = toResource(myResourceType, entity, true);
-			if (ResourceMetadataKeyEnum.UPDATED.get(currentTmp).after(end.getValue())) {
+			Date lastUpdated;
+			if (currentTmp instanceof IResource) {
+				lastUpdated = ResourceMetadataKeyEnum.UPDATED.get((IResource) currentTmp).getValue();
+			} else {
+				lastUpdated = ((IAnyResource) currentTmp).getMeta().getLastUpdated();
+			}
+			if (lastUpdated.after(end.getValue())) {
 				currentTmp = null;
 			}
 		} catch (ResourceNotFoundException e) {
@@ -661,7 +668,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ourLog.info("Processed metaDeleteOperation on {} in {}ms", new Object[] { theResourceId.getValue(), w.getMillisAndRestart() });
 
 		@SuppressWarnings("unchecked")
-		MT retVal = (MT)metaGetOperation(theMetaDel.getClass(), theResourceId);
+		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId);
 		return retVal;
 	}
 
@@ -680,7 +687,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		return retVal;
 	}
-	
+
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {
 		MT retVal;
 		try {
@@ -774,7 +781,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		T retVal = toResource(myResourceType, entity, false);
 
-		InstantDt deleted = ResourceMetadataKeyEnum.DELETED_AT.get(retVal);
+		IPrimitiveType<Date> deleted;
+		if (retVal instanceof IResource) {
+			deleted = ResourceMetadataKeyEnum.DELETED_AT.get((IResource) retVal);
+		} else {
+			deleted = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) retVal);
+		}
 		if (deleted != null && !deleted.isEmpty()) {
 			throw new ResourceGoneException("Resource was deleted at " + deleted.getValueAsString());
 		}
@@ -888,7 +900,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 		return search(map);
 	}
-	
+
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams) {
 		// Notify interceptors
@@ -928,7 +940,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@SuppressWarnings("unchecked")
 	@Required
-	public void setResourceType(Class<? extends IResource> theTableType) {
+	public void setResourceType(Class<? extends IBaseResource> theTableType) {
 		myResourceType = (Class<T>) theTableType;
 	}
 
@@ -942,14 +954,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private DaoMethodOutcome toMethodOutcome(final BaseHasResource theEntity, IBaseResource theResource) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
-		outcome.setId(theEntity.getIdDt());
+		
+		IIdType id = theEntity.getIdDt();
+		if (getContext().getVersion().getVersion().isRi()) {
+			id = new IdType(id.getValue());
+		}
+		
+		outcome.setId(id);
 		outcome.setResource(theResource);
 		if (theResource != null) {
-			theResource.setId(theEntity.getIdDt());
+			theResource.setId(id);
 			if (theResource instanceof IResource) {
 				ResourceMetadataKeyEnum.UPDATED.put((IResource) theResource, theEntity.getUpdated());
 			} else {
-				IBaseMetaType meta = ((IAnyResource)theResource).getMeta();
+				IBaseMetaType meta = ((IAnyResource) theResource).getMeta();
 				meta.setLastUpdated(theEntity.getUpdatedDate());
 			}
 		}
@@ -977,9 +995,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		return retVal;
 	}
-
-
-
 
 	@Override
 	public DaoMethodOutcome update(T theResource) {
@@ -1087,8 +1102,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		theDeleteConflicts.add(new DeleteConflict(sourceId, sourcePath, targetId));
 	}
 
-	
-	
 	private void validateResourceType(BaseHasResource entity) {
 		validateResourceType(entity, myResourceName);
 	}

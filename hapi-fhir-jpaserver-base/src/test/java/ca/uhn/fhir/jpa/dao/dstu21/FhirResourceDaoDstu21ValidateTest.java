@@ -8,22 +8,21 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.Observation;
+import org.hl7.fhir.dstu21.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu21.model.OperationOutcome;
+import org.hl7.fhir.dstu21.model.Organization;
+import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.StructureDefinition;
+import org.hl7.fhir.dstu21.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.dstu21.resource.Bundle;
-import ca.uhn.fhir.model.dstu21.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu21.resource.Observation;
-import ca.uhn.fhir.model.dstu21.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu21.resource.Organization;
-import ca.uhn.fhir.model.dstu21.resource.Patient;
-import ca.uhn.fhir.model.dstu21.resource.StructureDefinition;
-import ca.uhn.fhir.model.dstu21.resource.ValueSet;
-import ca.uhn.fhir.model.dstu21.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -71,16 +70,16 @@ public class FhirResourceDaoDstu21ValidateTest extends BaseJpaDstu21Test {
 		myValueSetDao.update((ValueSet) findResourceByIdInBundle(vss, "observation-relationshiptypes"));
 
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/org/hl7/fhir/instance/model/dstu21/profile/devicemetricobservation.profile.xml");
-		sd.setId(new IdDt());
+		sd.setId(new IdType());
 		sd.setUrl("http://example.com/foo/bar/" + methodName);
 		myStructureDefinitionDao.create(sd);
 
 		Observation input = new Observation();
-		ResourceMetadataKeyEnum.PROFILES.put(input, Arrays.asList(new IdDt(sd.getUrl())));
+		input.getMeta().getProfile().add(new IdType(sd.getUrl()));
 
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
 		input.getEncounter().setReference("http://foo.com/Encounter/9");
-		input.setStatus(ObservationStatusEnum.FINAL);
+		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
 		String encoded = null;
@@ -114,11 +113,11 @@ public class FhirResourceDaoDstu21ValidateTest extends BaseJpaDstu21Test {
 
 		Observation input = new Observation();
 		String profileUri = "http://example.com/" + methodName;
-		ResourceMetadataKeyEnum.PROFILES.put(input, Arrays.asList(new IdDt(profileUri)));
+		input.getMeta().getProfile().add(new IdType(profileUri));
 
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
 		input.getEncounter().setReference("http://foo.com/Encounter/9");
-		input.setStatus(ObservationStatusEnum.FINAL);
+		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
@@ -204,7 +203,7 @@ public class FhirResourceDaoDstu21ValidateTest extends BaseJpaDstu21Test {
 
 		Patient pat = new Patient();
 		pat.addName().addFamily(methodName);
-		pat.getManagingOrganization().setReference(orgId);
+		pat.getManagingOrganization().setReference(orgId.getValue());
 		IIdType patId = myPatientDao.create(pat).getId().toUnqualifiedVersionless();
 
 		OperationOutcome outcome = null;
@@ -230,10 +229,10 @@ public class FhirResourceDaoDstu21ValidateTest extends BaseJpaDstu21Test {
 
 	}
 
-	private IResource findResourceByIdInBundle(Bundle vss, String name) {
-		IResource retVal = null;
-		for (Entry next : vss.getEntry()) {
-			if (next.getResource().getId().getIdPart().equals(name)) {
+	private IBaseResource findResourceByIdInBundle(Bundle vss, String name) {
+		IBaseResource retVal = null;
+		for (BundleEntryComponent next : vss.getEntry()) {
+			if (next.getResource().getIdElement().getIdPart().equals(name)) {
 				retVal = next.getResource();
 				break;
 			}

@@ -166,10 +166,10 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-12-05T08:35:35-05:00"/>
+  <date value="2015-12-19T16:00:42-05:00"/>
   <description value="Base StructureDefinition for Quantity Type"/>
   <requirements value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
-  <fhirVersion value="1.1.0"/>
+  <fhirVersion value="1.2.0"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>

@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu21.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,22 +29,20 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.RemittanceOutcome;
-import org.hl7.fhir.dstu21.model.Enumerations.RemittanceOutcomeEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides the adjudication details from the processing of a Claim resource.
  */
@@ -85,14 +81,14 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -1917866697L;
 
-    /*
+    /**
      * Constructor
      */
       public ItemsComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ItemsComponent(PositiveIntType sequenceLinkId) {
@@ -401,14 +397,14 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -949880587L;
 
-    /*
+    /**
      * Constructor
      */
       public ItemAdjudicationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ItemAdjudicationComponent(Coding code) {
@@ -634,14 +630,14 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -1751018357L;
 
-    /*
+    /**
      * Constructor
      */
       public ItemDetailComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ItemDetailComponent(PositiveIntType sequenceLinkId) {
@@ -883,14 +879,14 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -949880587L;
 
-    /*
+    /**
      * Constructor
      */
       public DetailAdjudicationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public DetailAdjudicationComponent(Coding code) {
@@ -1109,14 +1105,14 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = 1780202110L;
 
-    /*
+    /**
      * Constructor
      */
       public SubDetailComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public SubDetailComponent(PositiveIntType sequenceLinkId) {
@@ -1307,14 +1303,14 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -949880587L;
 
-    /*
+    /**
      * Constructor
      */
       public SubdetailAdjudicationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public SubdetailAdjudicationComponent(Coding code) {
@@ -1561,14 +1557,14 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -1675935854L;
 
-    /*
+    /**
      * Constructor
      */
       public AddedItemComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public AddedItemComponent(Coding service) {
@@ -1956,14 +1952,14 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -949880587L;
 
-    /*
+    /**
      * Constructor
      */
       public AddedItemAdjudicationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public AddedItemAdjudicationComponent(Coding code) {
@@ -2189,14 +2185,14 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -2104242020L;
 
-    /*
+    /**
      * Constructor
      */
       public AddedItemsDetailComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public AddedItemsDetailComponent(Coding service) {
@@ -2399,14 +2395,14 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -949880587L;
 
-    /*
+    /**
      * Constructor
      */
       public AddedItemDetailAdjudicationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public AddedItemDetailAdjudicationComponent(Coding code) {
@@ -2631,22 +2627,22 @@ public class ClaimResponse extends DomainResource {
         protected PositiveIntType subdetailSequenceLinkId;
 
         /**
-         * An error code,froma specified code system, which details why the claim could not be adjudicated.
+         * An error code,from a specified code system, which details why the claim could not be adjudicated.
          */
         @Child(name = "code", type = {Coding.class}, order=4, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Error code detailing processing issues", formalDefinition="An error code,froma specified code system, which details why the claim could not be adjudicated." )
+        @Description(shortDefinition="Error code detailing processing issues", formalDefinition="An error code,from a specified code system, which details why the claim could not be adjudicated." )
         protected Coding code;
 
         private static final long serialVersionUID = -1893641175L;
 
-    /*
+    /**
      * Constructor
      */
       public ErrorsComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ErrorsComponent(Coding code) {
@@ -2790,7 +2786,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #code} (An error code,froma specified code system, which details why the claim could not be adjudicated.)
+         * @return {@link #code} (An error code,from a specified code system, which details why the claim could not be adjudicated.)
          */
         public Coding getCode() { 
           if (this.code == null)
@@ -2806,7 +2802,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #code} (An error code,froma specified code system, which details why the claim could not be adjudicated.)
+         * @param value {@link #code} (An error code,from a specified code system, which details why the claim could not be adjudicated.)
          */
         public ErrorsComponent setCode(Coding value) { 
           this.code = value;
@@ -2818,7 +2814,7 @@ public class ClaimResponse extends DomainResource {
           childrenList.add(new Property("sequenceLinkId", "positiveInt", "The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId));
           childrenList.add(new Property("detailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, detailSequenceLinkId));
           childrenList.add(new Property("subdetailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, subdetailSequenceLinkId));
-          childrenList.add(new Property("code", "Coding", "An error code,froma specified code system, which details why the claim could not be adjudicated.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("code", "Coding", "An error code,from a specified code system, which details why the claim could not be adjudicated.", 0, java.lang.Integer.MAX_VALUE, code));
         }
 
       @Override
@@ -2925,7 +2921,7 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = 1768923951L;
 
-    /*
+    /**
      * Constructor
      */
       public NotesComponent() {
@@ -3197,14 +3193,14 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = 621250924L;
 
-    /*
+    /**
      * Constructor
      */
       public CoverageComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public CoverageComponent(PositiveIntType sequence, BooleanType focal, Reference coverage, Coding relationship) {
@@ -3873,7 +3869,7 @@ public class ClaimResponse extends DomainResource {
 
     private static final long serialVersionUID = 2021598689L;
 
-  /*
+  /**
    * Constructor
    */
     public ClaimResponse() {
@@ -5086,6 +5082,30 @@ public class ClaimResponse extends DomainResource {
 
   @SearchParamDefinition(name="identifier", path="ClaimResponse.identifier", description="The identity of the insurer", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="request", path="ClaimResponse.request", description="The claim reference", type="reference" )
+  public static final String SP_REQUEST = "request";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClaimResponse:request</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST = new ca.uhn.fhir.model.api.Include("ClaimResponse:request").toLocked();
+
+  @SearchParamDefinition(name="disposition", path="ClaimResponse.disposition", description="The contents of the disposition message", type="string" )
+  public static final String SP_DISPOSITION = "disposition";
+  @SearchParamDefinition(name="paymentdate", path="ClaimResponse.paymentDate", description="The expected paymentDate", type="date" )
+  public static final String SP_PAYMENTDATE = "paymentdate";
+  @SearchParamDefinition(name="created", path="ClaimResponse.created", description="The creation date", type="date" )
+  public static final String SP_CREATED = "created";
+  @SearchParamDefinition(name="organization", path="ClaimResponse.organization", description="The organization who generated this resource", type="reference" )
+  public static final String SP_ORGANIZATION = "organization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClaimResponse:organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("ClaimResponse:organization").toLocked();
+
+  @SearchParamDefinition(name="outcome", path="ClaimResponse.outcome", description="The processing outcome", type="token" )
+  public static final String SP_OUTCOME = "outcome";
 
 }
 

@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Measurements and simple assertions made about a patient, device or other subject.
  */
@@ -211,6 +209,9 @@ public class Observation extends DomainResource {
         return "unknown";
       return "?";
       }
+    public String toSystem(ObservationStatus code) {
+      return code.getSystem();
+      }
     }
 
     public enum ObservationRelationshipType {
@@ -359,6 +360,9 @@ public class Observation extends DomainResource {
         return "interfered-by";
       return "?";
       }
+    public String toSystem(ObservationRelationshipType code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -400,7 +404,7 @@ public class Observation extends DomainResource {
 
         private static final long serialVersionUID = -238694788L;
 
-    /*
+    /**
      * Constructor
      */
       public ObservationReferenceRangeComponent() {
@@ -670,14 +674,14 @@ public class Observation extends DomainResource {
 
         private static final long serialVersionUID = 1541802577L;
 
-    /*
+    /**
      * Constructor
      */
       public ObservationRelatedComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ObservationRelatedComponent(Reference target) {
@@ -874,14 +878,14 @@ public class Observation extends DomainResource {
 
         private static final long serialVersionUID = 946602904L;
 
-    /*
+    /**
      * Constructor
      */
       public ObservationComponentComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ObservationComponentComponent(CodeableConcept code) {
@@ -1420,14 +1424,14 @@ public class Observation extends DomainResource {
 
     private static final long serialVersionUID = -931593572L;
 
-  /*
+  /**
    * Constructor
    */
     public Observation() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Observation(Enumeration<ObservationStatus> status, CodeableConcept code) {
@@ -2585,50 +2589,104 @@ public class Observation extends DomainResource {
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="subject", path="Observation.subject", description="The subject that the observation is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Observation:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Observation:subject").toLocked();
+
   @SearchParamDefinition(name="component-data-absent-reason", path="Observation.component.dataAbsentReason", description="The reason why the expected value in the element Observation.component.value[x] is missing.", type="token" )
-  public static final String SP_COMPONENTDATAABSENTREASON = "component-data-absent-reason";
+  public static final String SP_COMPONENT_DATA_ABSENT_REASON = "component-data-absent-reason";
   @SearchParamDefinition(name="value-concept", path="Observation.valueCodeableConcept", description="The value of the observation, if the value is a CodeableConcept", type="token" )
-  public static final String SP_VALUECONCEPT = "value-concept";
+  public static final String SP_VALUE_CONCEPT = "value-concept";
   @SearchParamDefinition(name="value-date", path="Observation.valueDateTime|Observation.valuePeriod", description="The value of the observation, if the value is a date or period of time", type="date" )
-  public static final String SP_VALUEDATE = "value-date";
+  public static final String SP_VALUE_DATE = "value-date";
   @SearchParamDefinition(name="related", path="", description="Related Observations - search on related-type and related-target together", type="composite" )
   public static final String SP_RELATED = "related";
   @SearchParamDefinition(name="patient", path="Observation.subject", description="The subject that the observation is about (if patient)", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Observation:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Observation:patient").toLocked();
+
   @SearchParamDefinition(name="specimen", path="Observation.specimen", description="Specimen used for this observation", type="reference" )
   public static final String SP_SPECIMEN = "specimen";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Observation:specimen</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SPECIMEN = new ca.uhn.fhir.model.api.Include("Observation:specimen").toLocked();
+
   @SearchParamDefinition(name="component-code", path="Observation.component.code", description="The component code of the observation type", type="token" )
-  public static final String SP_COMPONENTCODE = "component-code";
+  public static final String SP_COMPONENT_CODE = "component-code";
   @SearchParamDefinition(name="value-string", path="Observation.valueString", description="The value of the observation, if the value is a string, and also searches in CodeableConcept.text", type="string" )
-  public static final String SP_VALUESTRING = "value-string";
+  public static final String SP_VALUE_STRING = "value-string";
   @SearchParamDefinition(name="identifier", path="Observation.identifier", description="The unique id for a particular observation", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="component-code-value-[x]", path="", description="Both component code and one of the component value parameters", type="composite" )
-  public static final String SP_COMPONENTCODEVALUEX = "component-code-value-[x]";
-  @SearchParamDefinition(name="code-value-[x]", path="", description="Both code and one of the value parameters", type="composite" )
-  public static final String SP_CODEVALUEX = "code-value-[x]";
+  @SearchParamDefinition(name="component-code-value-concept", path="", description="Both component code and one of the component value parameters", type="composite", compositeOf={"component-code", "component-code-value-concept"} )
+  public static final String SP_COMPONENT_CODE_VALUE_CONCEPT = "component-code-value-concept";
+  @SearchParamDefinition(name="component-code-value-date", path="", description="Both component code and one of the component value parameters", type="composite", compositeOf={"component-code", "component-code-value-date"} )
+  public static final String SP_COMPONENT_CODE_VALUE_DATE = "component-code-value-date";
+  @SearchParamDefinition(name="component-code-value-string", path="", description="Both component code and one of the component value parameters", type="composite", compositeOf={"component-code", "component-code-value-string"} )
+  public static final String SP_COMPONENT_CODE_VALUE_STRING = "component-code-value-string";
+  @SearchParamDefinition(name="component-code-value-quantity", path="", description="Both component code and one of the component value parameters", type="composite", compositeOf={"component-code", "component-code-value-quantity"} )
+  public static final String SP_COMPONENT_CODE_VALUE_QUANTITY = "component-code-value-quantity";
+  @SearchParamDefinition(name="code-value-concept", path="", description="Both code and one of the value parameters", type="composite", compositeOf={"code", "code-value-concept"} )
+  public static final String SP_CODE_VALUE_CONCEPT = "code-value-concept";
+  @SearchParamDefinition(name="code-value-date", path="", description="Both code and one of the value parameters", type="composite", compositeOf={"code", "code-value-date"} )
+  public static final String SP_CODE_VALUE_DATE = "code-value-date";
+  @SearchParamDefinition(name="code-value-string", path="", description="Both code and one of the value parameters", type="composite", compositeOf={"code", "code-value-string"} )
+  public static final String SP_CODE_VALUE_STRING = "code-value-string";
+  @SearchParamDefinition(name="code-value-quantity", path="", description="Both code and one of the value parameters", type="composite", compositeOf={"code", "code-value-quantity"} )
+  public static final String SP_CODE_VALUE_QUANTITY = "code-value-quantity";
   @SearchParamDefinition(name="performer", path="Observation.performer", description="Who performed the observation", type="reference" )
   public static final String SP_PERFORMER = "performer";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Observation:performer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PERFORMER = new ca.uhn.fhir.model.api.Include("Observation:performer").toLocked();
+
   @SearchParamDefinition(name="value-quantity", path="Observation.valueQuantity", description="The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity" )
-  public static final String SP_VALUEQUANTITY = "value-quantity";
+  public static final String SP_VALUE_QUANTITY = "value-quantity";
   @SearchParamDefinition(name="component-value-quantity", path="Observation.component.valueQuantity", description="The value of the component observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity" )
-  public static final String SP_COMPONENTVALUEQUANTITY = "component-value-quantity";
+  public static final String SP_COMPONENT_VALUE_QUANTITY = "component-value-quantity";
   @SearchParamDefinition(name="data-absent-reason", path="Observation.dataAbsentReason", description="The reason why the expected value in the element Observation.value[x] is missing.", type="token" )
-  public static final String SP_DATAABSENTREASON = "data-absent-reason";
+  public static final String SP_DATA_ABSENT_REASON = "data-absent-reason";
   @SearchParamDefinition(name="encounter", path="Observation.encounter", description="Healthcare event related to the observation", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Observation:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("Observation:encounter").toLocked();
+
   @SearchParamDefinition(name="related-type", path="Observation.related.type", description="has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by", type="token" )
-  public static final String SP_RELATEDTYPE = "related-type";
+  public static final String SP_RELATED_TYPE = "related-type";
   @SearchParamDefinition(name="related-target", path="Observation.related.target", description="Resource that is related to this one", type="reference" )
-  public static final String SP_RELATEDTARGET = "related-target";
+  public static final String SP_RELATED_TARGET = "related-target";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Observation:related-target</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RELATED_TARGET = new ca.uhn.fhir.model.api.Include("Observation:related-target").toLocked();
+
   @SearchParamDefinition(name="component-value-string", path="Observation.component.valueString", description="The value of the component observation, if the value is a string, and also searches in CodeableConcept.text", type="string" )
-  public static final String SP_COMPONENTVALUESTRING = "component-value-string";
+  public static final String SP_COMPONENT_VALUE_STRING = "component-value-string";
   @SearchParamDefinition(name="component-value-concept", path="Observation.component.valueCodeableConcept", description="The value of the component observation, if the value is a CodeableConcept", type="token" )
-  public static final String SP_COMPONENTVALUECONCEPT = "component-value-concept";
+  public static final String SP_COMPONENT_VALUE_CONCEPT = "component-value-concept";
   @SearchParamDefinition(name="category", path="Observation.category", description="The classification of the type of observation", type="token" )
   public static final String SP_CATEGORY = "category";
   @SearchParamDefinition(name="device", path="Observation.device", description="The Device that generated the observation data.", type="reference" )
   public static final String SP_DEVICE = "device";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Observation:device</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DEVICE = new ca.uhn.fhir.model.api.Include("Observation:device").toLocked();
+
   @SearchParamDefinition(name="status", path="Observation.status", description="The status of the observation", type="token" )
   public static final String SP_STATUS = "status";
 

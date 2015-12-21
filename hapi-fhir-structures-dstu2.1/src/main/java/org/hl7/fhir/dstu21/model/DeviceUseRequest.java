@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Represents a request for a patient to employ a medical device. The device may be an implantable device, or an external assistive device, such as a walker.
  */
@@ -256,6 +257,9 @@ public class DeviceUseRequest extends DomainResource {
         return "aborted";
       return "?";
       }
+    public String toSystem(DeviceUseRequestStatus code) {
+      return code.getSystem();
+      }
     }
 
     public enum DeviceUseRequestPriority {
@@ -372,6 +376,9 @@ public class DeviceUseRequest extends DomainResource {
         return "asap";
       return "?";
       }
+    public String toSystem(DeviceUseRequestPriority code) {
+      return code.getSystem();
+      }
     }
 
     /**
@@ -482,14 +489,14 @@ public class DeviceUseRequest extends DomainResource {
 
     private static final long serialVersionUID = 1208477058L;
 
-  /*
+  /**
    * Constructor
    */
     public DeviceUseRequest() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public DeviceUseRequest(Reference device, Reference subject) {
@@ -1299,10 +1306,28 @@ public class DeviceUseRequest extends DomainResource {
 
   @SearchParamDefinition(name="subject", path="DeviceUseRequest.subject", description="Search by subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DeviceUseRequest:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("DeviceUseRequest:subject").toLocked();
+
   @SearchParamDefinition(name="patient", path="DeviceUseRequest.subject", description="Search by subject - a patient", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DeviceUseRequest:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("DeviceUseRequest:patient").toLocked();
+
   @SearchParamDefinition(name="device", path="DeviceUseRequest.device", description="Device requested", type="reference" )
   public static final String SP_DEVICE = "device";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DeviceUseRequest:device</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DEVICE = new ca.uhn.fhir.model.api.Include("DeviceUseRequest:device").toLocked();
+
 
 }
 

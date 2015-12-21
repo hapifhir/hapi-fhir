@@ -19,7 +19,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 
-public abstract class BaseDateTimeType extends PrimitiveType<Date>, IBaseDa {
+public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 
 	private static final long serialVersionUID = 1L;
 

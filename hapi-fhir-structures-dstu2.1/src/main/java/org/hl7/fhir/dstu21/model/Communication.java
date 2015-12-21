@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.
  */
@@ -178,6 +177,9 @@ public class Communication extends DomainResource {
         return "failed";
       return "?";
       }
+    public String toSystem(CommunicationStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -191,14 +193,14 @@ public class Communication extends DomainResource {
 
         private static final long serialVersionUID = -1763459053L;
 
-    /*
+    /**
      * Constructor
      */
       public CommunicationPayloadComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public CommunicationPayloadComponent(Type content) {
@@ -451,7 +453,7 @@ public class Communication extends DomainResource {
 
     private static final long serialVersionUID = -1654449146L;
 
-  /*
+  /**
    * Constructor
    */
     public Communication() {
@@ -1199,20 +1201,56 @@ public class Communication extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="request", path="Communication.requestDetail", description="CommunicationRequest producing this message", type="reference" )
   public static final String SP_REQUEST = "request";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Communication:request</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST = new ca.uhn.fhir.model.api.Include("Communication:request").toLocked();
+
   @SearchParamDefinition(name="sender", path="Communication.sender", description="Message sender", type="reference" )
   public static final String SP_SENDER = "sender";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Communication:sender</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SENDER = new ca.uhn.fhir.model.api.Include("Communication:sender").toLocked();
+
   @SearchParamDefinition(name="subject", path="Communication.subject", description="Focus of message", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Communication:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Communication:subject").toLocked();
+
   @SearchParamDefinition(name="patient", path="Communication.subject", description="Focus of message", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Communication:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Communication:patient").toLocked();
+
   @SearchParamDefinition(name="recipient", path="Communication.recipient", description="Message recipient", type="reference" )
   public static final String SP_RECIPIENT = "recipient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Communication:recipient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RECIPIENT = new ca.uhn.fhir.model.api.Include("Communication:recipient").toLocked();
+
   @SearchParamDefinition(name="received", path="Communication.received", description="When received", type="date" )
   public static final String SP_RECEIVED = "received";
   @SearchParamDefinition(name="medium", path="Communication.medium", description="A channel of communication", type="token" )
   public static final String SP_MEDIUM = "medium";
   @SearchParamDefinition(name="encounter", path="Communication.encounter", description="Encounter leading to message", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Communication:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("Communication:encounter").toLocked();
+
   @SearchParamDefinition(name="category", path="Communication.category", description="Message category", type="token" )
   public static final String SP_CATEGORY = "category";
   @SearchParamDefinition(name="sent", path="Communication.sent", description="When sent", type="date" )

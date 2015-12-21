@@ -13,20 +13,20 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hl7.fhir.dstu21.model.Base64BinaryType;
+import org.hl7.fhir.dstu21.model.Device;
+import org.hl7.fhir.dstu21.model.Media;
+import org.hl7.fhir.dstu21.model.Observation;
+import org.hl7.fhir.dstu21.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.Quantity;
+import org.hl7.fhir.dstu21.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.FhirSearchDao.Suggestion;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.model.dstu21.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu21.resource.Device;
-import ca.uhn.fhir.model.dstu21.resource.Media;
-import ca.uhn.fhir.model.dstu21.resource.Observation;
-import ca.uhn.fhir.model.dstu21.resource.Patient;
-import ca.uhn.fhir.model.dstu21.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -42,15 +42,15 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 	public void testCodeTextSearch() {
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
-		obs1.setStatus(ObservationStatusEnum.FINAL);
-		obs1.setValue(new QuantityDt(123));
+		obs1.setStatus(ObservationStatus.FINAL);
+		obs1.setValue(new Quantity(123));
 		obs1.setComments("obs1");
 		IIdType id1 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 		
 		Observation obs2 = new Observation();
 		obs2.getCode().setText("Diastolic Blood Pressure");
-		obs2.setStatus(ObservationStatusEnum.FINAL);
-		obs2.setValue(new QuantityDt(81));
+		obs2.setStatus(ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(81));
 		IIdType id2 = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
 		
 		SearchParameterMap map;
@@ -75,14 +75,14 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 	public void testStringTextSearch() {
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("AAAAA");
-		obs1.setValue(new StringDt("Systolic Blood Pressure"));
-		obs1.setStatus(ObservationStatusEnum.FINAL);
+		obs1.setValue(new StringType("Systolic Blood Pressure"));
+		obs1.setStatus(ObservationStatus.FINAL);
 		IIdType id1 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 		
 		Observation obs2 = new Observation();
 		obs1.getCode().setText("AAAAA");
-		obs1.setValue(new StringDt("Diastolic Blood Pressure"));
-		obs2.setStatus(ObservationStatusEnum.FINAL);
+		obs1.setValue(new StringType("Diastolic Blood Pressure"));
+		obs2.setStatus(ObservationStatus.FINAL);
 		IIdType id2 = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
 		
 		SearchParameterMap map;
@@ -101,10 +101,10 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		IIdType ptId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		Media med = new Media();
-		med.getSubject().setReference(ptId);
+		med.getSubject().setReferenceElement(ptId);
 		med.getSubtype().setText("Systolic Blood Pressure");
 		med.getContent().setContentType("LCws");
-		med.getContent().setData(new Base64BinaryDt(new byte[] {44,44,44,44,44,44,44,44}));
+		med.getContent().setDataElement(new Base64BinaryType(new byte[] {44,44,44,44,44,44,44,44}));
 		med.getContent().setTitle("bbbb syst");
 		myMediaDao.create(med);
 		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(med));
@@ -141,17 +141,17 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		IIdType ptId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
-		obs.getSubject().setReference(ptId);
+		obs.getSubject().setReferenceElement(ptId);
 		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
 		myObservationDao.create(obs);
 
 		obs = new Observation();
-		obs.getSubject().setReference(ptId);
+		obs.getSubject().setReferenceElement(ptId);
 		obs.getCode().setText("MNBVCXZ");
 		myObservationDao.create(obs);
 
 		obs = new Observation();
-		obs.getSubject().setReference(ptId);
+		obs.getSubject().setReferenceElement(ptId);
 		obs.getCode().setText("ZXC HELLO");
 		obs.addComponent().getCode().setText("HHHHHHHHHH");
 		myObservationDao.create(obs);
@@ -164,7 +164,7 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		IIdType ptId2 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
-		obs2.getSubject().setReference(ptId2);
+		obs2.getSubject().setReferenceElement(ptId2);
 		obs2.getCode().setText("ZXCVBNMZZ");
 		myObservationDao.create(obs2);
 
@@ -209,7 +209,7 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		SearchParameterMap map;
 
 		patient = new Patient();
-		patient.getText().setDiv("<div>DIVAAA</div>");
+		patient.getText().setDivAsString("<div>DIVAAA</div>");
 		patient.addName().addGiven("NAMEAAA");
 		IIdType pId1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
@@ -227,7 +227,7 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 
 		patient = new Patient();
 		patient.setId(pId1);
-		patient.getText().setDiv("<div>DIVBBB</div>");
+		patient.getText().setDivAsString("<div>DIVBBB</div>");
 		patient.addName().addGiven("NAMEBBB");
 		myPatientDao.update(patient);
 
@@ -268,23 +268,23 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		myDeviceDao.create(dev2).getId().toUnqualifiedVersionless();
 
 		Observation obs1 = new Observation();
-		obs1.getText().setDiv("<div>OBSTEXT1</div>");
-		obs1.getSubject().setReference(ptId1);
+		obs1.getText().setDivAsString("<div>OBSTEXT1</div>");
+		obs1.getSubject().setReferenceElement(ptId1);
 		obs1.getCode().addCoding().setCode("CODE1");
-		obs1.setValue(new StringDt("obsvalue1"));
-		obs1.getDevice().setReference(devId1);
+		obs1.setValue(new StringType("obsvalue1"));
+		obs1.getDevice().setReferenceElement(devId1);
 		IIdType obsId1 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
-		obs2.getSubject().setReference(ptId1);
+		obs2.getSubject().setReferenceElement(ptId1);
 		obs2.getCode().addCoding().setCode("CODE2");
-		obs2.setValue(new StringDt("obsvalue2"));
+		obs2.setValue(new StringType("obsvalue2"));
 		IIdType obsId2 = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
 
 		Observation obs3 = new Observation();
-		obs3.getSubject().setReference(ptId2);
+		obs3.getSubject().setReferenceElement(ptId2);
 		obs3.getCode().addCoding().setCode("CODE3");
-		obs3.setValue(new StringDt("obsvalue3"));
+		obs3.setValue(new StringType("obsvalue3"));
 		IIdType obsId3 = myObservationDao.create(obs3).getId().toUnqualifiedVersionless();
 		
 		HttpServletRequest request;
@@ -313,9 +313,9 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		 */
 		
 		Observation obs4 = new Observation();
-		obs4.getSubject().setReference(ptId1);
+		obs4.getSubject().setReferenceElement(ptId1);
 		obs4.getCode().addCoding().setCode("CODE1");
-		obs4.setValue(new StringDt("obsvalue1"));
+		obs4.setValue(new StringType("obsvalue1"));
 		IIdType obsId4 = myObservationDao.create(obs4).getId().toUnqualifiedVersionless();
 		assertNotEquals(obsId1.getIdPart(), obsId4.getIdPart(), devId1);
 
@@ -330,9 +330,9 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		
 		obs1 = new Observation();
 		obs1.setId(obsId1);
-		obs1.getSubject().setReference(ptId1);
+		obs1.getSubject().setReferenceElement(ptId1);
 		obs1.getCode().addCoding().setCode("CODE2");
-		obs1.setValue(new StringDt("obsvalue2"));
+		obs1.setValue(new StringType("obsvalue2"));
 		myObservationDao.update(obs1);
 
 		param = new StringAndListParam();
@@ -361,22 +361,22 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		IIdType devId2 = myDeviceDao.create(dev2).getId().toUnqualifiedVersionless();
 
 		Observation obs1 = new Observation();
-		obs1.getSubject().setReference(ptId1);
+		obs1.getSubject().setReferenceElement(ptId1);
 		obs1.getCode().addCoding().setCode("CODE1");
-		obs1.setValue(new StringDt("obsvalue1"));
-		obs1.getDevice().setReference(devId1);
+		obs1.setValue(new StringType("obsvalue1"));
+		obs1.getDevice().setReferenceElement(devId1);
 		IIdType obsId1 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
-		obs2.getSubject().setReference(ptId1);
+		obs2.getSubject().setReferenceElement(ptId1);
 		obs2.getCode().addCoding().setCode("CODE2");
-		obs2.setValue(new StringDt("obsvalue2"));
+		obs2.setValue(new StringType("obsvalue2"));
 		IIdType obsId2 = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
 
 		Observation obs3 = new Observation();
-		obs3.getSubject().setReference(ptId2);
+		obs3.getSubject().setReferenceElement(ptId2);
 		obs3.getCode().addCoding().setCode("CODE3");
-		obs3.setValue(new StringDt("obsvalue3"));
+		obs3.setValue(new StringType("obsvalue3"));
 		IIdType obsId3 = myObservationDao.create(obs3).getId().toUnqualifiedVersionless();
 		
 		HttpServletRequest request;
@@ -400,9 +400,9 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		 */
 		
 		Observation obs4 = new Observation();
-		obs4.getSubject().setReference(ptId1);
+		obs4.getSubject().setReferenceElement(ptId1);
 		obs4.getCode().addCoding().setCode("CODE1");
-		obs4.setValue(new StringDt("obsvalue1"));
+		obs4.setValue(new StringType("obsvalue1"));
 		IIdType obsId4 = myObservationDao.create(obs4).getId().toUnqualifiedVersionless();
 		assertNotEquals(obsId1.getIdPart(), obsId4.getIdPart(), devId1);
 
@@ -417,9 +417,9 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		
 		obs1 = new Observation();
 		obs1.setId(obsId1);
-		obs1.getSubject().setReference(ptId1);
+		obs1.getSubject().setReferenceElement(ptId1);
 		obs1.getCode().addCoding().setCode("CODE2");
-		obs1.setValue(new StringDt("obsvalue2"));
+		obs1.setValue(new StringType("obsvalue2"));
 		myObservationDao.update(obs1);
 
 		param = new StringAndListParam();
@@ -440,7 +440,7 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		SearchParameterMap map;
 
 		patient = new Patient();
-		patient.getText().setDiv("<div>DIVAAA</div>");
+		patient.getText().setDivAsString("<div>DIVAAA</div>");
 		patient.addName().addGiven("NAMEAAA");
 		IIdType pId1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
@@ -458,7 +458,7 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 
 		patient = new Patient();
 		patient.setId(pId1);
-		patient.getText().setDiv("<div>DIVBBB</div>");
+		patient.getText().setDivAsString("<div>DIVBBB</div>");
 		patient.addName().addGiven("NAMEBBB");
 		myPatientDao.update(patient, null, false);
 
@@ -501,13 +501,13 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		}
 
 		Observation obs = new Observation();
-		obs.getSubject().setReference(pId1);
-		obs.setValue(new StringDt("This is the FULLtext of the observation"));
+		obs.getSubject().setReferenceElement(pId1);
+		obs.setValue(new StringType("This is the FULLtext of the observation"));
 		IIdType oId1 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 
 		obs = new Observation();
-		obs.getSubject().setReference(pId1);
-		obs.setValue(new StringDt("Another fullText"));
+		obs.getSubject().setReferenceElement(pId1);
+		obs.setValue(new StringType("Another fullText"));
 		IIdType oId2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 
 		List<IIdType> patients;

@@ -29,17 +29,17 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import java.util.*;
 
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Optional Extensions Element - found in all resources.
  */
@@ -62,6 +62,21 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
 
     private static final long serialVersionUID = -1764879552L;
 
+  /**
+   * Constructor
+   */
+    public Extension() {
+      super();
+    }
+
+  /**
+   * Constructor
+   */
+    public Extension(UriType url) {
+      super();
+      this.url = url;
+    }
+
     /**
      * Constructor
      */
@@ -75,21 +90,6 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
     public Extension(String theUrl, IBaseDatatype theValue) {
       setUrl(theUrl);
       setValue(theValue);
-    }
-
-    /*
-     * Constructor
-     */
-      public Extension() {
-        super();
-      }
-
-  /*
-   * Constructor
-   */
-    public Extension(UriType url) {
-      super();
-      this.url = url;
     }
 
     /**

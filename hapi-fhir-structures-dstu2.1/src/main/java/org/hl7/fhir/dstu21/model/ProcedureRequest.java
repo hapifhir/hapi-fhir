@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A request for a procedure to be performed. May be a proposal or an order.
  */
@@ -256,6 +257,9 @@ public class ProcedureRequest extends DomainResource {
         return "aborted";
       return "?";
       }
+    public String toSystem(ProcedureRequestStatus code) {
+      return code.getSystem();
+      }
     }
 
     public enum ProcedureRequestPriority {
@@ -371,6 +375,9 @@ public class ProcedureRequest extends DomainResource {
       if (code == ProcedureRequestPriority.ASAP)
         return "asap";
       return "?";
+      }
+    public String toSystem(ProcedureRequestPriority code) {
+      return code.getSystem();
       }
     }
 
@@ -494,14 +501,14 @@ public class ProcedureRequest extends DomainResource {
 
     private static final long serialVersionUID = -916650578L;
 
-  /*
+  /**
    * Constructor
    */
     public ProcedureRequest() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public ProcedureRequest(Reference subject, CodeableConcept code) {
@@ -1318,14 +1325,44 @@ public class ProcedureRequest extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="performer", path="ProcedureRequest.performer", description="Who should perform the procedure", type="reference" )
   public static final String SP_PERFORMER = "performer";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ProcedureRequest:performer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PERFORMER = new ca.uhn.fhir.model.api.Include("ProcedureRequest:performer").toLocked();
+
   @SearchParamDefinition(name="subject", path="ProcedureRequest.subject", description="Search by subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ProcedureRequest:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("ProcedureRequest:subject").toLocked();
+
   @SearchParamDefinition(name="patient", path="ProcedureRequest.subject", description="Search by subject - a patient", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ProcedureRequest:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ProcedureRequest:patient").toLocked();
+
   @SearchParamDefinition(name="orderer", path="ProcedureRequest.orderer", description="Who made request", type="reference" )
   public static final String SP_ORDERER = "orderer";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ProcedureRequest:orderer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORDERER = new ca.uhn.fhir.model.api.Include("ProcedureRequest:orderer").toLocked();
+
   @SearchParamDefinition(name="encounter", path="ProcedureRequest.encounter", description="Encounter request created during", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ProcedureRequest:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("ProcedureRequest:encounter").toLocked();
+
 
 }
 

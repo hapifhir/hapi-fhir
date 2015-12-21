@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
+package org.hl7.fhir.dstu21.model.api;
 
 /*
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2015 University Health Network
  * %%
@@ -20,8 +20,12 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.validation.IValidationSupport;
+import java.util.List;
 
-public interface IJpaValidationSupport extends IValidationSupport {
+public interface IBaseHasModifierExtensions {
+
+    public List<? extends IBaseExtension<?, ?>> getModifierExtension();
+
+    public IBaseExtension<?, ?> addModifierExtension();
 
 }

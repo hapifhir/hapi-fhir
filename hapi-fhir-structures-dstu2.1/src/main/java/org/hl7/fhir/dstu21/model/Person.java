@@ -29,21 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGenderEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Demographics and administrative information about a person independent of a specific health-related context.
  */
@@ -164,6 +162,9 @@ public class Person extends DomainResource {
         return "level4";
       return "?";
       }
+    public String toSystem(IdentityAssuranceLevel code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -189,14 +190,14 @@ public class Person extends DomainResource {
 
         private static final long serialVersionUID = 508763647L;
 
-    /*
+    /**
      * Constructor
      */
       public PersonLinkComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public PersonLinkComponent(Reference target) {
@@ -438,7 +439,7 @@ public class Person extends DomainResource {
 
     private static final long serialVersionUID = -117464654L;
 
-  /*
+  /**
    * Constructor
    */
     public Person() {
@@ -1022,35 +1023,65 @@ public class Person extends DomainResource {
   @SearchParamDefinition(name="birthdate", path="Person.birthDate", description="The person's date of birth", type="date" )
   public static final String SP_BIRTHDATE = "birthdate";
   @SearchParamDefinition(name="address-state", path="Person.address.state", description="A state specified in an address", type="string" )
-  public static final String SP_ADDRESSSTATE = "address-state";
+  public static final String SP_ADDRESS_STATE = "address-state";
   @SearchParamDefinition(name="gender", path="Person.gender", description="The gender of the person", type="token" )
   public static final String SP_GENDER = "gender";
   @SearchParamDefinition(name="practitioner", path="Person.link.target", description="The Person links to this Practitioner", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Person:practitioner</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PRACTITIONER = new ca.uhn.fhir.model.api.Include("Person:practitioner").toLocked();
+
   @SearchParamDefinition(name="link", path="Person.link.target", description="Any link has this Patient, Person, RelatedPerson or Practitioner reference", type="reference" )
   public static final String SP_LINK = "link";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Person:link</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_LINK = new ca.uhn.fhir.model.api.Include("Person:link").toLocked();
+
   @SearchParamDefinition(name="relatedperson", path="Person.link.target", description="The Person links to this RelatedPerson", type="reference" )
   public static final String SP_RELATEDPERSON = "relatedperson";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Person:relatedperson</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RELATEDPERSON = new ca.uhn.fhir.model.api.Include("Person:relatedperson").toLocked();
+
   @SearchParamDefinition(name="address-postalcode", path="Person.address.postalCode", description="A postal code specified in an address", type="string" )
-  public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
+  public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
   @SearchParamDefinition(name="address-country", path="Person.address.country", description="A country specified in an address", type="string" )
-  public static final String SP_ADDRESSCOUNTRY = "address-country";
+  public static final String SP_ADDRESS_COUNTRY = "address-country";
   @SearchParamDefinition(name="phonetic", path="Person.name", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="phone", path="Person.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
   public static final String SP_PHONE = "phone";
   @SearchParamDefinition(name="patient", path="Person.link.target", description="The Person links to this Patient", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Person:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Person:patient").toLocked();
+
   @SearchParamDefinition(name="organization", path="Person.managingOrganization", description="The organization at which this person record is being managed", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Person:organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("Person:organization").toLocked();
+
   @SearchParamDefinition(name="name", path="Person.name", description="A portion of name in any name part", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="address-use", path="Person.address.use", description="A use code specified in an address", type="token" )
-  public static final String SP_ADDRESSUSE = "address-use";
+  public static final String SP_ADDRESS_USE = "address-use";
   @SearchParamDefinition(name="telecom", path="Person.telecom", description="The value in any kind of contact", type="token" )
   public static final String SP_TELECOM = "telecom";
   @SearchParamDefinition(name="address-city", path="Person.address.city", description="A city specified in an address", type="string" )
-  public static final String SP_ADDRESSCITY = "address-city";
+  public static final String SP_ADDRESS_CITY = "address-city";
   @SearchParamDefinition(name="email", path="Person.telecom.where(system='email')", description="A value in an email contact", type="token" )
   public static final String SP_EMAIL = "email";
 

@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingObjectSelection resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance ("cine" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.
  */
@@ -86,14 +84,14 @@ public class ImagingObjectSelection extends DomainResource {
 
         private static final long serialVersionUID = 341246743L;
 
-    /*
+    /**
      * Constructor
      */
       public StudyComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public StudyComponent(OidType uid) {
@@ -392,7 +390,7 @@ public class ImagingObjectSelection extends DomainResource {
 
         private static final long serialVersionUID = 229247770L;
 
-    /*
+    /**
      * Constructor
      */
       public SeriesComponent() {
@@ -649,14 +647,14 @@ public class ImagingObjectSelection extends DomainResource {
 
         private static final long serialVersionUID = 1641180916L;
 
-    /*
+    /**
      * Constructor
      */
       public InstanceComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public InstanceComponent(OidType sopClass, OidType uid, UriType url) {
@@ -947,14 +945,14 @@ public class ImagingObjectSelection extends DomainResource {
 
         private static final long serialVersionUID = -2068206970L;
 
-    /*
+    /**
      * Constructor
      */
       public FramesComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public FramesComponent(UriType url) {
@@ -1194,14 +1192,14 @@ public class ImagingObjectSelection extends DomainResource {
 
     private static final long serialVersionUID = -1961832713L;
 
-  /*
+  /**
    * Constructor
    */
     public ImagingObjectSelection() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public ImagingObjectSelection(OidType uid, Reference patient, CodeableConcept title) {
@@ -1626,13 +1624,25 @@ public class ImagingObjectSelection extends DomainResource {
   @SearchParamDefinition(name="identifier", path="ImagingObjectSelection.uid", description="UID of key DICOM object selection", type="uri" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="authoring-time", path="ImagingObjectSelection.authoringTime", description="Time of key DICOM object selection authoring", type="date" )
-  public static final String SP_AUTHORINGTIME = "authoring-time";
+  public static final String SP_AUTHORING_TIME = "authoring-time";
   @SearchParamDefinition(name="selected-study", path="ImagingObjectSelection.study.uid", description="Study selected in key DICOM object selection", type="uri" )
-  public static final String SP_SELECTEDSTUDY = "selected-study";
+  public static final String SP_SELECTED_STUDY = "selected-study";
   @SearchParamDefinition(name="author", path="ImagingObjectSelection.author", description="Author of key DICOM object selection", type="reference" )
   public static final String SP_AUTHOR = "author";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ImagingObjectSelection:author</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("ImagingObjectSelection:author").toLocked();
+
   @SearchParamDefinition(name="patient", path="ImagingObjectSelection.patient", description="Subject of key DICOM object selection", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ImagingObjectSelection:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ImagingObjectSelection:patient").toLocked();
+
   @SearchParamDefinition(name="title", path="ImagingObjectSelection.title", description="Title of key DICOM object selection", type="token" )
   public static final String SP_TITLE = "title";
 

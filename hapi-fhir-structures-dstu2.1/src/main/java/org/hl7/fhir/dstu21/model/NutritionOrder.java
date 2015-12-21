@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.
  */
@@ -227,6 +225,9 @@ public class NutritionOrder extends DomainResource {
         return "cancelled";
       return "?";
       }
+    public String toSystem(NutritionOrderStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -275,7 +276,7 @@ public class NutritionOrder extends DomainResource {
 
         private static final long serialVersionUID = 973058412L;
 
-    /*
+    /**
      * Constructor
      */
       public NutritionOrderOralDietComponent() {
@@ -668,7 +669,7 @@ public class NutritionOrder extends DomainResource {
 
         private static final long serialVersionUID = 465107295L;
 
-    /*
+    /**
      * Constructor
      */
       public NutritionOrderOralDietNutrientComponent() {
@@ -811,7 +812,7 @@ public class NutritionOrder extends DomainResource {
 
         private static final long serialVersionUID = -56402817L;
 
-    /*
+    /**
      * Constructor
      */
       public NutritionOrderOralDietTextureComponent() {
@@ -975,7 +976,7 @@ public class NutritionOrder extends DomainResource {
 
         private static final long serialVersionUID = 297545236L;
 
-    /*
+    /**
      * Constructor
      */
       public NutritionOrderSupplementComponent() {
@@ -1333,7 +1334,7 @@ public class NutritionOrder extends DomainResource {
 
         private static final long serialVersionUID = 292116061L;
 
-    /*
+    /**
      * Constructor
      */
       public NutritionOrderEnteralFormulaComponent() {
@@ -1806,7 +1807,7 @@ public class NutritionOrder extends DomainResource {
 
         private static final long serialVersionUID = 1895031997L;
 
-    /*
+    /**
      * Constructor
      */
       public NutritionOrderEnteralFormulaAdministrationComponent() {
@@ -2095,14 +2096,14 @@ public class NutritionOrder extends DomainResource {
 
     private static final long serialVersionUID = 1139624085L;
 
-  /*
+  /**
    * Constructor
    */
     public NutritionOrder() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public NutritionOrder(Reference patient, DateTimeType dateTime) {
@@ -2791,14 +2792,32 @@ public class NutritionOrder extends DomainResource {
   public static final String SP_DATETIME = "datetime";
   @SearchParamDefinition(name="provider", path="NutritionOrder.orderer", description="The identify of the provider who placed the nutrition order", type="reference" )
   public static final String SP_PROVIDER = "provider";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>NutritionOrder:provider</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROVIDER = new ca.uhn.fhir.model.api.Include("NutritionOrder:provider").toLocked();
+
   @SearchParamDefinition(name="patient", path="NutritionOrder.patient", description="The identity of the person who requires the diet, formula or nutritional supplement", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>NutritionOrder:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("NutritionOrder:patient").toLocked();
+
   @SearchParamDefinition(name="supplement", path="NutritionOrder.supplement.type", description="Type of supplement product requested", type="token" )
   public static final String SP_SUPPLEMENT = "supplement";
   @SearchParamDefinition(name="formula", path="NutritionOrder.enteralFormula.baseFormulaType", description="Type of enteral or infant formula", type="token" )
   public static final String SP_FORMULA = "formula";
   @SearchParamDefinition(name="encounter", path="NutritionOrder.encounter", description="Return nutrition orders with this encounter identifier", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>NutritionOrder:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("NutritionOrder:encounter").toLocked();
+
   @SearchParamDefinition(name="oraldiet", path="NutritionOrder.oralDiet.type", description="Type of diet that can be consumed orally (i.e., take via the mouth).", type="token" )
   public static final String SP_ORALDIET = "oraldiet";
   @SearchParamDefinition(name="status", path="NutritionOrder.status", description="Status of the nutrition order.", type="token" )

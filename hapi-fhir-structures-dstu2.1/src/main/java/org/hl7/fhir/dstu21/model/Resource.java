@@ -29,22 +29,29 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This is the base resource type for everything.
  */
 public abstract class Resource extends BaseResource implements IAnyResource {
+   @Override
+	public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum() {
+		return ca.uhn.fhir.context.FhirVersionEnum.DSTU2_1;
+	}
 
-	/**
+    /**
      * The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.
      */
     @Child(name = "id", type = {IdType.class}, order=0, min=0, max=1, modifier=false, summary=true)
@@ -74,7 +81,7 @@ public abstract class Resource extends BaseResource implements IAnyResource {
 
     private static final long serialVersionUID = -559462759L;
 
-  /*
+  /**
    * Constructor
    */
     public Resource() {
@@ -334,11 +341,6 @@ public abstract class Resource extends BaseResource implements IAnyResource {
       }
 
   public abstract ResourceType getResourceType();
-
-  @Override
-	public FhirVersionEnum getStructureFhirVersionEnum() {
-		return FhirVersionEnum.DSTU2_1;
-	}
 
 }
 

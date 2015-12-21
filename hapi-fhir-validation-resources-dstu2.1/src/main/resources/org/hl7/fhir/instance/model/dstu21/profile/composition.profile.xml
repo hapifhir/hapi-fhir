@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Composition"/>
   <meta>
-    <lastUpdated value="2015-12-05T08:35:35.779-05:00"/>
+    <lastUpdated value="2015-12-19T16:00:42.735-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -648,10 +648,10 @@
       <value value="http://www.hl7.org/Special/committees/structure/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-05T08:35:35-05:00"/>
+  <date value="2015-12-19T16:00:42-05:00"/>
   <description value="Base StructureDefinition for Composition Resource"/>
   <requirements value="To support documents, and also to capture the EN13606 notion of an attested commit to the patient EHR, and to allow a set of disparate resources at the information/engineering level to be gathered into a clinical statement."/>
-  <fhirVersion value="1.1.0"/>
+  <fhirVersion value="1.2.0"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>

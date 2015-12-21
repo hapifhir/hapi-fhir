@@ -32,6 +32,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -336,7 +337,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				// }
 				param.setDocumentation(nextParamDescription);
 				param.getTypeElement().setValue(nextParameter.getParamType().getCode());
-				for (Class<? extends IResource> nextTarget : nextParameter.getDeclaredTypes()) {
+				for (Class<? extends IBaseResource> nextTarget : nextParameter.getDeclaredTypes()) {
 					RuntimeResourceDefinition targetDef = myServerConfiguration.getFhirContext().getResourceDefinition(nextTarget);
 					if (targetDef != null) {
 						ResourceTypeEnum code = ResourceTypeEnum.VALUESET_BINDER.fromCodeString(targetDef.getName());

@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An action that is or was performed on a patient. This can be a physical intervention like an operation, or less invasive like counseling or hypnotherapy.
  */
@@ -161,6 +161,9 @@ public class Procedure extends DomainResource {
         return "entered-in-error";
       return "?";
       }
+    public String toSystem(ProcedureStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -186,7 +189,7 @@ public class Procedure extends DomainResource {
 
         private static final long serialVersionUID = -843698327L;
 
-    /*
+    /**
      * Constructor
      */
       public ProcedurePerformerComponent() {
@@ -349,14 +352,14 @@ public class Procedure extends DomainResource {
 
         private static final long serialVersionUID = 1779937807L;
 
-    /*
+    /**
      * Constructor
      */
       public ProcedureFocalDeviceComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ProcedureFocalDeviceComponent(Reference manipulated) {
@@ -681,14 +684,14 @@ public class Procedure extends DomainResource {
 
     private static final long serialVersionUID = -489125036L;
 
-  /*
+  /**
    * Constructor
    */
     public Procedure() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Procedure(Reference subject, Enumeration<ProcedureStatus> status, CodeableConcept code) {
@@ -1833,14 +1836,44 @@ public class Procedure extends DomainResource {
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="performer", path="Procedure.performer.actor", description="The reference to the practitioner", type="reference" )
   public static final String SP_PERFORMER = "performer";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Procedure:performer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PERFORMER = new ca.uhn.fhir.model.api.Include("Procedure:performer").toLocked();
+
   @SearchParamDefinition(name="subject", path="Procedure.subject", description="Search by subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Procedure:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Procedure:subject").toLocked();
+
   @SearchParamDefinition(name="patient", path="Procedure.subject", description="Search by subject - a patient", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Procedure:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Procedure:patient").toLocked();
+
   @SearchParamDefinition(name="location", path="Procedure.location", description="Where the procedure happened", type="reference" )
   public static final String SP_LOCATION = "location";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Procedure:location</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("Procedure:location").toLocked();
+
   @SearchParamDefinition(name="encounter", path="Procedure.encounter", description="The encounter associated with the procedure", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Procedure:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("Procedure:encounter").toLocked();
+
 
 }
 

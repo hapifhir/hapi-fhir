@@ -29,24 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.ConceptMapEquivalence;
-import org.hl7.fhir.dstu21.model.Enumerations.ConceptMapEquivalenceEnumFactory;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.
  */
@@ -71,7 +66,7 @@ public class ConceptMap extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
-    /*
+    /**
      * Constructor
      */
       public ConceptMapContactComponent() {
@@ -264,7 +259,7 @@ public class ConceptMap extends DomainResource {
 
         private static final long serialVersionUID = -458143877L;
 
-    /*
+    /**
      * Constructor
      */
       public SourceElementComponent() {
@@ -535,14 +530,14 @@ public class ConceptMap extends DomainResource {
 
         private static final long serialVersionUID = -804990059L;
 
-    /*
+    /**
      * Constructor
      */
       public TargetElementComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public TargetElementComponent(Enumeration<ConceptMapEquivalence> equivalence) {
@@ -955,14 +950,14 @@ public class ConceptMap extends DomainResource {
 
         private static final long serialVersionUID = 1488522448L;
 
-    /*
+    /**
      * Constructor
      */
       public OtherElementComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public OtherElementComponent(UriType element, UriType codeSystem, StringType code) {
@@ -1298,14 +1293,14 @@ public class ConceptMap extends DomainResource {
 
     private static final long serialVersionUID = 1687563642L;
 
-  /*
+  /**
    * Constructor
    */
     public ConceptMap() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public ConceptMap(Enumeration<ConformanceResourceStatus> status, Type source, Type target) {
@@ -2255,6 +2250,12 @@ public class ConceptMap extends DomainResource {
   public static final String SP_TARGETSYSTEM = "targetsystem";
   @SearchParamDefinition(name="source", path="ConceptMap.sourceReference", description="Identifies the source of the concepts which are being mapped", type="reference" )
   public static final String SP_SOURCE = "source";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ConceptMap:source</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SOURCE = new ca.uhn.fhir.model.api.Include("ConceptMap:source").toLocked();
+
   @SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map", type="token" )
   public static final String SP_VERSION = "version";
   @SearchParamDefinition(name="sourcesystem", path="ConceptMap.element.codeSystem", description="Code System (if value set crosses code systems)", type="uri" )
@@ -2263,10 +2264,22 @@ public class ConceptMap extends DomainResource {
   public static final String SP_URL = "url";
   @SearchParamDefinition(name="target", path="ConceptMap.target[x]", description="Provides context to the mappings", type="reference" )
   public static final String SP_TARGET = "target";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ConceptMap:target</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_TARGET = new ca.uhn.fhir.model.api.Include("ConceptMap:target").toLocked();
+
   @SearchParamDefinition(name="sourcecode", path="ConceptMap.element.code", description="Identifies element being mapped", type="token" )
   public static final String SP_SOURCECODE = "sourcecode";
   @SearchParamDefinition(name="sourceuri", path="ConceptMap.sourceUri", description="Identifies the source of the concepts which are being mapped", type="reference" )
   public static final String SP_SOURCEURI = "sourceuri";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ConceptMap:sourceuri</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SOURCEURI = new ca.uhn.fhir.model.api.Include("ConceptMap:sourceuri").toLocked();
+
   @SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="context", path="ConceptMap.useContext", description="A use context assigned to the concept map", type="token" )

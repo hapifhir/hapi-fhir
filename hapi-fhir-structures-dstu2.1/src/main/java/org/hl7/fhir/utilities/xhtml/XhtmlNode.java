@@ -34,11 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-
-@DatatypeDef(name="xhtml")
+@ca.uhn.fhir.model.api.annotation.DatatypeDef(name="xhtml")
 public class XhtmlNode implements IBaseXhtml {
 
   public static final String NBSP = Character.toString((char)0xa0);
@@ -352,15 +349,15 @@ public class XhtmlNode implements IBaseXhtml {
     return null;
   }
 
-	@Override
-	public String getValue() {
-		return getValueAsString();
-	}
-	
-	@Override
-	public IPrimitiveType<String> setValue(String theValue) throws IllegalArgumentException {
-		setValueAsString(theValue);
-		return this;
-	}
+@Override
+public String getValue() {
+	return getValueAsString();
+}
+
+@Override
+public XhtmlNode setValue(String theValue) throws IllegalArgumentException {
+	setValueAsString(theValue);
+	return this;
+}
 
 }

@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined "channel" so that another system is able to take an appropriate action.
  */
@@ -162,6 +160,9 @@ public class Subscription extends DomainResource {
       if (code == SubscriptionStatus.OFF)
         return "off";
       return "?";
+      }
+    public String toSystem(SubscriptionStatus code) {
+      return code.getSystem();
       }
     }
 
@@ -295,6 +296,9 @@ public class Subscription extends DomainResource {
         return "message";
       return "?";
       }
+    public String toSystem(SubscriptionChannelType code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -329,14 +333,14 @@ public class Subscription extends DomainResource {
 
         private static final long serialVersionUID = -279715391L;
 
-    /*
+    /**
      * Constructor
      */
       public SubscriptionChannelComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public SubscriptionChannelComponent(Enumeration<SubscriptionChannelType> type, StringType payload) {
@@ -675,14 +679,14 @@ public class Subscription extends DomainResource {
 
     private static final long serialVersionUID = -1390870804L;
 
-  /*
+  /**
    * Constructor
    */
     public Subscription() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Subscription(StringType criteria, StringType reason, Enumeration<SubscriptionStatus> status, SubscriptionChannelComponent channel) {

@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu21.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,20 +29,19 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An authorization for the supply of glasses and/or contact lenses to a patient.
  */
@@ -132,6 +129,9 @@ public class VisionPrescription extends DomainResource {
       if (code == VisionEyes.LEFT)
         return "left";
       return "?";
+      }
+    public String toSystem(VisionEyes code) {
+      return code.getSystem();
       }
     }
 
@@ -249,6 +249,9 @@ public class VisionPrescription extends DomainResource {
         return "out";
       return "?";
       }
+    public String toSystem(VisionBase code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -360,14 +363,14 @@ public class VisionPrescription extends DomainResource {
 
         private static final long serialVersionUID = -1586392610L;
 
-    /*
+    /**
      * Constructor
      */
       public VisionPrescriptionDispenseComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public VisionPrescriptionDispenseComponent(Coding product) {
@@ -1422,7 +1425,7 @@ public class VisionPrescription extends DomainResource {
 
     private static final long serialVersionUID = -1108276057L;
 
-  /*
+  /**
    * Constructor
    */
     public VisionPrescription() {
@@ -1867,14 +1870,32 @@ public class VisionPrescription extends DomainResource {
 
   @SearchParamDefinition(name="prescriber", path="VisionPrescription.prescriber", description="Who authorizes the vision product", type="reference" )
   public static final String SP_PRESCRIBER = "prescriber";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>VisionPrescription:prescriber</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PRESCRIBER = new ca.uhn.fhir.model.api.Include("VisionPrescription:prescriber").toLocked();
+
   @SearchParamDefinition(name="identifier", path="VisionPrescription.identifier", description="Return prescriptions with this external identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="patient", path="VisionPrescription.patient", description="The identity of a patient to list dispenses for", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>VisionPrescription:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("VisionPrescription:patient").toLocked();
+
   @SearchParamDefinition(name="datewritten", path="VisionPrescription.dateWritten", description="Return prescriptions written on this date", type="date" )
   public static final String SP_DATEWRITTEN = "datewritten";
   @SearchParamDefinition(name="encounter", path="VisionPrescription.encounter", description="Return prescriptions with this encounter identifier", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>VisionPrescription:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("VisionPrescription:encounter").toLocked();
+
 
 }
 

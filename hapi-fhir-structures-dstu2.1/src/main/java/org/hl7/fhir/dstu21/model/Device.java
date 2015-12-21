@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource identifies an instance of a manufactured item that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.  Medical devices includes durable (reusable) medical equipment, implantable devices, as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.  Non-medical devices may include items such as a machine, cellphone, computer, application, etc.
  */
@@ -144,6 +144,9 @@ public class Device extends DomainResource {
       if (code == DeviceStatus.ENTEREDINERROR)
         return "entered-in-error";
       return "?";
+      }
+    public String toSystem(DeviceStatus code) {
+      return code.getSystem();
       }
     }
 
@@ -276,14 +279,14 @@ public class Device extends DomainResource {
 
     private static final long serialVersionUID = 366690094L;
 
-  /*
+  /**
    * Constructor
    */
     public Device() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Device(CodeableConcept type) {
@@ -1213,12 +1216,30 @@ public class Device extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Device:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Device:patient").toLocked();
+
   @SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Device:organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("Device:organization").toLocked();
+
   @SearchParamDefinition(name="model", path="Device.model", description="The model of the device", type="string" )
   public static final String SP_MODEL = "model";
   @SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference" )
   public static final String SP_LOCATION = "location";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Device:location</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("Device:location").toLocked();
+
   @SearchParamDefinition(name="udi", path="Device.udi", description="FDA mandated Unique Device Identifier", type="string" )
   public static final String SP_UDI = "udi";
   @SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token" )

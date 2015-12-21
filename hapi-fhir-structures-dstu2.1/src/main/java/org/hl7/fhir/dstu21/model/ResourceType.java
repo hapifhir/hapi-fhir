@@ -2,7 +2,7 @@ package org.hl7.fhir.dstu21.model;
 
 import org.hl7.fhir.exceptions.FHIRException;
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
 public enum ResourceType {
     Account,
@@ -51,7 +51,6 @@ public enum ResourceType {
     Flag,
     Goal,
     Group,
-    GuidanceRequest,
     GuidanceResponse,
     HealthcareService,
     ImagingObjectSelection,
@@ -99,6 +98,7 @@ public enum ResourceType {
     RiskAssessment,
     Schedule,
     SearchParameter,
+    Sequence,
     Slot,
     Specimen,
     StructureDefinition,
@@ -205,8 +205,6 @@ public enum ResourceType {
       return "goal";
     case Group:
       return "group";
-    case GuidanceRequest:
-      return "guidancerequest";
     case GuidanceResponse:
       return "guidanceresponse";
     case HealthcareService:
@@ -301,6 +299,8 @@ public enum ResourceType {
       return "schedule";
     case SearchParameter:
       return "searchparameter";
+    case Sequence:
+      return "sequence";
     case Slot:
       return "slot";
     case Specimen:
@@ -419,8 +419,6 @@ public enum ResourceType {
       return Goal;
     if ("Group".equals(code))
       return Group;
-    if ("GuidanceRequest".equals(code))
-      return GuidanceRequest;
     if ("GuidanceResponse".equals(code))
       return GuidanceResponse;
     if ("HealthcareService".equals(code))
@@ -515,6 +513,8 @@ public enum ResourceType {
       return Schedule;
     if ("SearchParameter".equals(code))
       return SearchParameter;
+    if ("Sequence".equals(code))
+      return Sequence;
     if ("Slot".equals(code))
       return Slot;
     if ("Specimen".equals(code))

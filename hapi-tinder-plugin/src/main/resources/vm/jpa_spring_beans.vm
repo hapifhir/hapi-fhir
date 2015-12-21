@@ -49,7 +49,7 @@
 #else
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}">
 #end
-		<property name="resourceType" value="ca.uhn.fhir.model.${version}.resource.${res.declaringClassNameComplete}"/>
+		<property name="resourceType" value="${resourcePackage}.${res.declaringClassNameComplete}"/>
 		<property name="context" ref="myFhirContext${versionCapitalized}"/>
 	</bean>
 	<bean id="my${res.name}Rp${versionCapitalized}" class="${packageBase}.${res.declaringClassNameComplete}ResourceProvider">

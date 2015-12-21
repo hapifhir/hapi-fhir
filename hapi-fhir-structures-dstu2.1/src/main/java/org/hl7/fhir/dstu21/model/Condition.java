@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Use to record detailed information about conditions, problems or diagnoses recognized by a clinician. There are many uses including: recording a diagnosis during an encounter; populating a problem list or a summary statement, such as a discharge summary.
  */
@@ -195,6 +193,9 @@ public class Condition extends DomainResource {
         return "unknown";
       return "?";
       }
+    public String toSystem(ConditionVerificationStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -220,7 +221,7 @@ public class Condition extends DomainResource {
 
         private static final long serialVersionUID = -1961530405L;
 
-    /*
+    /**
      * Constructor
      */
       public ConditionStageComponent() {
@@ -396,7 +397,7 @@ public class Condition extends DomainResource {
 
         private static final long serialVersionUID = 945689926L;
 
-    /*
+    /**
      * Constructor
      */
       public ConditionEvidenceComponent() {
@@ -678,14 +679,14 @@ public class Condition extends DomainResource {
 
     private static final long serialVersionUID = -341227215L;
 
-  /*
+  /**
    * Constructor
    */
     public Condition() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Condition(Reference patient, CodeableConcept code, Enumeration<ConditionVerificationStatus> verificationStatus) {
@@ -1661,27 +1662,45 @@ public class Condition extends DomainResource {
   @SearchParamDefinition(name="clinicalstatus", path="Condition.clinicalStatus", description="The clinical status of the condition", type="token" )
   public static final String SP_CLINICALSTATUS = "clinicalstatus";
   @SearchParamDefinition(name="onset-info", path="Condition.onset[x]", description="Other onsets (boolean, age, range, string)", type="string" )
-  public static final String SP_ONSETINFO = "onset-info";
+  public static final String SP_ONSET_INFO = "onset-info";
   @SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token" )
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="Manifestation/symptom", type="token" )
   public static final String SP_EVIDENCE = "evidence";
   @SearchParamDefinition(name="encounter", path="Condition.encounter", description="Encounter when condition first asserted", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Condition:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("Condition:encounter").toLocked();
+
   @SearchParamDefinition(name="onset", path="Condition.onset[x]", description="Date related onsets (dateTime and Period)", type="date" )
   public static final String SP_ONSET = "onset";
   @SearchParamDefinition(name="asserter", path="Condition.asserter", description="Person who asserts this condition", type="reference" )
   public static final String SP_ASSERTER = "asserter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Condition:asserter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ASSERTER = new ca.uhn.fhir.model.api.Include("Condition:asserter").toLocked();
+
   @SearchParamDefinition(name="date-recorded", path="Condition.dateRecorded", description="A date, when the Condition statement was documented", type="date" )
-  public static final String SP_DATERECORDED = "date-recorded";
+  public static final String SP_DATE_RECORDED = "date-recorded";
   @SearchParamDefinition(name="stage", path="Condition.stage.summary", description="Simple summary (disease specific)", type="token" )
   public static final String SP_STAGE = "stage";
   @SearchParamDefinition(name="patient", path="Condition.patient", description="Who has the condition?", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Condition:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Condition:patient").toLocked();
+
   @SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token" )
   public static final String SP_CATEGORY = "category";
   @SearchParamDefinition(name="body-site", path="Condition.bodySite", description="Anatomical location, if relevant", type="token" )
-  public static final String SP_BODYSITE = "body-site";
+  public static final String SP_BODY_SITE = "body-site";
 
 }
 

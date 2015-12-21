@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called "MedicationOrder" rather than "MedicationPrescription" to generalize the use across inpatient and outpatient settings as well as for care plans, etc.
  */
@@ -195,6 +193,9 @@ public class MedicationOrder extends DomainResource {
         return "draft";
       return "?";
       }
+    public String toSystem(MedicationOrderStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -271,7 +272,7 @@ public class MedicationOrder extends DomainResource {
 
         private static final long serialVersionUID = -1470136646L;
 
-    /*
+    /**
      * Constructor
      */
       public MedicationOrderDosageInstructionComponent() {
@@ -821,7 +822,7 @@ public class MedicationOrder extends DomainResource {
 
         private static final long serialVersionUID = -1690502728L;
 
-    /*
+    /**
      * Constructor
      */
       public MedicationOrderDispenseRequestComponent() {
@@ -1108,14 +1109,14 @@ public class MedicationOrder extends DomainResource {
 
         private static final long serialVersionUID = 1693602518L;
 
-    /*
+    /**
      * Constructor
      */
       public MedicationOrderSubstitutionComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public MedicationOrderSubstitutionComponent(CodeableConcept type) {
@@ -1368,14 +1369,14 @@ public class MedicationOrder extends DomainResource {
 
     private static final long serialVersionUID = 619326051L;
 
-  /*
+  /**
    * Constructor
    */
     public MedicationOrder() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public MedicationOrder(Type medication) {
@@ -2202,18 +2203,42 @@ public class MedicationOrder extends DomainResource {
 
   @SearchParamDefinition(name="prescriber", path="MedicationOrder.prescriber", description="Who ordered the medication(s)", type="reference" )
   public static final String SP_PRESCRIBER = "prescriber";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationOrder:prescriber</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PRESCRIBER = new ca.uhn.fhir.model.api.Include("MedicationOrder:prescriber").toLocked();
+
   @SearchParamDefinition(name="identifier", path="MedicationOrder.identifier", description="Return prescriptions with this external identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="code", path="MedicationOrder.medicationCodeableConcept", description="Return administrations of this medication code", type="token" )
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="patient", path="MedicationOrder.patient", description="The identity of a patient to list orders  for", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationOrder:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("MedicationOrder:patient").toLocked();
+
   @SearchParamDefinition(name="datewritten", path="MedicationOrder.dateWritten", description="Return prescriptions written on this date", type="date" )
   public static final String SP_DATEWRITTEN = "datewritten";
   @SearchParamDefinition(name="medication", path="MedicationOrder.medicationReference", description="Return administrations of this medication reference", type="reference" )
   public static final String SP_MEDICATION = "medication";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationOrder:medication</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_MEDICATION = new ca.uhn.fhir.model.api.Include("MedicationOrder:medication").toLocked();
+
   @SearchParamDefinition(name="encounter", path="MedicationOrder.encounter", description="Return prescriptions with this encounter identifier", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicationOrder:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("MedicationOrder:encounter").toLocked();
+
   @SearchParamDefinition(name="status", path="MedicationOrder.status", description="Status of the prescription", type="token" )
   public static final String SP_STATUS = "status";
 

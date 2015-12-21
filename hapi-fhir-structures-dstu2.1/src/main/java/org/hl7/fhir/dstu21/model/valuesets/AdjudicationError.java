@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model.valuesets;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum AdjudicationError {
 
         /**
-         * null
+         * Missing Identifier
          */
         A001, 
         /**
-         * null
+         * Missing Creation Date
          */
         A002, 
         /**
@@ -51,16 +51,16 @@ public enum AdjudicationError {
         public static AdjudicationError fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("A001".equals(codeString))
+        if ("a001".equals(codeString))
           return A001;
-        if ("A002".equals(codeString))
+        if ("a002".equals(codeString))
           return A002;
         throw new FHIRException("Unknown AdjudicationError code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case A001: return "A001";
-            case A002: return "A002";
+            case A001: return "a001";
+            case A002: return "a002";
             default: return "?";
           }
         }
@@ -69,15 +69,15 @@ public enum AdjudicationError {
         }
         public String getDefinition() {
           switch (this) {
-            case A001: return "";
-            case A002: return "";
+            case A001: return "Missing Identifier";
+            case A002: return "Missing Creation Date";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case A001: return "A001";
-            case A002: return "A002";
+            case A001: return "Missing Identifier";
+            case A002: return "Missing Creation Date";
             default: return "?";
           }
     }

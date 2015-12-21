@@ -1,5 +1,10 @@
 package ca.uhn.fhir.jpa.dao;
 
+import org.hl7.fhir.dstu21.model.StructureDefinition;
+import org.hl7.fhir.dstu21.model.ValueSet;
+import org.hl7.fhir.dstu21.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.dstu21.model.ValueSet.ValueSetExpansionComponent;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -20,9 +25,6 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.ValueSet;
-import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,7 +33,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
-public class JpaValidationSupportDstu21 implements IJpaValidationSupport {
+public class JpaValidationSupportDstu21 implements IJpaValidationSupportDstu21 {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaValidationSupportDstu21.class);
 
@@ -41,11 +43,11 @@ public class JpaValidationSupportDstu21 implements IJpaValidationSupport {
 
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoDstu21")
-	private IFhirResourceDao<ca.uhn.fhir.model.dstu21.resource.StructureDefinition> myStructureDefinitionDao;
+	private IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
 
 	@Autowired
 	@Qualifier("myValueSetDaoDstu21")
-	private IFhirResourceDao<ca.uhn.fhir.model.dstu21.resource.ValueSet> myValueSetDao;
+	private IFhirResourceDao<ValueSet> myValueSetDao;
 
 	@Autowired
 	@Qualifier("myFhirContextDstu21")

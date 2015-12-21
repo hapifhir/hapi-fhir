@@ -29,22 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.RemittanceOutcome;
-import org.hl7.fhir.dstu21.model.Enumerations.RemittanceOutcomeEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides payment details and claim references supporting a bulk payment.
  */
@@ -124,14 +121,14 @@ public class PaymentReconciliation extends DomainResource {
 
         private static final long serialVersionUID = -1644048062L;
 
-    /*
+    /**
      * Constructor
      */
       public DetailsComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public DetailsComponent(Coding type) {
@@ -533,7 +530,7 @@ public class PaymentReconciliation extends DomainResource {
 
         private static final long serialVersionUID = 129959202L;
 
-    /*
+    /**
      * Constructor
      */
       public NotesComponent() {
@@ -809,14 +806,14 @@ public class PaymentReconciliation extends DomainResource {
 
     private static final long serialVersionUID = 454328025L;
 
-  /*
+  /**
    * Constructor
    */
     public PaymentReconciliation() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public PaymentReconciliation(Money total) {
@@ -1587,6 +1584,44 @@ public class PaymentReconciliation extends DomainResource {
 
   @SearchParamDefinition(name="identifier", path="PaymentReconciliation.identifier", description="The business identifier of the Explanation of Benefit", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="request", path="PaymentReconciliation.request", description="The reference to the claim", type="reference" )
+  public static final String SP_REQUEST = "request";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentReconciliation:request</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:request").toLocked();
+
+  @SearchParamDefinition(name="disposition", path="PaymentReconciliation.disposition", description="The contents of the disposition message", type="string" )
+  public static final String SP_DISPOSITION = "disposition";
+  @SearchParamDefinition(name="created", path="PaymentReconciliation.created", description="The creation date", type="date" )
+  public static final String SP_CREATED = "created";
+  @SearchParamDefinition(name="organization", path="PaymentReconciliation.organization", description="The organization who generated this resource", type="reference" )
+  public static final String SP_ORGANIZATION = "organization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentReconciliation:organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:organization").toLocked();
+
+  @SearchParamDefinition(name="requestprovider", path="PaymentReconciliation.requestProvider", description="The reference to the provider who sumbitted the claim", type="reference" )
+  public static final String SP_REQUESTPROVIDER = "requestprovider";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentReconciliation:requestprovider</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTPROVIDER = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:requestprovider").toLocked();
+
+  @SearchParamDefinition(name="requestorganization", path="PaymentReconciliation.requestOrganization", description="The organization who generated this resource", type="reference" )
+  public static final String SP_REQUESTORGANIZATION = "requestorganization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentReconciliation:requestorganization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTORGANIZATION = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:requestorganization").toLocked();
+
+  @SearchParamDefinition(name="outcome", path="PaymentReconciliation.outcome", description="The processing outcome", type="token" )
+  public static final String SP_OUTCOME = "outcome";
 
 }
 

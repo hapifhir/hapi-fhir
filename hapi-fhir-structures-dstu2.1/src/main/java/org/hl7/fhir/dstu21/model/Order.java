@@ -29,19 +29,17 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A request to perform an action.
  */
@@ -66,7 +64,7 @@ public class Order extends DomainResource {
 
         private static final long serialVersionUID = 307115287L;
 
-    /*
+    /**
      * Constructor
      */
       public OrderWhenComponent() {
@@ -269,7 +267,7 @@ public class Order extends DomainResource {
 
     private static final long serialVersionUID = -1392311096L;
 
-  /*
+  /**
    * Constructor
    */
     public Order() {
@@ -744,16 +742,46 @@ public class Order extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Order:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Order:subject").toLocked();
+
   @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Order:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Order:patient").toLocked();
+
   @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference" )
   public static final String SP_SOURCE = "source";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Order:source</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SOURCE = new ca.uhn.fhir.model.api.Include("Order:source").toLocked();
+
   @SearchParamDefinition(name="detail", path="Order.detail", description="What action is being ordered", type="reference" )
   public static final String SP_DETAIL = "detail";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Order:detail</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DETAIL = new ca.uhn.fhir.model.api.Include("Order:detail").toLocked();
+
   @SearchParamDefinition(name="when", path="Order.when.schedule", description="A formal schedule", type="date" )
   public static final String SP_WHEN = "when";
   @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference" )
   public static final String SP_TARGET = "target";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Order:target</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_TARGET = new ca.uhn.fhir.model.api.Include("Order:target").toLocked();
+
   @SearchParamDefinition(name="when_code", path="Order.when.code", description="Code specifies when request should be done. The code may simply be a priority code", type="token" )
   public static final String SP_WHENCODE = "when_code";
 

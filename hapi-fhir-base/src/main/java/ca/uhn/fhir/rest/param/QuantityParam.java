@@ -120,6 +120,16 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 	 * Constructor
 	 * 
 	 * @param theQuantity
+	 *            A quantity value (with no system or units), such as <code>100</code>
+	 */
+	public QuantityParam(long theQuantity) {
+		setValueAsQueryToken(null, Long.toString(theQuantity));
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theQuantity
 	 *            A quantity value (with no system or units), such as "100.0" or "&lt;=4"
 	 * @param theSystem
 	 *            The unit system

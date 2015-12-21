@@ -4498,7 +4498,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">If there's a constrained type, its content must match the path name in the first element of a snapshot</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">constrainedType.empty() or snapshot.element.first().path = constrainedType</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">constrainedType.empty() or snapshot.empty() or snapshot.element.first().path = constrainedType</Data></Cell>
     <Cell ss:StyleID="s109"><Data ss:Type="String">not(exists(f:constrainedType)) or not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
@@ -4855,7 +4855,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>2</SplitVertical>
-   <LeftColumnRightPane>3</LeftColumnRightPane>
+   <LeftColumnRightPane>5</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -4871,7 +4871,6 @@
     <Pane>
      <Number>0</Number>
      <ActiveRow>12</ActiveRow>
-     <ActiveCol>1</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

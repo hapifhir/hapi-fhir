@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.
  */
@@ -147,6 +145,9 @@ public class DetectedIssue extends DomainResource {
         return "low";
       return "?";
       }
+    public String toSystem(DetectedIssueSeverity code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -179,14 +180,14 @@ public class DetectedIssue extends DomainResource {
 
         private static final long serialVersionUID = -1994768436L;
 
-    /*
+    /**
      * Constructor
      */
       public DetectedIssueMitigationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public DetectedIssueMitigationComponent(CodeableConcept action) {
@@ -476,7 +477,7 @@ public class DetectedIssue extends DomainResource {
 
     private static final long serialVersionUID = -403732234L;
 
-  /*
+  /**
    * Constructor
    */
     public DetectedIssue() {
@@ -1055,10 +1056,28 @@ public class DetectedIssue extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="patient", path="DetectedIssue.patient", description="Associated patient", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DetectedIssue:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("DetectedIssue:patient").toLocked();
+
   @SearchParamDefinition(name="author", path="DetectedIssue.author", description="The provider or device that identified the issue", type="reference" )
   public static final String SP_AUTHOR = "author";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DetectedIssue:author</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("DetectedIssue:author").toLocked();
+
   @SearchParamDefinition(name="implicated", path="DetectedIssue.implicated", description="Problem resource", type="reference" )
   public static final String SP_IMPLICATED = "implicated";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DetectedIssue:implicated</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_IMPLICATED = new ca.uhn.fhir.model.api.Include("DetectedIssue:implicated").toLocked();
+
   @SearchParamDefinition(name="category", path="DetectedIssue.category", description="Issue Category, e.g. drug-drug, duplicate therapy, etc.", type="token" )
   public static final String SP_CATEGORY = "category";
 

@@ -236,7 +236,7 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
 
   @Override
   public IdType copy() {
-    return new IdType(getValueAsString());
+    return new IdType(getValue());
   }
 
   private String determineLocalPrefix(String theValue) {

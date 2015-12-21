@@ -25,9 +25,9 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-12-05T08:35:35-05:00"/>
+  <date value="2015-12-19T16:00:42-05:00"/>
   <description value="An amount of money. With regard to precision, see [Decimal Precision](datatypes.html#precision)"/>
-  <fhirVersion value="1.1.0"/>
+  <fhirVersion value="1.2.0"/>
   <kind value="datatype"/>
   <constrainedType value="Quantity"/>
   <abstract value="false"/>

@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.
  */
@@ -192,6 +192,9 @@ public class Encounter extends DomainResource {
       if (code == EncounterState.CANCELLED)
         return "cancelled";
       return "?";
+      }
+    public String toSystem(EncounterState code) {
+      return code.getSystem();
       }
     }
 
@@ -389,6 +392,9 @@ public class Encounter extends DomainResource {
         return "other";
       return "?";
       }
+    public String toSystem(EncounterClass code) {
+      return code.getSystem();
+      }
     }
 
     public enum EncounterLocationStatus {
@@ -509,6 +515,9 @@ Not to be used when the patient is currently at the location
         return "completed";
       return "?";
       }
+    public String toSystem(EncounterLocationStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -529,14 +538,14 @@ Not to be used when the patient is currently at the location
 
         private static final long serialVersionUID = 919229161L;
 
-    /*
+    /**
      * Constructor
      */
       public EncounterStatusHistoryComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public EncounterStatusHistoryComponent(Enumeration<EncounterState> status, Period period) {
@@ -713,7 +722,7 @@ Not to be used when the patient is currently at the location
 
         private static final long serialVersionUID = 317095765L;
 
-    /*
+    /**
      * Constructor
      */
       public EncounterParticipantComponent() {
@@ -1006,7 +1015,7 @@ Not to be used when the patient is currently at the location
 
         private static final long serialVersionUID = 164618034L;
 
-    /*
+    /**
      * Constructor
      */
       public EncounterHospitalizationComponent() {
@@ -1636,14 +1645,14 @@ Not to be used when the patient is currently at the location
 
         private static final long serialVersionUID = -322984880L;
 
-    /*
+    /**
      * Constructor
      */
       public EncounterLocationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public EncounterLocationComponent(Reference location) {
@@ -2016,14 +2025,14 @@ Not to be used when the patient is currently at the location
 
     private static final long serialVersionUID = 929562300L;
 
-  /*
+  /**
    * Constructor
    */
     public Encounter() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Encounter(Enumeration<EncounterState> status) {
@@ -3068,36 +3077,102 @@ Not to be used when the patient is currently at the location
   public static final String SP_REASON = "reason";
   @SearchParamDefinition(name="episodeofcare", path="Encounter.episodeOfCare", description="Episode(s) of care that this encounter should be recorded against", type="reference" )
   public static final String SP_EPISODEOFCARE = "episodeofcare";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:episodeofcare</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_EPISODEOFCARE = new ca.uhn.fhir.model.api.Include("Encounter:episodeofcare").toLocked();
+
   @SearchParamDefinition(name="participant-type", path="Encounter.participant.type", description="Role of participant in encounter", type="token" )
-  public static final String SP_PARTICIPANTTYPE = "participant-type";
+  public static final String SP_PARTICIPANT_TYPE = "participant-type";
   @SearchParamDefinition(name="incomingreferral", path="Encounter.incomingReferral", description="The ReferralRequest that initiated this encounter", type="reference" )
   public static final String SP_INCOMINGREFERRAL = "incomingreferral";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:incomingreferral</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_INCOMINGREFERRAL = new ca.uhn.fhir.model.api.Include("Encounter:incomingreferral").toLocked();
+
   @SearchParamDefinition(name="practitioner", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:practitioner</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PRACTITIONER = new ca.uhn.fhir.model.api.Include("Encounter:practitioner").toLocked();
+
   @SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days", type="number" )
   public static final String SP_LENGTH = "length";
   @SearchParamDefinition(name="appointment", path="Encounter.appointment", description="The appointment that scheduled this encounter", type="reference" )
   public static final String SP_APPOINTMENT = "appointment";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:appointment</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_APPOINTMENT = new ca.uhn.fhir.model.api.Include("Encounter:appointment").toLocked();
+
   @SearchParamDefinition(name="part-of", path="Encounter.partOf", description="Another Encounter this encounter is part of", type="reference" )
-  public static final String SP_PARTOF = "part-of";
+  public static final String SP_PART_OF = "part-of";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:part-of</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PART_OF = new ca.uhn.fhir.model.api.Include("Encounter:part-of").toLocked();
+
   @SearchParamDefinition(name="procedure", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference" )
   public static final String SP_PROCEDURE = "procedure";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:procedure</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROCEDURE = new ca.uhn.fhir.model.api.Include("Encounter:procedure").toLocked();
+
   @SearchParamDefinition(name="type", path="Encounter.type", description="Specific type of encounter", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="participant", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference" )
   public static final String SP_PARTICIPANT = "participant";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:participant</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PARTICIPANT = new ca.uhn.fhir.model.api.Include("Encounter:participant").toLocked();
+
   @SearchParamDefinition(name="condition", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference" )
   public static final String SP_CONDITION = "condition";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:condition</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONDITION = new ca.uhn.fhir.model.api.Include("Encounter:condition").toLocked();
+
   @SearchParamDefinition(name="patient", path="Encounter.patient", description="The patient present at the encounter", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Encounter:patient").toLocked();
+
   @SearchParamDefinition(name="location-period", path="Encounter.location.period", description="Time period during which the patient was present at the location", type="date" )
-  public static final String SP_LOCATIONPERIOD = "location-period";
+  public static final String SP_LOCATION_PERIOD = "location-period";
   @SearchParamDefinition(name="location", path="Encounter.location.location", description="Location the encounter takes place", type="reference" )
   public static final String SP_LOCATION = "location";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:location</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("Encounter:location").toLocked();
+
   @SearchParamDefinition(name="indication", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference" )
   public static final String SP_INDICATION = "indication";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:indication</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_INDICATION = new ca.uhn.fhir.model.api.Include("Encounter:indication").toLocked();
+
   @SearchParamDefinition(name="special-arrangement", path="Encounter.hospitalization.specialArrangement", description="Wheelchair, translator, stretcher, etc.", type="token" )
-  public static final String SP_SPECIALARRANGEMENT = "special-arrangement";
+  public static final String SP_SPECIAL_ARRANGEMENT = "special-arrangement";
   @SearchParamDefinition(name="status", path="Encounter.status", description="planned | arrived | in-progress | onleave | finished | cancelled", type="token" )
   public static final String SP_STATUS = "status";
 

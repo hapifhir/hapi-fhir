@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centres, etc.
  */
@@ -127,6 +128,9 @@ public class Account extends DomainResource {
       if (code == AccountStatus.INACTIVE)
         return "inactive";
       return "?";
+      }
+    public String toSystem(AccountStatus code) {
+      return code.getSystem();
       }
     }
 
@@ -219,7 +223,7 @@ public class Account extends DomainResource {
 
     private static final long serialVersionUID = -1926153194L;
 
-  /*
+  /**
    * Constructor
    */
     public Account() {
@@ -775,6 +779,12 @@ public class Account extends DomainResource {
 
   @SearchParamDefinition(name="owner", path="Account.owner", description="Who is responsible?", type="reference" )
   public static final String SP_OWNER = "owner";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Account:owner</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_OWNER = new ca.uhn.fhir.model.api.Include("Account:owner").toLocked();
+
   @SearchParamDefinition(name="identifier", path="Account.identifier", description="Account number", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="period", path="Account.coveragePeriod", description="Transaction window", type="date" )
@@ -783,8 +793,20 @@ public class Account extends DomainResource {
   public static final String SP_BALANCE = "balance";
   @SearchParamDefinition(name="subject", path="Account.subject", description="What is account tied to?", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Account:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Account:subject").toLocked();
+
   @SearchParamDefinition(name="patient", path="Account.subject", description="What is account tied to?", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Account:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Account:patient").toLocked();
+
   @SearchParamDefinition(name="name", path="Account.name", description="Human-readable label", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="type", path="Account.type", description="E.g. patient, expense, depreciation", type="token" )

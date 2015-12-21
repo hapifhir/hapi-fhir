@@ -29,21 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGenderEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A person who is directly or indirectly involved in the provisioning of healthcare.
  */
@@ -111,7 +109,7 @@ public class Practitioner extends DomainResource {
 
         private static final long serialVersionUID = -2146177018L;
 
-    /*
+    /**
      * Constructor
      */
       public PractitionerPractitionerRoleComponent() {
@@ -523,14 +521,14 @@ public class Practitioner extends DomainResource {
 
         private static final long serialVersionUID = 1095219071L;
 
-    /*
+    /**
      * Constructor
      */
       public PractitionerQualificationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public PractitionerQualificationComponent(CodeableConcept code) {
@@ -839,7 +837,7 @@ public class Practitioner extends DomainResource {
 
     private static final long serialVersionUID = 1066276346L;
 
-  /*
+  /**
    * Constructor
    */
     public Practitioner() {
@@ -1479,31 +1477,43 @@ public class Practitioner extends DomainResource {
   @SearchParamDefinition(name="role", path="Practitioner.practitionerRole.role", description="The practitioner can perform this role at for the organization", type="token" )
   public static final String SP_ROLE = "role";
   @SearchParamDefinition(name="address-state", path="Practitioner.address.state", description="A state specified in an address", type="string" )
-  public static final String SP_ADDRESSSTATE = "address-state";
+  public static final String SP_ADDRESS_STATE = "address-state";
   @SearchParamDefinition(name="gender", path="Practitioner.gender", description="Gender of the practitioner", type="token" )
   public static final String SP_GENDER = "gender";
   @SearchParamDefinition(name="address-postalcode", path="Practitioner.address.postalCode", description="A postalCode specified in an address", type="string" )
-  public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
+  public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
   @SearchParamDefinition(name="address-country", path="Practitioner.address.country", description="A country specified in an address", type="string" )
-  public static final String SP_ADDRESSCOUNTRY = "address-country";
+  public static final String SP_ADDRESS_COUNTRY = "address-country";
   @SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="phone", path="Practitioner.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
   public static final String SP_PHONE = "phone";
   @SearchParamDefinition(name="organization", path="Practitioner.practitionerRole.managingOrganization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Practitioner:organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("Practitioner:organization").toLocked();
+
   @SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="address-use", path="Practitioner.address.use", description="A use code specified in an address", type="token" )
-  public static final String SP_ADDRESSUSE = "address-use";
+  public static final String SP_ADDRESS_USE = "address-use";
   @SearchParamDefinition(name="telecom", path="Practitioner.telecom", description="The value in any kind of contact", type="token" )
   public static final String SP_TELECOM = "telecom";
   @SearchParamDefinition(name="location", path="Practitioner.practitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference" )
   public static final String SP_LOCATION = "location";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Practitioner:location</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("Practitioner:location").toLocked();
+
   @SearchParamDefinition(name="family", path="Practitioner.name.family", description="A portion of the family name", type="string" )
   public static final String SP_FAMILY = "family";
   @SearchParamDefinition(name="address-city", path="Practitioner.address.city", description="A city specified in an address", type="string" )
-  public static final String SP_ADDRESSCITY = "address-city";
+  public static final String SP_ADDRESS_CITY = "address-city";
   @SearchParamDefinition(name="communication", path="Practitioner.communication", description="One of the languages that the practitioner can communicate with", type="token" )
   public static final String SP_COMMUNICATION = "communication";
   @SearchParamDefinition(name="email", path="Practitioner.telecom.where(system='email')", description="A value in an email contact", type="token" )

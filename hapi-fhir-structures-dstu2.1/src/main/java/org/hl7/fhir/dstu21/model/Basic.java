@@ -29,17 +29,17 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Basic is used for handling concepts not yet defined in FHIR, narrative-only resources that don't map to an existing resource, and custom resources not appropriate for inclusion in the FHIR specification.
  */
@@ -93,14 +93,14 @@ public class Basic extends DomainResource {
 
     private static final long serialVersionUID = 916539354L;
 
-  /*
+  /**
    * Constructor
    */
     public Basic() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Basic(CodeableConcept code) {
@@ -410,12 +410,30 @@ public class Basic extends DomainResource {
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="subject", path="Basic.subject", description="Identifies the focus of this resource", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Basic:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Basic:subject").toLocked();
+
   @SearchParamDefinition(name="created", path="Basic.created", description="When created", type="date" )
   public static final String SP_CREATED = "created";
   @SearchParamDefinition(name="patient", path="Basic.subject", description="Identifies the focus of this resource", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Basic:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Basic:patient").toLocked();
+
   @SearchParamDefinition(name="author", path="Basic.author", description="Who created", type="reference" )
   public static final String SP_AUTHOR = "author";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Basic:author</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("Basic:author").toLocked();
+
 
 }
 

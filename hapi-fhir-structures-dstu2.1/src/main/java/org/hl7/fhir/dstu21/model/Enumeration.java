@@ -37,11 +37,11 @@ POSSIBILITY OF SUCH DAMAGE.
  * Primitive type "code" in FHIR, where the code is tied to an enumerated list of possible values
  * 
  */
-@DatatypeDef(name="code", isSpecialization=true) 
+@DatatypeDef(name = "code", isSpecialization = true)
 public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements IBaseEnumeration<T> {
 
 	private static final long serialVersionUID = 1L;
-	private EnumFactory<T> myEnumFactory;
+	private final EnumFactory<T> myEnumFactory;
 
 	/**
 	 * Constructor
@@ -55,6 +55,16 @@ public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements 
 	/**
 	 * Constructor
 	 */
+	public Enumeration(EnumFactory<T> theEnumFactory, String theValue) {
+		if (theEnumFactory == null)
+			throw new IllegalArgumentException("An enumeration factory must be provided");
+		myEnumFactory = theEnumFactory;
+		setValueAsString(theValue);
+	}
+
+	/**
+	 * Constructor
+	 */
 	public Enumeration(EnumFactory<T> theEnumFactory, T theValue) {
 		if (theEnumFactory == null)
 			throw new IllegalArgumentException("An enumeration factory must be provided");
@@ -62,14 +72,25 @@ public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements 
 		setValue(theValue);
 	}
 
+	@Override
+	public Enumeration<T> copy() {
+		return new Enumeration<T>(myEnumFactory, getValue());
+	}
+
+	@Override
+	protected String encode(T theValue) {
+		return myEnumFactory.toCode(theValue);
+	}
+
+	public String fhirType() {
+		return "code";
+	}
+
 	/**
-	 * Constructor
+	 * Provides the enum factory which binds this enumeration to a specific ValueSet
 	 */
-	public Enumeration(EnumFactory<T> theEnumFactory, String theValue) {
-		if (theEnumFactory == null)
-			throw new IllegalArgumentException("An enumeration factory must be provided");
-		myEnumFactory = theEnumFactory;
-		setValueAsString(theValue);
+	public EnumFactory<T> getEnumFactory() {
+		return myEnumFactory;
 	}
 
 	@Override
@@ -78,20 +99,5 @@ public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements 
 			return myEnumFactory.fromCode(theValue);
 		}
 		return null;
-	}
-
-	@Override
-	protected String encode(T theValue) {
-		return myEnumFactory.toCode(theValue);
-	}
-
-	@Override
-	public Enumeration<T> copy() {
-		return new Enumeration<T>(myEnumFactory, getValue());
-	}
-
-
-	public String fhirType() {
-		return "code";		
 	}
 }

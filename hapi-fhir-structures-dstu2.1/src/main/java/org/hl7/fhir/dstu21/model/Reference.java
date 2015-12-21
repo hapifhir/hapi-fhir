@@ -29,18 +29,17 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A reference from one resource to another.
  */
@@ -63,7 +62,7 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
 
     private static final long serialVersionUID = 22777321L;
 
-  /*
+  /**
    * Constructor
    */
     public Reference() {
@@ -84,7 +83,7 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
      * 
      * @param theReference The given reference as an IdType (e.g. "Patient/123" or "http://example.com/Patient/123")
      */
-    public Reference(IdType theReference) {
+    public Reference(IIdType theReference) {
       super(theReference);
     }
 
@@ -186,6 +185,22 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
       return this;
     }
 
+ /**
+   * Convenience setter which sets the reference to the complete {@link IIdType#getValue() value} of the given
+   * reference.
+   *
+   * @param theReference The reference, or <code>null</code>
+   * @return 
+   * @return Returns a reference to this
+   */
+  public Reference setReferenceElement(IIdType theReference) {
+    if (theReference != null) {
+      setReference(theReference.getValue());
+    } else {
+      setReference(null);
+    }
+    return this;
+  }
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("reference", "string", "A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.", 0, java.lang.Integer.MAX_VALUE, reference));

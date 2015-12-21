@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A photo, video, or audio recording acquired or used in healthcare. The actual content may be inline or provided by direct reference.
  */
@@ -144,6 +145,9 @@ public class Media extends DomainResource {
         return "audio";
       return "?";
       }
+    public String toSystem(DigitalMediaType code) {
+      return code.getSystem();
+      }
     }
 
     /**
@@ -242,14 +246,14 @@ public class Media extends DomainResource {
 
     private static final long serialVersionUID = -280764739L;
 
-  /*
+  /**
    * Constructor
    */
     public Media() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Media(Enumeration<DigitalMediaType> type, Attachment content) {
@@ -900,12 +904,30 @@ public class Media extends DomainResource {
   public static final String SP_CREATED = "created";
   @SearchParamDefinition(name="subject", path="Media.subject", description="Who/What this Media is a record of", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Media:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Media:subject").toLocked();
+
   @SearchParamDefinition(name="patient", path="Media.subject", description="Who/What this Media is a record of", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Media:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Media:patient").toLocked();
+
   @SearchParamDefinition(name="type", path="Media.type", description="photo | video | audio", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="operator", path="Media.operator", description="The person who generated the image", type="reference" )
   public static final String SP_OPERATOR = "operator";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Media:operator</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_OPERATOR = new ca.uhn.fhir.model.api.Include("Media:operator").toLocked();
+
 
 }
 

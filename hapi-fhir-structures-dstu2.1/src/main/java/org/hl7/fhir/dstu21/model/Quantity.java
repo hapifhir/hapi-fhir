@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu21.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,16 +29,18 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import java.util.*;
+
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
-
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.
  */
@@ -161,6 +161,9 @@ public class Quantity extends Type implements ICompositeType {
         return ">";
       return "?";
       }
+    public String toSystem(QuantityComparator code) {
+      return code.getSystem();
+      }
     }
 
     /**
@@ -200,13 +203,64 @@ public class Quantity extends Type implements ICompositeType {
 
     private static final long serialVersionUID = 1069574054L;
 
-  /*
+  /**
    * Constructor
    */
     public Quantity() {
       super();
     }
 
+ /**
+   * Convenience constructor
+   * 
+   * @param theValue The {@link #setValue(double) value}
+   */
+  public Quantity(double theValue) {
+    setValue(theValue);
+  }
+
+  /**
+   * Convenience constructor
+   * 
+   * @param theValue The {@link #setValue(long) value}
+   */
+  public Quantity(long theValue) {
+    setValue(theValue);
+  }
+  
+  /**
+   * Convenience constructor
+   * 
+   * @param theComparator The {@link #setComparator(QuantityComparator) comparator}
+   * @param theValue The {@link #setValue(BigDecimal) value}
+   * @param theSystem The {@link #setSystem(String)} (the code system for the units}
+   * @param theCode The {@link #setCode(String)} (the code for the units}
+   * @param theUnit The {@link #setUnit(String)} (the human readable display name for the units}
+   */
+  public Quantity(QuantityComparator theComparator, double theValue, String theSystem, String theCode, String theUnit) {
+    setValue(theValue);
+    setComparator(theComparator);
+    setSystem(theSystem);
+    setCode(theCode);
+    setUnit(theUnit);
+  }
+
+  /**
+   * Convenience constructor
+   * 
+   * @param theComparator The {@link #setComparator(QuantityComparator) comparator}
+   * @param theValue The {@link #setValue(BigDecimal) value}
+   * @param theSystem The {@link #setSystem(String)} (the code system for the units}
+   * @param theCode The {@link #setCode(String)} (the code for the units}
+   * @param theUnit The {@link #setUnit(String)} (the human readable display name for the units}
+   */
+  public Quantity(QuantityComparator theComparator, long theValue, String theSystem, String theCode, String theUnit) {
+    setValue(theValue);
+    setComparator(theComparator);
+    setSystem(theSystem);
+    setCode(theCode);
+    setUnit(theUnit);
+  }
     /**
      * @return {@link #value} (The value of the measured amount. The value includes an implicit precision in the presentation of the value.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
      */

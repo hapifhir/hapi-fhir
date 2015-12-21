@@ -293,7 +293,9 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 					}
 
 					if (compositeOf.size() > 2) {
-						throw new MojoExecutionException("Composite param " + nextCompositeParam.getName() + " has >2 parts, this isn't supported yet");
+						// TODO: change back to exception maybe? Grahame says these aren't allowed..
+						ourLog.warn("Composite param " + nextCompositeParam.getName() + " has >2 parts, this isn't supported yet");
+						continue;
 					}
 
 					for (SearchParameter part1 : compositeOf.get(0)) {

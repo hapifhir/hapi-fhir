@@ -29,20 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides processing status, errors and notes from the processing of a resource.
  */
@@ -67,7 +66,7 @@ public class ProcessResponse extends DomainResource {
 
         private static final long serialVersionUID = 129959202L;
 
-    /*
+    /**
      * Constructor
      */
       public ProcessResponseNotesComponent() {
@@ -329,7 +328,7 @@ public class ProcessResponse extends DomainResource {
 
     private static final long serialVersionUID = -1668062545L;
 
-  /*
+  /**
    * Constructor
    */
     public ProcessResponse() {
@@ -1006,12 +1005,36 @@ public class ProcessResponse extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="request", path="ProcessResponse.request", description="The reference to the claim", type="reference" )
   public static final String SP_REQUEST = "request";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ProcessResponse:request</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST = new ca.uhn.fhir.model.api.Include("ProcessResponse:request").toLocked();
+
   @SearchParamDefinition(name="organization", path="ProcessResponse.organization", description="The organization who generated this resource", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ProcessResponse:organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("ProcessResponse:organization").toLocked();
+
   @SearchParamDefinition(name="requestprovider", path="ProcessResponse.requestProvider", description="The Provider who is responsible the request transaction", type="reference" )
   public static final String SP_REQUESTPROVIDER = "requestprovider";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ProcessResponse:requestprovider</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTPROVIDER = new ca.uhn.fhir.model.api.Include("ProcessResponse:requestprovider").toLocked();
+
   @SearchParamDefinition(name="requestorganization", path="ProcessResponse.requestOrganization", description="The Organization who is responsible the request transaction", type="reference" )
   public static final String SP_REQUESTORGANIZATION = "requestorganization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ProcessResponse:requestorganization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTORGANIZATION = new ca.uhn.fhir.model.api.Include("ProcessResponse:requestorganization").toLocked();
+
 
 }
 

@@ -29,24 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.BindingStrength;
-import org.hl7.fhir.dstu21.model.Enumerations.BindingStrengthEnumFactory;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).
  */
@@ -135,6 +130,9 @@ public class OperationDefinition extends DomainResource {
         return "query";
       return "?";
       }
+    public String toSystem(OperationKind code) {
+      return code.getSystem();
+      }
     }
 
     public enum OperationParameterUse {
@@ -219,6 +217,9 @@ public class OperationDefinition extends DomainResource {
         return "out";
       return "?";
       }
+    public String toSystem(OperationParameterUse code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -239,7 +240,7 @@ public class OperationDefinition extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
-    /*
+    /**
      * Constructor
      */
       public OperationDefinitionContactComponent() {
@@ -479,14 +480,14 @@ public class OperationDefinition extends DomainResource {
 
         private static final long serialVersionUID = -1514145741L;
 
-    /*
+    /**
      * Constructor
      */
       public OperationDefinitionParameterComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public OperationDefinitionParameterComponent(CodeType name, Enumeration<OperationParameterUse> use, IntegerType min, StringType max) {
@@ -1031,14 +1032,14 @@ public class OperationDefinition extends DomainResource {
 
         private static final long serialVersionUID = 857140521L;
 
-    /*
+    /**
      * Constructor
      */
       public OperationDefinitionParameterBindingComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public OperationDefinitionParameterBindingComponent(Enumeration<BindingStrength> strength, Type valueSet) {
@@ -1350,14 +1351,14 @@ public class OperationDefinition extends DomainResource {
 
     private static final long serialVersionUID = 148203484L;
 
-  /*
+  /**
    * Constructor
    */
     public OperationDefinition() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public OperationDefinition(StringType name, Enumeration<ConformanceResourceStatus> status, Enumeration<OperationKind> kind, CodeType code, BooleanType system, BooleanType instance) {
@@ -2485,6 +2486,12 @@ public class OperationDefinition extends DomainResource {
   public static final String SP_KIND = "kind";
   @SearchParamDefinition(name="profile", path="OperationDefinition.parameter.profile", description="Profile on the type", type="reference" )
   public static final String SP_PROFILE = "profile";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>OperationDefinition:profile</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROFILE = new ca.uhn.fhir.model.api.Include("OperationDefinition:profile").toLocked();
+
   @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invoke at resource level for these type", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="version", path="OperationDefinition.version", description="Logical id for this version of the operation definition", type="token" )
@@ -2501,6 +2508,12 @@ public class OperationDefinition extends DomainResource {
   public static final String SP_STATUS = "status";
   @SearchParamDefinition(name="base", path="OperationDefinition.base", description="Marks this as a profile of the base", type="reference" )
   public static final String SP_BASE = "base";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>OperationDefinition:base</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_BASE = new ca.uhn.fhir.model.api.Include("OperationDefinition:base").toLocked();
+
 
 }
 

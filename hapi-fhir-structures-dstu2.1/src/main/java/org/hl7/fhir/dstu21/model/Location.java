@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu21.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,19 +29,19 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.
  */
@@ -148,6 +146,9 @@ public class Location extends DomainResource {
         return "inactive";
       return "?";
       }
+    public String toSystem(LocationStatus code) {
+      return code.getSystem();
+      }
     }
 
     public enum LocationMode {
@@ -232,6 +233,9 @@ public class Location extends DomainResource {
         return "kind";
       return "?";
       }
+    public String toSystem(LocationMode code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -259,14 +263,14 @@ public class Location extends DomainResource {
 
         private static final long serialVersionUID = -74276134L;
 
-    /*
+    /**
      * Constructor
      */
       public LocationPositionComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public LocationPositionComponent(DecimalType longitude, DecimalType latitude) {
@@ -641,7 +645,7 @@ public class Location extends DomainResource {
 
     private static final long serialVersionUID = -2100435761L;
 
-  /*
+  /**
    * Constructor
    */
     public Location() {
@@ -1280,28 +1284,40 @@ public class Location extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="partof", path="Location.partOf", description="The location of which this location is a part", type="reference" )
   public static final String SP_PARTOF = "partof";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Location:partof</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PARTOF = new ca.uhn.fhir.model.api.Include("Location:partof").toLocked();
+
   @SearchParamDefinition(name="near-distance", path="Location.position", description="A distance quantity to limit the near search to locations within a specific distance", type="token" )
-  public static final String SP_NEARDISTANCE = "near-distance";
+  public static final String SP_NEAR_DISTANCE = "near-distance";
   @SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location", type="string" )
   public static final String SP_ADDRESS = "address";
   @SearchParamDefinition(name="address-state", path="Location.address.state", description="A state specified in an address", type="string" )
-  public static final String SP_ADDRESSSTATE = "address-state";
+  public static final String SP_ADDRESS_STATE = "address-state";
   @SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="address-postalcode", path="Location.address.postalCode", description="A postal code specified in an address", type="string" )
-  public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
+  public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
   @SearchParamDefinition(name="address-country", path="Location.address.country", description="A country specified in an address", type="string" )
-  public static final String SP_ADDRESSCOUNTRY = "address-country";
+  public static final String SP_ADDRESS_COUNTRY = "address-country";
   @SearchParamDefinition(name="organization", path="Location.managingOrganization", description="Searches for locations that are managed by the provided organization", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Location:organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("Location:organization").toLocked();
+
   @SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="address-use", path="Location.address.use", description="A use code specified in an address", type="token" )
-  public static final String SP_ADDRESSUSE = "address-use";
+  public static final String SP_ADDRESS_USE = "address-use";
   @SearchParamDefinition(name="near", path="Location.position", description="The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)", type="token" )
   public static final String SP_NEAR = "near";
   @SearchParamDefinition(name="address-city", path="Location.address.city", description="A city specified in an address", type="string" )
-  public static final String SP_ADDRESSCITY = "address-city";
+  public static final String SP_ADDRESS_CITY = "address-city";
   @SearchParamDefinition(name="status", path="Location.status", description="Searches for locations with a specific kind of status", type="token" )
   public static final String SP_STATUS = "status";
 

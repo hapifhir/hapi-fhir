@@ -6,11 +6,6 @@ public class FHIRException extends Exception {
 		super();
 	}
 
-	// Note: the 4 argument constructor has been removed as it is not 1.6 compatible
-//	public FHIRException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-//		super(message, cause, enableSuppression, writableStackTrace);
-//	}
-
 	public FHIRException(String message, Throwable cause) {
 		super(message, cause);
 	}

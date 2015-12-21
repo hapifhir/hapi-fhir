@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.
  */
@@ -80,7 +79,7 @@ public class Organization extends DomainResource {
 
         private static final long serialVersionUID = 1831121305L;
 
-    /*
+    /**
      * Constructor
      */
       public OrganizationContactComponent() {
@@ -352,7 +351,7 @@ public class Organization extends DomainResource {
 
     private static final long serialVersionUID = -749567123L;
 
-  /*
+  /**
    * Constructor
    */
     public Organization() {
@@ -824,26 +823,32 @@ public class Organization extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference" )
   public static final String SP_PARTOF = "partof";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Organization:partof</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PARTOF = new ca.uhn.fhir.model.api.Include("Organization:partof").toLocked();
+
   @SearchParamDefinition(name="phonetic", path="Organization.name", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="address", path="Organization.address", description="A (part of the) address of the Organization", type="string" )
   public static final String SP_ADDRESS = "address";
   @SearchParamDefinition(name="address-state", path="Organization.address.state", description="A state specified in an address", type="string" )
-  public static final String SP_ADDRESSSTATE = "address-state";
+  public static final String SP_ADDRESS_STATE = "address-state";
   @SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="address-use", path="Organization.address.use", description="A use code specified in an address", type="token" )
-  public static final String SP_ADDRESSUSE = "address-use";
+  public static final String SP_ADDRESS_USE = "address-use";
   @SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token" )
   public static final String SP_ACTIVE = "active";
   @SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="address-city", path="Organization.address.city", description="A city specified in an address", type="string" )
-  public static final String SP_ADDRESSCITY = "address-city";
+  public static final String SP_ADDRESS_CITY = "address-city";
   @SearchParamDefinition(name="address-postalcode", path="Organization.address.postalCode", description="A postal code specified in an address", type="string" )
-  public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
+  public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
   @SearchParamDefinition(name="address-country", path="Organization.address.country", description="A country specified in an address", type="string" )
-  public static final String SP_ADDRESSCOUNTRY = "address-country";
+  public static final String SP_ADDRESS_COUNTRY = "address-country";
 
 }
 

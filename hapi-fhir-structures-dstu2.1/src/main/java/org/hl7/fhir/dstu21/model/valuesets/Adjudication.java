@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model.valuesets;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,31 +37,31 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum Adjudication {
 
         /**
-         * null
+         * Total submitted
          */
         TOTAL, 
         /**
-         * null
+         * Patient Co-Payment
          */
         COPAY, 
         /**
-         * null
+         * Amount of the change which is considered for adjudication
          */
         ELIGIBLE, 
         /**
-         * null
+         * Amount deducted from the eligible amount prior to adjudication
          */
         DEDUCTIBLE, 
         /**
-         * null
+         * Eligible Percentage
          */
         ELIGPERCENT, 
         /**
-         * null
+         * Emergency Department
          */
         TAX, 
         /**
-         * null
+         * Amount payable under the coverage
          */
         BENEFIT, 
         /**
@@ -104,25 +104,25 @@ public enum Adjudication {
         }
         public String getDefinition() {
           switch (this) {
-            case TOTAL: return "";
-            case COPAY: return "";
-            case ELIGIBLE: return "";
-            case DEDUCTIBLE: return "";
-            case ELIGPERCENT: return "";
-            case TAX: return "";
-            case BENEFIT: return "";
+            case TOTAL: return "Total submitted";
+            case COPAY: return "Patient Co-Payment";
+            case ELIGIBLE: return "Amount of the change which is considered for adjudication";
+            case DEDUCTIBLE: return "Amount deducted from the eligible amount prior to adjudication";
+            case ELIGPERCENT: return "Eligible Percentage";
+            case TAX: return "Emergency Department";
+            case BENEFIT: return "Amount payable under the coverage";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case TOTAL: return "total";
-            case COPAY: return "copay";
-            case ELIGIBLE: return "eligible";
-            case DEDUCTIBLE: return "deductible";
-            case ELIGPERCENT: return "eligpercent";
-            case TAX: return "tax";
-            case BENEFIT: return "benefit";
+            case TOTAL: return "Total";
+            case COPAY: return "CoPay";
+            case ELIGIBLE: return "Eligible Amount";
+            case DEDUCTIBLE: return "Deductable";
+            case ELIGPERCENT: return "Eligible %";
+            case TAX: return "Emergency Department";
+            case BENEFIT: return "Benefit Amount";
             default: return "?";
           }
     }

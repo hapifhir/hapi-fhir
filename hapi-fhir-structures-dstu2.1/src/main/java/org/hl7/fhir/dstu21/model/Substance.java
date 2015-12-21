@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A homogeneous material with a definite composition.
  */
@@ -74,7 +72,7 @@ public class Substance extends DomainResource {
 
         private static final long serialVersionUID = -794314734L;
 
-    /*
+    /**
      * Constructor
      */
       public SubstanceInstanceComponent() {
@@ -279,14 +277,14 @@ public class Substance extends DomainResource {
 
         private static final long serialVersionUID = -1783242034L;
 
-    /*
+    /**
      * Constructor
      */
       public SubstanceIngredientComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public SubstanceIngredientComponent(Reference substance) {
@@ -476,14 +474,14 @@ public class Substance extends DomainResource {
 
     private static final long serialVersionUID = -1653977206L;
 
-  /*
+  /**
    * Constructor
    */
     public Substance() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Substance(CodeableConcept code) {
@@ -850,13 +848,19 @@ public class Substance extends DomainResource {
   @SearchParamDefinition(name="identifier", path="Substance.identifier", description="Unique identifier for the substance", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="container-identifier", path="Substance.instance.identifier", description="Identifier of the package/container", type="token" )
-  public static final String SP_CONTAINERIDENTIFIER = "container-identifier";
+  public static final String SP_CONTAINER_IDENTIFIER = "container-identifier";
   @SearchParamDefinition(name="code", path="Substance.code", description="The code of the substance", type="token" )
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="Amount of substance in the package", type="quantity" )
   public static final String SP_QUANTITY = "quantity";
   @SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="A component of the substance", type="reference" )
   public static final String SP_SUBSTANCE = "substance";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Substance:substance</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBSTANCE = new ca.uhn.fhir.model.api.Include("Substance:substance").toLocked();
+
   @SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="Expiry date of package or container of substance", type="date" )
   public static final String SP_EXPIRY = "expiry";
   @SearchParamDefinition(name="category", path="Substance.category", description="The category of the substance", type="token" )

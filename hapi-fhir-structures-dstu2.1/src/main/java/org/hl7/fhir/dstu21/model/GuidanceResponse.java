@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A guidance response is the formal response to a previous guidance request. It is a derivative of the knowledge response that provides additional information relevant specifically to clinical decision support such as a description of any proposed actions to be taken.
  */
@@ -177,6 +177,9 @@ public class GuidanceResponse extends DomainResource {
         return "failure";
       return "?";
       }
+    public String toSystem(GuidanceResponseStatus code) {
+      return code.getSystem();
+      }
     }
 
     public enum GuidanceResponseActionType {
@@ -293,6 +296,9 @@ public class GuidanceResponse extends DomainResource {
         return "fire-event";
       return "?";
       }
+    public String toSystem(GuidanceResponseActionType code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -393,7 +399,7 @@ public class GuidanceResponse extends DomainResource {
 
         private static final long serialVersionUID = 1245922408L;
 
-    /*
+    /**
      * Constructor
      */
       public GuidanceResponseActionComponent() {
@@ -1146,14 +1152,14 @@ public class GuidanceResponse extends DomainResource {
 
     private static final long serialVersionUID = -2105369308L;
 
-  /*
+  /**
    * Constructor
    */
     public GuidanceResponse() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public GuidanceResponse(Reference module, Enumeration<GuidanceResponseStatus> status) {

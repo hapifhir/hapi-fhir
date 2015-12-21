@@ -29,23 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.DocumentReferenceStatus;
-import org.hl7.fhir.dstu21.model.Enumerations.DocumentReferenceStatusEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A manifest that defines a set of documents.
  */
@@ -57,20 +53,20 @@ public class DocumentManifest extends DomainResource {
         /**
          * The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed.
          */
-        @Child(name = "p", type = {Attachment.class, IBaseResource.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "p", type = {Attachment.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Contents of this set of documents", formalDefinition="The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed." )
         protected Type p;
 
         private static final long serialVersionUID = -347538500L;
 
-    /*
+    /**
      * Constructor
      */
       public DocumentManifestContentComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public DocumentManifestContentComponent(Type p) {
@@ -211,7 +207,7 @@ public class DocumentManifest extends DomainResource {
 
         private static final long serialVersionUID = -1670123330L;
 
-    /*
+    /**
      * Constructor
      */
       public DocumentManifestRelatedComponent() {
@@ -452,14 +448,14 @@ public class DocumentManifest extends DomainResource {
 
     private static final long serialVersionUID = -2056683927L;
 
-  /*
+  /**
    * Constructor
    */
     public DocumentManifest() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public DocumentManifest(Enumeration<DocumentReferenceStatus> status) {
@@ -1143,13 +1139,31 @@ public class DocumentManifest extends DomainResource {
   @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier|DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="related-id", path="DocumentManifest.related.identifier", description="Identifiers of things that are related", type="token" )
-  public static final String SP_RELATEDID = "related-id";
+  public static final String SP_RELATED_ID = "related-id";
   @SearchParamDefinition(name="content-ref", path="DocumentManifest.content.pReference", description="Contents of this set of documents", type="reference" )
-  public static final String SP_CONTENTREF = "content-ref";
+  public static final String SP_CONTENT_REF = "content-ref";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentManifest:content-ref</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTENT_REF = new ca.uhn.fhir.model.api.Include("DocumentManifest:content-ref").toLocked();
+
   @SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentManifest:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("DocumentManifest:subject").toLocked();
+
   @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the manifest", type="reference" )
   public static final String SP_AUTHOR = "author";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentManifest:author</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("DocumentManifest:author").toLocked();
+
   @SearchParamDefinition(name="created", path="DocumentManifest.created", description="When this document manifest created", type="date" )
   public static final String SP_CREATED = "created";
   @SearchParamDefinition(name="description", path="DocumentManifest.description", description="Human-readable description (title)", type="string" )
@@ -1159,11 +1173,29 @@ public class DocumentManifest extends DomainResource {
   @SearchParamDefinition(name="type", path="DocumentManifest.type", description="Kind of document set", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="related-ref", path="DocumentManifest.related.ref", description="Related Resource", type="reference" )
-  public static final String SP_RELATEDREF = "related-ref";
+  public static final String SP_RELATED_REF = "related-ref";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentManifest:related-ref</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RELATED_REF = new ca.uhn.fhir.model.api.Include("DocumentManifest:related-ref").toLocked();
+
   @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentManifest:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("DocumentManifest:patient").toLocked();
+
   @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference" )
   public static final String SP_RECIPIENT = "recipient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentManifest:recipient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RECIPIENT = new ca.uhn.fhir.model.api.Include("DocumentManifest:recipient").toLocked();
+
   @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superseded | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
 

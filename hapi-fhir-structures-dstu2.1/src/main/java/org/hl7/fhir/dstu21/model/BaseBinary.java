@@ -4,6 +4,8 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 public abstract class BaseBinary extends Resource implements IBaseBinary {
 
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public String getContentAsBase64() {
 		return getContentElement().getValueAsString();

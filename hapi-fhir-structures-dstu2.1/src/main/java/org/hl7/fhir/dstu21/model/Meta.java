@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.
  */
@@ -84,7 +84,7 @@ public class Meta extends Type implements IBaseMetaType {
 
     private static final long serialVersionUID = 867134915L;
 
-  /*
+  /**
    * Constructor
    */
     public Meta() {
@@ -292,6 +292,33 @@ public class Meta extends Type implements IBaseMetaType {
       return this.tag;
     }
 
+ 	/**
+ 	 * Returns the first tag (if any) that has the given system and code, or returns
+ 	 * <code>null</code> if none
+ 	 */
+ 	public Coding getTag(String theSystem, String theCode) {
+ 		for (Coding next : getTag()) {
+ 			if (ca.uhn.fhir.util.ObjectUtil.equals(next.getSystem(), theSystem) && ca.uhn.fhir.util.ObjectUtil.equals(next.getCode(), theCode)) {
+ 				return next;
+ 			}
+ 		}
+ 		return null;
+ 	}
+
+ 	/**
+ 	 * Returns the first security label (if any) that has the given system and code, or returns
+ 	 * <code>null</code> if none
+ 	 */
+ 	public Coding getSecurity(String theSystem, String theCode) {
+ 		for (Coding next : getTag()) {
+ 			if (ca.uhn.fhir.util.ObjectUtil.equals(next.getSystem(), theSystem) && ca.uhn.fhir.util.ObjectUtil.equals(next.getCode(), theCode)) {
+ 				return next;
+ 			}
+ 		}
+ 		return null;
+ 	}
+
+    
     public boolean hasTag() { 
       if (this.tag == null)
         return false;
@@ -323,6 +350,30 @@ public class Meta extends Type implements IBaseMetaType {
       return this;
     }
 
+    /**
+     * Convenience method which adds a tag
+     * 
+     * @param theSystem The code system
+     * @param theCode The code
+     * @param theDisplay The display name
+     * @return Returns a reference to <code>this</code> for easy chaining
+     */
+    public Meta addTag(String theSystem, String theCode, String theDisplay) {
+     addTag().setSystem(theSystem).setCode(theCode).setDisplay(theDisplay);
+     return this;
+    }
+    /**
+     * Convenience method which adds a security tag
+     * 
+     * @param theSystem The code system
+     * @param theCode The code
+     * @param theDisplay The display name
+     * @return Returns a reference to <code>this</code> for easy chaining
+     */
+    public Meta addSecurity(String theSystem, String theCode, String theDisplay) {
+     addSecurity().setSystem(theSystem).setCode(theCode).setDisplay(theDisplay);
+     return this;
+    }
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("versionId", "id", "The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted.", 0, java.lang.Integer.MAX_VALUE, versionId));

@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.
  */
@@ -193,6 +193,9 @@ public class EpisodeOfCare extends DomainResource {
         return "cancelled";
       return "?";
       }
+    public String toSystem(EpisodeOfCareStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -213,14 +216,14 @@ public class EpisodeOfCare extends DomainResource {
 
         private static final long serialVersionUID = -1192432864L;
 
-    /*
+    /**
      * Constructor
      */
       public EpisodeOfCareStatusHistoryComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public EpisodeOfCareStatusHistoryComponent(Enumeration<EpisodeOfCareStatus> status, Period period) {
@@ -397,7 +400,7 @@ public class EpisodeOfCare extends DomainResource {
 
         private static final long serialVersionUID = -437303089L;
 
-    /*
+    /**
      * Constructor
      */
       public EpisodeOfCareCareTeamComponent() {
@@ -693,14 +696,14 @@ public class EpisodeOfCare extends DomainResource {
 
     private static final long serialVersionUID = 1652653406L;
 
-  /*
+  /**
    * Constructor
    */
     public EpisodeOfCare() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public EpisodeOfCare(Enumeration<EpisodeOfCareStatus> status, Reference patient) {
@@ -1372,18 +1375,54 @@ public class EpisodeOfCare extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="condition", path="EpisodeOfCare.condition", description="Conditions/problems/diagnoses this episode of care is for", type="reference" )
   public static final String SP_CONDITION = "condition";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>EpisodeOfCare:condition</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONDITION = new ca.uhn.fhir.model.api.Include("EpisodeOfCare:condition").toLocked();
+
   @SearchParamDefinition(name="incomingreferral", path="EpisodeOfCare.referralRequest", description="Incoming Referral Request", type="reference" )
   public static final String SP_INCOMINGREFERRAL = "incomingreferral";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>EpisodeOfCare:incomingreferral</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_INCOMINGREFERRAL = new ca.uhn.fhir.model.api.Include("EpisodeOfCare:incomingreferral").toLocked();
+
   @SearchParamDefinition(name="patient", path="EpisodeOfCare.patient", description="Patient for this episode of care", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>EpisodeOfCare:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("EpisodeOfCare:patient").toLocked();
+
   @SearchParamDefinition(name="organization", path="EpisodeOfCare.managingOrganization", description="The organization that has assumed the specific responsibilities of this EpisodeOfCare", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>EpisodeOfCare:organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("EpisodeOfCare:organization").toLocked();
+
   @SearchParamDefinition(name="team-member", path="EpisodeOfCare.careTeam.member", description="A Practitioner or Organization allocated to the care team for this EpisodeOfCare", type="reference" )
-  public static final String SP_TEAMMEMBER = "team-member";
+  public static final String SP_TEAM_MEMBER = "team-member";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>EpisodeOfCare:team-member</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_TEAM_MEMBER = new ca.uhn.fhir.model.api.Include("EpisodeOfCare:team-member").toLocked();
+
   @SearchParamDefinition(name="type", path="EpisodeOfCare.type", description="Type/class  - e.g. specialist referral, disease management", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="care-manager", path="EpisodeOfCare.careManager", description="Care manager/care co-ordinator for the patient", type="reference" )
-  public static final String SP_CAREMANAGER = "care-manager";
+  public static final String SP_CARE_MANAGER = "care-manager";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>EpisodeOfCare:care-manager</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CARE_MANAGER = new ca.uhn.fhir.model.api.Include("EpisodeOfCare:care-manager").toLocked();
+
   @SearchParamDefinition(name="status", path="EpisodeOfCare.status", description="The current status of the Episode of Care as provided (does not check the status history collection)", type="token" )
   public static final String SP_STATUS = "status";
 

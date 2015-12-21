@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu21.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,19 +29,18 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
+import java.math.*;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.
  */
@@ -211,6 +208,9 @@ public class Timing extends Type implements ICompositeType {
       if (code == UnitsOfTime.A)
         return "a";
       return "?";
+      }
+    public String toSystem(UnitsOfTime code) {
+      return code.getSystem();
       }
     }
 
@@ -488,6 +488,9 @@ public class Timing extends Type implements ICompositeType {
         return "PCV";
       return "?";
       }
+    public String toSystem(EventTiming code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -571,7 +574,7 @@ public class Timing extends Type implements ICompositeType {
 
         private static final long serialVersionUID = -585686982L;
 
-    /*
+    /**
      * Constructor
      */
       public TimingRepeatComponent() {
@@ -1360,7 +1363,7 @@ public class Timing extends Type implements ICompositeType {
 
     private static final long serialVersionUID = 791565112L;
 
-  /*
+  /**
    * Constructor
    */
     public Timing() {

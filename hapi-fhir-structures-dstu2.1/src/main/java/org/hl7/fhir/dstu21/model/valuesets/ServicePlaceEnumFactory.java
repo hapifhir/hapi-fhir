@@ -29,59 +29,34 @@ package org.hl7.fhir.dstu21.model.valuesets;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
 
-import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.dstu21.model.EnumFactory;
 
-public enum AdjustmentReason {
+public class ServicePlaceEnumFactory implements EnumFactory<ServicePlace> {
 
-        /**
-         * null
-         */
-        A001, 
-        /**
-         * null
-         */
-        A002, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static AdjustmentReason fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("A001".equals(codeString))
-          return A001;
-        if ("A002".equals(codeString))
-          return A002;
-        throw new FHIRException("Unknown AdjustmentReason code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case A001: return "A001";
-            case A002: return "A002";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          return "http://hl7.org/fhir/adjustment-reason";
-        }
-        public String getDefinition() {
-          switch (this) {
-            case A001: return "";
-            case A002: return "";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case A001: return "A001";
-            case A002: return "A002";
-            default: return "?";
-          }
-    }
+  public ServicePlace fromCode(String codeString) throws IllegalArgumentException {
+    if (codeString == null || "".equals(codeString))
+      return null;
+    if ("emergency".equals(codeString))
+      return ServicePlace.EMERGENCY;
+    if ("clinic".equals(codeString))
+      return ServicePlace.CLINIC;
+    throw new IllegalArgumentException("Unknown ServicePlace code '"+codeString+"'");
+  }
 
+  public String toCode(ServicePlace code) {
+    if (code == ServicePlace.EMERGENCY)
+      return "emergency";
+    if (code == ServicePlace.CLINIC)
+      return "clinic";
+    return "?";
+  }
+
+    public String toSystem(ServicePlace code) {
+      return code.getSystem();
+      }
 
 }
 

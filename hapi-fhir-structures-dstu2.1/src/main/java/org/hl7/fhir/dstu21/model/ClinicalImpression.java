@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called "ClinicalImpression" rather than "ClinicalAssessment" to avoid confusion with the recording of assessment tools such as Apgar score.
  */
@@ -147,6 +145,9 @@ public class ClinicalImpression extends DomainResource {
         return "entered-in-error";
       return "?";
       }
+    public String toSystem(ClinicalImpressionStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -172,14 +173,14 @@ public class ClinicalImpression extends DomainResource {
 
         private static final long serialVersionUID = -301363326L;
 
-    /*
+    /**
      * Constructor
      */
       public ClinicalImpressionInvestigationsComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ClinicalImpressionInvestigationsComponent(CodeableConcept code) {
@@ -351,14 +352,14 @@ public class ClinicalImpression extends DomainResource {
 
         private static final long serialVersionUID = -888590978L;
 
-    /*
+    /**
      * Constructor
      */
       public ClinicalImpressionFindingComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ClinicalImpressionFindingComponent(CodeableConcept item) {
@@ -526,14 +527,14 @@ public class ClinicalImpression extends DomainResource {
 
         private static final long serialVersionUID = -1001661243L;
 
-    /*
+    /**
      * Constructor
      */
       public ClinicalImpressionRuledOutComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ClinicalImpressionRuledOutComponent(CodeableConcept item) {
@@ -834,14 +835,14 @@ public class ClinicalImpression extends DomainResource {
 
     private static final long serialVersionUID = 1650458630L;
 
-  /*
+  /**
    * Constructor
    */
     public ClinicalImpression() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public ClinicalImpression(Reference patient, Enumeration<ClinicalImpressionStatus> status) {
@@ -1856,26 +1857,74 @@ public class ClinicalImpression extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="previous", path="ClinicalImpression.previous", description="Reference to last assessment", type="reference" )
   public static final String SP_PREVIOUS = "previous";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClinicalImpression:previous</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PREVIOUS = new ca.uhn.fhir.model.api.Include("ClinicalImpression:previous").toLocked();
+
   @SearchParamDefinition(name="assessor", path="ClinicalImpression.assessor", description="The clinician performing the assessment", type="reference" )
   public static final String SP_ASSESSOR = "assessor";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClinicalImpression:assessor</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ASSESSOR = new ca.uhn.fhir.model.api.Include("ClinicalImpression:assessor").toLocked();
+
   @SearchParamDefinition(name="trigger", path="ClinicalImpression.triggerReference", description="Request or event that necessitated this assessment", type="reference" )
   public static final String SP_TRIGGER = "trigger";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClinicalImpression:trigger</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_TRIGGER = new ca.uhn.fhir.model.api.Include("ClinicalImpression:trigger").toLocked();
+
   @SearchParamDefinition(name="finding", path="ClinicalImpression.finding.item", description="Specific text or code for finding", type="token" )
   public static final String SP_FINDING = "finding";
   @SearchParamDefinition(name="ruledout", path="ClinicalImpression.ruledOut.item", description="Specific text of code for diagnosis", type="token" )
   public static final String SP_RULEDOUT = "ruledout";
   @SearchParamDefinition(name="problem", path="ClinicalImpression.problem", description="General assessment of patient state", type="reference" )
   public static final String SP_PROBLEM = "problem";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClinicalImpression:problem</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROBLEM = new ca.uhn.fhir.model.api.Include("ClinicalImpression:problem").toLocked();
+
   @SearchParamDefinition(name="patient", path="ClinicalImpression.patient", description="The patient being assessed", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClinicalImpression:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ClinicalImpression:patient").toLocked();
+
   @SearchParamDefinition(name="investigation", path="ClinicalImpression.investigations.item", description="Record of a specific investigation", type="reference" )
   public static final String SP_INVESTIGATION = "investigation";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClinicalImpression:investigation</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_INVESTIGATION = new ca.uhn.fhir.model.api.Include("ClinicalImpression:investigation").toLocked();
+
   @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Actions taken during assessment", type="reference" )
   public static final String SP_ACTION = "action";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClinicalImpression:action</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ACTION = new ca.uhn.fhir.model.api.Include("ClinicalImpression:action").toLocked();
+
   @SearchParamDefinition(name="trigger-code", path="ClinicalImpression.triggerCodeableConcept", description="Request or event that necessitated this assessment", type="token" )
-  public static final String SP_TRIGGERCODE = "trigger-code";
+  public static final String SP_TRIGGER_CODE = "trigger-code";
   @SearchParamDefinition(name="plan", path="ClinicalImpression.plan", description="Plan of action after assessment", type="reference" )
   public static final String SP_PLAN = "plan";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ClinicalImpression:plan</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PLAN = new ca.uhn.fhir.model.api.Include("ClinicalImpression:plan").toLocked();
+
   @SearchParamDefinition(name="resolved", path="ClinicalImpression.resolved", description="Diagnoses/conditions resolved since previous assessment", type="token" )
   public static final String SP_RESOLVED = "resolved";
   @SearchParamDefinition(name="status", path="ClinicalImpression.status", description="in-progress | completed | entered-in-error", type="token" )

@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.
  */
@@ -163,6 +161,9 @@ public class Composition extends DomainResource {
         return "entered-in-error";
       return "?";
       }
+    public String toSystem(CompositionStatus code) {
+      return code.getSystem();
+      }
     }
 
     public enum CompositionAttestationMode {
@@ -279,6 +280,9 @@ public class Composition extends DomainResource {
         return "official";
       return "?";
       }
+    public String toSystem(CompositionAttestationMode code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -311,7 +315,7 @@ public class Composition extends DomainResource {
 
         private static final long serialVersionUID = -436604745L;
 
-    /*
+    /**
      * Constructor
      */
       public CompositionAttesterComponent() {
@@ -571,7 +575,7 @@ public class Composition extends DomainResource {
 
         private static final long serialVersionUID = -1581379774L;
 
-    /*
+    /**
      * Constructor
      */
       public CompositionEventComponent() {
@@ -841,7 +845,7 @@ public class Composition extends DomainResource {
 
         private static final long serialVersionUID = -726390626L;
 
-    /*
+    /**
      * Constructor
      */
       public SectionComponent() {
@@ -1377,14 +1381,14 @@ public class Composition extends DomainResource {
 
     private static final long serialVersionUID = 2127852326L;
 
-  /*
+  /**
    * Constructor
    */
     public Composition() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Composition(DateTimeType date, CodeableConcept type, StringType title, Enumeration<CompositionStatus> status, Reference subject) {
@@ -2147,24 +2151,60 @@ public class Composition extends DomainResource {
   public static final String SP_PERIOD = "period";
   @SearchParamDefinition(name="subject", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Composition:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Composition:subject").toLocked();
+
   @SearchParamDefinition(name="author", path="Composition.author", description="Who and/or what authored the composition", type="reference" )
   public static final String SP_AUTHOR = "author";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Composition:author</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("Composition:author").toLocked();
+
   @SearchParamDefinition(name="confidentiality", path="Composition.confidentiality", description="As defined by affinity domain", type="token" )
   public static final String SP_CONFIDENTIALITY = "confidentiality";
   @SearchParamDefinition(name="section", path="Composition.section.code", description="Classification of section (recommended)", type="token" )
   public static final String SP_SECTION = "section";
   @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the Composition", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Composition:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("Composition:encounter").toLocked();
+
   @SearchParamDefinition(name="type", path="Composition.type", description="Kind of composition (LOINC if possible)", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="title", path="Composition.title", description="Human Readable name/title", type="string" )
   public static final String SP_TITLE = "title";
   @SearchParamDefinition(name="attester", path="Composition.attester.party", description="Who attested the composition", type="reference" )
   public static final String SP_ATTESTER = "attester";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Composition:attester</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ATTESTER = new ca.uhn.fhir.model.api.Include("Composition:attester").toLocked();
+
   @SearchParamDefinition(name="entry", path="Composition.section.entry", description="A reference to data that supports this section", type="reference" )
   public static final String SP_ENTRY = "entry";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Composition:entry</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENTRY = new ca.uhn.fhir.model.api.Include("Composition:entry").toLocked();
+
   @SearchParamDefinition(name="patient", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Composition:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Composition:patient").toLocked();
+
   @SearchParamDefinition(name="context", path="Composition.event.code", description="Code(s) that apply to the event being documented", type="token" )
   public static final String SP_CONTEXT = "context";
   @SearchParamDefinition(name="class", path="Composition.class", description="Categorization of Composition", type="token" )

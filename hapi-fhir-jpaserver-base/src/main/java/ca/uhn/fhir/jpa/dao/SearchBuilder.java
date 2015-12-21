@@ -55,6 +55,7 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -1302,17 +1303,25 @@ public class SearchBuilder {
 
 		for (ResourceTable next : q.getResultList()) {
 			Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
-			IResource resource = (IResource) myCallingDao.toResource(resourceType, next, theForHistoryOperation);
+			IBaseResource resource = (IBaseResource) myCallingDao.toResource(resourceType, next, theForHistoryOperation);
 			Integer index = position.get(next.getId());
 			if (index == null) {
 				ourLog.warn("Got back unexpected resource PID {}", next.getId());
 				continue;
 			}
 
-			if (theRevIncludedPids.contains(next.getId())) {
-				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.INCLUDE);
+			if (resource instanceof IResource) {
+				if (theRevIncludedPids.contains(next.getId())) {
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource)resource, BundleEntrySearchModeEnum.INCLUDE);
+				} else {
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource)resource, BundleEntrySearchModeEnum.MATCH);
+				}
 			} else {
-				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.MATCH);
+				if (theRevIncludedPids.contains(next.getId())) {
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource)resource, BundleEntrySearchModeEnum.INCLUDE.getCode());
+				} else {
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource)resource, BundleEntrySearchModeEnum.MATCH.getCode());
+				}
 			}
 
 			theResourceListToPopulate.set(index, resource);

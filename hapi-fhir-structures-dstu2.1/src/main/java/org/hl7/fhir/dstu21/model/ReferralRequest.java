@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organization.
  */
@@ -209,6 +209,9 @@ public class ReferralRequest extends DomainResource {
         return "completed";
       return "?";
       }
+    public String toSystem(ReferralStatus code) {
+      return code.getSystem();
+      }
     }
 
     /**
@@ -350,14 +353,14 @@ public class ReferralRequest extends DomainResource {
 
     private static final long serialVersionUID = 1948652599L;
 
-  /*
+  /**
    * Constructor
    */
     public ReferralRequest() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public ReferralRequest(Enumeration<ReferralStatus> status) {
@@ -1195,12 +1198,30 @@ public class ReferralRequest extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="requester", path="ReferralRequest.requester", description="Requester of referral / transfer of care", type="reference" )
   public static final String SP_REQUESTER = "requester";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ReferralRequest:requester</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTER = new ca.uhn.fhir.model.api.Include("ReferralRequest:requester").toLocked();
+
   @SearchParamDefinition(name="specialty", path="ReferralRequest.specialty", description="The specialty that the referral is for", type="token" )
   public static final String SP_SPECIALTY = "specialty";
   @SearchParamDefinition(name="patient", path="ReferralRequest.patient", description="Who the referral is about", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ReferralRequest:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ReferralRequest:patient").toLocked();
+
   @SearchParamDefinition(name="recipient", path="ReferralRequest.recipient", description="The person that the referral was sent to", type="reference" )
   public static final String SP_RECIPIENT = "recipient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ReferralRequest:recipient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RECIPIENT = new ca.uhn.fhir.model.api.Include("ReferralRequest:recipient").toLocked();
+
   @SearchParamDefinition(name="type", path="ReferralRequest.type", description="The type of the referral", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="priority", path="ReferralRequest.priority", description="The priority assigned to the referral", type="token" )

@@ -29,22 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.
  */
@@ -132,6 +129,9 @@ public class TestScript extends DomainResource {
       if (code == ProfileOriginType.FHIRDSTU2SDCFORMFILLER)
         return "FHIR-DSTU2-SDC-FormFiller";
       return "?";
+      }
+    public String toSystem(ProfileOriginType code) {
+      return code.getSystem();
       }
     }
 
@@ -249,6 +249,9 @@ public class TestScript extends DomainResource {
         return "FHIR-DSTU2-SDC-FormProcessor";
       return "?";
       }
+    public String toSystem(ProfileDestinationType code) {
+      return code.getSystem();
+      }
     }
 
     public enum ContentType {
@@ -333,6 +336,9 @@ public class TestScript extends DomainResource {
         return "json";
       return "?";
       }
+    public String toSystem(ContentType code) {
+      return code.getSystem();
+      }
     }
 
     public enum AssertionDirectionType {
@@ -416,6 +422,9 @@ public class TestScript extends DomainResource {
       if (code == AssertionDirectionType.REQUEST)
         return "request";
       return "?";
+      }
+    public String toSystem(AssertionDirectionType code) {
+      return code.getSystem();
       }
     }
 
@@ -628,6 +637,9 @@ public class TestScript extends DomainResource {
       if (code == AssertionOperatorType.NOTCONTAINS)
         return "notContains";
       return "?";
+      }
+    public String toSystem(AssertionOperatorType code) {
+      return code.getSystem();
       }
     }
 
@@ -873,6 +885,9 @@ public class TestScript extends DomainResource {
         return "unprocessable";
       return "?";
       }
+    public String toSystem(AssertionResponseTypes code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -893,7 +908,7 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptContactComponent() {
@@ -1079,7 +1094,7 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = 745183328L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptMetadataComponent() {
@@ -1260,14 +1275,14 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = 213372298L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptMetadataLinkComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptMetadataLinkComponent(UriType url) {
@@ -1495,14 +1510,14 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = 500671983L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptMetadataCapabilityComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptMetadataCapabilityComponent(Reference conformance) {
@@ -1982,14 +1997,14 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = -1472818765L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptOriginComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptOriginComponent(IntegerType index, Enumeration<ProfileOriginType> profile) {
@@ -2174,14 +2189,14 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = 399132503L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptDestinationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptDestinationComponent(IntegerType index, Enumeration<ProfileDestinationType> profile) {
@@ -2378,7 +2393,7 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = 1110683307L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptFixtureComponent() {
@@ -2602,36 +2617,43 @@ public class TestScript extends DomainResource {
         protected StringType name;
 
         /**
+         * A default, hard-coded, or user-defined value for this variable.
+         */
+        @Child(name = "defaultValue", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Default value for this variable", formalDefinition="A default, hard-coded, or user-defined value for this variable." )
+        protected StringType defaultValue;
+
+        /**
          * Will be used to grab the HTTP header field value from the headers that sourceId is pointing to.
          */
-        @Child(name = "headerField", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "headerField", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="HTTP header field name for source", formalDefinition="Will be used to grab the HTTP header field value from the headers that sourceId is pointing to." )
         protected StringType headerField;
 
         /**
          * XPath or JSONPath against the fixture body.  When variables are defined, either headerField must be specified or path, but not both.
          */
-        @Child(name = "path", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "path", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="XPath or JSONPath against the fixture body", formalDefinition="XPath or JSONPath against the fixture body.  When variables are defined, either headerField must be specified or path, but not both." )
         protected StringType path;
 
         /**
          * Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable.
          */
-        @Child(name = "sourceId", type = {IdType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "sourceId", type = {IdType.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Fixture Id of source expression or headerField within this variable", formalDefinition="Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable." )
         protected IdType sourceId;
 
-        private static final long serialVersionUID = 1128806685L;
+        private static final long serialVersionUID = 1821729272L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptVariableComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptVariableComponent(StringType name) {
@@ -2681,6 +2703,55 @@ public class TestScript extends DomainResource {
             if (this.name == null)
               this.name = new StringType();
             this.name.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #defaultValue} (A default, hard-coded, or user-defined value for this variable.). This is the underlying object with id, value and extensions. The accessor "getDefaultValue" gives direct access to the value
+         */
+        public StringType getDefaultValueElement() { 
+          if (this.defaultValue == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptVariableComponent.defaultValue");
+            else if (Configuration.doAutoCreate())
+              this.defaultValue = new StringType(); // bb
+          return this.defaultValue;
+        }
+
+        public boolean hasDefaultValueElement() { 
+          return this.defaultValue != null && !this.defaultValue.isEmpty();
+        }
+
+        public boolean hasDefaultValue() { 
+          return this.defaultValue != null && !this.defaultValue.isEmpty();
+        }
+
+        /**
+         * @param value {@link #defaultValue} (A default, hard-coded, or user-defined value for this variable.). This is the underlying object with id, value and extensions. The accessor "getDefaultValue" gives direct access to the value
+         */
+        public TestScriptVariableComponent setDefaultValueElement(StringType value) { 
+          this.defaultValue = value;
+          return this;
+        }
+
+        /**
+         * @return A default, hard-coded, or user-defined value for this variable.
+         */
+        public String getDefaultValue() { 
+          return this.defaultValue == null ? null : this.defaultValue.getValue();
+        }
+
+        /**
+         * @param value A default, hard-coded, or user-defined value for this variable.
+         */
+        public TestScriptVariableComponent setDefaultValue(String value) { 
+          if (Utilities.noString(value))
+            this.defaultValue = null;
+          else {
+            if (this.defaultValue == null)
+              this.defaultValue = new StringType();
+            this.defaultValue.setValue(value);
+          }
           return this;
         }
 
@@ -2834,6 +2905,7 @@ public class TestScript extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("name", "string", "Descriptive name for this variable.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("defaultValue", "string", "A default, hard-coded, or user-defined value for this variable.", 0, java.lang.Integer.MAX_VALUE, defaultValue));
           childrenList.add(new Property("headerField", "string", "Will be used to grab the HTTP header field value from the headers that sourceId is pointing to.", 0, java.lang.Integer.MAX_VALUE, headerField));
           childrenList.add(new Property("path", "string", "XPath or JSONPath against the fixture body.  When variables are defined, either headerField must be specified or path, but not both.", 0, java.lang.Integer.MAX_VALUE, path));
           childrenList.add(new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable.", 0, java.lang.Integer.MAX_VALUE, sourceId));
@@ -2843,6 +2915,8 @@ public class TestScript extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("name"))
           this.name = castToString(value); // StringType
+        else if (name.equals("defaultValue"))
+          this.defaultValue = castToString(value); // StringType
         else if (name.equals("headerField"))
           this.headerField = castToString(value); // StringType
         else if (name.equals("path"))
@@ -2857,6 +2931,9 @@ public class TestScript extends DomainResource {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("name")) {
           throw new FHIRException("Cannot call addChild on a primitive type TestScript.name");
+        }
+        else if (name.equals("defaultValue")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.defaultValue");
         }
         else if (name.equals("headerField")) {
           throw new FHIRException("Cannot call addChild on a primitive type TestScript.headerField");
@@ -2875,6 +2952,7 @@ public class TestScript extends DomainResource {
         TestScriptVariableComponent dst = new TestScriptVariableComponent();
         copyValues(dst);
         dst.name = name == null ? null : name.copy();
+        dst.defaultValue = defaultValue == null ? null : defaultValue.copy();
         dst.headerField = headerField == null ? null : headerField.copy();
         dst.path = path == null ? null : path.copy();
         dst.sourceId = sourceId == null ? null : sourceId.copy();
@@ -2888,8 +2966,8 @@ public class TestScript extends DomainResource {
         if (!(other instanceof TestScriptVariableComponent))
           return false;
         TestScriptVariableComponent o = (TestScriptVariableComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(headerField, o.headerField, true) && compareDeep(path, o.path, true)
-           && compareDeep(sourceId, o.sourceId, true);
+        return compareDeep(name, o.name, true) && compareDeep(defaultValue, o.defaultValue, true) && compareDeep(headerField, o.headerField, true)
+           && compareDeep(path, o.path, true) && compareDeep(sourceId, o.sourceId, true);
       }
 
       @Override
@@ -2899,13 +2977,14 @@ public class TestScript extends DomainResource {
         if (!(other instanceof TestScriptVariableComponent))
           return false;
         TestScriptVariableComponent o = (TestScriptVariableComponent) other;
-        return compareValues(name, o.name, true) && compareValues(headerField, o.headerField, true) && compareValues(path, o.path, true)
-           && compareValues(sourceId, o.sourceId, true);
+        return compareValues(name, o.name, true) && compareValues(defaultValue, o.defaultValue, true) && compareValues(headerField, o.headerField, true)
+           && compareValues(path, o.path, true) && compareValues(sourceId, o.sourceId, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (headerField == null || headerField.isEmpty())
-           && (path == null || path.isEmpty()) && (sourceId == null || sourceId.isEmpty());
+        return super.isEmpty() && (name == null || name.isEmpty()) && (defaultValue == null || defaultValue.isEmpty())
+           && (headerField == null || headerField.isEmpty()) && (path == null || path.isEmpty()) && (sourceId == null || sourceId.isEmpty())
+          ;
       }
 
   public String fhirType() {
@@ -2933,7 +3012,7 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = -1836543723L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptSetupComponent() {
@@ -3095,7 +3174,7 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = 1411550037L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptSetupActionComponent() {
@@ -3329,7 +3408,7 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = 808886214L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptSetupActionOperationComponent() {
@@ -4221,14 +4300,14 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = 274395337L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptSetupActionOperationRequestHeaderComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptSetupActionOperationRequestHeaderComponent(StringType field, StringType value) {
@@ -4525,7 +4604,7 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = -607939856L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptSetupActionAssertComponent() {
@@ -5639,7 +5718,7 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = 408339297L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptTestComponent() {
@@ -5914,7 +5993,7 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = 1411550037L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptTestActionComponent() {
@@ -6050,7 +6129,7 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = 1850225254L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptTeardownComponent() {
@@ -6172,7 +6251,7 @@ public class TestScript extends DomainResource {
 
         private static final long serialVersionUID = 1684092023L;
 
-    /*
+    /**
      * Constructor
      */
       public TestScriptTeardownActionComponent() {
@@ -6432,14 +6511,14 @@ public class TestScript extends DomainResource {
 
     private static final long serialVersionUID = -1185376163L;
 
-  /*
+  /**
    * Constructor
    */
     public TestScript() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public TestScript(UriType url, StringType name, Enumeration<ConformanceResourceStatus> status) {
@@ -7673,15 +7752,15 @@ public class TestScript extends DomainResource {
   @SearchParamDefinition(name="identifier", path="TestScript.identifier", description="External identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="testscript-test-capability", path="TestScript.test.metadata.capability.description", description="TestScript test required and validated capability", type="string" )
-  public static final String SP_TESTSCRIPTTESTCAPABILITY = "testscript-test-capability";
+  public static final String SP_TESTSCRIPT_TEST_CAPABILITY = "testscript-test-capability";
   @SearchParamDefinition(name="testscript-setup-capability", path="TestScript.setup.metadata.capability.description", description="TestScript setup required and validated capability", type="string" )
-  public static final String SP_TESTSCRIPTSETUPCAPABILITY = "testscript-setup-capability";
+  public static final String SP_TESTSCRIPT_SETUP_CAPABILITY = "testscript-setup-capability";
   @SearchParamDefinition(name="name", path="TestScript.name", description="Informal name for this TestScript", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="description", path="TestScript.description", description="Natural language description of the TestScript", type="string" )
   public static final String SP_DESCRIPTION = "description";
   @SearchParamDefinition(name="testscript-capability", path="TestScript.metadata.capability.description", description="TestScript required and validated capability", type="string" )
-  public static final String SP_TESTSCRIPTCAPABILITY = "testscript-capability";
+  public static final String SP_TESTSCRIPT_CAPABILITY = "testscript-capability";
   @SearchParamDefinition(name="url", path="TestScript.url", description="Absolute URL used to reference this TestScript", type="uri" )
   public static final String SP_URL = "url";
 

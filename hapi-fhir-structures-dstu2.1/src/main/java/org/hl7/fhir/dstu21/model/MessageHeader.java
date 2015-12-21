@@ -29,20 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The header for a message exchange that is either requesting or responding to an action.  The reference(s) that are the subject of the action as well as other information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.
  */
@@ -147,6 +146,9 @@ public class MessageHeader extends DomainResource {
         return "fatal-error";
       return "?";
       }
+    public String toSystem(ResponseType code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -179,14 +181,14 @@ public class MessageHeader extends DomainResource {
 
         private static final long serialVersionUID = -1008716838L;
 
-    /*
+    /**
      * Constructor
      */
       public MessageHeaderResponseComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public MessageHeaderResponseComponent(IdType identifier, Enumeration<ResponseType> code) {
@@ -445,14 +447,14 @@ public class MessageHeader extends DomainResource {
 
         private static final long serialVersionUID = -115878196L;
 
-    /*
+    /**
      * Constructor
      */
       public MessageSourceComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public MessageSourceComponent(UriType endpoint) {
@@ -799,14 +801,14 @@ public class MessageHeader extends DomainResource {
 
         private static final long serialVersionUID = -2097633309L;
 
-    /*
+    /**
      * Constructor
      */
       public MessageDestinationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public MessageDestinationComponent(UriType endpoint) {
@@ -1133,14 +1135,14 @@ public class MessageHeader extends DomainResource {
 
     private static final long serialVersionUID = 1429728517L;
 
-  /*
+  /**
    * Constructor
    */
     public MessageHeader() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public MessageHeader(InstantType timestamp, Coding event, MessageSourceComponent source) {
@@ -1710,26 +1712,62 @@ public class MessageHeader extends DomainResource {
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="data", path="MessageHeader.data", description="The actual content of the message", type="reference" )
   public static final String SP_DATA = "data";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MessageHeader:data</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DATA = new ca.uhn.fhir.model.api.Include("MessageHeader:data").toLocked();
+
   @SearchParamDefinition(name="receiver", path="MessageHeader.receiver", description="Intended \"real-world\" recipient for the data", type="reference" )
   public static final String SP_RECEIVER = "receiver";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MessageHeader:receiver</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RECEIVER = new ca.uhn.fhir.model.api.Include("MessageHeader:receiver").toLocked();
+
   @SearchParamDefinition(name="author", path="MessageHeader.author", description="The source of the decision", type="reference" )
   public static final String SP_AUTHOR = "author";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MessageHeader:author</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("MessageHeader:author").toLocked();
+
   @SearchParamDefinition(name="destination", path="MessageHeader.destination.name", description="Name of system", type="string" )
   public static final String SP_DESTINATION = "destination";
   @SearchParamDefinition(name="source", path="MessageHeader.source.name", description="Name of system", type="string" )
   public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="target", path="MessageHeader.destination.target", description="Particular delivery destination within the destination", type="reference" )
   public static final String SP_TARGET = "target";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MessageHeader:target</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_TARGET = new ca.uhn.fhir.model.api.Include("MessageHeader:target").toLocked();
+
   @SearchParamDefinition(name="destination-uri", path="MessageHeader.destination.endpoint", description="Actual destination address or id", type="uri" )
-  public static final String SP_DESTINATIONURI = "destination-uri";
+  public static final String SP_DESTINATION_URI = "destination-uri";
   @SearchParamDefinition(name="source-uri", path="MessageHeader.source.endpoint", description="Actual message source address or id", type="uri" )
-  public static final String SP_SOURCEURI = "source-uri";
+  public static final String SP_SOURCE_URI = "source-uri";
   @SearchParamDefinition(name="responsible", path="MessageHeader.responsible", description="Final responsibility for event", type="reference" )
   public static final String SP_RESPONSIBLE = "responsible";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MessageHeader:responsible</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RESPONSIBLE = new ca.uhn.fhir.model.api.Include("MessageHeader:responsible").toLocked();
+
   @SearchParamDefinition(name="response-id", path="MessageHeader.response.identifier", description="Id of original message", type="token" )
-  public static final String SP_RESPONSEID = "response-id";
+  public static final String SP_RESPONSE_ID = "response-id";
   @SearchParamDefinition(name="enterer", path="MessageHeader.enterer", description="The source of the data entry", type="reference" )
   public static final String SP_ENTERER = "enterer";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MessageHeader:enterer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENTERER = new ca.uhn.fhir.model.api.Include("MessageHeader:enterer").toLocked();
+
   @SearchParamDefinition(name="event", path="MessageHeader.event", description="Code for the event this message represents", type="token" )
   public static final String SP_EVENT = "event";
   @SearchParamDefinition(name="timestamp", path="MessageHeader.timestamp", description="Time that the message was sent", type="date" )

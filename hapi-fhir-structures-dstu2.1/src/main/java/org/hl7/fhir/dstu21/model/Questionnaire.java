@@ -29,20 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A structured set of questions intended to guide the collection of answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.
  */
@@ -146,6 +145,9 @@ public class Questionnaire extends DomainResource {
       if (code == QuestionnaireStatus.RETIRED)
         return "retired";
       return "?";
+      }
+    public String toSystem(QuestionnaireStatus code) {
+      return code.getSystem();
       }
     }
 
@@ -487,6 +489,9 @@ public class Questionnaire extends DomainResource {
         return "quantity";
       return "?";
       }
+    public String toSystem(QuestionnaireItemType code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -561,14 +566,14 @@ public class Questionnaire extends DomainResource {
 
         private static final long serialVersionUID = 10326314L;
 
-    /*
+    /**
      * Constructor
      */
       public QuestionnaireItemComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public QuestionnaireItemComponent(Enumeration<QuestionnaireItemType> type) {
@@ -1181,14 +1186,14 @@ public class Questionnaire extends DomainResource {
 
     private static final long serialVersionUID = 154986016L;
 
-  /*
+  /**
    * Constructor
    */
     public Questionnaire() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Questionnaire(Enumeration<QuestionnaireStatus> status) {

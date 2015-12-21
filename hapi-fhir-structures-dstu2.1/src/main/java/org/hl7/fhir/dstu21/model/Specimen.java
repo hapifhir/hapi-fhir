@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A sample to be used for analysis.
  */
@@ -163,6 +161,9 @@ public class Specimen extends DomainResource {
         return "entered-in-error";
       return "?";
       }
+    public String toSystem(SpecimenStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -216,7 +217,7 @@ public class Specimen extends DomainResource {
 
         private static final long serialVersionUID = -1418734687L;
 
-    /*
+    /**
      * Constructor
      */
       public SpecimenCollectionComponent() {
@@ -580,7 +581,7 @@ public class Specimen extends DomainResource {
 
         private static final long serialVersionUID = -373251521L;
 
-    /*
+    /**
      * Constructor
      */
       public SpecimenTreatmentComponent() {
@@ -848,7 +849,7 @@ public class Specimen extends DomainResource {
 
         private static final long serialVersionUID = 187274879L;
 
-    /*
+    /**
      * Constructor
      */
       public SpecimenContainerComponent() {
@@ -1254,14 +1255,14 @@ public class Specimen extends DomainResource {
 
     private static final long serialVersionUID = 1025605602L;
 
-  /*
+  /**
    * Constructor
    */
     public Specimen() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Specimen(Reference subject) {
@@ -1822,14 +1823,32 @@ public class Specimen extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="parent", path="Specimen.parent", description="The parent of the specimen", type="reference" )
   public static final String SP_PARENT = "parent";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Specimen:parent</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PARENT = new ca.uhn.fhir.model.api.Include("Specimen:parent").toLocked();
+
   @SearchParamDefinition(name="container-id", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token" )
-  public static final String SP_CONTAINERID = "container-id";
+  public static final String SP_CONTAINER_ID = "container-id";
   @SearchParamDefinition(name="bodysite", path="Specimen.collection.bodySite", description="The code for the body site from where the specimen originated", type="token" )
   public static final String SP_BODYSITE = "bodysite";
   @SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Specimen:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Specimen:subject").toLocked();
+
   @SearchParamDefinition(name="patient", path="Specimen.subject", description="The patient the specimen comes from", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Specimen:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Specimen:patient").toLocked();
+
   @SearchParamDefinition(name="collected", path="Specimen.collection.collected[x]", description="The date the specimen was collected", type="date" )
   public static final String SP_COLLECTED = "collected";
   @SearchParamDefinition(name="accession", path="Specimen.accessionIdentifier", description="The accession number associated with the specimen", type="token" )
@@ -1838,6 +1857,12 @@ public class Specimen extends DomainResource {
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="collector", path="Specimen.collection.collector", description="Who collected the specimen", type="reference" )
   public static final String SP_COLLECTOR = "collector";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Specimen:collector</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_COLLECTOR = new ca.uhn.fhir.model.api.Include("Specimen:collector").toLocked();
+
 
 }
 

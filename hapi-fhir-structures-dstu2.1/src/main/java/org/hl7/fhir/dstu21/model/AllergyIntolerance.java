@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.
  */
@@ -211,6 +209,9 @@ public class AllergyIntolerance extends DomainResource {
         return "entered-in-error";
       return "?";
       }
+    public String toSystem(AllergyIntoleranceStatus code) {
+      return code.getSystem();
+      }
     }
 
     public enum AllergyIntoleranceCriticality {
@@ -311,6 +312,9 @@ public class AllergyIntolerance extends DomainResource {
         return "CRITU";
       return "?";
       }
+    public String toSystem(AllergyIntoleranceCriticality code) {
+      return code.getSystem();
+      }
     }
 
     public enum AllergyIntoleranceType {
@@ -394,6 +398,9 @@ public class AllergyIntolerance extends DomainResource {
       if (code == AllergyIntoleranceType.INTOLERANCE)
         return "intolerance";
       return "?";
+      }
+    public String toSystem(AllergyIntoleranceType code) {
+      return code.getSystem();
       }
     }
 
@@ -511,6 +518,9 @@ public class AllergyIntolerance extends DomainResource {
         return "other";
       return "?";
       }
+    public String toSystem(AllergyIntoleranceCategory code) {
+      return code.getSystem();
+      }
     }
 
     public enum AllergyIntoleranceCertainty {
@@ -610,6 +620,9 @@ public class AllergyIntolerance extends DomainResource {
       if (code == AllergyIntoleranceCertainty.CONFIRMED)
         return "confirmed";
       return "?";
+      }
+    public String toSystem(AllergyIntoleranceCertainty code) {
+      return code.getSystem();
       }
     }
 
@@ -711,6 +724,9 @@ public class AllergyIntolerance extends DomainResource {
         return "severe";
       return "?";
       }
+    public String toSystem(AllergyIntoleranceSeverity code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -773,7 +789,7 @@ public class AllergyIntolerance extends DomainResource {
 
         private static final long serialVersionUID = -765664367L;
 
-    /*
+    /**
      * Constructor
      */
       public AllergyIntoleranceReactionComponent() {
@@ -1325,14 +1341,14 @@ public class AllergyIntolerance extends DomainResource {
 
     private static final long serialVersionUID = -1657522921L;
 
-  /*
+  /**
    * Constructor
    */
     public AllergyIntolerance() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public AllergyIntolerance(Reference patient, CodeableConcept substance) {
@@ -2126,12 +2142,24 @@ public class AllergyIntolerance extends DomainResource {
   public static final String SP_MANIFESTATION = "manifestation";
   @SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity", type="reference" )
   public static final String SP_RECORDER = "recorder";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>AllergyIntolerance:recorder</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RECORDER = new ca.uhn.fhir.model.api.Include("AllergyIntolerance:recorder").toLocked();
+
   @SearchParamDefinition(name="substance", path="AllergyIntolerance.substance|AllergyIntolerance.reaction.substance", description="Substance, (or class) considered to be responsible for risk", type="token" )
   public static final String SP_SUBSTANCE = "substance";
   @SearchParamDefinition(name="criticality", path="AllergyIntolerance.criticality", description="CRITL | CRITH | CRITU", type="token" )
   public static final String SP_CRITICALITY = "criticality";
   @SearchParamDefinition(name="reporter", path="AllergyIntolerance.reporter", description="Source of the information about the allergy", type="reference" )
   public static final String SP_REPORTER = "reporter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>AllergyIntolerance:reporter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REPORTER = new ca.uhn.fhir.model.api.Include("AllergyIntolerance:reporter").toLocked();
+
   @SearchParamDefinition(name="type", path="AllergyIntolerance.type", description="allergy | intolerance - Underlying mechanism (if known)", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="onset", path="AllergyIntolerance.reaction.onset", description="Date(/time) when manifestations showed", type="date" )
@@ -2140,10 +2168,16 @@ public class AllergyIntolerance extends DomainResource {
   public static final String SP_ROUTE = "route";
   @SearchParamDefinition(name="patient", path="AllergyIntolerance.patient", description="Who the sensitivity is for", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>AllergyIntolerance:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("AllergyIntolerance:patient").toLocked();
+
   @SearchParamDefinition(name="category", path="AllergyIntolerance.category", description="food | medication | environment | other - Category of Substance", type="token" )
   public static final String SP_CATEGORY = "category";
   @SearchParamDefinition(name="last-date", path="AllergyIntolerance.lastOccurence", description="Date(/time) of last known occurrence of a reaction", type="date" )
-  public static final String SP_LASTDATE = "last-date";
+  public static final String SP_LAST_DATE = "last-date";
   @SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="active | unconfirmed | confirmed | inactive | resolved | refuted | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
 

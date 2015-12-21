@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hl7.fhir.dstu21.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.OperationOutcome;
 import org.hl7.fhir.dstu21.model.OperationOutcome.IssueSeverity;
@@ -58,7 +59,6 @@ import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirInstanceValidator;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidationContext;
-import ca.uhn.fhir.validation.IValidationSupport;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.ValidationSupportChain;
@@ -124,7 +124,7 @@ public class FhirResourceDaoDstu21<T extends IAnyResource> extends BaseHapiFhirR
 
 		FhirInstanceValidator val = new FhirInstanceValidator();
 		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
-		val.setValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), myJpaValidationSupport));
+//		val.setValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), myJpaValidationSupport));
 		validator.registerValidatorModule(val);
 
 		validator.registerValidatorModule(new IdChecker(theMode));

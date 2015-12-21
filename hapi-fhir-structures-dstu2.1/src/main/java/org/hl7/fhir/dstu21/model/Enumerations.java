@@ -1,5 +1,38 @@
 package org.hl7.fhir.dstu21.model;
 
+/*
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+*/
+
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+
+
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 
 public class Enumerations {
@@ -135,6 +168,9 @@ public class Enumerations {
       if (code == AdministrativeGender.UNKNOWN)
         return "unknown";
       return "?";
+      }
+    public String toSystem(AdministrativeGender code) {
+      return code.getSystem();
       }
     }
 
@@ -284,6 +320,9 @@ public class Enumerations {
         return "a";
       return "?";
       }
+    public String toSystem(AgeUnits code) {
+      return code.getSystem();
+      }
     }
 
     public enum BindingStrength {
@@ -399,6 +438,9 @@ public class Enumerations {
       if (code == BindingStrength.EXAMPLE)
         return "example";
       return "?";
+      }
+    public String toSystem(BindingStrength code) {
+      return code.getSystem();
       }
     }
 
@@ -596,6 +638,9 @@ public class Enumerations {
         return "disjoint";
       return "?";
       }
+    public String toSystem(ConceptMapEquivalence code) {
+      return code.getSystem();
+      }
     }
 
     public enum ConformanceResourceStatus {
@@ -695,6 +740,9 @@ public class Enumerations {
       if (code == ConformanceResourceStatus.RETIRED)
         return "retired";
       return "?";
+      }
+    public String toSystem(ConformanceResourceStatus code) {
+      return code.getSystem();
       }
     }
 
@@ -891,6 +939,9 @@ public class Enumerations {
       if (code == DataAbsentReason.NAN)
         return "NaN";
       return "?";
+      }
+    public String toSystem(DataAbsentReason code) {
+      return code.getSystem();
       }
     }
 
@@ -1680,6 +1731,9 @@ public class Enumerations {
         return "xhtml";
       return "?";
       }
+    public String toSystem(DataType code) {
+      return code.getSystem();
+      }
     }
 
     public enum DocumentReferenceStatus {
@@ -1779,6 +1833,9 @@ public class Enumerations {
       if (code == DocumentReferenceStatus.ENTEREDINERROR)
         return "entered-in-error";
       return "?";
+      }
+    public String toSystem(DocumentReferenceStatus code) {
+      return code.getSystem();
       }
     }
 
@@ -2156,10 +2213,6 @@ public class Enumerations {
          */
         GROUP, 
         /**
-         * A guidance request is a request to evaluate a particular knowledge module focused on decision support, providing information relevant to decision support such as workflow and user context.
-         */
-        GUIDANCEREQUEST, 
-        /**
          * A guidance response is the formal response to a previous guidance request. It is a derivative of the knowledge response that provides additional information relevant specifically to clinical decision support such as a description of any proposed actions to be taken.
          */
         GUIDANCERESPONSE, 
@@ -2351,6 +2404,10 @@ public class Enumerations {
          * A search parameter that defines a named search item that can be used to search/filter on a resource.
          */
         SEARCHPARAMETER, 
+        /**
+         * Variation and Sequence data.
+         */
+        SEQUENCE, 
         /**
          * A slot of time on a schedule that may be available for booking appointments.
          */
@@ -2584,8 +2641,6 @@ public class Enumerations {
           return GOAL;
         if ("Group".equals(codeString))
           return GROUP;
-        if ("GuidanceRequest".equals(codeString))
-          return GUIDANCEREQUEST;
         if ("GuidanceResponse".equals(codeString))
           return GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
@@ -2682,6 +2737,8 @@ public class Enumerations {
           return SCHEDULE;
         if ("SearchParameter".equals(codeString))
           return SEARCHPARAMETER;
+        if ("Sequence".equals(codeString))
+          return SEQUENCE;
         if ("Slot".equals(codeString))
           return SLOT;
         if ("Specimen".equals(codeString))
@@ -2799,7 +2856,6 @@ public class Enumerations {
             case FLAG: return "Flag";
             case GOAL: return "Goal";
             case GROUP: return "Group";
-            case GUIDANCEREQUEST: return "GuidanceRequest";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
             case IMAGINGOBJECTSELECTION: return "ImagingObjectSelection";
@@ -2848,6 +2904,7 @@ public class Enumerations {
             case RISKASSESSMENT: return "RiskAssessment";
             case SCHEDULE: return "Schedule";
             case SEARCHPARAMETER: return "SearchParameter";
+            case SEQUENCE: return "Sequence";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case STRUCTUREDEFINITION: return "StructureDefinition";
@@ -2956,7 +3013,6 @@ public class Enumerations {
             case FLAG: return "http://hl7.org/fhir/resource-types";
             case GOAL: return "http://hl7.org/fhir/resource-types";
             case GROUP: return "http://hl7.org/fhir/resource-types";
-            case GUIDANCEREQUEST: return "http://hl7.org/fhir/resource-types";
             case GUIDANCERESPONSE: return "http://hl7.org/fhir/resource-types";
             case HEALTHCARESERVICE: return "http://hl7.org/fhir/resource-types";
             case IMAGINGOBJECTSELECTION: return "http://hl7.org/fhir/resource-types";
@@ -3005,6 +3061,7 @@ public class Enumerations {
             case RISKASSESSMENT: return "http://hl7.org/fhir/resource-types";
             case SCHEDULE: return "http://hl7.org/fhir/resource-types";
             case SEARCHPARAMETER: return "http://hl7.org/fhir/resource-types";
+            case SEQUENCE: return "http://hl7.org/fhir/resource-types";
             case SLOT: return "http://hl7.org/fhir/resource-types";
             case SPECIMEN: return "http://hl7.org/fhir/resource-types";
             case STRUCTUREDEFINITION: return "http://hl7.org/fhir/resource-types";
@@ -3113,7 +3170,6 @@ public class Enumerations {
             case FLAG: return "Prospective warnings of potential issues when providing care to the patient.";
             case GOAL: return "Describes the intended objective(s) for a patient, group or organization care, for example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.";
             case GROUP: return "Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.";
-            case GUIDANCEREQUEST: return "A guidance request is a request to evaluate a particular knowledge module focused on decision support, providing information relevant to decision support such as workflow and user context.";
             case GUIDANCERESPONSE: return "A guidance response is the formal response to a previous guidance request. It is a derivative of the knowledge response that provides additional information relevant specifically to clinical decision support such as a description of any proposed actions to be taken.";
             case HEALTHCARESERVICE: return "The details of a healthcare service available at a location.";
             case IMAGINGOBJECTSELECTION: return "A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingObjectSelection resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance (\"cine\" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.";
@@ -3162,6 +3218,7 @@ public class Enumerations {
             case RISKASSESSMENT: return "An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.";
             case SCHEDULE: return "A container for slot(s) of time that may be available for booking appointments.";
             case SEARCHPARAMETER: return "A search parameter that defines a named search item that can be used to search/filter on a resource.";
+            case SEQUENCE: return "Variation and Sequence data.";
             case SLOT: return "A slot of time on a schedule that may be available for booking appointments.";
             case SPECIMEN: return "A sample to be used for analysis.";
             case STRUCTUREDEFINITION: return "A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions, and constraints on resources and data types.";
@@ -3270,7 +3327,6 @@ public class Enumerations {
             case FLAG: return "Flag";
             case GOAL: return "Goal";
             case GROUP: return "Group";
-            case GUIDANCEREQUEST: return "GuidanceRequest";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
             case IMAGINGOBJECTSELECTION: return "ImagingObjectSelection";
@@ -3319,6 +3375,7 @@ public class Enumerations {
             case RISKASSESSMENT: return "RiskAssessment";
             case SCHEDULE: return "Schedule";
             case SEARCHPARAMETER: return "SearchParameter";
+            case SEQUENCE: return "Sequence";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case STRUCTUREDEFINITION: return "StructureDefinition";
@@ -3525,8 +3582,6 @@ public class Enumerations {
           return FHIRDefinedType.GOAL;
         if ("Group".equals(codeString))
           return FHIRDefinedType.GROUP;
-        if ("GuidanceRequest".equals(codeString))
-          return FHIRDefinedType.GUIDANCEREQUEST;
         if ("GuidanceResponse".equals(codeString))
           return FHIRDefinedType.GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
@@ -3623,6 +3678,8 @@ public class Enumerations {
           return FHIRDefinedType.SCHEDULE;
         if ("SearchParameter".equals(codeString))
           return FHIRDefinedType.SEARCHPARAMETER;
+        if ("Sequence".equals(codeString))
+          return FHIRDefinedType.SEQUENCE;
         if ("Slot".equals(codeString))
           return FHIRDefinedType.SLOT;
         if ("Specimen".equals(codeString))
@@ -3837,8 +3894,6 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.GOAL);
         if ("Group".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.GROUP);
-        if ("GuidanceRequest".equals(codeString))
-          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.GUIDANCEREQUEST);
         if ("GuidanceResponse".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.GUIDANCERESPONSE);
         if ("HealthcareService".equals(codeString))
@@ -3935,6 +3990,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.SCHEDULE);
         if ("SearchParameter".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.SEARCHPARAMETER);
+        if ("Sequence".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.SEQUENCE);
         if ("Slot".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.SLOT);
         if ("Specimen".equals(codeString))
@@ -4144,8 +4201,6 @@ public class Enumerations {
         return "Goal";
       if (code == FHIRDefinedType.GROUP)
         return "Group";
-      if (code == FHIRDefinedType.GUIDANCEREQUEST)
-        return "GuidanceRequest";
       if (code == FHIRDefinedType.GUIDANCERESPONSE)
         return "GuidanceResponse";
       if (code == FHIRDefinedType.HEALTHCARESERVICE)
@@ -4242,6 +4297,8 @@ public class Enumerations {
         return "Schedule";
       if (code == FHIRDefinedType.SEARCHPARAMETER)
         return "SearchParameter";
+      if (code == FHIRDefinedType.SEQUENCE)
+        return "Sequence";
       if (code == FHIRDefinedType.SLOT)
         return "Slot";
       if (code == FHIRDefinedType.SPECIMEN)
@@ -4263,6 +4320,9 @@ public class Enumerations {
       if (code == FHIRDefinedType.VISIONPRESCRIPTION)
         return "VisionPrescription";
       return "?";
+      }
+    public String toSystem(FHIRDefinedType code) {
+      return code.getSystem();
       }
     }
 
@@ -4476,6 +4536,9 @@ public class Enumerations {
         return "valueset-expand";
       return "?";
       }
+    public String toSystem(MessageEvent code) {
+      return code.getSystem();
+      }
     }
 
     public enum NoteType {
@@ -4576,6 +4639,9 @@ public class Enumerations {
         return "printoper";
       return "?";
       }
+    public String toSystem(NoteType code) {
+      return code.getSystem();
+      }
     }
 
     public enum RemittanceOutcome {
@@ -4659,6 +4725,9 @@ public class Enumerations {
       if (code == RemittanceOutcome.ERROR)
         return "error";
       return "?";
+      }
+    public String toSystem(RemittanceOutcome code) {
+      return code.getSystem();
       }
     }
 
@@ -4852,10 +4921,6 @@ public class Enumerations {
          */
         GROUP, 
         /**
-         * A guidance request is a request to evaluate a particular knowledge module focused on decision support, providing information relevant to decision support such as workflow and user context.
-         */
-        GUIDANCEREQUEST, 
-        /**
          * A guidance response is the formal response to a previous guidance request. It is a derivative of the knowledge response that provides additional information relevant specifically to clinical decision support such as a description of any proposed actions to be taken.
          */
         GUIDANCERESPONSE, 
@@ -5048,6 +5113,10 @@ public class Enumerations {
          */
         SEARCHPARAMETER, 
         /**
+         * Variation and Sequence data.
+         */
+        SEQUENCE, 
+        /**
          * A slot of time on a schedule that may be available for booking appointments.
          */
         SLOT, 
@@ -5188,8 +5257,6 @@ public class Enumerations {
           return GOAL;
         if ("Group".equals(codeString))
           return GROUP;
-        if ("GuidanceRequest".equals(codeString))
-          return GUIDANCEREQUEST;
         if ("GuidanceResponse".equals(codeString))
           return GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
@@ -5286,6 +5353,8 @@ public class Enumerations {
           return SCHEDULE;
         if ("SearchParameter".equals(codeString))
           return SEARCHPARAMETER;
+        if ("Sequence".equals(codeString))
+          return SEQUENCE;
         if ("Slot".equals(codeString))
           return SLOT;
         if ("Specimen".equals(codeString))
@@ -5357,7 +5426,6 @@ public class Enumerations {
             case FLAG: return "Flag";
             case GOAL: return "Goal";
             case GROUP: return "Group";
-            case GUIDANCEREQUEST: return "GuidanceRequest";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
             case IMAGINGOBJECTSELECTION: return "ImagingObjectSelection";
@@ -5406,6 +5474,7 @@ public class Enumerations {
             case RISKASSESSMENT: return "RiskAssessment";
             case SCHEDULE: return "Schedule";
             case SEARCHPARAMETER: return "SearchParameter";
+            case SEQUENCE: return "Sequence";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case STRUCTUREDEFINITION: return "StructureDefinition";
@@ -5468,7 +5537,6 @@ public class Enumerations {
             case FLAG: return "http://hl7.org/fhir/resource-types";
             case GOAL: return "http://hl7.org/fhir/resource-types";
             case GROUP: return "http://hl7.org/fhir/resource-types";
-            case GUIDANCEREQUEST: return "http://hl7.org/fhir/resource-types";
             case GUIDANCERESPONSE: return "http://hl7.org/fhir/resource-types";
             case HEALTHCARESERVICE: return "http://hl7.org/fhir/resource-types";
             case IMAGINGOBJECTSELECTION: return "http://hl7.org/fhir/resource-types";
@@ -5517,6 +5585,7 @@ public class Enumerations {
             case RISKASSESSMENT: return "http://hl7.org/fhir/resource-types";
             case SCHEDULE: return "http://hl7.org/fhir/resource-types";
             case SEARCHPARAMETER: return "http://hl7.org/fhir/resource-types";
+            case SEQUENCE: return "http://hl7.org/fhir/resource-types";
             case SLOT: return "http://hl7.org/fhir/resource-types";
             case SPECIMEN: return "http://hl7.org/fhir/resource-types";
             case STRUCTUREDEFINITION: return "http://hl7.org/fhir/resource-types";
@@ -5579,7 +5648,6 @@ public class Enumerations {
             case FLAG: return "Prospective warnings of potential issues when providing care to the patient.";
             case GOAL: return "Describes the intended objective(s) for a patient, group or organization care, for example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.";
             case GROUP: return "Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.";
-            case GUIDANCEREQUEST: return "A guidance request is a request to evaluate a particular knowledge module focused on decision support, providing information relevant to decision support such as workflow and user context.";
             case GUIDANCERESPONSE: return "A guidance response is the formal response to a previous guidance request. It is a derivative of the knowledge response that provides additional information relevant specifically to clinical decision support such as a description of any proposed actions to be taken.";
             case HEALTHCARESERVICE: return "The details of a healthcare service available at a location.";
             case IMAGINGOBJECTSELECTION: return "A manifest of a set of DICOM Service-Object Pair Instances (SOP Instances).  The referenced SOP Instances (images or other content) are for a single patient, and may be from one or more studies. The referenced SOP Instances have been selected for a purpose, such as quality assurance, conference, or consult. Reflecting that range of purposes, typical ImagingObjectSelection resources may include all SOP Instances in a study (perhaps for sharing through a Health Information Exchange); key images from multiple studies (for reference by a referring or treating physician); a multi-frame ultrasound instance (\"cine\" video clip) and a set of measurements taken from that instance (for inclusion in a teaching file); and so on.";
@@ -5628,6 +5696,7 @@ public class Enumerations {
             case RISKASSESSMENT: return "An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.";
             case SCHEDULE: return "A container for slot(s) of time that may be available for booking appointments.";
             case SEARCHPARAMETER: return "A search parameter that defines a named search item that can be used to search/filter on a resource.";
+            case SEQUENCE: return "Variation and Sequence data.";
             case SLOT: return "A slot of time on a schedule that may be available for booking appointments.";
             case SPECIMEN: return "A sample to be used for analysis.";
             case STRUCTUREDEFINITION: return "A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions, and constraints on resources and data types.";
@@ -5690,7 +5759,6 @@ public class Enumerations {
             case FLAG: return "Flag";
             case GOAL: return "Goal";
             case GROUP: return "Group";
-            case GUIDANCEREQUEST: return "GuidanceRequest";
             case GUIDANCERESPONSE: return "GuidanceResponse";
             case HEALTHCARESERVICE: return "HealthcareService";
             case IMAGINGOBJECTSELECTION: return "ImagingObjectSelection";
@@ -5739,6 +5807,7 @@ public class Enumerations {
             case RISKASSESSMENT: return "RiskAssessment";
             case SCHEDULE: return "Schedule";
             case SEARCHPARAMETER: return "SearchParameter";
+            case SEQUENCE: return "Sequence";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
             case STRUCTUREDEFINITION: return "StructureDefinition";
@@ -5853,8 +5922,6 @@ public class Enumerations {
           return ResourceType.GOAL;
         if ("Group".equals(codeString))
           return ResourceType.GROUP;
-        if ("GuidanceRequest".equals(codeString))
-          return ResourceType.GUIDANCEREQUEST;
         if ("GuidanceResponse".equals(codeString))
           return ResourceType.GUIDANCERESPONSE;
         if ("HealthcareService".equals(codeString))
@@ -5951,6 +6018,8 @@ public class Enumerations {
           return ResourceType.SCHEDULE;
         if ("SearchParameter".equals(codeString))
           return ResourceType.SEARCHPARAMETER;
+        if ("Sequence".equals(codeString))
+          return ResourceType.SEQUENCE;
         if ("Slot".equals(codeString))
           return ResourceType.SLOT;
         if ("Specimen".equals(codeString))
@@ -6073,8 +6142,6 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.GOAL);
         if ("Group".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.GROUP);
-        if ("GuidanceRequest".equals(codeString))
-          return new Enumeration<ResourceType>(this, ResourceType.GUIDANCEREQUEST);
         if ("GuidanceResponse".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.GUIDANCERESPONSE);
         if ("HealthcareService".equals(codeString))
@@ -6171,6 +6238,8 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.SCHEDULE);
         if ("SearchParameter".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.SEARCHPARAMETER);
+        if ("Sequence".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.SEQUENCE);
         if ("Slot".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.SLOT);
         if ("Specimen".equals(codeString))
@@ -6288,8 +6357,6 @@ public class Enumerations {
         return "Goal";
       if (code == ResourceType.GROUP)
         return "Group";
-      if (code == ResourceType.GUIDANCEREQUEST)
-        return "GuidanceRequest";
       if (code == ResourceType.GUIDANCERESPONSE)
         return "GuidanceResponse";
       if (code == ResourceType.HEALTHCARESERVICE)
@@ -6386,6 +6453,8 @@ public class Enumerations {
         return "Schedule";
       if (code == ResourceType.SEARCHPARAMETER)
         return "SearchParameter";
+      if (code == ResourceType.SEQUENCE)
+        return "Sequence";
       if (code == ResourceType.SLOT)
         return "Slot";
       if (code == ResourceType.SPECIMEN)
@@ -6407,6 +6476,9 @@ public class Enumerations {
       if (code == ResourceType.VISIONPRESCRIPTION)
         return "VisionPrescription";
       return "?";
+      }
+    public String toSystem(ResourceType code) {
+      return code.getSystem();
       }
     }
 
@@ -6588,6 +6660,9 @@ public class Enumerations {
         return "uri";
       return "?";
       }
+    public String toSystem(SearchParamType code) {
+      return code.getSystem();
+      }
     }
 
     public enum SpecialValues {
@@ -6735,6 +6810,9 @@ public class Enumerations {
       if (code == SpecialValues.NILKNOWN)
         return "nil-known";
       return "?";
+      }
+    public String toSystem(SpecialValues code) {
+      return code.getSystem();
       }
     }
 

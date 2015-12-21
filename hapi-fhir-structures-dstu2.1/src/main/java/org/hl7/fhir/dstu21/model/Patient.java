@@ -29,21 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGenderEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Demographics and other administrative information about an individual or animal receiving care or other health-related services.
  */
@@ -148,6 +146,9 @@ public class Patient extends DomainResource {
         return "seealso";
       return "?";
       }
+    public String toSystem(LinkType code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -208,7 +209,7 @@ public class Patient extends DomainResource {
 
         private static final long serialVersionUID = 364269017L;
 
-    /*
+    /**
      * Constructor
      */
       public ContactComponent() {
@@ -604,14 +605,14 @@ public class Patient extends DomainResource {
 
         private static final long serialVersionUID = -549738382L;
 
-    /*
+    /**
      * Constructor
      */
       public AnimalComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public AnimalComponent(CodeableConcept species) {
@@ -788,14 +789,14 @@ public class Patient extends DomainResource {
 
         private static final long serialVersionUID = 633792918L;
 
-    /*
+    /**
      * Constructor
      */
       public PatientCommunicationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public PatientCommunicationComponent(CodeableConcept language) {
@@ -964,14 +965,14 @@ public class Patient extends DomainResource {
 
         private static final long serialVersionUID = -1942104050L;
 
-    /*
+    /**
      * Constructor
      */
       public PatientLinkComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public PatientLinkComponent(Reference other, Enumeration<LinkType> type) {
@@ -1269,7 +1270,7 @@ public class Patient extends DomainResource {
 
     private static final long serialVersionUID = 2019992554L;
 
-  /*
+  /**
    * Constructor
    */
     public Patient() {
@@ -2217,27 +2218,33 @@ public class Patient extends DomainResource {
   @SearchParamDefinition(name="deceased", path="Patient.deceased[x]", description="This patient has been marked as deceased, or as a death date entered", type="token" )
   public static final String SP_DECEASED = "deceased";
   @SearchParamDefinition(name="address-state", path="Patient.address.state", description="A state specified in an address", type="string" )
-  public static final String SP_ADDRESSSTATE = "address-state";
+  public static final String SP_ADDRESS_STATE = "address-state";
   @SearchParamDefinition(name="gender", path="Patient.gender", description="Gender of the patient", type="token" )
   public static final String SP_GENDER = "gender";
   @SearchParamDefinition(name="animal-species", path="Patient.animal.species", description="The species for animal patients", type="token" )
-  public static final String SP_ANIMALSPECIES = "animal-species";
+  public static final String SP_ANIMAL_SPECIES = "animal-species";
   @SearchParamDefinition(name="link", path="Patient.link.other", description="All patients linked to the given patient", type="reference" )
   public static final String SP_LINK = "link";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Patient:link</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_LINK = new ca.uhn.fhir.model.api.Include("Patient:link").toLocked();
+
   @SearchParamDefinition(name="language", path="Patient.communication.language", description="Language code (irrespective of use value)", type="token" )
   public static final String SP_LANGUAGE = "language";
   @SearchParamDefinition(name="deathdate", path="Patient.deceasedDateTime", description="The date of death has been provided and satisfies this search value", type="date" )
   public static final String SP_DEATHDATE = "deathdate";
   @SearchParamDefinition(name="animal-breed", path="Patient.animal.breed", description="The breed for animal patients", type="token" )
-  public static final String SP_ANIMALBREED = "animal-breed";
+  public static final String SP_ANIMAL_BREED = "animal-breed";
   @SearchParamDefinition(name="address-country", path="Patient.address.country", description="A country specified in an address", type="string" )
-  public static final String SP_ADDRESSCOUNTRY = "address-country";
+  public static final String SP_ADDRESS_COUNTRY = "address-country";
   @SearchParamDefinition(name="phonetic", path="Patient.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="telecom", path="Patient.telecom", description="The value in any kind of telecom details of the patient", type="token" )
   public static final String SP_TELECOM = "telecom";
   @SearchParamDefinition(name="address-city", path="Patient.address.city", description="A city specified in an address", type="string" )
-  public static final String SP_ADDRESSCITY = "address-city";
+  public static final String SP_ADDRESS_CITY = "address-city";
   @SearchParamDefinition(name="email", path="Patient.telecom.where(system='email')", description="A value in an email contact", type="token" )
   public static final String SP_EMAIL = "email";
   @SearchParamDefinition(name="identifier", path="Patient.identifier", description="A patient identifier", type="token" )
@@ -2249,17 +2256,29 @@ public class Patient extends DomainResource {
   @SearchParamDefinition(name="active", path="Patient.active", description="Whether the patient record is active", type="token" )
   public static final String SP_ACTIVE = "active";
   @SearchParamDefinition(name="address-postalcode", path="Patient.address.postalCode", description="A postalCode specified in an address", type="string" )
-  public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
+  public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
   @SearchParamDefinition(name="careprovider", path="Patient.careProvider", description="Patient's nominated care provider, could be a care manager, not the organization that manages the record", type="reference" )
   public static final String SP_CAREPROVIDER = "careprovider";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Patient:careprovider</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CAREPROVIDER = new ca.uhn.fhir.model.api.Include("Patient:careprovider").toLocked();
+
   @SearchParamDefinition(name="phone", path="Patient.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
   public static final String SP_PHONE = "phone";
   @SearchParamDefinition(name="organization", path="Patient.managingOrganization", description="The organization at which this person is a patient", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Patient:organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("Patient:organization").toLocked();
+
   @SearchParamDefinition(name="name", path="Patient.name", description="A portion of either family or given name of the patient", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="address-use", path="Patient.address.use", description="A use code specified in an address", type="token" )
-  public static final String SP_ADDRESSUSE = "address-use";
+  public static final String SP_ADDRESS_USE = "address-use";
   @SearchParamDefinition(name="family", path="Patient.name.family", description="A portion of the family name of the patient", type="string" )
   public static final String SP_FAMILY = "family";
 

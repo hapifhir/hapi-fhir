@@ -29,24 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.dstu21.model.Enumerations.SearchParamType;
-import org.hl7.fhir.dstu21.model.Enumerations.SearchParamTypeEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A search parameter that defines a named search item that can be used to search/filter on a resource.
  */
@@ -183,6 +178,9 @@ public class SearchParameter extends DomainResource {
         return "other";
       return "?";
       }
+    public String toSystem(XPathUsageType code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -203,7 +201,7 @@ public class SearchParameter extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
-    /*
+    /**
      * Constructor
      */
       public SearchParameterContactComponent() {
@@ -478,14 +476,14 @@ public class SearchParameter extends DomainResource {
 
     private static final long serialVersionUID = -742596414L;
 
-  /*
+  /**
    * Constructor
    */
     public SearchParameter() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public SearchParameter(UriType url, StringType name, CodeType code, CodeType base, Enumeration<SearchParamType> type, StringType description) {

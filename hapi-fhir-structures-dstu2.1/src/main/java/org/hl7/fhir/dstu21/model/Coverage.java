@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Financial instrument which may be used to pay for or reimburse health care products and services.
  */
@@ -161,7 +162,7 @@ public class Coverage extends DomainResource {
 
     private static final long serialVersionUID = -1312031251L;
 
-  /*
+  /**
    * Constructor
    */
     public Coverage() {
@@ -901,6 +902,14 @@ public class Coverage extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token" )
   public static final String SP_SEQUENCE = "sequence";
+  @SearchParamDefinition(name="subscriber", path="Coverage.subscriber", description="Reference to the subscriber", type="reference" )
+  public static final String SP_SUBSCRIBER = "subscriber";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Coverage:subscriber</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBSCRIBER = new ca.uhn.fhir.model.api.Include("Coverage:subscriber").toLocked();
+
   @SearchParamDefinition(name="subplan", path="Coverage.subPlan", description="Sub-plan identifier", type="token" )
   public static final String SP_SUBPLAN = "subplan";
   @SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage", type="token" )
@@ -911,6 +920,12 @@ public class Coverage extends DomainResource {
   public static final String SP_DEPENDENT = "dependent";
   @SearchParamDefinition(name="issuer", path="Coverage.issuer", description="The identity of the insurer", type="reference" )
   public static final String SP_ISSUER = "issuer";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Coverage:issuer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ISSUER = new ca.uhn.fhir.model.api.Include("Coverage:issuer").toLocked();
+
   @SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token" )
   public static final String SP_GROUP = "group";
 

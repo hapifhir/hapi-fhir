@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection.
  */
@@ -193,6 +193,9 @@ public class AppointmentResponse extends DomainResource {
         return "needs-action";
       return "?";
       }
+    public String toSystem(ParticipantStatus code) {
+      return code.getSystem();
+      }
     }
 
     /**
@@ -263,14 +266,14 @@ public class AppointmentResponse extends DomainResource {
 
     private static final long serialVersionUID = 248548635L;
 
-  /*
+  /**
    * Constructor
    */
     public AppointmentResponse() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public AppointmentResponse(Reference appointment, Enumeration<ParticipantStatus> participantStatus) {
@@ -769,18 +772,48 @@ public class AppointmentResponse extends DomainResource {
 
   @SearchParamDefinition(name="actor", path="AppointmentResponse.actor", description="The Person, Location/HealthcareService or Device that this appointment response replies for", type="reference" )
   public static final String SP_ACTOR = "actor";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>AppointmentResponse:actor</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ACTOR = new ca.uhn.fhir.model.api.Include("AppointmentResponse:actor").toLocked();
+
   @SearchParamDefinition(name="identifier", path="AppointmentResponse.identifier", description="An Identifier in this appointment response", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="practitioner", path="AppointmentResponse.actor", description="This Response is for this Practitioner", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>AppointmentResponse:practitioner</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PRACTITIONER = new ca.uhn.fhir.model.api.Include("AppointmentResponse:practitioner").toLocked();
+
   @SearchParamDefinition(name="part-status", path="AppointmentResponse.participantStatus", description="The participants acceptance status for this appointment", type="token" )
-  public static final String SP_PARTSTATUS = "part-status";
+  public static final String SP_PART_STATUS = "part-status";
   @SearchParamDefinition(name="patient", path="AppointmentResponse.actor", description="This Response is for this Patient", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>AppointmentResponse:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("AppointmentResponse:patient").toLocked();
+
   @SearchParamDefinition(name="appointment", path="AppointmentResponse.appointment", description="The appointment that the response is attached to", type="reference" )
   public static final String SP_APPOINTMENT = "appointment";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>AppointmentResponse:appointment</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_APPOINTMENT = new ca.uhn.fhir.model.api.Include("AppointmentResponse:appointment").toLocked();
+
   @SearchParamDefinition(name="location", path="AppointmentResponse.actor", description="This Response is for this Location", type="reference" )
   public static final String SP_LOCATION = "location";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>AppointmentResponse:location</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("AppointmentResponse:location").toLocked();
+
 
 }
 

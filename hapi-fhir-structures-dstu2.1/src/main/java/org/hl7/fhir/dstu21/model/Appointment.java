@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).
  */
@@ -211,6 +209,9 @@ public class Appointment extends DomainResource {
         return "noshow";
       return "?";
       }
+    public String toSystem(AppointmentStatus code) {
+      return code.getSystem();
+      }
     }
 
     public enum ParticipantRequired {
@@ -310,6 +311,9 @@ public class Appointment extends DomainResource {
       if (code == ParticipantRequired.INFORMATIONONLY)
         return "information-only";
       return "?";
+      }
+    public String toSystem(ParticipantRequired code) {
+      return code.getSystem();
       }
     }
 
@@ -427,6 +431,9 @@ public class Appointment extends DomainResource {
         return "needs-action";
       return "?";
       }
+    public String toSystem(ParticipationStatus code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -466,14 +473,14 @@ public class Appointment extends DomainResource {
 
         private static final long serialVersionUID = -1620552507L;
 
-    /*
+    /**
      * Constructor
      */
       public AppointmentParticipantComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public AppointmentParticipantComponent(Enumeration<ParticipationStatus> status) {
@@ -833,14 +840,14 @@ public class Appointment extends DomainResource {
 
     private static final long serialVersionUID = -1403944125L;
 
-  /*
+  /**
    * Constructor
    */
     public Appointment() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Appointment(Enumeration<AppointmentStatus> status) {
@@ -1541,16 +1548,40 @@ public class Appointment extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="actor", path="Appointment.participant.actor", description="Any one of the individuals participating in the appointment", type="reference" )
   public static final String SP_ACTOR = "actor";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Appointment:actor</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ACTOR = new ca.uhn.fhir.model.api.Include("Appointment:actor").toLocked();
+
   @SearchParamDefinition(name="identifier", path="Appointment.identifier", description="An Identifier of the Appointment", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="practitioner", path="Appointment.participant.actor", description="One of the individuals of the appointment is this practitioner", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Appointment:practitioner</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PRACTITIONER = new ca.uhn.fhir.model.api.Include("Appointment:practitioner").toLocked();
+
   @SearchParamDefinition(name="part-status", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment. Can be used to locate participants that have not responded to meeting requests.", type="token" )
-  public static final String SP_PARTSTATUS = "part-status";
+  public static final String SP_PART_STATUS = "part-status";
   @SearchParamDefinition(name="patient", path="Appointment.participant.actor", description="One of the individuals of the appointment is this patient", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Appointment:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Appointment:patient").toLocked();
+
   @SearchParamDefinition(name="location", path="Appointment.participant.actor", description="This location is listed in the participants of the appointment", type="reference" )
   public static final String SP_LOCATION = "location";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Appointment:location</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("Appointment:location").toLocked();
+
   @SearchParamDefinition(name="status", path="Appointment.status", description="The overall status of the appointment", type="token" )
   public static final String SP_STATUS = "status";
 

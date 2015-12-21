@@ -29,17 +29,17 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * There is a variety of postal address formats defined around the world. This format defines a superset that is the basis for all addresses around the world.
  */
@@ -160,6 +160,9 @@ public class Address extends Type implements ICompositeType {
         return "old";
       return "?";
       }
+    public String toSystem(AddressUse code) {
+      return code.getSystem();
+      }
     }
 
     public enum AddressType {
@@ -260,6 +263,9 @@ public class Address extends Type implements ICompositeType {
         return "both";
       return "?";
       }
+    public String toSystem(AddressType code) {
+      return code.getSystem();
+      }
     }
 
     /**
@@ -334,7 +340,7 @@ public class Address extends Type implements ICompositeType {
 
     private static final long serialVersionUID = 561490318L;
 
-  /*
+  /**
    * Constructor
    */
     public Address() {

@@ -18,7 +18,7 @@
   </contact>
   <date value="2015-03-18"/>
   <description value="Describes how the observation resource is used to report structured genetic test results"/>
-  <fhirVersion value="1.1.0"/>
+  <fhirVersion value="1.2.0"/>
   <kind value="resource"/>
   <constrainedType value="Observation"/>
   <abstract value="false"/>

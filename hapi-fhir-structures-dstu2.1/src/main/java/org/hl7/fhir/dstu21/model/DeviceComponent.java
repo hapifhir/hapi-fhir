@@ -29,20 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes the characteristics, operational status and capabilities of a medical-related component of a medical device.
  */
@@ -275,6 +274,9 @@ public class DeviceComponent extends DomainResource {
         return "manual";
       return "?";
       }
+    public String toSystem(MeasmntPrinciple code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -302,7 +304,7 @@ public class DeviceComponent extends DomainResource {
 
         private static final long serialVersionUID = -1476597516L;
 
-    /*
+    /**
      * Constructor
      */
       public DeviceComponentProductionSpecificationComponent() {
@@ -566,14 +568,14 @@ public class DeviceComponent extends DomainResource {
 
     private static final long serialVersionUID = -1742890034L;
 
-  /*
+  /**
    * Constructor
    */
     public DeviceComponent() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public DeviceComponent(CodeableConcept type, Identifier identifier, InstantType lastSystemChange) {
@@ -1097,8 +1099,20 @@ public class DeviceComponent extends DomainResource {
 
   @SearchParamDefinition(name="parent", path="DeviceComponent.parent", description="The parent DeviceComponent resource", type="reference" )
   public static final String SP_PARENT = "parent";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DeviceComponent:parent</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PARENT = new ca.uhn.fhir.model.api.Include("DeviceComponent:parent").toLocked();
+
   @SearchParamDefinition(name="source", path="DeviceComponent.source", description="The device source", type="reference" )
   public static final String SP_SOURCE = "source";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DeviceComponent:source</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SOURCE = new ca.uhn.fhir.model.api.Include("DeviceComponent:source").toLocked();
+
   @SearchParamDefinition(name="type", path="DeviceComponent.type", description="The device component type", type="token" )
   public static final String SP_TYPE = "type";
 

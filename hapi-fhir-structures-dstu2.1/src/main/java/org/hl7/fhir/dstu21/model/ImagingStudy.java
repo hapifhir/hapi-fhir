@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.
  */
@@ -163,6 +161,9 @@ public class ImagingStudy extends DomainResource {
         return "UNAVAILABLE";
       return "?";
       }
+    public String toSystem(InstanceAvailability code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -246,14 +247,14 @@ public class ImagingStudy extends DomainResource {
 
         private static final long serialVersionUID = -1798366943L;
 
-    /*
+    /**
      * Constructor
      */
       public ImagingStudySeriesComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ImagingStudySeriesComponent(Coding modality, OidType uid, UnsignedIntType numberOfInstances) {
@@ -899,14 +900,14 @@ public class ImagingStudy extends DomainResource {
 
         private static final long serialVersionUID = -1450403705L;
 
-    /*
+    /**
      * Constructor
      */
       public ImagingStudySeriesInstanceComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ImagingStudySeriesInstanceComponent(OidType uid, OidType sopClass) {
@@ -1431,14 +1432,14 @@ public class ImagingStudy extends DomainResource {
 
     private static final long serialVersionUID = 1895046380L;
 
-  /*
+  /**
    * Constructor
    */
     public ImagingStudy() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public ImagingStudy(Reference patient, OidType uid, UnsignedIntType numberOfSeries, UnsignedIntType numberOfInstances) {
@@ -2393,13 +2394,19 @@ public class ImagingStudy extends DomainResource {
   @SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study identifier for the image", type="uri" )
   public static final String SP_STUDY = "study";
   @SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopClass", description="The type of the instance", type="uri" )
-  public static final String SP_DICOMCLASS = "dicom-class";
+  public static final String SP_DICOM_CLASS = "dicom-class";
   @SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the series", type="token" )
   public static final String SP_MODALITY = "modality";
   @SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="The body site studied", type="token" )
   public static final String SP_BODYSITE = "bodysite";
   @SearchParamDefinition(name="patient", path="ImagingStudy.patient", description="Who the study is about", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ImagingStudy:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ImagingStudy:patient").toLocked();
+
   @SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The identifier of the series of images", type="uri" )
   public static final String SP_SERIES = "series";
   @SearchParamDefinition(name="started", path="ImagingStudy.started", description="When the study was started", type="date" )
@@ -2408,6 +2415,12 @@ public class ImagingStudy extends DomainResource {
   public static final String SP_ACCESSION = "accession";
   @SearchParamDefinition(name="order", path="ImagingStudy.order", description="The order for the image", type="reference" )
   public static final String SP_ORDER = "order";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ImagingStudy:order</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORDER = new ca.uhn.fhir.model.api.Include("ImagingStudy:order").toLocked();
+
 
 }
 

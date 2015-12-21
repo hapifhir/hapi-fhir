@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes a measurement, calculation or setting capability of a medical device.
  */
@@ -145,6 +144,9 @@ public class DeviceMetric extends DomainResource {
       if (code == DeviceMetricOperationalStatus.STANDBY)
         return "standby";
       return "?";
+      }
+    public String toSystem(DeviceMetricOperationalStatus code) {
+      return code.getSystem();
       }
     }
 
@@ -326,6 +328,9 @@ public class DeviceMetric extends DomainResource {
         return "white";
       return "?";
       }
+    public String toSystem(DeviceMetricColor code) {
+      return code.getSystem();
+      }
     }
 
     public enum DeviceMetricCategory {
@@ -441,6 +446,9 @@ public class DeviceMetric extends DomainResource {
       if (code == DeviceMetricCategory.UNSPECIFIED)
         return "unspecified";
       return "?";
+      }
+    public String toSystem(DeviceMetricCategory code) {
+      return code.getSystem();
       }
     }
 
@@ -558,6 +566,9 @@ public class DeviceMetric extends DomainResource {
         return "two-point";
       return "?";
       }
+    public String toSystem(DeviceMetricCalibrationType code) {
+      return code.getSystem();
+      }
     }
 
     public enum DeviceMetricCalibrationState {
@@ -674,6 +685,9 @@ public class DeviceMetric extends DomainResource {
         return "unspecified";
       return "?";
       }
+    public String toSystem(DeviceMetricCalibrationState code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -701,7 +715,7 @@ public class DeviceMetric extends DomainResource {
 
         private static final long serialVersionUID = 1163986578L;
 
-    /*
+    /**
      * Constructor
      */
       public DeviceMetricCalibrationComponent() {
@@ -1014,14 +1028,14 @@ public class DeviceMetric extends DomainResource {
 
     private static final long serialVersionUID = 1786401018L;
 
-  /*
+  /**
    * Constructor
    */
     public DeviceMetric() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public DeviceMetric(CodeableConcept type, Identifier identifier, Enumeration<DeviceMetricCategory> category) {
@@ -1548,10 +1562,22 @@ public class DeviceMetric extends DomainResource {
 
   @SearchParamDefinition(name="parent", path="DeviceMetric.parent", description="The parent DeviceMetric resource", type="reference" )
   public static final String SP_PARENT = "parent";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DeviceMetric:parent</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PARENT = new ca.uhn.fhir.model.api.Include("DeviceMetric:parent").toLocked();
+
   @SearchParamDefinition(name="identifier", path="DeviceMetric.identifier", description="The identifier of the metric", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="source", path="DeviceMetric.source", description="The device resource", type="reference" )
   public static final String SP_SOURCE = "source";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DeviceMetric:source</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SOURCE = new ca.uhn.fhir.model.api.Include("DeviceMetric:source").toLocked();
+
   @SearchParamDefinition(name="type", path="DeviceMetric.type", description="The component type", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="category", path="DeviceMetric.category", description="The category of the metric", type="token" )

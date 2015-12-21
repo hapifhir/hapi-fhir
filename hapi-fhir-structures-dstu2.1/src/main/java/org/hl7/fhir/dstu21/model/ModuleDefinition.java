@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The ModuleDefinition resource defines the data requirements for a quality artifact.
  */
@@ -72,14 +72,14 @@ public class ModuleDefinition extends DomainResource {
 
         private static final long serialVersionUID = -862601139L;
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionModelComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionModelComponent(StringType identifier) {
@@ -339,7 +339,7 @@ public class ModuleDefinition extends DomainResource {
 
         private static final long serialVersionUID = 1633488790L;
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionLibraryComponent() {
@@ -652,14 +652,14 @@ public class ModuleDefinition extends DomainResource {
 
         private static final long serialVersionUID = -862601139L;
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionCodeSystemComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionCodeSystemComponent(StringType name, StringType identifier) {
@@ -916,14 +916,14 @@ public class ModuleDefinition extends DomainResource {
 
         private static final long serialVersionUID = 338950096L;
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionValueSetComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionValueSetComponent(StringType name, StringType identifier) {
@@ -1258,14 +1258,14 @@ public class ModuleDefinition extends DomainResource {
 
         private static final long serialVersionUID = 1572548838L;
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionParameterComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionParameterComponent(CodeType name, CodeType use, CodeType type) {
@@ -1640,14 +1640,14 @@ public class ModuleDefinition extends DomainResource {
 
         private static final long serialVersionUID = -777236908L;
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionDataComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionDataComponent(CodeType type) {
@@ -2007,14 +2007,14 @@ public class ModuleDefinition extends DomainResource {
 
         private static final long serialVersionUID = -666343535L;
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionDataCodeFilterComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionDataCodeFilterComponent(StringType path) {
@@ -2255,14 +2255,14 @@ public class ModuleDefinition extends DomainResource {
 
         private static final long serialVersionUID = 1791957163L;
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionDataDateFilterComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ModuleDefinitionDataDateFilterComponent(StringType path) {
@@ -2491,7 +2491,7 @@ public class ModuleDefinition extends DomainResource {
 
     private static final long serialVersionUID = -1288058693L;
 
-  /*
+  /**
    * Constructor
    */
     public ModuleDefinition() {

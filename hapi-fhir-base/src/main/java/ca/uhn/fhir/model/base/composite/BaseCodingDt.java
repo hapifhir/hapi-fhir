@@ -32,7 +32,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.TokenParam;
 
-public abstract class BaseCodingDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType, IBaseCoding {
+public abstract class BaseCodingDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
 
 	/**
 	 * Gets the value(s) for <b>code</b> (Symbol in syntax defined by the system). creating it if it does not exist. Will not return <code>null</code>.

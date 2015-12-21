@@ -18,7 +18,7 @@
   </contact>
   <date value="2012-05-12"/>
   <description value="LDL Cholesterol Result"/>
-  <fhirVersion value="1.1.0"/>
+  <fhirVersion value="1.2.0"/>
   <kind value="resource"/>
   <constrainedType value="Observation"/>
   <abstract value="false"/>
@@ -913,7 +913,7 @@
     <element>
       <path value="Observation.referenceRange.high"/>
       <name value="SimpleQuantity"/>
-      <short value="A fixed quantity (no comparator)"/>
+      <short value="High Range, if relevant"/>
       <definition value="&lt;3.0 mmol/L."/>
       <comments value="Per Australian NHF Recommendations."/>
       <min value="1"/>

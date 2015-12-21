@@ -29,25 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.dstu21.model.Enumerations.SearchParamType;
-import org.hl7.fhir.dstu21.model.Enumerations.SearchParamTypeEnumFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
  */
@@ -151,6 +145,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
       if (code == ConformanceStatementKind.REQUIREMENTS)
         return "requirements";
       return "?";
+      }
+    public String toSystem(ConformanceStatementKind code) {
+      return code.getSystem();
       }
     }
 
@@ -268,6 +265,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
         return "both";
       return "?";
       }
+    public String toSystem(UnknownContentCode code) {
+      return code.getSystem();
+      }
     }
 
     public enum RestfulConformanceMode {
@@ -351,6 +351,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
       if (code == RestfulConformanceMode.SERVER)
         return "server";
       return "?";
+      }
+    public String toSystem(RestfulConformanceMode code) {
+      return code.getSystem();
       }
     }
 
@@ -548,6 +551,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
         return "search-type";
       return "?";
       }
+    public String toSystem(TypeRestfulInteraction code) {
+      return code.getSystem();
+      }
     }
 
     public enum ResourceVersionPolicy {
@@ -648,6 +654,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
         return "versioned-update";
       return "?";
       }
+    public String toSystem(ResourceVersionPolicy code) {
+      return code.getSystem();
+      }
     }
 
     public enum ConditionalDeleteStatus {
@@ -747,6 +756,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
       if (code == ConditionalDeleteStatus.MULTIPLE)
         return "multiple";
       return "?";
+      }
+    public String toSystem(ConditionalDeleteStatus code) {
+      return code.getSystem();
       }
     }
 
@@ -960,6 +972,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
         return "type";
       return "?";
       }
+    public String toSystem(SearchModifierCode code) {
+      return code.getSystem();
+      }
     }
 
     public enum SystemRestfulInteraction {
@@ -1059,6 +1074,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
       if (code == SystemRestfulInteraction.HISTORYSYSTEM)
         return "history-system";
       return "?";
+      }
+    public String toSystem(SystemRestfulInteraction code) {
+      return code.getSystem();
       }
     }
 
@@ -1176,6 +1194,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
         return "both";
       return "?";
       }
+    public String toSystem(TransactionMode code) {
+      return code.getSystem();
+      }
     }
 
     public enum MessageSignificanceCategory {
@@ -1276,6 +1297,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
         return "Notification";
       return "?";
       }
+    public String toSystem(MessageSignificanceCategory code) {
+      return code.getSystem();
+      }
     }
 
     public enum ConformanceEventMode {
@@ -1359,6 +1383,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
       if (code == ConformanceEventMode.RECEIVER)
         return "receiver";
       return "?";
+      }
+    public String toSystem(ConformanceEventMode code) {
+      return code.getSystem();
       }
     }
 
@@ -1444,6 +1471,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
         return "consumer";
       return "?";
       }
+    public String toSystem(DocumentMode code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -1464,7 +1494,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = -1179697803L;
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceContactComponent() {
@@ -1657,14 +1687,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = 1819769027L;
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceSoftwareComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceSoftwareComponent(StringType name) {
@@ -1910,14 +1940,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = -289238508L;
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceImplementationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceImplementationComponent(StringType description) {
@@ -2154,14 +2184,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = 931983837L;
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceRestComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceRestComponent(Enumeration<RestfulConformanceMode> mode) {
@@ -2727,7 +2757,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = 391663952L;
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceRestSecurityComponent() {
@@ -3018,7 +3048,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = 2092655854L;
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceRestSecurityCertificateComponent() {
@@ -3284,14 +3314,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = 1781959905L;
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceRestResourceComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceRestResourceComponent(CodeType type) {
@@ -4041,14 +4071,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = -437507806L;
 
-    /*
+    /**
      * Constructor
      */
       public ResourceInteractionComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ResourceInteractionComponent(Enumeration<TypeRestfulInteraction> code) {
@@ -4271,14 +4301,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = -1020405086L;
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceRestResourceSearchParamComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceRestResourceSearchParamComponent(StringType name, Enumeration<SearchParamType> type) {
@@ -4776,14 +4806,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = 510675287L;
 
-    /*
+    /**
      * Constructor
      */
       public SystemInteractionComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public SystemInteractionComponent(Enumeration<SystemRestfulInteraction> code) {
@@ -4976,14 +5006,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = 122107272L;
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceRestOperationComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceRestOperationComponent(StringType name, Reference definition) {
@@ -5182,7 +5212,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = -712362545L;
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceMessagingComponent() {
@@ -5474,14 +5504,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = 1294656428L;
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceMessagingEndpointComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceMessagingEndpointComponent(Coding protocol, UriType address) {
@@ -5691,14 +5721,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = -47031390L;
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceMessagingEventComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceMessagingEventComponent(Coding code, Enumeration<ConformanceEventMode> mode, CodeType focus, Reference request, Reference response) {
@@ -6151,14 +6181,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
         private static final long serialVersionUID = -1059555053L;
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceDocumentComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public ConformanceDocumentComponent(Enumeration<DocumentMode> mode, Reference profile) {
@@ -6536,14 +6566,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
 
     private static final long serialVersionUID = 1863739648L;
 
-  /*
+  /**
    * Constructor
    */
     public Conformance() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public Conformance(DateTimeType date, Enumeration<ConformanceStatementKind> kind, IdType fhirVersion, Enumeration<UnknownContentCode> acceptUnknown) {
@@ -7754,6 +7784,12 @@ public class Conformance extends DomainResource implements IBaseConformance {
   public static final String SP_RESOURCE = "resource";
   @SearchParamDefinition(name="profile", path="Conformance.rest.resource.profile", description="A profile id invoked in a conformance statement", type="reference" )
   public static final String SP_PROFILE = "profile";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Conformance:profile</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROFILE = new ca.uhn.fhir.model.api.Include("Conformance:profile").toLocked();
+
   @SearchParamDefinition(name="format", path="Conformance.format", description="formats supported (xml | json | mime type)", type="token" )
   public static final String SP_FORMAT = "format";
   @SearchParamDefinition(name="description", path="Conformance.description", description="Text search in the description of the conformance statement", type="string" )
@@ -7765,7 +7801,13 @@ public class Conformance extends DomainResource implements IBaseConformance {
   @SearchParamDefinition(name="url", path="Conformance.url", description="The uri that identifies the conformance statement", type="uri" )
   public static final String SP_URL = "url";
   @SearchParamDefinition(name="supported-profile", path="Conformance.profile", description="Profiles for use cases supported", type="reference" )
-  public static final String SP_SUPPORTEDPROFILE = "supported-profile";
+  public static final String SP_SUPPORTED_PROFILE = "supported-profile";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Conformance:supported-profile</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUPPORTED_PROFILE = new ca.uhn.fhir.model.api.Include("Conformance:supported-profile").toLocked();
+
   @SearchParamDefinition(name="mode", path="Conformance.rest.mode", description="Mode - restful (server/client) or messaging (sender/receiver)", type="token" )
   public static final String SP_MODE = "mode";
   @SearchParamDefinition(name="security", path="Conformance.rest.security.service", description="OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates", type="token" )

@@ -29,17 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides the insurance eligibility details from the insurer regarding a specified coverage and optionally some class of service.
  */
@@ -110,9 +112,99 @@ public class EligibilityRequest extends DomainResource {
      */
     protected Organization organizationTarget;
 
-    private static final long serialVersionUID = 1836339504L;
+    /**
+     * Immediate (STAT), best effort (NORMAL), deferred (DEFER).
+     */
+    @Child(name = "priority", type = {Coding.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Desired processing priority", formalDefinition="Immediate (STAT), best effort (NORMAL), deferred (DEFER)." )
+    protected Coding priority;
 
-  /*
+    /**
+     * Person who created the invoice/claim/pre-determination or pre-authorization.
+     */
+    @Child(name = "enterer", type = {Practitioner.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Author", formalDefinition="Person who created the invoice/claim/pre-determination or pre-authorization." )
+    protected Reference enterer;
+
+    /**
+     * The actual object that is the target of the reference (Person who created the invoice/claim/pre-determination or pre-authorization.)
+     */
+    protected Practitioner entererTarget;
+
+    /**
+     * Facility where the services were provided.
+     */
+    @Child(name = "facility", type = {Location.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Servicing Facility", formalDefinition="Facility where the services were provided." )
+    protected Reference facility;
+
+    /**
+     * The actual object that is the target of the reference (Facility where the services were provided.)
+     */
+    protected Location facilityTarget;
+
+    /**
+     * Patient Resource.
+     */
+    @Child(name = "patient", type = {Patient.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="The subject of the Products and Services", formalDefinition="Patient Resource." )
+    protected Reference patient;
+
+    /**
+     * The actual object that is the target of the reference (Patient Resource.)
+     */
+    protected Patient patientTarget;
+
+    /**
+     * Financial instrument by which payment information for health care.
+     */
+    @Child(name = "coverage", type = {Coverage.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Insurance or medical plan", formalDefinition="Financial instrument by which payment information for health care." )
+    protected Reference coverage;
+
+    /**
+     * The actual object that is the target of the reference (Financial instrument by which payment information for health care.)
+     */
+    protected Coverage coverageTarget;
+
+    /**
+     * The contract number of a business agreement which describes the terms and conditions.
+     */
+    @Child(name = "businessArrangement", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Business agreement", formalDefinition="The contract number of a business agreement which describes the terms and conditions." )
+    protected StringType businessArrangement;
+
+    /**
+     * The relationship of the patient to the subscriber.
+     */
+    @Child(name = "relationship", type = {Coding.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Patient relationship to subscriber", formalDefinition="The relationship of the patient to the subscriber." )
+    protected Coding relationship;
+
+    /**
+     * The date or dates when the enclosed suite of services were performed or completed.
+     */
+    @Child(name = "serviced", type = {DateType.class, Period.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Estimated date or dates of Service", formalDefinition="The date or dates when the enclosed suite of services were performed or completed." )
+    protected Type serviced;
+
+    /**
+     * Dental, Vision, Medical, Pharmacy, Rehab etc.
+     */
+    @Child(name = "benefitCategory", type = {Coding.class}, order=15, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Benefit Category", formalDefinition="Dental, Vision, Medical, Pharmacy, Rehab etc." )
+    protected Coding benefitCategory;
+
+    /**
+     * Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.
+     */
+    @Child(name = "benefitSubCategory", type = {Coding.class}, order=16, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Benefit SubCategory", formalDefinition="Dental: basic, major, ortho; Vision exam, glasses, contacts; etc." )
+    protected Coding benefitSubCategory;
+
+    private static final long serialVersionUID = 1808061326L;
+
+  /**
    * Constructor
    */
     public EligibilityRequest() {
@@ -388,6 +480,372 @@ public class EligibilityRequest extends DomainResource {
       return this;
     }
 
+    /**
+     * @return {@link #priority} (Immediate (STAT), best effort (NORMAL), deferred (DEFER).)
+     */
+    public Coding getPriority() { 
+      if (this.priority == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.priority");
+        else if (Configuration.doAutoCreate())
+          this.priority = new Coding(); // cc
+      return this.priority;
+    }
+
+    public boolean hasPriority() { 
+      return this.priority != null && !this.priority.isEmpty();
+    }
+
+    /**
+     * @param value {@link #priority} (Immediate (STAT), best effort (NORMAL), deferred (DEFER).)
+     */
+    public EligibilityRequest setPriority(Coding value) { 
+      this.priority = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #enterer} (Person who created the invoice/claim/pre-determination or pre-authorization.)
+     */
+    public Reference getEnterer() { 
+      if (this.enterer == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.enterer");
+        else if (Configuration.doAutoCreate())
+          this.enterer = new Reference(); // cc
+      return this.enterer;
+    }
+
+    public boolean hasEnterer() { 
+      return this.enterer != null && !this.enterer.isEmpty();
+    }
+
+    /**
+     * @param value {@link #enterer} (Person who created the invoice/claim/pre-determination or pre-authorization.)
+     */
+    public EligibilityRequest setEnterer(Reference value) { 
+      this.enterer = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #enterer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Person who created the invoice/claim/pre-determination or pre-authorization.)
+     */
+    public Practitioner getEntererTarget() { 
+      if (this.entererTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.enterer");
+        else if (Configuration.doAutoCreate())
+          this.entererTarget = new Practitioner(); // aa
+      return this.entererTarget;
+    }
+
+    /**
+     * @param value {@link #enterer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Person who created the invoice/claim/pre-determination or pre-authorization.)
+     */
+    public EligibilityRequest setEntererTarget(Practitioner value) { 
+      this.entererTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #facility} (Facility where the services were provided.)
+     */
+    public Reference getFacility() { 
+      if (this.facility == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.facility");
+        else if (Configuration.doAutoCreate())
+          this.facility = new Reference(); // cc
+      return this.facility;
+    }
+
+    public boolean hasFacility() { 
+      return this.facility != null && !this.facility.isEmpty();
+    }
+
+    /**
+     * @param value {@link #facility} (Facility where the services were provided.)
+     */
+    public EligibilityRequest setFacility(Reference value) { 
+      this.facility = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #facility} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Facility where the services were provided.)
+     */
+    public Location getFacilityTarget() { 
+      if (this.facilityTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.facility");
+        else if (Configuration.doAutoCreate())
+          this.facilityTarget = new Location(); // aa
+      return this.facilityTarget;
+    }
+
+    /**
+     * @param value {@link #facility} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Facility where the services were provided.)
+     */
+    public EligibilityRequest setFacilityTarget(Location value) { 
+      this.facilityTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #patient} (Patient Resource.)
+     */
+    public Reference getPatient() { 
+      if (this.patient == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.patient");
+        else if (Configuration.doAutoCreate())
+          this.patient = new Reference(); // cc
+      return this.patient;
+    }
+
+    public boolean hasPatient() { 
+      return this.patient != null && !this.patient.isEmpty();
+    }
+
+    /**
+     * @param value {@link #patient} (Patient Resource.)
+     */
+    public EligibilityRequest setPatient(Reference value) { 
+      this.patient = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Patient Resource.)
+     */
+    public Patient getPatientTarget() { 
+      if (this.patientTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.patient");
+        else if (Configuration.doAutoCreate())
+          this.patientTarget = new Patient(); // aa
+      return this.patientTarget;
+    }
+
+    /**
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Patient Resource.)
+     */
+    public EligibilityRequest setPatientTarget(Patient value) { 
+      this.patientTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #coverage} (Financial instrument by which payment information for health care.)
+     */
+    public Reference getCoverage() { 
+      if (this.coverage == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.coverage");
+        else if (Configuration.doAutoCreate())
+          this.coverage = new Reference(); // cc
+      return this.coverage;
+    }
+
+    public boolean hasCoverage() { 
+      return this.coverage != null && !this.coverage.isEmpty();
+    }
+
+    /**
+     * @param value {@link #coverage} (Financial instrument by which payment information for health care.)
+     */
+    public EligibilityRequest setCoverage(Reference value) { 
+      this.coverage = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #coverage} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Financial instrument by which payment information for health care.)
+     */
+    public Coverage getCoverageTarget() { 
+      if (this.coverageTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.coverage");
+        else if (Configuration.doAutoCreate())
+          this.coverageTarget = new Coverage(); // aa
+      return this.coverageTarget;
+    }
+
+    /**
+     * @param value {@link #coverage} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Financial instrument by which payment information for health care.)
+     */
+    public EligibilityRequest setCoverageTarget(Coverage value) { 
+      this.coverageTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #businessArrangement} (The contract number of a business agreement which describes the terms and conditions.). This is the underlying object with id, value and extensions. The accessor "getBusinessArrangement" gives direct access to the value
+     */
+    public StringType getBusinessArrangementElement() { 
+      if (this.businessArrangement == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.businessArrangement");
+        else if (Configuration.doAutoCreate())
+          this.businessArrangement = new StringType(); // bb
+      return this.businessArrangement;
+    }
+
+    public boolean hasBusinessArrangementElement() { 
+      return this.businessArrangement != null && !this.businessArrangement.isEmpty();
+    }
+
+    public boolean hasBusinessArrangement() { 
+      return this.businessArrangement != null && !this.businessArrangement.isEmpty();
+    }
+
+    /**
+     * @param value {@link #businessArrangement} (The contract number of a business agreement which describes the terms and conditions.). This is the underlying object with id, value and extensions. The accessor "getBusinessArrangement" gives direct access to the value
+     */
+    public EligibilityRequest setBusinessArrangementElement(StringType value) { 
+      this.businessArrangement = value;
+      return this;
+    }
+
+    /**
+     * @return The contract number of a business agreement which describes the terms and conditions.
+     */
+    public String getBusinessArrangement() { 
+      return this.businessArrangement == null ? null : this.businessArrangement.getValue();
+    }
+
+    /**
+     * @param value The contract number of a business agreement which describes the terms and conditions.
+     */
+    public EligibilityRequest setBusinessArrangement(String value) { 
+      if (Utilities.noString(value))
+        this.businessArrangement = null;
+      else {
+        if (this.businessArrangement == null)
+          this.businessArrangement = new StringType();
+        this.businessArrangement.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #relationship} (The relationship of the patient to the subscriber.)
+     */
+    public Coding getRelationship() { 
+      if (this.relationship == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.relationship");
+        else if (Configuration.doAutoCreate())
+          this.relationship = new Coding(); // cc
+      return this.relationship;
+    }
+
+    public boolean hasRelationship() { 
+      return this.relationship != null && !this.relationship.isEmpty();
+    }
+
+    /**
+     * @param value {@link #relationship} (The relationship of the patient to the subscriber.)
+     */
+    public EligibilityRequest setRelationship(Coding value) { 
+      this.relationship = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #serviced} (The date or dates when the enclosed suite of services were performed or completed.)
+     */
+    public Type getServiced() { 
+      return this.serviced;
+    }
+
+    /**
+     * @return {@link #serviced} (The date or dates when the enclosed suite of services were performed or completed.)
+     */
+    public DateType getServicedDateType() throws FHIRException { 
+      if (!(this.serviced instanceof DateType))
+        throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.serviced.getClass().getName()+" was encountered");
+      return (DateType) this.serviced;
+    }
+
+    public boolean hasServicedDateType() { 
+      return this.serviced instanceof DateType;
+    }
+
+    /**
+     * @return {@link #serviced} (The date or dates when the enclosed suite of services were performed or completed.)
+     */
+    public Period getServicedPeriod() throws FHIRException { 
+      if (!(this.serviced instanceof Period))
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.serviced.getClass().getName()+" was encountered");
+      return (Period) this.serviced;
+    }
+
+    public boolean hasServicedPeriod() { 
+      return this.serviced instanceof Period;
+    }
+
+    public boolean hasServiced() { 
+      return this.serviced != null && !this.serviced.isEmpty();
+    }
+
+    /**
+     * @param value {@link #serviced} (The date or dates when the enclosed suite of services were performed or completed.)
+     */
+    public EligibilityRequest setServiced(Type value) { 
+      this.serviced = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #benefitCategory} (Dental, Vision, Medical, Pharmacy, Rehab etc.)
+     */
+    public Coding getBenefitCategory() { 
+      if (this.benefitCategory == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.benefitCategory");
+        else if (Configuration.doAutoCreate())
+          this.benefitCategory = new Coding(); // cc
+      return this.benefitCategory;
+    }
+
+    public boolean hasBenefitCategory() { 
+      return this.benefitCategory != null && !this.benefitCategory.isEmpty();
+    }
+
+    /**
+     * @param value {@link #benefitCategory} (Dental, Vision, Medical, Pharmacy, Rehab etc.)
+     */
+    public EligibilityRequest setBenefitCategory(Coding value) { 
+      this.benefitCategory = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #benefitSubCategory} (Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.)
+     */
+    public Coding getBenefitSubCategory() { 
+      if (this.benefitSubCategory == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create EligibilityRequest.benefitSubCategory");
+        else if (Configuration.doAutoCreate())
+          this.benefitSubCategory = new Coding(); // cc
+      return this.benefitSubCategory;
+    }
+
+    public boolean hasBenefitSubCategory() { 
+      return this.benefitSubCategory != null && !this.benefitSubCategory.isEmpty();
+    }
+
+    /**
+     * @param value {@link #benefitSubCategory} (Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.)
+     */
+    public EligibilityRequest setBenefitSubCategory(Coding value) { 
+      this.benefitSubCategory = value;
+      return this;
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
@@ -397,6 +855,16 @@ public class EligibilityRequest extends DomainResource {
         childrenList.add(new Property("target", "Reference(Organization)", "The Insurer who is target  of the request.", 0, java.lang.Integer.MAX_VALUE, target));
         childrenList.add(new Property("provider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, provider));
         childrenList.add(new Property("organization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, organization));
+        childrenList.add(new Property("priority", "Coding", "Immediate (STAT), best effort (NORMAL), deferred (DEFER).", 0, java.lang.Integer.MAX_VALUE, priority));
+        childrenList.add(new Property("enterer", "Reference(Practitioner)", "Person who created the invoice/claim/pre-determination or pre-authorization.", 0, java.lang.Integer.MAX_VALUE, enterer));
+        childrenList.add(new Property("facility", "Reference(Location)", "Facility where the services were provided.", 0, java.lang.Integer.MAX_VALUE, facility));
+        childrenList.add(new Property("patient", "Reference(Patient)", "Patient Resource.", 0, java.lang.Integer.MAX_VALUE, patient));
+        childrenList.add(new Property("coverage", "Reference(Coverage)", "Financial instrument by which payment information for health care.", 0, java.lang.Integer.MAX_VALUE, coverage));
+        childrenList.add(new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, java.lang.Integer.MAX_VALUE, businessArrangement));
+        childrenList.add(new Property("relationship", "Coding", "The relationship of the patient to the subscriber.", 0, java.lang.Integer.MAX_VALUE, relationship));
+        childrenList.add(new Property("serviced[x]", "date|Period", "The date or dates when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, serviced));
+        childrenList.add(new Property("benefitCategory", "Coding", "Dental, Vision, Medical, Pharmacy, Rehab etc.", 0, java.lang.Integer.MAX_VALUE, benefitCategory));
+        childrenList.add(new Property("benefitSubCategory", "Coding", "Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.", 0, java.lang.Integer.MAX_VALUE, benefitSubCategory));
       }
 
       @Override
@@ -415,6 +883,26 @@ public class EligibilityRequest extends DomainResource {
           this.provider = castToReference(value); // Reference
         else if (name.equals("organization"))
           this.organization = castToReference(value); // Reference
+        else if (name.equals("priority"))
+          this.priority = castToCoding(value); // Coding
+        else if (name.equals("enterer"))
+          this.enterer = castToReference(value); // Reference
+        else if (name.equals("facility"))
+          this.facility = castToReference(value); // Reference
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("coverage"))
+          this.coverage = castToReference(value); // Reference
+        else if (name.equals("businessArrangement"))
+          this.businessArrangement = castToString(value); // StringType
+        else if (name.equals("relationship"))
+          this.relationship = castToCoding(value); // Coding
+        else if (name.equals("serviced[x]"))
+          this.serviced = (Type) value; // Type
+        else if (name.equals("benefitCategory"))
+          this.benefitCategory = castToCoding(value); // Coding
+        else if (name.equals("benefitSubCategory"))
+          this.benefitSubCategory = castToCoding(value); // Coding
         else
           super.setProperty(name, value);
       }
@@ -447,6 +935,49 @@ public class EligibilityRequest extends DomainResource {
           this.organization = new Reference();
           return this.organization;
         }
+        else if (name.equals("priority")) {
+          this.priority = new Coding();
+          return this.priority;
+        }
+        else if (name.equals("enterer")) {
+          this.enterer = new Reference();
+          return this.enterer;
+        }
+        else if (name.equals("facility")) {
+          this.facility = new Reference();
+          return this.facility;
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("coverage")) {
+          this.coverage = new Reference();
+          return this.coverage;
+        }
+        else if (name.equals("businessArrangement")) {
+          throw new FHIRException("Cannot call addChild on a primitive type EligibilityRequest.businessArrangement");
+        }
+        else if (name.equals("relationship")) {
+          this.relationship = new Coding();
+          return this.relationship;
+        }
+        else if (name.equals("servicedDate")) {
+          this.serviced = new DateType();
+          return this.serviced;
+        }
+        else if (name.equals("servicedPeriod")) {
+          this.serviced = new Period();
+          return this.serviced;
+        }
+        else if (name.equals("benefitCategory")) {
+          this.benefitCategory = new Coding();
+          return this.benefitCategory;
+        }
+        else if (name.equals("benefitSubCategory")) {
+          this.benefitSubCategory = new Coding();
+          return this.benefitSubCategory;
+        }
         else
           return super.addChild(name);
       }
@@ -470,6 +1001,16 @@ public class EligibilityRequest extends DomainResource {
         dst.target = target == null ? null : target.copy();
         dst.provider = provider == null ? null : provider.copy();
         dst.organization = organization == null ? null : organization.copy();
+        dst.priority = priority == null ? null : priority.copy();
+        dst.enterer = enterer == null ? null : enterer.copy();
+        dst.facility = facility == null ? null : facility.copy();
+        dst.patient = patient == null ? null : patient.copy();
+        dst.coverage = coverage == null ? null : coverage.copy();
+        dst.businessArrangement = businessArrangement == null ? null : businessArrangement.copy();
+        dst.relationship = relationship == null ? null : relationship.copy();
+        dst.serviced = serviced == null ? null : serviced.copy();
+        dst.benefitCategory = benefitCategory == null ? null : benefitCategory.copy();
+        dst.benefitSubCategory = benefitSubCategory == null ? null : benefitSubCategory.copy();
         return dst;
       }
 
@@ -486,7 +1027,11 @@ public class EligibilityRequest extends DomainResource {
         EligibilityRequest o = (EligibilityRequest) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(ruleset, o.ruleset, true) && compareDeep(originalRuleset, o.originalRuleset, true)
            && compareDeep(created, o.created, true) && compareDeep(target, o.target, true) && compareDeep(provider, o.provider, true)
-           && compareDeep(organization, o.organization, true);
+           && compareDeep(organization, o.organization, true) && compareDeep(priority, o.priority, true) && compareDeep(enterer, o.enterer, true)
+           && compareDeep(facility, o.facility, true) && compareDeep(patient, o.patient, true) && compareDeep(coverage, o.coverage, true)
+           && compareDeep(businessArrangement, o.businessArrangement, true) && compareDeep(relationship, o.relationship, true)
+           && compareDeep(serviced, o.serviced, true) && compareDeep(benefitCategory, o.benefitCategory, true)
+           && compareDeep(benefitSubCategory, o.benefitSubCategory, true);
       }
 
       @Override
@@ -496,13 +1041,18 @@ public class EligibilityRequest extends DomainResource {
         if (!(other instanceof EligibilityRequest))
           return false;
         EligibilityRequest o = (EligibilityRequest) other;
-        return compareValues(created, o.created, true);
+        return compareValues(created, o.created, true) && compareValues(businessArrangement, o.businessArrangement, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (ruleset == null || ruleset.isEmpty())
            && (originalRuleset == null || originalRuleset.isEmpty()) && (created == null || created.isEmpty())
            && (target == null || target.isEmpty()) && (provider == null || provider.isEmpty()) && (organization == null || organization.isEmpty())
+           && (priority == null || priority.isEmpty()) && (enterer == null || enterer.isEmpty()) && (facility == null || facility.isEmpty())
+           && (patient == null || patient.isEmpty()) && (coverage == null || coverage.isEmpty()) && (businessArrangement == null || businessArrangement.isEmpty())
+           && (relationship == null || relationship.isEmpty()) && (serviced == null || serviced.isEmpty())
+           && (benefitCategory == null || benefitCategory.isEmpty()) && (benefitSubCategory == null || benefitSubCategory.isEmpty())
           ;
       }
 
@@ -513,6 +1063,40 @@ public class EligibilityRequest extends DomainResource {
 
   @SearchParamDefinition(name="identifier", path="EligibilityRequest.identifier", description="The business identifier of the Eligibility", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="provider", path="EligibilityRequest.provider", description="The reference to the provider", type="reference" )
+  public static final String SP_PROVIDER = "provider";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>EligibilityRequest:provider</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROVIDER = new ca.uhn.fhir.model.api.Include("EligibilityRequest:provider").toLocked();
+
+  @SearchParamDefinition(name="patient", path="EligibilityRequest.patient", description="The reference to the patient", type="reference" )
+  public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>EligibilityRequest:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("EligibilityRequest:patient").toLocked();
+
+  @SearchParamDefinition(name="created", path="EligibilityRequest.created", description="The creation date for the EOB", type="date" )
+  public static final String SP_CREATED = "created";
+  @SearchParamDefinition(name="organization", path="EligibilityRequest.organization", description="The reference to the providing organization", type="reference" )
+  public static final String SP_ORGANIZATION = "organization";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>EligibilityRequest:organization</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("EligibilityRequest:organization").toLocked();
+
+  @SearchParamDefinition(name="facility", path="EligibilityRequest.facility", description="Facility responsible for the goods and services", type="reference" )
+  public static final String SP_FACILITY = "facility";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>EligibilityRequest:facility</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_FACILITY = new ca.uhn.fhir.model.api.Include("EligibilityRequest:facility").toLocked();
+
 
 }
 

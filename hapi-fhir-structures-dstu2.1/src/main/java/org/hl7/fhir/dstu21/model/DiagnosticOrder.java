@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 6, 2015 19:25-0500 for FHIR v1.1.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
 
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of a request for a diagnostic investigation service to be performed.
  */
@@ -306,6 +305,9 @@ public class DiagnosticOrder extends DomainResource {
         return "failed";
       return "?";
       }
+    public String toSystem(DiagnosticOrderStatus code) {
+      return code.getSystem();
+      }
     }
 
     public enum DiagnosticOrderPriority {
@@ -422,6 +424,9 @@ public class DiagnosticOrder extends DomainResource {
         return "asap";
       return "?";
       }
+    public String toSystem(DiagnosticOrderPriority code) {
+      return code.getSystem();
+      }
     }
 
     @Block()
@@ -461,14 +466,14 @@ public class DiagnosticOrder extends DomainResource {
 
         private static final long serialVersionUID = -370793723L;
 
-    /*
+    /**
      * Constructor
      */
       public DiagnosticOrderEventComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public DiagnosticOrderEventComponent(Enumeration<DiagnosticOrderStatus> status, DateTimeType dateTime) {
@@ -759,14 +764,14 @@ public class DiagnosticOrder extends DomainResource {
 
         private static final long serialVersionUID = 381238192L;
 
-    /*
+    /**
      * Constructor
      */
       public DiagnosticOrderItemComponent() {
         super();
       }
 
-    /*
+    /**
      * Constructor
      */
       public DiagnosticOrderItemComponent(CodeableConcept code) {
@@ -1184,14 +1189,14 @@ public class DiagnosticOrder extends DomainResource {
 
     private static final long serialVersionUID = 700891227L;
 
-  /*
+  /**
    * Constructor
    */
     public DiagnosticOrder() {
       super();
     }
 
-  /*
+  /**
    * Constructor
    */
     public DiagnosticOrder(Reference subject) {
@@ -1919,7 +1924,7 @@ public class DiagnosticOrder extends DomainResource {
    }
 
   @SearchParamDefinition(name="item-past-status", path="DiagnosticOrder.item.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
-  public static final String SP_ITEMPASTSTATUS = "item-past-status";
+  public static final String SP_ITEM_PAST_STATUS = "item-past-status";
   @SearchParamDefinition(name="identifier", path="DiagnosticOrder.identifier", description="Identifiers assigned to this order", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="bodysite", path="DiagnosticOrder.item.bodySite", description="Location of requested test (if applicable)", type="token" )
@@ -1927,29 +1932,65 @@ public class DiagnosticOrder extends DomainResource {
   @SearchParamDefinition(name="code", path="DiagnosticOrder.item.code", description="Code to indicate the item (test or panel) being ordered", type="token" )
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="event-date", path="DiagnosticOrder.event.dateTime", description="The date at which the event happened", type="date" )
-  public static final String SP_EVENTDATE = "event-date";
+  public static final String SP_EVENT_DATE = "event-date";
   @SearchParamDefinition(name="event-status-date", path="", description="A combination of past-status and date", type="composite" )
-  public static final String SP_EVENTSTATUSDATE = "event-status-date";
+  public static final String SP_EVENT_STATUS_DATE = "event-status-date";
   @SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticOrder:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("DiagnosticOrder:subject").toLocked();
+
   @SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="The encounter that this diagnostic order is associated with", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticOrder:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("DiagnosticOrder:encounter").toLocked();
+
   @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor|DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference" )
   public static final String SP_ACTOR = "actor";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticOrder:actor</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ACTOR = new ca.uhn.fhir.model.api.Include("DiagnosticOrder:actor").toLocked();
+
   @SearchParamDefinition(name="item-date", path="DiagnosticOrder.item.event.dateTime", description="The date at which the event happened", type="date" )
-  public static final String SP_ITEMDATE = "item-date";
+  public static final String SP_ITEM_DATE = "item-date";
   @SearchParamDefinition(name="item-status-date", path="", description="A combination of item-past-status and item-date", type="composite" )
-  public static final String SP_ITEMSTATUSDATE = "item-status-date";
+  public static final String SP_ITEM_STATUS_DATE = "item-status-date";
   @SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
-  public static final String SP_EVENTSTATUS = "event-status";
+  public static final String SP_EVENT_STATUS = "event-status";
   @SearchParamDefinition(name="item-status", path="DiagnosticOrder.item.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
-  public static final String SP_ITEMSTATUS = "item-status";
+  public static final String SP_ITEM_STATUS = "item-status";
   @SearchParamDefinition(name="patient", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference" )
   public static final String SP_PATIENT = "patient";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticOrder:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("DiagnosticOrder:patient").toLocked();
+
   @SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="Who ordered the test", type="reference" )
   public static final String SP_ORDERER = "orderer";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticOrder:orderer</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORDERER = new ca.uhn.fhir.model.api.Include("DiagnosticOrder:orderer").toLocked();
+
   @SearchParamDefinition(name="specimen", path="DiagnosticOrder.specimen|DiagnosticOrder.item.specimen", description="If the whole order relates to specific specimens", type="reference" )
   public static final String SP_SPECIMEN = "specimen";
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DiagnosticOrder:specimen</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SPECIMEN = new ca.uhn.fhir.model.api.Include("DiagnosticOrder:specimen").toLocked();
+
   @SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
   public static final String SP_STATUS = "status";
 
