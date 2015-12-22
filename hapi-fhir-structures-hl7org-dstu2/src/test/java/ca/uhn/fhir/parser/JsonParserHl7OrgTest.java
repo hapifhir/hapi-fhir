@@ -1,7 +1,16 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -43,8 +52,6 @@ import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetCodeSystemComponent;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -54,6 +61,8 @@ import org.xml.sax.SAXException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.server.Constants;
@@ -1262,7 +1271,7 @@ public class JsonParserHl7OrgTest {
 		private static final long serialVersionUID = 1L;
 
 		@Child(order = 0, name = "foo")
-		@org.hl7.fhir.instance.model.annotations.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
+		@ca.uhn.fhir.model.api.annotation.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
 		private Address myFoo;
 
 		public Address getFoo() {
@@ -1281,7 +1290,7 @@ public class JsonParserHl7OrgTest {
 		private static final long serialVersionUID = 1L;
 
 		@Child(order = 0, name = "foo")
-		@org.hl7.fhir.instance.model.annotations.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
+		@ca.uhn.fhir.model.api.annotation.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
 		private Enumeration<AddressUse> myFoo;
 
 		public Enumeration<AddressUse> getFoo() {
@@ -1300,7 +1309,7 @@ public class JsonParserHl7OrgTest {
 		private static final long serialVersionUID = 1L;
 
 		@Child(order = 0, name = "foo")
-		@org.hl7.fhir.instance.model.annotations.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
+		@ca.uhn.fhir.model.api.annotation.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
 		private Reference myFoo;
 
 		public Reference getFoo() {

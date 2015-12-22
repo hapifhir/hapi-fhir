@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1560,28 +1560,118 @@ public class DeviceMetric extends DomainResource {
     return ResourceType.DeviceMetric;
    }
 
+ /**
+   * Search parameter: <b>parent</b>
+   * <p>
+   * Description: <b>The parent DeviceMetric resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceMetric.parent</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="parent", path="DeviceMetric.parent", description="The parent DeviceMetric resource", type="reference" )
   public static final String SP_PARENT = "parent";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>parent</b>
+   * <p>
+   * Description: <b>The parent DeviceMetric resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceMetric.parent</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PARENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PARENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DeviceMetric:parent</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PARENT = new ca.uhn.fhir.model.api.Include("DeviceMetric:parent").toLocked();
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>The identifier of the metric</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DeviceMetric.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="DeviceMetric.identifier", description="The identifier of the metric", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>The identifier of the metric</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DeviceMetric.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>source</b>
+   * <p>
+   * Description: <b>The device resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceMetric.source</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="source", path="DeviceMetric.source", description="The device resource", type="reference" )
   public static final String SP_SOURCE = "source";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>source</b>
+   * <p>
+   * Description: <b>The device resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceMetric.source</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SOURCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SOURCE);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DeviceMetric:source</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SOURCE = new ca.uhn.fhir.model.api.Include("DeviceMetric:source").toLocked();
 
+ /**
+   * Search parameter: <b>type</b>
+   * <p>
+   * Description: <b>The component type</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DeviceMetric.type</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="type", path="DeviceMetric.type", description="The component type", type="token" )
   public static final String SP_TYPE = "type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <p>
+   * Description: <b>The component type</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DeviceMetric.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+
+ /**
+   * Search parameter: <b>category</b>
+   * <p>
+   * Description: <b>The category of the metric</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DeviceMetric.category</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="category", path="DeviceMetric.category", description="The category of the metric", type="token" )
   public static final String SP_CATEGORY = "category";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>category</b>
+   * <p>
+   * Description: <b>The category of the metric</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DeviceMetric.category</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CATEGORY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CATEGORY);
+
 
 }
 

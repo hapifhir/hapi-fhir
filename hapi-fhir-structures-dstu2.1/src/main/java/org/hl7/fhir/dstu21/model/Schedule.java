@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -405,20 +405,92 @@ public class Schedule extends DomainResource {
     return ResourceType.Schedule;
    }
 
+ /**
+   * Search parameter: <b>actor</b>
+   * <p>
+   * Description: <b>The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Schedule.actor</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="actor", path="Schedule.actor", description="The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for", type="reference" )
   public static final String SP_ACTOR = "actor";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>actor</b>
+   * <p>
+   * Description: <b>The individual(HealthcareService, Practitioner, Location, ...) to find a Schedule for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Schedule.actor</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ACTOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ACTOR);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Schedule:actor</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ACTOR = new ca.uhn.fhir.model.api.Include("Schedule:actor").toLocked();
 
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>Search for Schedule resources that have a period that contains this date specified</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Schedule.planningHorizon</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="date", path="Schedule.planningHorizon", description="Search for Schedule resources that have a period that contains this date specified", type="date" )
   public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>Search for Schedule resources that have a period that contains this date specified</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Schedule.planningHorizon</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>A Schedule Identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Schedule.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="Schedule.identifier", description="A Schedule Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>A Schedule Identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Schedule.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>type</b>
+   * <p>
+   * Description: <b>The type of appointments that can be booked into associated slot(s)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Schedule.type</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="type", path="Schedule.type", description="The type of appointments that can be booked into associated slot(s)", type="token" )
   public static final String SP_TYPE = "type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <p>
+   * Description: <b>The type of appointments that can be booked into associated slot(s)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Schedule.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+
 
 }
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1136,68 +1136,302 @@ public class DocumentManifest extends DomainResource {
     return ResourceType.DocumentManifest;
    }
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>Unique Identifier for the set of documents</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DocumentManifest.masterIdentifier, DocumentManifest.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier|DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>Unique Identifier for the set of documents</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DocumentManifest.masterIdentifier, DocumentManifest.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>related-id</b>
+   * <p>
+   * Description: <b>Identifiers of things that are related</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DocumentManifest.related.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="related-id", path="DocumentManifest.related.identifier", description="Identifiers of things that are related", type="token" )
   public static final String SP_RELATED_ID = "related-id";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>related-id</b>
+   * <p>
+   * Description: <b>Identifiers of things that are related</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DocumentManifest.related.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam RELATED_ID = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_RELATED_ID);
+
+ /**
+   * Search parameter: <b>content-ref</b>
+   * <p>
+   * Description: <b>Contents of this set of documents</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.content.pReference</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="content-ref", path="DocumentManifest.content.pReference", description="Contents of this set of documents", type="reference" )
   public static final String SP_CONTENT_REF = "content-ref";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>content-ref</b>
+   * <p>
+   * Description: <b>Contents of this set of documents</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.content.pReference</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONTENT_REF = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONTENT_REF);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DocumentManifest:content-ref</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTENT_REF = new ca.uhn.fhir.model.api.Include("DocumentManifest:content-ref").toLocked();
 
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>The subject of the set of documents</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
   public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>The subject of the set of documents</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DocumentManifest:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("DocumentManifest:subject").toLocked();
 
+ /**
+   * Search parameter: <b>author</b>
+   * <p>
+   * Description: <b>Who and/or what authored the manifest</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.author</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the manifest", type="reference" )
   public static final String SP_AUTHOR = "author";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>author</b>
+   * <p>
+   * Description: <b>Who and/or what authored the manifest</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.author</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam AUTHOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_AUTHOR);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DocumentManifest:author</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("DocumentManifest:author").toLocked();
 
+ /**
+   * Search parameter: <b>created</b>
+   * <p>
+   * Description: <b>When this document manifest created</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DocumentManifest.created</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="created", path="DocumentManifest.created", description="When this document manifest created", type="date" )
   public static final String SP_CREATED = "created";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>created</b>
+   * <p>
+   * Description: <b>When this document manifest created</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DocumentManifest.created</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam CREATED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_CREATED);
+
+ /**
+   * Search parameter: <b>description</b>
+   * <p>
+   * Description: <b>Human-readable description (title)</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>DocumentManifest.description</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="description", path="DocumentManifest.description", description="Human-readable description (title)", type="string" )
   public static final String SP_DESCRIPTION = "description";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <p>
+   * Description: <b>Human-readable description (title)</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>DocumentManifest.description</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+
+ /**
+   * Search parameter: <b>source</b>
+   * <p>
+   * Description: <b>The source system/application/software</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>DocumentManifest.source</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="source", path="DocumentManifest.source", description="The source system/application/software", type="uri" )
   public static final String SP_SOURCE = "source";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>source</b>
+   * <p>
+   * Description: <b>The source system/application/software</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>DocumentManifest.source</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam SOURCE = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_SOURCE);
+
+ /**
+   * Search parameter: <b>type</b>
+   * <p>
+   * Description: <b>Kind of document set</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DocumentManifest.type</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="type", path="DocumentManifest.type", description="Kind of document set", type="token" )
   public static final String SP_TYPE = "type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <p>
+   * Description: <b>Kind of document set</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DocumentManifest.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+
+ /**
+   * Search parameter: <b>related-ref</b>
+   * <p>
+   * Description: <b>Related Resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.related.ref</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="related-ref", path="DocumentManifest.related.ref", description="Related Resource", type="reference" )
   public static final String SP_RELATED_REF = "related-ref";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>related-ref</b>
+   * <p>
+   * Description: <b>Related Resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.related.ref</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam RELATED_REF = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_RELATED_REF);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DocumentManifest:related-ref</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_RELATED_REF = new ca.uhn.fhir.model.api.Include("DocumentManifest:related-ref").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>The subject of the set of documents</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>The subject of the set of documents</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DocumentManifest:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("DocumentManifest:patient").toLocked();
 
+ /**
+   * Search parameter: <b>recipient</b>
+   * <p>
+   * Description: <b>Intended to get notified about this set of documents</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.recipient</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference" )
   public static final String SP_RECIPIENT = "recipient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
+   * <p>
+   * Description: <b>Intended to get notified about this set of documents</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.recipient</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam RECIPIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_RECIPIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DocumentManifest:recipient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_RECIPIENT = new ca.uhn.fhir.model.api.Include("DocumentManifest:recipient").toLocked();
 
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>current | superseded | entered-in-error</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DocumentManifest.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superseded | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>current | superseded | entered-in-error</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DocumentManifest.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

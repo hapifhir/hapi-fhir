@@ -19,6 +19,7 @@ import org.hl7.fhir.dstu21.model.UriType;
 import org.hl7.fhir.dstu21.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -190,6 +191,7 @@ public class FhirResourceDaoValueSetDstu21Test extends BaseJpaDstu21Test {
 	}
 	
 	@Test
+	@Ignore
 	public void testExpandByIdentifier() {
 		ValueSet expanded = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "11378");
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);

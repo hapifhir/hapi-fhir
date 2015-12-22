@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -694,24 +694,78 @@ public class DeviceUseStatement extends DomainResource {
     return ResourceType.DeviceUseStatement;
    }
 
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>Search by subject</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceUseStatement.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="subject", path="DeviceUseStatement.subject", description="Search by subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>Search by subject</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceUseStatement.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DeviceUseStatement:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("DeviceUseStatement:subject").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>Search by subject - a patient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceUseStatement.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="DeviceUseStatement.subject", description="Search by subject - a patient", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>Search by subject - a patient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceUseStatement.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DeviceUseStatement:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("DeviceUseStatement:patient").toLocked();
 
+ /**
+   * Search parameter: <b>device</b>
+   * <p>
+   * Description: <b>Search by device</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceUseStatement.device</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="device", path="DeviceUseStatement.device", description="Search by device", type="reference" )
   public static final String SP_DEVICE = "device";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>device</b>
+   * <p>
+   * Description: <b>Search by device</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceUseStatement.device</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam DEVICE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_DEVICE);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DeviceUseStatement:device</b>".

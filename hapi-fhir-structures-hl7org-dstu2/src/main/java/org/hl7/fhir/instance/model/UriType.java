@@ -32,7 +32,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /**
  * Primitive type "uri" in FHIR: any valid URI. Sometimes constrained to be only an absolute URI, and sometimes constrained to be a literal reference

@@ -27,14 +27,13 @@ import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.InstantType;
 import org.hl7.fhir.dstu21.model.Organization;
 import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.Resource;
 import org.hl7.fhir.dstu21.model.UriType;
-import org.hl7.fhir.dstu21.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -60,7 +59,7 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 
 		Date now = new Date();
 		Patient retrieved = myPatientDao.read(outcome.getId());
-		InstantType updated = retrieved.getMeta().getLastUpdatedElement();
+		InstantType updated = retrieved.getMeta().getLastUpdatedElement().copy();
 		assertTrue(updated.before(now));
 
 		Thread.sleep(1000);
@@ -99,13 +98,19 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null);
 
 		assertEquals(2, historyBundle.size());
-
+		
 		List<IBaseResource> history = historyBundle.getResources(0, 2);
+		
+		ourLog.info("updated : {}", updated.getValueAsString());
+		ourLog.info("  * Exp : {}", ((Resource) history.get(1)).getMeta().getLastUpdatedElement().getValueAsString());
+		ourLog.info("updated2: {}", updated2.getValueAsString());
+		ourLog.info("  * Exp : {}", ((Resource) history.get(0)).getMeta().getLastUpdatedElement().getValueAsString());
+		
 		assertEquals("1", history.get(1).getIdElement().getVersionIdPart());
 		assertEquals("2", history.get(0).getIdElement().getVersionIdPart());
-		assertEquals(updated.getValue(), ((IAnyResource) history.get(1)).getMeta().getLastUpdated());
+		assertEquals(updated.getValueAsString(), ((Resource) history.get(1)).getMeta().getLastUpdatedElement().getValueAsString());
 		assertEquals("001", ((Patient) history.get(1)).getIdentifier().get(0).getValue());
-		assertEquals(updated2.getValue(), ((IAnyResource) history.get(0)).getMeta().getLastUpdated());
+		assertEquals(updated2.getValueAsString(), ((Resource) history.get(0)).getMeta().getLastUpdatedElement().getValueAsString());
 		assertEquals("002", ((Patient) history.get(0)).getIdentifier().get(0).getValue());
 
 	}

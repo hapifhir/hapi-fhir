@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1356,58 +1356,256 @@ public class ListResource extends DomainResource {
     return ResourceType.List;
    }
 
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>When the list was prepared</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>List.date</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="date", path="List.date", description="When the list was prepared", type="date" )
   public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>When the list was prepared</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>List.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>item</b>
+   * <p>
+   * Description: <b>Actual entry</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>List.entry.item</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="item", path="List.entry.item", description="Actual entry", type="reference" )
   public static final String SP_ITEM = "item";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>item</b>
+   * <p>
+   * Description: <b>Actual entry</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>List.entry.item</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ITEM = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ITEM);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ListResource:item</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ITEM = new ca.uhn.fhir.model.api.Include("ListResource:item").toLocked();
 
+ /**
+   * Search parameter: <b>empty-reason</b>
+   * <p>
+   * Description: <b>Why list is empty</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>List.emptyReason</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="Why list is empty", type="token" )
   public static final String SP_EMPTY_REASON = "empty-reason";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>empty-reason</b>
+   * <p>
+   * Description: <b>Why list is empty</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>List.emptyReason</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam EMPTY_REASON = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_EMPTY_REASON);
+
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>What the purpose of this list is</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>List.code</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="code", path="List.code", description="What the purpose of this list is", type="token" )
   public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>What the purpose of this list is</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>List.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
+
+ /**
+   * Search parameter: <b>notes</b>
+   * <p>
+   * Description: <b>Comments about the list</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>List.note</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="notes", path="List.note", description="Comments about the list", type="string" )
   public static final String SP_NOTES = "notes";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>notes</b>
+   * <p>
+   * Description: <b>Comments about the list</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>List.note</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NOTES = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NOTES);
+
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>If all resources have the same subject</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>List.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="subject", path="List.subject", description="If all resources have the same subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>If all resources have the same subject</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>List.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ListResource:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("ListResource:subject").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>If all resources have the same subject</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>List.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="List.subject", description="If all resources have the same subject", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>If all resources have the same subject</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>List.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ListResource:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ListResource:patient").toLocked();
 
+ /**
+   * Search parameter: <b>source</b>
+   * <p>
+   * Description: <b>Who and/or what defined the list contents (aka Author)</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>List.source</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="source", path="List.source", description="Who and/or what defined the list contents (aka Author)", type="reference" )
   public static final String SP_SOURCE = "source";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>source</b>
+   * <p>
+   * Description: <b>Who and/or what defined the list contents (aka Author)</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>List.source</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SOURCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SOURCE);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ListResource:source</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SOURCE = new ca.uhn.fhir.model.api.Include("ListResource:source").toLocked();
 
+ /**
+   * Search parameter: <b>encounter</b>
+   * <p>
+   * Description: <b>Context in which list created</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>List.encounter</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="encounter", path="List.encounter", description="Context in which list created", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+   * <p>
+   * Description: <b>Context in which list created</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>List.encounter</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ListResource:encounter</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("ListResource:encounter").toLocked();
 
+ /**
+   * Search parameter: <b>title</b>
+   * <p>
+   * Description: <b>Descriptive name for the list</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>List.title</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="title", path="List.title", description="Descriptive name for the list", type="string" )
   public static final String SP_TITLE = "title";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>title</b>
+   * <p>
+   * Description: <b>Descriptive name for the list</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>List.title</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam TITLE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_TITLE);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>current | retired | entered-in-error</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>List.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="List.status", description="current | retired | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>current | retired | entered-in-error</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>List.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

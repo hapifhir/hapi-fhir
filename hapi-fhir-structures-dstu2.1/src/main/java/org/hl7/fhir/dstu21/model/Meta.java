@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -292,33 +292,6 @@ public class Meta extends Type implements IBaseMetaType {
       return this.tag;
     }
 
- 	/**
- 	 * Returns the first tag (if any) that has the given system and code, or returns
- 	 * <code>null</code> if none
- 	 */
- 	public Coding getTag(String theSystem, String theCode) {
- 		for (Coding next : getTag()) {
- 			if (ca.uhn.fhir.util.ObjectUtil.equals(next.getSystem(), theSystem) && ca.uhn.fhir.util.ObjectUtil.equals(next.getCode(), theCode)) {
- 				return next;
- 			}
- 		}
- 		return null;
- 	}
-
- 	/**
- 	 * Returns the first security label (if any) that has the given system and code, or returns
- 	 * <code>null</code> if none
- 	 */
- 	public Coding getSecurity(String theSystem, String theCode) {
- 		for (Coding next : getTag()) {
- 			if (ca.uhn.fhir.util.ObjectUtil.equals(next.getSystem(), theSystem) && ca.uhn.fhir.util.ObjectUtil.equals(next.getCode(), theCode)) {
- 				return next;
- 			}
- 		}
- 		return null;
- 	}
-
-    
     public boolean hasTag() { 
       if (this.tag == null)
         return false;
@@ -374,6 +347,31 @@ public class Meta extends Type implements IBaseMetaType {
      addSecurity().setSystem(theSystem).setCode(theCode).setDisplay(theDisplay);
      return this;
     }
+   /**
+   * Returns the first tag (if any) that has the given system and code, or returns
+   * <code>null</code> if none
+   */
+  public Coding getTag(String theSystem, String theCode) {
+    for (Coding next : getTag()) {
+      if (ca.uhn.fhir.util.ObjectUtil.equals(next.getSystem(), theSystem) && ca.uhn.fhir.util.ObjectUtil.equals(next.getCode(), theCode)) {
+        return next;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Returns the first security label (if any) that has the given system and code, or returns
+   * <code>null</code> if none
+   */
+  public Coding getSecurity(String theSystem, String theCode) {
+    for (Coding next : getTag()) {
+      if (ca.uhn.fhir.util.ObjectUtil.equals(next.getSystem(), theSystem) && ca.uhn.fhir.util.ObjectUtil.equals(next.getCode(), theCode)) {
+        return next;
+      }
+    }
+    return null;
+  }
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("versionId", "id", "The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted.", 0, java.lang.Integer.MAX_VALUE, versionId));

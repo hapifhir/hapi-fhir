@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1558,84 +1558,354 @@ public class DiagnosticReport extends DomainResource {
     return ResourceType.DiagnosticReport;
    }
 
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>The clinically relevant time of the report</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DiagnosticReport.effective[x]</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="date", path="DiagnosticReport.effective[x]", description="The clinically relevant time of the report", type="date" )
   public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>The clinically relevant time of the report</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DiagnosticReport.effective[x]</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>An identifier for the report</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticReport.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="DiagnosticReport.identifier", description="An identifier for the report", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>An identifier for the report</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticReport.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>image</b>
+   * <p>
+   * Description: <b>A reference to the image source.</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.image.link</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="image", path="DiagnosticReport.image.link", description="A reference to the image source.", type="reference" )
   public static final String SP_IMAGE = "image";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>image</b>
+   * <p>
+   * Description: <b>A reference to the image source.</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.image.link</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam IMAGE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_IMAGE);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticReport:image</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_IMAGE = new ca.uhn.fhir.model.api.Include("DiagnosticReport:image").toLocked();
 
+ /**
+   * Search parameter: <b>request</b>
+   * <p>
+   * Description: <b>Reference to the test or procedure request.</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.request</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="request", path="DiagnosticReport.request", description="Reference to the test or procedure request.", type="reference" )
   public static final String SP_REQUEST = "request";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>request</b>
+   * <p>
+   * Description: <b>Reference to the test or procedure request.</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.request</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticReport:request</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST = new ca.uhn.fhir.model.api.Include("DiagnosticReport:request").toLocked();
 
+ /**
+   * Search parameter: <b>performer</b>
+   * <p>
+   * Description: <b>Who was the source of the report (organization)</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.performer</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)", type="reference" )
   public static final String SP_PERFORMER = "performer";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>performer</b>
+   * <p>
+   * Description: <b>Who was the source of the report (organization)</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.performer</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PERFORMER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PERFORMER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticReport:performer</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PERFORMER = new ca.uhn.fhir.model.api.Include("DiagnosticReport:performer").toLocked();
 
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>The code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticReport.code</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="code", path="DiagnosticReport.code", description="The code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result", type="token" )
   public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>The code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticReport.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
+
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>The subject of the report</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="subject", path="DiagnosticReport.subject", description="The subject of the report", type="reference" )
   public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>The subject of the report</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticReport:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("DiagnosticReport:subject").toLocked();
 
+ /**
+   * Search parameter: <b>diagnosis</b>
+   * <p>
+   * Description: <b>A coded diagnosis on the report</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticReport.codedDiagnosis</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="diagnosis", path="DiagnosticReport.codedDiagnosis", description="A coded diagnosis on the report", type="token" )
   public static final String SP_DIAGNOSIS = "diagnosis";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>diagnosis</b>
+   * <p>
+   * Description: <b>A coded diagnosis on the report</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticReport.codedDiagnosis</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam DIAGNOSIS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_DIAGNOSIS);
+
+ /**
+   * Search parameter: <b>encounter</b>
+   * <p>
+   * Description: <b>The Encounter when the order was made</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.encounter</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="encounter", path="DiagnosticReport.encounter", description="The Encounter when the order was made", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+   * <p>
+   * Description: <b>The Encounter when the order was made</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.encounter</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticReport:encounter</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("DiagnosticReport:encounter").toLocked();
 
+ /**
+   * Search parameter: <b>result</b>
+   * <p>
+   * Description: <b>Link to an atomic result (observation resource)</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.result</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="result", path="DiagnosticReport.result", description="Link to an atomic result (observation resource)", type="reference" )
   public static final String SP_RESULT = "result";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>result</b>
+   * <p>
+   * Description: <b>Link to an atomic result (observation resource)</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.result</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam RESULT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_RESULT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticReport:result</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_RESULT = new ca.uhn.fhir.model.api.Include("DiagnosticReport:result").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>The subject of the report if a patient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="DiagnosticReport.subject", description="The subject of the report if a patient", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>The subject of the report if a patient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticReport:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("DiagnosticReport:patient").toLocked();
 
+ /**
+   * Search parameter: <b>specimen</b>
+   * <p>
+   * Description: <b>The specimen details</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.specimen</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="specimen", path="DiagnosticReport.specimen", description="The specimen details", type="reference" )
   public static final String SP_SPECIMEN = "specimen";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
+   * <p>
+   * Description: <b>The specimen details</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticReport.specimen</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SPECIMEN = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SPECIMEN);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticReport:specimen</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SPECIMEN = new ca.uhn.fhir.model.api.Include("DiagnosticReport:specimen").toLocked();
 
+ /**
+   * Search parameter: <b>issued</b>
+   * <p>
+   * Description: <b>When the report was issued</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DiagnosticReport.issued</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="issued", path="DiagnosticReport.issued", description="When the report was issued", type="date" )
   public static final String SP_ISSUED = "issued";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>issued</b>
+   * <p>
+   * Description: <b>When the report was issued</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DiagnosticReport.issued</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam ISSUED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_ISSUED);
+
+ /**
+   * Search parameter: <b>category</b>
+   * <p>
+   * Description: <b>Which diagnostic discipline/department created the report</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticReport.category</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="category", path="DiagnosticReport.category", description="Which diagnostic discipline/department created the report", type="token" )
   public static final String SP_CATEGORY = "category";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>category</b>
+   * <p>
+   * Description: <b>Which diagnostic discipline/department created the report</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticReport.category</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CATEGORY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CATEGORY);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>The status of the report</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticReport.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="DiagnosticReport.status", description="The status of the report", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>The status of the report</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticReport.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

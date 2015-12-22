@@ -110,7 +110,7 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
 			Patient nextPt = (Patient) next;
-			retVal.add(nextPt.addName().getNameAsSingleString());
+			retVal.add(nextPt.getName().get(0).getNameAsSingleString());
 		}
 		return retVal;
 	}
@@ -2314,17 +2314,17 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 		IIdType id2 = myEncounterDao.create(e2).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm;
-		List<IIdType> actual;
+		List<String> actual;
 
 		pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Encounter.SP_LENGTH));
-		actual = toUnqualifiedVersionlessIds(myEncounterDao.search(pm));
-		assertThat(actual, contains(id1, id2, id3));
+		actual = toUnqualifiedVersionlessIdValues(myEncounterDao.search(pm));
+		assertThat(actual, contains(toValues(id1, id2, id3)));
 
 		pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Encounter.SP_LENGTH, SortOrderEnum.DESC));
-		actual = toUnqualifiedVersionlessIds(myEncounterDao.search(pm));
-		assertThat(actual, contains(id3, id2, id1));
+		actual = toUnqualifiedVersionlessIdValues(myEncounterDao.search(pm));
+		assertThat(actual, contains(toValues(id3, id2, id1)));
 	}
 
 	public void testSortByQuantity() {

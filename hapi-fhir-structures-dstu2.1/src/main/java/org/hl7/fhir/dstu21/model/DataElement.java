@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1646,28 +1646,226 @@ public class DataElement extends DomainResource {
     return ResourceType.DataElement;
    }
 
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>The data element publication date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DataElement.date</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="date", path="DataElement.date", description="The data element publication date", type="date" )
   public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>The data element publication date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DataElement.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>The identifier of the data element</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DataElement.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="DataElement.identifier", description="The identifier of the data element", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>The identifier of the data element</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DataElement.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>A code for the data element (server may choose to do subsumption)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DataElement.element.code</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="code", path="DataElement.element.code", description="A code for the data element (server may choose to do subsumption)", type="token" )
   public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>A code for the data element (server may choose to do subsumption)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DataElement.element.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
+
+ /**
+   * Search parameter: <b>stringency</b>
+   * <p>
+   * Description: <b>The stringency of the data element definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DataElement.stringency</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="stringency", path="DataElement.stringency", description="The stringency of the data element definition", type="token" )
   public static final String SP_STRINGENCY = "stringency";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>stringency</b>
+   * <p>
+   * Description: <b>The stringency of the data element definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DataElement.stringency</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STRINGENCY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STRINGENCY);
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>Name of the data element</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>DataElement.name</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="name", path="DataElement.name", description="Name of the data element", type="string" )
   public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>Name of the data element</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>DataElement.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>context</b>
+   * <p>
+   * Description: <b>A use context assigned to the data element</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DataElement.useContext</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="context", path="DataElement.useContext", description="A use context assigned to the data element", type="token" )
   public static final String SP_CONTEXT = "context";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context</b>
+   * <p>
+   * Description: <b>A use context assigned to the data element</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DataElement.useContext</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT);
+
+ /**
+   * Search parameter: <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the data element</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>DataElement.publisher</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="publisher", path="DataElement.publisher", description="Name of the publisher of the data element", type="string" )
   public static final String SP_PUBLISHER = "publisher";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the data element</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>DataElement.publisher</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>description</b>
+   * <p>
+   * Description: <b>Text search in the description of the data element.  This corresponds to the definition of the first DataElement.element.</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>DataElement.element.definition</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="description", path="DataElement.element.definition", description="Text search in the description of the data element.  This corresponds to the definition of the first DataElement.element.", type="string" )
   public static final String SP_DESCRIPTION = "description";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <p>
+   * Description: <b>Text search in the description of the data element.  This corresponds to the definition of the first DataElement.element.</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>DataElement.element.definition</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+
+ /**
+   * Search parameter: <b>version</b>
+   * <p>
+   * Description: <b>The version identifier of the data element</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>DataElement.version</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="version", path="DataElement.version", description="The version identifier of the data element", type="string" )
   public static final String SP_VERSION = "version";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>version</b>
+   * <p>
+   * Description: <b>The version identifier of the data element</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>DataElement.version</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam VERSION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_VERSION);
+
+ /**
+   * Search parameter: <b>url</b>
+   * <p>
+   * Description: <b>The official URL for the data element</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>DataElement.url</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="url", path="DataElement.url", description="The official URL for the data element", type="uri" )
   public static final String SP_URL = "url";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>url</b>
+   * <p>
+   * Description: <b>The official URL for the data element</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>DataElement.url</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>The current status of the data element</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DataElement.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="DataElement.status", description="The current status of the data element", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>The current status of the data element</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DataElement.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

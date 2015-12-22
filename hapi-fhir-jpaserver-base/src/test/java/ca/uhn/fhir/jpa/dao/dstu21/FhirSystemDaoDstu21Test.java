@@ -301,7 +301,7 @@ public class FhirSystemDaoDstu21Test extends BaseJpaDstu21SystemTest {
 		assertEquals("1", respEntry.getResponse().getEtag());
 
 		o = (Observation) myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()));
-		assertEquals(id.toVersionless(), o.getSubject().getReference());
+		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
 		assertEquals("1", o.getIdElement().getVersionIdPart());
 
 	}
@@ -375,7 +375,7 @@ public class FhirSystemDaoDstu21Test extends BaseJpaDstu21SystemTest {
 		assertEquals("1", respEntry.getResponse().getEtag());
 
 		o = (Observation) myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()));
-		assertEquals(new IdType(patientId).toUnqualifiedVersionless(), o.getSubject().getReference());
+		assertEquals(new IdType(patientId).toUnqualifiedVersionless().getValue(), o.getSubject().getReference());
 	}
 
 	@Test
@@ -1033,13 +1033,13 @@ public class FhirSystemDaoDstu21Test extends BaseJpaDstu21SystemTest {
 		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
 		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.READ), detailsCapt.capture());
 		details = detailsCapt.getValue();
-		assertEquals(idv1.toUnqualifiedVersionless(), details.getId());
+		assertEquals(idv1.toUnqualifiedVersionless().getValue(), details.getId().getValue());
 		assertEquals("Patient", details.getResourceType());
 
 		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
 		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.VREAD), detailsCapt.capture());
 		details = detailsCapt.getValue();
-		assertEquals(idv1.toUnqualified(), details.getId());
+		assertEquals(idv1.toUnqualified().getValue(), details.getId().getValue());
 		assertEquals("Patient", details.getResourceType());
 
 		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
@@ -1195,7 +1195,7 @@ public class FhirSystemDaoDstu21Test extends BaseJpaDstu21SystemTest {
 
 		nextEntry = resp.getEntry().get(1);
 		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()));
-		assertEquals(id.toVersionless(), o.getSubject().getReference());
+		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
 
 	}
 
@@ -1267,7 +1267,7 @@ public class FhirSystemDaoDstu21Test extends BaseJpaDstu21SystemTest {
 
 		nextEntry = resp.getEntry().get(1);
 		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()));
-		assertEquals(patientId.toVersionless(), o.getSubject().getReference());
+		assertEquals(patientId.toVersionless().getValue(), o.getSubject().getReference());
 
 	}
 
@@ -1308,7 +1308,7 @@ public class FhirSystemDaoDstu21Test extends BaseJpaDstu21SystemTest {
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", nextEntry.getResponse().getStatus());
 
 		o = myObservationDao.read(new IdType(resp.getEntry().get(1).getResponse().getLocation()));
-		assertEquals(id.toVersionless(), o.getSubject().getReference());
+		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
 
 	}
 

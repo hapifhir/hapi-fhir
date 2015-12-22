@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -2476,38 +2476,272 @@ public class OperationDefinition extends DomainResource {
     return ResourceType.OperationDefinition;
    }
 
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>Date for this version of the operation definition</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>OperationDefinition.date</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="date", path="OperationDefinition.date", description="Date for this version of the operation definition", type="date" )
   public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>Date for this version of the operation definition</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>OperationDefinition.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>Name used to invoke the operation</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.code</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="code", path="OperationDefinition.code", description="Name used to invoke the operation", type="token" )
   public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>Name used to invoke the operation</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
+
+ /**
+   * Search parameter: <b>instance</b>
+   * <p>
+   * Description: <b>Invoke on an instance?</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.instance</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="instance", path="OperationDefinition.instance", description="Invoke on an instance?", type="token" )
   public static final String SP_INSTANCE = "instance";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>instance</b>
+   * <p>
+   * Description: <b>Invoke on an instance?</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.instance</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam INSTANCE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_INSTANCE);
+
+ /**
+   * Search parameter: <b>kind</b>
+   * <p>
+   * Description: <b>operation | query</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.kind</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="kind", path="OperationDefinition.kind", description="operation | query", type="token" )
   public static final String SP_KIND = "kind";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>kind</b>
+   * <p>
+   * Description: <b>operation | query</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.kind</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam KIND = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_KIND);
+
+ /**
+   * Search parameter: <b>profile</b>
+   * <p>
+   * Description: <b>Profile on the type</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>OperationDefinition.parameter.profile</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="profile", path="OperationDefinition.parameter.profile", description="Profile on the type", type="reference" )
   public static final String SP_PROFILE = "profile";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>profile</b>
+   * <p>
+   * Description: <b>Profile on the type</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>OperationDefinition.parameter.profile</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PROFILE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PROFILE);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>OperationDefinition:profile</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PROFILE = new ca.uhn.fhir.model.api.Include("OperationDefinition:profile").toLocked();
 
+ /**
+   * Search parameter: <b>type</b>
+   * <p>
+   * Description: <b>Invoke at resource level for these type</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.type</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invoke at resource level for these type", type="token" )
   public static final String SP_TYPE = "type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <p>
+   * Description: <b>Invoke at resource level for these type</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+
+ /**
+   * Search parameter: <b>version</b>
+   * <p>
+   * Description: <b>Logical id for this version of the operation definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.version</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="version", path="OperationDefinition.version", description="Logical id for this version of the operation definition", type="token" )
   public static final String SP_VERSION = "version";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>version</b>
+   * <p>
+   * Description: <b>Logical id for this version of the operation definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.version</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam VERSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VERSION);
+
+ /**
+   * Search parameter: <b>url</b>
+   * <p>
+   * Description: <b>Logical URL to reference this operation definition</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>OperationDefinition.url</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="url", path="OperationDefinition.url", description="Logical URL to reference this operation definition", type="uri" )
   public static final String SP_URL = "url";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>url</b>
+   * <p>
+   * Description: <b>Logical URL to reference this operation definition</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>OperationDefinition.url</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
+
+ /**
+   * Search parameter: <b>system</b>
+   * <p>
+   * Description: <b>Invoke at the system level?</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.system</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="system", path="OperationDefinition.system", description="Invoke at the system level?", type="token" )
   public static final String SP_SYSTEM = "system";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>system</b>
+   * <p>
+   * Description: <b>Invoke at the system level?</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.system</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SYSTEM = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SYSTEM);
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>Informal name for this operation</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>OperationDefinition.name</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="name", path="OperationDefinition.name", description="Informal name for this operation", type="string" )
   public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>Informal name for this operation</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>OperationDefinition.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher (Organization or individual)</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>OperationDefinition.publisher</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="publisher", path="OperationDefinition.publisher", description="Name of the publisher (Organization or individual)", type="string" )
   public static final String SP_PUBLISHER = "publisher";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher (Organization or individual)</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>OperationDefinition.publisher</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>draft | active | retired</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="OperationDefinition.status", description="draft | active | retired", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>draft | active | retired</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>OperationDefinition.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
+ /**
+   * Search parameter: <b>base</b>
+   * <p>
+   * Description: <b>Marks this as a profile of the base</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>OperationDefinition.base</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="base", path="OperationDefinition.base", description="Marks this as a profile of the base", type="reference" )
   public static final String SP_BASE = "base";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>base</b>
+   * <p>
+   * Description: <b>Marks this as a profile of the base</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>OperationDefinition.base</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam BASE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_BASE);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>OperationDefinition:base</b>".

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1387,20 +1387,146 @@ public class SearchParameter extends DomainResource {
     return ResourceType.SearchParameter;
    }
 
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>Code used in URL</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.code</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="code", path="SearchParameter.code", description="Code used in URL", type="token" )
   public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>Code used in URL</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>Informal name for this search parameter</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>SearchParameter.name</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="name", path="SearchParameter.name", description="Informal name for this search parameter", type="string" )
   public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>Informal name for this search parameter</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>SearchParameter.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>description</b>
+   * <p>
+   * Description: <b>Documentation for  search parameter</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>SearchParameter.description</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="description", path="SearchParameter.description", description="Documentation for  search parameter", type="string" )
   public static final String SP_DESCRIPTION = "description";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <p>
+   * Description: <b>Documentation for  search parameter</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>SearchParameter.description</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+
+ /**
+   * Search parameter: <b>type</b>
+   * <p>
+   * Description: <b>number | date | string | token | reference | composite | quantity | uri</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.type</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="type", path="SearchParameter.type", description="number | date | string | token | reference | composite | quantity | uri", type="token" )
   public static final String SP_TYPE = "type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <p>
+   * Description: <b>number | date | string | token | reference | composite | quantity | uri</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+
+ /**
+   * Search parameter: <b>url</b>
+   * <p>
+   * Description: <b>Absolute URL used to reference this search parameter</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>SearchParameter.url</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="url", path="SearchParameter.url", description="Absolute URL used to reference this search parameter", type="uri" )
   public static final String SP_URL = "url";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>url</b>
+   * <p>
+   * Description: <b>Absolute URL used to reference this search parameter</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>SearchParameter.url</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
+
+ /**
+   * Search parameter: <b>base</b>
+   * <p>
+   * Description: <b>The resource type this search parameter applies to</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.base</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="base", path="SearchParameter.base", description="The resource type this search parameter applies to", type="token" )
   public static final String SP_BASE = "base";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>base</b>
+   * <p>
+   * Description: <b>The resource type this search parameter applies to</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.base</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam BASE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_BASE);
+
+ /**
+   * Search parameter: <b>target</b>
+   * <p>
+   * Description: <b>Types of resource (if a resource reference)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.target</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="target", path="SearchParameter.target", description="Types of resource (if a resource reference)", type="token" )
   public static final String SP_TARGET = "target";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>target</b>
+   * <p>
+   * Description: <b>Types of resource (if a resource reference)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.target</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TARGET = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TARGET);
+
 
 }
 

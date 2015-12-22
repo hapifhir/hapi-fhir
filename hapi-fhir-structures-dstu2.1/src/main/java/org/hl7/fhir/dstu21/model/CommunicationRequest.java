@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1311,68 +1311,302 @@ public class CommunicationRequest extends DomainResource {
     return ResourceType.CommunicationRequest;
    }
 
+ /**
+   * Search parameter: <b>requester</b>
+   * <p>
+   * Description: <b>An individual who requested a communication</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CommunicationRequest.requester</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="requester", path="CommunicationRequest.requester", description="An individual who requested a communication", type="reference" )
   public static final String SP_REQUESTER = "requester";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>requester</b>
+   * <p>
+   * Description: <b>An individual who requested a communication</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CommunicationRequest.requester</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUESTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUESTER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>CommunicationRequest:requester</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTER = new ca.uhn.fhir.model.api.Include("CommunicationRequest:requester").toLocked();
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>Unique identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CommunicationRequest.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="CommunicationRequest.identifier", description="Unique identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>Unique identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CommunicationRequest.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>Focus of message</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CommunicationRequest.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="subject", path="CommunicationRequest.subject", description="Focus of message", type="reference" )
   public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>Focus of message</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CommunicationRequest.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>CommunicationRequest:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("CommunicationRequest:subject").toLocked();
 
+ /**
+   * Search parameter: <b>medium</b>
+   * <p>
+   * Description: <b>A channel of communication</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CommunicationRequest.medium</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="medium", path="CommunicationRequest.medium", description="A channel of communication", type="token" )
   public static final String SP_MEDIUM = "medium";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>medium</b>
+   * <p>
+   * Description: <b>A channel of communication</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CommunicationRequest.medium</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam MEDIUM = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_MEDIUM);
+
+ /**
+   * Search parameter: <b>encounter</b>
+   * <p>
+   * Description: <b>Encounter leading to message</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CommunicationRequest.encounter</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="encounter", path="CommunicationRequest.encounter", description="Encounter leading to message", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+   * <p>
+   * Description: <b>Encounter leading to message</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CommunicationRequest.encounter</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>CommunicationRequest:encounter</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("CommunicationRequest:encounter").toLocked();
 
+ /**
+   * Search parameter: <b>priority</b>
+   * <p>
+   * Description: <b>Message urgency</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CommunicationRequest.priority</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="priority", path="CommunicationRequest.priority", description="Message urgency", type="token" )
   public static final String SP_PRIORITY = "priority";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>priority</b>
+   * <p>
+   * Description: <b>Message urgency</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CommunicationRequest.priority</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PRIORITY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PRIORITY);
+
+ /**
+   * Search parameter: <b>requested</b>
+   * <p>
+   * Description: <b>When ordered or proposed</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>CommunicationRequest.requestedOn</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="requested", path="CommunicationRequest.requestedOn", description="When ordered or proposed", type="date" )
   public static final String SP_REQUESTED = "requested";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>requested</b>
+   * <p>
+   * Description: <b>When ordered or proposed</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>CommunicationRequest.requestedOn</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam REQUESTED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_REQUESTED);
+
+ /**
+   * Search parameter: <b>sender</b>
+   * <p>
+   * Description: <b>Message sender</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CommunicationRequest.sender</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="sender", path="CommunicationRequest.sender", description="Message sender", type="reference" )
   public static final String SP_SENDER = "sender";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>sender</b>
+   * <p>
+   * Description: <b>Message sender</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CommunicationRequest.sender</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SENDER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SENDER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>CommunicationRequest:sender</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SENDER = new ca.uhn.fhir.model.api.Include("CommunicationRequest:sender").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>Focus of message</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CommunicationRequest.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="CommunicationRequest.subject", description="Focus of message", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>Focus of message</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CommunicationRequest.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>CommunicationRequest:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("CommunicationRequest:patient").toLocked();
 
+ /**
+   * Search parameter: <b>recipient</b>
+   * <p>
+   * Description: <b>Message recipient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CommunicationRequest.recipient</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="recipient", path="CommunicationRequest.recipient", description="Message recipient", type="reference" )
   public static final String SP_RECIPIENT = "recipient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
+   * <p>
+   * Description: <b>Message recipient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CommunicationRequest.recipient</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam RECIPIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_RECIPIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>CommunicationRequest:recipient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_RECIPIENT = new ca.uhn.fhir.model.api.Include("CommunicationRequest:recipient").toLocked();
 
+ /**
+   * Search parameter: <b>time</b>
+   * <p>
+   * Description: <b>When scheduled</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>CommunicationRequest.scheduledDateTime</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="time", path="CommunicationRequest.scheduledDateTime", description="When scheduled", type="date" )
   public static final String SP_TIME = "time";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>time</b>
+   * <p>
+   * Description: <b>When scheduled</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>CommunicationRequest.scheduledDateTime</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam TIME = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_TIME);
+
+ /**
+   * Search parameter: <b>category</b>
+   * <p>
+   * Description: <b>Message category</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CommunicationRequest.category</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="category", path="CommunicationRequest.category", description="Message category", type="token" )
   public static final String SP_CATEGORY = "category";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>category</b>
+   * <p>
+   * Description: <b>Message category</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CommunicationRequest.category</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CATEGORY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CATEGORY);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | failed</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CommunicationRequest.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="CommunicationRequest.status", description="proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | failed", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | failed</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CommunicationRequest.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

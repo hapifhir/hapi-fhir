@@ -135,4 +135,20 @@ public interface IIdType {
 
 	IIdType withVersion(String theVersion);
 
+	/**
+	 * Sets the value of this ID by combining all of the individual parts.
+	 * <p>
+	 * <b>Required parameters:</b> The following rules apply to the parameters of this method (in this case, populated means
+	 * a non-empty string and not populated means <code>null</code> or an empty string)
+	 * </p>
+	 * <ul>
+	 * <li>All values may be not populated</li>
+	 * <li>If <b>theVersionIdPart</b> is populated, <b>theResourceType</b> and <b>theIdPart</b> must be populated</li>
+	 * <li>If <b>theBaseUrl</b> is populated and <b>theIdPart</b> is populated, <b>theResourceType</b> must be populated</li>
+	 * </ul>
+	 * 
+	 * @return Returns a reference to <code>this</code> for easy method chaining
+	 */
+	IIdType setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart);
+
 }

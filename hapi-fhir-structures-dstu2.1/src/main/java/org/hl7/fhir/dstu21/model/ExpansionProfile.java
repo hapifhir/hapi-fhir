@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -2979,22 +2979,166 @@ public class ExpansionProfile extends DomainResource {
     return ResourceType.ExpansionProfile;
    }
 
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>The expansion profile publication date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>ExpansionProfile.date</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="date", path="ExpansionProfile.date", description="The expansion profile publication date", type="date" )
   public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>The expansion profile publication date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>ExpansionProfile.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>The identifier for the expansion profile</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ExpansionProfile.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="ExpansionProfile.identifier", description="The identifier for the expansion profile", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>The identifier for the expansion profile</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ExpansionProfile.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>The name of the expansion profile</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ExpansionProfile.name</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="name", path="ExpansionProfile.name", description="The name of the expansion profile", type="string" )
   public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>The name of the expansion profile</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ExpansionProfile.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the expansion profile</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ExpansionProfile.publisher</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="publisher", path="ExpansionProfile.publisher", description="Name of the publisher of the expansion profile", type="string" )
   public static final String SP_PUBLISHER = "publisher";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the expansion profile</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ExpansionProfile.publisher</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>description</b>
+   * <p>
+   * Description: <b>Text search in the description of the expansion profile</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ExpansionProfile.description</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="description", path="ExpansionProfile.description", description="Text search in the description of the expansion profile", type="string" )
   public static final String SP_DESCRIPTION = "description";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <p>
+   * Description: <b>Text search in the description of the expansion profile</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ExpansionProfile.description</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+
+ /**
+   * Search parameter: <b>version</b>
+   * <p>
+   * Description: <b>The version identifier of the expansion profile</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ExpansionProfile.version</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="version", path="ExpansionProfile.version", description="The version identifier of the expansion profile", type="token" )
   public static final String SP_VERSION = "version";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>version</b>
+   * <p>
+   * Description: <b>The version identifier of the expansion profile</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ExpansionProfile.version</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam VERSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VERSION);
+
+ /**
+   * Search parameter: <b>url</b>
+   * <p>
+   * Description: <b>The logical URL for the expansion profile</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ExpansionProfile.url</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="url", path="ExpansionProfile.url", description="The logical URL for the expansion profile", type="uri" )
   public static final String SP_URL = "url";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>url</b>
+   * <p>
+   * Description: <b>The logical URL for the expansion profile</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ExpansionProfile.url</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>The status of the expansion profile</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ExpansionProfile.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="ExpansionProfile.status", description="The status of the expansion profile", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>The status of the expansion profile</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ExpansionProfile.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

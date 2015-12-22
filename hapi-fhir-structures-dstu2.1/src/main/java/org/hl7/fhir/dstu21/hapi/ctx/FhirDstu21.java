@@ -29,11 +29,15 @@ import org.hl7.fhir.dstu21.hapi.rest.server.Dstu21BundleFactory;
 import org.hl7.fhir.dstu21.hapi.rest.server.ServerConformanceProvider;
 import org.hl7.fhir.dstu21.hapi.rest.server.ServerProfileProvider;
 import org.hl7.fhir.dstu21.model.Coding;
+import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.Reference;
+import org.hl7.fhir.dstu21.model.Resource;
 import org.hl7.fhir.dstu21.model.StructureDefinition;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -98,7 +102,7 @@ public class FhirDstu21 implements IFhirVersion {
 
 	@Override
 	public IPrimitiveType<Date> getLastUpdated(IBaseResource theResource) {
-		return ResourceMetadataKeyEnum.UPDATED.get((IResource) theResource);
+		return ((Resource) theResource).getMeta().getLastUpdatedElement();
 	}
 
 	@Override
@@ -124,6 +128,11 @@ public class FhirDstu21 implements IFhirVersion {
 	@Override
 	public IBaseCoding newCodingDt() {
 		return new Coding();
+	}
+
+	@Override
+	public IIdType newIdType() {
+		return new IdType();
 	}
 
 }

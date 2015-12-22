@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -819,36 +819,252 @@ public class Organization extends DomainResource {
     return ResourceType.Organization;
    }
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>Any identifier for the organization (not the accreditation issuer's identifier)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Organization.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>Any identifier for the organization (not the accreditation issuer's identifier)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Organization.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>partof</b>
+   * <p>
+   * Description: <b>Search all organizations that are part of the given organization</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Organization.partOf</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference" )
   public static final String SP_PARTOF = "partof";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>partof</b>
+   * <p>
+   * Description: <b>Search all organizations that are part of the given organization</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Organization.partOf</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PARTOF = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PARTOF);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Organization:partof</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PARTOF = new ca.uhn.fhir.model.api.Include("Organization:partof").toLocked();
 
+ /**
+   * Search parameter: <b>phonetic</b>
+   * <p>
+   * Description: <b>A portion of the organization's name using some kind of phonetic matching algorithm</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.name</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="phonetic", path="Organization.name", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
+   * <p>
+   * Description: <b>A portion of the organization's name using some kind of phonetic matching algorithm</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PHONETIC = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PHONETIC);
+
+ /**
+   * Search parameter: <b>address</b>
+   * <p>
+   * Description: <b>A (part of the) address of the Organization</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.address</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="address", path="Organization.address", description="A (part of the) address of the Organization", type="string" )
   public static final String SP_ADDRESS = "address";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>address</b>
+   * <p>
+   * Description: <b>A (part of the) address of the Organization</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.address</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS);
+
+ /**
+   * Search parameter: <b>address-state</b>
+   * <p>
+   * Description: <b>A state specified in an address</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.address.state</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="address-state", path="Organization.address.state", description="A state specified in an address", type="string" )
   public static final String SP_ADDRESS_STATE = "address-state";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>address-state</b>
+   * <p>
+   * Description: <b>A state specified in an address</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.address.state</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_STATE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_STATE);
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>A portion of the organization's name</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.name</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string" )
   public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>A portion of the organization's name</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>address-use</b>
+   * <p>
+   * Description: <b>A use code specified in an address</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Organization.address.use</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="address-use", path="Organization.address.use", description="A use code specified in an address", type="token" )
   public static final String SP_ADDRESS_USE = "address-use";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>address-use</b>
+   * <p>
+   * Description: <b>A use code specified in an address</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Organization.address.use</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ADDRESS_USE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ADDRESS_USE);
+
+ /**
+   * Search parameter: <b>active</b>
+   * <p>
+   * Description: <b>Whether the organization's record is active</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Organization.active</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token" )
   public static final String SP_ACTIVE = "active";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>active</b>
+   * <p>
+   * Description: <b>Whether the organization's record is active</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Organization.active</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ACTIVE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ACTIVE);
+
+ /**
+   * Search parameter: <b>type</b>
+   * <p>
+   * Description: <b>A code for the type of organization</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Organization.type</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token" )
   public static final String SP_TYPE = "type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <p>
+   * Description: <b>A code for the type of organization</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Organization.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+
+ /**
+   * Search parameter: <b>address-city</b>
+   * <p>
+   * Description: <b>A city specified in an address</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.address.city</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="address-city", path="Organization.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESS_CITY = "address-city";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
+   * <p>
+   * Description: <b>A city specified in an address</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.address.city</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_CITY = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_CITY);
+
+ /**
+   * Search parameter: <b>address-postalcode</b>
+   * <p>
+   * Description: <b>A postal code specified in an address</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.address.postalCode</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="address-postalcode", path="Organization.address.postalCode", description="A postal code specified in an address", type="string" )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
+   * <p>
+   * Description: <b>A postal code specified in an address</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.address.postalCode</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_POSTALCODE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_POSTALCODE);
+
+ /**
+   * Search parameter: <b>address-country</b>
+   * <p>
+   * Description: <b>A country specified in an address</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.address.country</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="address-country", path="Organization.address.country", description="A country specified in an address", type="string" )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>address-country</b>
+   * <p>
+   * Description: <b>A country specified in an address</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Organization.address.country</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_COUNTRY = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_COUNTRY);
+
 
 }
 

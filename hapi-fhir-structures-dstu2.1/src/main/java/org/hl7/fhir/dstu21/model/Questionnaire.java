@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1814,20 +1814,146 @@ public class Questionnaire extends DomainResource {
     return ResourceType.Questionnaire;
    }
 
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>When the questionnaire was last changed</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Questionnaire.date</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="date", path="Questionnaire.date", description="When the questionnaire was last changed", type="date" )
   public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>When the questionnaire was last changed</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Questionnaire.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>An identifier for the questionnaire</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Questionnaire.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>An identifier for the questionnaire</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Questionnaire.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>A code that corresponds to the questionnaire or one of its groups</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Questionnaire.item.concept</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="code", path="Questionnaire.item.concept", description="A code that corresponds to the questionnaire or one of its groups", type="token" )
   public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>A code that corresponds to the questionnaire or one of its groups</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Questionnaire.item.concept</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
+
+ /**
+   * Search parameter: <b>publisher</b>
+   * <p>
+   * Description: <b>The author of the questionnaire</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Questionnaire.publisher</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="publisher", path="Questionnaire.publisher", description="The author of the questionnaire", type="string" )
   public static final String SP_PUBLISHER = "publisher";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <p>
+   * Description: <b>The author of the questionnaire</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Questionnaire.publisher</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>title</b>
+   * <p>
+   * Description: <b>All or part of the name of the questionnaire</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Questionnaire.title</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="title", path="Questionnaire.title", description="All or part of the name of the questionnaire", type="string" )
   public static final String SP_TITLE = "title";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>title</b>
+   * <p>
+   * Description: <b>All or part of the name of the questionnaire</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Questionnaire.title</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam TITLE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_TITLE);
+
+ /**
+   * Search parameter: <b>version</b>
+   * <p>
+   * Description: <b>The business version of the questionnaire</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Questionnaire.version</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="version", path="Questionnaire.version", description="The business version of the questionnaire", type="string" )
   public static final String SP_VERSION = "version";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>version</b>
+   * <p>
+   * Description: <b>The business version of the questionnaire</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Questionnaire.version</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam VERSION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_VERSION);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>The status of the questionnaire</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Questionnaire.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>The status of the questionnaire</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Questionnaire.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

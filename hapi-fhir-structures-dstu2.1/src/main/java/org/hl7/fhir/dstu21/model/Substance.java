@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -845,26 +845,152 @@ public class Substance extends DomainResource {
     return ResourceType.Substance;
    }
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>Unique identifier for the substance</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Substance.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="Substance.identifier", description="Unique identifier for the substance", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>Unique identifier for the substance</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Substance.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>container-identifier</b>
+   * <p>
+   * Description: <b>Identifier of the package/container</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Substance.instance.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="container-identifier", path="Substance.instance.identifier", description="Identifier of the package/container", type="token" )
   public static final String SP_CONTAINER_IDENTIFIER = "container-identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>container-identifier</b>
+   * <p>
+   * Description: <b>Identifier of the package/container</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Substance.instance.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTAINER_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTAINER_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>The code of the substance</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Substance.code</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="code", path="Substance.code", description="The code of the substance", type="token" )
   public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>The code of the substance</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Substance.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
+
+ /**
+   * Search parameter: <b>quantity</b>
+   * <p>
+   * Description: <b>Amount of substance in the package</b><br>
+   * Type: <b>quantity</b><br>
+   * Path: <b>Substance.instance.quantity</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="Amount of substance in the package", type="quantity" )
   public static final String SP_QUANTITY = "quantity";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>quantity</b>
+   * <p>
+   * Description: <b>Amount of substance in the package</b><br>
+   * Type: <b>quantity</b><br>
+   * Path: <b>Substance.instance.quantity</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.QuantityClientParam QUANTITY = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_QUANTITY);
+
+ /**
+   * Search parameter: <b>substance</b>
+   * <p>
+   * Description: <b>A component of the substance</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Substance.ingredient.substance</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="A component of the substance", type="reference" )
   public static final String SP_SUBSTANCE = "substance";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>substance</b>
+   * <p>
+   * Description: <b>A component of the substance</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Substance.ingredient.substance</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBSTANCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBSTANCE);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Substance:substance</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBSTANCE = new ca.uhn.fhir.model.api.Include("Substance:substance").toLocked();
 
+ /**
+   * Search parameter: <b>expiry</b>
+   * <p>
+   * Description: <b>Expiry date of package or container of substance</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Substance.instance.expiry</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="Expiry date of package or container of substance", type="date" )
   public static final String SP_EXPIRY = "expiry";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>expiry</b>
+   * <p>
+   * Description: <b>Expiry date of package or container of substance</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Substance.instance.expiry</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam EXPIRY = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_EXPIRY);
+
+ /**
+   * Search parameter: <b>category</b>
+   * <p>
+   * Description: <b>The category of the substance</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Substance.category</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="category", path="Substance.category", description="The category of the substance", type="token" )
   public static final String SP_CATEGORY = "category";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>category</b>
+   * <p>
+   * Description: <b>The category of the substance</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Substance.category</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CATEGORY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CATEGORY);
+
 
 }
 

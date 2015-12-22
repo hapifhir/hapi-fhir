@@ -1348,7 +1348,7 @@
       <value value="http://www.hl7.org/Special/committees/Vocab/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-20T10:49:55-05:00"/>
+  <date value="2015-12-21T16:53:52-05:00"/>
   <description value="Base StructureDefinition for ValueSet Resource"/>
   <fhirVersion value="1.2.0"/>
   <mapping>

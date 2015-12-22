@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1321,42 +1321,150 @@ public class ProcedureRequest extends DomainResource {
     return ResourceType.ProcedureRequest;
    }
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>A unique identifier of the Procedure Request</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ProcedureRequest.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="ProcedureRequest.identifier", description="A unique identifier of the Procedure Request", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>A unique identifier of the Procedure Request</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ProcedureRequest.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>performer</b>
+   * <p>
+   * Description: <b>Who should perform the procedure</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ProcedureRequest.performer</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="performer", path="ProcedureRequest.performer", description="Who should perform the procedure", type="reference" )
   public static final String SP_PERFORMER = "performer";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>performer</b>
+   * <p>
+   * Description: <b>Who should perform the procedure</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ProcedureRequest.performer</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PERFORMER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PERFORMER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ProcedureRequest:performer</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PERFORMER = new ca.uhn.fhir.model.api.Include("ProcedureRequest:performer").toLocked();
 
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>Search by subject</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ProcedureRequest.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="subject", path="ProcedureRequest.subject", description="Search by subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>Search by subject</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ProcedureRequest.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ProcedureRequest:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("ProcedureRequest:subject").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>Search by subject - a patient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ProcedureRequest.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="ProcedureRequest.subject", description="Search by subject - a patient", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>Search by subject - a patient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ProcedureRequest.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ProcedureRequest:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ProcedureRequest:patient").toLocked();
 
+ /**
+   * Search parameter: <b>orderer</b>
+   * <p>
+   * Description: <b>Who made request</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ProcedureRequest.orderer</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="orderer", path="ProcedureRequest.orderer", description="Who made request", type="reference" )
   public static final String SP_ORDERER = "orderer";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>orderer</b>
+   * <p>
+   * Description: <b>Who made request</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ProcedureRequest.orderer</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORDERER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORDERER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ProcedureRequest:orderer</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ORDERER = new ca.uhn.fhir.model.api.Include("ProcedureRequest:orderer").toLocked();
 
+ /**
+   * Search parameter: <b>encounter</b>
+   * <p>
+   * Description: <b>Encounter request created during</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ProcedureRequest.encounter</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="encounter", path="ProcedureRequest.encounter", description="Encounter request created during", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+   * <p>
+   * Description: <b>Encounter request created during</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ProcedureRequest.encounter</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ProcedureRequest:encounter</b>".

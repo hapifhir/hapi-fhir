@@ -14,7 +14,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +35,6 @@ import org.hl7.fhir.dstu21.model.DiagnosticReport;
 import org.hl7.fhir.dstu21.model.Encounter;
 import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.Immunization;
-import org.hl7.fhir.dstu21.model.InstantType;
 import org.hl7.fhir.dstu21.model.Location;
 import org.hl7.fhir.dstu21.model.Medication;
 import org.hl7.fhir.dstu21.model.MedicationOrder;
@@ -69,9 +67,7 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -588,9 +584,9 @@ public class FhirResourceDaoDstu21SearchNoFtTest extends BaseJpaDstu21Test {
 		{
 			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
 			params.put(BaseResource.SP_RES_LANGUAGE, new StringParam("en_CA"));
-			List<IResource> patients = toList(myPatientDao.search(params));
+			List<IBaseResource> patients = toList(myPatientDao.search(params));
 			assertEquals(1, patients.size());
-			assertEquals(id1.toUnqualifiedVersionless(), patients.get(0).getId().toUnqualifiedVersionless());
+			assertEquals(id1.toUnqualifiedVersionless(), patients.get(0).getIdElement().toUnqualifiedVersionless());
 		}
 		{
 			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
@@ -1468,7 +1464,7 @@ public class FhirResourceDaoDstu21SearchNoFtTest extends BaseJpaDstu21Test {
 			params.addInclude(Patient.INCLUDE_ORGANIZATION);
 			params.addInclude(Organization.INCLUDE_PARTOF.asNonRecursive());
 			IBundleProvider search = myPatientDao.search(params);
-			List<IResource> patients = toList(search);
+			List<IBaseResource> patients = toList(search);
 			assertEquals(2, patients.size());
 			assertEquals(Patient.class, patients.get(0).getClass());
 			assertEquals(Organization.class, patients.get(1).getClass());
@@ -1480,7 +1476,7 @@ public class FhirResourceDaoDstu21SearchNoFtTest extends BaseJpaDstu21Test {
 			params.addInclude(Patient.INCLUDE_ORGANIZATION);
 			params.addInclude(Organization.INCLUDE_PARTOF.asRecursive());
 			IBundleProvider search = myPatientDao.search(params);
-			List<IResource> patients = toList(search);
+			List<IBaseResource> patients = toList(search);
 			assertEquals(3, patients.size());
 			assertEquals(Patient.class, patients.get(0).getClass());
 			assertEquals(Organization.class, patients.get(1).getClass());
@@ -1490,9 +1486,9 @@ public class FhirResourceDaoDstu21SearchNoFtTest extends BaseJpaDstu21Test {
 			// * include non recursive
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("Tester_" + methodName + "_P1"));
-			params.addInclude(IResource.INCLUDE_ALL.asNonRecursive());
+			params.addInclude(IBaseResource.INCLUDE_ALL.asNonRecursive());
 			IBundleProvider search = myPatientDao.search(params);
-			List<IResource> patients = toList(search);
+			List<IBaseResource> patients = toList(search);
 			assertEquals(2, patients.size());
 			assertEquals(Patient.class, patients.get(0).getClass());
 			assertEquals(Organization.class, patients.get(1).getClass());
@@ -1501,9 +1497,9 @@ public class FhirResourceDaoDstu21SearchNoFtTest extends BaseJpaDstu21Test {
 			// * include recursive
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("Tester_" + methodName + "_P1"));
-			params.addInclude(IResource.INCLUDE_ALL.asRecursive());
+			params.addInclude(IBaseResource.INCLUDE_ALL.asRecursive());
 			IBundleProvider search = myPatientDao.search(params);
-			List<IResource> patients = toList(search);
+			List<IBaseResource> patients = toList(search);
 			assertEquals(3, patients.size());
 			assertEquals(Patient.class, patients.get(0).getClass());
 			assertEquals(Organization.class, patients.get(1).getClass());
@@ -1515,7 +1511,7 @@ public class FhirResourceDaoDstu21SearchNoFtTest extends BaseJpaDstu21Test {
 			params.add(Patient.SP_FAMILY, new StringParam("Tester_" + methodName + "_P1"));
 			params.addInclude(Encounter.INCLUDE_INDICATION);
 			IBundleProvider search = myPatientDao.search(params);
-			List<IResource> patients = toList(search);
+			List<IBaseResource> patients = toList(search);
 			assertEquals(1, patients.size());
 			assertEquals(Patient.class, patients.get(0).getClass());
 		}
@@ -1717,7 +1713,7 @@ public class FhirResourceDaoDstu21SearchNoFtTest extends BaseJpaDstu21Test {
 		params.add(Patient.SP_FAMILY, new StringParam("Tester_testSearchWithIncludesThatHaveTextId_P1"));
 		params.addInclude(Patient.INCLUDE_ORGANIZATION);
 		IBundleProvider search = myPatientDao.search(params);
-		List<IResource> patients = toList(search);
+		List<IBaseResource> patients = toList(search);
 		assertEquals(2, patients.size());
 		assertEquals(Patient.class, patients.get(0).getClass());
 		assertEquals(Organization.class, patients.get(1).getClass());

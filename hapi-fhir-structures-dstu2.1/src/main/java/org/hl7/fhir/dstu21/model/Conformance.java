@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -7776,50 +7776,338 @@ public class Conformance extends DomainResource implements IBaseConformance {
     return ResourceType.Conformance;
    }
 
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>The conformance statement publication date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Conformance.date</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="date", path="Conformance.date", description="The conformance statement publication date", type="date" )
   public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>The conformance statement publication date</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Conformance.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>software</b>
+   * <p>
+   * Description: <b>Part of a the name of a software application</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Conformance.software.name</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="software", path="Conformance.software.name", description="Part of a the name of a software application", type="string" )
   public static final String SP_SOFTWARE = "software";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>software</b>
+   * <p>
+   * Description: <b>Part of a the name of a software application</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Conformance.software.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam SOFTWARE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_SOFTWARE);
+
+ /**
+   * Search parameter: <b>resource</b>
+   * <p>
+   * Description: <b>Name of a resource mentioned in a conformance statement</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.rest.resource.type</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="resource", path="Conformance.rest.resource.type", description="Name of a resource mentioned in a conformance statement", type="token" )
   public static final String SP_RESOURCE = "resource";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>resource</b>
+   * <p>
+   * Description: <b>Name of a resource mentioned in a conformance statement</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.rest.resource.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam RESOURCE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_RESOURCE);
+
+ /**
+   * Search parameter: <b>profile</b>
+   * <p>
+   * Description: <b>A profile id invoked in a conformance statement</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Conformance.rest.resource.profile</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="profile", path="Conformance.rest.resource.profile", description="A profile id invoked in a conformance statement", type="reference" )
   public static final String SP_PROFILE = "profile";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>profile</b>
+   * <p>
+   * Description: <b>A profile id invoked in a conformance statement</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Conformance.rest.resource.profile</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PROFILE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PROFILE);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Conformance:profile</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PROFILE = new ca.uhn.fhir.model.api.Include("Conformance:profile").toLocked();
 
+ /**
+   * Search parameter: <b>format</b>
+   * <p>
+   * Description: <b>formats supported (xml | json | mime type)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.format</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="format", path="Conformance.format", description="formats supported (xml | json | mime type)", type="token" )
   public static final String SP_FORMAT = "format";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>format</b>
+   * <p>
+   * Description: <b>formats supported (xml | json | mime type)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.format</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam FORMAT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_FORMAT);
+
+ /**
+   * Search parameter: <b>description</b>
+   * <p>
+   * Description: <b>Text search in the description of the conformance statement</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Conformance.description</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="description", path="Conformance.description", description="Text search in the description of the conformance statement", type="string" )
   public static final String SP_DESCRIPTION = "description";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <p>
+   * Description: <b>Text search in the description of the conformance statement</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Conformance.description</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+
+ /**
+   * Search parameter: <b>fhirversion</b>
+   * <p>
+   * Description: <b>The version of FHIR</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.version</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="fhirversion", path="Conformance.version", description="The version of FHIR", type="token" )
   public static final String SP_FHIRVERSION = "fhirversion";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>fhirversion</b>
+   * <p>
+   * Description: <b>The version of FHIR</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.version</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam FHIRVERSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_FHIRVERSION);
+
+ /**
+   * Search parameter: <b>version</b>
+   * <p>
+   * Description: <b>The version identifier of the conformance statement</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.version</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="version", path="Conformance.version", description="The version identifier of the conformance statement", type="token" )
   public static final String SP_VERSION = "version";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>version</b>
+   * <p>
+   * Description: <b>The version identifier of the conformance statement</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.version</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam VERSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VERSION);
+
+ /**
+   * Search parameter: <b>url</b>
+   * <p>
+   * Description: <b>The uri that identifies the conformance statement</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>Conformance.url</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="url", path="Conformance.url", description="The uri that identifies the conformance statement", type="uri" )
   public static final String SP_URL = "url";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>url</b>
+   * <p>
+   * Description: <b>The uri that identifies the conformance statement</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>Conformance.url</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
+
+ /**
+   * Search parameter: <b>supported-profile</b>
+   * <p>
+   * Description: <b>Profiles for use cases supported</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Conformance.profile</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="supported-profile", path="Conformance.profile", description="Profiles for use cases supported", type="reference" )
   public static final String SP_SUPPORTED_PROFILE = "supported-profile";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>supported-profile</b>
+   * <p>
+   * Description: <b>Profiles for use cases supported</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Conformance.profile</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUPPORTED_PROFILE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUPPORTED_PROFILE);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Conformance:supported-profile</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUPPORTED_PROFILE = new ca.uhn.fhir.model.api.Include("Conformance:supported-profile").toLocked();
 
+ /**
+   * Search parameter: <b>mode</b>
+   * <p>
+   * Description: <b>Mode - restful (server/client) or messaging (sender/receiver)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.rest.mode</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="mode", path="Conformance.rest.mode", description="Mode - restful (server/client) or messaging (sender/receiver)", type="token" )
   public static final String SP_MODE = "mode";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>mode</b>
+   * <p>
+   * Description: <b>Mode - restful (server/client) or messaging (sender/receiver)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.rest.mode</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam MODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_MODE);
+
+ /**
+   * Search parameter: <b>security</b>
+   * <p>
+   * Description: <b>OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.rest.security.service</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="security", path="Conformance.rest.security.service", description="OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates", type="token" )
   public static final String SP_SECURITY = "security";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>security</b>
+   * <p>
+   * Description: <b>OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.rest.security.service</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SECURITY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SECURITY);
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>Name of the conformance statement</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Conformance.name</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="name", path="Conformance.name", description="Name of the conformance statement", type="string" )
   public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>Name of the conformance statement</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Conformance.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the conformance statement</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Conformance.publisher</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="publisher", path="Conformance.publisher", description="Name of the publisher of the conformance statement", type="string" )
   public static final String SP_PUBLISHER = "publisher";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the conformance statement</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Conformance.publisher</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>event</b>
+   * <p>
+   * Description: <b>Event code in a conformance statement</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.messaging.event.code</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="event", path="Conformance.messaging.event.code", description="Event code in a conformance statement", type="token" )
   public static final String SP_EVENT = "event";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>event</b>
+   * <p>
+   * Description: <b>Event code in a conformance statement</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.messaging.event.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam EVENT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_EVENT);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>The current status of the conformance statement</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="Conformance.status", description="The current status of the conformance statement", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>The current status of the conformance statement</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

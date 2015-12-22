@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -2713,20 +2713,146 @@ public class ModuleMetadata extends DomainResource {
     return ResourceType.ModuleMetadata;
    }
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>Logical identifier for the module (e.g. CMS-143)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ModuleMetadata.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="ModuleMetadata.identifier", description="Logical identifier for the module (e.g. CMS-143)", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>Logical identifier for the module (e.g. CMS-143)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ModuleMetadata.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>topic</b>
+   * <p>
+   * Description: <b>Topics associated with the module</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ModuleMetadata.topic</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="topic", path="ModuleMetadata.topic", description="Topics associated with the module", type="token" )
   public static final String SP_TOPIC = "topic";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>topic</b>
+   * <p>
+   * Description: <b>Topics associated with the module</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ModuleMetadata.topic</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TOPIC = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TOPIC);
+
+ /**
+   * Search parameter: <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ModuleMetadata.description</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="description", path="ModuleMetadata.description", description="Text search against the description", type="string" )
   public static final String SP_DESCRIPTION = "description";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>description</b>
+   * <p>
+   * Description: <b>Text search against the description</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ModuleMetadata.description</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+
+ /**
+   * Search parameter: <b>keyword</b>
+   * <p>
+   * Description: <b>Keywords associated with the module</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ModuleMetadata.keyword</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="keyword", path="ModuleMetadata.keyword", description="Keywords associated with the module", type="string" )
   public static final String SP_KEYWORD = "keyword";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>keyword</b>
+   * <p>
+   * Description: <b>Keywords associated with the module</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ModuleMetadata.keyword</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam KEYWORD = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_KEYWORD);
+
+ /**
+   * Search parameter: <b>title</b>
+   * <p>
+   * Description: <b>Text search against the title</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ModuleMetadata.title</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="title", path="ModuleMetadata.title", description="Text search against the title", type="string" )
   public static final String SP_TITLE = "title";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>title</b>
+   * <p>
+   * Description: <b>Text search against the title</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ModuleMetadata.title</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam TITLE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_TITLE);
+
+ /**
+   * Search parameter: <b>version</b>
+   * <p>
+   * Description: <b>Version of the module (e.g. 1.0.0)</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ModuleMetadata.version</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="version", path="ModuleMetadata.version", description="Version of the module (e.g. 1.0.0)", type="string" )
   public static final String SP_VERSION = "version";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>version</b>
+   * <p>
+   * Description: <b>Version of the module (e.g. 1.0.0)</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ModuleMetadata.version</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam VERSION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_VERSION);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>Status of the module</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ModuleMetadata.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="ModuleMetadata.status", description="Status of the module", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>Status of the module</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ModuleMetadata.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

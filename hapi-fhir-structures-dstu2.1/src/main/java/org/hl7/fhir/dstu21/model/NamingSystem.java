@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1604,40 +1604,292 @@ public class NamingSystem extends DomainResource {
     return ResourceType.NamingSystem;
    }
 
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>Publication Date(/time)</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>NamingSystem.date</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="date", path="NamingSystem.date", description="Publication Date(/time)", type="date" )
   public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>Publication Date(/time)</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>NamingSystem.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>period</b>
+   * <p>
+   * Description: <b>When is identifier valid?</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>NamingSystem.uniqueId.period</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="period", path="NamingSystem.uniqueId.period", description="When is identifier valid?", type="date" )
   public static final String SP_PERIOD = "period";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>period</b>
+   * <p>
+   * Description: <b>When is identifier valid?</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>NamingSystem.uniqueId.period</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam PERIOD = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_PERIOD);
+
+ /**
+   * Search parameter: <b>kind</b>
+   * <p>
+   * Description: <b>codesystem | identifier | root</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.kind</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="kind", path="NamingSystem.kind", description="codesystem | identifier | root", type="token" )
   public static final String SP_KIND = "kind";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>kind</b>
+   * <p>
+   * Description: <b>codesystem | identifier | root</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.kind</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam KIND = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_KIND);
+
+ /**
+   * Search parameter: <b>type</b>
+   * <p>
+   * Description: <b>e.g. driver,  provider,  patient, bank etc.</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.type</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="type", path="NamingSystem.type", description="e.g. driver,  provider,  patient, bank etc.", type="token" )
   public static final String SP_TYPE = "type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <p>
+   * Description: <b>e.g. driver,  provider,  patient, bank etc.</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+
+ /**
+   * Search parameter: <b>id-type</b>
+   * <p>
+   * Description: <b>oid | uuid | uri | other</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.uniqueId.type</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="id-type", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token" )
   public static final String SP_ID_TYPE = "id-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>id-type</b>
+   * <p>
+   * Description: <b>oid | uuid | uri | other</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.uniqueId.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ID_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ID_TYPE);
+
+ /**
+   * Search parameter: <b>responsible</b>
+   * <p>
+   * Description: <b>Who maintains system namespace?</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>NamingSystem.responsible</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="responsible", path="NamingSystem.responsible", description="Who maintains system namespace?", type="string" )
   public static final String SP_RESPONSIBLE = "responsible";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>responsible</b>
+   * <p>
+   * Description: <b>Who maintains system namespace?</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>NamingSystem.responsible</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam RESPONSIBLE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_RESPONSIBLE);
+
+ /**
+   * Search parameter: <b>contact</b>
+   * <p>
+   * Description: <b>Name of a individual to contact</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>NamingSystem.contact.name</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="contact", path="NamingSystem.contact.name", description="Name of a individual to contact", type="string" )
   public static final String SP_CONTACT = "contact";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>contact</b>
+   * <p>
+   * Description: <b>Name of a individual to contact</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>NamingSystem.contact.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam CONTACT = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_CONTACT);
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>Human-readable label</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>NamingSystem.name</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="name", path="NamingSystem.name", description="Human-readable label", type="string" )
   public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>Human-readable label</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>NamingSystem.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>context</b>
+   * <p>
+   * Description: <b>Content intends to support these contexts</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.useContext</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="context", path="NamingSystem.useContext", description="Content intends to support these contexts", type="token" )
   public static final String SP_CONTEXT = "context";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context</b>
+   * <p>
+   * Description: <b>Content intends to support these contexts</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.useContext</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT);
+
+ /**
+   * Search parameter: <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher (Organization or individual)</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>NamingSystem.publisher</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="publisher", path="NamingSystem.publisher", description="Name of the publisher (Organization or individual)", type="string" )
   public static final String SP_PUBLISHER = "publisher";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher (Organization or individual)</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>NamingSystem.publisher</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>telecom</b>
+   * <p>
+   * Description: <b>Contact details for individual or publisher</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.contact.telecom</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="telecom", path="NamingSystem.contact.telecom", description="Contact details for individual or publisher", type="token" )
   public static final String SP_TELECOM = "telecom";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
+   * <p>
+   * Description: <b>Contact details for individual or publisher</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.contact.telecom</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TELECOM = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TELECOM);
+
+ /**
+   * Search parameter: <b>value</b>
+   * <p>
+   * Description: <b>The unique identifier</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>NamingSystem.uniqueId.value</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="value", path="NamingSystem.uniqueId.value", description="The unique identifier", type="string" )
   public static final String SP_VALUE = "value";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>value</b>
+   * <p>
+   * Description: <b>The unique identifier</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>NamingSystem.uniqueId.value</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam VALUE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_VALUE);
+
+ /**
+   * Search parameter: <b>replaced-by</b>
+   * <p>
+   * Description: <b>Use this instead</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>NamingSystem.replacedBy</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="replaced-by", path="NamingSystem.replacedBy", description="Use this instead", type="reference" )
   public static final String SP_REPLACED_BY = "replaced-by";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>replaced-by</b>
+   * <p>
+   * Description: <b>Use this instead</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>NamingSystem.replacedBy</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REPLACED_BY = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REPLACED_BY);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>NamingSystem:replaced-by</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_REPLACED_BY = new ca.uhn.fhir.model.api.Include("NamingSystem:replaced-by").toLocked();
 
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>draft | active | retired</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="NamingSystem.status", description="draft | active | retired", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>draft | active | retired</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>NamingSystem.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

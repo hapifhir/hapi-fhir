@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -650,34 +650,124 @@ public class Flag extends DomainResource {
     return ResourceType.Flag;
    }
 
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>Time period when flag is active</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Flag.period</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="date", path="Flag.period", description="Time period when flag is active", type="date" )
   public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>Time period when flag is active</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Flag.period</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>The identity of a subject to list flags for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Flag.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="subject", path="Flag.subject", description="The identity of a subject to list flags for", type="reference" )
   public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>The identity of a subject to list flags for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Flag.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Flag:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Flag:subject").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>The identity of a subject to list flags for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Flag.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="Flag.subject", description="The identity of a subject to list flags for", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>The identity of a subject to list flags for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Flag.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Flag:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Flag:patient").toLocked();
 
+ /**
+   * Search parameter: <b>author</b>
+   * <p>
+   * Description: <b>Flag creator</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Flag.author</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference" )
   public static final String SP_AUTHOR = "author";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>author</b>
+   * <p>
+   * Description: <b>Flag creator</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Flag.author</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam AUTHOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_AUTHOR);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Flag:author</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("Flag:author").toLocked();
 
+ /**
+   * Search parameter: <b>encounter</b>
+   * <p>
+   * Description: <b>Alert relevant during encounter</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Flag.encounter</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="encounter", path="Flag.encounter", description="Alert relevant during encounter", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+   * <p>
+   * Description: <b>Alert relevant during encounter</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Flag.encounter</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Flag:encounter</b>".

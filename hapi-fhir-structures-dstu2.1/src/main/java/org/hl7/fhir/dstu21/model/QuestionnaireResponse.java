@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1499,58 +1499,202 @@ public class QuestionnaireResponse extends DomainResource {
     return ResourceType.QuestionnaireResponse;
    }
 
+ /**
+   * Search parameter: <b>authored</b>
+   * <p>
+   * Description: <b>When the questionnaire was authored</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>QuestionnaireResponse.authored</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="authored", path="QuestionnaireResponse.authored", description="When the questionnaire was authored", type="date" )
   public static final String SP_AUTHORED = "authored";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>authored</b>
+   * <p>
+   * Description: <b>When the questionnaire was authored</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>QuestionnaireResponse.authored</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam AUTHORED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_AUTHORED);
+
+ /**
+   * Search parameter: <b>questionnaire</b>
+   * <p>
+   * Description: <b>The questionnaire the answers are provided for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.questionnaire</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="questionnaire", path="QuestionnaireResponse.questionnaire", description="The questionnaire the answers are provided for", type="reference" )
   public static final String SP_QUESTIONNAIRE = "questionnaire";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>questionnaire</b>
+   * <p>
+   * Description: <b>The questionnaire the answers are provided for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.questionnaire</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam QUESTIONNAIRE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_QUESTIONNAIRE);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>QuestionnaireResponse:questionnaire</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_QUESTIONNAIRE = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:questionnaire").toLocked();
 
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>The subject of the questionnaire</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="subject", path="QuestionnaireResponse.subject", description="The subject of the questionnaire", type="reference" )
   public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>The subject of the questionnaire</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>QuestionnaireResponse:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:subject").toLocked();
 
+ /**
+   * Search parameter: <b>author</b>
+   * <p>
+   * Description: <b>The author of the questionnaire</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.author</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire", type="reference" )
   public static final String SP_AUTHOR = "author";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>author</b>
+   * <p>
+   * Description: <b>The author of the questionnaire</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.author</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam AUTHOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_AUTHOR);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>QuestionnaireResponse:author</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:author").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>The patient that is the subject of the questionnaire</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="QuestionnaireResponse.subject", description="The patient that is the subject of the questionnaire", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>The patient that is the subject of the questionnaire</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>QuestionnaireResponse:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:patient").toLocked();
 
+ /**
+   * Search parameter: <b>encounter</b>
+   * <p>
+   * Description: <b>Encounter during which questionnaire was authored</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.encounter</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="encounter", path="QuestionnaireResponse.encounter", description="Encounter during which questionnaire was authored", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+   * <p>
+   * Description: <b>Encounter during which questionnaire was authored</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.encounter</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>QuestionnaireResponse:encounter</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:encounter").toLocked();
 
+ /**
+   * Search parameter: <b>source</b>
+   * <p>
+   * Description: <b>The person who answered the questions</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.source</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="source", path="QuestionnaireResponse.source", description="The person who answered the questions", type="reference" )
   public static final String SP_SOURCE = "source";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>source</b>
+   * <p>
+   * Description: <b>The person who answered the questions</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>QuestionnaireResponse.source</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SOURCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SOURCE);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>QuestionnaireResponse:source</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SOURCE = new ca.uhn.fhir.model.api.Include("QuestionnaireResponse:source").toLocked();
 
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>The status of the questionnaire response</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>QuestionnaireResponse.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="QuestionnaireResponse.status", description="The status of the questionnaire response", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>The status of the questionnaire response</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>QuestionnaireResponse.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

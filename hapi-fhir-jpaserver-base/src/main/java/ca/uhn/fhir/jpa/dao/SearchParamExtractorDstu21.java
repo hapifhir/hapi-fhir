@@ -207,7 +207,7 @@ public class SearchParamExtractorDstu21 extends BaseSearchParamExtractor impleme
 						continue;
 					}
 
-					if (new UriType(BaseHapiFhirDao.UCUM_NS).equals(nextValue.getSystemElement())) {
+					if (BaseHapiFhirDao.UCUM_NS.equals(nextValue.getSystem())) {
 						if (isNotBlank(nextValue.getCode())) {
 
 							Unit<? extends javax.measure.quantity.Quantity> unit = Unit.valueOf(nextValue.getCode());
@@ -441,12 +441,12 @@ public class SearchParamExtractorDstu21 extends BaseSearchParamExtractor impleme
 			List<String> codes = new ArrayList<String>();
 
 			String needContactPointSystem = null;
-			if (nextPath.endsWith("(system=phone)")) {
-				nextPath = nextPath.substring(0, nextPath.length() - "(system=phone)".length());
+			if (nextPath.endsWith(".where(system='phone')")) {
+				nextPath = nextPath.substring(0, nextPath.length() - ".where(system='phone')".length());
 				needContactPointSystem = "phone";
 			}
-			if (nextPath.endsWith("(system=email)")) {
-				nextPath = nextPath.substring(0, nextPath.length() - "(system=email)".length());
+			if (nextPath.endsWith(".where(system='email')")) {
+				nextPath = nextPath.substring(0, nextPath.length() - ".where(system='email')".length());
 				needContactPointSystem = "email";
 			}
 

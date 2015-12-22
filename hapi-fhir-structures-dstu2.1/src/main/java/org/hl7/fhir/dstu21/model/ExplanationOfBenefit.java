@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -8866,46 +8866,190 @@ public class ExplanationOfBenefit extends DomainResource {
     return ResourceType.ExplanationOfBenefit;
    }
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>The business identifier of the Explanation of Benefit</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ExplanationOfBenefit.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="ExplanationOfBenefit.identifier", description="The business identifier of the Explanation of Benefit", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>The business identifier of the Explanation of Benefit</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ExplanationOfBenefit.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>disposition</b>
+   * <p>
+   * Description: <b>The contents of the disposition message</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ExplanationOfBenefit.disposition</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="disposition", path="ExplanationOfBenefit.disposition", description="The contents of the disposition message", type="string" )
   public static final String SP_DISPOSITION = "disposition";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>disposition</b>
+   * <p>
+   * Description: <b>The contents of the disposition message</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>ExplanationOfBenefit.disposition</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam DISPOSITION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DISPOSITION);
+
+ /**
+   * Search parameter: <b>provider</b>
+   * <p>
+   * Description: <b>The reference to the provider</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ExplanationOfBenefit.provider</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="provider", path="ExplanationOfBenefit.provider", description="The reference to the provider", type="reference" )
   public static final String SP_PROVIDER = "provider";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>provider</b>
+   * <p>
+   * Description: <b>The reference to the provider</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ExplanationOfBenefit.provider</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PROVIDER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PROVIDER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ExplanationOfBenefit:provider</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PROVIDER = new ca.uhn.fhir.model.api.Include("ExplanationOfBenefit:provider").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>The reference to the patient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ExplanationOfBenefit.patient</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="ExplanationOfBenefit.patient", description="The reference to the patient", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>The reference to the patient</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ExplanationOfBenefit.patient</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ExplanationOfBenefit:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ExplanationOfBenefit:patient").toLocked();
 
+ /**
+   * Search parameter: <b>created</b>
+   * <p>
+   * Description: <b>The creation date for the EOB</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>ExplanationOfBenefit.created</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="created", path="ExplanationOfBenefit.created", description="The creation date for the EOB", type="date" )
   public static final String SP_CREATED = "created";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>created</b>
+   * <p>
+   * Description: <b>The creation date for the EOB</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>ExplanationOfBenefit.created</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam CREATED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_CREATED);
+
+ /**
+   * Search parameter: <b>organization</b>
+   * <p>
+   * Description: <b>The reference to the providing organization</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ExplanationOfBenefit.organization</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="organization", path="ExplanationOfBenefit.organization", description="The reference to the providing organization", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>organization</b>
+   * <p>
+   * Description: <b>The reference to the providing organization</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ExplanationOfBenefit.organization</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ExplanationOfBenefit:organization</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("ExplanationOfBenefit:organization").toLocked();
 
+ /**
+   * Search parameter: <b>claim</b>
+   * <p>
+   * Description: <b>The reference to the claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ExplanationOfBenefit.claim</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="claim", path="ExplanationOfBenefit.claim", description="The reference to the claim", type="reference" )
   public static final String SP_CLAIM = "claim";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>claim</b>
+   * <p>
+   * Description: <b>The reference to the claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ExplanationOfBenefit.claim</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CLAIM = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CLAIM);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ExplanationOfBenefit:claim</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_CLAIM = new ca.uhn.fhir.model.api.Include("ExplanationOfBenefit:claim").toLocked();
 
+ /**
+   * Search parameter: <b>facility</b>
+   * <p>
+   * Description: <b>Facility responsible for the goods and services</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ExplanationOfBenefit.facility</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="facility", path="ExplanationOfBenefit.facility", description="Facility responsible for the goods and services", type="reference" )
   public static final String SP_FACILITY = "facility";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>facility</b>
+   * <p>
+   * Description: <b>Facility responsible for the goods and services</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ExplanationOfBenefit.facility</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam FACILITY = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_FACILITY);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ExplanationOfBenefit:facility</b>".

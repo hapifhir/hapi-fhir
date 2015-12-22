@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1923,76 +1923,382 @@ public class DiagnosticOrder extends DomainResource {
     return ResourceType.DiagnosticOrder;
    }
 
+ /**
+   * Search parameter: <b>item-past-status</b>
+   * <p>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.item.event.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="item-past-status", path="DiagnosticOrder.item.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
   public static final String SP_ITEM_PAST_STATUS = "item-past-status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>item-past-status</b>
+   * <p>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.item.event.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ITEM_PAST_STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ITEM_PAST_STATUS);
+
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>Identifiers assigned to this order</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="DiagnosticOrder.identifier", description="Identifiers assigned to this order", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>Identifiers assigned to this order</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>bodysite</b>
+   * <p>
+   * Description: <b>Location of requested test (if applicable)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.item.bodySite</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="bodysite", path="DiagnosticOrder.item.bodySite", description="Location of requested test (if applicable)", type="token" )
   public static final String SP_BODYSITE = "bodysite";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>bodysite</b>
+   * <p>
+   * Description: <b>Location of requested test (if applicable)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.item.bodySite</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam BODYSITE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_BODYSITE);
+
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>Code to indicate the item (test or panel) being ordered</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.item.code</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="code", path="DiagnosticOrder.item.code", description="Code to indicate the item (test or panel) being ordered", type="token" )
   public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>Code to indicate the item (test or panel) being ordered</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.item.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
+
+ /**
+   * Search parameter: <b>event-date</b>
+   * <p>
+   * Description: <b>The date at which the event happened</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DiagnosticOrder.event.dateTime</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="event-date", path="DiagnosticOrder.event.dateTime", description="The date at which the event happened", type="date" )
   public static final String SP_EVENT_DATE = "event-date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>event-date</b>
+   * <p>
+   * Description: <b>The date at which the event happened</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DiagnosticOrder.event.dateTime</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam EVENT_DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_EVENT_DATE);
+
+ /**
+   * Search parameter: <b>event-status-date</b>
+   * <p>
+   * Description: <b>A combination of past-status and date</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="event-status-date", path="", description="A combination of past-status and date", type="composite" )
   public static final String SP_EVENT_STATUS_DATE = "event-status-date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>event-status-date</b>
+   * <p>
+   * Description: <b>A combination of past-status and date</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam EVENT_STATUS_DATE = new ca.uhn.fhir.rest.gclient.CompositeClientParam(SP_EVENT_STATUS_DATE);
+
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>Who and/or what test is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticOrder.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>Who and/or what test is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticOrder.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticOrder:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("DiagnosticOrder:subject").toLocked();
 
+ /**
+   * Search parameter: <b>encounter</b>
+   * <p>
+   * Description: <b>The encounter that this diagnostic order is associated with</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticOrder.encounter</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="The encounter that this diagnostic order is associated with", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+   * <p>
+   * Description: <b>The encounter that this diagnostic order is associated with</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticOrder.encounter</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticOrder:encounter</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("DiagnosticOrder:encounter").toLocked();
 
+ /**
+   * Search parameter: <b>actor</b>
+   * <p>
+   * Description: <b>Who recorded or did this</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticOrder.event.actor, DiagnosticOrder.item.event.actor</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor|DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference" )
   public static final String SP_ACTOR = "actor";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>actor</b>
+   * <p>
+   * Description: <b>Who recorded or did this</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticOrder.event.actor, DiagnosticOrder.item.event.actor</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ACTOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ACTOR);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticOrder:actor</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ACTOR = new ca.uhn.fhir.model.api.Include("DiagnosticOrder:actor").toLocked();
 
+ /**
+   * Search parameter: <b>item-date</b>
+   * <p>
+   * Description: <b>The date at which the event happened</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DiagnosticOrder.item.event.dateTime</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="item-date", path="DiagnosticOrder.item.event.dateTime", description="The date at which the event happened", type="date" )
   public static final String SP_ITEM_DATE = "item-date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>item-date</b>
+   * <p>
+   * Description: <b>The date at which the event happened</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>DiagnosticOrder.item.event.dateTime</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam ITEM_DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_ITEM_DATE);
+
+ /**
+   * Search parameter: <b>item-status-date</b>
+   * <p>
+   * Description: <b>A combination of item-past-status and item-date</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="item-status-date", path="", description="A combination of item-past-status and item-date", type="composite" )
   public static final String SP_ITEM_STATUS_DATE = "item-status-date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>item-status-date</b>
+   * <p>
+   * Description: <b>A combination of item-past-status and item-date</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam ITEM_STATUS_DATE = new ca.uhn.fhir.rest.gclient.CompositeClientParam(SP_ITEM_STATUS_DATE);
+
+ /**
+   * Search parameter: <b>event-status</b>
+   * <p>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.event.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
   public static final String SP_EVENT_STATUS = "event-status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>event-status</b>
+   * <p>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.event.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam EVENT_STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_EVENT_STATUS);
+
+ /**
+   * Search parameter: <b>item-status</b>
+   * <p>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.item.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="item-status", path="DiagnosticOrder.item.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
   public static final String SP_ITEM_STATUS = "item-status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>item-status</b>
+   * <p>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.item.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ITEM_STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ITEM_STATUS);
+
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>Who and/or what test is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticOrder.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>Who and/or what test is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticOrder.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticOrder:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("DiagnosticOrder:patient").toLocked();
 
+ /**
+   * Search parameter: <b>orderer</b>
+   * <p>
+   * Description: <b>Who ordered the test</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticOrder.orderer</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="Who ordered the test", type="reference" )
   public static final String SP_ORDERER = "orderer";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>orderer</b>
+   * <p>
+   * Description: <b>Who ordered the test</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticOrder.orderer</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORDERER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORDERER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticOrder:orderer</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ORDERER = new ca.uhn.fhir.model.api.Include("DiagnosticOrder:orderer").toLocked();
 
+ /**
+   * Search parameter: <b>specimen</b>
+   * <p>
+   * Description: <b>If the whole order relates to specific specimens</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticOrder.specimen, DiagnosticOrder.item.specimen</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="specimen", path="DiagnosticOrder.specimen|DiagnosticOrder.item.specimen", description="If the whole order relates to specific specimens", type="reference" )
   public static final String SP_SPECIMEN = "specimen";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
+   * <p>
+   * Description: <b>If the whole order relates to specific specimens</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DiagnosticOrder.specimen, DiagnosticOrder.item.specimen</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SPECIMEN = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SPECIMEN);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>DiagnosticOrder:specimen</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SPECIMEN = new ca.uhn.fhir.model.api.Include("DiagnosticOrder:specimen").toLocked();
 
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DiagnosticOrder.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

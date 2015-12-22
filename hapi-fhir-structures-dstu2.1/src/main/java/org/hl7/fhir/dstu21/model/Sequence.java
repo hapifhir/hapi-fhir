@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -2262,20 +2262,146 @@ public class Sequence extends DomainResource {
     return ResourceType.Sequence;
    }
 
+ /**
+   * Search parameter: <b>coordinate</b>
+   * <p>
+   * Description: <b>Genomic coordinate of the sequence. For example, a search for sequence in region 1:123-345 can be represented as `coordinate=1$lt345$gt123`</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="coordinate", path="", description="Genomic coordinate of the sequence. For example, a search for sequence in region 1:123-345 can be represented as `coordinate=1$lt345$gt123`", type="composite" )
   public static final String SP_COORDINATE = "coordinate";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>coordinate</b>
+   * <p>
+   * Description: <b>Genomic coordinate of the sequence. For example, a search for sequence in region 1:123-345 can be represented as `coordinate=1$lt345$gt123`</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam COORDINATE = new ca.uhn.fhir.rest.gclient.CompositeClientParam(SP_COORDINATE);
+
+ /**
+   * Search parameter: <b>variationid</b>
+   * <p>
+   * Description: <b>Identifier for variant</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Sequence.variationID</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="variationid", path="Sequence.variationID", description="Identifier for variant", type="token" )
   public static final String SP_VARIATIONID = "variationid";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>variationid</b>
+   * <p>
+   * Description: <b>Identifier for variant</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Sequence.variationID</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam VARIATIONID = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VARIATIONID);
+
+ /**
+   * Search parameter: <b>species</b>
+   * <p>
+   * Description: <b>The organism from which sample of the sequence was extracted.</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Sequence.species</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="species", path="Sequence.species", description="The organism from which sample of the sequence was extracted.", type="token" )
   public static final String SP_SPECIES = "species";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>species</b>
+   * <p>
+   * Description: <b>The organism from which sample of the sequence was extracted.</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Sequence.species</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SPECIES = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SPECIES);
+
+ /**
+   * Search parameter: <b>chromosome</b>
+   * <p>
+   * Description: <b>Chromosome of the sequence</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Sequence.coordinate.chromosome</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="chromosome", path="Sequence.coordinate.chromosome", description="Chromosome of the sequence", type="token" )
   public static final String SP_CHROMOSOME = "chromosome";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>chromosome</b>
+   * <p>
+   * Description: <b>Chromosome of the sequence</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Sequence.coordinate.chromosome</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CHROMOSOME = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CHROMOSOME);
+
+ /**
+   * Search parameter: <b>start</b>
+   * <p>
+   * Description: <b>Start position (0-based inclusive) of the sequence</b><br>
+   * Type: <b>number</b><br>
+   * Path: <b>Sequence.coordinate.start</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="start", path="Sequence.coordinate.start", description="Start position (0-based inclusive) of the sequence", type="number" )
   public static final String SP_START = "start";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>start</b>
+   * <p>
+   * Description: <b>Start position (0-based inclusive) of the sequence</b><br>
+   * Type: <b>number</b><br>
+   * Path: <b>Sequence.coordinate.start</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.NumberClientParam START = new ca.uhn.fhir.rest.gclient.NumberClientParam(SP_START);
+
+ /**
+   * Search parameter: <b>end</b>
+   * <p>
+   * Description: <b>End position (0-based exclusive) of the sequence</b><br>
+   * Type: <b>number</b><br>
+   * Path: <b>Sequence.coordinate.end</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="end", path="Sequence.coordinate.end", description="End position (0-based exclusive) of the sequence", type="number" )
   public static final String SP_END = "end";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>end</b>
+   * <p>
+   * Description: <b>End position (0-based exclusive) of the sequence</b><br>
+   * Type: <b>number</b><br>
+   * Path: <b>Sequence.coordinate.end</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.NumberClientParam END = new ca.uhn.fhir.rest.gclient.NumberClientParam(SP_END);
+
+ /**
+   * Search parameter: <b>type</b>
+   * <p>
+   * Description: <b>The type of the variant: Amino acid / cDNA transcript / RNA variation.</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Sequence.type</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="type", path="Sequence.type", description="The type of the variant: Amino acid / cDNA transcript / RNA variation.", type="token" )
   public static final String SP_TYPE = "type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <p>
+   * Description: <b>The type of the variant: Amino acid / cDNA transcript / RNA variation.</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Sequence.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+
 
 }
 

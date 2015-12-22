@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -736,54 +736,216 @@ public class Order extends DomainResource {
     return ResourceType.Order;
    }
 
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>When the order was made</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Order.date</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="date", path="Order.date", description="When the order was made", type="date" )
   public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>When the order was made</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Order.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>Instance id from source, target, and/or  others</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Order.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="Order.identifier", description="Instance id from source, target, and/or  others", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>Instance id from source, target, and/or  others</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Order.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>Patient this order is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Order.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>Patient this order is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Order.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Order:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Order:subject").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>Patient this order is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Order.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>Patient this order is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Order.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Order:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Order:patient").toLocked();
 
+ /**
+   * Search parameter: <b>source</b>
+   * <p>
+   * Description: <b>Who initiated the order</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Order.source</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference" )
   public static final String SP_SOURCE = "source";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>source</b>
+   * <p>
+   * Description: <b>Who initiated the order</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Order.source</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SOURCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SOURCE);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Order:source</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SOURCE = new ca.uhn.fhir.model.api.Include("Order:source").toLocked();
 
+ /**
+   * Search parameter: <b>detail</b>
+   * <p>
+   * Description: <b>What action is being ordered</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Order.detail</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="detail", path="Order.detail", description="What action is being ordered", type="reference" )
   public static final String SP_DETAIL = "detail";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>detail</b>
+   * <p>
+   * Description: <b>What action is being ordered</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Order.detail</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam DETAIL = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_DETAIL);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Order:detail</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_DETAIL = new ca.uhn.fhir.model.api.Include("Order:detail").toLocked();
 
+ /**
+   * Search parameter: <b>when</b>
+   * <p>
+   * Description: <b>A formal schedule</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Order.when.schedule</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="when", path="Order.when.schedule", description="A formal schedule", type="date" )
   public static final String SP_WHEN = "when";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>when</b>
+   * <p>
+   * Description: <b>A formal schedule</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Order.when.schedule</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam WHEN = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_WHEN);
+
+ /**
+   * Search parameter: <b>target</b>
+   * <p>
+   * Description: <b>Who is intended to fulfill the order</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Order.target</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference" )
   public static final String SP_TARGET = "target";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>target</b>
+   * <p>
+   * Description: <b>Who is intended to fulfill the order</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Order.target</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam TARGET = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_TARGET);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Order:target</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_TARGET = new ca.uhn.fhir.model.api.Include("Order:target").toLocked();
 
+ /**
+   * Search parameter: <b>when_code</b>
+   * <p>
+   * Description: <b>Code specifies when request should be done. The code may simply be a priority code</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Order.when.code</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="when_code", path="Order.when.code", description="Code specifies when request should be done. The code may simply be a priority code", type="token" )
   public static final String SP_WHENCODE = "when_code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>when_code</b>
+   * <p>
+   * Description: <b>Code specifies when request should be done. The code may simply be a priority code</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Order.when.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam WHENCODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_WHENCODE);
+
 
 }
 

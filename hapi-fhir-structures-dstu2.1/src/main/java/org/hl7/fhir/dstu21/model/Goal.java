@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1271,30 +1271,138 @@ public class Goal extends DomainResource {
     return ResourceType.Goal;
    }
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>External Ids for this goal</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Goal.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="Goal.identifier", description="External Ids for this goal", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>External Ids for this goal</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Goal.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>Who this goal is intended for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Goal.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="Goal.subject", description="Who this goal is intended for", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>Who this goal is intended for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Goal.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Goal:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Goal:patient").toLocked();
 
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>Who this goal is intended for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Goal.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="subject", path="Goal.subject", description="Who this goal is intended for", type="reference" )
   public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>Who this goal is intended for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Goal.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Goal:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Goal:subject").toLocked();
 
+ /**
+   * Search parameter: <b>targetdate</b>
+   * <p>
+   * Description: <b>Reach goal on or before</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Goal.targetDate</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="targetdate", path="Goal.targetDate", description="Reach goal on or before", type="date" )
   public static final String SP_TARGETDATE = "targetdate";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>targetdate</b>
+   * <p>
+   * Description: <b>Reach goal on or before</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Goal.targetDate</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam TARGETDATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_TARGETDATE);
+
+ /**
+   * Search parameter: <b>category</b>
+   * <p>
+   * Description: <b>E.g. Treatment, dietary, behavioral, etc.</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Goal.category</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="category", path="Goal.category", description="E.g. Treatment, dietary, behavioral, etc.", type="token" )
   public static final String SP_CATEGORY = "category";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>category</b>
+   * <p>
+   * Description: <b>E.g. Treatment, dietary, behavioral, etc.</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Goal.category</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CATEGORY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CATEGORY);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>proposed | planned | accepted | rejected | in-progress | achieved | sustaining | on-hold | cancelled</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Goal.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="Goal.status", description="proposed | planned | accepted | rejected | in-progress | achieved | sustaining | on-hold | cancelled", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>proposed | planned | accepted | rejected | in-progress | achieved | sustaining | on-hold | cancelled</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Goal.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

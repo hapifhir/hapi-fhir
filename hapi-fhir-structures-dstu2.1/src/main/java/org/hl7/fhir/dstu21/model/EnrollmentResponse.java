@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -707,8 +707,26 @@ public class EnrollmentResponse extends DomainResource {
     return ResourceType.EnrollmentResponse;
    }
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>The business identifier of the Explanation of Benefit</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>EnrollmentResponse.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="EnrollmentResponse.identifier", description="The business identifier of the Explanation of Benefit", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>The business identifier of the Explanation of Benefit</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>EnrollmentResponse.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
 
 }
 

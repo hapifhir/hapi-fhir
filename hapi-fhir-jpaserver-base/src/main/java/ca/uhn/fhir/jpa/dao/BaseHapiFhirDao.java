@@ -54,6 +54,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.StringType;
 import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -1272,9 +1273,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 		}
 
+		res.getMeta().getTag().clear();
+		res.getMeta().getProfile().clear();
+		res.getMeta().getSecurity().clear();
+		res.getMeta().setLastUpdated(null);
+		res.getMeta().setVersionId(null);
+		
 		populateResourceId(res, theEntity);
 
-		res.getMeta().setLastUpdated(theEntity.getUpdated().getValue());
+		res.getMeta().setLastUpdated(theEntity.getUpdatedDate());
 		IDao.RESOURCE_PID.put(res, theEntity.getId());
 
 		Collection<? extends BaseTag> tags = theEntity.getTags();
@@ -1726,7 +1733,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		List<IPrimitiveType> childElements = getContext().newTerser().getAllPopulatedChildElementsOfType(theResource, IPrimitiveType.class);
 		for (@SuppressWarnings("rawtypes")
 		IPrimitiveType nextType : childElements) {
-			if (nextType instanceof StringDt) {
+			if (nextType instanceof StringDt || nextType.getClass().equals(StringType.class)) {
 				String nextValue = nextType.getValueAsString();
 				if (isNotBlank(nextValue)) {
 					retVal.append(nextValue.replace("\n", " ").replace("\r", " "));

@@ -22,12 +22,12 @@ package ca.uhn.fhir.jpa.provider;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.Meta;
+import org.hl7.fhir.dstu21.model.Parameters;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.model.dstu2.composite.MetaDt;
-import ca.uhn.fhir.model.dstu2.resource.Parameters;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -71,7 +71,7 @@ public class JpaResourceProviderDstu21<T extends IAnyResource> extends BaseJpaRe
 	}
 
 	@Delete()
-	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdDt theResource, @ConditionalUrlParam(supportsMultiple=true) String theConditional) {
+	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdType theResource, @ConditionalUrlParam(supportsMultiple=true) String theConditional) {
 		startRequest(theRequest);
 		try {
 			if (theConditional != null) {
@@ -86,49 +86,49 @@ public class JpaResourceProviderDstu21<T extends IAnyResource> extends BaseJpaRe
 
 	//@formatter:off
 	@Operation(name=OPERATION_NAME_META, idempotent=true, returnParameters= {
-		@OperationParam(name="return", type=MetaDt.class)
+		@OperationParam(name="return", type=Meta.class)
 	})
 	//@formatter:on
 	public Parameters meta() {
 		Parameters parameters = new Parameters();
-		MetaDt metaGetOperation = getDao().metaGetOperation(MetaDt.class);
+		Meta metaGetOperation = getDao().metaGetOperation(Meta.class);
 		parameters.addParameter().setName("return").setValue(metaGetOperation);
 		return parameters;
 	}
 
 	//@formatter:off
 	@Operation(name=OPERATION_NAME_META, idempotent=true, returnParameters= {
-		@OperationParam(name="return", type=MetaDt.class)
+		@OperationParam(name="return", type=Meta.class)
 	})
 	//@formatter:on
-	public Parameters meta(@IdParam IdDt theId) {
+	public Parameters meta(@IdParam IdType theId) {
 		Parameters parameters = new Parameters();
-		MetaDt metaGetOperation = getDao().metaGetOperation(MetaDt.class, theId);
+		Meta metaGetOperation = getDao().metaGetOperation(Meta.class, theId);
 		parameters.addParameter().setName("return").setValue(metaGetOperation);
 		return parameters;
 	}
 
 	//@formatter:off
 	@Operation(name=OPERATION_NAME_META_ADD, idempotent=true, returnParameters= {
-		@OperationParam(name="return", type=MetaDt.class)
+		@OperationParam(name="return", type=Meta.class)
 	})
 	//@formatter:on
-	public Parameters metaAdd(@IdParam IdDt theId, @OperationParam(name = "meta") MetaDt theMeta) {
+	public Parameters metaAdd(@IdParam IdType theId, @OperationParam(name = "meta") Meta theMeta) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
 		}
 		Parameters parameters = new Parameters();
-		MetaDt metaAddOperation = getDao().metaAddOperation(theId, theMeta);
+		Meta metaAddOperation = getDao().metaAddOperation(theId, theMeta);
 		parameters.addParameter().setName("return").setValue(metaAddOperation);
 		return parameters;
 	}
 
 	//@formatter:off
 	@Operation(name=OPERATION_NAME_META_DELETE, idempotent=true, returnParameters= {
-		@OperationParam(name="return", type=MetaDt.class)
+		@OperationParam(name="return", type=Meta.class)
 	})
 	//@formatter:on
-	public Parameters metaDelete(@IdParam IdDt theId, @OperationParam(name = "meta") MetaDt theMeta) {
+	public Parameters metaDelete(@IdParam IdType theId, @OperationParam(name = "meta") Meta theMeta) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
 		}
@@ -138,7 +138,7 @@ public class JpaResourceProviderDstu21<T extends IAnyResource> extends BaseJpaRe
 	}
 
 	@Update
-	public MethodOutcome update(HttpServletRequest theRequest, @ResourceParam T theResource, @IdParam IdDt theId, @ConditionalUrlParam String theConditional) {
+	public MethodOutcome update(HttpServletRequest theRequest, @ResourceParam T theResource, @IdParam IdType theId, @ConditionalUrlParam String theConditional) {
 		startRequest(theRequest);
 		try {
 			if (theConditional != null) {
@@ -159,7 +159,7 @@ public class JpaResourceProviderDstu21<T extends IAnyResource> extends BaseJpaRe
 	}
 		
 	@Validate
-	public MethodOutcome validate(@ResourceParam T theResource, @IdParam IdDt theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
+	public MethodOutcome validate(@ResourceParam T theResource, @IdParam IdType theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
 			@Validate.Profile String theProfile) {
 		return getDao().validate(theResource, theId, theRawResource, theEncoding, theMode, theProfile);
 	}

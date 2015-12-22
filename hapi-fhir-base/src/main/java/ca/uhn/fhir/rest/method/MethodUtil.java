@@ -732,7 +732,7 @@ public class MethodUtil {
 		MethodOutcome retVal = new MethodOutcome();
 		if (locationHeaders != null && locationHeaders.size() > 0) {
 			String locationHeader = locationHeaders.get(0);
-			BaseOutcomeReturningMethodBinding.parseContentLocation(retVal, theResourceName, locationHeader);
+			BaseOutcomeReturningMethodBinding.parseContentLocation(theContext, retVal, theResourceName, locationHeader);
 		}
 		if (theResponseStatusCode != Constants.STATUS_HTTP_204_NO_CONTENT) {
 			EncodingEnum ct = EncodingEnum.forContentType(theResponseMimeType);

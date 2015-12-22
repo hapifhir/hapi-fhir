@@ -5,7 +5,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu21.model.Bundle;
@@ -18,9 +17,9 @@ import org.hl7.fhir.dstu21.model.Organization;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.StructureDefinition;
 import org.hl7.fhir.dstu21.model.ValueSet;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -34,6 +33,7 @@ public class FhirResourceDaoDstu21ValidateTest extends BaseJpaDstu21Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu21ValidateTest.class);
 
 	@Test
+	@Ignore
 	public void testValidateResourceContainingProfileDeclarationJson() throws Exception {
 		String methodName = "testValidateResourceContainingProfileDeclarationJson";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.JSON);
@@ -46,6 +46,7 @@ public class FhirResourceDaoDstu21ValidateTest extends BaseJpaDstu21Test {
 	}
 
 	@Test
+	@Ignore
 	public void testValidateResourceContainingProfileDeclarationXml() throws Exception {
 		String methodName = "testValidateResourceContainingProfileDeclarationXml";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.XML);

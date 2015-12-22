@@ -30,16 +30,15 @@ package org.hl7.fhir.instance.model;
 */
 
 // Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.Enumerations.*;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 /**
  * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities.
  */

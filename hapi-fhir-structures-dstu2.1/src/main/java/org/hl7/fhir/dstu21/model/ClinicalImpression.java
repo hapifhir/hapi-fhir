@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1853,82 +1853,334 @@ public class ClinicalImpression extends DomainResource {
     return ResourceType.ClinicalImpression;
    }
 
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>When the assessment occurred</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>ClinicalImpression.date</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="date", path="ClinicalImpression.date", description="When the assessment occurred", type="date" )
   public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>When the assessment occurred</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>ClinicalImpression.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>previous</b>
+   * <p>
+   * Description: <b>Reference to last assessment</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.previous</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="previous", path="ClinicalImpression.previous", description="Reference to last assessment", type="reference" )
   public static final String SP_PREVIOUS = "previous";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>previous</b>
+   * <p>
+   * Description: <b>Reference to last assessment</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.previous</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PREVIOUS = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PREVIOUS);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ClinicalImpression:previous</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PREVIOUS = new ca.uhn.fhir.model.api.Include("ClinicalImpression:previous").toLocked();
 
+ /**
+   * Search parameter: <b>assessor</b>
+   * <p>
+   * Description: <b>The clinician performing the assessment</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.assessor</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="assessor", path="ClinicalImpression.assessor", description="The clinician performing the assessment", type="reference" )
   public static final String SP_ASSESSOR = "assessor";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>assessor</b>
+   * <p>
+   * Description: <b>The clinician performing the assessment</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.assessor</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ASSESSOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ASSESSOR);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ClinicalImpression:assessor</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ASSESSOR = new ca.uhn.fhir.model.api.Include("ClinicalImpression:assessor").toLocked();
 
+ /**
+   * Search parameter: <b>trigger</b>
+   * <p>
+   * Description: <b>Request or event that necessitated this assessment</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.triggerReference</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="trigger", path="ClinicalImpression.triggerReference", description="Request or event that necessitated this assessment", type="reference" )
   public static final String SP_TRIGGER = "trigger";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>trigger</b>
+   * <p>
+   * Description: <b>Request or event that necessitated this assessment</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.triggerReference</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam TRIGGER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_TRIGGER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ClinicalImpression:trigger</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_TRIGGER = new ca.uhn.fhir.model.api.Include("ClinicalImpression:trigger").toLocked();
 
+ /**
+   * Search parameter: <b>finding</b>
+   * <p>
+   * Description: <b>Specific text or code for finding</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ClinicalImpression.finding.item</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="finding", path="ClinicalImpression.finding.item", description="Specific text or code for finding", type="token" )
   public static final String SP_FINDING = "finding";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>finding</b>
+   * <p>
+   * Description: <b>Specific text or code for finding</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ClinicalImpression.finding.item</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam FINDING = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_FINDING);
+
+ /**
+   * Search parameter: <b>ruledout</b>
+   * <p>
+   * Description: <b>Specific text of code for diagnosis</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ClinicalImpression.ruledOut.item</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="ruledout", path="ClinicalImpression.ruledOut.item", description="Specific text of code for diagnosis", type="token" )
   public static final String SP_RULEDOUT = "ruledout";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>ruledout</b>
+   * <p>
+   * Description: <b>Specific text of code for diagnosis</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ClinicalImpression.ruledOut.item</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam RULEDOUT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_RULEDOUT);
+
+ /**
+   * Search parameter: <b>problem</b>
+   * <p>
+   * Description: <b>General assessment of patient state</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.problem</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="problem", path="ClinicalImpression.problem", description="General assessment of patient state", type="reference" )
   public static final String SP_PROBLEM = "problem";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>problem</b>
+   * <p>
+   * Description: <b>General assessment of patient state</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.problem</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PROBLEM = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PROBLEM);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ClinicalImpression:problem</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PROBLEM = new ca.uhn.fhir.model.api.Include("ClinicalImpression:problem").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>The patient being assessed</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.patient</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="ClinicalImpression.patient", description="The patient being assessed", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>The patient being assessed</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.patient</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ClinicalImpression:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ClinicalImpression:patient").toLocked();
 
+ /**
+   * Search parameter: <b>investigation</b>
+   * <p>
+   * Description: <b>Record of a specific investigation</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.investigations.item</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="investigation", path="ClinicalImpression.investigations.item", description="Record of a specific investigation", type="reference" )
   public static final String SP_INVESTIGATION = "investigation";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>investigation</b>
+   * <p>
+   * Description: <b>Record of a specific investigation</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.investigations.item</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INVESTIGATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INVESTIGATION);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ClinicalImpression:investigation</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_INVESTIGATION = new ca.uhn.fhir.model.api.Include("ClinicalImpression:investigation").toLocked();
 
+ /**
+   * Search parameter: <b>action</b>
+   * <p>
+   * Description: <b>Actions taken during assessment</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.action</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Actions taken during assessment", type="reference" )
   public static final String SP_ACTION = "action";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>action</b>
+   * <p>
+   * Description: <b>Actions taken during assessment</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.action</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ACTION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ACTION);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ClinicalImpression:action</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ACTION = new ca.uhn.fhir.model.api.Include("ClinicalImpression:action").toLocked();
 
+ /**
+   * Search parameter: <b>trigger-code</b>
+   * <p>
+   * Description: <b>Request or event that necessitated this assessment</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ClinicalImpression.triggerCodeableConcept</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="trigger-code", path="ClinicalImpression.triggerCodeableConcept", description="Request or event that necessitated this assessment", type="token" )
   public static final String SP_TRIGGER_CODE = "trigger-code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>trigger-code</b>
+   * <p>
+   * Description: <b>Request or event that necessitated this assessment</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ClinicalImpression.triggerCodeableConcept</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TRIGGER_CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TRIGGER_CODE);
+
+ /**
+   * Search parameter: <b>plan</b>
+   * <p>
+   * Description: <b>Plan of action after assessment</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.plan</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="plan", path="ClinicalImpression.plan", description="Plan of action after assessment", type="reference" )
   public static final String SP_PLAN = "plan";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>plan</b>
+   * <p>
+   * Description: <b>Plan of action after assessment</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ClinicalImpression.plan</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PLAN = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PLAN);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ClinicalImpression:plan</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PLAN = new ca.uhn.fhir.model.api.Include("ClinicalImpression:plan").toLocked();
 
+ /**
+   * Search parameter: <b>resolved</b>
+   * <p>
+   * Description: <b>Diagnoses/conditions resolved since previous assessment</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ClinicalImpression.resolved</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="resolved", path="ClinicalImpression.resolved", description="Diagnoses/conditions resolved since previous assessment", type="token" )
   public static final String SP_RESOLVED = "resolved";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>resolved</b>
+   * <p>
+   * Description: <b>Diagnoses/conditions resolved since previous assessment</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ClinicalImpression.resolved</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam RESOLVED = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_RESOLVED);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>in-progress | completed | entered-in-error</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ClinicalImpression.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="ClinicalImpression.status", description="in-progress | completed | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>in-progress | completed | entered-in-error</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ClinicalImpression.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

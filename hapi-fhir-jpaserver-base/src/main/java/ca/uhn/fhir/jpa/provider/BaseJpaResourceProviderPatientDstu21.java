@@ -4,7 +4,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.List;
 
+import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.StringType;
+import org.hl7.fhir.dstu21.model.UnsignedIntType;
 
 /*
  * #%L
@@ -28,7 +31,6 @@ import org.hl7.fhir.dstu21.model.Patient;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -52,11 +54,11 @@ public class BaseJpaResourceProviderPatientDstu21 extends JpaResourceProviderDst
 			javax.servlet.http.HttpServletRequest theServletRequest,
 
 			@IdParam 
-			ca.uhn.fhir.model.primitive.IdDt theId,
+			IdType theId,
 			
 			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
 			@OperationParam(name = Constants.PARAM_COUNT) 
-			ca.uhn.fhir.model.primitive.UnsignedIntDt theCount,
+			UnsignedIntType theCount,
 			
 			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 			@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1) 
@@ -64,11 +66,11 @@ public class BaseJpaResourceProviderPatientDstu21 extends JpaResourceProviderDst
 
 			@Description(shortDefinition="Filter the resources to return only resources matching the given _content filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
 			@OperationParam(name = Constants.PARAM_CONTENT, min=0, max=OperationParam.MAX_UNLIMITED) 
-			List<StringDt> theContent,
+			List<StringType> theContent,
 
 			@Description(shortDefinition="Filter the resources to return only resources matching the given _text filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
 			@OperationParam(name = Constants.PARAM_TEXT, min=0, max=OperationParam.MAX_UNLIMITED) 
-			List<StringDt> theNarrative,
+			List<StringType> theNarrative,
 
 			@Sort
 			SortSpec theSortSpec
@@ -94,7 +96,7 @@ public class BaseJpaResourceProviderPatientDstu21 extends JpaResourceProviderDst
 
 				@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
 				@OperationParam(name = Constants.PARAM_COUNT) 
-				ca.uhn.fhir.model.primitive.UnsignedIntDt theCount,
+				UnsignedIntType theCount,
 				
 				@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 				@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1) 
@@ -102,11 +104,11 @@ public class BaseJpaResourceProviderPatientDstu21 extends JpaResourceProviderDst
 
 				@Description(shortDefinition="Filter the resources to return only resources matching the given _content filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
 				@OperationParam(name = Constants.PARAM_CONTENT, min=0, max=OperationParam.MAX_UNLIMITED) 
-				List<StringDt> theContent,
+				List<StringType> theContent,
 
 				@Description(shortDefinition="Filter the resources to return only resources matching the given _text filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
 				@OperationParam(name = Constants.PARAM_TEXT, min=0, max=OperationParam.MAX_UNLIMITED) 
-				List<StringDt> theNarrative,
+				List<StringType> theNarrative,
 
 				@Sort
 				SortSpec theSortSpec
@@ -122,10 +124,10 @@ public class BaseJpaResourceProviderPatientDstu21 extends JpaResourceProviderDst
 
 	}
 
-	private StringAndListParam toStringAndList(List<StringDt> theNarrative) {
+	private StringAndListParam toStringAndList(List<StringType> theNarrative) {
 		StringAndListParam retVal = new StringAndListParam();
 		if (theNarrative != null) {
-			for (StringDt next : theNarrative) {
+			for (StringType next : theNarrative) {
 				if (isNotBlank(next.getValue())) {
 					retVal.addAnd(new StringOrListParam().addOr(new StringParam(next.getValue())));
 				}

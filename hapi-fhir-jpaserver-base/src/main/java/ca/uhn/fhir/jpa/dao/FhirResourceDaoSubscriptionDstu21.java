@@ -32,6 +32,7 @@ import javax.persistence.Query;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu21.model.Subscription;
 import org.hl7.fhir.dstu21.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,8 +53,6 @@ import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.SubscriptionFlaggedResource;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -175,9 +174,10 @@ public class FhirResourceDaoSubscriptionDstu21 extends FhirResourceDaoDstu21<Sub
 
 		List<SubscriptionFlaggedResource> flags = new ArrayList<SubscriptionFlaggedResource>();
 		Date mostRecentMatch = null;
-		for (IBaseResource next : results.getResources(0, results.size())) {
+		for (IBaseResource nextBase : results.getResources(0, results.size())) {
+			IAnyResource next = (IAnyResource)nextBase;
 
-			Date updated = ResourceMetadataKeyEnum.UPDATED.get((IResource) next).getValue();
+			Date updated = next.getMeta().getLastUpdated();
 			if (mostRecentMatch == null) {
 				mostRecentMatch = updated;
 			} else {
@@ -189,7 +189,7 @@ public class FhirResourceDaoSubscriptionDstu21 extends FhirResourceDaoDstu21<Sub
 			}
 
 			SubscriptionFlaggedResource nextFlag = new SubscriptionFlaggedResource();
-			Long pid = IDao.RESOURCE_PID.get((IResource) next);
+			Long pid = IDao.RESOURCE_PID.get(next);
 			
 			ourLog.info("New resource for subscription: {}", pid);
 			
@@ -274,7 +274,7 @@ public class FhirResourceDaoSubscriptionDstu21 extends FhirResourceDaoDstu21<Sub
 		} else {
 			Query q = myEntityManager.createNamedQuery("Q_HFJ_SUBSCRIPTION_SET_STATUS");
 			q.setParameter("res_id", resourceId);
-			q.setParameter("status", resource.getStatusElement().getValue());
+			q.setParameter("status", resource.getStatusElement().getValueAsString());
 			if (q.executeUpdate() > 0) {
 				ourLog.info("Updated subscription status for subscription {} to {}", resourceId, resource.getStatus());
 			} else {

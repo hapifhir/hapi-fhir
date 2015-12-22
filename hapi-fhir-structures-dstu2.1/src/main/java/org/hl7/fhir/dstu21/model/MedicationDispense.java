@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -2039,74 +2039,308 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     return ResourceType.MedicationDispense;
    }
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>Return dispenses with this external identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicationDispense.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="MedicationDispense.identifier", description="Return dispenses with this external identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>Return dispenses with this external identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicationDispense.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>Return dispenses of this medicine code</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicationDispense.medicationCodeableConcept</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="code", path="MedicationDispense.medicationCodeableConcept", description="Return dispenses of this medicine code", type="token" )
   public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>Return dispenses of this medicine code</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicationDispense.medicationCodeableConcept</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
+
+ /**
+   * Search parameter: <b>receiver</b>
+   * <p>
+   * Description: <b>Who collected the medication</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.receiver</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="receiver", path="MedicationDispense.receiver", description="Who collected the medication", type="reference" )
   public static final String SP_RECEIVER = "receiver";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>receiver</b>
+   * <p>
+   * Description: <b>Who collected the medication</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.receiver</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam RECEIVER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_RECEIVER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>MedicationDispense:receiver</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_RECEIVER = new ca.uhn.fhir.model.api.Include("MedicationDispense:receiver").toLocked();
 
+ /**
+   * Search parameter: <b>destination</b>
+   * <p>
+   * Description: <b>Return dispenses that should be sent to a specific destination</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.destination</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="destination", path="MedicationDispense.destination", description="Return dispenses that should be sent to a specific destination", type="reference" )
   public static final String SP_DESTINATION = "destination";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>destination</b>
+   * <p>
+   * Description: <b>Return dispenses that should be sent to a specific destination</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.destination</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam DESTINATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_DESTINATION);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>MedicationDispense:destination</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_DESTINATION = new ca.uhn.fhir.model.api.Include("MedicationDispense:destination").toLocked();
 
+ /**
+   * Search parameter: <b>medication</b>
+   * <p>
+   * Description: <b>Return dispenses of this medicine resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.medicationReference</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="medication", path="MedicationDispense.medicationReference", description="Return dispenses of this medicine resource", type="reference" )
   public static final String SP_MEDICATION = "medication";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>medication</b>
+   * <p>
+   * Description: <b>Return dispenses of this medicine resource</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.medicationReference</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam MEDICATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_MEDICATION);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>MedicationDispense:medication</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_MEDICATION = new ca.uhn.fhir.model.api.Include("MedicationDispense:medication").toLocked();
 
+ /**
+   * Search parameter: <b>responsibleparty</b>
+   * <p>
+   * Description: <b>Return all dispenses with the specified responsible party</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.substitution.responsibleParty</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="responsibleparty", path="MedicationDispense.substitution.responsibleParty", description="Return all dispenses with the specified responsible party", type="reference" )
   public static final String SP_RESPONSIBLEPARTY = "responsibleparty";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>responsibleparty</b>
+   * <p>
+   * Description: <b>Return all dispenses with the specified responsible party</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.substitution.responsibleParty</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam RESPONSIBLEPARTY = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_RESPONSIBLEPARTY);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>MedicationDispense:responsibleparty</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_RESPONSIBLEPARTY = new ca.uhn.fhir.model.api.Include("MedicationDispense:responsibleparty").toLocked();
 
+ /**
+   * Search parameter: <b>type</b>
+   * <p>
+   * Description: <b>Return all dispenses of a specific type</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicationDispense.type</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="type", path="MedicationDispense.type", description="Return all dispenses of a specific type", type="token" )
   public static final String SP_TYPE = "type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <p>
+   * Description: <b>Return all dispenses of a specific type</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicationDispense.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+
+ /**
+   * Search parameter: <b>whenhandedover</b>
+   * <p>
+   * Description: <b>Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>MedicationDispense.whenHandedOver</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="whenhandedover", path="MedicationDispense.whenHandedOver", description="Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)", type="date" )
   public static final String SP_WHENHANDEDOVER = "whenhandedover";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>whenhandedover</b>
+   * <p>
+   * Description: <b>Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>MedicationDispense.whenHandedOver</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam WHENHANDEDOVER = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_WHENHANDEDOVER);
+
+ /**
+   * Search parameter: <b>whenprepared</b>
+   * <p>
+   * Description: <b>Date when medication prepared</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>MedicationDispense.whenPrepared</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="whenprepared", path="MedicationDispense.whenPrepared", description="Date when medication prepared", type="date" )
   public static final String SP_WHENPREPARED = "whenprepared";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>whenprepared</b>
+   * <p>
+   * Description: <b>Date when medication prepared</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>MedicationDispense.whenPrepared</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam WHENPREPARED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_WHENPREPARED);
+
+ /**
+   * Search parameter: <b>dispenser</b>
+   * <p>
+   * Description: <b>Return all dispenses performed by a specific individual</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.dispenser</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="dispenser", path="MedicationDispense.dispenser", description="Return all dispenses performed by a specific individual", type="reference" )
   public static final String SP_DISPENSER = "dispenser";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>dispenser</b>
+   * <p>
+   * Description: <b>Return all dispenses performed by a specific individual</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.dispenser</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam DISPENSER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_DISPENSER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>MedicationDispense:dispenser</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_DISPENSER = new ca.uhn.fhir.model.api.Include("MedicationDispense:dispenser").toLocked();
 
+ /**
+   * Search parameter: <b>prescription</b>
+   * <p>
+   * Description: <b>The identity of a prescription to list dispenses from</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.authorizingPrescription</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="prescription", path="MedicationDispense.authorizingPrescription", description="The identity of a prescription to list dispenses from", type="reference" )
   public static final String SP_PRESCRIPTION = "prescription";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>prescription</b>
+   * <p>
+   * Description: <b>The identity of a prescription to list dispenses from</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.authorizingPrescription</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PRESCRIPTION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PRESCRIPTION);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>MedicationDispense:prescription</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PRESCRIPTION = new ca.uhn.fhir.model.api.Include("MedicationDispense:prescription").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>The identity of a patient to list dispenses  for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.patient</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="MedicationDispense.patient", description="The identity of a patient to list dispenses  for", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>The identity of a patient to list dispenses  for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicationDispense.patient</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>MedicationDispense:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("MedicationDispense:patient").toLocked();
 
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>Status of the dispense</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicationDispense.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="MedicationDispense.status", description="Status of the dispense", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>Status of the dispense</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicationDispense.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

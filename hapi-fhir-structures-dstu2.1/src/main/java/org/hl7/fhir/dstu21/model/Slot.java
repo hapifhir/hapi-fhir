@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -712,22 +712,112 @@ public class Slot extends DomainResource {
     return ResourceType.Slot;
    }
 
+ /**
+   * Search parameter: <b>schedule</b>
+   * <p>
+   * Description: <b>The Schedule Resource that we are seeking a slot within</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Slot.schedule</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="schedule", path="Slot.schedule", description="The Schedule Resource that we are seeking a slot within", type="reference" )
   public static final String SP_SCHEDULE = "schedule";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>schedule</b>
+   * <p>
+   * Description: <b>The Schedule Resource that we are seeking a slot within</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Slot.schedule</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SCHEDULE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SCHEDULE);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Slot:schedule</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SCHEDULE = new ca.uhn.fhir.model.api.Include("Slot:schedule").toLocked();
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>A Slot Identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="Slot.identifier", description="A Slot Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>A Slot Identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>start</b>
+   * <p>
+   * Description: <b>Appointment date/time.</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Slot.start</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="start", path="Slot.start", description="Appointment date/time.", type="date" )
   public static final String SP_START = "start";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>start</b>
+   * <p>
+   * Description: <b>Appointment date/time.</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Slot.start</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam START = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_START);
+
+ /**
+   * Search parameter: <b>slot-type</b>
+   * <p>
+   * Description: <b>The type of appointments that can be booked into the slot</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.type</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="slot-type", path="Slot.type", description="The type of appointments that can be booked into the slot", type="token" )
   public static final String SP_SLOT_TYPE = "slot-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>slot-type</b>
+   * <p>
+   * Description: <b>The type of appointments that can be booked into the slot</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SLOT_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SLOT_TYPE);
+
+ /**
+   * Search parameter: <b>fb-type</b>
+   * <p>
+   * Description: <b>The free/busy status of the appointment</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.freeBusyType</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="fb-type", path="Slot.freeBusyType", description="The free/busy status of the appointment", type="token" )
   public static final String SP_FB_TYPE = "fb-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>fb-type</b>
+   * <p>
+   * Description: <b>The free/busy status of the appointment</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.freeBusyType</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam FB_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_FB_TYPE);
+
 
 }
 

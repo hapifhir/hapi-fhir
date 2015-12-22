@@ -9,11 +9,12 @@ import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.ResourceType;
 import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Extension;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
+
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 @ResourceDef(name = "ResourceWithExtensionsA", id="0001")
 public class ResourceWithExtensionsA extends Resource {

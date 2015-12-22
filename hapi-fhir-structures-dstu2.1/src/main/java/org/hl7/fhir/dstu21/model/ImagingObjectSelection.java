@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -1621,30 +1621,138 @@ public class ImagingObjectSelection extends DomainResource {
     return ResourceType.ImagingObjectSelection;
    }
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>UID of key DICOM object selection</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ImagingObjectSelection.uid</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="ImagingObjectSelection.uid", description="UID of key DICOM object selection", type="uri" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>UID of key DICOM object selection</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ImagingObjectSelection.uid</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>authoring-time</b>
+   * <p>
+   * Description: <b>Time of key DICOM object selection authoring</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>ImagingObjectSelection.authoringTime</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="authoring-time", path="ImagingObjectSelection.authoringTime", description="Time of key DICOM object selection authoring", type="date" )
   public static final String SP_AUTHORING_TIME = "authoring-time";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>authoring-time</b>
+   * <p>
+   * Description: <b>Time of key DICOM object selection authoring</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>ImagingObjectSelection.authoringTime</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam AUTHORING_TIME = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_AUTHORING_TIME);
+
+ /**
+   * Search parameter: <b>selected-study</b>
+   * <p>
+   * Description: <b>Study selected in key DICOM object selection</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ImagingObjectSelection.study.uid</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="selected-study", path="ImagingObjectSelection.study.uid", description="Study selected in key DICOM object selection", type="uri" )
   public static final String SP_SELECTED_STUDY = "selected-study";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>selected-study</b>
+   * <p>
+   * Description: <b>Study selected in key DICOM object selection</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ImagingObjectSelection.study.uid</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam SELECTED_STUDY = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_SELECTED_STUDY);
+
+ /**
+   * Search parameter: <b>author</b>
+   * <p>
+   * Description: <b>Author of key DICOM object selection</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ImagingObjectSelection.author</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="author", path="ImagingObjectSelection.author", description="Author of key DICOM object selection", type="reference" )
   public static final String SP_AUTHOR = "author";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>author</b>
+   * <p>
+   * Description: <b>Author of key DICOM object selection</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ImagingObjectSelection.author</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam AUTHOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_AUTHOR);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ImagingObjectSelection:author</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("ImagingObjectSelection:author").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>Subject of key DICOM object selection</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ImagingObjectSelection.patient</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="ImagingObjectSelection.patient", description="Subject of key DICOM object selection", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>Subject of key DICOM object selection</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ImagingObjectSelection.patient</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>ImagingObjectSelection:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("ImagingObjectSelection:patient").toLocked();
 
+ /**
+   * Search parameter: <b>title</b>
+   * <p>
+   * Description: <b>Title of key DICOM object selection</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingObjectSelection.title</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="title", path="ImagingObjectSelection.title", description="Title of key DICOM object selection", type="token" )
   public static final String SP_TITLE = "title";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>title</b>
+   * <p>
+   * Description: <b>Title of key DICOM object selection</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingObjectSelection.title</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TITLE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TITLE);
+
 
 }
 

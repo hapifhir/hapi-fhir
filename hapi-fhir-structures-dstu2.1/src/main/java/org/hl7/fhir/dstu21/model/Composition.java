@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -2143,74 +2143,362 @@ public class Composition extends DomainResource {
     return ResourceType.Composition;
    }
 
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>Composition editing time</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Composition.date</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="date", path="Composition.date", description="Composition editing time", type="date" )
   public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>Composition editing time</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Composition.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>Logical identifier of composition (version-independent)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="Composition.identifier", description="Logical identifier of composition (version-independent)", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>Logical identifier of composition (version-independent)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>period</b>
+   * <p>
+   * Description: <b>The period covered by the documentation</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Composition.event.period</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="period", path="Composition.event.period", description="The period covered by the documentation", type="date" )
   public static final String SP_PERIOD = "period";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>period</b>
+   * <p>
+   * Description: <b>The period covered by the documentation</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>Composition.event.period</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam PERIOD = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_PERIOD);
+
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>Who and/or what the composition is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Composition.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="subject", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>Who and/or what the composition is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Composition.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Composition:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("Composition:subject").toLocked();
 
+ /**
+   * Search parameter: <b>author</b>
+   * <p>
+   * Description: <b>Who and/or what authored the composition</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Composition.author</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="author", path="Composition.author", description="Who and/or what authored the composition", type="reference" )
   public static final String SP_AUTHOR = "author";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>author</b>
+   * <p>
+   * Description: <b>Who and/or what authored the composition</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Composition.author</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam AUTHOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_AUTHOR);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Composition:author</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("Composition:author").toLocked();
 
+ /**
+   * Search parameter: <b>confidentiality</b>
+   * <p>
+   * Description: <b>As defined by affinity domain</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.confidentiality</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="confidentiality", path="Composition.confidentiality", description="As defined by affinity domain", type="token" )
   public static final String SP_CONFIDENTIALITY = "confidentiality";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>confidentiality</b>
+   * <p>
+   * Description: <b>As defined by affinity domain</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.confidentiality</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONFIDENTIALITY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONFIDENTIALITY);
+
+ /**
+   * Search parameter: <b>section</b>
+   * <p>
+   * Description: <b>Classification of section (recommended)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.section.code</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="section", path="Composition.section.code", description="Classification of section (recommended)", type="token" )
   public static final String SP_SECTION = "section";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>section</b>
+   * <p>
+   * Description: <b>Classification of section (recommended)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.section.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SECTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SECTION);
+
+ /**
+   * Search parameter: <b>encounter</b>
+   * <p>
+   * Description: <b>Context of the Composition</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Composition.encounter</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the Composition", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+   * <p>
+   * Description: <b>Context of the Composition</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Composition.encounter</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Composition:encounter</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("Composition:encounter").toLocked();
 
+ /**
+   * Search parameter: <b>type</b>
+   * <p>
+   * Description: <b>Kind of composition (LOINC if possible)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.type</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="type", path="Composition.type", description="Kind of composition (LOINC if possible)", type="token" )
   public static final String SP_TYPE = "type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <p>
+   * Description: <b>Kind of composition (LOINC if possible)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+
+ /**
+   * Search parameter: <b>title</b>
+   * <p>
+   * Description: <b>Human Readable name/title</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Composition.title</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="title", path="Composition.title", description="Human Readable name/title", type="string" )
   public static final String SP_TITLE = "title";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>title</b>
+   * <p>
+   * Description: <b>Human Readable name/title</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Composition.title</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam TITLE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_TITLE);
+
+ /**
+   * Search parameter: <b>attester</b>
+   * <p>
+   * Description: <b>Who attested the composition</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Composition.attester.party</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="attester", path="Composition.attester.party", description="Who attested the composition", type="reference" )
   public static final String SP_ATTESTER = "attester";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>attester</b>
+   * <p>
+   * Description: <b>Who attested the composition</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Composition.attester.party</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ATTESTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ATTESTER);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Composition:attester</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ATTESTER = new ca.uhn.fhir.model.api.Include("Composition:attester").toLocked();
 
+ /**
+   * Search parameter: <b>entry</b>
+   * <p>
+   * Description: <b>A reference to data that supports this section</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Composition.section.entry</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="entry", path="Composition.section.entry", description="A reference to data that supports this section", type="reference" )
   public static final String SP_ENTRY = "entry";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>entry</b>
+   * <p>
+   * Description: <b>A reference to data that supports this section</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Composition.section.entry</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENTRY = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENTRY);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Composition:entry</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ENTRY = new ca.uhn.fhir.model.api.Include("Composition:entry").toLocked();
 
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>Who and/or what the composition is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Composition.subject</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>Who and/or what the composition is about</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Composition.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>Composition:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Composition:patient").toLocked();
 
+ /**
+   * Search parameter: <b>context</b>
+   * <p>
+   * Description: <b>Code(s) that apply to the event being documented</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.event.code</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="context", path="Composition.event.code", description="Code(s) that apply to the event being documented", type="token" )
   public static final String SP_CONTEXT = "context";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context</b>
+   * <p>
+   * Description: <b>Code(s) that apply to the event being documented</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.event.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT);
+
+ /**
+   * Search parameter: <b>class</b>
+   * <p>
+   * Description: <b>Categorization of Composition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.class</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="class", path="Composition.class", description="Categorization of Composition", type="token" )
   public static final String SP_CLASS = "class";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>class</b>
+   * <p>
+   * Description: <b>Categorization of Composition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.class</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CLASS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CLASS);
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>preliminary | final | amended | entered-in-error</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.status</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="status", path="Composition.status", description="preliminary | final | amended | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>preliminary | final | amended | entered-in-error</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Composition.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
 
 }
 

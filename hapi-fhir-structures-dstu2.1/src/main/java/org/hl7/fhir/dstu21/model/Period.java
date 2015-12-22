@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -165,6 +165,32 @@ public class Period extends Type implements ICompositeType {
       }
       return this;
     }
+
+   /**
+   * Sets the value for <b>start</b> ()
+   *
+     * <p>
+     * <b>Definition:</b>
+     * The start of the period. The boundary is inclusive.
+     * </p> 
+   */
+  public Period setStart( Date theDate,  TemporalPrecisionEnum thePrecision) {
+    start = new DateTimeType(theDate, thePrecision); 
+    return this; 
+  }
+
+   /**
+   * Sets the value for <b>end</b> ()
+   *
+     * <p>
+     * <b>Definition:</b>
+     * The end of the period. The boundary is inclusive.
+     * </p> 
+   */
+  public Period setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+    end = new DateTimeType(theDate, thePrecision); 
+    return this; 
+  }
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);

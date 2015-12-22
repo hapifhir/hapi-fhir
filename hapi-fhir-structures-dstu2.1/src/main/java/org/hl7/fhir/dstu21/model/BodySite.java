@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Sun, Dec 20, 2015 20:55-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
 
 import java.util.*;
 
@@ -468,12 +468,66 @@ public class BodySite extends DomainResource {
     return ResourceType.BodySite;
    }
 
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>Identifier for this instance of the anatomical location</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>BodySite.identifier</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="identifier", path="BodySite.identifier", description="Identifier for this instance of the anatomical location", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>Identifier for this instance of the anatomical location</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>BodySite.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>Named anatomical location</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>BodySite.code</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="code", path="BodySite.code", description="Named anatomical location", type="token" )
   public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>Named anatomical location</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>BodySite.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
+
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>Patient to whom bodysite belongs</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>BodySite.patient</b><br>
+   * </p>
+   */
   @SearchParamDefinition(name="patient", path="BodySite.patient", description="Patient to whom bodysite belongs", type="reference" )
   public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>Patient to whom bodysite belongs</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>BodySite.patient</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
    * the path value of "<b>BodySite:patient</b>".
