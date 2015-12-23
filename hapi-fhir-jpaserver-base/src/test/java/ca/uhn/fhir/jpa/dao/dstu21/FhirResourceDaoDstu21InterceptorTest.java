@@ -7,6 +7,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.Patient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,8 +17,6 @@ import org.mockito.ArgumentCaptor;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.interceptor.IJpaServerInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaServerInterceptorAdapter;
-import ca.uhn.fhir.model.dstu21.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
 public class FhirResourceDaoDstu21InterceptorTest extends BaseJpaDstu21Test {
@@ -84,7 +84,7 @@ public class FhirResourceDaoDstu21InterceptorTest extends BaseJpaDstu21Test {
 		p.addName().addFamily("PATIENT");
 		Long id = myPatientDao.create(p).getId().getIdPartAsLong();
 
-		myPatientDao.delete(new IdDt("Patient", id));
+		myPatientDao.delete(new IdType("Patient", id));
 		
 		ArgumentCaptor<ActionRequestDetails> detailsCapt;
 		ArgumentCaptor<ResourceTable> tableCapt;
@@ -105,7 +105,7 @@ public class FhirResourceDaoDstu21InterceptorTest extends BaseJpaDstu21Test {
 		Long id = myPatientDao.create(p).getId().getIdPartAsLong();
 
 		p = new Patient();
-		p.setId(new IdDt(id));
+		p.setId(new IdType(id));
 		p.addName().addFamily("PATIENT1");
 		Long id2 = myPatientDao.update(p).getId().getIdPartAsLong();
 		assertEquals(id, id2);
@@ -124,7 +124,7 @@ public class FhirResourceDaoDstu21InterceptorTest extends BaseJpaDstu21Test {
 		 */
 
 		p = new Patient();
-		p.setId(new IdDt(id));
+		p.setId(new IdType(id));
 		p.addName().addFamily("PATIENT2");
 		id2 = myPatientDao.update(p, "Patient?family=PATIENT1").getId().getIdPartAsLong();
 		assertEquals(id, id2);

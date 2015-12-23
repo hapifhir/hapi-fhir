@@ -65,7 +65,7 @@ public class BaseDateTimeDtTest {
 		DateTimeDt dt = DateTimeDt.withCurrentTime();
 		String str = dt.getValueAsString();
 		char offset = str.charAt(19);
-		if (offset != '+' && offset != '-') {
+		if (offset != '+' && offset != '-' && offset != 'Z') {
 			fail("No timezone provided: " + str);
 		}
 	}
@@ -75,7 +75,7 @@ public class BaseDateTimeDtTest {
 		InstantDt dt = InstantDt.withCurrentTime();
 		String str = dt.getValueAsString();
 		char offset = str.charAt(23);
-		if (offset != '+' && offset != '-') {
+		if (offset != '+' && offset != '-' && offset != 'Z') {
 			fail("No timezone provided: " + str);
 		}
 	}

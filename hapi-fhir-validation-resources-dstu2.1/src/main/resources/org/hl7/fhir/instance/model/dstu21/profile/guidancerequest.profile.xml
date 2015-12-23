@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="GuidanceRequest"/>
   <meta>
-    <lastUpdated value="2015-12-05T08:35:35.779-05:00"/>
+    <lastUpdated value="2015-12-09T22:19:48.288-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -348,7 +348,7 @@
       <value value="http://www.hl7.org/Special/committees/dss/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-05T08:35:35-05:00"/>
+  <date value="2015-12-09T22:19:48-05:00"/>
   <description value="Base StructureDefinition for GuidanceRequest Resource"/>
   <fhirVersion value="1.1.0"/>
   <mapping>

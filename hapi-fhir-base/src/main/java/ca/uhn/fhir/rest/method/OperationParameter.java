@@ -43,6 +43,7 @@ import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -66,7 +67,7 @@ public class OperationParameter implements IParameter {
 	private final String myOperationName;
 	private Class<?> myParameterType;
 	private String myParamType;
-	private FhirContext myContext;
+	private final FhirContext myContext;
 	private boolean myAllowGet;
 
 	public OperationParameter(FhirContext theCtx, String theOperationName, OperationParam theOperationParam) {
@@ -82,6 +83,10 @@ public class OperationParameter implements IParameter {
 	}
 
 
+
+	protected FhirContext getContext() {
+		return myContext;
+	}
 
 	public int getMax() {
 		return myMax;
@@ -102,6 +107,12 @@ public class OperationParameter implements IParameter {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+		if (getContext().getVersion().getVersion().isRi()) {
+			if (IDatatype.class.isAssignableFrom(theParameterType)) {
+				throw new ConfigurationException("Incorrect use of type " + theParameterType.getSimpleName() + " as parameter type for method when context is for version " + getContext().getVersion().getVersion().name() + " in method: " + theMethod.toString());
+			}
+		}
+		
 		myParameterType = theParameterType;
 		if (theInnerCollectionType != null) {
 			myInnerCollectionType = CollectionBinder.getInstantiableCollectionType(theInnerCollectionType, myName);

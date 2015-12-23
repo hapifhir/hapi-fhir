@@ -22,7 +22,7 @@ package org.hl7.fhir.instance.model.api;
 
 import java.util.List;
 
-public interface IDomainResource extends IAnyResource {
+public interface IDomainResource extends IAnyResource, IBaseHasExtensions, IBaseHasModifierExtensions {
 
 	List<? extends IAnyResource> getContained();
 

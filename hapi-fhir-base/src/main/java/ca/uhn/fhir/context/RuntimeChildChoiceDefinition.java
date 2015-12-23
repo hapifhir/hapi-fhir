@@ -109,22 +109,26 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			} else {
 				nextDef = theClassToElementDefinitions.get(next);
 				BaseRuntimeElementDefinition<?> nextDefForChoice = nextDef;
-				if (nextDef instanceof IRuntimeDatatypeDefinition) {
-					IRuntimeDatatypeDefinition nextDefDatatype = (IRuntimeDatatypeDefinition) nextDef;
-					if (nextDefDatatype.getProfileOf() != null) {
-						/*
-						 * Elements which are called foo[x] and have a choice which is a profiled datatype must use the
-						 * unprofiled datatype as the element name. E.g. if foo[x] allows markdown as a datatype, it calls the
-						 * element fooString when encoded, because markdown is a profile of string. This is according to the
-						 * FHIR spec
-						 */
-						nextDefForChoice = null;
-						nonPreferred = true;
-						Class<? extends IBaseDatatype> profileType = nextDefDatatype.getProfileOf();
-						BaseRuntimeElementDefinition<?> elementDef = theClassToElementDefinitions.get(profileType);
-						elementName = getElementName() + StringUtils.capitalize(elementDef.getName());
-					}
-				}
+				/*
+				 * In HAPI 1.3 the following applied:
+				 * Elements which are called foo[x] and have a choice which is a profiled datatype must use the
+				 * unprofiled datatype as the element name. E.g. if foo[x] allows markdown as a datatype, it calls the
+				 * element fooString when encoded, because markdown is a profile of string. This is according to the
+				 * FHIR spec
+				 * 
+				 * As of HAPI 1.4 this has been disabled after conversation with Grahame. It appears
+				 * that it is not correct behaviour.
+				 */
+//				if (nextDef instanceof IRuntimeDatatypeDefinition) {
+//					IRuntimeDatatypeDefinition nextDefDatatype = (IRuntimeDatatypeDefinition) nextDef;
+//					if (nextDefDatatype.getProfileOf() != null) {
+//						nextDefForChoice = null;
+//						nonPreferred = true;
+//						Class<? extends IBaseDatatype> profileType = nextDefDatatype.getProfileOf();
+//						BaseRuntimeElementDefinition<?> elementDef = theClassToElementDefinitions.get(profileType);
+//						elementName = getElementName() + StringUtils.capitalize(elementDef.getName());
+//					}
+//				}
 				if (nextDefForChoice != null) {
 					elementName = getElementName() + StringUtils.capitalize(nextDefForChoice.getName());
 				}

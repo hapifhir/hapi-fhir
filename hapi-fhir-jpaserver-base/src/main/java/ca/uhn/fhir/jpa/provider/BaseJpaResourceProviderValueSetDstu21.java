@@ -24,36 +24,35 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.BooleanUtils;
+import org.hl7.fhir.dstu21.model.BooleanType;
+import org.hl7.fhir.dstu21.model.CodeType;
+import org.hl7.fhir.dstu21.model.CodeableConcept;
+import org.hl7.fhir.dstu21.model.Coding;
+import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.Parameters;
+import org.hl7.fhir.dstu21.model.StringType;
+import org.hl7.fhir.dstu21.model.UriType;
+import org.hl7.fhir.dstu21.model.ValueSet;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.LookupCodeResult;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
-import ca.uhn.fhir.model.dstu21.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu21.composite.CodingDt;
-import ca.uhn.fhir.model.dstu21.resource.Parameters;
-import ca.uhn.fhir.model.dstu21.resource.ValueSet;
-import ca.uhn.fhir.model.primitive.BooleanDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
-public class BaseJpaResourceProviderValueSetDstu21 extends JpaResourceProviderDstu2<ValueSet> {
+public class BaseJpaResourceProviderValueSetDstu21 extends JpaResourceProviderDstu21<ValueSet> {
 
 	//@formatter:off
 	@Operation(name = "$expand", idempotent = true)
 	public ValueSet expand(
 			HttpServletRequest theServletRequest,
-			@IdParam(optional=true) IdDt theId,
+			@IdParam(optional=true) IdType theId,
 			@OperationParam(name="valueSet", min=0, max=1) ValueSet theValueSet,
-			@OperationParam(name="identifier", min=0, max=1) UriDt theIdentifier,
-			@OperationParam(name = "filter", min=0, max=1) StringDt theFilter) {
+			@OperationParam(name="identifier", min=0, max=1) UriType theIdentifier,
+			@OperationParam(name = "filter", min=0, max=1) StringType theFilter) {
 		//@formatter:on
 		
 		boolean haveId = theId != null && theId.hasIdPart();
@@ -70,7 +69,7 @@ public class BaseJpaResourceProviderValueSetDstu21 extends JpaResourceProviderDs
 		
 		startRequest(theServletRequest);
 		try {
-			IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> dao = (IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>) getDao();
+			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
 			if (haveId) {
 				return dao.expand(theId, toFilterString(theFilter));
 			} else if (haveIdentifier) {
@@ -100,39 +99,39 @@ public class BaseJpaResourceProviderValueSetDstu21 extends JpaResourceProviderDs
 	}
 
 
-	private String toFilterString(StringDt theFilter) {
+	private String toFilterString(StringType theFilter) {
 		return theFilter != null ? theFilter.getValue() : null;
 	}
 
 	//@formatter:off
 	@Operation(name = "$lookup", idempotent = true, returnParameters= {
-		@OperationParam(name="name", type=StringDt.class, min=1),
-		@OperationParam(name="version", type=StringDt.class, min=0),
-		@OperationParam(name="display", type=StringDt.class, min=1),
-		@OperationParam(name="abstract", type=BooleanDt.class, min=1),
+		@OperationParam(name="name", type=StringType.class, min=1),
+		@OperationParam(name="version", type=StringType.class, min=0),
+		@OperationParam(name="display", type=StringType.class, min=1),
+		@OperationParam(name="abstract", type=BooleanType.class, min=1),
 	})
 	public Parameters lookup(
 			HttpServletRequest theServletRequest,
-			@OperationParam(name="code", min=0, max=1) CodeDt theCode, 
-			@OperationParam(name="system", min=0, max=1) UriDt theSystem,
-			@OperationParam(name="coding", min=0, max=1) CodingDt theCoding 
+			@OperationParam(name="code", min=0, max=1) CodeType theCode, 
+			@OperationParam(name="system", min=0, max=1) UriType theSystem,
+			@OperationParam(name="coding", min=0, max=1) Coding theCoding 
 			) {
 		//@formatter:on
 		
 		startRequest(theServletRequest);
 		try {
-			IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> dao = (IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>) getDao();
+			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
 			LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding);
 			if (result.isFound()==false) {
 				throw new ResourceNotFoundException("Unable to find code[" + result.getSearchedForCode() + "] in system[" + result.getSearchedForSystem() + "]");
 			}
 			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("name").setValue(new StringDt(result.getCodeSystemDisplayName()));
+			retVal.addParameter().setName("name").setValue(new StringType(result.getCodeSystemDisplayName()));
 			if (isNotBlank(result.getCodeSystemVersion())) {
-				retVal.addParameter().setName("version").setValue(new StringDt(result.getCodeSystemVersion()));
+				retVal.addParameter().setName("version").setValue(new StringType(result.getCodeSystemVersion()));
 			}
-			retVal.addParameter().setName("display").setValue(new StringDt(result.getCodeDisplay()));
-			retVal.addParameter().setName("abstract").setValue(new BooleanDt(result.isCodeIsAbstract()));			
+			retVal.addParameter().setName("display").setValue(new StringType(result.getCodeDisplay()));
+			retVal.addParameter().setName("abstract").setValue(new BooleanType(result.isCodeIsAbstract()));			
 			return retVal;
 		} finally {
 			endRequest(theServletRequest);
@@ -142,33 +141,33 @@ public class BaseJpaResourceProviderValueSetDstu21 extends JpaResourceProviderDs
 	
 	//@formatter:off
 	@Operation(name = "$validate-code", idempotent = true, returnParameters= {
-		@OperationParam(name="result", type=BooleanDt.class, min=1),
-		@OperationParam(name="message", type=StringDt.class),
-		@OperationParam(name="display", type=StringDt.class)
+		@OperationParam(name="result", type=BooleanType.class, min=1),
+		@OperationParam(name="message", type=StringType.class),
+		@OperationParam(name="display", type=StringType.class)
 	})
 	public Parameters validateCode(
 			HttpServletRequest theServletRequest,
-			@IdParam(optional=true) IdDt theId, 
-			@OperationParam(name="identifier", min=0, max=1) UriDt theValueSetIdentifier, 
-			@OperationParam(name="code", min=0, max=1) CodeDt theCode, 
-			@OperationParam(name="system", min=0, max=1) UriDt theSystem,
-			@OperationParam(name="display", min=0, max=1) StringDt theDisplay,
-			@OperationParam(name="coding", min=0, max=1) CodingDt theCoding,
-			@OperationParam(name="codeableConcept", min=0, max=1) CodeableConceptDt theCodeableConcept
+			@IdParam(optional=true) IdType theId, 
+			@OperationParam(name="identifier", min=0, max=1) UriType theValueSetIdentifier, 
+			@OperationParam(name="code", min=0, max=1) CodeType theCode, 
+			@OperationParam(name="system", min=0, max=1) UriType theSystem,
+			@OperationParam(name="display", min=0, max=1) StringType theDisplay,
+			@OperationParam(name="coding", min=0, max=1) Coding theCoding,
+			@OperationParam(name="codeableConcept", min=0, max=1) CodeableConcept theCodeableConcept
 			) {
 		//@formatter:on
 		
 		startRequest(theServletRequest);
 		try {
-			IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> dao = (IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>) getDao();
+			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
 			ValidateCodeResult result = dao.validateCode(theValueSetIdentifier, theId, theCode, theSystem, theDisplay, theCoding, theCodeableConcept);
 			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("result").setValue(new BooleanDt(result.isResult()));
+			retVal.addParameter().setName("result").setValue(new BooleanType(result.isResult()));
 			if (isNotBlank(result.getMessage())) {
-				retVal.addParameter().setName("message").setValue(new StringDt(result.getMessage()));
+				retVal.addParameter().setName("message").setValue(new StringType(result.getMessage()));
 			}
 			if (isNotBlank(result.getDisplay())) {
-				retVal.addParameter().setName("display").setValue(new StringDt(result.getDisplay()));
+				retVal.addParameter().setName("display").setValue(new StringType(result.getDisplay()));
 			}
 			return retVal;
 		} finally {

@@ -39,24 +39,24 @@ cp $FHIRTRUNK/build/publish/fhir-xhtml.xsd ./hapi-fhir-validation-resources-$PRO
 cp $FHIRTRUNK/build/publish/xml.xsd ./hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/schema/
 
 # Copy Model
-cp -fvR $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/model hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/
-find hapi-fhir-structures-hl7org-$PROJVERSION/src -name "*.class" | xargs rm -v
+cp -fvR $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/model hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/
+find hapi-fhir-structures-$PROJVERSION/src -name "*.class" | xargs rm -v
 
 # Exception class
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/exceptions/FHIRException.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/exceptions/
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/exceptions/FHIRFormatError.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/exceptions/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/exceptions/FHIRException.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/exceptions/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/exceptions/FHIRFormatError.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/exceptions/
 
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/Utilities.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/utilities
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/CSFile.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/utilities
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/MyURIResolver.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/utilities
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/ZipURIResolver.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/utilities
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/Inflector.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/utilities
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/FileNotifier.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/utilities
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/XhtmlNode.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xhtml/
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/XhtmlDocument.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xhtml/
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/NodeType.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xhtml/
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/XhtmlParser.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xhtml/
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/XhtmlComposer.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xhtml/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/Utilities.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/CSFile.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/MyURIResolver.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/ZipURIResolver.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/Inflector.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/FileNotifier.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities
+#cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/XhtmlNode.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xhtml/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/XhtmlDocument.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xhtml/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/NodeType.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xhtml/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/XhtmlParser.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xhtml/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/XhtmlComposer.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xhtml/
 
 # XML
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xml/IXMLWriter.java hapi-fhir-structures-hl7org-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xml/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xml/IXMLWriter.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xml/

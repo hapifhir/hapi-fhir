@@ -16,6 +16,7 @@ nohup.out
 tmp.txt
 *.hprof
 tmp.txt
+ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString/
 
 # Vagrant stuff.
 .vagrant

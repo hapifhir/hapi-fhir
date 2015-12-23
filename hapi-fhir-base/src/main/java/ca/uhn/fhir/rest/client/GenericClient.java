@@ -853,10 +853,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IDeleteTyped resource(IResource theResource) {
+		public IDeleteTyped resource(IBaseResource theResource) {
 			Validate.notNull(theResource, "theResource can not be null");
-			IdDt id = theResource.getId();
-			Validate.notNull(id, "theResource.getId() can not be null");
+			IIdType id = theResource.getIdElement();
+			Validate.notNull(id, "theResource.getIdElement() can not be null");
 			if (id.hasResourceType() == false || id.hasIdPart() == false) {
 				throw new IllegalArgumentException("theResource.getId() must contain a resource type and logical ID at a minimum (e.g. Patient/1234), found: " + id.getValue());
 			}
@@ -1798,7 +1798,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				}
 			}
 
-			if (myReturnBundleType == null && myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
+			if (myReturnBundleType == null && myContext.getVersion().getVersion().isRi()) {
 				throw new IllegalArgumentException("When using the client with HL7.org structures, you must specify "
 						+ "the bundle return type for the client by adding \".returnBundle(org.hl7.fhir.instance.model.Bundle.class)\" to your search method call before the \".execute()\" method");
 			}

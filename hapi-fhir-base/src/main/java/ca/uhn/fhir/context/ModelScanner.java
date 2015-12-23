@@ -54,6 +54,7 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
@@ -192,7 +193,7 @@ class ModelScanner {
 		Map<String, Class<? extends IBaseResource>> resourceTypes = myNameToResourceType;
 
 		myVersionTypes = scanVersionPropertyFile(theDatatypes, resourceTypes, myVersion);
-
+		
 		// toScan.add(DateDt.class);
 		// toScan.add(CodeDt.class);
 		// toScan.add(DecimalDt.class);
@@ -245,58 +246,58 @@ class ModelScanner {
 	private <T extends Annotation> T pullAnnotation(Class<?> theContainer, AnnotatedElement theTarget, Class<T> theAnnotationType) {
 
 		T retVal = theTarget.getAnnotation(theAnnotationType);
-		if (myContext.getVersion().getVersion() != FhirVersionEnum.DSTU2_HL7ORG) {
+//		if (myContext.getVersion().getVersion() != FhirVersionEnum.DSTU2_HL7ORG) {
 			return retVal;
-		}
-
-		if (retVal == null) {
-			final Class<? extends Annotation> altAnnotationClass;
-			/*
-			 * Use a cache to minimize Class.forName calls, since they are slow and expensive..
-			 */
-			if (myAnnotationForwards.containsKey(theAnnotationType) == false) {
-				String sourceClassName = theAnnotationType.getName();
-				String candidateAltClassName = sourceClassName.replace("ca.uhn.fhir.model.api.annotation", "org.hl7.fhir.instance.model.annotations");
-				if (!sourceClassName.equals(candidateAltClassName)) {
-					Class<?> forName;
-					try {
-						forName = Class.forName(candidateAltClassName);
-						ourLog.debug("Forwarding annotation request for [{}] to class [{}]", theAnnotationType, forName);
-					} catch (ClassNotFoundException e) {
-						forName = null;
-					}
-					altAnnotationClass = (Class<? extends Annotation>) forName;
-				} else {
-					altAnnotationClass = null;
-				}
-				myAnnotationForwards.put(theAnnotationType, altAnnotationClass);
-			} else {
-				altAnnotationClass = myAnnotationForwards.get(theAnnotationType);
-			}
-
-			if (altAnnotationClass == null) {
-				return null;
-			}
-
-			final Annotation altAnnotation;
-			altAnnotation = theTarget.getAnnotation(altAnnotationClass);
-			if (altAnnotation == null) {
-				return null;
-			}
-
-			InvocationHandler h = new InvocationHandler() {
-
-				@Override
-				public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable {
-					Method altMethod = altAnnotationClass.getMethod(theMethod.getName(), theMethod.getParameterTypes());
-					return altMethod.invoke(altAnnotation, theArgs);
-				}
-			};
-			retVal = (T) Proxy.newProxyInstance(theAnnotationType.getClassLoader(), new Class<?>[] { theAnnotationType }, h);
-
-		}
-
-		return retVal;
+//		}
+//
+//		if (retVal == null) {
+//			final Class<? extends Annotation> altAnnotationClass;
+//			/*
+//			 * Use a cache to minimize Class.forName calls, since they are slow and expensive..
+//			 */
+//			if (myAnnotationForwards.containsKey(theAnnotationType) == false) {
+//				String sourceClassName = theAnnotationType.getName();
+//				String candidateAltClassName = sourceClassName.replace("ca.uhn.fhir.model.api.annotation", "org.hl7.fhir.instance.model.annotations");
+//				if (!sourceClassName.equals(candidateAltClassName)) {
+//					Class<?> forName;
+//					try {
+//						forName = Class.forName(candidateAltClassName);
+//						ourLog.debug("Forwarding annotation request for [{}] to class [{}]", theAnnotationType, forName);
+//					} catch (ClassNotFoundException e) {
+//						forName = null;
+//					}
+//					altAnnotationClass = (Class<? extends Annotation>) forName;
+//				} else {
+//					altAnnotationClass = null;
+//				}
+//				myAnnotationForwards.put(theAnnotationType, altAnnotationClass);
+//			} else {
+//				altAnnotationClass = myAnnotationForwards.get(theAnnotationType);
+//			}
+//
+//			if (altAnnotationClass == null) {
+//				return null;
+//			}
+//
+//			final Annotation altAnnotation;
+//			altAnnotation = theTarget.getAnnotation(altAnnotationClass);
+//			if (altAnnotation == null) {
+//				return null;
+//			}
+//
+//			InvocationHandler h = new InvocationHandler() {
+//
+//				@Override
+//				public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable {
+//					Method altMethod = altAnnotationClass.getMethod(theMethod.getName(), theMethod.getParameterTypes());
+//					return altMethod.invoke(altAnnotation, theArgs);
+//				}
+//			};
+//			retVal = (T) Proxy.newProxyInstance(theAnnotationType.getClassLoader(), new Class<?>[] { theAnnotationType }, h);
+//
+//		}
+//
+//		return retVal;
 	}
 
 	private void scan(Class<? extends IBase> theClass) throws ConfigurationException {
@@ -366,6 +367,8 @@ class ModelScanner {
 		RuntimeCompositeDatatypeDefinition resourceDef;
 		if (theClass.equals(ExtensionDt.class)) {
 			resourceDef = new RuntimeExtensionDtDefinition(theDatatypeDefinition, theClass, true);
+//		} else if (IBaseMetaType.class.isAssignableFrom(theClass)) {
+//			resourceDef = new RuntimeMetaDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
 		} else {
 			resourceDef = new RuntimeCompositeDatatypeDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
 		}

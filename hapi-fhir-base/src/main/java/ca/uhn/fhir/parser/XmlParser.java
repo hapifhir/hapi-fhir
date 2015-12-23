@@ -600,7 +600,7 @@ public class XmlParser extends BaseParser implements IParser {
 			} else {
 
 				List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
-				values = super.preProcessValues(nextChild, values);
+				values = super.preProcessValues(nextChild, theResource, values);
 
 				if (values == null || values.isEmpty()) {
 					continue;

@@ -675,4 +675,25 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 		return theIdPart.toString();
 	}
 
+	@Override
+	public IIdType setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart) {
+		if (isNotBlank(theVersionIdPart)) {
+			Validate.notBlank(theResourceType, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
+			Validate.notBlank(theIdPart, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");
+		}
+		if (isNotBlank(theBaseUrl) && isNotBlank(theIdPart)) {
+			Validate.notBlank(theResourceType, "If theBaseUrl is populated and theIdPart is populated, theResourceType must be populated");
+		}
+		
+		setValue(null);
+		
+		myBaseUrl = theBaseUrl;
+		myResourceType = theResourceType;
+		myUnqualifiedId = theIdPart;
+		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionIdPart, null);
+		myHaveComponentParts = true;
+		
+		return this;
+	}
+
 }

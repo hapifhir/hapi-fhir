@@ -21,17 +21,16 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.model.Meta;
+import org.hl7.fhir.dstu21.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-
-import ca.uhn.fhir.model.dstu21.composite.MetaDt;
-import ca.uhn.fhir.model.dstu21.resource.Bundle;
-import ca.uhn.fhir.model.dstu21.resource.SearchParameter;
 
 public class FhirResourceDaoSearchParameterDstu21 extends FhirResourceDaoDstu21<SearchParameter>implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
 	@Autowired
-	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
+	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 	
 	/**
 	 * This method is called once per minute to perform any required re-indexing. During most passes this will

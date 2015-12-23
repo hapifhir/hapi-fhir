@@ -45,4 +45,16 @@ public interface IBaseMetaType extends ICompositeType {
 	
 	IBaseMetaType setVersionId(String theVersionId);
 
+	/**
+	 * Returns the first tag (if any) that has the given system and code, or returns
+	 * <code>null</code> if none
+	 */
+	IBaseCoding getTag(String theSystem, String theCode);
+
+ 	/**
+ 	 * Returns the first security label (if any) that has the given system and code, or returns
+ 	 * <code>null</code> if none
+ 	 */
+	IBaseCoding getSecurity(String theSystem, String theCode);
+
 }

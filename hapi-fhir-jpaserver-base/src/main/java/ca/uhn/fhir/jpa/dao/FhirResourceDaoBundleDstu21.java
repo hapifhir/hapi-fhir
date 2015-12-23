@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.dao;
 
+import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu21.model.Bundle.BundleType;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -20,9 +24,6 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.model.dstu21.resource.Bundle;
-import ca.uhn.fhir.model.dstu21.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu21.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 public class FhirResourceDaoBundleDstu21 extends FhirResourceDaoDstu21<Bundle> {
@@ -31,12 +32,12 @@ public class FhirResourceDaoBundleDstu21 extends FhirResourceDaoDstu21<Bundle> {
 	protected void preProcessResourceForStorage(Bundle theResource) {
 		super.preProcessResourceForStorage(theResource);
 
-		if (theResource.getTypeElement().getValueAsEnum() != BundleTypeEnum.DOCUMENT) {
-			String message = "Unable to store a Bundle resource on this server with a Bundle.type value other than '" + BundleTypeEnum.DOCUMENT.getCode() + "' - Value was: " + (theResource.getTypeElement().getValueAsEnum() != null ? theResource.getTypeElement().getValueAsEnum().getCode() : "(missing)");
+		if (theResource.getType() != BundleType.DOCUMENT) {
+			String message = "Unable to store a Bundle resource on this server with a Bundle.type value other than '" + BundleType.DOCUMENT.toCode() + "' - Value was: " + (theResource.getType() != null ? theResource.getType().toCode() : "(missing)");
 			throw new UnprocessableEntityException(message);
 		}
 
-		for (Entry next : theResource.getEntry()) {
+		for (BundleEntryComponent next : theResource.getEntry()) {
 			next.setFullUrl((String)null);
 		}
 	}

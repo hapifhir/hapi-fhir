@@ -39,8 +39,21 @@ import java.util.Set;
 import javax.persistence.TypedQuery;
 
 import org.apache.http.NameValuePair;
+import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu21.model.Bundle.BundleEntryResponseComponent;
+import org.hl7.fhir.dstu21.model.Bundle.BundleType;
+import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.Meta;
+import org.hl7.fhir.dstu21.model.OperationOutcome;
+import org.hl7.fhir.dstu21.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.dstu21.model.Resource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -60,15 +73,6 @@ import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.dstu21.composite.MetaDt;
-import ca.uhn.fhir.model.dstu21.resource.Bundle;
-import ca.uhn.fhir.model.dstu21.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu21.resource.Bundle.EntryResponse;
-import ca.uhn.fhir.model.dstu21.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu21.valueset.BundleTypeEnum;
-import ca.uhn.fhir.model.dstu21.valueset.HTTPVerbEnum;
-import ca.uhn.fhir.model.dstu21.valueset.IssueSeverityEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -90,7 +94,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.UrlUtil.UrlParts;
 
-public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
+public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu21.class);
 
 	@Autowired
@@ -104,7 +108,7 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
 		Bundle resp = new Bundle();
-		resp.setType(BundleTypeEnum.BATCH_RESPONSE);
+		resp.setType(BundleType.BATCHRESPONSE);
 		OperationOutcome ooResp = new OperationOutcome();
 		resp.addEntry().setResource(ooResp);
 
@@ -112,13 +116,13 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		 * For batch, we handle each entry as a mini-transaction in its own database transaction so that if one fails, it doesn't prevent others
 		 */
 
-		for (final Entry nextRequestEntry : theRequest.getEntry()) {
+		for (final BundleEntryComponent nextRequestEntry : theRequest.getEntry()) {
 
 			TransactionCallback<Bundle> callback = new TransactionCallback<Bundle>() {
 				@Override
 				public Bundle doInTransaction(TransactionStatus theStatus) {
 					Bundle subRequestBundle = new Bundle();
-					subRequestBundle.setType(BundleTypeEnum.TRANSACTION);
+					subRequestBundle.setType(BundleType.TRANSACTION);
 					subRequestBundle.addEntry(nextRequestEntry);
 
 					Bundle subResponseBundle = transaction((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
@@ -131,7 +135,7 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				Bundle nextResponseBundle = txTemplate.execute(callback);
 				caughtEx = null;
 
-				Entry subResponseEntry = nextResponseBundle.getEntry().get(0);
+				BundleEntryComponent subResponseEntry = nextResponseBundle.getEntry().get(0);
 				resp.addEntry(subResponseEntry);
 				/*
 				 * If the individual entry didn't have a resource in its response, bring the sub-transaction's OperationOutcome across so the client can see it
@@ -148,13 +152,13 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			}
 
 			if (caughtEx != null) {
-				Entry nextEntry = resp.addEntry();
+				BundleEntryComponent nextEntry = resp.addEntry();
 
 				OperationOutcome oo = new OperationOutcome();
-				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setDiagnostics(caughtEx.getMessage());
+				oo.addIssue().setSeverity(IssueSeverity.ERROR).setDiagnostics(caughtEx.getMessage());
 				nextEntry.setResource(oo);
 
-				EntryResponse nextEntryResp = nextEntry.getResponse();
+				BundleEntryResponseComponent nextEntryResp = nextEntry.getResponse();
 				nextEntryResp.setStatus(toStatusString(caughtEx.getStatusCode()));
 			}
 
@@ -162,12 +166,12 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info("Batch completed in {}ms", new Object[] { delay });
-		ooResp.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Batch completed in " + delay + "ms");
+		ooResp.addIssue().setSeverity(IssueSeverity.INFORMATION).setDiagnostics("Batch completed in " + delay + "ms");
 
 		return resp;
 	}
 
-	private String extractTransactionUrlOrThrowException(Entry nextEntry, HTTPVerbEnum verb) {
+	private String extractTransactionUrlOrThrowException(BundleEntryComponent nextEntry, HTTPVerb verb) {
 		String url = nextEntry.getRequest().getUrl();
 		if (isBlank(url)) {
 			throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionMissingUrl", verb.name()));
@@ -189,8 +193,8 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		return p.parseResource(theResource.getClass(), p.encodeResourceToString(theResource));
 	}
 
-	private IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IResource> theClass) {
-		IFhirResourceDao<? extends IResource> retVal = getDao(theClass);
+	private IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
+		IFhirResourceDao<? extends IBaseResource> retVal = getDao(theClass);
 		if (retVal == null) {
 			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + getContext().getResourceDefinition(theClass).getName());
 		}
@@ -198,7 +202,7 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	}
 
 	@Override
-	public MetaDt metaGetOperation() {
+	public Meta metaGetOperation() {
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null);
 		notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
@@ -207,13 +211,13 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
 		List<TagDefinition> tagDefinitions = q.getResultList();
 
-		MetaDt retVal = toMetaDt(tagDefinitions);
+		Meta retVal = toMeta(tagDefinitions);
 
 		return retVal;
 	}
 	
-	protected MetaDt toMetaDt(Collection<TagDefinition> tagDefinitions) {
-		MetaDt retVal = new MetaDt();
+	protected Meta toMeta(Collection<TagDefinition> tagDefinitions) {
+		Meta retVal = new Meta();
 		for (TagDefinition next : tagDefinitions) {
 			switch (next.getTagType()) {
 			case PROFILE:
@@ -268,18 +272,18 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 	@SuppressWarnings("unchecked")
 	private Bundle transaction(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName) {
-		BundleTypeEnum transactionType = theRequest.getTypeElement().getValueAsEnum();
-		if (transactionType == BundleTypeEnum.BATCH) {
+		BundleType transactionType = theRequest.getTypeElement().getValue();
+		if (transactionType == BundleType.BATCH) {
 			return batch(theRequestDetails, theRequest);
 		}
 
 		if (transactionType == null) {
-			String message = "Transactiion Bundle did not specify valid Bundle.type, assuming " + BundleTypeEnum.TRANSACTION.getCode();
+			String message = "Transactiion Bundle did not specify valid Bundle.type, assuming " + BundleType.TRANSACTION.toCode();
 			ourLog.warn(message);
-			transactionType = BundleTypeEnum.TRANSACTION;
+			transactionType = BundleType.TRANSACTION;
 		}
-		if (transactionType != BundleTypeEnum.TRANSACTION) {
-			throw new InvalidRequestException("Unable to process transaction where incoming Bundle.type = " + transactionType.getCode());
+		if (transactionType != BundleType.TRANSACTION) {
+			throw new InvalidRequestException("Unable to process transaction where incoming Bundle.type = " + transactionType.toCode());
 		}
 
 		ourLog.info("Beginning {} with {} resources", theActionName, theRequest.getEntry().size());
@@ -287,9 +291,9 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		long start = System.currentTimeMillis();
 		Date updateTime = new Date();
 
-		Set<IdDt> allIds = new LinkedHashSet<IdDt>();
-		Map<IdDt, IdDt> idSubstitutions = new HashMap<IdDt, IdDt>();
-		Map<IdDt, DaoMethodOutcome> idToPersistedOutcome = new HashMap<IdDt, DaoMethodOutcome>();
+		Set<IdType> allIds = new LinkedHashSet<IdType>();
+		Map<IdType, IdType> idSubstitutions = new HashMap<IdType, IdType>();
+		Map<IdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<IdType, DaoMethodOutcome>();
 
 		/*
 		 * We want to execute the transaction request bundle elements in the order
@@ -302,12 +306,12 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		 * we want the GET processing to use the final indexing state
 		 */
 		Bundle response = new Bundle();
-		List<Entry> getEntries = new ArrayList<Entry>();
-		IdentityHashMap<Entry, Integer> originalRequestOrder = new IdentityHashMap<Bundle.Entry, Integer>();
+		List<BundleEntryComponent> getEntries = new ArrayList<BundleEntryComponent>();
+		IdentityHashMap<BundleEntryComponent, Integer> originalRequestOrder = new IdentityHashMap<Bundle.BundleEntryComponent, Integer>();
 		for (int i = 0; i < theRequest.getEntry().size(); i++) {
 			originalRequestOrder.put(theRequest.getEntry().get(i), i);
 			response.addEntry();
-			if (theRequest.getEntry().get(i).getRequest().getMethodElement().getValueAsEnum() == HTTPVerbEnum.GET) {
+			if (theRequest.getEntry().get(i).getRequest().getMethodElement().getValue() == HTTPVerb.GET) {
 				getEntries.add(theRequest.getEntry().get(i));
 			}
 		}
@@ -326,16 +330,16 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				ourLog.info("Processed {} non-GET entries out of {}", i, theRequest.getEntry().size());
 			}
 
-			Entry nextReqEntry = theRequest.getEntry().get(i);
-			IResource res = nextReqEntry.getResource();
-			IdDt nextResourceId = null;
+			BundleEntryComponent nextReqEntry = theRequest.getEntry().get(i);
+			Resource res = nextReqEntry.getResource();
+			IdType nextResourceId = null;
 			if (res != null) {
 
-				nextResourceId = res.getId();
+				nextResourceId = res.getIdElement();
 
 				if (nextResourceId.hasIdPart() == false) {
 					if (isNotBlank(nextReqEntry.getFullUrl())) {
-						nextResourceId = new IdDt(nextReqEntry.getFullUrl());
+						nextResourceId = new IdType(nextReqEntry.getFullUrl());
 					}
 				}
 
@@ -344,7 +348,7 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				}
 
 				if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType() && !isPlaceholder(nextResourceId)) {
-					nextResourceId = new IdDt(toResourceName(res.getClass()), nextResourceId.getIdPart());
+					nextResourceId = new IdType(toResourceName(res.getClass()), nextResourceId.getIdPart());
 					res.setId(nextResourceId);
 				}
 
@@ -356,7 +360,7 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextResourceId));
 					}
 				} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart()) {
-					IdDt nextId = nextResourceId.toUnqualifiedVersionless();
+					IdType nextId = nextResourceId.toUnqualifiedVersionless();
 					if (!allIds.add(nextId)) {
 						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextId));
 					}
@@ -364,13 +368,13 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 			}
 
-			HTTPVerbEnum verb = nextReqEntry.getRequest().getMethodElement().getValueAsEnum();
+			HTTPVerb verb = nextReqEntry.getRequest().getMethodElement().getValue();
 			if (verb == null) {
 				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextReqEntry.getRequest().getMethod()));
 			}
 
 			String resourceType = res != null ? getContext().getResourceDefinition(res).getName() : null;
-			Entry nextRespEntry = response.getEntry().get(originalRequestOrder.get(nextReqEntry));
+			BundleEntryComponent nextRespEntry = response.getEntry().get(originalRequestOrder.get(nextReqEntry));
 
 			switch (verb) {
 			case POST: {
@@ -387,10 +391,10 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				// DELETE
 				String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
 				UrlParts parts = UrlUtil.parseUrl(url);
-				ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb.getCode(), url);
+				ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb.toCode(), url);
 				int status = Constants.STATUS_HTTP_204_NO_CONTENT;
 				if (parts.getResourceId() != null) {
-					ResourceTable deleted = dao.delete(new IdDt(parts.getResourceType(), parts.getResourceId()), deleteConflicts);
+					ResourceTable deleted = dao.delete(new IdType(parts.getResourceType(), parts.getResourceId()), deleteConflicts);
 					if (deleted != null) {
 						deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless());
 					}
@@ -418,7 +422,7 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 				UrlParts parts = UrlUtil.parseUrl(url);
 				if (isNotBlank(parts.getResourceId())) {
-					res.setId(new IdDt(parts.getResourceType(), parts.getResourceId()));
+					res.setId(new IdType(parts.getResourceType(), parts.getResourceId()));
 					outcome = resourceDao.update(res, null, false);
 				} else {
 					res.setId((String) null);
@@ -452,24 +456,24 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 		FhirTerser terser = getContext().newTerser();
 		for (DaoMethodOutcome nextOutcome : idToPersistedOutcome.values()) {
-			IResource nextResource = (IResource) nextOutcome.getResource();
+			IBaseResource nextResource = (IBaseResource) nextOutcome.getResource();
 			if (nextResource == null) {
 				continue;
 			}
 
-			List<BaseResourceReferenceDt> allRefs = terser.getAllPopulatedChildElementsOfType(nextResource, BaseResourceReferenceDt.class);
-			for (BaseResourceReferenceDt nextRef : allRefs) {
-				IdDt nextId = nextRef.getReference();
+			List<IBaseReference> allRefs = terser.getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class);
+			for (IBaseReference nextRef : allRefs) {
+				IIdType nextId = nextRef.getReferenceElement();
 				if (idSubstitutions.containsKey(nextId)) {
-					IdDt newId = idSubstitutions.get(nextId);
+					IdType newId = idSubstitutions.get(nextId);
 					ourLog.info(" * Replacing resource ref {} with {}", nextId, newId);
-					nextRef.setReference(newId);
+					nextRef.setReference(newId.getValue());
 				} else {
 					ourLog.debug(" * Reference [{}] does not exist in bundle", nextId);
 				}
 			}
 
-			InstantDt deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get(nextResource);
+			IPrimitiveType<Date> deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 			updateEntity(nextResource, nextOutcome.getEntity(), false, deletedTimestampOrNull, true, false, updateTime);
 		}
@@ -479,8 +483,8 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		/*
 		 * Double check we didn't allow any duplicates we shouldn't have
 		 */
-		for (Entry nextEntry : theRequest.getEntry()) {
-			if (nextEntry.getRequest().getMethodElement().getValueAsEnum() == HTTPVerbEnum.POST) {
+		for (BundleEntryComponent nextEntry : theRequest.getEntry()) {
+			if (nextEntry.getRequest().getMethodElement().getValue() == HTTPVerb.POST) {
 				String matchUrl = nextEntry.getRequest().getIfNoneExist();
 				if (isNotBlank(matchUrl)) {
 					IFhirResourceDao<?> resourceDao = getDao(nextEntry.getResource().getClass());
@@ -493,8 +497,8 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			}
 		}
 
-		for (IdDt next : allIds) {
-			IdDt replacement = idSubstitutions.get(next);
+		for (IdType next : allIds) {
+			IdType replacement = idSubstitutions.get(next);
 			if (replacement == null) {
 				continue;
 			}
@@ -508,16 +512,16 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		 * Loop through the request and process any entries of type GET
 		 */
 		for (int i = 0; i < getEntries.size(); i++) {
-			Entry nextReqEntry = getEntries.get(i);
+			BundleEntryComponent nextReqEntry = getEntries.get(i);
 			Integer originalOrder = originalRequestOrder.get(nextReqEntry);
-			Entry nextRespEntry = response.getEntry().get(originalOrder);
+			BundleEntryComponent nextRespEntry = response.getEntry().get(originalOrder);
 
 			ServletSubRequestDetails requestDetails = new ServletSubRequestDetails();
 			requestDetails.setServletRequest(theRequestDetails.getServletRequest());
 			requestDetails.setRequestType(RequestTypeEnum.GET);
 			requestDetails.setServer(theRequestDetails.getServer());
 			
-			String url = extractTransactionUrlOrThrowException(nextReqEntry, HTTPVerbEnum.GET);
+			String url = extractTransactionUrlOrThrowException(nextReqEntry, HTTPVerb.GET);
 			
 			int qIndex = url.indexOf('?');
 			ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
@@ -561,7 +565,7 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 					if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
 						resource = filterNestedBundle(requestDetails, resource);
 					}
-					nextRespEntry.setResource((IResource) resource);
+					nextRespEntry.setResource((Resource) resource);
 					nextRespEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_200_OK));
 				} catch (NotModifiedException e) {
 					nextRespEntry.getResponse().setStatus(toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
@@ -575,21 +579,21 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info(theActionName + " completed in {}ms", new Object[] { delay });
 
-		response.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
+		response.setType(BundleType.TRANSACTIONRESPONSE);
 		return response;
 	}
 
-	private static void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome,
-			Entry newEntry, String theResourceType, IResource theRes) {
-		IdDt newId = (IdDt) outcome.getId().toUnqualifiedVersionless();
-		IdDt resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
+	private static void handleTransactionCreateOrUpdateOutcome(Map<IdType, IdType> idSubstitutions, Map<IdType, DaoMethodOutcome> idToPersistedOutcome, IdType nextResourceId, DaoMethodOutcome outcome,
+			BundleEntryComponent newEntry, String theResourceType, IBaseResource theRes) {
+		IdType newId = (IdType) outcome.getId().toUnqualifiedVersionless();
+		IdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
 			idSubstitutions.put(resourceId, newId);
 			if (isPlaceholder(resourceId)) {
 				/*
 				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified kind too just to be lenient.
 				 */
-				idSubstitutions.put(new IdDt(theResourceType + '/' + resourceId.getValue()), newId);
+				idSubstitutions.put(new IdType(theResourceType + '/' + resourceId.getValue()), newId);
 			}
 		}
 		idToPersistedOutcome.put(newId, outcome);
@@ -600,10 +604,10 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		}
 		newEntry.getResponse().setLocation(outcome.getId().toUnqualified().getValue());
 		newEntry.getResponse().setEtag(outcome.getId().getVersionIdPart());
-		newEntry.getResponse().setLastModified(ResourceMetadataKeyEnum.UPDATED.get(theRes));
+		newEntry.getResponse().setLastModified(((Resource)theRes).getMeta().getLastUpdated());
 	}
 
-	private static boolean isPlaceholder(IdDt theId) {
+	private static boolean isPlaceholder(IdType theId) {
 		if ("urn:oid:".equals(theId.getBaseUrl()) || "urn:uuid:".equals(theId.getBaseUrl())) {
 			return true;
 		}
@@ -624,20 +628,20 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	 * Process any GET interactions
 	 */
 	//@formatter:off
-	public class TransactionSorter implements Comparator<Entry> {
+	public class TransactionSorter implements Comparator<BundleEntryComponent> {
 
 		@Override
-		public int compare(Entry theO1, Entry theO2) {			
+		public int compare(BundleEntryComponent theO1, BundleEntryComponent theO2) {			
 			int o1 = toOrder(theO1);
 			int o2 = toOrder(theO2);
 
 			return o1 - o2;
 		}
 
-		private int toOrder(Entry theO1) {
+		private int toOrder(BundleEntryComponent theO1) {
 			int o1 = 0;
-			if (theO1.getRequest().getMethodElement().getValueAsEnum() != null) {
-			switch (theO1.getRequest().getMethodElement().getValueAsEnum()) {
+			if (theO1.getRequest().getMethodElement().getValue() != null) {
+			switch (theO1.getRequest().getMethodElement().getValue()) {
 			case DELETE:
 				o1 = 1;
 				break;
@@ -649,6 +653,9 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				break;
 			case GET:
 				o1 = 4;
+				break;
+			case NULL:
+				o1 = 0;
 				break;
 			}
 			}

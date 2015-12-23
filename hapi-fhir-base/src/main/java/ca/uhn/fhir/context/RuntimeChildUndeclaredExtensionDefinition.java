@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -34,6 +35,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
 
 public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildDefinition {
 
@@ -153,13 +155,8 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		myDatatypeToAttributeName = new HashMap<Class<? extends IBase>, String>();
 		myDatatypeToDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 
-//		for (theContext.get)
-		
 		for (BaseRuntimeElementDefinition<?> next : theClassToElementDefinitions.values()) {
 			if (next instanceof IRuntimeDatatypeDefinition) {
-				// if (next.getName().equals("CodeableConcept")) {
-				// System.out.println();
-				// }
 
 				myDatatypeToDefinition.put(next.getImplementingClass(), next);
 
@@ -178,7 +175,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 					 * type.
 					 */
 					if (!qualifiedName.startsWith("ca.uhn.fhir.model")) {
-						if (!qualifiedName.startsWith("org.hl7.fhir.instance.model")) {
+						if (!qualifiedName.startsWith("org.hl7.fhir")) {
 							continue;
 						}
 					}
@@ -197,12 +194,6 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 		myAttributeNameToDefinition = datatypeAttributeNameToDefinition;
 
-
-//		for (Entry<String, BaseRuntimeElementDefinition<?>> next : myAttributeNameToDefinition.entrySet()) {
-//			@SuppressWarnings("unchecked")
-//			Class<? extends IDatatype> type = (Class<? extends IDatatype>) next.getValue().getImplementingClass();
-//			myDatatypeToDefinition.put(type, next.getValue());
-//		}
 
 		/*
 		 * Resource reference - The correct name is 'valueReference' in DSTU2 and 'valueResource' in DSTU1

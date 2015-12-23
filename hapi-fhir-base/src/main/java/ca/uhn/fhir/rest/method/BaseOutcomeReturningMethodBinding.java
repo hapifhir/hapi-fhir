@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -267,12 +268,14 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		}
 	}
 
-	protected static void parseContentLocation(MethodOutcome theOutcomeToPopulate, String theResourceName, String theLocationHeader) {
+	protected static void parseContentLocation(FhirContext theContext, MethodOutcome theOutcomeToPopulate, String theResourceName, String theLocationHeader) {
 		if (StringUtils.isBlank(theLocationHeader)) {
 			return;
 		}
 
-		theOutcomeToPopulate.setId(new IdDt(theLocationHeader));
+		IIdType id = theContext.getVersion().newIdType();
+		id.setValue(theLocationHeader);
+		theOutcomeToPopulate.setId(id);
 
 		String resourceNamePart = "/" + theResourceName + "/";
 		int resourceIndex = theLocationHeader.lastIndexOf(resourceNamePart);

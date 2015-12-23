@@ -1,7 +1,13 @@
 package org.hl7.fhir.instance.model.api;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.Include;
 
 /*
  * #%L
@@ -32,6 +38,16 @@ import ca.uhn.fhir.model.api.IElement;
  * <code>ca.uhn.fhir.model.dstu.resource.Patient</code>)
  */
 public interface IBaseResource extends IBase, IElement {
+
+	/**
+	 * Include constant for <code>*</code> (return all includes)
+	 */
+	public static final Include INCLUDE_ALL = new Include("*", false).toLocked();
+
+	/**
+	 * Include set containing only {@link #INCLUDE_ALL}
+	 */
+	public static final Set<Include> WILDCARD_ALL_SET = Collections.unmodifiableSet(new HashSet<Include>(Arrays.asList(INCLUDE_ALL)));
 
 	IIdType getIdElement();
 	

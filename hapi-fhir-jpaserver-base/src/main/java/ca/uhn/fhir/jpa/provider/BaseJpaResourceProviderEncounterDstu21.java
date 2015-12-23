@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.provider;
 
+import org.hl7.fhir.dstu21.model.Encounter;
+import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.UnsignedIntType;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -22,7 +26,6 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoEncounter;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.dstu21.resource.Encounter;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -43,11 +46,11 @@ public class BaseJpaResourceProviderEncounterDstu21 extends JpaResourceProviderD
 			javax.servlet.http.HttpServletRequest theServletRequest,
 
 			@IdParam 
-			ca.uhn.fhir.model.primitive.IdDt theId,
+			IdType theId,
 			
 			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
 			@OperationParam(name = Constants.PARAM_COUNT) 
-			ca.uhn.fhir.model.primitive.UnsignedIntDt theCount,
+			UnsignedIntType theCount,
 			
 			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 			@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1) 
@@ -76,7 +79,7 @@ public class BaseJpaResourceProviderEncounterDstu21 extends JpaResourceProviderD
 
 				@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
 				@OperationParam(name = Constants.PARAM_COUNT) 
-				ca.uhn.fhir.model.primitive.UnsignedIntDt theCount,
+				UnsignedIntType theCount,
 				
 				@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 				@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1) 

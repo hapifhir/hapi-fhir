@@ -42,7 +42,7 @@ public class BaseDstu21Config extends BaseConfig {
 	}
 
 	@Bean(name = "mySystemDaoDstu21", autowire = Autowire.BY_NAME)
-	public IFhirSystemDao<ca.uhn.fhir.model.dstu21.resource.Bundle, ca.uhn.fhir.model.dstu21.composite.MetaDt> systemDaoDstu21() {
+	public IFhirSystemDao<org.hl7.fhir.dstu21.model.Bundle, org.hl7.fhir.dstu21.model.Meta> systemDaoDstu21() {
 		ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu21 retVal = new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu21();
 		return retVal;
 	}
@@ -55,7 +55,7 @@ public class BaseDstu21Config extends BaseConfig {
 	}
 
 	@Bean(name = "myJpaValidationSupportDstu21", autowire = Autowire.BY_NAME)
-	public ca.uhn.fhir.jpa.dao.IJpaValidationSupport jpaValidationSupportDstu2() {
+	public ca.uhn.fhir.jpa.dao.IJpaValidationSupportDstu21 jpaValidationSupportDstu2() {
 		ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu21 retVal = new ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu21();
 		return retVal;
 	}

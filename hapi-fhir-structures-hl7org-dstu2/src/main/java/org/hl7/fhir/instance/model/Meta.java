@@ -34,11 +34,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.utilities.Utilities;
+
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 /**
  * The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.
  */
@@ -386,6 +387,31 @@ public class Meta extends Type implements IBaseMetaType {
           ;
       }
 
+      /**
+       * Returns the first tag (if any) that has the given system and code, or returns
+       * <code>null</code> if none
+       */
+      public Coding getTag(String theSystem, String theCode) {
+        for (Coding next : getTag()) {
+          if (ca.uhn.fhir.util.ObjectUtil.equals(next.getSystem(), theSystem) && ca.uhn.fhir.util.ObjectUtil.equals(next.getCode(), theCode)) {
+            return next;
+          }
+        }
+        return null;
+      }
+
+      /**
+       * Returns the first security label (if any) that has the given system and code, or returns
+       * <code>null</code> if none
+       */
+      public Coding getSecurity(String theSystem, String theCode) {
+        for (Coding next : getTag()) {
+          if (ca.uhn.fhir.util.ObjectUtil.equals(next.getSystem(), theSystem) && ca.uhn.fhir.util.ObjectUtil.equals(next.getCode(), theCode)) {
+            return next;
+          }
+        }
+        return null;
+      }
 
 }
 

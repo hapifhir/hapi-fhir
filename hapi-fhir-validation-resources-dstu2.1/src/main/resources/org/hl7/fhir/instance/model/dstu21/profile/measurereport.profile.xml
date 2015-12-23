@@ -18,7 +18,7 @@
   </contact>
   <date value="2014-01-31"/>
   <description value="A set of resources composed into a single coherent clinical statement with clinical attestation"/>
-  <fhirVersion value="1.1.0"/>
+  <fhirVersion value="1.2.0"/>
   <kind value="resource"/>
   <constrainedType value="Composition"/>
   <abstract value="false"/>

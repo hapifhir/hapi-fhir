@@ -35,6 +35,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -397,5 +398,11 @@ public class FhirDstu1 implements IFhirVersion {
 
 		return theExtensionDefToCode;
 	}
+
+	@Override
+	public IIdType newIdType() {
+		return new IdDt();
+	}
+
 
 }

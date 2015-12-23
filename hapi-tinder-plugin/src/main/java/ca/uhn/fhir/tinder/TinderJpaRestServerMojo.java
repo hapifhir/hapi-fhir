@@ -27,6 +27,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.EscapeTool;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 
 @Mojo(name = "generate-jparest-server", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
@@ -148,7 +149,12 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			ctx.put("configPackageBase", configPackageBase);
 			ctx.put("version", version);
 			ctx.put("esc", new EscapeTool());
-
+			if (BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi()) {
+				ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
+			} else {
+				ctx.put("resourcePackage", "ca.uhn.fhir.model." + version + ".resource");
+			}
+			
 			String capitalize = WordUtils.capitalize(version);
 			if ("Dstu".equals(capitalize)) {
 				capitalize="Dstu1";
@@ -211,7 +217,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 		TinderJpaRestServerMojo mojo = new TinderJpaRestServerMojo();
 		mojo.myProject = new MavenProject();
-		mojo.version = "dstu2";
+		mojo.version = "dstu21";
 		mojo.packageBase = "ca.uhn.test";
 		mojo.configPackageBase = "ca.uhn.test";
 //		mojo.baseResourceNames = new ArrayList<String>(Collections.singletonList("observation"));

@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.model.api;
 
+import ca.uhn.fhir.model.api.IElement;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +23,6 @@ package org.hl7.fhir.instance.model.api;
  */
 
 
-public interface IBaseDatatype extends IBase {
+public interface IBaseDatatype extends IElement {
 
 }

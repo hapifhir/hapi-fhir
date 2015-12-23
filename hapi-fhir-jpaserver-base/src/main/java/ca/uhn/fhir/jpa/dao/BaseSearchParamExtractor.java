@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
@@ -40,7 +42,7 @@ public class BaseSearchParamExtractor {
 		return myContext;
 	}
 
-	protected List<Object> extractValues(String thePaths, IResource theResource) {
+	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
 		List<Object> values = new ArrayList<Object>();
 		String[] nextPathsSplit = thePaths.split("\\|");
 		FhirTerser t = myContext.newTerser();

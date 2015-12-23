@@ -193,6 +193,32 @@ public class ${className}
 		return setLastUpdated(theHeaderDateValue, TemporalPrecisionEnum.SECOND);
 	}
 
+	/**
+ 	 * Returns the first tag (if any) that has the given system and code, or returns
+ 	 * <code>null</code> if none
+ 	 */
+ 	public CodingDt getTag(String theSystem, String theCode) {
+ 		for (CodingDt next : getTag()) {
+ 			if (ca.uhn.fhir.util.ObjectUtil.equals(next.getSystem(), theSystem) && ca.uhn.fhir.util.ObjectUtil.equals(next.getCode(), theCode)) {
+ 				return next;
+ 			}
+ 		}
+ 		return null;
+ 	}
+
+ 	/**
+ 	 * Returns the first security label (if any) that has the given system and code, or returns
+ 	 * <code>null</code> if none
+ 	 */
+ 	public CodingDt getSecurity(String theSystem, String theCode) {
+ 		for (CodingDt next : getTag()) {
+ 			if (ca.uhn.fhir.util.ObjectUtil.equals(next.getSystem(), theSystem) && ca.uhn.fhir.util.ObjectUtil.equals(next.getCode(), theCode)) {
+ 				return next;
+ 			}
+ 		}
+ 		return null;
+ 	}  
+
 #end
 #if ( ${className} == "ResourceReferenceDt" )
 	/**

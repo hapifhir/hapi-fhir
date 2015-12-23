@@ -4,7 +4,9 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
@@ -14,9 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 
-import ca.uhn.fhir.jpa.dao.FhirSearchDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.FhirSearchDao.Suggestion;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.resource.Device;
 import ca.uhn.fhir.model.dstu2.resource.Media;
 import ca.uhn.fhir.model.dstu2.resource.Observation;

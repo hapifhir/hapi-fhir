@@ -1,11 +1,37 @@
 package ca.uhn.fhir.jpa.dao;
 
+/*
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2015 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hl7.fhir.dstu21.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.OperationOutcome;
+import org.hl7.fhir.dstu21.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.dstu21.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -21,9 +47,6 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.dstu21.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu21.valueset.IssueSeverityEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -36,13 +59,12 @@ import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirInstanceValidator;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidationContext;
-import ca.uhn.fhir.validation.IValidationSupport;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.ValidationSupportChain;
 import net.sourceforge.cobertura.CoverageIgnore;
 
-public class FhirResourceDaoDstu21<T extends IResource> extends BaseHapiFhirResourceDao<T> {
+public class FhirResourceDaoDstu21<T extends IAnyResource> extends BaseHapiFhirResourceDao<T> {
 
 	@Autowired()
 	@Qualifier("myJpaValidationSupportDstu21")
@@ -70,8 +92,9 @@ public class FhirResourceDaoDstu21<T extends IResource> extends BaseHapiFhirReso
 	@Override
 	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage) {
 		OperationOutcome oo = new OperationOutcome();
-		oo.getIssueFirstRep().getSeverityElement().setValue(theSeverity);
-		oo.getIssueFirstRep().getDiagnosticsElement().setValue(theMessage);
+		OperationOutcomeIssueComponent issue = oo.addIssue();
+		issue.getSeverityElement().setValueAsString(theSeverity);
+		issue.setDiagnostics(theMessage);
 		return oo;
 	}
 
@@ -93,15 +116,15 @@ public class FhirResourceDaoDstu21<T extends IResource> extends BaseHapiFhirReso
 			validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 				
 			OperationOutcome oo = new OperationOutcome();
-			oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Ok to delete");
-			return new MethodOutcome(new IdDt(theId.getValue()), oo);
+			oo.addIssue().setSeverity(IssueSeverity.INFORMATION).setDiagnostics("Ok to delete");
+			return new MethodOutcome(new IdType(theId.getValue()), oo);
 		}
 
 		FhirValidator validator = getContext().newValidator();
 
 		FhirInstanceValidator val = new FhirInstanceValidator();
 		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
-		val.setValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), myJpaValidationSupport));
+//		val.setValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), myJpaValidationSupport));
 		validator.registerValidatorModule(val);
 
 		validator.registerValidatorModule(new IdChecker(theMode));

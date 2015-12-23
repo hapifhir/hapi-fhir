@@ -22,24 +22,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hl7.fhir.dstu21.model.Coding;
+import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.InstantType;
+import org.hl7.fhir.dstu21.model.Organization;
+import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.Resource;
+import org.hl7.fhir.dstu21.model.UriType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
-import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.dstu21.composite.CodingDt;
-import ca.uhn.fhir.model.dstu21.resource.Organization;
-import ca.uhn.fhir.model.dstu21.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -62,15 +59,13 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 
 		Date now = new Date();
 		Patient retrieved = myPatientDao.read(outcome.getId());
-		InstantDt published = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
-		InstantDt updated = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		assertTrue(published.before(now));
+		InstantType updated = retrieved.getMeta().getLastUpdatedElement().copy();
 		assertTrue(updated.before(now));
 
 		Thread.sleep(1000);
 
 		reset(myInterceptor);
-		retrieved.getIdentifierFirstRep().setValue("002");
+		retrieved.getIdentifier().get(0).setValue("002");
 		MethodOutcome outcome2 = myPatientDao.update(retrieved);
 		assertEquals(outcome.getId().getIdPart(), outcome2.getId().getIdPart());
 		assertNotEquals(outcome.getId().getVersionIdPart(), outcome2.getId().getVersionIdPart());
@@ -88,11 +83,9 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 
 		Patient retrieved2 = myPatientDao.read(outcome.getId().toVersionless());
 
-		assertEquals("2", retrieved2.getId().getVersionIdPart());
-		assertEquals("002", retrieved2.getIdentifierFirstRep().getValue());
-		InstantDt published2 = (InstantDt) retrieved2.getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
-		InstantDt updated2 = (InstantDt) retrieved2.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		assertTrue(published2.before(now));
+		assertEquals("2", retrieved2.getIdElement().getVersionIdPart());
+		assertEquals("002", retrieved2.getIdentifier().get(0).getValue());
+		InstantType updated2 = retrieved2.getMeta().getLastUpdatedElement();
 		assertTrue(updated2.after(now));
 		assertTrue(updated2.before(now2));
 
@@ -105,17 +98,20 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null);
 
 		assertEquals(2, historyBundle.size());
-
+		
 		List<IBaseResource> history = historyBundle.getResources(0, 2);
+		
+		ourLog.info("updated : {}", updated.getValueAsString());
+		ourLog.info("  * Exp : {}", ((Resource) history.get(1)).getMeta().getLastUpdatedElement().getValueAsString());
+		ourLog.info("updated2: {}", updated2.getValueAsString());
+		ourLog.info("  * Exp : {}", ((Resource) history.get(0)).getMeta().getLastUpdatedElement().getValueAsString());
+		
 		assertEquals("1", history.get(1).getIdElement().getVersionIdPart());
 		assertEquals("2", history.get(0).getIdElement().getVersionIdPart());
-		assertEquals(published, ResourceMetadataKeyEnum.PUBLISHED.get((IResource) history.get(1)));
-		assertEquals(published, ResourceMetadataKeyEnum.PUBLISHED.get((IResource) history.get(1)));
-		assertEquals(updated, ResourceMetadataKeyEnum.UPDATED.get((IResource) history.get(1)));
-		assertEquals("001", ((Patient) history.get(1)).getIdentifierFirstRep().getValue());
-		assertEquals(published2, ResourceMetadataKeyEnum.PUBLISHED.get((IResource) history.get(0)));
-		assertEquals(updated2, ResourceMetadataKeyEnum.UPDATED.get((IResource) history.get(0)));
-		assertEquals("002", ((Patient) history.get(0)).getIdentifierFirstRep().getValue());
+		assertEquals(updated.getValueAsString(), ((Resource) history.get(1)).getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("001", ((Patient) history.get(1)).getIdentifier().get(0).getValue());
+		assertEquals(updated2.getValueAsString(), ((Resource) history.get(0)).getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("002", ((Patient) history.get(0)).getIdentifier().get(0).getValue());
 
 	}
 
@@ -136,10 +132,10 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 		myPatientDao.update(p, "Patient?identifier=urn%3Asystem%7C" + methodName);
 
 		p = myPatientDao.read(id.toVersionless());
-		assertThat(p.getId().toVersionless().toString(), not(containsString("test")));
-		assertEquals(id.toVersionless(), p.getId().toVersionless());
-		assertNotEquals(id, p.getId());
-		assertThat(p.getId().toString(), endsWith("/_history/2"));
+		assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
+		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
+		assertNotEquals(id, p.getIdElement());
+		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
 
 	}
 
@@ -155,7 +151,7 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 		assertEquals("Patient/" + methodName, id.toUnqualifiedVersionless().getValue());
 
 		p = myPatientDao.read(id);
-		assertEquals(methodName, p.getIdentifierFirstRep().getValue());
+		assertEquals(methodName, p.getIdentifier().get(0).getValue());
 	}
 
 	@Test
@@ -179,16 +175,10 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 		{
 			Patient p1 = new Patient();
 			p1.addName().addFamily(methodName);
-
-			TagList tagList = new TagList();
-			tagList.addTag("tag_scheme1", "tag_term1");
-			ResourceMetadataKeyEnum.TAG_LIST.put(p1, tagList);
-			List<BaseCodingDt> secList = new ArrayList<BaseCodingDt>();
-			secList.add(new CodingDt("sec_scheme1", "sec_term1"));
-			ResourceMetadataKeyEnum.SECURITY_LABELS.put(p1, secList);
-			List<IdDt> profileList = new ArrayList<IdDt>();
-			profileList.add(new IdDt("http://foo1"));
-			ResourceMetadataKeyEnum.PROFILES.put(p1, profileList);
+			
+			p1.getMeta().addTag("tag_scheme1", "tag_term1",null);
+			p1.getMeta().addSecurity("sec_scheme1", "sec_term1",null);
+			p1.getMeta().addProfile("http://foo1");
 
 			p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
 		}
@@ -197,30 +187,29 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 			p1.setId(p1id);
 			p1.addName().addFamily(methodName);
 
-			TagList tagList = new TagList();
-			tagList.addTag("tag_scheme2", "tag_term2");
-			ResourceMetadataKeyEnum.TAG_LIST.put(p1, tagList);
-			List<BaseCodingDt> secList = new ArrayList<BaseCodingDt>();
-			secList.add(new CodingDt("sec_scheme2", "sec_term2"));
-			ResourceMetadataKeyEnum.SECURITY_LABELS.put(p1, secList);
-			List<IdDt> profileList = new ArrayList<IdDt>();
-			profileList.add(new IdDt("http://foo2"));
-			ResourceMetadataKeyEnum.PROFILES.put(p1, profileList);
+			p1.getMeta().addTag("tag_scheme2", "tag_term2", null);
+			p1.getMeta().addSecurity("sec_scheme2", "sec_term2", null);
+			p1.getMeta().addProfile("http://foo2");
 
 			myPatientDao.update(p1);
 		}
 		{
 			Patient p1 = myPatientDao.read(p1id);
-			TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(p1);
-			assertThat(tagList, containsInAnyOrder(new Tag("tag_scheme1", "tag_term1"), new Tag("tag_scheme2", "tag_term2")));
-			List<BaseCodingDt> secList = ResourceMetadataKeyEnum.SECURITY_LABELS.get(p1);
+			List<Coding> tagList = p1.getMeta().getTag();
 			Set<String> secListValues = new HashSet<String>();
-			for (BaseCodingDt next : secList) {
+			for (Coding next : tagList) {
+				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
+			}
+			assertThat(secListValues, containsInAnyOrder("tag_scheme1|tag_term1", "tag_scheme2|tag_term2"));
+			List<Coding> secList = p1.getMeta().getSecurity();
+			secListValues = new HashSet<String>();
+			for (Coding next : secList) {
 				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
 			}
 			assertThat(secListValues, containsInAnyOrder("sec_scheme1|sec_term1", "sec_scheme2|sec_term2"));
-			List<IdDt> profileList = ResourceMetadataKeyEnum.PROFILES.get(p1);
-			assertThat(profileList, contains(new IdDt("http://foo2"))); // no foo1
+			List<UriType> profileList = p1.getMeta().getProfile();
+			assertEquals(1, profileList.size());
+			assertEquals("http://foo2", profileList.get(0).getValueAsString()); // no foo1
 		}
 	}
 
@@ -236,27 +225,27 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 		p2.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2BBB");
 		myPatientDao.create(p2).getId();
 
-		Set<Long> ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA"));
+		Set<Long> ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA"));
 		assertEquals(1, ids.size());
 		assertThat(ids, contains(p1id.getIdPartAsLong()));
 
 		// Update the name
-		p1.getNameFirstRep().getGivenFirstRep().setValue("testUpdateMaintainsSearchParamsDstu2BBB");
+		p1.getName().get(0).getGiven().get(0).setValue("testUpdateMaintainsSearchParamsDstu2BBB");
 		MethodOutcome update2 = myPatientDao.update(p1);
 		IIdType p1id2 = update2.getId();
 
-		ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA"));
+		ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA"));
 		assertEquals(0, ids.size());
 
-		ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2BBB"));
+		ids = myPatientDao.searchForIds(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2BBB"));
 		assertEquals(2, ids.size());
 
 		// Make sure vreads work
 		p1 = myPatientDao.read(p1id);
-		assertEquals("testUpdateMaintainsSearchParamsDstu2AAA", p1.getNameFirstRep().getGivenAsSingleString());
+		assertEquals("testUpdateMaintainsSearchParamsDstu2AAA", p1.getName().get(0).getGivenAsSingleString());
 
 		p1 = myPatientDao.read(p1id2);
-		assertEquals("testUpdateMaintainsSearchParamsDstu2BBB", p1.getNameFirstRep().getGivenAsSingleString());
+		assertEquals("testUpdateMaintainsSearchParamsDstu2BBB", p1.getName().get(0).getGivenAsSingleString());
 
 	}
 
@@ -270,7 +259,7 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 		Organization p2 = new Organization();
 		p2.getNameElement().setValue("testUpdateRejectsInvalidTypes");
 		try {
-			p2.setId(new IdDt("Organization/" + p1id.getIdPart()));
+			p2.setId(new IdType("Organization/" + p1id.getIdPart()));
 			myOrganizationDao.update(p2);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -278,7 +267,7 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 		}
 
 		try {
-			p2.setId(new IdDt("Patient/" + p1id.getIdPart()));
+			p2.setId(new IdType("Patient/" + p1id.getIdPart()));
 			myOrganizationDao.update(p2);
 			fail();
 		} catch (UnprocessableEntityException e) {
@@ -295,11 +284,11 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 			Patient patient = new Patient();
 			patient.addName().addFamily(name);
 
-			List<IdDt> tl = new ArrayList<IdDt>();
-			tl.add(new IdDt("http://foo/bar"));
-			tl.add(new IdDt("http://foo/bar"));
-			tl.add(new IdDt("http://foo/bar"));
-			ResourceMetadataKeyEnum.PROFILES.put(patient, tl);
+			List<IdType> tl = new ArrayList<IdType>();
+			tl.add(new IdType("http://foo/bar"));
+			tl.add(new IdType("http://foo/bar"));
+			tl.add(new IdType("http://foo/bar"));
+			patient.getMeta().getProfile().addAll(tl);
 
 			id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 		}
@@ -307,7 +296,7 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 		// Do a read
 		{
 			Patient patient = myPatientDao.read(id);
-			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
+			List<UriType> tl = patient.getMeta().getProfile();
 			assertEquals(1, tl.size());
 			assertEquals("http://foo/bar", tl.get(0).getValue());
 		}
@@ -322,9 +311,9 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 			Patient patient = new Patient();
 			patient.addName().addFamily(name);
 
-			List<IdDt> tl = new ArrayList<IdDt>();
-			tl.add(new IdDt("http://foo/bar"));
-			ResourceMetadataKeyEnum.PROFILES.put(patient, tl);
+			List<IdType> tl = new ArrayList<IdType>();
+			tl.add(new IdType("http://foo/bar"));
+			patient.getMeta().getProfile().addAll(tl);
 
 			id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 		}
@@ -332,7 +321,7 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 		// Do a read
 		{
 			Patient patient = myPatientDao.read(id);
-			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
+			List<UriType> tl = patient.getMeta().getProfile();
 			assertEquals(1, tl.size());
 			assertEquals("http://foo/bar", tl.get(0).getValue());
 		}
@@ -343,9 +332,10 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 			patient.setId(id);
 			patient.addName().addFamily(name);
 
-			List<IdDt> tl = new ArrayList<IdDt>();
-			tl.add(new IdDt("http://foo/baz"));
-			ResourceMetadataKeyEnum.PROFILES.put(patient, tl);
+			List<IdType> tl = new ArrayList<IdType>();
+			tl.add(new IdType("http://foo/baz"));
+			patient.getMeta().getProfile().clear();
+			patient.getMeta().getProfile().addAll(tl);
 
 			id = myPatientDao.update(patient).getId().toUnqualifiedVersionless();
 		}
@@ -353,7 +343,7 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 		// Do a read
 		{
 			Patient patient = myPatientDao.read(id);
-			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
+			List<UriType> tl = patient.getMeta().getProfile();
 			assertEquals(1, tl.size());
 			assertEquals("http://foo/baz", tl.get(0).getValue());
 		}
@@ -413,7 +403,7 @@ public class FhirResourceDaoDstu21UpdateTest extends BaseJpaDstu21Test {
 		assertEquals("1", id.getVersionIdPart());
 
 		p = myPatientDao.read(id.toUnqualifiedVersionless());
-		assertEquals("Patient/123abc", p.getId().toUnqualifiedVersionless().getValue());
+		assertEquals("Patient/123abc", p.getIdElement().toUnqualifiedVersionless().getValue());
 		assertEquals("Hello", p.getName().get(0).getFamily().get(0).getValue());
 
 	}
