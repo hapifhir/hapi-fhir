@@ -25,6 +25,7 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Required;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
@@ -57,7 +58,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@History
-	public IBundleProvider getHistoryForResourceInstance(HttpServletRequest theRequest, @IdParam IdDt theId, @Since Date theDate) {
+	public IBundleProvider getHistoryForResourceInstance(HttpServletRequest theRequest, @IdParam IIdType theId, @Since Date theDate) {
 		startRequest(theRequest);
 		try {
 			return myDao.history(theId, theDate);

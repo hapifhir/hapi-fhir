@@ -26,16 +26,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hl7.fhir.dstu21.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu21.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.OperationOutcome;
 import org.hl7.fhir.dstu21.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu21.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.hl7.fhir.dstu21.validation.IResourceValidator.BestPracticeWarningLevel;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.validation.IResourceValidator.BestPracticeWarningLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -44,7 +45,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -55,13 +55,10 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
-import ca.uhn.fhir.validation.FhirInstanceValidator;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationResult;
-import ca.uhn.fhir.validation.ValidationSupportChain;
 import net.sourceforge.cobertura.CoverageIgnore;
 
 public class FhirResourceDaoDstu21<T extends IAnyResource> extends BaseHapiFhirResourceDao<T> {

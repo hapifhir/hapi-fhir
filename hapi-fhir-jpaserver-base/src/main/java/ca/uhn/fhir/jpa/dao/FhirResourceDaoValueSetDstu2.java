@@ -31,6 +31,8 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.codec.binary.StringUtils;
+import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,8 +54,6 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
-import ca.uhn.fhir.validation.ValidationSupportChain;
 
 public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>implements IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> {
 

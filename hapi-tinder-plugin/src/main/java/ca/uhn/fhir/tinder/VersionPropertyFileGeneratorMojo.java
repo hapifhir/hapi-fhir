@@ -74,7 +74,14 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 					continue;
 				}
 				ourLog.info("Found datatype: {}", annotation.name());
-				datatypeTypes.put(annotation.name(), clazz);
+				String name = annotation.name();
+				if (datatypeTypes.containsKey(name)) {
+					name = annotation.name() + ".2";
+				}
+				if (datatypeTypes.containsKey(name)) {
+					throw new Error("Already have " + name);
+				}
+				datatypeTypes.put(name, clazz);
 			}
 
 		}

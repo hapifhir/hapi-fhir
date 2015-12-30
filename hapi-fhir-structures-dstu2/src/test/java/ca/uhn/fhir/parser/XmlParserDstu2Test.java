@@ -340,6 +340,7 @@ public class XmlParserDstu2Test {
 
 	}
 
+
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
 

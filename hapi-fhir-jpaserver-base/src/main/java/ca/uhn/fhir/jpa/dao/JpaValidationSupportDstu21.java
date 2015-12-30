@@ -38,10 +38,6 @@ public class JpaValidationSupportDstu21 implements IJpaValidationSupportDstu21 {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaValidationSupportDstu21.class);
 
 	@Autowired
-	@Qualifier("myFhirContextDstu2Hl7Org")
-	private FhirContext myRiCtx;
-
-	@Autowired
 	@Qualifier("myStructureDefinitionDaoDstu21")
 	private IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
 
@@ -65,7 +61,7 @@ public class JpaValidationSupportDstu21 implements IJpaValidationSupportDstu21 {
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
-		String resourceName = myRiCtx.getResourceDefinition(theClass).getName();
+		String resourceName = myDstu21Ctx.getResourceDefinition(theClass).getName();
 		IBundleProvider search;
 		if ("ValueSet".equals(resourceName)) {
 			search = myValueSetDao.search(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_URL, new UriParam(theUri));
@@ -83,15 +79,7 @@ public class JpaValidationSupportDstu21 implements IJpaValidationSupportDstu21 {
 			ourLog.warn("Found multiple {} instances with URL search value of: {}", resourceName, theUri);
 		}
 
-		IBaseResource res = search.getResources(0, 1).get(0);
-
-		/*
-		 * Validator wants RI structures and not HAPI ones, so convert
-		 * 
-		 * TODO: we really need a more efficient way of converting.. Or maybe this will just go away when we move to RI structures
-		 */
-		String encoded = myDstu21Ctx.newJsonParser().encodeResourceToString(res);
-		return myRiCtx.newJsonParser().parseResource(theClass, encoded);
+		return (T) search.getResources(0, 1).get(0);
 	}
 
 	@Override

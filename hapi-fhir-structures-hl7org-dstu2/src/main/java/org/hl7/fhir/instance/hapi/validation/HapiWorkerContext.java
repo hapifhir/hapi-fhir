@@ -1,16 +1,17 @@
-package ca.uhn.fhir.validation;
+package org.hl7.fhir.instance.hapi.validation;
 
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.formats.IParser;
 import org.hl7.fhir.instance.formats.ParserType;
+import org.hl7.fhir.instance.hapi.validation.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.ConceptMap;
+import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.ValueSet;
-import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
@@ -24,7 +25,6 @@ import org.hl7.fhir.instance.utils.IWorkerContext;
 import org.hl7.fhir.instance.validation.IResourceValidator;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.validation.IValidationSupport.CodeValidationResult;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpanderFactory, ValueSetExpander {
   private final FhirContext myCtx;

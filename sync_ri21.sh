@@ -39,8 +39,9 @@ cp $FHIRTRUNK/build/publish/fhir-xhtml.xsd ./hapi-fhir-validation-resources-$PRO
 cp $FHIRTRUNK/build/publish/xml.xsd ./hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/schema/
 
 # Copy Model
-cp -fvR $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/model hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/
-find hapi-fhir-structures-$PROJVERSION/src -name "*.class" | xargs rm -v
+#TODO reenable
+#cp -fvR $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/model hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/
+#find hapi-fhir-structures-$PROJVERSION/src -name "*.class" | xargs rm -v
 
 # Exception class
 cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/exceptions/FHIRException.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/exceptions/
@@ -57,6 +58,37 @@ cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir
 cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/NodeType.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xhtml/
 cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/XhtmlParser.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xhtml/
 cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/XhtmlComposer.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xhtml/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/Table.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/CommaSeparatedStringBuilder.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xml/XMLUtil.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xml/
+
+# Formats
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/formats/IParser.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/formats/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/formats/ParserType.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/formats/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/formats/FormatUtilities.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/formats/
+
+# Terminologies
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/terminologies/ValueSetExpander.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/terminologies/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/terminologies/ValueSetChecker.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/terminologies/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/terminologies/ValueSetExpanderSimple.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/terminologies/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/terminologies/ValueSetExpanderFactory.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/terminologies/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/terminologies/ValueSetCheckerSimple.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/terminologies/
+
+# Utils
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/utils/ToolingExtensions.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/utils/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/utils/IWorkerContext.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/utils/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/utils/INarrativeGenerator.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/utils/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/utils/EOperationOutcome.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/utils/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/utils/FHIRPathEngine.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/utils/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/utils/ProfileUtilities.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/utils/
+
+# Validation
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/validation/* hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/validation/
+cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/exceptions/* hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/exceptions/
+rm hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/validation/Validator.java
+rm hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/validation/ValidationEngine.java
+rm hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/validation/ProfileValidator.java
+rm hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/validation/ProfileValidatorTests.java
 
 # XML
 cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xml/IXMLWriter.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/utilities/xml/

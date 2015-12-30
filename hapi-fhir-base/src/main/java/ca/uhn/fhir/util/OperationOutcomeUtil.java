@@ -160,7 +160,8 @@ public class OperationOutcomeUtil {
 		} else {
 			detailsChild = issueElement.getChildByName("details");
 		}
-		BaseRuntimeElementDefinition<?> stringDef = theCtx.getElementDefinition("string");
+		
+		BaseRuntimeElementDefinition<?> stringDef = detailsChild.getChildByName(detailsChild.getElementName());
 		BaseRuntimeChildDefinition severityChild = issueElement.getChildByName("severity");
 		BaseRuntimeChildDefinition locationChild = issueElement.getChildByName("location");
 

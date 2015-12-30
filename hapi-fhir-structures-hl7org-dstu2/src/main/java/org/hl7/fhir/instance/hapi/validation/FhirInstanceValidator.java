@@ -1,4 +1,4 @@
-package ca.uhn.fhir.validation;
+package org.hl7.fhir.instance.hapi.validation;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -32,6 +32,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.fhir.validation.IValidatorModule;
 
 public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
 

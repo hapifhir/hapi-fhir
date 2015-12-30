@@ -38,6 +38,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 import org.hl7.fhir.dstu21.model.Conformance;
 import org.hl7.fhir.dstu21.model.Conformance.ConditionalDeleteStatus;
 import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestComponent;
@@ -56,7 +57,6 @@ import org.hl7.fhir.dstu21.model.OperationDefinition;
 import org.hl7.fhir.dstu21.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.dstu21.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.dstu21.model.ResourceType;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;

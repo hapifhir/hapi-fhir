@@ -1,11 +1,15 @@
-package ca.uhn.fhir.validation;
+package org.hl7.fhir.dstu21.hapi.validation;
 
 import java.util.List;
 
+import org.hl7.fhir.dstu21.validation.ValidationMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.validation.ValidationMessage;
 
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.SingleValidationMessage;
 
 /**
  * Base class for a bridge between the RI validation tools and HAPI

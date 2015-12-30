@@ -1,7 +1,7 @@
-package ca.uhn.fhir.validation;
+package org.hl7.fhir.instance.hapi.validation;
 
-import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;

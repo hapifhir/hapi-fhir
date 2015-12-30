@@ -1,5 +1,7 @@
 package org.hl7.fhir.dstu21.model;
 
+import java.math.BigDecimal;
+
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -29,18 +31,16 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
+import java.util.List;
 
-import java.util.*;
-
-import java.math.*;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.utilities.Utilities;
+
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Block;
-import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.exceptions.FHIRException;
+import ca.uhn.fhir.model.api.annotation.Description;
 /**
  * A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.
  */

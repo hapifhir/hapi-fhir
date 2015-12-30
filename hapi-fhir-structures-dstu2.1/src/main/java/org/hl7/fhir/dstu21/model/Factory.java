@@ -5,9 +5,9 @@ import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.UUID;
 
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 import org.hl7.fhir.dstu21.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu21.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlParser;
 
@@ -143,7 +143,11 @@ public class Factory {
 	public static Narrative newNarrative(NarrativeStatus status, String html) throws IOException, FHIRException {
 		Narrative n = new Narrative();
 		n.setStatus(status);
-		n.setDiv(new XhtmlParser().parseFragment("<div>"+Utilities.escapeXml(html)+"</div>"));
+		try {
+			n.setDiv(new XhtmlParser().parseFragment("<div>"+Utilities.escapeXml(html)+"</div>"));
+		} catch (org.hl7.fhir.exceptions.FHIRException e) {
+			throw new FHIRException(e.getMessage(), e);
+		}
 		return n;
 	}
 

@@ -15,6 +15,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
+import org.hl7.fhir.instance.hapi.validation.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.instance.model.CodeType;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Observation.ObservationStatus;
@@ -35,7 +39,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.validation.IValidationSupport.CodeValidationResult;
 
 public class FhirInstanceValidatorTest {
 

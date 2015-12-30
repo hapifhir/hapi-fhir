@@ -1,4 +1,4 @@
-package ca.uhn.fhir.validation;
+package org.hl7.fhir.instance.hapi.validation;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

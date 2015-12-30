@@ -18,7 +18,6 @@ import org.hl7.fhir.dstu21.model.UriType;
 import org.hl7.fhir.dstu21.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,7 +51,7 @@ public class ResourceProviderDstu21ValueSetTest extends BaseResourceProviderDstu
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 		
-		assertEquals(new BooleanType(true), respParam.getParameter().get(0).getValue());
+		assertEquals(true, ((BooleanType)respParam.getParameter().get(0).getValue()).booleanValue());
 	}
 
 	@Test
@@ -70,7 +69,7 @@ public class ResourceProviderDstu21ValueSetTest extends BaseResourceProviderDstu
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 		
-		assertEquals(new BooleanType(true), respParam.getParameter().get(0).getValue());
+		assertEquals(true, ((BooleanType)respParam.getParameter().get(0).getValue()).booleanValue());
 	}
 
 	@Test
@@ -89,15 +88,15 @@ public class ResourceProviderDstu21ValueSetTest extends BaseResourceProviderDstu
 		ourLog.info(resp);
 		
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(new StringType("Unknown"), respParam.getParameter().get(0).getValue());
+		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(new StringType("Systolic blood pressure--expiration"), respParam.getParameter().get(1).getValue());
+		assertEquals(("Systolic blood pressure--expiration"), ((StringType)respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(new BooleanType(false), respParam.getParameter().get(2).getValue());
+		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).getValue().booleanValue());
 	}
 	
 	@Test
-	@Ignore
+//	@Ignore
 	public void testLookupOperationForBuiltInCode() {
 		//@formatter:off
 		Parameters respParam = ourClient
@@ -113,11 +112,11 @@ public class ResourceProviderDstu21ValueSetTest extends BaseResourceProviderDstu
 		ourLog.info(resp);
 		
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(new StringType("Unknown"), respParam.getParameter().get(0).getValue());
+		assertEquals("Unknown", ((StringType)respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(new StringType("Married"), respParam.getParameter().get(1).getValue());
+		assertEquals("Married", ((StringType)respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(new BooleanType(false), respParam.getParameter().get(2).getValue());
+		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).booleanValue());
 	}
 
 	@Test
@@ -135,11 +134,11 @@ public class ResourceProviderDstu21ValueSetTest extends BaseResourceProviderDstu
 		ourLog.info(resp);
 		
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(new StringType("Unknown"), respParam.getParameter().get(0).getValue());
+		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(new StringType("Systolic blood pressure--expiration"), respParam.getParameter().get(1).getValue());
+		assertEquals(("Systolic blood pressure--expiration"), ((StringType)respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(new BooleanType(false), respParam.getParameter().get(2).getValue());
+		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).getValue().booleanValue());
 	}
 
 	@Test

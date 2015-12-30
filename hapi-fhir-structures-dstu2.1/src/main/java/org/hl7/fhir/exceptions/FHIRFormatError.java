@@ -2,6 +2,8 @@ package org.hl7.fhir.exceptions;
 
 public class FHIRFormatError extends FHIRException {
 
+	private static final long serialVersionUID = 1L;
+
 	public FHIRFormatError() {
 		super();
 	}

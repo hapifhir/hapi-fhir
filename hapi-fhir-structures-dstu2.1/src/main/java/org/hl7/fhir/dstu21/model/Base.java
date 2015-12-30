@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 

@@ -29,18 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Mon, Dec 21, 2015 19:58-0500 for FHIR v1.2.0
+// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
-
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 import org.hl7.fhir.utilities.Utilities;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.Block;
-import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.exceptions.FHIRException;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 /**
  * Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organization.
  */

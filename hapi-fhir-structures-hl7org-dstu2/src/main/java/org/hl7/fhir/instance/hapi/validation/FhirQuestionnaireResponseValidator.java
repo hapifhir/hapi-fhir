@@ -1,4 +1,4 @@
-package ca.uhn.fhir.validation;
+package org.hl7.fhir.instance.hapi.validation;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -21,6 +21,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import ca.uhn.fhir.validation.IResourceLoader;
+import ca.uhn.fhir.validation.IValidationContext;
 
 public class FhirQuestionnaireResponseValidator extends BaseValidatorBridge {
 

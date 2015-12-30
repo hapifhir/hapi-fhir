@@ -232,7 +232,8 @@ class ModelScanner {
 	}
 
 	private boolean isStandardType(Class<? extends IBase> theClass) {
-		return myVersionTypes.contains(theClass);
+		boolean retVal = myVersionTypes.contains(theClass);
+		return retVal;
 	}
 
 	/**
@@ -690,7 +691,13 @@ class ModelScanner {
 		}
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		if (!theDatatypeDefinition.isSpecialization()) {
-			myNameToElementDefinitions.put(resourceName, resourceDef);
+			if (myVersion.isRi() && IDatatype.class.isAssignableFrom(theClass)) {
+				ourLog.debug("Not adding non RI type {} to RI context", theClass);
+			} else if (!myVersion.isRi() && !IDatatype.class.isAssignableFrom(theClass)) {
+				ourLog.debug("Not adding RI type {} to non RI context", theClass);
+			} else {
+				myNameToElementDefinitions.put(resourceName, resourceDef);
+			}
 		}
 
 		return resourceName;

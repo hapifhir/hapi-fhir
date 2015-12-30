@@ -757,6 +757,5 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
 		
 		return this;
 	}
-
 	
 }

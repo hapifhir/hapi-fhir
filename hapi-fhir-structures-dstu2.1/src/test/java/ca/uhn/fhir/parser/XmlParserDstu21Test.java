@@ -37,6 +37,7 @@ import org.hl7.fhir.dstu21.model.Bundle;
 import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu21.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.dstu21.model.Bundle.BundleType;
+import org.hl7.fhir.dstu21.model.CodeType;
 import org.hl7.fhir.dstu21.model.CodeableConcept;
 import org.hl7.fhir.dstu21.model.Coding;
 import org.hl7.fhir.dstu21.model.Composition;
@@ -276,6 +277,25 @@ public class XmlParserDstu21Test {
 		Reference rr = (Reference) exts.get(0).getValue();
 		o = (Organization) rr.getResource();
 		assertEquals("ORG", o.getName());
+
+	}
+
+	@Test
+	public void testEncodeAndParseExtensionOnCode() {
+		Organization o = new Organization();
+		o.setName("ORG");
+		o.addExtension(new Extension("urn:foo", new CodeType("acode")));
+
+		String str = ourCtx.newXmlParser().encodeResourceToString(o);
+		ourLog.info(str);
+		assertThat(str, containsString("<valueCode value=\"acode\"/>"));
+
+		o = ourCtx.newXmlParser().parseResource(Organization.class, str);
+
+		List<Extension> exts = o.getExtensionsByUrl("urn:foo");
+		assertEquals(1, exts.size());
+		CodeType code = (CodeType) exts.get(0).getValue();
+		assertEquals("acode", code.getValue());
 
 	}
 
