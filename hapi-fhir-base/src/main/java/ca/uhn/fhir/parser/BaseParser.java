@@ -41,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -374,6 +375,15 @@ public abstract class BaseParser implements IParser {
 		return stringWriter.toString();
 	}
 
+	private void filterCodingsWithNoCodeOrSystem(List<? extends IBaseCoding> tagList) {
+		for (int i = 0; i < tagList.size(); i++) {
+			if (isBlank(tagList.get(i).getCode()) && isBlank(tagList.get(i).getSystem())) {
+				tagList.remove(i);
+				i--;
+			}
+		}
+	}
+
 	protected String fixContainedResourceId(String theValue) {
 		if (StringUtils.isNotBlank(theValue) && theValue.charAt(0) == '#') {
 			return theValue.substring(1);
@@ -409,7 +419,7 @@ public abstract class BaseParser implements IParser {
 		TagList tags = ResourceMetadataKeyEnum.TAG_LIST.get(theIResource);
 		if (shouldAddSubsettedTag()) {
 			tags = new TagList(tags);
-			tags.add(new Tag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE, "Resource encoded in summary mode"));
+			tags.add(new Tag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE, subsetDescription()));
 		}
 
 		return tags;
@@ -538,56 +548,51 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@SuppressWarnings("cast")
-	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition metaChildUncast, List<? extends IBase> theValues) {
-		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-			if (shouldAddSubsettedTag() && metaChildUncast.getValidChildNames().contains("meta")) {
-				BaseRuntimeElementDefinition<?> childByName = metaChildUncast.getChildByName("meta");
-				if (childByName instanceof BaseRuntimeElementCompositeDefinition<?>) {
-					BaseRuntimeElementCompositeDefinition<?> metaChildUncast1 = (BaseRuntimeElementCompositeDefinition<?>) childByName;
-					if (metaChildUncast1 != null) {
-						if (IBaseMetaType.class.isAssignableFrom(metaChildUncast1.getImplementingClass())) {
-							IBaseMetaType metaValue;
-							if (theValues != null && theValues.size() >= 1) {
-								metaValue = (IBaseMetaType) theValues.iterator().next();
-								try {
-									metaValue = (IBaseMetaType) metaValue.getClass().getMethod("copy").invoke(metaValue);
-								} catch (Exception e) {
-									throw new InternalErrorException("Failed to duplicate meta", e);
-								}
-							} else {
-								metaValue = (IBaseMetaType) metaChildUncast1.newInstance();
-							}
-
-							ArrayList<IBase> retVal = new ArrayList<IBase>();
-							retVal.add(metaValue);
-
-							BaseRuntimeChildDefinition tagChild = metaChildUncast1.getChildByName("tag");
-							BaseRuntimeElementCompositeDefinition<?> codingDef = (BaseRuntimeElementCompositeDefinition<?>) ((BaseRuntimeElementCompositeDefinition<?>) tagChild.getChildByName("tag"));
-							IBase coding = codingDef.newInstance();
-							tagChild.getMutator().addValue(metaValue, coding);
-
-							BaseRuntimeChildDefinition systemChild = codingDef.getChildByName("system");
-							IPrimitiveType<?> system = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
-							system.setValueAsString(Constants.TAG_SUBSETTED_SYSTEM);
-							systemChild.getMutator().addValue(coding, system);
-
-							BaseRuntimeChildDefinition codeChild = codingDef.getChildByName("code");
-							IPrimitiveType<?> code = (IPrimitiveType<?>) myContext.getElementDefinition("code").newInstance();
-							code.setValueAsString(Constants.TAG_SUBSETTED_CODE);
-							codeChild.getMutator().addValue(coding, code);
-
-							BaseRuntimeChildDefinition displayChild = codingDef.getChildByName("display");
-							IPrimitiveType<?> display = (IPrimitiveType<?>) myContext.getElementDefinition("string").newInstance();
-							display.setValueAsString("Resource encoded in summary mode");
-							displayChild.getMutator().addValue(coding, display);
-
-							return retVal;
-						}
-					}
+	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition metaChildUncast, IBaseResource theResource, List<? extends IBase> theValues) {
+		if (myContext.getVersion().getVersion().isRi()) {
+			
+			/*
+			 * If we're encoding the meta tag, we do some massaging of the meta values before
+			 * encoding. Buf if there is no meta element at all, we create one since we're possibly going to be
+			 * adding things to it
+			 */
+			if (theValues.isEmpty() && metaChildUncast.getElementName().equals("meta")) {
+				BaseRuntimeElementDefinition<?> metaChild = metaChildUncast.getChildByName("meta");
+				if (IBaseMetaType.class.isAssignableFrom(metaChild.getImplementingClass())) {
+					IBaseMetaType newType = (IBaseMetaType) metaChild.newInstance();
+					theValues = Collections.singletonList(newType);
 				}
 			}
+			
+			if (theValues.size() == 1 && theValues.get(0) instanceof IBaseMetaType) {
+				
+				IBaseMetaType metaValue = (IBaseMetaType) theValues.get(0);
+				try {
+					metaValue = (IBaseMetaType) metaValue.getClass().getMethod("copy").invoke(metaValue);
+				} catch (Exception e) {
+					throw new InternalErrorException("Failed to duplicate meta", e);
+				}
+				
+				if (isBlank(metaValue.getVersionId())) {
+					if (theResource.getIdElement().hasVersionIdPart()) {
+						metaValue.setVersionId(theResource.getIdElement().getVersionIdPart());
+					}
+				}
+				
+				filterCodingsWithNoCodeOrSystem(metaValue.getTag());
+				filterCodingsWithNoCodeOrSystem(metaValue.getSecurity());
+				
+				if (shouldAddSubsettedTag()) {
+					IBaseCoding coding = metaValue.addTag();
+					coding.setCode(Constants.TAG_SUBSETTED_CODE);
+					coding.setSystem(Constants.TAG_SUBSETTED_SYSTEM);
+					coding.setDisplay(subsetDescription());
+				}
+				
+				return Collections.singletonList(metaValue);
+			}
 		}
-
+		
 		return theValues;
 	}
 
@@ -654,6 +659,10 @@ public abstract class BaseParser implements IParser {
 
 	protected boolean shouldAddSubsettedTag() {
 		return isSummaryMode() || isSuppressNarratives();
+	}
+
+	private String subsetDescription() {
+		return "Resource encoded in summary mode";
 	}
 
 	protected void throwExceptionForUnknownChildType(BaseRuntimeChildDefinition nextChild, Class<? extends IBase> theType) {

@@ -29,7 +29,8 @@ POSSIBILITY OF SUCH DAMAGE.
 package org.hl7.fhir.instance.model;
 
 import org.apache.commons.codec.binary.Base64;
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /**
  * Primitive type "base64Binary" in FHIR: a sequence of bytes represented in base64

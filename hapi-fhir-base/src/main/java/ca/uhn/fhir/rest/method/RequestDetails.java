@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -43,7 +45,7 @@ public abstract class RequestDetails {
 	private String myCompartmentName;
 	private String myCompleteUrl;
 	private String myFhirServerBase;
-	private IdDt myId;
+	private IIdType myId;
 	private String myOperation;
 	private Map<String, String[]> myParameters;
 	private String myRequestPath;
@@ -72,7 +74,7 @@ public abstract class RequestDetails {
 		return myFhirServerBase;
 	}
 
-	public IdDt getId() {
+	public IIdType getId() {
 		return myId;
 	}
 
@@ -132,7 +134,7 @@ public abstract class RequestDetails {
 		myFhirServerBase = theFhirServerBase;
 	}
 
-	public void setId(IdDt theId) {
+	public void setId(IIdType theId) {
 		myId = theId;
 	}
 

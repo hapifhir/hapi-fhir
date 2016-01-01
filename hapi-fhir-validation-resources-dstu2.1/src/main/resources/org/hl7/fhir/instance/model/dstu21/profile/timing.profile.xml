@@ -413,10 +413,10 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-19T16:00:42-05:00"/>
   <description value="Base StructureDefinition for Timing Type"/>
   <requirements value="Need to able to track proposed timing schedules. There are several different ways to do this: one or more specified times, a simple rules like three times a day, or  before/after meals."/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.2.0"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -547,7 +547,7 @@
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="(period.empty() and frequency.empty()) xor when.empty()"/>
+          <valueString value="((period or frequency) and when).not()"/>
         </extension>
         <key value="tim-3"/>
         <severity value="error"/>
@@ -920,7 +920,7 @@
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="(period.empty() and frequency.empty()) xor when.empty()"/>
+          <valueString value="((period or frequency) and when).not()"/>
         </extension>
         <key value="tim-3"/>
         <severity value="error"/>

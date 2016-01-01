@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.model;
 
+import java.math.BigDecimal;
+
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -30,16 +32,14 @@ package org.hl7.fhir.instance.model;
 */
 
 // Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+import java.util.List;
 
-import java.util.*;
-
-import java.math.*;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 /**
  * A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.
  */

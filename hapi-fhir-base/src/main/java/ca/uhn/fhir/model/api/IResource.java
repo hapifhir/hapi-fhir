@@ -40,15 +40,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * </p>
  */
 public interface IResource extends ICompositeElement, org.hl7.fhir.instance.model.api.IBaseResource {
-	/**
-	 * Include constant for <code>*</code> (return all includes)
-	 */
-	public static final Include INCLUDE_ALL = new Include("*", false).toLocked();
-
-	/**
-	 * Include set containing only {@link #INCLUDE_ALL}
-	 */
-	public static final Set<Include> WILDCARD_ALL_SET = Collections.unmodifiableSet(new HashSet<Include>(Arrays.asList(INCLUDE_ALL)));
 
 	/**
 	 * Returns the contained resource list for this resource.

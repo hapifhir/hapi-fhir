@@ -10,9 +10,9 @@
   <name value="Shareable ValueSet"/>
   <status value="draft"/>
   <publisher value="HL7"/>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-19T16:00:42-05:00"/>
   <description value="Enforces the minimum information set for the value set metadata required by HL7 and other organisations that share and publish value sets"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.2.0"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>

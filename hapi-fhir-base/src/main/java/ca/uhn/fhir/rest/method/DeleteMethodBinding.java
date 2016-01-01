@@ -66,7 +66,7 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 			}
 		}
 
-		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 		if (myIdParameterIndex == null) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
 		}

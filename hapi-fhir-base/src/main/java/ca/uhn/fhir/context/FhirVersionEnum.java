@@ -34,25 +34,38 @@ public enum FhirVersionEnum {
 	 * ***********************
 	 */
 	
-	DSTU1("ca.uhn.fhir.model.dstu.FhirDstu1", null), 
+	DSTU1("ca.uhn.fhir.model.dstu.FhirDstu1", null, false), 
 	
-	DSTU2("ca.uhn.fhir.model.dstu2.FhirDstu2", null),
+	DSTU2("ca.uhn.fhir.model.dstu2.FhirDstu2", null, false),
 	
-	DEV("ca.uhn.fhir.model.dev.FhirDev", null), 
+	DSTU2_1("org.hl7.fhir.dstu21.hapi.ctx.FhirDstu21", null, true), 
 	
-	DSTU2_HL7ORG("org.hl7.fhir.instance.FhirDstu2Hl7Org", DSTU2), 
-	
-	DSTU2_1("ca.uhn.fhir.model.dstu21.FhirDstu21", null);
+	DSTU2_HL7ORG("org.hl7.fhir.instance.FhirDstu2Hl7Org", DSTU2, true);
 
-
-	private final String myVersionClass;
 	private final FhirVersionEnum myEquivalent;
+	private final boolean myIsRi;
 	private volatile Boolean myPresentOnClasspath;
+	private final String myVersionClass;
 	private volatile IFhirVersion myVersionImplementation;
 
-	FhirVersionEnum(String theVersionClass, FhirVersionEnum theEquivalent) {
+	FhirVersionEnum(String theVersionClass, FhirVersionEnum theEquivalent, boolean theIsRi) {
 		myVersionClass = theVersionClass;
 		myEquivalent = theEquivalent;
+		myIsRi = theIsRi;
+	}
+
+	public IFhirVersion getVersionImplementation() {
+		if (!isPresentOnClasspath()) {
+			throw new IllegalStateException("Version " + name() + " is not present on classpath");
+		}
+		if (myVersionImplementation == null) {
+			try {
+				myVersionImplementation = (IFhirVersion) Class.forName(myVersionClass).newInstance();
+			} catch (Exception e) {
+				throw new InternalErrorException("Failed to instantiate FHIR version " + name(), e);
+			}
+		}
+		return myVersionImplementation;
 	}
 	
 	public boolean isEquivalentTo(FhirVersionEnum theVersion) {
@@ -86,18 +99,11 @@ public enum FhirVersionEnum {
 		return retVal;
 	}
 
-	public IFhirVersion getVersionImplementation() {
-		if (!isPresentOnClasspath()) {
-			throw new IllegalStateException("Version " + name() + " is not present on classpath");
-		}
-		if (myVersionImplementation == null) {
-			try {
-				myVersionImplementation = (IFhirVersion) Class.forName(myVersionClass).newInstance();
-			} catch (Exception e) {
-				throw new InternalErrorException("Failed to instantiate FHIR version " + name(), e);
-			}
-		}
-		return myVersionImplementation;
+	/**
+	 * Is this version using the HL7.org RI structures?
+	 */
+	public boolean isRi() {
+		return myIsRi;
 	}
 	
 }

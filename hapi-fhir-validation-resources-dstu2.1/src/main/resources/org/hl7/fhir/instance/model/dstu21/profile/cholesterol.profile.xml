@@ -18,7 +18,7 @@
   </contact>
   <date value="2012-05-12"/>
   <description value="Describes how the lab report is used for a standard Lipid Profile - Cholesterol, Triglyceride and Cholesterol fractions. Uses LOINC codes"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.2.0"/>
   <kind value="resource"/>
   <constrainedType value="Observation"/>
   <abstract value="false"/>
@@ -1112,7 +1112,7 @@
     <element>
       <path value="Observation.referenceRange.high"/>
       <name value="SimpleQuantity"/>
-      <short value="A fixed quantity (no comparator)"/>
+      <short value="High Range, if relevant"/>
       <definition value="&lt;4.5 mmol/L."/>
       <comments value="Per Australian NHF Recommendations."/>
       <min value="1"/>

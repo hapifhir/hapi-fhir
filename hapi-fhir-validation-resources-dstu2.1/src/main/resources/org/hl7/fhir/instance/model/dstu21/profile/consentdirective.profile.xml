@@ -18,7 +18,6 @@
   </contact>
   <date value="2014-01-31"/>
   <description value="Consent Directive"/>
-  <fhirVersion value="1.0.2"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -33,7 +32,7 @@
       <path value="Contract"/>
       <name value="ConsentDirective"/>
       <short value="Consent Directive"/>
-      <definition value="A record of a healthcare consumer’s privacy policy, which is in accordance with governing jurisdictional and organization privacy policies that grant or withhold consent:   • To one or more identified entities in a defined role   • To perform one or more operations (e.g. collect, access, use, disclose, amend, or delete)   • On an instance or type of individually identifiable health information [IIHI]  • For a purpose such as treatment, payment, operations, research, public health, quality measures, health status evaluation by third parties, or marketing   • Under certain conditions, e.g. when unconscious   • For specified time period, e.g. effective and expiration dates   • In certain context, e.g. in an emergency   A consent directive is an instance of governing jurisdictional and organization privacy policies, which may or may not be backed up by a signed document (paper or electronic). [HITSP TP30]."/>
+      <definition value="A record of a healthcare consumer’s privacy policy, which is in accordance with governing jurisdictional and organization privacy policies that grant or withhold consent:   • To one or more identified entities in a defined role   • To perform one or more operations (e.g., collect, access, use, disclose, amend, or delete)   • On an instance or type of individually identifiable health information [IIHI]  • For a purpose such as treatment, payment, operations, research, public health, quality measures, health status evaluation by third parties, or marketing   • Under certain conditions, e.g., when unconscious   • For specified time period, e.g., effective and expiration dates   • In certain context, e.g., in an emergency   A consent directive is an instance of governing jurisdictional and organization privacy policies, which may or may not be backed up by a signed document (paper or electronic). [HITSP TP30]."/>
       <min value="0"/>
       <max value="*"/>
       <base>
@@ -56,7 +55,7 @@
     <element>
       <path value="Contract.id"/>
       <short value="Logical id of this artifact"/>
-      <definition value="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes."/>
+      <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
@@ -90,7 +89,7 @@
       <path value="Contract.implicitRules"/>
       <short value="A set of rules under which this content was created"/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However, the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -121,7 +120,7 @@
       </type>
       <binding>
         <strength value="required"/>
-        <description value="A human language."/>
+        <description value="A human language"/>
         <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
       </binding>
     </element>
@@ -329,7 +328,7 @@
       <name value="ConsentDirective.domain"/>
       <short value="Domain in which this Consent Directive applies"/>
       <definition value="Recognized governance framework or system operating with a circumscribed scope in accordance with specified principles, policies, processes or procedures for managing rights, actions, or behaviors of parties or principals relative to privacy protection and control of the collection, access, use and disclosure of resources."/>
-      <alias value="scope of governance jurisdiction"/>
+      <alias value="scope of governance jurisdication"/>
       <min value="0"/>
       <max value="*"/>
       <base>
@@ -346,7 +345,7 @@
       <path value="Contract.type"/>
       <name value="ConsentDirective.type"/>
       <short value="Consent Directive Type"/>
-      <definition value="Specific type of patient privacy Consent Directive reflecting the range of patient discretion over granting of rights to patient information and actions that may be taken on that information; e.g. Opt-in, opt-out, Share All (such as authorization to disclose to payer for payment purposes or benefit eligibility), Share Partial(such as Title 38 Section 7332 and 42 CFR Part 2), Implied Consent, such as a HIPAA Notice of Privacy Practices."/>
+      <definition value="Specific type of patient privacy Consent Directive reflecting the range of patient discretion over granting of rights to patient information and actions that may be taken on that information.  E.g., Opt-in, opt-out, Share All (such as authorization to disclose to payer for payment purposes or benefit eligibility), Share Partial(such as Title 38 Section 7332 and 42 CFR Part 2), Implied Consent, such as a HIPAA Notice of Privacy Practices."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -360,7 +359,7 @@
       <isSummary value="true"/>
       <binding>
         <strength value="example"/>
-        <description value="List of overall contract codes."/>
+        <description value="List of overall contract codes"/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/contract-type"/>
         </valueSetReference>
@@ -388,14 +387,14 @@
       <isSummary value="true"/>
       <binding>
         <strength value="example"/>
-        <description value="Detailed codes within the above."/>
+        <description value="Detailed codes within the above"/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/contract-subtype"/>
         </valueSetReference>
       </binding>
       <mapping>
         <identity value="rim"/>
-        <map value="e.g. RECOV"/>
+        <map value="e.g., RECOV"/>
       </mapping>
     </element>
     <element>
@@ -415,14 +414,14 @@
       </type>
       <binding>
         <strength value="example"/>
-        <description value="Detailed codes for the contract action."/>
+        <description value="Detailed codes for the contract action"/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/contract-action"/>
         </valueSetReference>
       </binding>
       <mapping>
         <identity value="rim"/>
-        <map value="e.g. JURISPOL"/>
+        <map value="e.g., JURISPOL"/>
       </mapping>
     </element>
     <element>
@@ -442,14 +441,14 @@
       </type>
       <binding>
         <strength value="example"/>
-        <description value="Detailed codes for the contract action reason."/>
+        <description value="Detailed codes for the contract action reason"/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse"/>
         </valueSetReference>
       </binding>
       <mapping>
         <identity value="rim"/>
-        <map value="e.g. QUALIMP"/>
+        <map value="e.g., QUALIMP"/>
       </mapping>
     </element>
     <element>
@@ -603,7 +602,7 @@
       </type>
       <binding>
         <strength value="example"/>
-        <description value="Detailed codes for the contract actor role."/>
+        <description value="Detailed codes for the contract actor role"/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/contract-actorrole"/>
         </valueSetReference>
@@ -767,7 +766,6 @@
       <name value="ConsentDirective.valuedItem.quantity"/>
       <short value="Count of Contract Valued Items"/>
       <definition value="Specifies the units by which the Contract Valued Item is measured or counted, and quantifies the countable or measurable Contract Valued Item instances."/>
-      <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -779,32 +777,9 @@
         <code value="Quantity"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="code.empty() or system"/>
-        </extension>
-        <key value="qty-3"/>
-        <severity value="error"/>
-        <human value="If a code for the unit is present, the system SHALL also be present"/>
-        <xpath value="not(exists(f:code)) or exists(f:system)"/>
-      </constraint>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="comparator.empty()"/>
-        </extension>
-        <key value="sqty-1"/>
-        <severity value="error"/>
-        <human value="The comparator is not used on a SimpleQuantity"/>
-        <xpath value="not(exists(f:comparator))"/>
-      </constraint>
-      <isSummary value="true"/>
-      <mapping>
-        <identity value="v2"/>
-        <map value="SN (see also Range) or CQ"/>
-      </mapping>
       <mapping>
         <identity value="rim"/>
-        <map value="PQ, IVL&lt;PQ&gt;, MO, CO, depending on the values"/>
+        <map value="COCT_RM440000UV09 ValuedItem unitQuantity"/>
       </mapping>
     </element>
     <element>
@@ -812,7 +787,6 @@
       <name value="ConsentDirective.valuedItem.unitprice"/>
       <short value="Contract Valued Item fee, charge, or cost."/>
       <definition value="A Contract Valued Item unit valuation measure."/>
-      <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -824,32 +798,9 @@
         <code value="Quantity"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="code.empty() or system"/>
-        </extension>
-        <key value="qty-3"/>
-        <severity value="error"/>
-        <human value="If a code for the unit is present, the system SHALL also be present"/>
-        <xpath value="not(exists(f:code)) or exists(f:system)"/>
-      </constraint>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="(code or value.empty()) and (system.empty() or system = &#39;urn:iso:std:iso:4217&#39;)"/>
-        </extension>
-        <key value="mny-1"/>
-        <severity value="error"/>
-        <human value="There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:iso:std:iso:4217&quot; - currency)."/>
-        <xpath value="(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value=&#39;urn:iso:std:iso:4217&#39;)"/>
-      </constraint>
-      <isSummary value="true"/>
-      <mapping>
-        <identity value="v2"/>
-        <map value="SN (see also Range) or CQ"/>
-      </mapping>
       <mapping>
         <identity value="rim"/>
-        <map value="PQ, IVL&lt;PQ&gt;, MO, CO, depending on the values"/>
+        <map value="COCT_RM440000UV09 ValuedItem unitPriceAmt"/>
       </mapping>
       <mapping>
         <identity value="v2"/>
@@ -909,7 +860,6 @@
       <name value="ConsentDirective.valuedItem.net"/>
       <short value="Total Contract Valued Item Value"/>
       <definition value="Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
-      <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -921,32 +871,9 @@
         <code value="Quantity"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="code.empty() or system"/>
-        </extension>
-        <key value="qty-3"/>
-        <severity value="error"/>
-        <human value="If a code for the unit is present, the system SHALL also be present"/>
-        <xpath value="not(exists(f:code)) or exists(f:system)"/>
-      </constraint>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="(code or value.empty()) and (system.empty() or system = &#39;urn:iso:std:iso:4217&#39;)"/>
-        </extension>
-        <key value="mny-1"/>
-        <severity value="error"/>
-        <human value="There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:iso:std:iso:4217&quot; - currency)."/>
-        <xpath value="(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value=&#39;urn:iso:std:iso:4217&#39;)"/>
-      </constraint>
-      <isSummary value="true"/>
-      <mapping>
-        <identity value="v2"/>
-        <map value="SN (see also Range) or CQ"/>
-      </mapping>
       <mapping>
         <identity value="rim"/>
-        <map value="PQ, IVL&lt;PQ&gt;, MO, CO, depending on the values"/>
+        <map value="COCT_RM440000UV09 ValuedItem netAmt"/>
       </mapping>
       <mapping>
         <identity value="v2"/>
@@ -1042,7 +969,7 @@
       <path value="Contract.signer.type"/>
       <name value="ConsentDirective.signer.type"/>
       <short value="Consent Directive Signer Type"/>
-      <definition value="Role of this Consent Directive signer, e.g. patient who is Consent Directive Grantee, the Substitute Decision Maker such as a person with Power of Attorney to whom the patient has granted or delegated rights to execute a Consent Directive on the patient&#39;s behalf, a notary public or witness."/>
+      <definition value="Role of this Consent Directive signer, e.g., patient who is Consent Directive Grantee, the Substitute Decision Maker such as a person with Power of Attorney to whom the patient has granted or delegated rights to execute a Consent Directive on the patient&#39;s behalf, a notary public or witness."/>
       <min value="1"/>
       <max value="1"/>
       <base>
@@ -1055,7 +982,7 @@
       </type>
       <binding>
         <strength value="preferred"/>
-        <description value="List of parties who may be signing."/>
+        <description value="List of parties who may be signing"/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/contract-signer-type"/>
         </valueSetReference>
@@ -1246,7 +1173,7 @@
       <path value="Contract.term.type"/>
       <name value="ConsentDirective.term.type"/>
       <short value="Consent Directive Term Type"/>
-      <definition value="Type of Consent Directive Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g. life time maximum benefit."/>
+      <definition value="Type of Consent Directive Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g., life time maximum benefit."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -1259,7 +1186,7 @@
       </type>
       <binding>
         <strength value="example"/>
-        <description value="Detailed codes for the types of contract provisions."/>
+        <description value="Detailed codes for the types of contract provisions"/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/contract-term-type"/>
         </valueSetReference>
@@ -1269,7 +1196,7 @@
       <path value="Contract.term.subType"/>
       <name value="ConsentDirective.term.subType"/>
       <short value="Consent Directive Term Subtype"/>
-      <definition value="Subtype of this Consent Directive Provision, e.g. life time maximum payment for a contract term for specific valued item, e.g. disability payment."/>
+      <definition value="Subtype of this Consent Directive Provision, e.g., life time maximum payment for a contract term for specific valued item, e.g., disability payment."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -1282,7 +1209,7 @@
       </type>
       <binding>
         <strength value="example"/>
-        <description value="Detailed codes for the subtypes of contract provisions."/>
+        <description value="Detailed codes for the subtypes of contract provisions"/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/contract-term-subtype"/>
         </valueSetReference>
@@ -1322,7 +1249,7 @@
       </type>
       <binding>
         <strength value="example"/>
-        <description value="Detailed codes for the contract action."/>
+        <description value="Detailed codes for the contract action"/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/contract-action"/>
         </valueSetReference>
@@ -1345,7 +1272,7 @@
       </type>
       <binding>
         <strength value="example"/>
-        <description value="Detailed codes for the contract action reason."/>
+        <description value="Detailed codes for the contract action reason"/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse"/>
         </valueSetReference>
@@ -1502,7 +1429,7 @@
       </type>
       <binding>
         <strength value="example"/>
-        <description value="Detailed codes for the contract actor role."/>
+        <description value="Detailed codes for the contract actor role"/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/contract-actorrole"/>
         </valueSetReference>
@@ -1682,7 +1609,6 @@
       <name value="ConsentDirective.term.valuedItem.quantity"/>
       <short value="Contract Term Valued Item Count"/>
       <definition value="Specifies the units by which the Contract Provision Valued Item is measured or counted, and quantifies the countable or measurable Contract Term Valued Item instances."/>
-      <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -1694,32 +1620,9 @@
         <code value="Quantity"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="code.empty() or system"/>
-        </extension>
-        <key value="qty-3"/>
-        <severity value="error"/>
-        <human value="If a code for the unit is present, the system SHALL also be present"/>
-        <xpath value="not(exists(f:code)) or exists(f:system)"/>
-      </constraint>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="comparator.empty()"/>
-        </extension>
-        <key value="sqty-1"/>
-        <severity value="error"/>
-        <human value="The comparator is not used on a SimpleQuantity"/>
-        <xpath value="not(exists(f:comparator))"/>
-      </constraint>
-      <isSummary value="true"/>
-      <mapping>
-        <identity value="v2"/>
-        <map value="SN (see also Range) or CQ"/>
-      </mapping>
       <mapping>
         <identity value="rim"/>
-        <map value="PQ, IVL&lt;PQ&gt;, MO, CO, depending on the values"/>
+        <map value="COCT_RM440000UV09 ValuedUnitItem unitQuantity"/>
       </mapping>
     </element>
     <element>
@@ -1727,7 +1630,6 @@
       <name value="ConsentDirective.term.valuedItem.unitPrice"/>
       <short value="Contract Term Valued Item fee, charge, or cost."/>
       <definition value="A Contract Provision Valued Item unit valuation measure."/>
-      <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -1739,32 +1641,9 @@
         <code value="Quantity"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="code.empty() or system"/>
-        </extension>
-        <key value="qty-3"/>
-        <severity value="error"/>
-        <human value="If a code for the unit is present, the system SHALL also be present"/>
-        <xpath value="not(exists(f:code)) or exists(f:system)"/>
-      </constraint>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="(code or value.empty()) and (system.empty() or system = &#39;urn:iso:std:iso:4217&#39;)"/>
-        </extension>
-        <key value="mny-1"/>
-        <severity value="error"/>
-        <human value="There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:iso:std:iso:4217&quot; - currency)."/>
-        <xpath value="(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value=&#39;urn:iso:std:iso:4217&#39;)"/>
-      </constraint>
-      <isSummary value="true"/>
-      <mapping>
-        <identity value="v2"/>
-        <map value="SN (see also Range) or CQ"/>
-      </mapping>
       <mapping>
         <identity value="rim"/>
-        <map value="PQ, IVL&lt;PQ&gt;, MO, CO, depending on the values"/>
+        <map value="COCT_RM440000UV09 ValuedUnitItem unitPriceAmt"/>
       </mapping>
     </element>
     <element>
@@ -1812,7 +1691,6 @@
       <name value="ConsentDirective.term.valuedItem.net"/>
       <short value="Total Contract Term Valued Item Value"/>
       <definition value="Expresses the product of the Contract Provision Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
-      <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
       <min value="0"/>
       <max value="1"/>
       <base>
@@ -1824,33 +1702,6 @@
         <code value="Quantity"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="code.empty() or system"/>
-        </extension>
-        <key value="qty-3"/>
-        <severity value="error"/>
-        <human value="If a code for the unit is present, the system SHALL also be present"/>
-        <xpath value="not(exists(f:code)) or exists(f:system)"/>
-      </constraint>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="(code or value.empty()) and (system.empty() or system = &#39;urn:iso:std:iso:4217&#39;)"/>
-        </extension>
-        <key value="mny-1"/>
-        <severity value="error"/>
-        <human value="There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:iso:std:iso:4217&quot; - currency)."/>
-        <xpath value="(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value=&#39;urn:iso:std:iso:4217&#39;)"/>
-      </constraint>
-      <isSummary value="true"/>
-      <mapping>
-        <identity value="v2"/>
-        <map value="SN (see also Range) or CQ"/>
-      </mapping>
-      <mapping>
-        <identity value="rim"/>
-        <map value="PQ, IVL&lt;PQ&gt;, MO, CO, depending on the values"/>
-      </mapping>
     </element>
     <element>
       <path value="Contract.term.group"/>
@@ -2231,7 +2082,7 @@
       <path value="Contract"/>
       <name value="ConsentDirective"/>
       <short value="Consent Directive"/>
-      <definition value="A record of a healthcare consumer’s privacy policy, which is in accordance with governing jurisdictional and organization privacy policies that grant or withhold consent:   • To one or more identified entities in a defined role   • To perform one or more operations (e.g. collect, access, use, disclose, amend, or delete)   • On an instance or type of individually identifiable health information [IIHI]  • For a purpose such as treatment, payment, operations, research, public health, quality measures, health status evaluation by third parties, or marketing   • Under certain conditions, e.g. when unconscious   • For specified time period, e.g. effective and expiration dates   • In certain context, e.g. in an emergency   A consent directive is an instance of governing jurisdictional and organization privacy policies, which may or may not be backed up by a signed document (paper or electronic). [HITSP TP30]."/>
+      <definition value="A record of a healthcare consumer’s privacy policy, which is in accordance with governing jurisdictional and organization privacy policies that grant or withhold consent:   • To one or more identified entities in a defined role   • To perform one or more operations (e.g., collect, access, use, disclose, amend, or delete)   • On an instance or type of individually identifiable health information [IIHI]  • For a purpose such as treatment, payment, operations, research, public health, quality measures, health status evaluation by third parties, or marketing   • Under certain conditions, e.g., when unconscious   • For specified time period, e.g., effective and expiration dates   • In certain context, e.g., in an emergency   A consent directive is an instance of governing jurisdictional and organization privacy policies, which may or may not be backed up by a signed document (paper or electronic). [HITSP TP30]."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2300,7 +2151,7 @@
       <name value="ConsentDirective.domain"/>
       <short value="Domain in which this Consent Directive applies"/>
       <definition value="Recognized governance framework or system operating with a circumscribed scope in accordance with specified principles, policies, processes or procedures for managing rights, actions, or behaviors of parties or principals relative to privacy protection and control of the collection, access, use and disclosure of resources."/>
-      <alias value="scope of governance jurisdiction"/>
+      <alias value="scope of governance jurisdication"/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2312,7 +2163,7 @@
       <path value="Contract.type"/>
       <name value="ConsentDirective.type"/>
       <short value="Consent Directive Type"/>
-      <definition value="Specific type of patient privacy Consent Directive reflecting the range of patient discretion over granting of rights to patient information and actions that may be taken on that information; e.g. Opt-in, opt-out, Share All (such as authorization to disclose to payer for payment purposes or benefit eligibility), Share Partial(such as Title 38 Section 7332 and 42 CFR Part 2), Implied Consent, such as a HIPAA Notice of Privacy Practices."/>
+      <definition value="Specific type of patient privacy Consent Directive reflecting the range of patient discretion over granting of rights to patient information and actions that may be taken on that information.  E.g., Opt-in, opt-out, Share All (such as authorization to disclose to payer for payment purposes or benefit eligibility), Share Partial(such as Title 38 Section 7332 and 42 CFR Part 2), Implied Consent, such as a HIPAA Notice of Privacy Practices."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2546,7 +2397,7 @@
       <path value="Contract.signer.type"/>
       <name value="ConsentDirective.signer.type"/>
       <short value="Consent Directive Signer Type"/>
-      <definition value="Role of this Consent Directive signer, e.g. patient who is Consent Directive Grantee, the Substitute Decision Maker such as a person with Power of Attorney to whom the patient has granted or delegated rights to execute a Consent Directive on the patient&#39;s behalf, a notary public or witness."/>
+      <definition value="Role of this Consent Directive signer, e.g., patient who is Consent Directive Grantee, the Substitute Decision Maker such as a person with Power of Attorney to whom the patient has granted or delegated rights to execute a Consent Directive on the patient&#39;s behalf, a notary public or witness."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -2633,7 +2484,7 @@
       <path value="Contract.term.type"/>
       <name value="ConsentDirective.term.type"/>
       <short value="Consent Directive Term Type"/>
-      <definition value="Type of Consent Directive Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g. life time maximum benefit."/>
+      <definition value="Type of Consent Directive Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g., life time maximum benefit."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2644,7 +2495,7 @@
       <path value="Contract.term.subType"/>
       <name value="ConsentDirective.term.subType"/>
       <short value="Consent Directive Term Subtype"/>
-      <definition value="Subtype of this Consent Directive Provision, e.g. life time maximum payment for a contract term for specific valued item, e.g. disability payment."/>
+      <definition value="Subtype of this Consent Directive Provision, e.g., life time maximum payment for a contract term for specific valued item, e.g., disability payment."/>
       <min value="0"/>
       <max value="1"/>
       <type>

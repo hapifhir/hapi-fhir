@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
@@ -35,6 +36,16 @@ public class BaseJpaTest {
 		return retVal;
 	}
 
+	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.dstu21.model.Bundle theFound) {
+		List<IIdType> retVal = new ArrayList<IIdType>();
+		for (BundleEntryComponent next : theFound.getEntry()) {
+			// if (next.getResource()!= null) {
+			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
+			// }
+		}
+		return retVal;
+	}
+
 	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		int size = theFound.size();
@@ -42,6 +53,25 @@ public class BaseJpaTest {
 		List<IBaseResource> resources = theFound.getResources(0, size);
 		for (IBaseResource next : resources) {
 			retVal.add((IIdType) next.getIdElement().toUnqualifiedVersionless());
+		}
+		return retVal;
+	}
+	
+	protected String[] toValues(IIdType... theValues) {
+		ArrayList<String> retVal = new ArrayList<String>();
+		for (IIdType next : theValues) {
+			retVal.add(next.getValue());
+		}
+		return retVal.toArray(new String[retVal.size()]);
+	}
+	
+	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
+		List<String> retVal = new ArrayList<String>();
+		int size = theFound.size();
+		ourLog.info("Found {} results", size);
+		List<IBaseResource> resources = theFound.getResources(0, size);
+		for (IBaseResource next : resources) {
+			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
 		}
 		return retVal;
 	}

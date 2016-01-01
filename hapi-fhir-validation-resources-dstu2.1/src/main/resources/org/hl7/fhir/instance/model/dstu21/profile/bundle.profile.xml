@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Bundle"/>
   <meta>
-    <lastUpdated value="2015-12-01T11:05:39.051-05:00"/>
+    <lastUpdated value="2015-12-19T16:00:42.735-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -596,9 +596,9 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-19T16:00:42-05:00"/>
   <description value="Base StructureDefinition for Bundle Resource"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.2.0"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -629,7 +629,7 @@
       </type>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="entry.distinct(fullUrl,resource.meta.versionId)"/>
+          <valueString value="entry.where(fullUrl).distinct(fullUrl,resource.meta.versionId)"/>
         </extension>
         <key value="bdl-7"/>
         <severity value="error"/>
@@ -656,7 +656,7 @@
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="total or (type = &#39; searchset&#39;) or (type = &#39;history&#39;)"/>
+          <valueString value="total.empty() or (type = &#39;searchset&#39;) or (type = &#39;history&#39;)"/>
         </extension>
         <key value="bdl-1"/>
         <severity value="error"/>
@@ -1337,7 +1337,7 @@
       </type>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="entry.distinct(fullUrl,resource.meta.versionId)"/>
+          <valueString value="entry.where(fullUrl).distinct(fullUrl,resource.meta.versionId)"/>
         </extension>
         <key value="bdl-7"/>
         <severity value="error"/>
@@ -1364,7 +1364,7 @@
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="total or (type = &#39; searchset&#39;) or (type = &#39;history&#39;)"/>
+          <valueString value="total.empty() or (type = &#39;searchset&#39;) or (type = &#39;history&#39;)"/>
         </extension>
         <key value="bdl-1"/>
         <severity value="error"/>

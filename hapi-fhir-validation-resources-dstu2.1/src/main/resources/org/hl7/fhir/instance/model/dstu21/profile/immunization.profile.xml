@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Immunization"/>
   <meta>
-    <lastUpdated value="2015-12-01T11:05:39.051-05:00"/>
+    <lastUpdated value="2015-12-19T16:00:42.735-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -691,9 +691,9 @@
       <value value="http://www.hl7.org/Special/committees/pher/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-19T16:00:42-05:00"/>
   <description value="Base StructureDefinition for Immunization Resource"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.2.0"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -729,7 +729,7 @@
       </type>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="(wasNotGiven = &#39;true&#39;).not() or explanation.reasonNotGiven.empty()"/>
+          <valueString value="(wasNotGiven = &#39;true&#39;) or explanation.reasonNotGiven.empty()"/>
         </extension>
         <key value="imm-2"/>
         <severity value="error"/>
@@ -1763,7 +1763,7 @@
       </type>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="(wasNotGiven = &#39;true&#39;).not() or explanation.reasonNotGiven.empty()"/>
+          <valueString value="(wasNotGiven = &#39;true&#39;) or explanation.reasonNotGiven.empty()"/>
         </extension>
         <key value="imm-2"/>
         <severity value="error"/>

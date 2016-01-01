@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -59,6 +60,14 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 	 * Constructor
 	 */
 	public DateParam(QuantityCompararatorEnum theComparator, DateTimeDt theDate) {
+		myComparator = theComparator;
+		setValueAsString(theDate != null ? theDate.getValueAsString() : null);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public DateParam(QuantityCompararatorEnum theComparator, IPrimitiveType<Date> theDate) {
 		myComparator = theComparator;
 		setValueAsString(theDate != null ? theDate.getValueAsString() : null);
 	}

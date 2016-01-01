@@ -18,7 +18,7 @@
   </contact>
   <date value="2012-05-12"/>
   <description value="HDL Cholesterol Result"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.2.0"/>
   <kind value="resource"/>
   <constrainedType value="Observation"/>
   <abstract value="false"/>
@@ -900,7 +900,7 @@
     <element>
       <path value="Observation.referenceRange.low"/>
       <name value="SimpleQuantity"/>
-      <short value="A fixed quantity (no comparator)"/>
+      <short value="Low Range, if relevant"/>
       <definition value="&gt;1.5 mmol/L."/>
       <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
       <min value="1"/>

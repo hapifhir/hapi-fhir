@@ -25,6 +25,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -123,6 +124,11 @@ public class FhirDstu2 implements IFhirVersion {
 	@Override
 	public BaseCodingDt newCodingDt() {
 		return new CodingDt();
+	}
+
+	@Override
+	public IIdType newIdType() {
+		return new IdDt();
 	}
 
 }

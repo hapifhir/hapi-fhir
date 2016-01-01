@@ -16,9 +16,9 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-19T16:00:42-05:00"/>
   <description value="Base StructureDefinition for string Type: A sequence of Unicode characters"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.2.0"/>
   <kind value="datatype"/>
   <abstract value="false"/>
   <base value="http://hl7.org/fhir/StructureDefinition/Element"/>

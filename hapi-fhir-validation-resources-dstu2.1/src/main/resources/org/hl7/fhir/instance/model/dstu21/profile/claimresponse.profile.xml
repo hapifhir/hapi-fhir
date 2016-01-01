@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="ClaimResponse"/>
   <meta>
-    <lastUpdated value="2015-12-01T11:05:39.051-05:00"/>
+    <lastUpdated value="2015-12-19T16:00:42.735-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -1075,7 +1075,7 @@
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzME+lXFigAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+3OsRUAIAjEUOL+O8cJABttJM11/x1qZAGqRBEVcNIqdWj1efDqQbb3HwwwwEfABmQUHSPM9dtDAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
             <img src="data: image/png;base64,R0lGODlhEAAQAOZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///////yH5BAEAAH8ALAAAAAAQABAAAAfNgH+Cg36FfoOIhH4JBxBghYl/hQkNAV0IVT5GkJKLCwtQaSsSdx9aR26Gcwt2IkQaNRI6dBERIzCFDSgWSW8WCDkbBnoOQ3uFARc/JQJfCAZlT0x4ZFyFBxdNQT9ZCBNWKQoKUQ+FEDgcdTIAV14YDmg2CgSFA0hmQC5TLE4VRTdrKJAoxOeFCzZSwsw4U6BCizwUQhQyEaAPiAwCVNCY0FCNnA6GPAwYoETIFgY9loiRA4dToTYnsOxg8CBGHE6ICvEYQ4AKzkidfgoKBAA7" alt="." style="background-color: white; background-color: inherit" title="Data Type" class="hierarchy"/> 
-            <span title="ClaimResponse.error.code : An error code,froma specified code system, which details why the claim could not be adjudicated.">code</span>
+            <span title="ClaimResponse.error.code : An error code,from a specified code system, which details why the claim could not be adjudicated.">code</span>
             <a name="ClaimResponse.error.code"> </a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
@@ -1087,8 +1087,8 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Error code detailing processing issues
             <br/>
-            <a href="valueset-adjudication-error.html" title="The error codes for adjudication processing.">Adjudication Error Codes</a> (
-            <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set.">Required</a>)
+            <a href="valueset-adjudication-error.html" title="The adjudication error codes.">Adjudication Error Codes</a> (
+            <a href="terminologies.html#extensible" title="To be conformant, instances of this element SHALL include a code from the specified value set if any of the codes within the value set can apply to the concept being communicated.  If the valueset does not cover the concept (based on human review), alternate codings (or, data type allowing, text) may be included instead.">Extensible</a>)
           </td>
         </tr>
 
@@ -1181,7 +1181,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Reason for Payment adjustment
             <br/>
-            <a href="valueset-adjustment-reason.html" title="Adjustment reason codes.">Adjustment Reason Codes</a> (
+            <a href="valueset-payment-adjustment-reason.html" title="Payment Adjustment reason codes.">Payment Adjustment Reason Codes</a> (
             <a href="terminologies.html#extensible" title="To be conformant, instances of this element SHALL include a code from the specified value set if any of the codes within the value set can apply to the concept being communicated.  If the valueset does not cover the concept (based on human review), alternate codings (or, data type allowing, text) may be included instead.">Extensible</a>)
           </td>
         </tr>
@@ -1573,9 +1573,9 @@
       <value value="http://www.hl7.org/Special/committees/fm/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-19T16:00:42-05:00"/>
   <description value="Base StructureDefinition for ClaimResponse Resource"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.2.0"/>
   <mapping>
     <identity value="w5"/>
     <uri value="http://hl7.org/fhir/w5"/>
@@ -2992,7 +2992,7 @@
     <element>
       <path value="ClaimResponse.error.code"/>
       <short value="Error code detailing processing issues"/>
-      <definition value="An error code,froma specified code system, which details why the claim could not be adjudicated."/>
+      <definition value="An error code,from a specified code system, which details why the claim could not be adjudicated."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -3000,8 +3000,8 @@
       </type>
       <isSummary value="true"/>
       <binding>
-        <strength value="required"/>
-        <description value="The error codes for adjudication processing."/>
+        <strength value="extensible"/>
+        <description value="The adjudication error codes."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/adjudication-error"/>
         </valueSetReference>
@@ -3068,9 +3068,9 @@
       <isSummary value="true"/>
       <binding>
         <strength value="extensible"/>
-        <description value="Adjustment reason codes."/>
+        <description value="Payment Adjustment reason codes."/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/adjustment-reason"/>
+          <reference value="http://hl7.org/fhir/ValueSet/payment-adjustment-reason"/>
         </valueSetReference>
       </binding>
     </element>
@@ -4163,7 +4163,7 @@
     <element>
       <path value="ClaimResponse.error.code"/>
       <short value="Error code detailing processing issues"/>
-      <definition value="An error code,froma specified code system, which details why the claim could not be adjudicated."/>
+      <definition value="An error code,from a specified code system, which details why the claim could not be adjudicated."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -4171,8 +4171,8 @@
       </type>
       <isSummary value="true"/>
       <binding>
-        <strength value="required"/>
-        <description value="The error codes for adjudication processing."/>
+        <strength value="extensible"/>
+        <description value="The adjudication error codes."/>
         <valueSetReference>
           <reference value="http://hl7.org/fhir/ValueSet/adjudication-error"/>
         </valueSetReference>
@@ -4239,9 +4239,9 @@
       <isSummary value="true"/>
       <binding>
         <strength value="extensible"/>
-        <description value="Adjustment reason codes."/>
+        <description value="Payment Adjustment reason codes."/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/adjustment-reason"/>
+          <reference value="http://hl7.org/fhir/ValueSet/payment-adjustment-reason"/>
         </valueSetReference>
       </binding>
     </element>

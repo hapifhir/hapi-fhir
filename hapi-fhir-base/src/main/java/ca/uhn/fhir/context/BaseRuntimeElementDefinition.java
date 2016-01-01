@@ -66,7 +66,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName()+"[" + getName() + "]";
+		return getClass().getSimpleName()+"[" + getName() + ", " + getImplementingClass().getSimpleName() + "]";
 	}
 
 	public void addExtension(RuntimeChildDeclaredExtensionDefinition theExtension) {
@@ -214,8 +214,8 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		/**
 		 * HL7.org style.
 		 */
-		PRIMITIVE_XHTML_HL7ORG
-
+		PRIMITIVE_XHTML_HL7ORG, 
+		
 	}
 
 }

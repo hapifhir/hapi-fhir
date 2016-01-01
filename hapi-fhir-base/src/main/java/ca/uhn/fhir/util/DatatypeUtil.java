@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
 import ca.uhn.fhir.model.primitive.StringDt;
 
 public class DatatypeUtil {
@@ -46,9 +48,9 @@ public class DatatypeUtil {
 	/**
 	 * Joins a list of strings with a single space (' ') between each string 
 	 */
-	public static String joinStringsSpaceSeparated(List<StringDt> theStrings) {
+	public static String joinStringsSpaceSeparated(List<? extends IPrimitiveType<String>> theStrings) {
 		StringBuilder b = new StringBuilder();
-		for (StringDt next : theStrings) {
+		for (IPrimitiveType<String> next : theStrings) {
 			if (next.isEmpty()) {
 				continue;
 			}

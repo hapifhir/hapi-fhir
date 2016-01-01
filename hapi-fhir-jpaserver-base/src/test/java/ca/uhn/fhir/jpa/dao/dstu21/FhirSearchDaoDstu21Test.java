@@ -6,13 +6,13 @@ import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
+import org.hl7.fhir.dstu21.model.Organization;
+import org.hl7.fhir.dstu21.model.Patient;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.jpa.dao.ISearchDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.model.dstu21.resource.Organization;
-import ca.uhn.fhir.model.dstu21.resource.Patient;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -108,13 +108,13 @@ public class FhirSearchDaoDstu21Test extends BaseJpaDstu21Test {
 		Long id1;
 		{
 			Patient patient = new Patient();
-			patient.getText().setDiv("<div>AAAS<p>FOO</p> CCC    </div>");
+			patient.getText().setDivAsString("<div>AAAS<p>FOO</p> CCC    </div>");
 			id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 		Long id2;
 		{
 			Patient patient = new Patient();
-			patient.getText().setDiv("<div>AAAB<p>FOO</p> CCC    </div>");
+			patient.getText().setDivAsString("<div>AAAB<p>FOO</p> CCC    </div>");
 			id2 = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 

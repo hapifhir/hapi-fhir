@@ -40,7 +40,7 @@ public class ValidateMethodBindingDstu1 extends BaseOutcomeReturningMethodBindin
 	public ValidateMethodBindingDstu1(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, Validate.class, theProvider);
 
-		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -26,6 +25,8 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -44,7 +45,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	public UpdateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, Update.class, theProvider);
 
-		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 	}
 
 	@Override
@@ -59,9 +60,9 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		 * Content-Location header, but we allow it in the PUT URL as well..
 		 */
 		String locationHeader = theRequest.getHeader(Constants.HEADER_CONTENT_LOCATION);
-		IdDt id = theRequest.getId();
+		IIdType id = theRequest.getId();
 		if (isNotBlank(locationHeader)) {
-			id = new IdDt(locationHeader);
+			id.setValue(locationHeader);
 			if (isNotBlank(id.getResourceType())) {
 				if (!getResourceName().equals(id.getResourceType())) {
 					throw new InvalidRequestException("Attempting to update '" + getResourceName() + "' but content-location header specifies different resource type '" + id.getResourceType() + "' - header value: " + locationHeader);
@@ -85,7 +86,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 
 		if (isNotBlank(locationHeader)) {
 			MethodOutcome mo = new MethodOutcome();
-			parseContentLocation(mo, getResourceName(), locationHeader);
+			parseContentLocation(getContext(), mo, getResourceName(), locationHeader);
 			if (mo.getId() == null || mo.getId().isEmpty()) {
 				throw new InvalidRequestException("Invalid Content-Location header for resource " + getResourceName() + ": " + locationHeader);
 			}

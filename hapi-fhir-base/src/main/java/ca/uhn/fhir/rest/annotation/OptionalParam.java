@@ -23,8 +23,9 @@ package ca.uhn.fhir.rest.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 //import ca.uhn.fhir.testmodel.Patient; // TODO: qualify this correctly
@@ -116,5 +117,5 @@ public @interface OptionalParam {
      * this value must not be populated.
      * </p>
      */
-    Class<? extends IResource>[] targetTypes() default {};
+    Class<? extends IBaseResource>[] targetTypes() default {};
 }

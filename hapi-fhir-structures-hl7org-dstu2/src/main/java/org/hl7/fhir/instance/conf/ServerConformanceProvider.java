@@ -57,14 +57,14 @@ import org.hl7.fhir.instance.model.Conformance.TypeRestfulInteraction;
 import org.hl7.fhir.instance.model.Conformance.UnknownContentCode;
 import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatus;
 import org.hl7.fhir.instance.model.Enumerations.ResourceType;
+import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.OperationDefinition;
 import org.hl7.fhir.instance.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.instance.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
 import ca.uhn.fhir.rest.annotation.Metadata;
@@ -81,7 +81,6 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 /**
@@ -466,7 +465,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
         if (nextParameter.getParamType() != null) {
           param.getTypeElement().setValueAsString(nextParameter.getParamType().getCode());
         }
-        for (Class<? extends IResource> nextTarget : nextParameter.getDeclaredTypes()) {
+        for (Class<? extends IBaseResource> nextTarget : nextParameter.getDeclaredTypes()) {
           RuntimeResourceDefinition targetDef = myRestfulServer.getFhirContext().getResourceDefinition(nextTarget);
           if (targetDef != null) {
             ResourceType code;
@@ -511,7 +510,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
   }
 
   @Read(type = OperationDefinition.class)
-  public OperationDefinition readOperationDefinition(@IdParam IdDt theId) {
+  public OperationDefinition readOperationDefinition(@IdParam IdType theId) {
     if (theId == null || theId.hasIdPart() == false) {
       throw new ResourceNotFoundException(theId);
     }

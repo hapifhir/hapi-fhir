@@ -531,7 +531,7 @@ public class JsonParser extends BaseParser implements IParser {
 			BaseRuntimeChildDefinition nextChild = nextChildElem.getDef();
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
-				if (gen != null) {
+				if (gen != null && theResource instanceof IResource) {
 					BaseNarrativeDt<?> narr = ((IResource) theResource).getText();
 					if (narr.getDiv().isEmpty()) {
 						gen.generateNarrative(theResDef.getResourceProfile(), theResource, narr);
@@ -552,7 +552,7 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 
 			List<? extends IBase> values = nextChild.getAccessor().getValues(theNextValue);
-			values = super.preProcessValues(nextChild, values);
+			values = super.preProcessValues(nextChild, theResource, values);
 
 			if (values == null || values.isEmpty()) {
 				continue;

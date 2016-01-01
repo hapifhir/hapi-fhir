@@ -11,6 +11,30 @@ import javax.persistence.EntityManager;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
+import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.model.CodeableConcept;
+import org.hl7.fhir.dstu21.model.Coding;
+import org.hl7.fhir.dstu21.model.ConceptMap;
+import org.hl7.fhir.dstu21.model.Device;
+import org.hl7.fhir.dstu21.model.DiagnosticOrder;
+import org.hl7.fhir.dstu21.model.DiagnosticReport;
+import org.hl7.fhir.dstu21.model.Encounter;
+import org.hl7.fhir.dstu21.model.Immunization;
+import org.hl7.fhir.dstu21.model.Location;
+import org.hl7.fhir.dstu21.model.Media;
+import org.hl7.fhir.dstu21.model.Medication;
+import org.hl7.fhir.dstu21.model.MedicationOrder;
+import org.hl7.fhir.dstu21.model.Meta;
+import org.hl7.fhir.dstu21.model.Observation;
+import org.hl7.fhir.dstu21.model.Organization;
+import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.Practitioner;
+import org.hl7.fhir.dstu21.model.Questionnaire;
+import org.hl7.fhir.dstu21.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu21.model.StructureDefinition;
+import org.hl7.fhir.dstu21.model.Subscription;
+import org.hl7.fhir.dstu21.model.Substance;
+import org.hl7.fhir.dstu21.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -53,30 +77,6 @@ import ca.uhn.fhir.jpa.entity.SubscriptionFlaggedResource;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu21;
-import ca.uhn.fhir.model.dstu21.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu21.composite.CodingDt;
-import ca.uhn.fhir.model.dstu21.composite.MetaDt;
-import ca.uhn.fhir.model.dstu21.resource.Bundle;
-import ca.uhn.fhir.model.dstu21.resource.ConceptMap;
-import ca.uhn.fhir.model.dstu21.resource.Device;
-import ca.uhn.fhir.model.dstu21.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu21.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu21.resource.Encounter;
-import ca.uhn.fhir.model.dstu21.resource.Immunization;
-import ca.uhn.fhir.model.dstu21.resource.Location;
-import ca.uhn.fhir.model.dstu21.resource.Media;
-import ca.uhn.fhir.model.dstu21.resource.Medication;
-import ca.uhn.fhir.model.dstu21.resource.MedicationOrder;
-import ca.uhn.fhir.model.dstu21.resource.Observation;
-import ca.uhn.fhir.model.dstu21.resource.Organization;
-import ca.uhn.fhir.model.dstu21.resource.Patient;
-import ca.uhn.fhir.model.dstu21.resource.Practitioner;
-import ca.uhn.fhir.model.dstu21.resource.Questionnaire;
-import ca.uhn.fhir.model.dstu21.resource.QuestionnaireResponse;
-import ca.uhn.fhir.model.dstu21.resource.StructureDefinition;
-import ca.uhn.fhir.model.dstu21.resource.Subscription;
-import ca.uhn.fhir.model.dstu21.resource.Substance;
-import ca.uhn.fhir.model.dstu21.resource.ValueSet;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -164,7 +164,7 @@ public abstract class BaseJpaDstu21Test extends BaseJpaTest {
 	protected IFhirResourceDao<Substance> mySubstanceDao;
 	@Autowired
 	@Qualifier("mySystemDaoDstu21")
-	protected IFhirSystemDao<Bundle, MetaDt> mySystemDao;
+	protected IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@Autowired
 	@Qualifier("mySystemProviderDstu21")
 	protected JpaSystemProviderDstu21 mySystemProvider;
@@ -172,7 +172,7 @@ public abstract class BaseJpaDstu21Test extends BaseJpaTest {
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("myValueSetDaoDstu21")
-	protected IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 
 	@Before
 	public void beforeCreateInterceptor() {

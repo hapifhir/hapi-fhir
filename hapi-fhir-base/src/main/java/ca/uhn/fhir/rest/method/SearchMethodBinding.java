@@ -65,7 +65,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		Search search = theMethod.getAnnotation(Search.class);
 		this.myQueryName = StringUtils.defaultIfBlank(search.queryName(), null);
 		this.myCompartmentName = StringUtils.defaultIfBlank(search.compartmentName(), null);
-		this.myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		this.myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 		this.myAllowUnknownParams = search.allowUnknownParams();
 
 		Description desc = theMethod.getAnnotation(Description.class);

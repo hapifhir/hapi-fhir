@@ -2,6 +2,10 @@ package ca.uhn.fhir.jpa.util;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import org.hl7.fhir.dstu21.model.Subscription;
+import org.hl7.fhir.dstu21.model.Subscription.SubscriptionChannelType;
+import org.hl7.fhir.dstu21.model.Subscription.SubscriptionStatus;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -26,13 +30,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import ca.uhn.fhir.jpa.dao.FhirResourceDaoSubscriptionDstu2;
+import ca.uhn.fhir.jpa.dao.FhirResourceDaoSubscriptionDstu21;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.dstu21.resource.Subscription;
-import ca.uhn.fhir.model.dstu21.valueset.SubscriptionChannelTypeEnum;
-import ca.uhn.fhir.model.dstu21.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -41,11 +42,11 @@ import net.sourceforge.cobertura.CoverageIgnore;
 
 /**
  * Interceptor which requires newly created {@link Subscription subscriptions} to be in
- * {@link SubscriptionStatusEnum#REQUESTED} state and prevents clients from changing the status.
+ * {@link SubscriptionStatus#REQUESTED} state and prevents clients from changing the status.
  */
 public class SubscriptionsRequireManualActivationInterceptorDstu21 extends InterceptorAdapter {
 
-	public static final ResourceMetadataKeyEnum<Object> ALLOW_STATUS_CHANGE = new ResourceMetadataKeyEnum<Object>(FhirResourceDaoSubscriptionDstu2.class.getName() + "_ALLOW_STATUS_CHANGE") {
+	public static final ResourceMetadataKeyEnum<Object> ALLOW_STATUS_CHANGE = new ResourceMetadataKeyEnum<Object>(FhirResourceDaoSubscriptionDstu21.class.getName() + "_ALLOW_STATUS_CHANGE") {
 		private static final long serialVersionUID = 1;
 
 		@CoverageIgnore
@@ -85,9 +86,9 @@ public class SubscriptionsRequireManualActivationInterceptorDstu21 extends Inter
 
 	private void verifyStatusOk(RestOperationTypeEnum theOperation, ActionRequestDetails theRequestDetails) {
 		Subscription subscription = (Subscription) theRequestDetails.getResource();
-		SubscriptionStatusEnum newStatus = subscription.getStatusElement().getValueAsEnum();
+		SubscriptionStatus newStatus = subscription.getStatusElement().getValue();
 
-		if (newStatus == SubscriptionStatusEnum.REQUESTED || newStatus == SubscriptionStatusEnum.OFF) {
+		if (newStatus == SubscriptionStatus.REQUESTED || newStatus == SubscriptionStatus.OFF) {
 			return;
 		}
 
@@ -101,7 +102,7 @@ public class SubscriptionsRequireManualActivationInterceptorDstu21 extends Inter
 			Subscription existing;
 			try {
 				existing = myDao.read(requestId);
-				SubscriptionStatusEnum existingStatus = existing.getStatusElement().getValueAsEnum();
+				SubscriptionStatus existingStatus = existing.getStatusElement().getValue();
 				if (existingStatus != newStatus) {
 					verifyActiveStatus(subscription, newStatus, existingStatus);
 				}
@@ -113,14 +114,14 @@ public class SubscriptionsRequireManualActivationInterceptorDstu21 extends Inter
 		}
 	}
 
-	private void verifyActiveStatus(Subscription theSubscription, SubscriptionStatusEnum newStatus, SubscriptionStatusEnum theExistingStatus) {
-		SubscriptionChannelTypeEnum channelType = theSubscription.getChannel().getTypeElement().getValueAsEnum();
+	private void verifyActiveStatus(Subscription theSubscription, SubscriptionStatus newStatus, SubscriptionStatus theExistingStatus) {
+		SubscriptionChannelType channelType = theSubscription.getChannel().getTypeElement().getValue();
 
 		if (channelType == null) {
 			throw new UnprocessableEntityException("Subscription.channel.type must be populated");
 		}
 
-		if (channelType == SubscriptionChannelTypeEnum.WEBSOCKET) {
+		if (channelType == SubscriptionChannelType.WEBSOCKET) {
 			return;
 		}
 
@@ -128,13 +129,13 @@ public class SubscriptionsRequireManualActivationInterceptorDstu21 extends Inter
 			throw new UnprocessableEntityException("Subscription.status can not be changed from " + describeStatus(theExistingStatus) + " to " + describeStatus(newStatus));
 		}
 
-		throw new UnprocessableEntityException("Subscription.status must be '" + SubscriptionStatusEnum.OFF.getCode() + "' or '" + SubscriptionStatusEnum.REQUESTED.getCode() + "' on a newly created subscription");
+		throw new UnprocessableEntityException("Subscription.status must be '" + SubscriptionStatus.OFF.toCode() + "' or '" + SubscriptionStatus.REQUESTED.toCode() + "' on a newly created subscription");
 	}
 
-	private String describeStatus(SubscriptionStatusEnum existingStatus) {
+	private String describeStatus(SubscriptionStatus existingStatus) {
 		String existingStatusString;
 		if (existingStatus != null) {
-			existingStatusString = '\'' + existingStatus.getCode() + '\'';
+			existingStatusString = '\'' + existingStatus.toCode() + '\'';
 		} else {
 			existingStatusString = "null";
 		}

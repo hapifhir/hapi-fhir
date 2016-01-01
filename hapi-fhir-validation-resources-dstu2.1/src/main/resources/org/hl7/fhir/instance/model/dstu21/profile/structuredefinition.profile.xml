@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="StructureDefinition"/>
   <meta>
-    <lastUpdated value="2015-12-01T11:05:39.051-05:00"/>
+    <lastUpdated value="2015-12-19T16:00:42.735-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -54,8 +54,6 @@
             <span style="font-style: italic" title="sdf-12">element.base cannot appear if there is no base on the structure definition</span>
             <br/>
             <span style="font-style: italic" title="sdf-11">If there&#39;s a constrained type, its content must match the path name in the first element of a snapshot</span>
-            <br/>
-            <span style="font-style: italic" title="sdf-13">element.base must appear if there is a base on the structure definition</span>
             <br/>
             <span style="font-style: italic" title="sdf-1">Element paths must be unique unless the structure is a constraint</span>
             <br/>
@@ -393,7 +391,7 @@
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
-            <span title="StructureDefinition.fhirVersion : The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.2 for this version.">fhirVersion</span>
+            <span title="StructureDefinition.fhirVersion : The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.2.0 for this version.">fhirVersion</span>
             <a name="StructureDefinition.fhirVersion"> </a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
@@ -728,9 +726,9 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-19T16:00:42-05:00"/>
   <description value="Base StructureDefinition for StructureDefinition Resource"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.2.0"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
@@ -782,7 +780,7 @@
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="snapshot.element.base.empty() xor base"/>
+          <valueString value="snapshot.element.base implies base"/>
         </extension>
         <key value="sdf-12"/>
         <requirements value="Ensure that element.base appears with base or not"/>
@@ -792,23 +790,13 @@
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="constrainedType.empty() or snapshot.element.first.path = constrainedType"/>
+          <valueString value="constrainedType.empty() or snapshot.empty() or snapshot.element.first().path = constrainedType"/>
         </extension>
         <key value="sdf-11"/>
         <requirements value="Ensure that the constrainedType is not inconsistent with the other information in the structure"/>
         <severity value="error"/>
         <human value="If there&#39;s a constrained type, its content must match the path name in the first element of a snapshot"/>
         <xpath value="not(exists(f:constrainedType)) or not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value)"/>
-      </constraint>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="snapshot.element.base.empty() xor base"/>
-        </extension>
-        <key value="sdf-13"/>
-        <requirements value="Ensure that element.base appears if there&#39;s a constrained type on the structure definition"/>
-        <severity value="error"/>
-        <human value="element.base must appear if there is a base on the structure definition"/>
-        <xpath value="not(f:constrainedType) or not(f:snapshot/f:element[not(f:base)])"/>
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
@@ -831,7 +819,7 @@
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="constrainedType or url = &#39;http://hl7.org/fhir/StuctureDefinition/&#39;+id"/>
+          <valueString value="constrainedType or url = &#39;http://hl7.org/fhir/StructureDefinition/&#39;+id"/>
         </extension>
         <key value="sdf-7"/>
         <severity value="error"/>
@@ -1341,7 +1329,7 @@
     <element>
       <path value="StructureDefinition.fhirVersion"/>
       <short value="FHIR Version this StructureDefinition targets"/>
-      <definition value="The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.2 for this version."/>
+      <definition value="The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.2.0 for this version."/>
       <comments value="A StructureDefinition does not need to specify the target it applies to,as StructureDefinitions will often be valid across multiple versions of FHIR. FHIR tooling can determine whether a StructureDefinition is consistent with a particular StructureDefinition if desired."/>
       <min value="0"/>
       <max value="1"/>
@@ -1757,7 +1745,7 @@
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="snapshot.element.base.empty() xor base"/>
+          <valueString value="snapshot.element.base implies base"/>
         </extension>
         <key value="sdf-12"/>
         <requirements value="Ensure that element.base appears with base or not"/>
@@ -1767,23 +1755,13 @@
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="constrainedType.empty() or snapshot.element.first.path = constrainedType"/>
+          <valueString value="constrainedType.empty() or snapshot.empty() or snapshot.element.first().path = constrainedType"/>
         </extension>
         <key value="sdf-11"/>
         <requirements value="Ensure that the constrainedType is not inconsistent with the other information in the structure"/>
         <severity value="error"/>
         <human value="If there&#39;s a constrained type, its content must match the path name in the first element of a snapshot"/>
         <xpath value="not(exists(f:constrainedType)) or not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value)"/>
-      </constraint>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="snapshot.element.base.empty() xor base"/>
-        </extension>
-        <key value="sdf-13"/>
-        <requirements value="Ensure that element.base appears if there&#39;s a constrained type on the structure definition"/>
-        <severity value="error"/>
-        <human value="element.base must appear if there is a base on the structure definition"/>
-        <xpath value="not(f:constrainedType) or not(f:snapshot/f:element[not(f:base)])"/>
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
@@ -1806,7 +1784,7 @@
       </constraint>
       <constraint>
         <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="constrainedType or url = &#39;http://hl7.org/fhir/StuctureDefinition/&#39;+id"/>
+          <valueString value="constrainedType or url = &#39;http://hl7.org/fhir/StructureDefinition/&#39;+id"/>
         </extension>
         <key value="sdf-7"/>
         <severity value="error"/>
@@ -2140,7 +2118,7 @@
     <element>
       <path value="StructureDefinition.fhirVersion"/>
       <short value="FHIR Version this StructureDefinition targets"/>
-      <definition value="The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.0.2 for this version."/>
+      <definition value="The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.2.0 for this version."/>
       <comments value="A StructureDefinition does not need to specify the target it applies to,as StructureDefinitions will often be valid across multiple versions of FHIR. FHIR tooling can determine whether a StructureDefinition is consistent with a particular StructureDefinition if desired."/>
       <min value="0"/>
       <max value="1"/>

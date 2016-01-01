@@ -18,7 +18,7 @@
   </contact>
   <date value="2012-05-12"/>
   <description value="Triglyceride Result"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.2.0"/>
   <kind value="resource"/>
   <constrainedType value="Observation"/>
   <abstract value="false"/>

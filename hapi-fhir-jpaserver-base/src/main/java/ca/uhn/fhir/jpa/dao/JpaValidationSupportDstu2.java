@@ -31,7 +31,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
-public class JpaValidationSupportDstu2 implements IJpaValidationSupport {
+public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaValidationSupportDstu2.class);
 

@@ -30,13 +30,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -133,7 +133,7 @@ public class SearchParameter extends BaseQueryParameter {
 	}
 	
 	private List<Class<? extends IQueryParameterType>> myCompositeTypes;
-	private List<Class<? extends IResource>> myDeclaredTypes;
+	private List<Class<? extends IBaseResource>> myDeclaredTypes;
 	private String myDescription;
 	private String myName;
 	private IParamBinder<?> myParamBinder;
@@ -168,7 +168,7 @@ public class SearchParameter extends BaseQueryParameter {
 		return retVal;
 	}
 
-	public List<Class<? extends IResource>> getDeclaredTypes() {
+	public List<Class<? extends IBaseResource>> getDeclaredTypes() {
 		return Collections.unmodifiableList(myDeclaredTypes);
 	}
 
@@ -255,7 +255,7 @@ public class SearchParameter extends BaseQueryParameter {
 		myCompositeTypes = Arrays.asList(theCompositeTypes);
 	}
 
-	public void setDeclaredTypes(Class<? extends IResource>[] theTypes) {
+	public void setDeclaredTypes(Class<? extends IBaseResource>[] theTypes) {
 		myDeclaredTypes = Arrays.asList(theTypes);
 	}
 

@@ -69,7 +69,7 @@ public class ParametersUtil {
 		IBase parameter = paramChildElem.newInstance();
 		paramChild.getMutator().addValue(theTargetResource, parameter);
 		IPrimitiveType<?> value;
-		if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
+		if (theContext.getVersion().getVersion().isRi()) {
 			value = (IPrimitiveType<?>) theContext.getElementDefinition("string").newInstance(theName);
 		} else {
 			value = new StringDt(theName);

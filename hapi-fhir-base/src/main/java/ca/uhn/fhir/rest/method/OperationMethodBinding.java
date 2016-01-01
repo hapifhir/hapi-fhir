@@ -35,6 +35,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -42,7 +43,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -76,7 +76,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 
 		myIdempotent = theIdempotent;
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 		if (myIdParamIndex != null) {
 			for (Annotation next : theMethod.getParameterAnnotations()[myIdParamIndex]) {
 				if (next instanceof IdParam) {
@@ -230,7 +230,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		String id = null;
 		if (myIdParamIndex != null) {
-			IdDt idDt = (IdDt) theArgs[myIdParamIndex];
+			IIdType idDt = (IIdType) theArgs[myIdParamIndex];
 			id = idDt.getValue();
 		}
 		IBaseParameters parameters = (IBaseParameters) getContext().getResourceDefinition("Parameters").newInstance();

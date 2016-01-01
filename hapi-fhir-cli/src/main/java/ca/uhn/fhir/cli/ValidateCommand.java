@@ -4,15 +4,13 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.fusesource.jansi.Ansi.*;
+import static org.fusesource.jansi.Ansi.ansi;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -21,24 +19,20 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
-import org.fusesource.jansi.Ansi;
+import org.fusesource.jansi.Ansi.Color;
+import org.hl7.fhir.dstu21.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu21.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.dstu21.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.dstu21.model.StructureDefinition;
 
 import com.phloc.commons.io.file.FileUtils;
-import com.sun.tools.corba.se.idl.ParameterEntry;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 import ca.uhn.fhir.rest.method.MethodUtil;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.validation.DefaultProfileValidationSupport;
-import ca.uhn.fhir.validation.FhirInstanceValidator;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
-import ca.uhn.fhir.validation.ValidationSupportChain;
-import net.sf.saxon.expr.instruct.LocalParam;
-import net.sf.saxon.om.Chain;
 
 public class ValidateCommand extends BaseCommand {
 
@@ -112,7 +106,7 @@ public class ValidateCommand extends BaseCommand {
 					throw new ParseException("Failed to load file '" + localProfile + "' - Error: " + e.toString());
 				}
 				
-				org.hl7.fhir.instance.model.StructureDefinition sd = (org.hl7.fhir.instance.model.StructureDefinition) MethodUtil.detectEncodingNoDefault(input).newParser(FhirContext.forDstu2Hl7Org()).parseResource(input);
+				StructureDefinition sd = (StructureDefinition) MethodUtil.detectEncodingNoDefault(input).newParser(getFhirCtx()).parseResource(input);
 				instanceValidator.setStructureDefintion(sd);
 			}
 			if (theCommandLine.hasOption("r")) {

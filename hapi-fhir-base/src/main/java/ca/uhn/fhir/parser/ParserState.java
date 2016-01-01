@@ -35,8 +35,11 @@ import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -147,11 +150,7 @@ class ParserState<T> {
 		IBase newChildInstance;
 		try {
 			IFhirVersion version;
-			if (theTarget instanceof IResource) {
-				version = ((IResource) theTarget).getStructureFhirVersionEnum().getVersionImplementation();
-			} else {
-				version = FhirVersionEnum.DSTU2_HL7ORG.getVersionImplementation();
-			}
+			version = theTarget.getStructureFhirVersionEnum().getVersionImplementation();
 			newChildInstance = version.getResourceReferenceType().newInstance();
 		} catch (InstantiationException e) {
 			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
@@ -234,10 +233,10 @@ class ParserState<T> {
 			throws DataFormatException {
 		ParserState<T> retVal = new ParserState<T>(theContext, theJsonMode, theErrorHandler);
 		if (theResourceType == null) {
-			if (theContext.getVersion().getVersion() != FhirVersionEnum.DSTU2_HL7ORG) {
-				retVal.push(retVal.new PreResourceStateHapi(theResourceType));
-			} else {
+			if (theContext.getVersion().getVersion().isRi()) {
 				retVal.push(retVal.new PreResourceStateHl7Org(theResourceType));
+			} else {
+				retVal.push(retVal.new PreResourceStateHapi(theResourceType));
 			}
 		} else {
 			if (IResource.class.isAssignableFrom(theResourceType)) {
@@ -1409,7 +1408,7 @@ class ParserState<T> {
 	private class ContainedResourcesStateHl7Org extends PreResourceState {
 
 		public ContainedResourcesStateHl7Org(PreResourceState thePreResourcesState) {
-			super(thePreResourcesState, FhirVersionEnum.DSTU2_HL7ORG);
+			super(thePreResourcesState, thePreResourcesState.myParentVersion);
 		}
 
 		@Override
@@ -1664,11 +1663,11 @@ class ParserState<T> {
 				return;
 			}
 			case RESOURCE: {
-				if (myInstance instanceof IResource || myInstance instanceof IElement) {
-					ParserState<T>.PreResourceStateHapi state = new PreResourceStateHapi(myInstance, child.getMutator(), null);
+				if (myInstance instanceof IAnyResource || myInstance instanceof IBaseBackboneElement) {
+					ParserState<T>.PreResourceStateHl7Org state = new PreResourceStateHl7Org(myInstance, child.getMutator(), null);
 					push(state);
 				} else {
-					ParserState<T>.PreResourceStateHl7Org state = new PreResourceStateHl7Org(myInstance, child.getMutator(), null);
+					ParserState<T>.PreResourceStateHapi state = new PreResourceStateHapi(myInstance, child.getMutator(), null);
 					push(state);
 				}
 				return;
@@ -1757,7 +1756,7 @@ class ParserState<T> {
 			case RESOURCE_REF: {
 				ICompositeType newChildInstance = (ICompositeType) newResourceReferenceDt(getPreResourceState().myInstance);
 				myExtension.setValue(newChildInstance);
-				if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
+				if (myContext.getVersion().getVersion().isRi()) {
 					ParserState<T>.ResourceReferenceStateHl7Org newState = new ResourceReferenceStateHl7Org(getPreResourceState(), (IBaseReference) newChildInstance);
 					push(newState);
 				} else {
@@ -1788,7 +1787,7 @@ class ParserState<T> {
 
 	private class SecurityLabelElementStateHapi extends ElementCompositeState {
 
-		public SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, BaseCodingDt codingDt) {
+		public SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBase codingDt) {
 			super(thePreResourceState, theDef, codingDt);
 		}
 
@@ -1824,12 +1823,12 @@ class ParserState<T> {
 				myMap.put(ResourceMetadataKeyEnum.UPDATED, updated);
 			} else if (theLocalPart.equals("security")) {
 				@SuppressWarnings("unchecked")
-				List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) myMap.get(ResourceMetadataKeyEnum.SECURITY_LABELS);
+				List<IBase> securityLabels = (List<IBase>) myMap.get(ResourceMetadataKeyEnum.SECURITY_LABELS);
 				if (securityLabels == null) {
-					securityLabels = new ArrayList<BaseCodingDt>();
+					securityLabels = new ArrayList<IBase>();
 					myMap.put(ResourceMetadataKeyEnum.SECURITY_LABELS, securityLabels);
 				}
-				BaseCodingDt securityLabel = myContext.getVersion().newCodingDt();
+				IBase securityLabel = myContext.getVersion().newCodingDt();
 				BaseRuntimeElementCompositeDefinition<?> codinfDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(securityLabel.getClass());
 				push(new SecurityLabelElementStateHapi(getPreResourceState(), codinfDef, securityLabel));
 				securityLabels.add(securityLabel);

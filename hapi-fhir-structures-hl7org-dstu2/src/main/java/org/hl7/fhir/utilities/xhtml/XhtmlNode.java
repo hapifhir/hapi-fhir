@@ -55,9 +55,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 @DatatypeDef(name="xhtml")
 public class XhtmlNode implements IBaseXhtml {

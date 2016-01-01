@@ -1,0 +1,41 @@
+
+Datatypes
+- Primitive Types have changed from StringDt to StringType
+- Composite Types have changed from CodeableConceptDt to CondeableConcept
+   - ResourceReferenceDt has changed to Reference
+   - Reference#getReference() returns the reference text, Reference#getReferenceElement() returns the type
+
+Setter Names
+- Names for some component setters/mutators have changed in the new structures. In the 
+  old structures if the field type was a primitive (e.g. a string) there would be
+  two setters: setName(String) and setName(StringDt). In the new structures, the setters
+  are called setName(String) and setNameElement(StringType). This is more consistent with
+  the way the getters are named.
+- addFoo() has been renamed to addFooElement()
+
+Resource Metadata
+- Resource#getId() returns the string ID (e.g. "http://example.com/Patient/1")
+   - Resource#getIdElement() returns the IdType previously returned by Resource#getId()
+
+- Resource metadata lives in Resource#getMeta() instead of using a map
+   - Resource#getMeta()#getLastUpdate() returns the resource's last update time
+   - Resource#getMeta()#getTag() returns the resource's tag list
+   - Resource#getMeta()#getProfile() returns the resource's profile list
+
+Contained Resources
+- Resource#getContained() returns the list of contained resources (previously it returned a useless ContainedDt object which held the list of contained resources)
+
+Enums
+- Enums are named "[EnumName]" instead of "[EnumName]Enum". For example, ConditionVerificationStatusEnum is now called ConditionVerificationStatus
+
+Resource/Datatype Components
+- The Java model classes representing sub-elements within a resource now have a longer name
+  reflecting the containing element name and ending in "Component". For example, the Java structure
+  representing the "Bundle.entry" component was called "Entry" in the HAPI structures but is
+  called BundleEntryComponent in the RI structures. 
+  
+Removed stuff to bring back
+- Repeating fields "firstRep" methods are gone, e.g. Patient#getNameFirstRep()
+- Enums and field setters for CodeableConcept types with extendible bindings are gone, 
+  e.g. Identifier#setType(IdentifierTypeCodesEnum)
+  

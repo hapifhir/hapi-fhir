@@ -5,12 +5,12 @@ import org.hl7.fhir.instance.model.BackboneElement;
 import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.Patient;
 import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Extension;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
+import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.ElementUtil;
 
 

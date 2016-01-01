@@ -50,12 +50,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ProvidedResourceScanner;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -64,7 +64,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
-import ca.uhn.fhir.rest.method.PageMethodBinding;
 import ca.uhn.fhir.rest.method.ParseAction;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
@@ -565,13 +564,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			Map<String, String[]> params = new HashMap<String, String[]>(theRequest.getParameterMap());
 			requestDetails.setParameters(params);
 
-			IdDt id;
+			IIdType id;
 			populateRequestDetailsFromRequestPath(requestDetails, requestPath);
 
 			if (theRequestType == RequestTypeEnum.PUT) {
 				String contentLocation = theRequest.getHeader(Constants.HEADER_CONTENT_LOCATION);
 				if (contentLocation != null) {
-					id = new IdDt(contentLocation);
+					id = myFhirContext.getVersion().newIdType();
+					id.setValue(contentLocation);
 					requestDetails.setId(id);
 				}
 			}
@@ -876,7 +876,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		StringTokenizer tok = new StringTokenizer(theRequestPath, "/");
 		String resourceName = null;
 
-		IdDt id = null;
+		IIdType id = null;
 		String operation = null;
 		String compartment = null;
 		if (tok.hasMoreTokens()) {
@@ -893,7 +893,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			if (partIsOperation(nextString)) {
 				operation = nextString;
 			} else {
-				id = new IdDt(resourceName, UrlUtil.unescape(nextString));
+				id = myFhirContext.getVersion().newIdType();
+				id.setParts(null, resourceName, UrlUtil.unescape(nextString), null);
 			}
 		}
 
@@ -905,7 +906,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					if (id == null) {
 						throw new InvalidRequestException("Don't know how to handle request path: " + theRequestPath);
 					}
-					id = new IdDt(resourceName, id.getIdPart(), UrlUtil.unescape(versionString));
+					id.setParts(null, resourceName, id.getIdPart(), UrlUtil.unescape(versionString));
 				} else {
 					operation = Constants.PARAM_HISTORY;
 				}

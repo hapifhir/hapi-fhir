@@ -20,6 +20,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.Parameters;
 import org.hl7.fhir.instance.model.Patient;
 import org.hl7.fhir.instance.model.StringType;
@@ -31,7 +32,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -52,7 +52,7 @@ public class OperationClientTest {
 
 		ourHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.getRestfulClientFactory().setHttpClient(ourHttpClient);
-		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		ourHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
@@ -78,7 +78,7 @@ public class OperationClientTest {
 
 		int idx = 0;
 
-		Parameters response = client.opInstance(new IdDt("222"), new StringType("PARAM1str"), new Patient().setActive(true));
+		Parameters response = client.opInstance(new IdType("222"), new StringType("PARAM1str"), new Patient().setActive(true));
 		assertEquals("FOO", response.getParameter().get(0).getName());
 		HttpPost value = (HttpPost) capt.getAllValues().get(idx);
 		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
@@ -273,7 +273,7 @@ public class OperationClientTest {
 		//@formatter:off
 		@Operation(name="$OP_INSTANCE", type=Patient.class)
 		public Parameters opInstance(
-				@IdParam IdDt theId,
+				@IdParam IdType theId,
 				@OperationParam(name="PARAM1") StringType theParam1,
 				@OperationParam(name="PARAM2") Patient theParam2
 				);

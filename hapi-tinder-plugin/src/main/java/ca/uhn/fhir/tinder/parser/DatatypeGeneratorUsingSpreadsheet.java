@@ -32,16 +32,13 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		theTarget.setSummary("Y");
 	}
 
-	private String myVersion;
-
 	public DatatypeGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) {
 		super(theVersion, theBaseDir);
-		myVersion = theVersion;
 	}
 
 	@Override
 	protected String getTemplate() {
-		return "dstu".equals(myVersion) ? "/vm/dt_composite_dstu.vm" : "/vm/dt_composite.vm";
+		return "dstu".equals(getVersion()) ? "/vm/dt_composite_dstu.vm" : "/vm/dt_composite.vm";
 	}
 
 	@Override
@@ -107,7 +104,7 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	protected List<String> getInputStreamNames() {
 		ArrayList<String> retVal = new ArrayList<String>();
 
-		String version = myVersion;
+		String version = getVersion();
 		if (version.equals("dev")) {
 			version = "dstu2";
 		}

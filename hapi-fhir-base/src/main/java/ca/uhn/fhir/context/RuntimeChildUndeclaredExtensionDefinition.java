@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -35,7 +34,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
 
 public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildDefinition {
 
@@ -149,6 +147,8 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		return false;
 	}
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeChildUndeclaredExtensionDefinition.class);
+	
 	@Override
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
@@ -160,7 +160,12 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 				myDatatypeToDefinition.put(next.getImplementingClass(), next);
 
-				if (!((IRuntimeDatatypeDefinition) next).isSpecialization()) {
+				boolean isSpecialization = ((IRuntimeDatatypeDefinition) next).isSpecialization();
+				if (isSpecialization) {
+					ourLog.trace("Not adding specialization: {}", next.getImplementingClass());
+				}
+				
+				if (!isSpecialization) {
 					
 					if (!next.isStandardType()) {
 						continue;

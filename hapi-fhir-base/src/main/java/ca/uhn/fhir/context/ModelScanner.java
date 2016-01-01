@@ -54,6 +54,7 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
@@ -231,7 +232,8 @@ class ModelScanner {
 	}
 
 	private boolean isStandardType(Class<? extends IBase> theClass) {
-		return myVersionTypes.contains(theClass);
+		boolean retVal = myVersionTypes.contains(theClass);
+		return retVal;
 	}
 
 	/**
@@ -245,58 +247,58 @@ class ModelScanner {
 	private <T extends Annotation> T pullAnnotation(Class<?> theContainer, AnnotatedElement theTarget, Class<T> theAnnotationType) {
 
 		T retVal = theTarget.getAnnotation(theAnnotationType);
-		if (myContext.getVersion().getVersion() != FhirVersionEnum.DSTU2_HL7ORG) {
+//		if (myContext.getVersion().getVersion() != FhirVersionEnum.DSTU2_HL7ORG) {
 			return retVal;
-		}
-
-		if (retVal == null) {
-			final Class<? extends Annotation> altAnnotationClass;
-			/*
-			 * Use a cache to minimize Class.forName calls, since they are slow and expensive..
-			 */
-			if (myAnnotationForwards.containsKey(theAnnotationType) == false) {
-				String sourceClassName = theAnnotationType.getName();
-				String candidateAltClassName = sourceClassName.replace("ca.uhn.fhir.model.api.annotation", "org.hl7.fhir.instance.model.annotations");
-				if (!sourceClassName.equals(candidateAltClassName)) {
-					Class<?> forName;
-					try {
-						forName = Class.forName(candidateAltClassName);
-						ourLog.debug("Forwarding annotation request for [{}] to class [{}]", theAnnotationType, forName);
-					} catch (ClassNotFoundException e) {
-						forName = null;
-					}
-					altAnnotationClass = (Class<? extends Annotation>) forName;
-				} else {
-					altAnnotationClass = null;
-				}
-				myAnnotationForwards.put(theAnnotationType, altAnnotationClass);
-			} else {
-				altAnnotationClass = myAnnotationForwards.get(theAnnotationType);
-			}
-
-			if (altAnnotationClass == null) {
-				return null;
-			}
-
-			final Annotation altAnnotation;
-			altAnnotation = theTarget.getAnnotation(altAnnotationClass);
-			if (altAnnotation == null) {
-				return null;
-			}
-
-			InvocationHandler h = new InvocationHandler() {
-
-				@Override
-				public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable {
-					Method altMethod = altAnnotationClass.getMethod(theMethod.getName(), theMethod.getParameterTypes());
-					return altMethod.invoke(altAnnotation, theArgs);
-				}
-			};
-			retVal = (T) Proxy.newProxyInstance(theAnnotationType.getClassLoader(), new Class<?>[] { theAnnotationType }, h);
-
-		}
-
-		return retVal;
+//		}
+//
+//		if (retVal == null) {
+//			final Class<? extends Annotation> altAnnotationClass;
+//			/*
+//			 * Use a cache to minimize Class.forName calls, since they are slow and expensive..
+//			 */
+//			if (myAnnotationForwards.containsKey(theAnnotationType) == false) {
+//				String sourceClassName = theAnnotationType.getName();
+//				String candidateAltClassName = sourceClassName.replace("ca.uhn.fhir.model.api.annotation", "org.hl7.fhir.instance.model.annotations");
+//				if (!sourceClassName.equals(candidateAltClassName)) {
+//					Class<?> forName;
+//					try {
+//						forName = Class.forName(candidateAltClassName);
+//						ourLog.debug("Forwarding annotation request for [{}] to class [{}]", theAnnotationType, forName);
+//					} catch (ClassNotFoundException e) {
+//						forName = null;
+//					}
+//					altAnnotationClass = (Class<? extends Annotation>) forName;
+//				} else {
+//					altAnnotationClass = null;
+//				}
+//				myAnnotationForwards.put(theAnnotationType, altAnnotationClass);
+//			} else {
+//				altAnnotationClass = myAnnotationForwards.get(theAnnotationType);
+//			}
+//
+//			if (altAnnotationClass == null) {
+//				return null;
+//			}
+//
+//			final Annotation altAnnotation;
+//			altAnnotation = theTarget.getAnnotation(altAnnotationClass);
+//			if (altAnnotation == null) {
+//				return null;
+//			}
+//
+//			InvocationHandler h = new InvocationHandler() {
+//
+//				@Override
+//				public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable {
+//					Method altMethod = altAnnotationClass.getMethod(theMethod.getName(), theMethod.getParameterTypes());
+//					return altMethod.invoke(altAnnotation, theArgs);
+//				}
+//			};
+//			retVal = (T) Proxy.newProxyInstance(theAnnotationType.getClassLoader(), new Class<?>[] { theAnnotationType }, h);
+//
+//		}
+//
+//		return retVal;
 	}
 
 	private void scan(Class<? extends IBase> theClass) throws ConfigurationException {
@@ -366,6 +368,8 @@ class ModelScanner {
 		RuntimeCompositeDatatypeDefinition resourceDef;
 		if (theClass.equals(ExtensionDt.class)) {
 			resourceDef = new RuntimeExtensionDtDefinition(theDatatypeDefinition, theClass, true);
+//		} else if (IBaseMetaType.class.isAssignableFrom(theClass)) {
+//			resourceDef = new RuntimeMetaDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
 		} else {
 			resourceDef = new RuntimeCompositeDatatypeDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
 		}
@@ -608,7 +612,7 @@ class ModelScanner {
 				RuntimeChildResourceBlockDefinition def = new RuntimeChildResourceBlockDefinition(next, childAnnotation, descriptionAnnotation, elementName, blockDef);
 				orderMap.put(order, def);
 
-			} else if (IDatatype.class.equals(nextElementType) || IElement.class.equals(nextElementType) || "org.hl7.fhir.instance.model.Type".equals(nextElementType.getName()) || IBaseDatatype.class.equals(nextElementType)) {
+			} else if (IDatatype.class.equals(nextElementType) || IElement.class.equals(nextElementType) || "Type".equals(nextElementType.getSimpleName()) || IBaseDatatype.class.equals(nextElementType)) {
 
 				RuntimeChildAny def = new RuntimeChildAny(next, elementName, childAnnotation, descriptionAnnotation);
 				orderMap.put(order, def);
@@ -687,7 +691,13 @@ class ModelScanner {
 		}
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		if (!theDatatypeDefinition.isSpecialization()) {
-			myNameToElementDefinitions.put(resourceName, resourceDef);
+			if (myVersion.isRi() && IDatatype.class.isAssignableFrom(theClass)) {
+				ourLog.debug("Not adding non RI type {} to RI context", theClass);
+			} else if (!myVersion.isRi() && !IDatatype.class.isAssignableFrom(theClass)) {
+				ourLog.debug("Not adding RI type {} to non RI context", theClass);
+			} else {
+				myNameToElementDefinitions.put(resourceName, resourceDef);
+			}
 		}
 
 		return resourceName;

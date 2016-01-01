@@ -24,15 +24,12 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.sourceforge.cobertura.CoverageIgnore;
-
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Required;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -40,8 +37,9 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import net.sourceforge.cobertura.CoverageIgnore;
 
-public abstract class BaseJpaResourceProvider<T extends IResource> extends BaseJpaProvider implements IResourceProvider {
+public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider implements IResourceProvider {
 
 	private IFhirResourceDao<T> myDao;
 
@@ -59,7 +57,7 @@ public abstract class BaseJpaResourceProvider<T extends IResource> extends BaseJ
 	}
 
 	@History
-	public IBundleProvider getHistoryForResourceInstance(HttpServletRequest theRequest, @IdParam IdDt theId, @Since Date theDate) {
+	public IBundleProvider getHistoryForResourceInstance(HttpServletRequest theRequest, @IdParam IIdType theId, @Since Date theDate) {
 		startRequest(theRequest);
 		try {
 			return myDao.history(theId, theDate);
@@ -79,12 +77,12 @@ public abstract class BaseJpaResourceProvider<T extends IResource> extends BaseJ
 	}
 
 	@Override
-	public Class<? extends IResource> getResourceType() {
+	public Class<? extends IBaseResource> getResourceType() {
 		return myDao.getResourceType();
 	}
 
 	@GetTags
-	public TagList getTagsForResourceInstance(HttpServletRequest theRequest, @IdParam IdDt theResourceId) {
+	public TagList getTagsForResourceInstance(HttpServletRequest theRequest, @IdParam IIdType theResourceId) {
 		startRequest(theRequest);
 		try {
 			return myDao.getTags(theResourceId);
@@ -104,7 +102,7 @@ public abstract class BaseJpaResourceProvider<T extends IResource> extends BaseJ
 	}
 
 	@Read(version = true)
-	public T read(HttpServletRequest theRequest, @IdParam IdDt theId) {
+	public T read(HttpServletRequest theRequest, @IdParam IIdType theId) {
 		startRequest(theRequest);
 		try {
 			return myDao.read(theId);

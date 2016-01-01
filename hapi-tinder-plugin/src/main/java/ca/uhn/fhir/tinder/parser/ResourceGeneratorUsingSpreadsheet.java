@@ -16,11 +16,9 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	private List<String> myInputStreamNames;
 	private ArrayList<InputStream> myInputStreams;
 	private String myTemplate = null;
-	protected String myVersion;
 
 	public ResourceGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) {
 		super(theVersion, theBaseDir);
-		myVersion = theVersion;
 	}
 
 	public List<String> getInputStreamNames() {
@@ -48,7 +46,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		myInputStreams = new ArrayList<InputStream>();
 
 		for (String next : theBaseResourceNames) {
-			String resName = "/res/" + myVersion + "/" + next.toLowerCase() + "-spreadsheet.xml";
+			String resName = "/res/" + getVersion() + "/" + next.toLowerCase() + "-spreadsheet.xml";
 			resName = resName.replace("/dev/", "/dstu2/");
 			
 			InputStream nextRes = getClass().getResourceAsStream(resName);
@@ -86,7 +84,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	protected String getTemplate() {
 		if (myTemplate != null) {
 			return myTemplate;
-		} else if ("dstu".equals(myVersion)) {
+		} else if ("dstu".equals(getVersion())) {
 			return "/vm/resource_dstu.vm";
 		} else {
 			return "/vm/resource.vm";

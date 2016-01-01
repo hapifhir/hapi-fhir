@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import javax.annotation.PostConstruct;
 
+import org.hl7.fhir.instance.hapi.validation.FhirQuestionnaireResponseValidator;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -36,7 +37,6 @@ import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.validation.FhirQuestionnaireResponseValidator;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IResourceLoader;
 import ca.uhn.fhir.validation.ValidationResult;

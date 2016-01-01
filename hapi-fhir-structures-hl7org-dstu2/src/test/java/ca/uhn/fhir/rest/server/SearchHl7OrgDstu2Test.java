@@ -28,9 +28,6 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.util.PatternMatcherB;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class SearchHl7OrgDstu2Test {
 
 	private static CloseableHttpClient ourClient;

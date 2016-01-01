@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="ExpansionProfile"/>
   <meta>
-    <lastUpdated value="2015-12-01T11:05:39.051-05:00"/>
+    <lastUpdated value="2015-12-19T16:00:42.735-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -38,17 +38,12 @@
             <span title="ExpansionProfile : Resource to define constraints on the Expansion of a FHIR ValueSet.">ExpansionProfile</span>
             <a name="ExpansionProfile"> </a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
-            <span title="This element has or is affected by some invariants">I</span>
-          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
             <a href="domainresource.html">DomainResource</a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Defines behaviour and contraints on the ValueSet Expansion operation
-            <br/>
-            <span style="font-style: italic" title="exp-5">SHALL have at least one of– codeSystems.include– codeSystems.exclude– includeDesignations (as true)– excludeNested– excludeNotForUI– excludePostCoordinated– displayLanguage– limitedExpansion</span>
-          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Defines behaviour and contraints on the ValueSet Expansion operation</td>
         </tr>
 
         <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
@@ -707,6 +702,24 @@
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
+            <span title="ExpansionProfile.includeInactive : Controls whether inactive concepts are included or excluded in value set expansions.">includeInactive</span>
+            <a name="ExpansionProfile.includeInactive"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
+            <a href="datatypes.html#boolean">boolean</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Include or exclude inactive concepts in the expansion</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="hierarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="hierarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="hierarchy"/> 
             <span title="ExpansionProfile.excludeNested : Controls whether or not the value set expansion includes nested codes (i.e. ValueSet.expansion.contains.contains).">excludeNested</span>
             <a name="ExpansionProfile.excludeNested"> </a>
           </td>
@@ -826,9 +839,9 @@
       <value value="http://www.hl7.org/Special/committees/Vocab/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-19T16:00:42-05:00"/>
   <description value="Base StructureDefinition for ExpansionProfile Resource"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.2.0"/>
   <mapping>
     <identity value="w5"/>
     <uri value="http://hl7.org/fhir/w5"/>
@@ -853,15 +866,6 @@
       <type>
         <code value="DomainResource"/>
       </type>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="codeSystem.include.empty().not() or codeSystem.exclude.empty().not() or includeDesignations = true or excludeNested.empty().not() or excludeNotForUI.empty().not() or excludePostCoordinated.empty().not() or displayLanguage.empty().not() or limitedExpansion.empty().not()"/>
-        </extension>
-        <key value="exp-5"/>
-        <severity value="error"/>
-        <human value="SHALL have at least one of– codeSystems.include– codeSystems.exclude– includeDesignations (as true)– excludeNested– excludeNotForUI– excludePostCoordinated– displayLanguage– limitedExpansion"/>
-        <xpath value="exists(f:codeSystems.include) or exists(f:codeSystems.exclude) or (exists(f:includeDesignations) and f:includeDesignations=&#39;true&#39;) orexists(f:excludeNested) orexists(f:codeSystem.excludeNotForUI) orexists(f:codeSystem.excludePostCoordinated) orexists(f:codeSystem.displayLanguage) orexists(f:codeSystem.limitedExpansion)"/>
-      </constraint>
       <mapping>
         <identity value="w5"/>
         <map value="conformance.terminology"/>
@@ -2009,6 +2013,18 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <path value="ExpansionProfile.includeInactive"/>
+      <short value="Include or exclude inactive concepts in the expansion"/>
+      <definition value="Controls whether inactive concepts are included or excluded in value set expansions."/>
+      <comments value="Inactive codes are included if includeInactive is present and has a value of &quot;true&quot;."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="boolean"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
       <path value="ExpansionProfile.excludeNested"/>
       <short value="Include or exclude nested codes in the value set expansion"/>
       <definition value="Controls whether or not the value set expansion includes nested codes (i.e. ValueSet.expansion.contains.contains)."/>
@@ -2084,15 +2100,6 @@
       <type>
         <code value="DomainResource"/>
       </type>
-      <constraint>
-        <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-          <valueString value="codeSystem.include.empty().not() or codeSystem.exclude.empty().not() or includeDesignations = true or excludeNested.empty().not() or excludeNotForUI.empty().not() or excludePostCoordinated.empty().not() or displayLanguage.empty().not() or limitedExpansion.empty().not()"/>
-        </extension>
-        <key value="exp-5"/>
-        <severity value="error"/>
-        <human value="SHALL have at least one of– codeSystems.include– codeSystems.exclude– includeDesignations (as true)– excludeNested– excludeNotForUI– excludePostCoordinated– displayLanguage– limitedExpansion"/>
-        <xpath value="exists(f:codeSystems.include) or exists(f:codeSystems.exclude) or (exists(f:includeDesignations) and f:includeDesignations=&#39;true&#39;) orexists(f:excludeNested) orexists(f:codeSystem.excludeNotForUI) orexists(f:codeSystem.excludePostCoordinated) orexists(f:codeSystem.displayLanguage) orexists(f:codeSystem.limitedExpansion)"/>
-      </constraint>
       <mapping>
         <identity value="w5"/>
         <map value="conformance.terminology"/>
@@ -2546,6 +2553,18 @@
       <short value="Include or exclude the value set definition in the expansion"/>
       <definition value="Controls whether the value set definition is included or excluded in value set expansions."/>
       <comments value="The ValueSet defintion refers to all fields in the ValueSet definition apart from  ValueSet.contains. The definition is only included if includeDefinition is present and has a value of &quot;true&quot;."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="boolean"/>
+      </type>
+      <isSummary value="true"/>
+    </element>
+    <element>
+      <path value="ExpansionProfile.includeInactive"/>
+      <short value="Include or exclude inactive concepts in the expansion"/>
+      <definition value="Controls whether inactive concepts are included or excluded in value set expansions."/>
+      <comments value="Inactive codes are included if includeInactive is present and has a value of &quot;true&quot;."/>
       <min value="0"/>
       <max value="1"/>
       <type>

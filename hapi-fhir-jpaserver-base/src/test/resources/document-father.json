@@ -451,8 +451,8 @@
           "text": "Doxycycline"
         },
         "status": "confirmed",
-        "criticality": "high",
-        "type": "immune",
+        "criticality": "CRITH",
+        "type": "allergy",
         "event": [
           {
             "manifestation": [

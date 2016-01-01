@@ -4021,7 +4021,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s84"><Data ss:Type="String">whenHandedOver cannot be before whenPrepared</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s84"><Data ss:Type="String">whenHandedOver.empty() or whenPrepare.empty() or whenHandedOver &lt; whenPrepared</Data><NamedCell
+    <Cell ss:StyleID="s84"><Data ss:Type="String">whenHandedOver.empty() or whenPrepared.empty() or whenHandedOver &gt;= whenPrepared</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">not(exists(f:whenHandedOver/@value)) or not(exists(f:whenPrepared/@value)) or ( f:whenHandedOver/@value &gt;= f:whenPrepared/@value)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>

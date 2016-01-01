@@ -3719,7 +3719,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s83"><Data ss:Type="String">Provide a code or a schedule, but not both</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s83"><Data ss:Type="String">code.empty() xor schedule</Data><NamedCell
+    <Cell ss:StyleID="s83"><Data ss:Type="String">code.empty() or schedule.empty()</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">exists(f:code) != exists(f:schedule)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>

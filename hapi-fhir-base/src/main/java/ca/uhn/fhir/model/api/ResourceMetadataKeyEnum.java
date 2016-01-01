@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
@@ -71,7 +73,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * Values for this key are of type <b>{@link InstantDt}</b>
 	 * </p>
 	 */
-	public static final ResourceMetadataKeyEnum<InstantDt> DELETED_AT = new ResourceMetadataKeyEnum<InstantDt>("DELETED_AT") {
+	public static final ResourceMetadataKeySupportingAnyResource<InstantDt, IPrimitiveType<Date>> DELETED_AT = new ResourceMetadataKeySupportingAnyResource<InstantDt, IPrimitiveType<Date>>("DELETED_AT") {
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -82,6 +84,17 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		@Override
 		public void put(IResource theResource, InstantDt theObject) {
 			theResource.getResourceMetadata().put(DELETED_AT, theObject);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public IPrimitiveType<Date> get(IAnyResource theResource) {
+			return (IPrimitiveType<Date>) theResource.getUserData(DELETED_AT.name());
+		}
+
+		@Override
+		public void put(IAnyResource theResource, IPrimitiveType<Date> theObject) {
+			theResource.setUserData(DELETED_AT.name(), theObject);
 		}
 	};
 
@@ -120,7 +133,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * Values for this key are of type <b>{@link BundleEntrySearchModeEnum}</b>
 	 * </p>
 	 */
-	public static final ResourceMetadataKeyEnum<BundleEntrySearchModeEnum> ENTRY_SEARCH_MODE = new ResourceMetadataKeyEnum<BundleEntrySearchModeEnum>("ENTRY_SEARCH_MODE") {
+	public static final ResourceMetadataKeySupportingAnyResource<BundleEntrySearchModeEnum, String> ENTRY_SEARCH_MODE = new ResourceMetadataKeySupportingAnyResource<BundleEntrySearchModeEnum, String>("ENTRY_SEARCH_MODE") {
 		private static final long serialVersionUID = 1L;
 		@Override
 		public BundleEntrySearchModeEnum get(IResource theResource) {
@@ -130,6 +143,16 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		@Override
 		public void put(IResource theResource, BundleEntrySearchModeEnum theObject) {
 			theResource.getResourceMetadata().put(ENTRY_SEARCH_MODE, theObject);
+		}
+
+		@Override
+		public String get(IAnyResource theResource) {
+			return (String) theResource.getUserData(ENTRY_SEARCH_MODE.name());
+		}
+
+		@Override
+		public void put(IAnyResource theResource, String theObject) {
+			theResource.setUserData(ENTRY_SEARCH_MODE.name(), theObject);
 		}
 	};
 
@@ -145,7 +168,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * Values for this key are of type <b>{@link BundleEntryTransactionMethodEnum}</b>
 	 * </p>
 	 */
-	public static final ResourceMetadataKeyEnum<BundleEntryTransactionMethodEnum> ENTRY_TRANSACTION_METHOD = new ResourceMetadataKeyEnum<BundleEntryTransactionMethodEnum>(
+	public static final ResourceMetadataKeySupportingAnyResource<BundleEntryTransactionMethodEnum, String> ENTRY_TRANSACTION_METHOD = new ResourceMetadataKeySupportingAnyResource<BundleEntryTransactionMethodEnum, String>(
 			"ENTRY_TRANSACTION_OPERATION") {
 				private static final long serialVersionUID = 1L;
 
@@ -159,6 +182,17 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		public void put(IResource theResource, BundleEntryTransactionMethodEnum theObject) {
 			theResource.getResourceMetadata().put(ENTRY_TRANSACTION_METHOD, theObject);
 		}
+
+		@Override
+		public String get(IAnyResource theResource) {
+			return (String) theResource.getUserData(ENTRY_TRANSACTION_METHOD.name());
+		}
+
+		@Override
+		public void put(IAnyResource theResource, String theObject) {
+			theResource.setUserData(ENTRY_TRANSACTION_METHOD.name(), theObject);
+		}
+		
 	};
 
 	/**
@@ -444,7 +478,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		return result;
 	}
 
-	private String name() {
+	public String name() {
 		return myValue;
 	}
 
@@ -573,4 +607,19 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 				+ IdDt.class.getCanonicalName());
 	}
 
+	public static abstract class ResourceMetadataKeySupportingAnyResource<T, T2> extends ResourceMetadataKeyEnum<T> {
+
+		public ResourceMetadataKeySupportingAnyResource(String theValue) {
+			super(theValue);
+		}
+
+		private static final long serialVersionUID = 1L;
+
+		
+		public abstract T2 get(IAnyResource theResource);
+
+		public abstract void put(IAnyResource theResource, T2 theObject);
+
+	}
+	
 }

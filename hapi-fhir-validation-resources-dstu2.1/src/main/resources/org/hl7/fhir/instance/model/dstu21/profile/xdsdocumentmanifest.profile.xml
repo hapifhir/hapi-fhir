@@ -18,7 +18,7 @@
   </contact>
   <date value="2012-06-24"/>
   <description value="SubmissionSet"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.2.0"/>
   <kind value="resource"/>
   <constrainedType value="DocumentManifest"/>
   <abstract value="false"/>

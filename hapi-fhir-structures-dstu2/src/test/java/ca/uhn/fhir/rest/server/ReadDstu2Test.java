@@ -28,9 +28,6 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class ReadDstu2Test {
 
 	private static CloseableHttpClient ourClient;
@@ -70,6 +67,8 @@ public class ReadDstu2Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
+		
+		ourLog.info(responseContent);
 	}
 
 	@AfterClass

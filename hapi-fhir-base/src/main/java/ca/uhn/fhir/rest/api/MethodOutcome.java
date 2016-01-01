@@ -50,7 +50,7 @@ public class MethodOutcome {
 	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called
 	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
 	 */
-	public MethodOutcome(IdDt theId, Boolean theCreated) {
+	public MethodOutcome(IIdType theId, Boolean theCreated) {
 		myId = theId;
 		myCreated = theCreated;
 	}
@@ -64,7 +64,7 @@ public class MethodOutcome {
 	 * @param theBaseOperationOutcome
 	 *            The operation outcome to return with the response (or null for none)
 	 */
-	public MethodOutcome(IdDt theId, IBaseOperationOutcome theBaseOperationOutcome) {
+	public MethodOutcome(IIdType theId, IBaseOperationOutcome theBaseOperationOutcome) {
 		myId = theId;
 		myOperationOutcome = theBaseOperationOutcome;
 	}
@@ -82,17 +82,17 @@ public class MethodOutcome {
 	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called
 	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
 	 */
-	public MethodOutcome(IdDt theId, IBaseOperationOutcome theBaseOperationOutcome, Boolean theCreated) {
+	public MethodOutcome(IIdType theId, IBaseOperationOutcome theBaseOperationOutcome, Boolean theCreated) {
 		myId = theId;
 		myOperationOutcome = theBaseOperationOutcome;
 		myCreated = theCreated;
 	}
 
 	/**
-	 * @deprecated Use the constructor which accepts a single IdDt parameter, and include the logical ID and version ID in that IdDt instance
+	 * @deprecated Use the constructor which accepts a single IIdType parameter, and include the logical ID and version ID in that IIdType instance
 	 */
 	@Deprecated
-	public MethodOutcome(IdDt theId, IdDt theVersionId) {
+	public MethodOutcome(IIdType theId, IdDt theVersionId) {
 		myId = theId;
 		myVersionId = theVersionId;
 	}
@@ -101,7 +101,7 @@ public class MethodOutcome {
 	 * @deprecated Use the constructor which accepts a single IdDt parameter, and include the logical ID and version ID in that IdDt instance
 	 */
 	@Deprecated
-	public MethodOutcome(IdDt theId, IdDt theVersionId, IBaseOperationOutcome theBaseOperationOutcome) {
+	public MethodOutcome(IIdType theId, IdDt theVersionId, IBaseOperationOutcome theBaseOperationOutcome) {
 		myId = theId;
 		myVersionId = theVersionId;
 		myOperationOutcome = theBaseOperationOutcome;
@@ -175,7 +175,7 @@ public class MethodOutcome {
 	 * @param theId
 	 *            The ID of the created/updated resource
 	 */
-	public void setId(IdDt theId) {
+	public void setId(IIdType theId) {
 		myId = theId;
 	}
 
@@ -200,7 +200,7 @@ public class MethodOutcome {
 	}
 
 	/**
-	 * @deprecated Put the ID and version ID into the same IdDt instance and pass it to {@link #setId(IdDt)}
+	 * @deprecated Put the ID and version ID into the same IdDt instance and pass it to {@link #setId(IIdType)}
 	 */
 	@Deprecated
 	public void setVersionId(IdDt theVersionId) {

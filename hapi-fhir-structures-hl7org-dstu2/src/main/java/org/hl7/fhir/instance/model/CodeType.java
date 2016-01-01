@@ -30,7 +30,7 @@ package org.hl7.fhir.instance.model;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /**
  * Primitive type "code" in FHIR, when not bound to an enumerated list of codes

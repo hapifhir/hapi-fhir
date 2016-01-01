@@ -13,20 +13,20 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hl7.fhir.dstu21.model.Base64BinaryType;
+import org.hl7.fhir.dstu21.model.Device;
+import org.hl7.fhir.dstu21.model.Media;
+import org.hl7.fhir.dstu21.model.Observation;
+import org.hl7.fhir.dstu21.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.Quantity;
+import org.hl7.fhir.dstu21.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.jpa.dao.FhirSearchDao.Suggestion;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.model.dstu21.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu21.resource.Device;
-import ca.uhn.fhir.model.dstu21.resource.Media;
-import ca.uhn.fhir.model.dstu21.resource.Observation;
-import ca.uhn.fhir.model.dstu21.resource.Patient;
-import ca.uhn.fhir.model.dstu21.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.primitive.Base64BinaryDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -42,31 +42,31 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 	public void testCodeTextSearch() {
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
-		obs1.setStatus(ObservationStatusEnum.FINAL);
-		obs1.setValue(new QuantityDt(123));
+		obs1.setStatus(ObservationStatus.FINAL);
+		obs1.setValue(new Quantity(123));
 		obs1.setComments("obs1");
 		IIdType id1 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 		
 		Observation obs2 = new Observation();
 		obs2.getCode().setText("Diastolic Blood Pressure");
-		obs2.setStatus(ObservationStatusEnum.FINAL);
-		obs2.setValue(new QuantityDt(81));
+		obs2.setStatus(ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(81));
 		IIdType id2 = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
 		
 		SearchParameterMap map;
 		
 		map = new SearchParameterMap();
 		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setText(true));
-		assertThat(toUnqualifiedVersionlessIds(myObservationDao.search(map)), containsInAnyOrder(id1, id2));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
 
 		map = new SearchParameterMap();
 		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setText(true));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
 
 		map = new SearchParameterMap();
 		map.add(Observation.SP_CODE, new TokenParam(null, "blood").setText(true));
 		map.add(Constants.PARAM_CONTENT, new StringParam("obs1"));
-		assertThat(toUnqualifiedVersionlessIds(myObservationDao.search(map)), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1)));
 
 	}
 
@@ -75,21 +75,21 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 	public void testStringTextSearch() {
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("AAAAA");
-		obs1.setValue(new StringDt("Systolic Blood Pressure"));
-		obs1.setStatus(ObservationStatusEnum.FINAL);
+		obs1.setValue(new StringType("Systolic Blood Pressure"));
+		obs1.setStatus(ObservationStatus.FINAL);
 		IIdType id1 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 		
 		Observation obs2 = new Observation();
 		obs1.getCode().setText("AAAAA");
-		obs1.setValue(new StringDt("Diastolic Blood Pressure"));
-		obs2.setStatus(ObservationStatusEnum.FINAL);
+		obs1.setValue(new StringType("Diastolic Blood Pressure"));
+		obs2.setStatus(ObservationStatus.FINAL);
 		IIdType id2 = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
 		
 		SearchParameterMap map;
 		
 		map = new SearchParameterMap();
 		map.add(Observation.SP_VALUE_STRING, new StringParam("sure").setContains(true));
-		assertThat(toUnqualifiedVersionlessIds(myObservationDao.search(map)), containsInAnyOrder(id1, id2));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
 
 	}
 
@@ -101,10 +101,10 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		IIdType ptId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		Media med = new Media();
-		med.getSubject().setReference(ptId);
+		med.getSubject().setReferenceElement(ptId);
 		med.getSubtype().setText("Systolic Blood Pressure");
 		med.getContent().setContentType("LCws");
-		med.getContent().setData(new Base64BinaryDt(new byte[] {44,44,44,44,44,44,44,44}));
+		med.getContent().setDataElement(new Base64BinaryType(new byte[] {44,44,44,44,44,44,44,44}));
 		med.getContent().setTitle("bbbb syst");
 		myMediaDao.create(med);
 		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(med));
@@ -141,17 +141,17 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		IIdType ptId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
-		obs.getSubject().setReference(ptId);
+		obs.getSubject().setReferenceElement(ptId);
 		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
 		myObservationDao.create(obs);
 
 		obs = new Observation();
-		obs.getSubject().setReference(ptId);
+		obs.getSubject().setReferenceElement(ptId);
 		obs.getCode().setText("MNBVCXZ");
 		myObservationDao.create(obs);
 
 		obs = new Observation();
-		obs.getSubject().setReference(ptId);
+		obs.getSubject().setReferenceElement(ptId);
 		obs.getCode().setText("ZXC HELLO");
 		obs.addComponent().getCode().setText("HHHHHHHHHH");
 		myObservationDao.create(obs);
@@ -164,7 +164,7 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		IIdType ptId2 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
-		obs2.getSubject().setReference(ptId2);
+		obs2.getSubject().setReferenceElement(ptId2);
 		obs2.getCode().setText("ZXCVBNMZZ");
 		myObservationDao.create(obs2);
 
@@ -209,17 +209,17 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		SearchParameterMap map;
 
 		patient = new Patient();
-		patient.getText().setDiv("<div>DIVAAA</div>");
+		patient.getText().setDivAsString("<div>DIVAAA</div>");
 		patient.addName().addGiven("NAMEAAA");
 		IIdType pId1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_TEXT, new StringParam("DIVAAA"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
 
 		/*
 		 * Reindex
@@ -227,25 +227,25 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 
 		patient = new Patient();
 		patient.setId(pId1);
-		patient.getText().setDiv("<div>DIVBBB</div>");
+		patient.getText().setDivAsString("<div>DIVBBB</div>");
 		patient.addName().addGiven("NAMEBBB");
 		myPatientDao.update(patient);
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
 
 		map = new SearchParameterMap();
 		map.add(Patient.SP_NAME, new StringParam("NAMEBBB"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEBBB"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_TEXT, new StringParam("DIVBBB"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
 
 	}
 
@@ -268,27 +268,27 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		myDeviceDao.create(dev2).getId().toUnqualifiedVersionless();
 
 		Observation obs1 = new Observation();
-		obs1.getText().setDiv("<div>OBSTEXT1</div>");
-		obs1.getSubject().setReference(ptId1);
+		obs1.getText().setDivAsString("<div>OBSTEXT1</div>");
+		obs1.getSubject().setReferenceElement(ptId1);
 		obs1.getCode().addCoding().setCode("CODE1");
-		obs1.setValue(new StringDt("obsvalue1"));
-		obs1.getDevice().setReference(devId1);
+		obs1.setValue(new StringType("obsvalue1"));
+		obs1.getDevice().setReferenceElement(devId1);
 		IIdType obsId1 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
-		obs2.getSubject().setReference(ptId1);
+		obs2.getSubject().setReferenceElement(ptId1);
 		obs2.getCode().addCoding().setCode("CODE2");
-		obs2.setValue(new StringDt("obsvalue2"));
+		obs2.setValue(new StringType("obsvalue2"));
 		IIdType obsId2 = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
 
 		Observation obs3 = new Observation();
-		obs3.getSubject().setReference(ptId2);
+		obs3.getSubject().setReferenceElement(ptId2);
 		obs3.getCode().addCoding().setCode("CODE3");
-		obs3.setValue(new StringDt("obsvalue3"));
+		obs3.setValue(new StringType("obsvalue3"));
 		IIdType obsId3 = myObservationDao.create(obs3).getId().toUnqualifiedVersionless();
 		
 		HttpServletRequest request;
-		List<IIdType> actual;
+		List<String> actual;
 		request = mock(HttpServletRequest.class);
 		StringAndListParam param;
 		
@@ -296,33 +296,33 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, param, null));
-		assertThat(actual, containsInAnyOrder(ptId1, obsId1, devId1));
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, param, null));
+		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, devId1)));
 
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obstext1")));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, null, param));
-		assertThat(actual, containsInAnyOrder(ptId1, obsId1, devId1));
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, null, param));
+		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, devId1)));
 
 		request = mock(HttpServletRequest.class);
-		actual = toUnqualifiedVersionlessIds(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, null, null));
-		assertThat(actual, containsInAnyOrder(ptId1, obsId1, obsId2, devId1));
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, null, null));
+		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, obsId2, devId1)));
 
 		/*
 		 * Add another match
 		 */
 		
 		Observation obs4 = new Observation();
-		obs4.getSubject().setReference(ptId1);
+		obs4.getSubject().setReferenceElement(ptId1);
 		obs4.getCode().addCoding().setCode("CODE1");
-		obs4.setValue(new StringDt("obsvalue1"));
+		obs4.setValue(new StringType("obsvalue1"));
 		IIdType obsId4 = myObservationDao.create(obs4).getId().toUnqualifiedVersionless();
 		assertNotEquals(obsId1.getIdPart(), obsId4.getIdPart(), devId1);
 
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, param, null));
-		assertThat(actual, containsInAnyOrder(ptId1, obsId1, obsId4, devId1));
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, param, null));
+		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, obsId4, devId1)));
 
 		/*
 		 * Make one previous match no longer match
@@ -330,15 +330,15 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		
 		obs1 = new Observation();
 		obs1.setId(obsId1);
-		obs1.getSubject().setReference(ptId1);
+		obs1.getSubject().setReferenceElement(ptId1);
 		obs1.getCode().addCoding().setCode("CODE2");
-		obs1.setValue(new StringDt("obsvalue2"));
+		obs1.setValue(new StringType("obsvalue2"));
 		myObservationDao.update(obs1);
 
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, param, null));
-		assertThat(actual, containsInAnyOrder(ptId1, obsId4));
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, param, null));
+		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId4)));
 
 	}
 	
@@ -361,26 +361,26 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		IIdType devId2 = myDeviceDao.create(dev2).getId().toUnqualifiedVersionless();
 
 		Observation obs1 = new Observation();
-		obs1.getSubject().setReference(ptId1);
+		obs1.getSubject().setReferenceElement(ptId1);
 		obs1.getCode().addCoding().setCode("CODE1");
-		obs1.setValue(new StringDt("obsvalue1"));
-		obs1.getDevice().setReference(devId1);
+		obs1.setValue(new StringType("obsvalue1"));
+		obs1.getDevice().setReferenceElement(devId1);
 		IIdType obsId1 = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
-		obs2.getSubject().setReference(ptId1);
+		obs2.getSubject().setReferenceElement(ptId1);
 		obs2.getCode().addCoding().setCode("CODE2");
-		obs2.setValue(new StringDt("obsvalue2"));
+		obs2.setValue(new StringType("obsvalue2"));
 		IIdType obsId2 = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
 
 		Observation obs3 = new Observation();
-		obs3.getSubject().setReference(ptId2);
+		obs3.getSubject().setReferenceElement(ptId2);
 		obs3.getCode().addCoding().setCode("CODE3");
-		obs3.setValue(new StringDt("obsvalue3"));
+		obs3.setValue(new StringType("obsvalue3"));
 		IIdType obsId3 = myObservationDao.create(obs3).getId().toUnqualifiedVersionless();
 		
 		HttpServletRequest request;
-		List<IIdType> actual;
+		List<String> actual;
 		request = mock(HttpServletRequest.class);
 		StringAndListParam param;
 		
@@ -388,28 +388,28 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.patientTypeEverything(request, null, null, null, param, null));
-		assertThat(actual, containsInAnyOrder(ptId1, obsId1, devId1));
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, null, null, null, param, null));
+		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, devId1)));
 
 		request = mock(HttpServletRequest.class);
-		actual = toUnqualifiedVersionlessIds(myPatientDao.patientTypeEverything(request, null, null, null, null, null));
-		assertThat(actual, containsInAnyOrder(ptId1, obsId1, obsId2, devId1, ptId2, obsId3));
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, null, null, null, null, null));
+		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, obsId2, devId1, ptId2, obsId3)));
 
 		/*
 		 * Add another match
 		 */
 		
 		Observation obs4 = new Observation();
-		obs4.getSubject().setReference(ptId1);
+		obs4.getSubject().setReferenceElement(ptId1);
 		obs4.getCode().addCoding().setCode("CODE1");
-		obs4.setValue(new StringDt("obsvalue1"));
+		obs4.setValue(new StringType("obsvalue1"));
 		IIdType obsId4 = myObservationDao.create(obs4).getId().toUnqualifiedVersionless();
 		assertNotEquals(obsId1.getIdPart(), obsId4.getIdPart(), devId1);
 
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.patientTypeEverything(request, null, null, null, param, null));
-		assertThat(actual, containsInAnyOrder(ptId1, obsId1, obsId4, devId1));
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, null, null, null, param, null));
+		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, obsId4, devId1)));
 
 		/*
 		 * Make one previous match no longer match
@@ -417,15 +417,15 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		
 		obs1 = new Observation();
 		obs1.setId(obsId1);
-		obs1.getSubject().setReference(ptId1);
+		obs1.getSubject().setReferenceElement(ptId1);
 		obs1.getCode().addCoding().setCode("CODE2");
-		obs1.setValue(new StringDt("obsvalue2"));
+		obs1.setValue(new StringType("obsvalue2"));
 		myObservationDao.update(obs1);
 
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.patientTypeEverything(request, null, null, null, param, null));
-		assertThat(actual, containsInAnyOrder(ptId1, obsId4));
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, null, null, null, param, null));
+		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId4)));
 
 	}
 
@@ -440,17 +440,17 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		SearchParameterMap map;
 
 		patient = new Patient();
-		patient.getText().setDiv("<div>DIVAAA</div>");
+		patient.getText().setDivAsString("<div>DIVAAA</div>");
 		patient.addName().addGiven("NAMEAAA");
 		IIdType pId1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_TEXT, new StringParam("DIVAAA"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
 
 		/*
 		 * Update but don't reindex
@@ -458,34 +458,34 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 
 		patient = new Patient();
 		patient.setId(pId1);
-		patient.getText().setDiv("<div>DIVBBB</div>");
+		patient.getText().setDivAsString("<div>DIVBBB</div>");
 		patient.addName().addGiven("NAMEBBB");
 		myPatientDao.update(patient, null, false);
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEBBB"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), not(contains(pId1)));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), not(contains(toValues(pId1))));
 
 		myPatientDao.update(patient, null, true);
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
 
 		map = new SearchParameterMap();
 		map.add(Patient.SP_NAME, new StringParam("NAMEBBB"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEBBB"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_TEXT, new StringParam("DIVBBB"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
 
 	}
 
@@ -501,27 +501,27 @@ public class FhirResourceDaoDstu21SearchFtTest extends BaseJpaDstu21Test {
 		}
 
 		Observation obs = new Observation();
-		obs.getSubject().setReference(pId1);
-		obs.setValue(new StringDt("This is the FULLtext of the observation"));
+		obs.getSubject().setReferenceElement(pId1);
+		obs.setValue(new StringType("This is the FULLtext of the observation"));
 		IIdType oId1 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 
 		obs = new Observation();
-		obs.getSubject().setReference(pId1);
-		obs.setValue(new StringDt("Another fullText"));
+		obs.getSubject().setReferenceElement(pId1);
+		obs.setValue(new StringType("Another fullText"));
 		IIdType oId2 = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 
-		List<IIdType> patients;
+		List<String> patients;
 		SearchParameterMap params;
 
 		params = new SearchParameterMap();
 		params.add(Constants.PARAM_CONTENT, new StringParam("fulltext"));
-		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-		assertThat(patients, containsInAnyOrder(pId1));
+		patients = toUnqualifiedVersionlessIdValues(myPatientDao.search(params));
+		assertThat(patients, containsInAnyOrder(toValues(pId1)));
 
 		params = new SearchParameterMap();
 		params.add(Constants.PARAM_CONTENT, new StringParam("FULLTEXT"));
-		patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-		assertThat(patients, containsInAnyOrder(oId1, oId2));
+		patients = toUnqualifiedVersionlessIdValues(myObservationDao.search(params));
+		assertThat(patients, containsInAnyOrder(toValues(oId1, oId2)));
 
 	}
 

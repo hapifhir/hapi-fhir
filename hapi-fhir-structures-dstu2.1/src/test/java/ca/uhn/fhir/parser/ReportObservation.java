@@ -1,12 +1,13 @@
 package ca.uhn.fhir.parser;
 
+import org.hl7.fhir.dstu21.model.BooleanType;
+import org.hl7.fhir.dstu21.model.Observation;
+import org.hl7.fhir.dstu21.model.StringType;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu21.resource.Observation;
-import ca.uhn.fhir.model.primitive.BooleanDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.ElementUtil;
 
 @ResourceDef(name = "Observation", id = "reportobservation")
@@ -19,22 +20,22 @@ public class ReportObservation extends Observation {
 	@Child(name = "mandatory", order = 0)
 	@Extension(url = "#mandatory", definedLocally = true, isModifier = false)
 	@Description(shortDefinition = "The report observation is mandatory or not")
-	private BooleanDt mandatory;
+	private BooleanType mandatory;
 
 	@Child(name = "readOnly", order = 1)
 	@Extension(url = "#readOnly", definedLocally = true, isModifier = false)
 	@Description(shortDefinition = "The report observation is read only or not")
-	private BooleanDt readOnly;
+	private BooleanType readOnly;
 
 	@Child(name = "defaultCursor", order = 2)
 	@Extension(url = "#defaultCursor", definedLocally = true, isModifier = false)
 	@Description(shortDefinition = "The report observation is default cursor or not")
-	private BooleanDt defaultCursor;
+	private BooleanType defaultCursor;
 
 	@Child(name = "sectionContentId", order = 3)
 	@Extension(url = "#sectionContentId", definedLocally = true, isModifier = false)
 	@Description(shortDefinition = "The primary key of the report section content")
-	private StringDt sectionContentId;
+	private StringType sectionContentId;
 
 	/**
 	 * It is important to override the isEmpty() method, adding a check for any newly added fields.
@@ -53,58 +54,58 @@ public class ReportObservation extends Observation {
 	 ********/
 
 	/** Getter for mandatory */
-	public BooleanDt getMandatory() {
+	public BooleanType getMandatory() {
 		if (mandatory == null) {
-			mandatory = new BooleanDt(false);
+			mandatory = new BooleanType(false);
 		}
 		return mandatory;
 	}
 
 	/** Setter for mandatory */
 	public ReportObservation setMandatory(Boolean isMandatory) {
-		mandatory = new BooleanDt(isMandatory);
+		mandatory = new BooleanType(isMandatory);
 		return this;
 	}
 
 	/** Getter for readOnly */
-	public BooleanDt getReadOnly() {
+	public BooleanType getReadOnly() {
 		if (readOnly == null) {
-			readOnly = new BooleanDt(false);
+			readOnly = new BooleanType(false);
 		}
 		return readOnly;
 	}
 
 	/** Setter for readOnly */
 	public ReportObservation setReadOnly(Boolean isReadOnly) {
-		readOnly = new BooleanDt(isReadOnly);
+		readOnly = new BooleanType(isReadOnly);
 		return this;
 	}
 
 	/** Getter for defaultCursor */
-	public BooleanDt getDefaultCursor() {
+	public BooleanType getDefaultCursor() {
 		if (defaultCursor == null) {
-			defaultCursor = new BooleanDt(false);
+			defaultCursor = new BooleanType(false);
 		}
 		return defaultCursor;
 	}
 
 	/** Setter for defaultCursor */
 	public ReportObservation setDefaultCursor(Boolean isDefaultCursor) {
-		defaultCursor = new BooleanDt(isDefaultCursor);
+		defaultCursor = new BooleanType(isDefaultCursor);
 		return this;
 	}
 
 	/** Getter for sectionContentId */
-	public StringDt getSectionContentId() {
+	public StringType getSectionContentId() {
 		if (sectionContentId == null) {
-			sectionContentId = new StringDt();
+			sectionContentId = new StringType();
 		}
 		return sectionContentId;
 	}
 
 	/** Setter for sectionContentId */
 	public ReportObservation setSectionContentId(String sectionContentId) {
-		this.sectionContentId = new StringDt(sectionContentId);
+		this.sectionContentId = new StringType(sectionContentId);
 		return this;
 	}
 

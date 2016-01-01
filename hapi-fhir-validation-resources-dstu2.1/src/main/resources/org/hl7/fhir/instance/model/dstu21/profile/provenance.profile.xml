@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Provenance"/>
   <meta>
-    <lastUpdated value="2015-12-01T11:05:39.051-05:00"/>
+    <lastUpdated value="2015-12-19T16:00:42.735-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -116,7 +116,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..*</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
-            <a href="datatypes.html#CodeableConcept">CodeableConcept</a>
+            <a href="datatypes.html#Coding">Coding</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Reason the activity is occurring
             <br/>
@@ -138,7 +138,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
-            <a href="datatypes.html#CodeableConcept">CodeableConcept</a>
+            <a href="datatypes.html#Coding">Coding</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">Activity that occurred
             <br/>
@@ -195,7 +195,7 @@
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
             <span title="This element is included in summaries">Σ</span>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">1..*</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">
             <a href="backboneelement.html">BackboneElement</a>
           </td>
@@ -500,9 +500,9 @@
       <value value="http://www.hl7.org/Special/committees/secure/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-01T11:05:39-05:00"/>
+  <date value="2015-12-19T16:00:42-05:00"/>
   <description value="Base StructureDefinition for Provenance Resource"/>
-  <fhirVersion value="1.0.2"/>
+  <fhirVersion value="1.2.0"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
@@ -697,7 +697,7 @@
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.object.reference"/>
+        <map value="AuditEvent.entity.reference"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -749,7 +749,7 @@
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.event.dateTime"/>
+        <map value="AuditEvent.recorded"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -767,7 +767,7 @@
       <min value="0"/>
       <max value="*"/>
       <type>
-        <code value="CodeableConcept"/>
+        <code value="Coding"/>
       </type>
       <isSummary value="true"/>
       <binding>
@@ -783,7 +783,7 @@
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.event.purposeOfEvent"/>
+        <map value="AuditEvent.purposeOfEvent"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -801,7 +801,7 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="CodeableConcept"/>
+        <code value="Coding"/>
       </type>
       <isSummary value="true"/>
       <binding>
@@ -817,7 +817,7 @@
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.event.purposeOfEvent"/>
+        <map value="AuditEvent.purposeOfEvent"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -845,7 +845,7 @@
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.participant.location"/>
+        <map value="AuditEvent.agent.location"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -873,7 +873,7 @@
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.participant.policy"/>
+        <map value="AuditEvent.agent.policy"/>
       </mapping>
     </element>
     <element>
@@ -882,7 +882,7 @@
       <short value="Agents involved in creating resource"/>
       <definition value="An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility."/>
       <comments value="Several agents may be associated (i.e. has some responsibility for an activity) with an activity and vice-versa."/>
-      <min value="0"/>
+      <min value="1"/>
       <max value="*"/>
       <type>
         <code value="BackboneElement"/>
@@ -894,7 +894,7 @@
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.pariticipant"/>
+        <map value="AuditEvent.agent"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -980,7 +980,7 @@
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.participant.role"/>
+        <map value="AuditEvent.agent.role"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1020,7 +1020,7 @@
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.participant.reference"/>
+        <map value="AuditEvent.agent.reference"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1048,7 +1048,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.participant.userId"/>
+        <map value="AuditEvent.agent.userId"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1192,7 +1192,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.object"/>
+        <map value="AuditEvent.entity"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1273,7 +1273,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.object.lifecycle"/>
+        <map value="AuditEvent.entity.lifecycle"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1304,7 +1304,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.object.type"/>
+        <map value="AuditEvent.entity.type"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1328,7 +1328,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.object.reference"/>
+        <map value="AuditEvent.entity.reference"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1351,7 +1351,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.object.description"/>
+        <map value="AuditEvent.entity.description"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1433,7 +1433,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.object.reference"/>
+        <map value="AuditEvent.entity.reference"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1485,7 +1485,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.event.dateTime"/>
+        <map value="AuditEvent.recorded"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1503,7 +1503,7 @@ practitioner: ./id"/>
       <min value="0"/>
       <max value="*"/>
       <type>
-        <code value="CodeableConcept"/>
+        <code value="Coding"/>
       </type>
       <isSummary value="true"/>
       <binding>
@@ -1519,7 +1519,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.event.purposeOfEvent"/>
+        <map value="AuditEvent.purposeOfEvent"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1537,7 +1537,7 @@ practitioner: ./id"/>
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="CodeableConcept"/>
+        <code value="Coding"/>
       </type>
       <isSummary value="true"/>
       <binding>
@@ -1553,7 +1553,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.event.purposeOfEvent"/>
+        <map value="AuditEvent.purposeOfEvent"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1581,7 +1581,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.participant.location"/>
+        <map value="AuditEvent.agent.location"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1609,7 +1609,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.participant.policy"/>
+        <map value="AuditEvent.agent.policy"/>
       </mapping>
     </element>
     <element>
@@ -1618,7 +1618,7 @@ practitioner: ./id"/>
       <short value="Agents involved in creating resource"/>
       <definition value="An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility."/>
       <comments value="Several agents may be associated (i.e. has some responsibility for an activity) with an activity and vice-versa."/>
-      <min value="0"/>
+      <min value="1"/>
       <max value="*"/>
       <type>
         <code value="BackboneElement"/>
@@ -1630,7 +1630,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.pariticipant"/>
+        <map value="AuditEvent.agent"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1665,7 +1665,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.participant.role"/>
+        <map value="AuditEvent.agent.role"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1705,7 +1705,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.participant.reference"/>
+        <map value="AuditEvent.agent.reference"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1733,7 +1733,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.participant.userId"/>
+        <map value="AuditEvent.agent.userId"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1826,7 +1826,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.object"/>
+        <map value="AuditEvent.entity"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1856,7 +1856,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.object.lifecycle"/>
+        <map value="AuditEvent.entity.lifecycle"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1887,7 +1887,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.object.type"/>
+        <map value="AuditEvent.entity.type"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1911,7 +1911,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.object.reference"/>
+        <map value="AuditEvent.entity.reference"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>
@@ -1934,7 +1934,7 @@ practitioner: ./id"/>
       </mapping>
       <mapping>
         <identity value="fhirauditevent"/>
-        <map value="AuditEvent.object.description"/>
+        <map value="AuditEvent.entity.description"/>
       </mapping>
       <mapping>
         <identity value="w3c.prov"/>

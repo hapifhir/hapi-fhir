@@ -8,7 +8,7 @@
   <Author>Grahame</Author>
   <LastAuthor>Microsoft Office User</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2015-11-26T01:19:28Z</LastSaved>
+  <LastSaved>2015-12-10T06:16:55Z</LastSaved>
   <Version>15.0</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
@@ -19,7 +19,7 @@
   <WindowWidth>51200</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>460</WindowTopY>
-  <ActiveSheet>2</ActiveSheet>
+  <ActiveSheet>1</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -910,6 +910,8 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Print>
+   </Print>
    <Zoom>400</Zoom>
    <PageLayoutZoom>0</PageLayoutZoom>
    <ProtectObjects>False</ProtectObjects>
@@ -922,9 +924,9 @@
  <Worksheet ss:Name="Data Elements">
   <Names>
    <NamedRange ss:Name="_FilterDatabase"
-    ss:RefersTo="='Data Elements'!R1C1:R100C24" ss:Hidden="1"/>
+    ss:RefersTo="='Data Elements'!R1C1:R101C24" ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="25" ss:ExpandedRowCount="108" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="25" ss:ExpandedRowCount="109" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s68" ss:DefaultColumnWidth="65"
    ss:DefaultRowHeight="15">
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="361"/>
@@ -2145,6 +2147,39 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><Data ss:Type="String">The ValueSet defintion refers to all fields in the ValueSet definition apart from  ValueSet.contains. The definition is only included if includeDefinition is present and has a value of &quot;true&quot;.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s85"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s85"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s85"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s85"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s96"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s90"><Data ss:Type="String">ExpansionProfile.includeInactive</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s97"><Data ss:Type="String">0..1</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">boolean</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">y</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Include or exclude inactive concepts in the expansion</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><Data ss:Type="String">Controls whether inactive concepts are included or excluded in value set expansions.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><Data ss:Type="String">Inactive codes are included if includeInactive is present and has a value of &quot;true&quot;.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s85"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3952,10 +3987,11 @@
    </Print>
    <Zoom>161</Zoom>
    <PageLayoutZoom>0</PageLayoutZoom>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>17</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -3968,18 +4004,17 @@
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>22</ActiveRow>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>34</ActiveRow>
+     <ActiveCol>13</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
-  <AutoFilter x:Range="R1C1:R100C24"
+  <AutoFilter x:Range="R1C1:R101C24"
    xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
  </Worksheet>
@@ -4077,14 +4112,14 @@
     <Cell ss:StyleID="s119"><Data ss:Type="String">exists(f:language) or exists(f:use)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="180">
-    <Cell ss:MergeDown="8" ss:StyleID="s117"><Data ss:Type="Number">5</Data><NamedCell
+    <Cell ss:MergeDown="8" ss:StyleID="s117"><Data ss:Type="String">!5</Data><NamedCell
       ss:Name="Invariantids"/></Cell>
     <Cell ss:MergeDown="8" ss:StyleID="s118"/>
     <Cell ss:MergeDown="8" ss:StyleID="s118"/>
     <Cell ss:MergeDown="8" ss:StyleID="s118"><Data ss:Type="String">ExpansionProfile</Data></Cell>
-    <Cell ss:MergeDown="8" ss:StyleID="s118"><Data ss:Type="String">SHALL have at least one of&#13;–&#160;codeSystems.include&#13;– codeSystems.exclude&#13;–&#160;includeDesignations (as true)&#13;– excludeNested&#13;– excludeNotForUI&#13;– excludePostCoordinated&#13;– displayLanguage&#13;– limitedExpansion </Data></Cell>
-    <Cell ss:MergeDown="8" ss:StyleID="s118"><Data ss:Type="String">codeSystem.include.empty().not() or codeSystem.exclude.empty().not() or includeDesignations = true or excludeNested.empty().not() or excludeNotForUI.empty().not() or excludePostCoordinated.empty().not() or displayLanguage.empty().not() or limitedExpansion.empty().not()</Data></Cell>
-    <Cell ss:MergeDown="8" ss:StyleID="s119"><Data ss:Type="String">exists(f:codeSystems.include) or exists(f:codeSystems.exclude) or (exists(f:includeDesignations) and f:includeDesignations='true') or&#13;exists(f:excludeNested) or&#13;exists(f:codeSystem.excludeNotForUI) or&#13;exists(f:codeSystem.excludePostCoordinated) or&#13;exists(f:codeSystem.displayLanguage) or&#13;exists(f:codeSystem.limitedExpansion)</Data></Cell>
+    <Cell ss:MergeDown="8" ss:StyleID="s118"><Data ss:Type="String">SHALL have at least one of&#13;–&#160;codeSystems.include&#13;– codeSystems.exclude&#13;–&#160;includeDesignations (as true)&#13;– includeInactive (as true)&#13;– excludeNested&#13;– excludeNotForUI&#13;– excludePostCoordinated&#13;– displayLanguage&#13;– limitedExpansion </Data></Cell>
+    <Cell ss:MergeDown="8" ss:StyleID="s118"><Data ss:Type="String">codeSystem.include&#13;.empty().not() or  codeSystem.exclude.empty().not()  or&#160;includeDesignations = true or includeInactive = true or excludeNested.empty().not() or excludeNotForUI.empty().not() or excludePostCoordinated&#13;.empty().not() or displayLanguage&#13;.empty().not() or  limitedExpansion.empty().not() </Data></Cell>
+    <Cell ss:MergeDown="8" ss:StyleID="s119"><Data ss:Type="String">exists(f:codeSystems.include) or exists(f:codeSystems.exclude) or &#13;(exists(f:includeInactive) and f:includeInactive='true')&#13;(exists(f:includeDesignations) and f:includeDesignations='true') or&#13;exists(f:codeSystems.excludeNested) or&#13;exists(f:codeSystems.excludeNotForUI) or&#13;exists(f:codeSystems.excludePostCoordinated) or&#13;exists(f:codeSystems.displayLanguage) or&#13;exists(f:codeSystems.limitedExpansion)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Span="7"/>
    <Row ss:Index="15" ss:AutoFitHeight="0">
@@ -4425,8 +4460,8 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <PageLayoutZoom>0</PageLayoutZoom>
-   <Selected/>
+   <Zoom>216</Zoom>
+   <PageLayoutZoom>216</PageLayoutZoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4446,8 +4481,9 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>14</ActiveRow>
+     <ActiveRow>5</ActiveRow>
      <ActiveCol>6</ActiveCol>
+     <RangeSelection>R6C7:R14C7</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

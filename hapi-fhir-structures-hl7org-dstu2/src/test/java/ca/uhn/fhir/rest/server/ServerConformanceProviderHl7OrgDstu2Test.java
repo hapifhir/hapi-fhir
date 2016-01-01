@@ -1,8 +1,13 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,18 +23,18 @@ import org.hl7.fhir.instance.model.Conformance.ConformanceRestComponent;
 import org.hl7.fhir.instance.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.instance.model.Conformance.SystemRestfulInteraction;
 import org.hl7.fhir.instance.model.Conformance.TypeRestfulInteraction;
+import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.DiagnosticReport;
+import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.OperationDefinition;
 import org.hl7.fhir.instance.model.Patient;
+import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -49,6 +54,7 @@ import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 
@@ -128,7 +134,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		rs.init(createServletConfig());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/everything"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/everything"));
 				
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
@@ -263,7 +269,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		Conformance sconf = sc.getServerConformance(createHttpServletRequest());
 		assertEquals("OperationDefinition/plain", sconf.getRest().get(0).getOperation().get(0).getDefinition().getReference());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/plain"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/plain"));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
@@ -448,7 +454,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		}
 
 		@Delete
-		public MethodOutcome delete(@IdParam IdDt theId, @ConditionalUrlParam String theConditionalUrl) {
+		public MethodOutcome delete(@IdParam IdType theId, @ConditionalUrlParam String theConditionalUrl) {
 			return null;
 		}
 
@@ -458,7 +464,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		}
 
 		@Update
-		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
+		public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
 			return null;
 		}
 
@@ -471,7 +477,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		}
 
 		@History
-		public List<IBaseResource> history(@IdParam IdDt theId) {
+		public List<IBaseResource> history(@IdParam IdType theId) {
 			return null;
 		}
 
@@ -483,7 +489,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 	public static class MultiOptionalProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier, @Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringDt theName) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier, @Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringParam theName) {
 			return null;
 		}
 
@@ -497,7 +503,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		}
 
 		@Delete
-		public MethodOutcome delete(@IdParam IdDt theId) {
+		public MethodOutcome delete(@IdParam IdType theId) {
 			return null;
 		}
 
@@ -507,7 +513,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		}
 
 		@Update
-		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
+		public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient thePatient) {
 			return null;
 		}
 
@@ -516,9 +522,9 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 	public static class PlainProviderWithExtendedOperationOnNoType {
 
 		@Operation(name = "plain", idempotent = true, returnParameters= {
-			@OperationParam(min=1, max=2, name="out1", type=StringDt.class)
+			@OperationParam(min=1, max=2, name="out1", type=StringType.class)
 		})
-		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart, @OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
 
@@ -527,7 +533,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 	public static class ProviderWithExtendedOperationReturningBundle implements IResourceProvider {
 
 		@Operation(name = "everything", idempotent = true)
-		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart, @OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
 
@@ -560,7 +566,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		}
 
 		@Read(version = false)
-		public Patient readPatient(@IdParam IdDt theId) {
+		public Patient readPatient(@IdParam IdType theId) {
 			return null;
 		}
 
@@ -612,7 +618,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		}
 
 		@Read(version = true)
-		public Patient readPatient(@IdParam IdDt theId) {
+		public Patient readPatient(@IdParam IdType theId) {
 			return null;
 		}
 

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -47,6 +49,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -71,6 +74,7 @@ import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 public abstract class BaseClient implements IRestfulClient {
 
@@ -284,7 +288,7 @@ public abstract class BaseClient implements IRestfulClient {
 				}
 
 				String message = "HTTP " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase();
-				BaseOperationOutcome oo = null;
+				IBaseOperationOutcome oo = null;
 				if (Constants.CT_TEXT.equals(mimeType)) {
 					message = message + ": " + body;
 				} else {
@@ -293,9 +297,10 @@ public abstract class BaseClient implements IRestfulClient {
 						IParser p = enc.newParser(theContext);
 						try {
 							// TODO: handle if something other than OO comes back
-							oo = (BaseOperationOutcome) p.parseResource(body);
-							if (oo.getIssueFirstRep().getDetailsElement().isEmpty() == false) {
-								message = message + ": " + oo.getIssueFirstRep().getDetailsElement().getValue();
+							oo = (IBaseOperationOutcome) p.parseResource(body);
+							String details = OperationOutcomeUtil.getFirstIssueDetails(getFhirContext(), oo);
+							if (isNotBlank(details)) {
+								message = message + ": " + details;
 							}
 						} catch (Exception e) {
 							ourLog.debug("Failed to process OperationOutcome response");
