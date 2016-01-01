@@ -22,179 +22,21 @@ import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class ResourceProviderDstu21ValueSetTest extends BaseResourceProviderDstu21Test {
 
-	private IIdType myExtensionalVsId;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu21ValueSetTest.class);
+	private IIdType myExtensionalVsId;
 	
 	@Before
 	@Transactional
 	public void before02() throws IOException {
-		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
+		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.1.xml");
 		upload.setId("");
 		myExtensionalVsId = myValueSetDao.create(upload).getId().toUnqualifiedVersionless();
 	}
 	
-	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstance() {
-		//@formatter:off
-		Parameters respParam = ourClient
-			.operation()
-			.onInstance(myExtensionalVsId)
-			.named("validate-code")
-			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-			.andParameter("system", new UriType("http://loinc.org"))
-			.execute();
-		//@formatter:on
-
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
-		
-		assertEquals(true, ((BooleanType)respParam.getParameter().get(0).getValue()).booleanValue());
-	}
-
-	@Test
-	public void testValidateCodeOperationByCodeAndSystemType() {
-		//@formatter:off
-		Parameters respParam = ourClient
-			.operation()
-			.onType(ValueSet.class)
-			.named("validate-code")
-			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
-			.andParameter("system", new UriType("http://loinc.org"))
-			.execute();
-		//@formatter:on
-
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
-		
-		assertEquals(true, ((BooleanType)respParam.getParameter().get(0).getValue()).booleanValue());
-	}
-
-	@Test
-	public void testLookupOperationByCodeAndSystem() {
-		//@formatter:off
-		Parameters respParam = ourClient
-			.operation()
-			.onType(ValueSet.class)
-			.named("lookup")
-			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
-			.andParameter("system", new UriType("http://loinc.org"))
-			.execute();
-		//@formatter:on
-
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
-		
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(("Systolic blood pressure--expiration"), ((StringType)respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).getValue().booleanValue());
-	}
-	
-	@Test
-//	@Ignore
-	public void testLookupOperationForBuiltInCode() {
-		//@formatter:off
-		Parameters respParam = ourClient
-			.operation()
-			.onType(ValueSet.class)
-			.named("lookup")
-			.withParameter(Parameters.class, "code", new CodeType("M"))
-			.andParameter("system", new UriType("http://hl7.org/fhir/v3/MaritalStatus"))
-			.execute();
-		//@formatter:on
-
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
-		
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals("Unknown", ((StringType)respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Married", ((StringType)respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).booleanValue());
-	}
-
-	@Test
-	public void testLookupOperationByCoding() {
-		//@formatter:off
-		Parameters respParam = ourClient
-			.operation()
-			.onType(ValueSet.class)
-			.named("lookup")
-			.withParameter(Parameters.class, "coding", new Coding().setSystem("http://loinc.org").setCode("8450-9"))
-			.execute();
-		//@formatter:on
-
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
-		
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(("Systolic blood pressure--expiration"), ((StringType)respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).getValue().booleanValue());
-	}
-
-	@Test
-	public void testLookupOperationByInvalidCombination() {
-		//@formatter:off
-		try {
-			ourClient
-				.operation()
-				.onType(ValueSet.class)
-				.named("lookup")
-				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://loinc.org").setCode("8450-9"))
-				.andParameter("code", new CodeType("8450-9"))
-				.andParameter("system", new UriType("http://loinc.org"))
-				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
-		}
-		//@formatter:on
-	}
-
-	@Test
-	public void testLookupOperationByInvalidCombination2() {
-		//@formatter:off
-		try {
-			ourClient
-				.operation()
-				.onType(ValueSet.class)
-				.named("lookup")
-				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://loinc.org").setCode("8450-9"))
-				.andParameter("system", new UriType("http://loinc.org"))
-				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
-		}
-		//@formatter:on
-	}
-
-	@Test
-	public void testLookupOperationByInvalidCombination3() {
-		//@formatter:off
-		try {
-			ourClient
-				.operation()
-				.onType(ValueSet.class)
-				.named("lookup")
-				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://loinc.org").setCode(null))
-				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: No code, coding, or codeableConcept provided to validate", e.getMessage());
-		}
-		//@formatter:on
-	}
-
 	@Test
 	public void testExpandById() throws IOException {
 		//@formatter:off
@@ -214,14 +56,14 @@ public class ResourceProviderDstu21ValueSetTest extends BaseResourceProviderDstu
 			stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">", 
 				"<expansion>", 
 					"<contains>", 
-						"<system value=\"http://loinc.org\"/>",
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>", 
-					"</contains>",
-					"<contains>", 
-						"<system value=\"http://loinc.org\"/>",
+						"<system value=\"http://acme.org\"/>",
 						"<code value=\"8450-9\"/>", 
 						"<display value=\"Systolic blood pressure--expiration\"/>", 
+					"</contains>",
+					"<contains>", 
+						"<system value=\"http://acme.org\"/>",
+						"<code value=\"11378-7\"/>",
+						"<display value=\"Systolic blood pressure at First encounter\"/>", 
 					"</contains>",
 				"</expansion>" 
 					));
@@ -250,28 +92,8 @@ public class ResourceProviderDstu21ValueSetTest extends BaseResourceProviderDstu
 				"<display value=\"Systolic blood pressure at First encounter\"/>"));
 		//@formatter:on
 
-		/*
-		 * Filter with code
-		 */
-
-		//@formatter:off
-		respParam = ourClient
-			.operation()
-			.onInstance(myExtensionalVsId)
-			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("11378"))
-			.execute();
-		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
-		ourLog.info(resp);
-		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
 	}
-	
+
 	@Test
 	public void testExpandByIdentifier() {
 		//@formatter:off
@@ -370,6 +192,224 @@ public class ResourceProviderDstu21ValueSetTest extends BaseResourceProviderDstu
 		}
 		//@formatter:on
 
+	}
+
+	@Test
+	public void testLookupOperationByCodeAndSystemBuiltInCode() {
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("ACSN"))
+			.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
+			.execute();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals("Accession ID", ((StringType)respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(2).getName());
+		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).getValue().booleanValue());
+	}
+
+	@Test
+	public void testLookupOperationByCodeAndSystemBuiltInNonexistantCode() {
+		//@formatter:off
+		try {
+			ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "code", new CodeType("ACSNAAAAAA"))
+				.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
+				.execute();
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// good
+		}
+		//@formatter:on
+	}
+
+	@Test
+	public void testLookupOperationByCodeAndSystemUserDefinedCode() {
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.execute();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals(("Systolic blood pressure--expiration"), ((StringType)respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(2).getName());
+		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).getValue().booleanValue());
+	}
+
+	@Test
+	public void testLookupOperationByCodeAndSystemUserDefinedNonExistantCode() {
+		//@formatter:off
+		try {
+			ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "code", new CodeType("8450-9AAAAA"))
+				.andParameter("system", new UriType("http://acme.org"))
+				.execute();
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// good
+		}
+		//@formatter:on
+	}
+
+	@Test
+	public void testLookupOperationByCoding() {
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9"))
+			.execute();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals(("Unknown"), ((StringType)respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals(("Systolic blood pressure--expiration"), ((StringType)respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(2).getName());
+		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).getValue().booleanValue());
+	}
+
+	@Test
+	public void testLookupOperationByInvalidCombination() {
+		//@formatter:off
+		try {
+			ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9"))
+				.andParameter("code", new CodeType("8450-9"))
+				.andParameter("system", new UriType("http://acme.org"))
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+		}
+		//@formatter:on
+	}
+
+	@Test
+	public void testLookupOperationByInvalidCombination2() {
+		//@formatter:off
+		try {
+			ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9"))
+				.andParameter("system", new UriType("http://acme.org"))
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+		}
+		//@formatter:on
+	}
+
+	@Test
+	public void testLookupOperationByInvalidCombination3() {
+		//@formatter:off
+		try {
+			ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode(null))
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: No code, coding, or codeableConcept provided to validate", e.getMessage());
+		}
+		//@formatter:on
+	}
+	
+	@Test
+//	@Ignore
+	public void testLookupOperationForBuiltInCode() {
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("M"))
+			.andParameter("system", new UriType("http://hl7.org/fhir/v3/MaritalStatus"))
+			.execute();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals("Unknown", ((StringType)respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals("Married", ((StringType)respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(2).getName());
+		assertEquals(false, ((BooleanType)respParam.getParameter().get(2).getValue()).booleanValue());
+	}
+
+	@Test
+	public void testValidateCodeOperationByCodeAndSystemInstance() {
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.execute();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals(true, ((BooleanType)respParam.getParameter().get(0).getValue()).booleanValue());
+	}
+
+	@Test
+	public void testValidateCodeOperationByCodeAndSystemType() {
+		//@formatter:off
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.execute();
+		//@formatter:on
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+		
+		assertEquals(true, ((BooleanType)respParam.getParameter().get(0).getValue()).booleanValue());
 	}
 	
 }

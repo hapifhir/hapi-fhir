@@ -75,7 +75,7 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 		
 		myResourceName = theConetxt.getResourceDefinition(myType).getName();
 
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 		myVersionIdParamIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 		myTagListParamIndex = MethodUtil.findTagListParameterIndex(theMethod);
 

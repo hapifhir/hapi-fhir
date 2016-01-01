@@ -95,7 +95,7 @@ public class SystemProviderDstu21Test extends BaseJpaDstu21Test {
 			servletHolder.setServlet(restServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
-			ourCtx = FhirContext.forDstu2();
+			ourCtx = FhirContext.forDstu2_1();
 			restServer.setFhirContext(ourCtx);
 
 			ourServer.setHandler(proxyHandler);
@@ -213,9 +213,9 @@ public class SystemProviderDstu21Test extends BaseJpaDstu21Test {
 			Parameters parameters = ourCtx.newXmlParser().parseResource(Parameters.class, output);
 			assertEquals(2, parameters.getParameter().size());
 			assertEquals("keyword", parameters.getParameter().get(0).getPart().get(0).getName());
-			assertEquals(new StringType("ZXCVBNM"), parameters.getParameter().get(0).getPart().get(0).getValue());
+			assertEquals(("ZXCVBNM"), ((StringType)parameters.getParameter().get(0).getPart().get(0).getValue()).getValueAsString());
 			assertEquals("score", parameters.getParameter().get(0).getPart().get(1).getName());
-			assertEquals(new DecimalType("1.0"), parameters.getParameter().get(0).getPart().get(1).getValue());
+			assertEquals(("1.0"), ((DecimalType)parameters.getParameter().get(0).getPart().get(1).getValue()).getValueAsString());
 			
 		} finally {
 			http.close();
@@ -356,7 +356,7 @@ public class SystemProviderDstu21Test extends BaseJpaDstu21Test {
 		} catch (InvalidRequestException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 			assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
-			assertEquals("processing", oo.getIssue().get(0).getCode());
+			assertEquals("processing", oo.getIssue().get(0).getCode().toCode());
 		}
 	}
 

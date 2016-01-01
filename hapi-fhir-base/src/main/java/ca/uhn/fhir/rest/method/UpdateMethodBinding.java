@@ -45,7 +45,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	public UpdateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, Update.class, theProvider);
 
-		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 	}
 
 	@Override

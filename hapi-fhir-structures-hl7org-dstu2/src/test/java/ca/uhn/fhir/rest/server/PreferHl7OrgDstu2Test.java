@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.TimeUnit;
 
@@ -15,13 +15,13 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.Patient;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -103,13 +103,13 @@ public class PreferHl7OrgDstu2Test {
 
 		@Create()
 		public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
-			MethodOutcome retVal = new MethodOutcome(new IdDt("Patient/001/_history/002"));
+			MethodOutcome retVal = new MethodOutcome(new IdType("Patient/001/_history/002"));
 			return retVal;
 		}
 
 		@Update()
-		public MethodOutcome updatePatient(@ResourceParam Patient thePatient, @IdParam IdDt theIdParam) {
-			return new MethodOutcome(new IdDt("Patient/001/_history/002"));
+		public MethodOutcome updatePatient(@ResourceParam Patient thePatient, @IdParam IdType theIdParam) {
+			return new MethodOutcome(new IdType("Patient/001/_history/002"));
 		}
 
 	}

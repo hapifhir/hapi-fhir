@@ -1,7 +1,11 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +25,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.Bundle;
+import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.IntegerType;
 import org.hl7.fhir.instance.model.Parameters;
 import org.hl7.fhir.instance.model.Patient;
@@ -32,7 +37,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -50,7 +54,7 @@ public class OperationServerHl7OrgTest {
 	private static Patient ourLastParam2;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerHl7OrgTest.class);
 	private static int ourPort;
-	private static IdDt ourLastId;
+	private static IdType ourLastId;
 	private static Server ourServer;
 	private static String ourLastMethod;
 	private static List<StringType> ourLastParam3;
@@ -294,7 +298,7 @@ public class OperationServerHl7OrgTest {
 
 	@Test
 	public void testInstanceEverythingHapiClient() throws Exception {
-		Parameters p = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort).operation().onInstance(new IdDt("Patient/123")).named("$everything").withParameters(new Parameters()).execute();
+		Parameters p = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort).operation().onInstance(new IdType("Patient/123")).named("$everything").withParameters(new Parameters()).execute();
 		Bundle b = (Bundle) p.getParameter().get(0).getResource();
 		assertNotNull(b);
 		
@@ -416,7 +420,7 @@ public class OperationServerHl7OrgTest {
 		 * Just to make sure this method doesn't "steal" calls
 		 */
 		@Read
-		public Patient read(@IdParam IdDt theId) {
+		public Patient read(@IdParam IdType theId) {
 			ourLastMethod = "read";
 			Patient retVal = new Patient();
 			retVal.setId(theId);
@@ -424,7 +428,7 @@ public class OperationServerHl7OrgTest {
 		}
 
 		@Operation(name = "$everything", idempotent=true)
-		public Bundle patientEverything(@IdParam IdDt thePatientId) {
+		public Bundle patientEverything(@IdParam IdType thePatientId) {
 			ourLastMethod = "instance $everything";
 			ourLastId = thePatientId;
 			return new Bundle();
@@ -482,7 +486,7 @@ public class OperationServerHl7OrgTest {
 		//@formatter:off
 		@Operation(name="$OP_INSTANCE")
 		public Parameters opInstance(
-				@IdParam IdDt theId,
+				@IdParam IdType theId,
 				@OperationParam(name="PARAM1") StringType theParam1,
 				@OperationParam(name="PARAM2") Patient theParam2
 				) {

@@ -32,6 +32,7 @@ import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.dstu21.model.Address.AddressUse;
 import org.hl7.fhir.dstu21.model.AllergyIntolerance;
 import org.hl7.fhir.dstu21.model.Annotation;
+import org.hl7.fhir.dstu21.model.Attachment;
 import org.hl7.fhir.dstu21.model.Binary;
 import org.hl7.fhir.dstu21.model.Bundle;
 import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
@@ -82,6 +83,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.Constants;
@@ -1679,6 +1681,12 @@ public class XmlParserDstu21Test {
 		DocumentManifest actual = ourCtx.newXmlParser().parseResource(DocumentManifest.class, encoded);
 		assertEquals(1, actual.getContained().size());
 		assertEquals(1, actual.getContent().size());
+
+		/*
+		 * If this fails, it's possibe the DocumentManifest structure is wrong:
+		 * It should be
+		 *         @Child(name = "p", type = {Attachment.class, ValueSet.class}, order=1, min=1, max=1, modifier=false, summary=true)
+		 */
 		assertNotNull(((Reference) actual.getContent().get(0).getP()).getResource());
 	}
 
@@ -1730,7 +1738,7 @@ public class XmlParserDstu21Test {
 			"            <id value=\"1\"/>\n" + 
 			"            <meta>\n" +
 			"               <versionId value=\"2\"/>\n" +
-			"               <lastUpdated value=\"2001-02-22T11:22:33-05:00\"/>\n" +
+			"               <lastUpdated value=\"2001-02-22T09:22:33-07:00\"/>\n" +
 			"            </meta>\n" + 
 			"            <birthDate value=\"2012-01-02\"/>\n" + 
 			"         </Patient>\n" + 
@@ -1758,9 +1766,10 @@ public class XmlParserDstu21Test {
 		assertEquals("match", entry.getSearch().getMode().toCode());
 		assertEquals("POST", entry.getRequest().getMethod().toCode());
 		assertEquals("http://foo/Patient?identifier=value", entry.getRequest().getUrl());
-		assertEquals("2001-02-22T11:22:33-05:00", pt.getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("2001-02-22T09:22:33-07:00", pt.getMeta().getLastUpdatedElement().getValueAsString());
 
-		String reEncoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
+		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
+		String reEncoded = p.encodeResourceToString(b);
 		ourLog.info(reEncoded);
 
 		Diff d = new Diff(new StringReader(bundle), new StringReader(reEncoded));

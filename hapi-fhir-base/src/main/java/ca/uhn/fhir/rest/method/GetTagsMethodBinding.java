@@ -67,7 +67,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 			myResourceName = theConetxt.getResourceDefinition(myType).getName();
 		}
 
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 		myVersionIdParamIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 
 		if (myIdParamIndex != null && myType.equals(IResource.class)) {

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.util.Date;
@@ -20,6 +21,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Patient;
 import org.junit.AfterClass;
@@ -28,7 +30,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -178,12 +179,12 @@ public class ETagServerHl7OrgTest {
 
   }
 
-  private static IdDt ourLastId;
+  private static IdType ourLastId;
 
   public static class PatientProvider implements IResourceProvider {
 
     @Read(version = true)
-    public Patient findPatient(@IdParam IdDt theId) {
+    public Patient findPatient(@IdParam IdType theId) {
       Patient patient = new Patient();
       patient.getMeta().setLastUpdated(ourLastModifiedDate);
       patient.addIdentifier().setSystem(theId.getIdPart()).setValue(theId.getVersionIdPart());
@@ -192,7 +193,7 @@ public class ETagServerHl7OrgTest {
     }
 
     @Update
-    public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient theResource) {
+    public MethodOutcome updatePatient(@IdParam IdType theId, @ResourceParam Patient theResource) {
       ourLastId = theId;
 
       if ("222".equals(theId.getVersionIdPart())) {

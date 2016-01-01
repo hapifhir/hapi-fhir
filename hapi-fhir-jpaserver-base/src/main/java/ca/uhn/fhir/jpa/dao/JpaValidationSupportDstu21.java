@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.StructureDefinition;
 import org.hl7.fhir.dstu21.model.ValueSet;
 import org.hl7.fhir.dstu21.model.ValueSet.ConceptSetComponent;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
@@ -61,10 +63,20 @@ public class JpaValidationSupportDstu21 implements IJpaValidationSupportDstu21 {
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+		IdType id = new IdType(theUri);
+		boolean localReference = false;
+		if (id.hasBaseUrl() == false && id.hasIdPart() == true) {
+			localReference = true;
+		}
+
 		String resourceName = myDstu21Ctx.getResourceDefinition(theClass).getName();
 		IBundleProvider search;
 		if ("ValueSet".equals(resourceName)) {
-			search = myValueSetDao.search(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_URL, new UriParam(theUri));
+			if (localReference) {
+				search = myValueSetDao.search(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_RES_ID, new StringParam(theUri));
+			} else {
+				search = myValueSetDao.search(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_URL, new UriParam(theUri));
+			}
 		} else if ("StructureDefinition".equals(resourceName)) {
 			search = myStructureDefinitionDao.search(ca.uhn.fhir.model.dstu2.resource.StructureDefinition.SP_URL, new UriParam(theUri));
 		} else {

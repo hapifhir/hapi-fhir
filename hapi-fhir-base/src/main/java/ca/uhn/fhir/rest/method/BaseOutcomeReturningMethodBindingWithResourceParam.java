@@ -75,7 +75,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		}
 
 		myResourceName = theContext.getResourceDefinition(myResourceType).getName();
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 		if (myIdParamIndex != null) {
 			myIdParamType = (Class<? extends IIdType>) theMethod.getParameterTypes()[myIdParamIndex];
 		}

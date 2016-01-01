@@ -2299,7 +2299,7 @@ public class ResourceProviderDstu21Test extends BaseResourceProviderDstu21Test {
 	@Test
 	public void testValueSetExpandOperation() throws IOException {
 
-		ValueSet upload = myFhirCtx.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderDstu21Test.class.getResourceAsStream("/extensional-case-2.xml")));
+		ValueSet upload = myFhirCtx.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderDstu21Test.class.getResourceAsStream("/extensional-case-2.1.xml")));
 		IIdType vsid = ourClient.create().resource(upload).execute().getId().toUnqualifiedVersionless();
 
 		HttpGet get = new HttpGet(ourServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand");
@@ -2313,14 +2313,14 @@ public class ResourceProviderDstu21Test extends BaseResourceProviderDstu21Test {
 				stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">", 
 					"<expansion>", 
 						"<contains>", 
-							"<system value=\"http://loinc.org\"/>",
-							"<code value=\"11378-7\"/>",
-							"<display value=\"Systolic blood pressure at First encounter\"/>", 
-						"</contains>",
-						"<contains>", 
-							"<system value=\"http://loinc.org\"/>",
+							"<system value=\"http://acme.org\"/>",
 							"<code value=\"8450-9\"/>", 
 							"<display value=\"Systolic blood pressure--expiration\"/>", 
+						"</contains>",
+						"<contains>", 
+							"<system value=\"http://acme.org\"/>",
+							"<code value=\"11378-7\"/>",
+							"<display value=\"Systolic blood pressure at First encounter\"/>", 
 						"</contains>",
 					"</expansion>" 
 						));
@@ -2344,27 +2344,6 @@ public class ResourceProviderDstu21Test extends BaseResourceProviderDstu21Test {
 			assertThat(resp, stringContainsInOrder(
 					"<code value=\"11378-7\"/>", 
 					"<display value=\"Systolic blood pressure at First encounter\"/>"));
-			//@formatter:on
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
-
-		/*
-		 * Filter with code
-		 */
-
-		get = new HttpGet(ourServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand?filter=11378");
-		response = ourHttpClient.execute(get);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent());
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			//@formatter:off
-			assertThat(resp, stringContainsInOrder(
-					"<code value=\"11378-7\"/>", 
-					"<display value=\"Systolic blood pressure at First encounter\"/>"
-					));
 			//@formatter:on
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());

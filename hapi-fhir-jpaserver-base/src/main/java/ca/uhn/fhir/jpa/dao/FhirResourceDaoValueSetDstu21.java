@@ -23,11 +23,10 @@ package ca.uhn.fhir.jpa.dao;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -36,7 +35,6 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.codec.binary.StringUtils;
 import org.hl7.fhir.dstu21.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu21.hapi.validation.HapiWorkerContext;
-import org.hl7.fhir.dstu21.hapi.validation.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu21.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu21.model.CodeableConcept;
 import org.hl7.fhir.dstu21.model.Coding;
@@ -48,19 +46,16 @@ import org.hl7.fhir.dstu21.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu21.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu21.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.dstu21.terminologies.ValueSetExpander;
-import org.hl7.fhir.dstu21.terminologies.ValueSetExpander.ETooCostly;
 import org.hl7.fhir.dstu21.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class FhirResourceDaoValueSetDstu21 extends FhirResourceDaoDstu21<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 
@@ -81,31 +76,23 @@ public class FhirResourceDaoValueSetDstu21 extends FhirResourceDaoDstu21<ValueSe
 
 	@Override
 	public ValueSet expand(IIdType theId, String theFilter) {
-//		throw new UnsupportedOperationException();
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
-		ConceptSetComponent inc = new ConceptSetComponent();
-		inc.setSystem(theId.getValue());
-		ValueSetExpansionComponent outcome = workerContext.expandVS(inc);
+		ValueSet source = workerContext.fetchResource(ValueSet.class, theId.getValue());
 
-		ValueSet retVal = new ValueSet();
-		retVal.setExpansion(outcome);
-		return retVal;
-	}
-
-	private ValueSet loadValueSetForExpansion(IIdType theId) {
-		if (theId.getValue().startsWith("http://hl7.org/fhir/")) {
-			ValueSet valueSet = myValidationSupport.fetchResource(getContext(), ValueSet.class, theId.getValue());
-			if (valueSet != null) {
-				return valueSet; // getContext().newJsonParser().parseResource(ValueSet.class,
-										// getContext().newJsonParser().encodeResourceToString(valueSet));
+		ValueSetExpansionOutcome outcome = workerContext.expand(source);
+		ValueSetExpansionComponent expansion = outcome.getValueset().getExpansion();
+		if (isNotBlank(theFilter)) {
+			for (Iterator<ValueSetExpansionContainsComponent> containsIter = expansion.getContains().iterator(); containsIter.hasNext();) {
+				ValueSetExpansionContainsComponent nextContains = containsIter.next();
+				if (!nextContains.getDisplay().toLowerCase().contains(theFilter.toLowerCase())) {
+					containsIter.remove();
+				}
 			}
 		}
-		BaseHasResource sourceEntity = readEntity(theId);
-		if (sourceEntity == null) {
-			throw new ResourceNotFoundException(theId);
-		}
-		ValueSet source = (ValueSet) toResource(sourceEntity, false);
-		return source;
+
+		ValueSet retVal = new ValueSet();
+		retVal.setExpansion(expansion);
+		return retVal;
 	}
 
 	@Override
@@ -239,9 +226,9 @@ public class FhirResourceDaoValueSetDstu21 extends FhirResourceDaoDstu21<ValueSe
 	}
 
 	private List<IIdType> findValueSetIdsContainingSystemAndCode(String theCode, String theSystem) {
-		if (theSystem != null && theSystem.startsWith("http://hl7.org/fhir/ValueSet")) {
-			return Collections.singletonList((IIdType) new IdType(theSystem));
-		}
+//		if (theSystem != null && theSystem.startsWith("http://hl7.org/fhir/ValueSet")) {
+//			return Collections.singletonList((IIdType) new IdType(theSystem));
+//		}
 
 		List<IIdType> valueSetIds;
 		Set<Long> ids = searchForIds(ValueSet.SP_CODE, new TokenParam(theSystem, theCode));
@@ -320,48 +307,65 @@ public class FhirResourceDaoValueSetDstu21 extends FhirResourceDaoDstu21<ValueSe
 			system = theSystem.getValue();
 		}
 
-//		CodeValidationResult validateOutcome = myJpaValidationSupport.validateCode(getContext(), system, code, null);
-//		
-//		LookupCodeResult result = new LookupCodeResult();
-//		result.setSearchedForCode(code);
-//		result.setSearchedForSystem(system);
-//		result.setFound(false);
-//		if (validateOutcome.isOk()) {
-//			result.setFound(true);
-//			result.setCodeIsAbstract(validateOutcome.asConceptDefinition().getAbstract());
-//			result.setCodeDisplay(validateOutcome.asConceptDefinition().getDisplay());
-//		}
-//		return result;
-//		result.getDisplay()
-//		
-//		List<IIdType> valueSetIds = findValueSetIdsContainingSystemAndCode(code, system);
-//		for (IIdType nextId : valueSetIds) {
-//			ValueSet expansion = expand(nextId, null);
-//			List<ValueSetExpansionContainsComponent> contains = expansion.getExpansion().getContains();
-//			ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.LookupCodeResult result = lookup(contains, system, code);
-//			if (result != null) {
-//				return result;
-//			}
-//		}
-//
-		
-		HapiWorkerContext ctx = new HapiWorkerContext(getContext(), myValidationSupport);
-		ValueSetExpander expander = ctx.getExpander();
-		ValueSet source = new ValueSet();
-		source.getCompose().addInclude().setSystem(system).addConcept().setCode(code);
-		
-		ValueSetExpansionOutcome expansion;
-		try {
-			expansion = expander.expand(source);
-		} catch (Exception e) {
-			throw new InternalErrorException(e);
+		// CodeValidationResult validateOutcome = myJpaValidationSupport.validateCode(getContext(), system, code, null);
+		//
+		// LookupCodeResult result = new LookupCodeResult();
+		// result.setSearchedForCode(code);
+		// result.setSearchedForSystem(system);
+		// result.setFound(false);
+		// if (validateOutcome.isOk()) {
+		// result.setFound(true);
+		// result.setCodeIsAbstract(validateOutcome.asConceptDefinition().getAbstract());
+		// result.setCodeDisplay(validateOutcome.asConceptDefinition().getDisplay());
+		// }
+		// return result;
+
+		if (myValidationSupport.isCodeSystemSupported(getContext(), system)) {
+			HapiWorkerContext ctx = new HapiWorkerContext(getContext(), myValidationSupport);
+			ValueSetExpander expander = ctx.getExpander();
+			ValueSet source = new ValueSet();
+			source.getCompose().addInclude().setSystem(system).addConcept().setCode(code);
+
+			ValueSetExpansionOutcome expansion;
+			try {
+				expansion = expander.expand(source);
+			} catch (Exception e) {
+				throw new InternalErrorException(e);
+			}
+			List<ValueSetExpansionContainsComponent> contains = expansion.getValueset().getExpansion().getContains();
+			ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.LookupCodeResult result = lookup(contains, system, code);
+			if (result != null) {
+				return result;
+			}
+
+		} else {
+
+			/*
+			 * If it's not a built-in code system, use ones from the database
+			 */
+
+			List<IIdType> valueSetIds = findValueSetIdsContainingSystemAndCode(code, system);
+			for (IIdType nextId : valueSetIds) {
+				ValueSet expansion = read(nextId);
+				for (ConceptDefinitionComponent next : expansion.getCodeSystem().getConcept()) {
+					if (code.equals(next.getCode())) {
+						ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.LookupCodeResult retVal = new LookupCodeResult();
+						retVal.setSearchedForCode(code);
+						retVal.setSearchedForSystem(system);
+						retVal.setFound(true);
+						if (next.getAbstractElement().getValue() != null) {
+							retVal.setCodeIsAbstract(next.getAbstractElement().booleanValue());
+						}
+						retVal.setCodeDisplay(next.getDisplay());
+						retVal.setCodeSystemDisplayName("Unknown"); // TODO: implement
+						return retVal;
+					}
+				}
+			}
+
 		}
-		List<ValueSetExpansionContainsComponent> contains = expansion.getValueset().getExpansion().getContains();
-		ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.LookupCodeResult result = lookup(contains, system, code);
-		if (result != null) {
-			return result;
-		}
-		
+
+		// We didn't find it..
 		LookupCodeResult retVal = new LookupCodeResult();
 		retVal.setFound(false);
 		retVal.setSearchedForCode(code);

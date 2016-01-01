@@ -11,23 +11,22 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Search;
 
 public class ServerUsingOldTypesDstu21Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
-	
+
 	@Test
-	public void testReadProvider() {
+	public void testReadProviderString() {
 		RestfulServer srv = new RestfulServer(ourCtx);
 		srv.setFhirContext(ourCtx);
-		srv.setResourceProviders(new ReadProvider());
+		srv.setResourceProviders(new ReadProviderString());
 
 		try {
 			srv.init();
@@ -36,6 +35,21 @@ public class ServerUsingOldTypesDstu21Test {
 			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
 		}
 	}
+
+	@Test
+	public void testReadProviderIdDt() {
+		RestfulServer srv = new RestfulServer(ourCtx);
+		srv.setFhirContext(ourCtx);
+		srv.setResourceProviders(new ReadProviderIdDt());
+
+		try {
+			srv.init();
+			fail();
+		} catch (ServletException e) {
+			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
+		}
+	}
+
 	@Test
 	public void testOperationProvider() {
 		RestfulServer srv = new RestfulServer(ourCtx);
@@ -49,8 +63,8 @@ public class ServerUsingOldTypesDstu21Test {
 			assertThat(e.getCause().toString(), StringContains.containsString("Incorrect use of type"));
 		}
 	}
-	
-	public static class ReadProvider implements IResourceProvider {
+
+	public static class ReadProviderString implements IResourceProvider {
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
@@ -64,6 +78,20 @@ public class ServerUsingOldTypesDstu21Test {
 
 	}
 
+	public static class ReadProviderIdDt implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Read
+		public Patient opTypeRetOldBundle(@IdParam IdDt theId) {
+			return null;
+		}
+
+	}
+
 	public static class OperationProvider implements IResourceProvider {
 
 		@Override
@@ -71,8 +99,8 @@ public class ServerUsingOldTypesDstu21Test {
 			return Patient.class;
 		}
 
-		@Operation(name="foo")
-		public Patient opTypeRetOldBundle(@OperationParam(name="foo") IntegerDt theId) {
+		@Operation(name = "foo")
+		public Patient opTypeRetOldBundle(@OperationParam(name = "foo") IntegerDt theId) {
 			return null;
 		}
 

@@ -27,12 +27,12 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -55,7 +55,7 @@ public class ServerProfileProvider implements IResourceProvider {
 	}
 	
 	@Read()
-	public StructureDefinition getProfileById(HttpServletRequest theRequest, @IdParam IdDt theId) {
+	public StructureDefinition getProfileById(HttpServletRequest theRequest, @IdParam IdType theId) {
 		RuntimeResourceDefinition retVal = myContext.getResourceDefinitionById(theId.getIdPart());
 		if (retVal==null) {
 			return null;

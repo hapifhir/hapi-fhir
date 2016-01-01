@@ -56,7 +56,7 @@ public class DocumentManifest extends DomainResource {
         /**
          * The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed.
          */
-        @Child(name = "p", type = {Attachment.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "p", type = {Attachment.class, ValueSet.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Contents of this set of documents", formalDefinition="The list of references to document content, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed." )
         protected Type p;
 

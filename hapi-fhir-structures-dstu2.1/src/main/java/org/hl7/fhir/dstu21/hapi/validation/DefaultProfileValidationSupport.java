@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.hl7.fhir.dstu21.model.Bundle;
 import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
@@ -14,6 +16,7 @@ import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu21.model.ValueSet;
 import org.hl7.fhir.dstu21.model.ValueSet.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu21.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu21.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu21.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -30,7 +33,21 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	@Override
 	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-		return null;
+		ValueSetExpansionComponent retVal = new ValueSetExpansionComponent();
+		
+		Set<String> wantCodes = new HashSet<String>();
+		for (ConceptReferenceComponent next : theInclude.getConcept()) {
+			wantCodes.add(next.getCode());
+		}
+		
+		ValueSet system = fetchCodeSystem(theContext, theInclude.getSystem());
+		for (ConceptDefinitionComponent next : system.getCodeSystem().getConcept()) {
+			if (wantCodes.isEmpty() || wantCodes.contains(next.getCode())) {
+				retVal.addContains().setSystem(theInclude.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+			}
+		}
+		
+		return retVal;
 	}
 
 	@Override
@@ -98,7 +115,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	}
 
 	private void loadCodeSystems(FhirContext theContext, Map<String, ValueSet> theCodeSystems, String theClasspath) {
-		ourLog.info("Loading code systems from file: {}", theClasspath);
+		ourLog.info("Loading code systems from classpath: {}", theClasspath);
 		InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
 		if (valuesetText != null) {
 			InputStreamReader reader;

@@ -35,7 +35,7 @@ public class FhirResourceDaoValueSetDstu21Test extends BaseJpaDstu21Test {
 	@Before
 	@Transactional
 	public void before02() throws IOException {
-		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
+		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.1.xml");
 		upload.setId("");
 		myExtensionalVsId = myValueSetDao.create(upload).getId().toUnqualifiedVersionless();
 	}
@@ -45,7 +45,7 @@ public class FhirResourceDaoValueSetDstu21Test extends BaseJpaDstu21Test {
 		UriType valueSetIdentifier = null;
 		IdType id = null;
 		CodeType code = new CodeType("8450-9-XXX");
-		UriType system = new UriType("http://loinc.org");
+		UriType system = new UriType("http://acme.org");
 		StringType display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
@@ -58,7 +58,7 @@ public class FhirResourceDaoValueSetDstu21Test extends BaseJpaDstu21Test {
 		UriType valueSetIdentifier = null;
 		IdType id = null;
 		CodeType code = new CodeType("8450-9");
-		UriType system = new UriType("http://loinc.org");
+		UriType system = new UriType("http://acme.org");
 		StringType display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
@@ -72,7 +72,7 @@ public class FhirResourceDaoValueSetDstu21Test extends BaseJpaDstu21Test {
 		UriType valueSetIdentifier = new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		IdType id = null;
 		CodeType code = new CodeType("11378-7");
-		UriType system = new UriType("http://loinc.org");
+		UriType system = new UriType("http://acme.org");
 		StringType display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
@@ -86,7 +86,7 @@ public class FhirResourceDaoValueSetDstu21Test extends BaseJpaDstu21Test {
 		UriType valueSetIdentifier = new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		IdType id = null;
 		CodeType code = new CodeType("11378-7");
-		UriType system = new UriType("http://loinc.org");
+		UriType system = new UriType("http://acme.org");
 		StringType display = new StringType("Systolic blood pressure at First encounterXXXX");
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
@@ -100,7 +100,7 @@ public class FhirResourceDaoValueSetDstu21Test extends BaseJpaDstu21Test {
 		UriType valueSetIdentifier = new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		IdType id = null;
 		CodeType code = new CodeType("11378-7");
-		UriType system = new UriType("http://loinc.org");
+		UriType system = new UriType("http://acme.org");
 		StringType display = new StringType("Systolic blood pressure at First encounter");
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
@@ -118,7 +118,7 @@ public class FhirResourceDaoValueSetDstu21Test extends BaseJpaDstu21Test {
 		StringType display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding().setSystem("http://loinc.org").setCode("11378-7");
+		codeableConcept.addCoding().setSystem("http://acme.org").setCode("11378-7");
 		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
@@ -129,7 +129,7 @@ public class FhirResourceDaoValueSetDstu21Test extends BaseJpaDstu21Test {
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
 		CodeType code = new CodeType("11378-7");
-		UriType system = new UriType("http://loinc.org");
+		UriType system = new UriType("http://acme.org");
 		StringType display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
@@ -150,14 +150,14 @@ public class FhirResourceDaoValueSetDstu21Test extends BaseJpaDstu21Test {
 			stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">", 
 				"<expansion>", 
 					"<contains>", 
-						"<system value=\"http://loinc.org\"/>",
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>", 
-					"</contains>",
-					"<contains>", 
-						"<system value=\"http://loinc.org\"/>",
+						"<system value=\"http://acme.org\"/>",
 						"<code value=\"8450-9\"/>", 
 						"<display value=\"Systolic blood pressure--expiration\"/>", 
+					"</contains>",
+					"<contains>", 
+						"<system value=\"http://acme.org\"/>",
+						"<code value=\"11378-7\"/>",
+						"<display value=\"Systolic blood pressure at First encounter\"/>", 
 					"</contains>",
 				"</expansion>" 
 					));
@@ -176,18 +176,6 @@ public class FhirResourceDaoValueSetDstu21Test extends BaseJpaDstu21Test {
 				"<display value=\"Systolic blood pressure at First encounter\"/>"));
 		//@formatter:on
 
-		/*
-		 * Filter with code
-		 */
-
-		expanded = myValueSetDao.expand(myExtensionalVsId, ("11378"));
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
-		ourLog.info(resp);
-		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
 	}
 	
 	@Test

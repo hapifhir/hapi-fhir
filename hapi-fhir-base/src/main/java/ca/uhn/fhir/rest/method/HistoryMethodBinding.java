@@ -55,7 +55,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	public HistoryMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider) {
 		super(toReturnType(theMethod, theProvider), theMethod, theConetxt, theProvider);
 
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 
 		History historyAnnotation = theMethod.getAnnotation(History.class);
 		Class<? extends IBaseResource> type = historyAnnotation.type();

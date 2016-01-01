@@ -1,7 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +23,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.Binary;
+import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -28,7 +31,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -205,7 +207,7 @@ public class BinaryHl7OrgDstu2Test {
 		@Create
 		public MethodOutcome create(@ResourceParam Binary theBinary) {
 			ourLast = theBinary;
-			return new MethodOutcome(new IdDt("1"));
+			return new MethodOutcome(new IdType("1"));
 		}
 
 		@Override
@@ -214,7 +216,7 @@ public class BinaryHl7OrgDstu2Test {
 		}
 
 		@Read
-		public Binary read(@IdParam IdDt theId) {
+		public Binary read(@IdParam IdType theId) {
 			Binary retVal = new Binary();
 			retVal.setId("1");
 			retVal.setContent(new byte[] { 1, 2, 3, 4 });

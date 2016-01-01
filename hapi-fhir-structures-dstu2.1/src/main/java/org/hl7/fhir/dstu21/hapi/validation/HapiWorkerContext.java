@@ -28,6 +28,7 @@ import org.hl7.fhir.dstu21.validation.IResourceValidator;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
 	private final FhirContext myCtx;
@@ -169,7 +170,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 			throw new InternalErrorException(e);
 		}
 		if (vso.getError() != null) {
-			return null;
+			throw new InvalidRequestException(vso.getError());
 		} else {
 			return vso;
 		}

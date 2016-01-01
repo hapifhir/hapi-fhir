@@ -59,7 +59,7 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 			myParamNames.add(next.getName());
 		}
 
-		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
+		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod, getContext());
 
 	}
 

@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Required;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -83,7 +82,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@GetTags
-	public TagList getTagsForResourceInstance(HttpServletRequest theRequest, @IdParam IdDt theResourceId) {
+	public TagList getTagsForResourceInstance(HttpServletRequest theRequest, @IdParam IIdType theResourceId) {
 		startRequest(theRequest);
 		try {
 			return myDao.getTags(theResourceId);
@@ -103,7 +102,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@Read(version = true)
-	public T read(HttpServletRequest theRequest, @IdParam IdDt theId) {
+	public T read(HttpServletRequest theRequest, @IdParam IIdType theId) {
 		startRequest(theRequest);
 		try {
 			return myDao.read(theId);

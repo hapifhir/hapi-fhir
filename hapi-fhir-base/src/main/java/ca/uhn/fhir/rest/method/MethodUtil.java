@@ -322,8 +322,20 @@ public class MethodUtil {
 		return MethodUtil.findParamAnnotationIndex(theMethod, ConditionalUrlParam.class);
 	}
 
-	public static Integer findIdParameterIndex(Method theMethod) {
-		return MethodUtil.findParamAnnotationIndex(theMethod, IdParam.class);
+	public static Integer findIdParameterIndex(Method theMethod, FhirContext theContext) {
+		Integer index = MethodUtil.findParamAnnotationIndex(theMethod, IdParam.class);
+		if (index != null) {
+			Class<?> paramType = theMethod.getParameterTypes()[index];
+			if (IIdType.class.equals(paramType)) {
+				return index;
+			}
+			boolean isRi = theContext.getVersion().getVersion().isRi();
+			boolean usesHapiId = IdDt.class.equals(paramType);
+			if (isRi == usesHapiId) {
+				throw new ConfigurationException("Method uses the wrong Id datatype (IdDt / IdType) for the given context FHIR version: " + theMethod.toString());
+			}
+		}
+		return index;
 	}
 
 	public static Integer findParamAnnotationIndex(Method theMethod, Class<?> toFind) {

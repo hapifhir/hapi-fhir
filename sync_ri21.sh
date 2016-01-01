@@ -80,7 +80,6 @@ cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl
 cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/utils/INarrativeGenerator.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/utils/
 cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/utils/EOperationOutcome.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/utils/
 cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/utils/FHIRPathEngine.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/utils/
-cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/utils/ProfileUtilities.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/utils/
 
 # Validation
 cp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/validation/* hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/validation/
