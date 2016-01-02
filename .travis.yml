@@ -6,7 +6,7 @@ jdk:
   - oraclejdk8
 env:
   global:
-    - MAVEN_OPTS="-Xmx1500m"
+    - MAVEN_OPTS="-Xmx1024m"
 
 cache:
   directories:
