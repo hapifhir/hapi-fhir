@@ -19,17 +19,15 @@ package ca.uhn.fhir.rest.client.exceptions;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.io.Reader;
 
-import net.sourceforge.cobertura.CoverageIgnore;
-
 import org.apache.commons.io.IOUtils;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 @CoverageIgnore
 public class NonFhirResponseException extends BaseServerResponseException {

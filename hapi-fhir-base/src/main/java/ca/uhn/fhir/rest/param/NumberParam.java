@@ -19,8 +19,7 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.math.BigDecimal;
 

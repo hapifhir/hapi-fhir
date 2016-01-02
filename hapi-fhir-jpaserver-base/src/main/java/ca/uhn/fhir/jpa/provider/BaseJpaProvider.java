@@ -30,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.MDC;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class BaseJpaProvider {

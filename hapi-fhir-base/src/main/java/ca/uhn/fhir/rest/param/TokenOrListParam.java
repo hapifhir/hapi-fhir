@@ -5,7 +5,7 @@ import java.util.List;
 
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
-import net.sourceforge.cobertura.CoverageIgnore;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /*
  * #%L

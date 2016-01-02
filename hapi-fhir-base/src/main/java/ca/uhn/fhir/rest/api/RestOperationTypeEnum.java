@@ -24,7 +24,7 @@ package ca.uhn.fhir.rest.api;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.sourceforge.cobertura.CoverageIgnore;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 @CoverageIgnore
 public enum RestOperationTypeEnum {

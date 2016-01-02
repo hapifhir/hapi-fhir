@@ -37,7 +37,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import net.sourceforge.cobertura.CoverageIgnore;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider implements IResourceProvider {
 

@@ -26,7 +26,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 
 import ca.uhn.fhir.rest.client.IClientInterceptor;
 import ca.uhn.fhir.rest.server.Constants;
-import net.sourceforge.cobertura.CoverageIgnore;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * HTTP interceptor to be used for adding HTTP Authorization using "bearer tokens" to requests. Bearer tokens are used for protocols such as OAUTH2 (see the

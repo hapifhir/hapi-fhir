@@ -24,8 +24,8 @@ package ca.uhn.fhir.model.valueset;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * This Enum is only used to support using the DSTU1 Bundle structure (<code>ca.uhn.fhir.model.api.Bundle</code>)

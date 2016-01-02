@@ -45,7 +45,6 @@ import ca.uhn.fhir.rest.param.TransactionParameter;
 import ca.uhn.fhir.rest.param.TransactionParameter.ParamStyle;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IRestfulServer;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 

@@ -1,10 +1,9 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-import net.sourceforge.cobertura.CoverageIgnore;
-
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /*
  * #%L

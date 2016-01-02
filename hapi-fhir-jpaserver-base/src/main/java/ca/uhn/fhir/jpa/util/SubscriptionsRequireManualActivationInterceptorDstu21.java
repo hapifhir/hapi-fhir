@@ -38,7 +38,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
-import net.sourceforge.cobertura.CoverageIgnore;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * Interceptor which requires newly created {@link Subscription subscriptions} to be in

@@ -27,7 +27,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.util.FhirTerser;
 
 public class BaseSearchParamExtractor {

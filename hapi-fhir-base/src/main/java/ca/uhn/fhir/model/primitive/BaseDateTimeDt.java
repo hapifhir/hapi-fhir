@@ -19,8 +19,11 @@ package ca.uhn.fhir.model.primitive;
  * limitations under the License.
  * #L%
  */
-
-import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.*;
+import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.DAY;
+import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.MILLI;
+import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.MONTH;
+import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.SECOND;
+import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.YEAR;
 
 import java.text.ParseException;
 import java.util.ArrayList;

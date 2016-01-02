@@ -81,6 +81,10 @@
 				project to provide nice syntax highlighting. Thanks to Rob Hausam for
 				noting that this wasn't there.
 			</action>
+			<action type="add">
+				Introduce custom @CoverageIgnore annotation to hapi-fhir-base in order to 
+				remove dependency on cobertura during build and in runtime.
+			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">

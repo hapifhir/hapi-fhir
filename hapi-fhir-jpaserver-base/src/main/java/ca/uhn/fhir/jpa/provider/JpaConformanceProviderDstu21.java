@@ -43,8 +43,8 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
-import net.sourceforge.cobertura.CoverageIgnore;
 
 public class JpaConformanceProviderDstu21 extends org.hl7.fhir.dstu21.hapi.rest.server.ServerConformanceProvider {
 

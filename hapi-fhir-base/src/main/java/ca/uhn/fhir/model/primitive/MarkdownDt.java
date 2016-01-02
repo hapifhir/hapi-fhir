@@ -21,7 +21,7 @@ package ca.uhn.fhir.model.primitive;
  */
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import net.sourceforge.cobertura.CoverageIgnore;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 @DatatypeDef(name = "markdown", profileOf=StringDt.class)
 @CoverageIgnore

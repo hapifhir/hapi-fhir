@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /*
  * #%L

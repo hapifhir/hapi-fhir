@@ -32,6 +32,12 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.oclc.purl.dsdl.svrl.SchematronOutputType;
 
+import com.phloc.commons.error.IResourceError;
+import com.phloc.commons.error.IResourceErrorGroup;
+import com.phloc.schematron.ISchematronResource;
+import com.phloc.schematron.SchematronHelper;
+import com.phloc.schematron.xslt.SchematronResourceSCH;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
@@ -44,12 +50,6 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SchemaBaseValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationContext;
-
-import com.phloc.commons.error.IResourceError;
-import com.phloc.commons.error.IResourceErrorGroup;
-import com.phloc.schematron.ISchematronResource;
-import com.phloc.schematron.SchematronHelper;
-import com.phloc.schematron.xslt.SchematronResourceSCH;
 
 /**
  * This class is only used using reflection from {@link SchematronProvider} in order

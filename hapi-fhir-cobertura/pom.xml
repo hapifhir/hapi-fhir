@@ -208,6 +208,7 @@
 								<ignore>**/valueset/*.class</ignore>
 								<ignore>**/exceptions/*.class</ignore>
 							</excludes>
+							<ignoreMethodAnnotation>ca.uhn.fhir.util.CoverageIgnore</ignoreMethodAnnotation>
 							<!-- <ignoreMethodAnnotations> <ignoreMethodAnnotation>net.sourceforge.cobertura.CoverageIgnore</ignoreMethodAnnotation> </ignoreMethodAnnotations> -->
 						</instrumentation>
 					</configuration>

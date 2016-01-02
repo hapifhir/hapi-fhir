@@ -17,6 +17,7 @@ tmp.txt
 *.hprof
 tmp.txt
 ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString/
+ca.uhn.fhir.jpa.entity.ResourceTable/
 
 # Vagrant stuff.
 .vagrant

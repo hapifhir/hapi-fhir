@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
-import net.sourceforge.cobertura.CoverageIgnore;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /*
  * #%L

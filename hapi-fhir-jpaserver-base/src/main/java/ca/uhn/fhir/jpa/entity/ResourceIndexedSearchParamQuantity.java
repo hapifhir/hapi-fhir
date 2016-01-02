@@ -33,7 +33,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
-import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.NumericField;
 
 import ca.uhn.fhir.jpa.util.BigDecimalNumericFieldBridge;

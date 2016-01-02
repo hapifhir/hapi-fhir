@@ -57,12 +57,6 @@
 			<artifactId>slf4j-android</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.sourceforge.cobertura</groupId>
-			<artifactId>cobertura</artifactId>
-			<version>2.1.1</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
@@ -142,8 +136,8 @@
 							<include>javax.xml.stream:stax-api</include>
 							<include>org.codehaus.woodstox:stax2-api</include>
 							<include>org.glassfish:javax.json</include>
-							<include>net.sourceforge.cobertura:cobertura</include>
 							<!--
+							<include>net.sourceforge.cobertura:cobertura</include>
 							<include>org.apache.commons:*</include>
 							<include>org.apache.httpcomponents:*</include>
 							<include>commons-codec:commons-codec</include>
@@ -162,13 +156,6 @@
 						</relocation>
 					</relocations>
 					<filters combine.children="append">
-						<!-- Make CoverageIgnore annotation available for android. -->
-						<filter>	
-							<artifact>net.sourceforge.cobertura:cobertura</artifact>
-							<includes>
-								<include>net/sourceforge/cobertura/CoverageIgnore*</include>
-							</includes>
-						</filter>
 						<!-- Exclude server side stuff, except exceptions which are used clientside -->
 						<filter>	
 							<artifact>ca.uhn.hapi.fhir:hapi-fhir-base</artifact>
