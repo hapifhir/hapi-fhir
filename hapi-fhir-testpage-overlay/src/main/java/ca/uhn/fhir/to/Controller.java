@@ -1,6 +1,9 @@
 package ca.uhn.fhir.to;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -14,6 +17,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu21.model.CodeType;
+import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestComponent;
+import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestResourceComponent;
+import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestResourceSearchParamComponent;
+import org.hl7.fhir.dstu21.model.StringType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
@@ -36,7 +44,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.GenericClient;
-import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
@@ -124,7 +131,7 @@ public class Controller extends BaseController {
 
 		long start = System.currentTimeMillis();
 		try {
-			client.delete((Class<? extends IResource>) def.getImplementingClass(), new IdDt(id));
+			client.delete((Class<? extends IBaseResource>) def.getImplementingClass(), new IdDt(id));
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}
@@ -143,7 +150,7 @@ public class Controller extends BaseController {
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
 
-		Class<? extends IResource> resType = null;
+		Class<? extends IBaseResource> resType = null;
 		ResultType returnsResource = ResultType.TAGLIST;
 		String outcomeDescription = "Tag List";
 
@@ -158,7 +165,7 @@ public class Controller extends BaseController {
 					return "resource";
 				}
 
-				resType = (Class<? extends IResource>) def.getImplementingClass();
+				resType = (Class<? extends IBaseResource>) def.getImplementingClass();
 				String id = theReq.getParameter("resource-tags-id");
 				if (isNotBlank(id)) {
 					String vid = theReq.getParameter("resource-tags-vid");
@@ -287,7 +294,7 @@ public class Controller extends BaseController {
 
 	@RequestMapping({ "/resource" })
 	public String actionResource(HttpServletRequest theServletRequest, final ResourceRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
-		IResource conformance = addCommonParams(theServletRequest, theRequest, theModel);
+		IBaseResource conformance = addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
@@ -303,12 +310,14 @@ public class Controller extends BaseController {
 		List<List<String>> queryIncludes = new ArrayList<List<String>>();
 
 		switch (theRequest.getFhirVersion(myConfig)) {
-		case DEV:
-		case DSTU2:
-			haveSearchParams = extractSearchParamsDev(conformance, resourceName, includes, revIncludes, sortParams, queries, haveSearchParams, queryIncludes);
-			break;
 		case DSTU1:
 			haveSearchParams = extractSearchParamsDstu1(conformance, resourceName, includes, sortParams, queries, haveSearchParams, queryIncludes);
+			break;
+		case DSTU2:
+			haveSearchParams = extractSearchParamsDstu2(conformance, resourceName, includes, revIncludes, sortParams, queries, haveSearchParams, queryIncludes);
+			break;
+		case DSTU2_1:
+			haveSearchParams = extractSearchParamsDstu21(conformance, resourceName, includes, revIncludes, sortParams, queries, haveSearchParams, queryIncludes);
 			break;
 		default:
 			throw new IllegalStateException("Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
@@ -324,7 +333,7 @@ public class Controller extends BaseController {
 		if (isNotBlank(theRequest.getUpdateId())) {
 			String updateId = theRequest.getUpdateId();
 			String updateVid = defaultIfEmpty(theRequest.getUpdateVid(), null);
-			IResource updateResource = (IResource) client.read(def.getImplementingClass(), new IdDt(resourceName, updateId, updateVid));
+			IBaseResource updateResource = (IBaseResource) client.read(def.getImplementingClass(), new IdDt(resourceName, updateId, updateVid));
 			String updateResourceString = theRequest.newParser(getContext(theRequest)).setPrettyPrint(true).encodeResourceToString(updateResource);
 			theModel.put("updateResource", updateResourceString);
 			theModel.put("updateResourceId", updateId);
@@ -353,7 +362,7 @@ public class Controller extends BaseController {
 		IQuery query;
 		if (isNotBlank(theReq.getParameter("resource"))) {
 			try {
-				query = search.forResource((Class<? extends IResource>) getResourceType(theRequest, theReq).getImplementingClass());
+				query = search.forResource((Class<? extends IBaseResource>) getResourceType(theRequest, theReq).getImplementingClass());
 			} catch (ServletException e) {
 				theModel.put("errorMsg", e.toString());
 				return "resource";
@@ -528,10 +537,10 @@ public class Controller extends BaseController {
 		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
 		client.setPrettyPrint(true);
 
-		Class<? extends IResource> type = null; // def.getImplementingClass();
+		Class<? extends IBaseResource> type = null; // def.getImplementingClass();
 		if ("history-type".equals(theMethod)) {
 			RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(theRequest.getResource());
-			type = (Class<? extends IResource>) def.getImplementingClass();
+			type = (Class<? extends IBaseResource>) def.getImplementingClass();
 		}
 
 		String body = validate ? theReq.getParameter("resource-validate-body") : theReq.getParameter("resource-create-body");
@@ -542,7 +551,7 @@ public class Controller extends BaseController {
 
 		body = preProcessMessageBody(body);
 
-		IResource resource;
+		IBaseResource resource;
 		try {
 			if (body.startsWith("{")) {
 				resource = getContext(theRequest).newJsonParser().parseResource(type, body);
@@ -613,10 +622,10 @@ public class Controller extends BaseController {
 		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
 
 		String id = null;
-		Class<? extends IResource> type = null; // def.getImplementingClass();
+		Class<? extends IBaseResource> type = null; // def.getImplementingClass();
 		if ("history-type".equals(theMethod)) {
 			RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(theRequest.getResource());
-			type = (Class<? extends IResource>) def.getImplementingClass();
+			type = (Class<? extends IBaseResource>) def.getImplementingClass();
 			id = StringUtils.defaultString(theReq.getParameter("resource-history-id"));
 		}
 
@@ -647,44 +656,7 @@ public class Controller extends BaseController {
 
 	}
 
-	private boolean extractSearchParamsDev(IResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
-			List<List<String>> queryIncludes) {
-		ca.uhn.fhir.model.dstu2.resource.Conformance conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) theConformance;
-		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
-			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextRes : nextRest.getResource()) {
-				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
-					for (StringDt next : nextRes.getSearchInclude()) {
-						if (next.isEmpty() == false) {
-							includes.add(next.getValue());
-						}
-					}
-					for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValueAsEnum() != ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.COMPOSITE) {
-							sortParams.add(next.getNameElement().getValue());
-						}
-					}
-					if (nextRes.getSearchParam().size() > 0) {
-						haveSearchParams = true;
-					}
-				} else {
-					// It's a different resource from the one we're searching, so
-					// scan for revinclude candidates
-					for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValueAsEnum() == ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.REFERENCE) {
-							for (BoundCodeDt<ResourceTypeEnum> nextTargetType : next.getTarget()) {
-								if (nextTargetType.getValue().equals(resourceName)) {
-									theRevIncludes.add(nextRes.getTypeElement().getValue() + ":" + next.getName());
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return haveSearchParams;
-	}
-
-	private boolean extractSearchParamsDstu1(IResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
+	private boolean extractSearchParamsDstu1(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
 			List<List<String>> queryIncludes) {
 		Conformance conformance = (Conformance) theConformance;
 		for (Rest nextRest : conformance.getRest()) {
@@ -733,7 +705,81 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery theQuery, JsonGenerator theClientCodeJsonWriter) {
+	private boolean extractSearchParamsDstu2(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
+			List<List<String>> queryIncludes) {
+		ca.uhn.fhir.model.dstu2.resource.Conformance conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) theConformance;
+		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
+			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextRes : nextRest.getResource()) {
+				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
+					for (StringDt next : nextRes.getSearchInclude()) {
+						if (next.isEmpty() == false) {
+							includes.add(next.getValue());
+						}
+					}
+					for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValueAsEnum() != ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.COMPOSITE) {
+							sortParams.add(next.getNameElement().getValue());
+						}
+					}
+					if (nextRes.getSearchParam().size() > 0) {
+						haveSearchParams = true;
+					}
+				} else {
+					// It's a different resource from the one we're searching, so
+					// scan for revinclude candidates
+					for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValueAsEnum() == ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.REFERENCE) {
+							for (BoundCodeDt<ResourceTypeEnum> nextTargetType : next.getTarget()) {
+								if (nextTargetType.getValue().equals(resourceName)) {
+									theRevIncludes.add(nextRes.getTypeElement().getValue() + ":" + next.getName());
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return haveSearchParams;
+	}
+
+	private boolean extractSearchParamsDstu21(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
+			List<List<String>> queryIncludes) {
+		org.hl7.fhir.dstu21.model.Conformance conformance = (org.hl7.fhir.dstu21.model.Conformance) theConformance;
+		for (ConformanceRestComponent nextRest : conformance.getRest()) {
+			for (ConformanceRestResourceComponent nextRes : nextRest.getResource()) {
+				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
+					for (StringType next : nextRes.getSearchInclude()) {
+						if (next.isEmpty() == false) {
+							includes.add(next.getValue());
+						}
+					}
+					for (ConformanceRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue() != org.hl7.fhir.dstu21.model.Enumerations.SearchParamType.COMPOSITE) {
+							sortParams.add(next.getNameElement().getValue());
+						}
+					}
+					if (nextRes.getSearchParam().size() > 0) {
+						haveSearchParams = true;
+					}
+				} else {
+					// It's a different resource from the one we're searching, so
+					// scan for revinclude candidates
+					for (ConformanceRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue() == org.hl7.fhir.dstu21.model.Enumerations.SearchParamType.REFERENCE) {
+							for (CodeType nextTargetType : next.getTarget()) {
+								if (nextTargetType.getValue().equals(resourceName)) {
+									theRevIncludes.add(nextRes.getTypeElement().getValue() + ":" + next.getName());
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return haveSearchParams;
+	}
+
+	private boolean handleSearchParam(String paramIdxString, HttpServletRequest theReq, IQuery<?> theQuery, JsonGenerator theClientCodeJsonWriter) {
 		String nextName = theReq.getParameter("param." + paramIdxString + ".name");
 		if (isBlank(nextName)) {
 			return false;

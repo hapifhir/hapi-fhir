@@ -75,7 +75,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * 
 	 */
 	@Deprecated
-	MethodOutcome create(IResource theResource);
+	MethodOutcome create(IBaseResource theResource);
 
 	/**
 	 * Fluent method for the "delete" operation, which performs a logical delete on a server resource
@@ -93,7 +93,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * @deprecated Use {@link #delete()} instead
 	 */
 	@Deprecated
-	MethodOutcome delete(Class<? extends IResource> theType, IdDt theId);
+	MethodOutcome delete(Class<? extends IBaseResource> theType, IdDt theId);
 
 	/**
 	 * Implementation of the "delete instance" method.
@@ -106,7 +106,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * @deprecated Use {@link #delete()} instead
 	 */
 	@Deprecated
-	MethodOutcome delete(Class<? extends IResource> theType, String theId);
+	MethodOutcome delete(Class<? extends IBaseResource> theType, String theId);
 
 	/**
 	 * Retrieves the server's conformance statement
@@ -150,7 +150,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * @deprecated As of 0.9, use the fluent {@link #history()} method instead
 	 */
 	@Deprecated
-	<T extends IResource> Bundle history(Class<T> theType, IdDt theId, DateTimeDt theSince, Integer theLimit);
+	<T extends IBaseResource> Bundle history(Class<T> theType, IdDt theId, DateTimeDt theSince, Integer theLimit);
 
 	/**
 	 * Implementation of the "history instance" method.
@@ -169,7 +169,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * @deprecated As of 0.9, use the fluent {@link #history()} method instead
 	 */
 	@Deprecated
-	<T extends IResource> Bundle history(Class<T> theType, String theId, DateTimeDt theSince, Integer theLimit);
+	<T extends IBaseResource> Bundle history(Class<T> theType, String theId, DateTimeDt theSince, Integer theLimit);
 
 	/**
 	 * Loads the previous/next bundle of resources from a paged set, using the link specified in the "link type=next" tag within the atom bundle.
@@ -327,7 +327,7 @@ public interface IGenericClient extends IRestfulClient {
 	 *            The new resource body
 	 * @return An outcome containing the results and possibly the new version ID
 	 */
-	MethodOutcome update(IdDt theId, IResource theResource);
+	MethodOutcome update(IdDt theId, IBaseResource theResource);
 
 	/**
 	 * Implementation of the "instance update" method.
@@ -338,7 +338,7 @@ public interface IGenericClient extends IRestfulClient {
 	 *            The new resource body
 	 * @return An outcome containing the results and possibly the new version ID
 	 */
-	MethodOutcome update(String theId, IResource theResource);
+	MethodOutcome update(String theId, IBaseResource theResource);
 
 	/**
 	 * Validate a resource
@@ -352,7 +352,7 @@ public interface IGenericClient extends IRestfulClient {
 	 *            The resource to validate
 	 * @return An outcome containing any validation issues
 	 */
-	MethodOutcome validate(IResource theResource);
+	MethodOutcome validate(IBaseResource theResource);
 
 	/**
 	 * Implementation of the "instance vread" method. Note that this method expects <code>theId</code> to contain a resource ID as well as a version ID, and will fail if it does not.
@@ -382,7 +382,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * @deprecated Deprecated in 0.7 - IdDt can contain an ID and a version, so this class doesn't make a lot of sense
 	 */
 	@Deprecated
-	<T extends IResource> T vread(Class<T> theType, IdDt theId, IdDt theVersionId);
+	<T extends IBaseResource> T vread(Class<T> theType, IdDt theId, IdDt theVersionId);
 
 	/**
 	 * Implementation of the "instance vread" method.

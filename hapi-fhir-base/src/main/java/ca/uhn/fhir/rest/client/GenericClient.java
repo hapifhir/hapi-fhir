@@ -59,7 +59,6 @@ import ca.uhn.fhir.context.IRuntimeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.resource.BaseConformance;
@@ -194,7 +193,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public MethodOutcome create(IResource theResource) {
+	public MethodOutcome create(IBaseResource theResource) {
 		BaseHttpClientInvocation invocation = MethodUtil.createCreateInvocation(theResource, myContext);
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
@@ -216,7 +215,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public MethodOutcome delete(final Class<? extends IResource> theType, IdDt theId) {
+	public MethodOutcome delete(final Class<? extends IBaseResource> theType, IdDt theId) {
 		HttpDeleteClientInvocation invocation = DeleteMethodBinding.createDeleteInvocation(theId.withResourceType(toResourceName(theType)));
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
@@ -229,7 +228,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public MethodOutcome delete(Class<? extends IResource> theType, String theId) {
+	public MethodOutcome delete(Class<? extends IBaseResource> theType, String theId) {
 		return delete(theType, new IdDt(theId));
 	}
 
@@ -328,7 +327,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public <T extends IResource> Bundle history(final Class<T> theType, IdDt theIdDt, DateTimeDt theSince, Integer theLimit) {
+	public <T extends IBaseResource> Bundle history(final Class<T> theType, IdDt theIdDt, DateTimeDt theSince, Integer theLimit) {
 		String resourceName = theType != null ? toResourceName(theType) : null;
 		String id = theIdDt != null && theIdDt.isEmpty() == false ? theIdDt.getValue() : null;
 		HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(resourceName, id, theSince, theLimit);
@@ -343,7 +342,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public <T extends IResource> Bundle history(Class<T> theType, String theId, DateTimeDt theSince, Integer theLimit) {
+	public <T extends IBaseResource> Bundle history(Class<T> theType, String theId, DateTimeDt theSince, Integer theLimit) {
 		return history(theType, new IdDt(theId), theSince, theLimit);
 	}
 
@@ -517,7 +516,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public MethodOutcome update(IdDt theIdDt, IResource theResource) {
+	public MethodOutcome update(IdDt theIdDt, IBaseResource theResource) {
 		BaseHttpClientInvocation invocation = MethodUtil.createUpdateInvocation(theResource, null, theIdDt, myContext);
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
@@ -532,7 +531,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public MethodOutcome update(String theId, IResource theResource) {
+	public MethodOutcome update(String theId, IBaseResource theResource) {
 		return update(new IdDt(theId), theResource);
 	}
 
@@ -542,7 +541,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public MethodOutcome validate(IResource theResource) {
+	public MethodOutcome validate(IBaseResource theResource) {
 		BaseHttpClientInvocation invocation;
 		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
 			invocation = ValidateMethodBindingDstu1.createValidateInvocation(theResource, null, myContext);
@@ -573,7 +572,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	/* also deprecated in interface */
 	@Deprecated
 	@Override
-	public <T extends IResource> T vread(final Class<T> theType, IdDt theId, IdDt theVersionId) {
+	public <T extends IBaseResource> T vread(final Class<T> theType, IdDt theId, IdDt theVersionId) {
 		return vread(theType, theId.withVersion(theVersionId.getIdPart()));
 	}
 
@@ -1010,27 +1009,27 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IGetTags forResource(Class<? extends IResource> theClass) {
+		public IGetTags forResource(Class<? extends IBaseResource> theClass) {
 			setResourceClass(theClass);
 			return this;
 		}
 
 		@Override
-		public IGetTags forResource(Class<? extends IResource> theClass, String theId) {
+		public IGetTags forResource(Class<? extends IBaseResource> theClass, String theId) {
 			setResourceClass(theClass);
 			myId = theId;
 			return this;
 		}
 
 		@Override
-		public IGetTags forResource(Class<? extends IResource> theClass, String theId, String theVersionId) {
+		public IGetTags forResource(Class<? extends IBaseResource> theClass, String theId, String theVersionId) {
 			setResourceClass(theClass);
 			myId = theId;
 			myVersionId = theVersionId;
 			return this;
 		}
 
-		private void setResourceClass(Class<? extends IResource> theClass) {
+		private void setResourceClass(Class<? extends IBaseResource> theClass) {
 			if (theClass != null) {
 				myResourceName = myContext.getResourceDefinition(theClass).getName();
 			} else {
@@ -1694,9 +1693,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private final class ResourceListResponseHandler implements IClientResponseHandler<List<IBaseResource>> {
 
-		private Class<? extends IResource> myType;
+		private Class<? extends IBaseResource> myType;
 
-		public ResourceListResponseHandler(Class<? extends IResource> theType) {
+		public ResourceListResponseHandler(Class<? extends IBaseResource> theType) {
 			myType = theType;
 		}
 

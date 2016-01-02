@@ -28,6 +28,11 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.HttpEntityWrapper;
+import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestComponent;
+import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestResourceComponent;
+import org.hl7.fhir.dstu21.model.DecimalType;
+import org.hl7.fhir.dstu21.model.Extension;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
 import org.thymeleaf.TemplateEngine;
@@ -66,7 +71,7 @@ public class BaseController {
 		super();
 	}
 
-	protected IResource addCommonParams(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+	protected IBaseResource addCommonParams(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		if (myConfig.getDebugTemplatesMode()) {
 			myTemplateEngine.getCacheManager().clearAllCaches();
 		}
@@ -290,14 +295,14 @@ public class BaseController {
 		return returnsResource;
 	}
 
-	private IResource loadAndAddConf(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+	private IBaseResource loadAndAddConf(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		switch (theRequest.getFhirVersion(myConfig)) {
-		case DEV:
-			return loadAndAddConfDstu2(theServletRequest, theRequest, theModel);
 		case DSTU1:
 			return loadAndAddConfDstu1(theServletRequest, theRequest, theModel);
 		case DSTU2:
 			return loadAndAddConfDstu2(theServletRequest, theRequest, theModel);
+		case DSTU2_1:
+			return loadAndAddConfDstu21(theServletRequest, theRequest, theModel);
 		}
 		throw new IllegalStateException("Unknown version: " + theRequest.getFhirVersion(myConfig));
 	}
@@ -422,6 +427,65 @@ public class BaseController {
 		return conformance;
 	}
 
+	private IBaseResource loadAndAddConfDstu21(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
+	
+		org.hl7.fhir.dstu21.model.Conformance conformance;
+		try {
+			conformance = (org.hl7.fhir.dstu21.model.Conformance) client.conformance();
+		} catch (Exception e) {
+			ourLog.warn("Failed to load conformance statement", e);
+			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
+			conformance = new org.hl7.fhir.dstu21.model.Conformance();
+		}
+	
+		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(conformance));
+	
+		Map<String, Number> resourceCounts = new HashMap<String, Number>();
+		long total = 0;
+		for (ConformanceRestComponent nextRest : conformance.getRest()) {
+			for (ConformanceRestResourceComponent nextResource : nextRest.getResource()) {
+				List<Extension> exts = nextResource.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
+				if (exts != null && exts.size() > 0) {
+					Number nextCount = ((DecimalType) (exts.get(0).getValue())).getValueAsNumber();
+					resourceCounts.put(nextResource.getTypeElement().getValue(), nextCount);
+					total += nextCount.longValue();
+				}
+			}
+		}
+		theModel.put("resourceCounts", resourceCounts);
+	
+		if (total > 0) {
+			for (ConformanceRestComponent nextRest : conformance.getRest()) {
+				Collections.sort(nextRest.getResource(), new Comparator<ConformanceRestResourceComponent>() {
+					@Override
+					public int compare(ConformanceRestResourceComponent theO1, ConformanceRestResourceComponent theO2) {
+						DecimalType count1 = new DecimalType();
+						List<Extension> count1exts = theO1.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
+						if (count1exts != null && count1exts.size() > 0) {
+							count1 = (DecimalType) count1exts.get(0).getValue();
+						}
+						DecimalType count2 = new DecimalType();
+						List<Extension> count2exts = theO2.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
+						if (count2exts != null && count2exts.size() > 0) {
+							count2 = (DecimalType) count2exts.get(0).getValue();
+						}
+						int retVal = count2.compareTo(count1);
+						if (retVal == 0) {
+							retVal = theO1.getTypeElement().getValue().compareTo(theO2.getTypeElement().getValue());
+						}
+						return retVal;
+					}
+				});
+			}
+		}
+	
+		theModel.put("conf", conformance);
+		theModel.put("requiredParamExtension", ExtensionConstants.PARAM_IS_REQUIRED);
+	
+		return conformance;
+	}
 	protected String logPrefix(ModelMap theModel) {
 		return "[server=" + theModel.get("serverId") + "] - ";
 	}

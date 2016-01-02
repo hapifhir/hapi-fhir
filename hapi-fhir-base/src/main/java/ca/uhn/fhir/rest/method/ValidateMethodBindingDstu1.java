@@ -24,6 +24,8 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -74,7 +76,7 @@ public class ValidateMethodBindingDstu1 extends BaseOutcomeReturningMethodBindin
 		return retVal;
 	}
 
-	public static HttpPostClientInvocation createValidateInvocation(IResource theResource, IdDt theId, FhirContext theContext) {
+	public static HttpPostClientInvocation createValidateInvocation(IBaseResource theResource, IdDt theId, FhirContext theContext) {
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(theContext.getResourceDefinition(theResource).getName());
 		urlExtension.append('/');
