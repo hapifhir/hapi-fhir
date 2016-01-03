@@ -15,11 +15,13 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
+import ca.uhn.fhir.jpa.config.WebsocketDstu2Config;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
@@ -115,16 +117,14 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			GenericWebApplicationContext webApplicationContext = new GenericWebApplicationContext();
 			webApplicationContext.setParent(myAppCtx);
 			webApplicationContext.refresh();
-//			ContextLoaderListener loaderListener = new ContextLoaderListener(webApplicationContext);
-//			loaderListener.initWebApplicationContext(mock(ServletContext.class));
-//	
+
 			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, webApplicationContext); 
 			
 			DispatcherServlet dispatcherServlet = new DispatcherServlet();
-//			dispatcherServlet.setApplicationContext(webApplicationContext);
 			dispatcherServlet.setContextClass(AnnotationConfigWebApplicationContext.class);
 			ServletHolder subsServletHolder = new ServletHolder();
 			subsServletHolder.setServlet(dispatcherServlet);
+			subsServletHolder.setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, WebsocketDstu2Config.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
 			

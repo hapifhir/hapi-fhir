@@ -22,12 +22,12 @@ package ca.uhn.fhir.jpa.subscription;
 
 import org.springframework.beans.factory.FactoryBean;
 
-public class SubscriptionWebsocketHandlerFactory implements FactoryBean<ISubscriptionWebsocketHandler> {
-	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
+public class SubscriptionWebsocketHandlerFactoryDstu21 implements FactoryBean<ISubscriptionWebsocketHandler> {
+	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionWebsocketHandlerDstu21.class);
 
 	@Override
 	public ISubscriptionWebsocketHandler getObject() throws Exception {
-		return new SubscriptionWebsocketHandler();
+		return new SubscriptionWebsocketHandlerDstu21();
 	}
 
 	@Override

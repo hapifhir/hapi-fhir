@@ -31,7 +31,7 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 
-import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandler;
+import ca.uhn.fhir.jpa.subscription.SubscriptionWebsocketHandlerDstu2;
 
 @Configuration
 @EnableWebSocket()
@@ -44,7 +44,7 @@ public class WebsocketDstu2Config implements WebSocketConfigurer {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public WebSocketHandler subscriptionWebSocketHandler() {
-		return new PerConnectionWebSocketHandler(SubscriptionWebsocketHandler.class);
+		return new PerConnectionWebSocketHandler(SubscriptionWebsocketHandlerDstu2.class);
 	}
 
 	@Bean
