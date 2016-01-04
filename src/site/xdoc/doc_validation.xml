@@ -20,12 +20,14 @@
 					of a resource. It can be used to catch input data that is impossible to
 					fit into the HAPI data model. For
 					example, it can be used to throw exceptions
-					or display error messages if a resource being parsed contains tags for which
-					there are no appropriate fields in a HAPI data structure.
+					or display error messages if a resource being parsed contains elements for which
+					there are no appropriate fields in a HAPI data structure. This is useful in order to ensure
+					that no data is being lost during parsing, but is less comprehensive than resource validation
+					against raw text data.
 				</li>
 				<li>
 					<b>Resource Validation</b>
-					is validation of the parsed (or constructed) resource against
+					is validation of the raw or parsed resource against
 					the official FHIR validation rules (e.g. Schema/Schematron/Profile/StructureDefinition/ValueSet).
 				</li>
 			</ul>

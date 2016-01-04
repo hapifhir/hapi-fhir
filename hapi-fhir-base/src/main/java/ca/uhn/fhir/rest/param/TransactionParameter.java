@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.param;
 
-import java.io.IOException;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -108,13 +106,7 @@ public class TransactionParameter implements IParameter {
 		IParser parser = encoding.newParser(theRequest.getServer().getFhirContext());
 
 		Reader reader;
-		try {
-			reader = ResourceParameter.createRequestReader(theRequest);
-		}
-		catch (IOException e) {
-			ourLog.error("Could not load request resource", e);
-			throw new InvalidRequestException(String.format("Could not load request resource: %s", e.getMessage()));
-		}
+		reader = ResourceParameter.createRequestReader(theRequest);
 
 		switch (myParamStyle) {
 			case DSTU1_BUNDLE: {

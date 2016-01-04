@@ -38,6 +38,7 @@ public class MethodOutcome {
 	 * Constructor
 	 */
 	public MethodOutcome() {
+		super();
 	}
 
 	/**

@@ -1,5 +1,12 @@
 package ca.uhn.fhir.jpa.config;
 
+import org.hl7.fhir.dstu21.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu21.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.dstu21.hapi.validation.FhirQuestionnaireResponseValidator;
+import org.hl7.fhir.dstu21.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu21.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.dstu21.validation.IResourceValidator.BestPracticeWarningLevel;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -21,8 +28,11 @@ package ca.uhn.fhir.jpa.config;
  */
 
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -30,6 +40,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.FhirSearchDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.ISearchDao;
+import ca.uhn.fhir.validation.IValidatorModule;
 
 @Configuration
 @EnableTransactionManagement
@@ -48,22 +59,48 @@ public class BaseDstu21Config extends BaseConfig {
 	}
 
 	@Bean(name = "mySystemProviderDstu21")
-	public ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu21 systemProviderDstu2() {
+	public ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu21 systemProviderDstu21() {
 		ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu21 retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu21();
 		retVal.setDao(systemDaoDstu21());
 		return retVal;
 	}
 
 	@Bean(name = "myJpaValidationSupportDstu21", autowire = Autowire.BY_NAME)
-	public ca.uhn.fhir.jpa.dao.IJpaValidationSupportDstu21 jpaValidationSupportDstu2() {
+	public ca.uhn.fhir.jpa.dao.IJpaValidationSupportDstu21 jpaValidationSupportDstu21() {
 		ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu21 retVal = new ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu21();
 		return retVal;
 	}
 
+	@Qualifier("myJpaValidationSupportDstu21")
+	private IValidationSupport myJpaValidationSupportDstu21;
+	
 	@Bean(autowire = Autowire.BY_TYPE)
-	public ISearchDao searchDao() {
+	public ISearchDao searchDaoDstu21() {
 		FhirSearchDao searchDao = new FhirSearchDao();
 		return searchDao;
+	}
+	
+	@Bean(name="myInstanceValidatorDstu21")
+	@Lazy
+	public IValidatorModule instanceValidatorDstu21() {
+		FhirInstanceValidator val = new FhirInstanceValidator();
+		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+		val.setValidationSupport(validationSupportChainDstu21());
+		return val;
+	}
+
+	@Bean(name="myQuestionnaireResponseValidatorDstu21")
+	@Lazy
+	public IValidatorModule questionnaireResponseValidatorDstu21() {
+		FhirQuestionnaireResponseValidator module = new FhirQuestionnaireResponseValidator();
+		module.setValidationSupport(validationSupportChainDstu21());
+		return module;
+	}
+
+	@Bean
+	public IValidationSupport validationSupportChainDstu21() {
+		return new ValidationSupportChain(new DefaultProfileValidationSupport(), myJpaValidationSupportDstu21);
+//		return new ValidationSupportChain();
 	}
 
 }

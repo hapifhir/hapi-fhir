@@ -64,7 +64,7 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>, M
 		ourLog.info("Beginning transaction with {} resources", theResources.size());
 
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext());
 		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 
 		long start = System.currentTimeMillis();

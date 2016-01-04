@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao;
 
 import javax.annotation.PostConstruct;
 
-import org.hl7.fhir.dstu21.hapi.validation.FhirQuestionnaireResponseValidator;
 import org.hl7.fhir.dstu21.model.OperationOutcome;
 import org.hl7.fhir.dstu21.model.Questionnaire;
 import org.hl7.fhir.dstu21.model.QuestionnaireResponse;
@@ -31,20 +30,24 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IResourceLoader;
+import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationResult;
 
 public class FhirResourceDaoQuestionnaireResponseDstu21 extends FhirResourceDaoDstu21<QuestionnaireResponse> {
 
 	private Boolean myValidateResponses;
-
+	
 	@Autowired
-	private IJpaValidationSupportDstu21 myValidationSupport;
+	@Qualifier("myQuestionnaireResponseValidatorDstu21")
+	private IValidatorModule myQuestionnaireResponseValidatorDstu21;
+
 
 	/**
 	 * Initialize the bean
@@ -75,9 +78,7 @@ public class FhirResourceDaoQuestionnaireResponseDstu21 extends FhirResourceDaoD
 		val.setValidateAgainstStandardSchema(false);
 		val.setValidateAgainstStandardSchematron(false);
 
-		FhirQuestionnaireResponseValidator module = new FhirQuestionnaireResponseValidator();
-		module.setValidationSupport(myValidationSupport);
-		val.registerValidatorModule(module);
+		val.registerValidatorModule(myQuestionnaireResponseValidatorDstu21);
 
 		ValidationResult result = val.validateWithResult(getContext().newJsonParser().parseResource(getContext().newJsonParser().encodeResourceToString(qa)));
 		if (!result.isSuccessful()) {

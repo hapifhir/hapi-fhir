@@ -35,17 +35,18 @@ import ca.uhn.fhir.rest.method.ParseAction;
 
 public interface IRestfulResponse {
 
-    Object streamResponseAsResource(IBaseResource resource, boolean prettyPrint, Set<SummaryEnum> summaryMode, int operationStatus, boolean respondGzip, boolean addContentLocationHeader) 
-    		throws IOException;
-    Object streamResponseAsBundle(Bundle bundle, Set<SummaryEnum> summaryMode, boolean respondGzip, boolean requestIsBrowser) 
-    		throws IOException;
+	Object streamResponseAsResource(IBaseResource resource, boolean prettyPrint, Set<SummaryEnum> summaryMode, int operationStatus, boolean respondGzip, boolean addContentLocationHeader) throws IOException;
 
-    Object returnResponse(ParseAction<?> outcome, int operationStatus, boolean allowPrefer, MethodOutcome response, String resourceName) throws IOException;
-    
-    Writer getResponseWriter(int statusCode, String contentType, String charset, boolean respondGzip) throws UnsupportedEncodingException, IOException;
-    Object sendWriterResponse(int status, String contentType, String charset, Writer writer) throws IOException;
-    
-    void addHeader(String headerKey, String headerValue);
+	Object streamResponseAsBundle(Bundle bundle, Set<SummaryEnum> summaryMode, boolean respondGzip, boolean requestIsBrowser) throws IOException;
 
-    Object sendAttachmentResponse(IBaseBinary bin, int stausCode, String contentType) throws IOException;
+	Object returnResponse(ParseAction<?> outcome, int operationStatus, boolean allowPrefer, MethodOutcome response, String resourceName) throws IOException;
+
+	Writer getResponseWriter(int statusCode, String contentType, String charset, boolean respondGzip) throws UnsupportedEncodingException, IOException;
+
+	Object sendWriterResponse(int status, String contentType, String charset, Writer writer) throws IOException;
+
+	void addHeader(String headerKey, String headerValue);
+
+	Object sendAttachmentResponse(IBaseBinary bin, int stausCode, String contentType) throws IOException;
+
 }

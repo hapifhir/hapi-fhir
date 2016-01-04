@@ -52,6 +52,7 @@ import org.hl7.fhir.dstu21.model.Meta;
 import org.hl7.fhir.dstu21.model.Observation;
 import org.hl7.fhir.dstu21.model.OperationOutcome;
 import org.hl7.fhir.dstu21.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.dstu21.model.OperationOutcome.IssueType;
 import org.hl7.fhir.dstu21.model.Organization;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.Period;
@@ -293,9 +294,10 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 	@Test
 	public void testCreateOperationOutcomeError() {
 		FhirResourceDaoDstu21<Bundle> dao = new FhirResourceDaoDstu21<Bundle>();
-		OperationOutcome oo = (OperationOutcome) dao.createErrorOperationOutcome("my message");
+		OperationOutcome oo = (OperationOutcome) dao.createErrorOperationOutcome("my message", "incomplete");
 		assertEquals(IssueSeverity.ERROR.toCode(), oo.getIssue().get(0).getSeverity().toCode());
 		assertEquals("my message", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(IssueType.INCOMPLETE, oo.getIssue().get(0).getCode());
 	}
 
 	@Test
@@ -304,6 +306,7 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 		OperationOutcome oo = (OperationOutcome) dao.createInfoOperationOutcome("my message");
 		assertEquals(IssueSeverity.INFORMATION.toCode(), oo.getIssue().get(0).getSeverity().toCode());
 		assertEquals("my message", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(IssueType.INFORMATIONAL, oo.getIssue().get(0).getCode());
 	}
 
 	@Test

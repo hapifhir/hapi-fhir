@@ -64,7 +64,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Override
 	public void deleteAllTagsOnServer() {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext());
 		notifyInterceptors(RestOperationTypeEnum.DELETE_TAGS, requestDetails);
 
 		myEntityManager.createQuery("DELETE from ResourceTag t").executeUpdate();
@@ -122,7 +122,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Override
 	public TagList getAllTags() {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext());
 		notifyInterceptors(RestOperationTypeEnum.GET_TAGS, requestDetails);
 
 		StopWatch w = new StopWatch();
@@ -157,7 +157,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Override
 	public IBundleProvider history(Date theSince) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext());
 		notifyInterceptors(RestOperationTypeEnum.HISTORY_SYSTEM, requestDetails);
 
 		StopWatch w = new StopWatch();

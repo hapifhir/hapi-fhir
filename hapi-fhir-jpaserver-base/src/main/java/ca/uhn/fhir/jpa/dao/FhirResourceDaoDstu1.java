@@ -60,7 +60,7 @@ public class FhirResourceDaoDstu1<T extends IResource> extends BaseHapiFhirResou
 	}
 
 	@Override
-	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage) {
+	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
 		OperationOutcome oo = new OperationOutcome();
 		oo.getIssueFirstRep().getSeverityElement().setValue(theSeverity);
 		oo.getIssueFirstRep().getDetailsElement().setValue(theMessage);

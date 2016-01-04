@@ -89,16 +89,17 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 	}
 
 	@Override
-	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage) {
+	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
 		OperationOutcome oo = new OperationOutcome();
 		oo.getIssueFirstRep().getSeverityElement().setValue(theSeverity);
 		oo.getIssueFirstRep().getDiagnosticsElement().setValue(theMessage);
+		oo.getIssueFirstRep().getCodeElement().setValue(theCode);
 		return oo;
 	}
 
 	@Override
 	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile) {
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, null, theResource);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, null, theResource, getContext());
 		notifyInterceptors(RestOperationTypeEnum.VALIDATE, requestDetails);
 
 		if (theMode == ValidationModeEnum.DELETE) {

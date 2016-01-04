@@ -94,41 +94,38 @@ public class ResourceParameter implements IParameter {
 	}
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource)
-			throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding)
-			throws InternalErrorException, InvalidRequestException {
-			switch (myMode) { 
-				case BODY:
-					try {
-						return IOUtils.toString(createRequestReader(theRequest));
-					}
-					catch (IOException e) {
-						// Shouldn't happen since we're reading from a byte array
-						throw new InternalErrorException("Failed to load request");
-					}
-				case ENCODING:
-					return RestfulServerUtils.determineRequestEncoding(theRequest);
-				case RESOURCE:
-				default:
-					return parseResourceFromRequest(theRequest, theMethodBinding, myResourceType);
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+		switch (myMode) {
+		case BODY:
+			try {
+				return IOUtils.toString(createRequestReader(theRequest));
+			} catch (IOException e) {
+				// Shouldn't happen since we're reading from a byte array
+				throw new InternalErrorException("Failed to load request");
 			}
-//		}	    
+		case ENCODING:
+			return RestfulServerUtils.determineRequestEncoding(theRequest);
+		case RESOURCE:
+		default:
+			return parseResourceFromRequest(theRequest, theMethodBinding, myResourceType);
+		}
+		// }
 	}
-	
+
 	public static Reader createRequestReader(RequestDetails theRequest, Charset charset) {
 		Reader requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents()), charset);
 		return requestReader;
 	}
 
-    public static Reader createRequestReader(RequestDetails theRequest) throws IOException {
+	public static Reader createRequestReader(RequestDetails theRequest) {
 		return createRequestReader(theRequest, determineRequestCharset(theRequest));
-	}		
+	}
 
 	public static Charset determineRequestCharset(RequestDetails theRequest) {
 		String ct = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
@@ -142,11 +139,10 @@ public class ResourceParameter implements IParameter {
 			charset = Charset.forName("UTF-8");
 		}
 		return charset;
-	}    
-	
+	}
+
 	@SuppressWarnings("unchecked")
-	public static <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding,
-			Class<T> theResourceType) {
+	public static <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding, Class<T> theResourceType) {
 		FhirContext ctx = theRequest.getServer().getFhirContext();
 
 		final Charset charset = determineRequestCharset(theRequest);
@@ -170,7 +166,7 @@ public class ResourceParameter implements IParameter {
 				String body;
 				try {
 					body = IOUtils.toString(requestReader);
-					} catch (IOException e) {
+				} catch (IOException e) {
 					// This shouldn't happen since we're reading from a byte array..
 					throw new InternalErrorException(e);
 				}
@@ -210,8 +206,8 @@ public class ResourceParameter implements IParameter {
 			}
 		}
 		return retVal;
-	}	
-	
+	}
+
 	public static IBaseResource parseResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
 		IBaseResource retVal;
 		if (IBaseBinary.class.isAssignableFrom(theResourceType)) {
@@ -226,7 +222,7 @@ public class ResourceParameter implements IParameter {
 			retVal = loadResourceFromRequest(theRequest, theMethodBinding, theResourceType);
 		}
 		return retVal;
-	}	
+	}
 
 	public enum Mode {
 		BODY, ENCODING, RESOURCE

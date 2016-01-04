@@ -26,6 +26,24 @@
 				codebase. This dependency was accidentally introduced in
 				1.3, and animal-sniffer-plugin failed to detect it (sigh).
 			</action>
+			<action type="add">
+				Add two new server interceptors: 
+				<![CDATA[
+				<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/RequestValidatingInterceptor.html">RequestValidatingInterceptor</a> 
+				and 
+				<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/ResponseValidatingInterceptor.html">ResponseValidatingInterceptor</a>
+				]]>
+				which can be used to validate incoming requests or outgoing responses using the standard FHIR validation
+				tools. See the 
+				<![CDATA[
+				<a href="./doc_rest_server_interceptor.html#RequestResponse_Validation">Server Validation Page</a>
+				]]>
+				for examples of how to use these interceptors. These intereptors have both
+				been enabled on the
+				<![CDATA[
+				<a href="http://fhirtest.uhn.ca">public test page</a>.
+				]]>
+			</action>
 			<action type="fix" issue="259">
 				Make IBoundCodeableConcept and IValueSetEnumBinder serializable,
 				fixing an issue when trying to serialize model classes containing
@@ -78,7 +96,7 @@
 				Support target parameter type in _include / _revinclude values, e.g.
 				_include=Patient:careProvider:Organization. Thanks to Joe Portner
 				for reporting!
-			<action>
+			</action>
 			<action type="add">
 				Use ResponseHighlighterInterceptor in the hapi-fhir-jpaserver-example
 				project to provide nice syntax highlighting. Thanks to Rob Hausam for

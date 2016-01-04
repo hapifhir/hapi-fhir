@@ -13,8 +13,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.fhir.validation.IValidatorModule;
 
-public class FhirQuestionnaireResponseValidator extends BaseValidatorBridge {
+public class FhirQuestionnaireResponseValidator extends BaseValidatorBridge implements IValidatorModule {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirQuestionnaireResponseValidator.class);
 	private IValidationSupport myValidationSupport;

@@ -83,7 +83,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 //@formatter:off
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes= {TestDstu21Config.class /*, ca.uhn.fhir.jpa.config.WebsocketDstu21Config.class*/ })
+@ContextConfiguration(classes= {TestDstu21Config.class})
 //@formatter:on
 public abstract class BaseJpaDstu21Test extends BaseJpaTest {
 

@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.WebsocketDstu21Config;
@@ -32,7 +33,10 @@ import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
+import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhirtest.config.TestDstu21Config;
 import ca.uhn.fhirtest.config.TestDstu2Config;
 
@@ -42,7 +46,7 @@ public class TestRestfulServer extends RestfulServer {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestRestfulServer.class);
 
-	private AnnotationConfigApplicationContext myAppCtx;
+	private AnnotationConfigWebApplicationContext myAppCtx;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -72,7 +76,11 @@ public class TestRestfulServer extends RestfulServer {
 		String baseUrlProperty;
 		switch (fhirVersionParam.trim().toUpperCase()) {
 		case "DSTU1": {
-			myAppCtx = new AnnotationConfigApplicationContext(ca.uhn.fhirtest.config.TestDstu1Config.class);
+			myAppCtx = new AnnotationConfigWebApplicationContext();
+			myAppCtx.setServletConfig(getServletConfig());
+			myAppCtx.setParent(parentAppCtx);
+			myAppCtx.register(ca.uhn.fhirtest.config.TestDstu1Config.class);
+			myAppCtx.refresh();
 			setFhirContext(FhirContext.forDstu1());
 			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
 			systemProviderDstu1 = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
@@ -85,7 +93,8 @@ public class TestRestfulServer extends RestfulServer {
 			break;
 		}
 		case "DSTU2": {
-			myAppCtx = new AnnotationConfigApplicationContext();
+			myAppCtx = new AnnotationConfigWebApplicationContext();
+			myAppCtx.setServletConfig(getServletConfig());
 			myAppCtx.setParent(parentAppCtx);
 			myAppCtx.register(TestDstu2Config.class, WebsocketDstu2Config.class);
 			myAppCtx.refresh();
@@ -101,7 +110,8 @@ public class TestRestfulServer extends RestfulServer {
 			break;
 		}
 		case "DSTU21": {
-			myAppCtx = new AnnotationConfigApplicationContext();
+			myAppCtx = new AnnotationConfigWebApplicationContext();
+			myAppCtx.setServletConfig(getServletConfig());
 			myAppCtx.setParent(parentAppCtx);
 			myAppCtx.register(TestDstu21Config.class, WebsocketDstu21Config.class);
 			myAppCtx.refresh();

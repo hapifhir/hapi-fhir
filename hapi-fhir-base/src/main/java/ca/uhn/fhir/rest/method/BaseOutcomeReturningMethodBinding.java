@@ -32,6 +32,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -48,11 +49,13 @@ import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IRestfulServer;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
@@ -64,8 +67,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 		if (!theMethod.getReturnType().equals(MethodOutcome.class)) {
 			if (!allowVoidReturnType()) {
-				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName()
-						+ " method but it does not return " + MethodOutcome.class);
+				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
 			} else if (theMethod.getReturnType() == void.class) {
 				myReturnVoid = true;
 			}
@@ -84,7 +86,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	protected abstract BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource resource);
 
 	/**
-	 * For servers, this method will match only incoming requests that match the given operation, or which have no operation in the URL if this method returns null.
+	 * For servers, this method will match only incoming requests that match the given operation, or which have no
+	 * operation in the URL if this method returns null.
 	 */
 	protected abstract String getMatchingOperation();
 
@@ -109,51 +112,29 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 	@Override
 	public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
-		switch (theResponseStatusCode) {
-		case Constants.STATUS_HTTP_200_OK:
-		case Constants.STATUS_HTTP_201_CREATED:
-		case Constants.STATUS_HTTP_204_NO_CONTENT:
+		if (theResponseStatusCode >= 200 && theResponseStatusCode < 300) {
 			if (myReturnVoid) {
 				return null;
 			}
 			MethodOutcome retVal = MethodUtil.process2xxResponse(getContext(), getResourceName(), theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
 			return retVal;
-		default:
+		} else {
 			throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
 		}
-
 	}
-	
+
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-//		if (requestContainsResource()) {
-//			requestContents = parseIncomingServerResource(theRequest);
-//		} else {
-//			requestContents = null;
-//		}
 
 		Object[] params = createParametersForServerRequest(theRequest);
 		addParametersForServerRequest(theRequest, params);
 
-		
 		/*
-		 * No need to catch nd handle exceptions here, we already handle them one level up
-		 * including invoking interceptors on them
+		 * No need to catch and handle exceptions here, we already handle them one level up including invoking interceptors
+		 * on them
 		 */
 		MethodOutcome response;
-//		try {
-			response = (MethodOutcome) invokeServerMethod(theServer, theRequest, params);
-//		} catch (InternalErrorException e) {
-//			ourLog.error("Internal error during method invocation", e);
-//			EncodingEnum encodingNotNull = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
-//			streamOperationOutcome(e, theServer, encodingNotNull, servletResponse, theRequest);
-//			return;
-//		} catch (BaseServerResponseException e) {
-//			ourLog.info("Exception during method invocation: " + e.getMessage());
-//			EncodingEnum encodingNotNull = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
-//			streamOperationOutcome(e, theServer, encodingNotNull, servletResponse, theRequest);
-//			return;
-//		}
+		response = (MethodOutcome) invokeServerMethod(theServer, theRequest, params);
 
 		if (response != null && response.getId() != null && response.getId().hasResourceType()) {
 			if (getContext().getResourceDefinition(response.getId().getResourceType()) == null) {
@@ -161,25 +142,17 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			}
 		}
 
-		IBaseResource outcome = response != null ? response.getOperationOutcome() : null;
+		IBaseOperationOutcome outcome = response != null ? response.getOperationOutcome() : null;
 		IBaseResource resource = response != null ? response.getResource() : null;
-		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-			IServerInterceptor next = theServer.getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, outcome);
-			if (!continueProcessing) {
-				return null;
-			}
-		}
 
-		return returnResponse(theRequest, response, outcome, resource);
+		return returnResponse(theServer, theRequest, response, outcome, resource);
 	}
-	
+
 	private int getOperationStatus(MethodOutcome response) {
 		switch (getRestOperationType()) {
 		case CREATE:
 			if (response == null) {
-				throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName()
-						+ " returned null, which is not allowed for create operation");
+				throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null, which is not allowed for create operation");
 			}
 			if (response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
 				return Constants.STATUS_HTTP_201_CREATED;
@@ -212,15 +185,14 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		}
 	}
 
-	private Object returnResponse(RequestDetails theRequest, MethodOutcome response, IBaseResource originalOutcome, IBaseResource resource) throws IOException {
+	private Object returnResponse(IRestfulServer<?> theServer, RequestDetails theRequest, MethodOutcome response, IBaseResource originalOutcome, IBaseResource resource) throws IOException {
 		boolean allowPrefer = false;
 		int operationStatus = getOperationStatus(response);
 		IBaseResource outcome = originalOutcome;
-		
-		if(EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE).contains(getRestOperationType())) {
+
+		if (EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE).contains(getRestOperationType())) {
 			allowPrefer = true;
 		}
-		
 
 		if (resource != null && allowPrefer) {
 			String prefer = theRequest.getHeader(Constants.HEADER_PREFER);
@@ -230,8 +202,16 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 					outcome = resource;
 				}
 			}
-		} 
-		
+		}
+
+		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+			IServerInterceptor next = theServer.getInterceptors().get(i);
+			boolean continueProcessing = next.outgoingResponse(theRequest, outcome);
+			if (!continueProcessing) {
+				return null;
+			}
+		}
+
 		return theRequest.getResponse().returnResponse(ParseAction.create(outcome), operationStatus, allowPrefer, response, getResourceName());
 	}
 
@@ -241,8 +221,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 	protected abstract Set<RequestTypeEnum> provideAllowableRequestTypes();
 
-	protected void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingEnum theEncodingNotNull, HttpServletResponse theResponse, RequestDetails theRequest)
-			throws IOException {
+	protected void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingEnum theEncodingNotNull, HttpServletResponse theResponse, RequestDetails theRequest) throws IOException {
 		theResponse.setStatus(theE.getStatusCode());
 
 		theServer.addHeadersToResponse(theResponse);

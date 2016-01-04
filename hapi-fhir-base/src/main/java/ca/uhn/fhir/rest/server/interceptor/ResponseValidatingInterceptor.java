@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import java.nio.charset.Charset;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -29,49 +31,54 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.param.ResourceParameter;
+import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.ValidationResult;
 
 /**
- * Not yet complete!
- * 
- * TODO: complete this
+ * This interceptor intercepts each outgoing response and if it contains a FHIR resource, validates that resource. The
+ * interceptor may be configured to run any validator modules, and will then add headers to the response or fail the
+ * request with an {@link UnprocessableEntityException HTTP 422 Unprocessable Entity}.
  */
-class ResponseValidatingInterceptor extends InterceptorAdapter {
-
-	private FhirValidator myValidator;
-	
-	/**
-	 * Returns the validator used by this interceptor
-	 */
-	public FhirValidator getValidator() {
-		return myValidator;
-	}
+public class ResponseValidatingInterceptor extends BaseValidatingInterceptor<IBaseResource> {
 
 	/**
-	 * Sets the validator instance to use. Must not be null.
+	 * X-HAPI-Request-Validation
 	 */
-	public void setValidator(FhirValidator theValidator) {
-		Validate.notNull(theValidator, "Validator must not be null");
-		myValidator = theValidator;
-	}
+	public static final String DEFAULT_RESPONSE_HEADER_NAME = "X-HAPI-Response-Validation";
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseValidatingInterceptor.class);
 
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
+	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
+		validate(theResponseObject, theRequestDetails);
 		return true;
 	}
 
+	/**
+	 * Sets the name of the response header to add validation failures to
+	 * 
+	 * @see #DEFAULT_RESPONSE_HEADER_NAME
+	 * @see #setAddResponseHeaderOnSeverity(ResultSeverityEnum)
+	 */
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
-		return true;
+	public void setResponseHeaderName(String theResponseHeaderName) {
+		super.setResponseHeaderName(theResponseHeaderName);
 	}
 
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
-		
-		return true;
+	String provideDefaultResponseHeaderName() {
+		return DEFAULT_RESPONSE_HEADER_NAME;
 	}
 
-	
-	
+	@Override
+	ValidationResult doValidate(FhirValidator theValidator, IBaseResource theRequest) {
+		return theValidator.validateWithResult(theRequest);
+	}
+
 }

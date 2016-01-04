@@ -26,13 +26,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.hl7.fhir.dstu21.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu21.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.OperationOutcome;
 import org.hl7.fhir.dstu21.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu21.model.OperationOutcome.OperationOutcomeIssueComponent;
-import org.hl7.fhir.dstu21.validation.IResourceValidator.BestPracticeWarningLevel;
+import org.hl7.fhir.instance.model.OperationOutcome.IssueType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -63,11 +62,26 @@ import ca.uhn.fhir.validation.ValidationResult;
 
 public class FhirResourceDaoDstu21<T extends IAnyResource> extends BaseHapiFhirResourceDao<T> {
 
-	@Autowired()
-	@Qualifier("myJpaValidationSupportDstu21")
-	private IValidationSupport myJpaValidationSupport;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu21.class);
 
-	
+	@Autowired()
+	@Qualifier("myInstanceValidatorDstu21")
+	private IValidatorModule myInstanceValidator;
+
+	@Override
+	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
+		OperationOutcome oo = new OperationOutcome();
+		OperationOutcomeIssueComponent issue = oo.addIssue();
+		issue.getSeverityElement().setValueAsString(theSeverity);
+		issue.setDiagnostics(theMessage);
+		try {
+			issue.setCode(org.hl7.fhir.dstu21.model.OperationOutcome.IssueType.fromCode(theCode));
+		} catch (FHIRException e) {
+			ourLog.error("Unknown code: {}", theCode);
+		}
+		return oo;
+	}
+
 	@Override
 	protected List<Object> getIncludeValues(FhirTerser theTerser, Include theInclude, IBaseResource theResource, RuntimeResourceDefinition theResourceDef) {
 		List<Object> values;
@@ -87,17 +101,8 @@ public class FhirResourceDaoDstu21<T extends IAnyResource> extends BaseHapiFhirR
 	}
 
 	@Override
-	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage) {
-		OperationOutcome oo = new OperationOutcome();
-		OperationOutcomeIssueComponent issue = oo.addIssue();
-		issue.getSeverityElement().setValueAsString(theSeverity);
-		issue.setDiagnostics(theMessage);
-		return oo;
-	}
-
-	@Override
 	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile) {
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, null, theResource);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, null, theResource, getContext());
 		notifyInterceptors(RestOperationTypeEnum.VALIDATE, requestDetails);
 
 		if (theMode == ValidationModeEnum.DELETE) {
@@ -111,7 +116,7 @@ public class FhirResourceDaoDstu21<T extends IAnyResource> extends BaseHapiFhirR
 			List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
 			validateOkToDelete(deleteConflicts, entity);
 			validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
-				
+
 			OperationOutcome oo = new OperationOutcome();
 			oo.addIssue().setSeverity(IssueSeverity.INFORMATION).setDiagnostics("Ok to delete");
 			return new MethodOutcome(new IdType(theId.getValue()), oo);
@@ -119,10 +124,7 @@ public class FhirResourceDaoDstu21<T extends IAnyResource> extends BaseHapiFhirR
 
 		FhirValidator validator = getContext().newValidator();
 
-		FhirInstanceValidator val = new FhirInstanceValidator();
-		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
-//		val.setValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), myJpaValidationSupport));
-		validator.registerValidatorModule(val);
+		validator.registerValidatorModule(myInstanceValidator);
 
 		validator.registerValidatorModule(new IdChecker(theMode));
 
@@ -151,6 +153,12 @@ public class FhirResourceDaoDstu21<T extends IAnyResource> extends BaseHapiFhirR
 			myMode = theMode;
 		}
 
+		@CoverageIgnore
+		@Override
+		public void validateBundle(IValidationContext<Bundle> theContext) {
+			throw new UnsupportedOperationException();
+		}
+
 		@Override
 		public void validateResource(IValidationContext<IBaseResource> theCtx) {
 			boolean hasId = theCtx.getResource().getIdElement().hasIdPart();
@@ -164,12 +172,6 @@ public class FhirResourceDaoDstu21<T extends IAnyResource> extends BaseHapiFhirR
 				}
 			}
 
-		}
-
-		@CoverageIgnore
-		@Override
-		public void validateBundle(IValidationContext<Bundle> theContext) {
-			throw new UnsupportedOperationException();
 		}
 
 	}

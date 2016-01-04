@@ -201,7 +201,7 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	@Override
 	public Meta metaGetOperation() {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null, getContext());
 		notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
 
 		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t)";
@@ -260,7 +260,7 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest) {
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null, "Bundle", theRequest);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, "Bundle", theRequest, getContext());
 		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 
 		String actionName = "Transaction";

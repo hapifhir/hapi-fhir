@@ -23,8 +23,9 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.validation.IResourceLoader;
 import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.fhir.validation.IValidatorModule;
 
-public class FhirQuestionnaireResponseValidator extends BaseValidatorBridge {
+public class FhirQuestionnaireResponseValidator extends BaseValidatorBridge implements IValidatorModule {
 
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory
       .getLogger(FhirQuestionnaireResponseValidator.class);
