@@ -9,10 +9,13 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu21.hapi.validation.DefaultProfileValidationSupport;
@@ -95,7 +98,8 @@ public class FhirInstanceValidatorTest {
 		when(myMockSupport.fetchResource(any(FhirContext.class), any(Class.class), any(String.class))).thenAnswer(new Answer<IBaseResource>() {
 			@Override
 			public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
-				IBaseResource retVal = myDefaultValidationSupport.fetchResource((FhirContext) theInvocation.getArguments()[0], (Class<IBaseResource>) theInvocation.getArguments()[1], (String) theInvocation.getArguments()[2]);
+				IBaseResource retVal = myDefaultValidationSupport.fetchResource((FhirContext) theInvocation.getArguments()[0], (Class<IBaseResource>) theInvocation.getArguments()[1],
+						(String) theInvocation.getArguments()[2]);
 				ourLog.info("fetchResource({}, {}) : {}", new Object[] { theInvocation.getArguments()[1], theInvocation.getArguments()[2], retVal });
 				return retVal;
 			}
@@ -166,9 +170,9 @@ public class FhirInstanceValidatorTest {
 
 	@Test
 	public void testValidateRawJsonResource() {
-		// @formatter:off
-    String input = "{" + "\"resourceType\":\"Patient\"," + "\"id\":\"123\"" + "}";
-    // @formatter:on
+		//@formatter:off
+		String input = "{" + "\"resourceType\":\"Patient\"," + "\"id\":\"123\"" + "}";
+		//@formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 0, output.getMessages().size());
@@ -177,8 +181,8 @@ public class FhirInstanceValidatorTest {
 	@Test
 	public void testValidateRawJsonResourceBadAttributes() {
 		// @formatter:off
-    String input = "{" + "\"resourceType\":\"Patient\"," + "\"id\":\"123\"," + "\"foo\":\"123\"" + "}";
-    // @formatter:on
+		String input = "{" + "\"resourceType\":\"Patient\"," + "\"id\":\"123\"," + "\"foo\":\"123\"" + "}";
+		// @formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 1, output.getMessages().size());
@@ -191,11 +195,33 @@ public class FhirInstanceValidatorTest {
 	@Test
 	public void testValidateRawXmlResource() {
 		// @formatter:off
-    String input = "<Patient xmlns=\"http://hl7.org/fhir\">" + "<id value=\"123\"/>" + "</Patient>";
-    // @formatter:on
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">" + "<id value=\"123\"/>" + "</Patient>";
+		// @formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 0, output.getMessages().size());
+	}
+
+	@Test
+	public void testValidateBigRawJsonResource() throws Exception {
+		InputStream stream = FhirInstanceValidatorTest.class.getResourceAsStream("/conformance.json.gz");
+		stream = new GZIPInputStream(stream);
+		String input = IOUtils.toString(stream);
+	
+		long start = System.currentTimeMillis();
+		ValidationResult output = null;
+		int passes = 1;
+		for (int i = 0; i < passes; i++) {
+			ourLog.info("Pass {}", i+1);
+			output = myVal.validateWithResult(input);
+		}
+		
+		long delay = System.currentTimeMillis() - start;
+		long per = delay / passes;
+
+		logResultsAndReturnAll(output);
+		
+		ourLog.info("Took {} ms -- {}ms / pass", delay, per);
 	}
 
 	@Test
@@ -304,9 +330,12 @@ public class FhirInstanceValidatorTest {
 
 	@Test
 	public void testValidateResourceWithDefaultValuesetBadCode() {
-		String input = "<Observation xmlns=\"http://hl7.org/fhir\">\n" + "   <status value=\"notvalidcode\"/>\n" + "   <code>\n" + "      <text value=\"No code here!\"/>\n" + "   </code>\n" + "</Observation>";
+		String input = "<Observation xmlns=\"http://hl7.org/fhir\">\n" + "   <status value=\"notvalidcode\"/>\n" + "   <code>\n" + "      <text value=\"No code here!\"/>\n" + "   </code>\n"
+				+ "</Observation>";
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals("The value provided is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set", output.getMessages().get(0).getMessage());
+		assertEquals(
+				"The value provided is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set",
+				output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -319,7 +348,9 @@ public class FhirInstanceValidatorTest {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
 		assertEquals("/f:Patient/f:identifier/f:type", all.get(0).getLocationString());
-		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code", all.get(0).getMessage());
+		assertEquals(
+				"None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code",
+				all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}

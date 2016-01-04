@@ -206,6 +206,13 @@ public class TestRestfulServer extends RestfulServer {
 
 	}
 
+	@Override
+	public void destroy() {
+		super.destroy();
+		ourLog.info("Server is shutting down");
+		myAppCtx.destroy();
+	}
+
 	/**
 	 * The public server is deployed to http://fhirtest.uhn.ca and the JEE webserver
 	 * where this FHIR server is deployed is actually fronted by an Apache HTTPd instance,

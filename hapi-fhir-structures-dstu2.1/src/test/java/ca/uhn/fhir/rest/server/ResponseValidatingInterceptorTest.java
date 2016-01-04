@@ -30,6 +30,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
 import ca.uhn.fhir.util.PortUtil;
@@ -111,6 +112,7 @@ public class ResponseValidatingInterceptorTest {
 		assertThat(status.toString(), not(containsString("X-HAPI-Response-Validation")));
 	}
 
+
 	@Test
 	public void testSearchJsonValidNoValidatorsSpecifiedDefaultMessage() throws Exception {
 		myInterceptor.setResponseHeaderValueNoIssues("NO ISSUES");
@@ -185,6 +187,45 @@ public class ResponseValidatingInterceptorTest {
 		assertThat(status.toString(), containsString("X-HAPI-Response-Validation"));
 	}
 	
+	@Test
+	public void testSkipEnabled() throws Exception {
+		IValidatorModule module = new FhirInstanceValidator();
+		myInterceptor.addValidatorModule(module);
+		myInterceptor.addExcludeOperationType(RestOperationTypeEnum.METADATA);
+		myInterceptor.setResponseHeaderValueNoIssues("No issues");
+		
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.toString(), not(containsString("X-HAPI-Response-Validation")));
+	}
+
+	@Test
+	public void testSkipNotEnabled() throws Exception {
+		IValidatorModule module = new FhirInstanceValidator();
+		myInterceptor.addValidatorModule(module);
+		myInterceptor.setResponseHeaderValueNoIssues("No issues");
+		
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.toString(), (containsString("X-HAPI-Response-Validation")));
+	}
+
 	@Test
 	public void testSearchXmlValidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
