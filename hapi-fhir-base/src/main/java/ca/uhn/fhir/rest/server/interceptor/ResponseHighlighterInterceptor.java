@@ -54,6 +54,22 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	public static final String PARAM_RAW_TRUE = "true";
 	public static final String PARAM_RAW = "_raw";
 
+//	private boolean myEncodeHeaders = false;
+//	
+//	/**
+//	 * Should headers be included in the HTML response?
+//	 */
+//	public boolean isEncodeHeaders() {
+//		return myEncodeHeaders;
+//	}
+//
+//	/**
+//	 * Should headers be included in the HTML response?
+//	 */
+//	public void setEncodeHeaders(boolean theEncodeHeaders) {
+//		myEncodeHeaders = theEncodeHeaders;
+//	}
+
 	private String format(String theResultBody, EncodingEnum theEncodingEnum) {
 		String str = StringEscapeUtils.escapeHtml4(theResultBody);
 		if (str == null || theEncodingEnum == null) {
@@ -242,33 +258,66 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		}
 		rawB.append(PARAM_RAW).append('=').append(PARAM_RAW_TRUE);
 		
+		StringBuilder b = new StringBuilder();
+		b.append("<html lang=\"en\">\n");
+		b.append("	<head>\n");
+		b.append("		<meta charset=\"utf-8\" />\n");
+		b.append("       <style>\n");
+		b.append(".hlQuot {\n");
+		b.append("  color: #88F;\n");
+		b.append("}\n");
+		b.append(".hlAttr {\n");
+		b.append("  color: #888;\n");
+		b.append("}\n");
+		b.append(".hlTagName {\n");
+		b.append("  color: #006699;\n");
+		b.append("}\n");
+		b.append(".hlControl {\n");
+		b.append("  color: #660000;\n");
+		b.append("}\n");
+		b.append(".hlText {\n");
+		b.append("  color: #000000;\n");
+		b.append("}\n");
+		b.append(".hlUrlBase {\n");
+		b.append("}");
+		b.append(".headersDiv {\n");
+		b.append("  background: #EEE;");
+		b.append("}");
+		b.append(".headerName {\n");
+		b.append("  color: #888;\n");
+		b.append("  font-family: monospace;\n");
+		b.append("}");
+		b.append(".headerValue {\n");
+		b.append("  color: #88F;\n");
+		b.append("  font-family: monospace;\n");
+		b.append("}");
+		b.append("BODY {\n");
+		b.append("  font-family: Arial;\n");
+		b.append("}");
+		b.append("       </style>\n");
+		b.append("	</head>\n");
+		b.append("\n");
+		b.append("	<body>");
+		b.append("This result is being rendered in HTML for easy viewing. <a href=\"");
+		b.append(rawB.toString());
+		b.append("\">Click here</a> to disable this.<br/><br/>");
+//		if (isEncodeHeaders()) {
+//			b.append("<h1>Request Headers</h1>");
+//			b.append("<div class=\"headersDiv\">");
+//			for (int next : theRequestDetails.get)
+//			b.append("</div>");
+//			b.append("<h1>Response Headers</h1>");
+//			b.append("<div class=\"headersDiv\">");
+//			b.append("</div>");
+//			b.append("<h1>Response Body</h1>");
+//		}
+		b.append("<pre>");
+		b.append(format(encoded, encoding));
+		b.append("</pre>");
+		b.append("   </body>");
+		b.append("</html>");
 		//@formatter:off
-		String out = "<html lang=\"en\">\n" + 
-		"	<head>\n" + 
-		"		<meta charset=\"utf-8\" />\n" + 
-		"       <style>\n" + ".hlQuot {\n" + 
-		"	color: #88F;\n" + "}\n" + 
-		".hlAttr {\n" +
-		"	color: #888;\n" + 
-		"}\n" + ".hlTagName {\n" + 
-		"	color: #006699;\n" + "}\n" + 
-		".hlControl {\n" + 
-		"	color: #660000;\n" + 
-		"}\n" + ".hlText {\n" + 
-		"	color: #000000;\n" + 
-		"}\n" + 
-		".hlUrlBase {\n" + 
-		"}" + 
-		"       </style>\n" + 
-		"	</head>\n" + 
-		"\n" + 
-		"	<body>" + 
-		"This result is being rendered in HTML for easy viewing. <a href=\"" + rawB.toString() + "\">Click here</a> to disable this.<br/><br/>" +
-		"<pre>" + 
-		format(encoded, encoding) + 
-		"</pre>" + 
-		"   </body>" + 
-		"</html>";
+		String out = b.toString();
 		//@formatter:on
 
 		try {

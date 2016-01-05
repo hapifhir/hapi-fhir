@@ -433,7 +433,7 @@ public class BaseController {
 	
 		org.hl7.fhir.dstu21.model.Conformance conformance;
 		try {
-			conformance = (org.hl7.fhir.dstu21.model.Conformance) client.conformance();
+			conformance = client.fetchConformance().ofType(org.hl7.fhir.dstu21.model.Conformance.class).execute();
 		} catch (Exception e) {
 			ourLog.warn("Failed to load conformance statement", e);
 			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());

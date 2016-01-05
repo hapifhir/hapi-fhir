@@ -120,8 +120,7 @@
 	<h4>Resources</h4>
 	
 	<ul class="nav nav-sidebar">
-		<th:block
-			th:each="resource, resIterStat : ${conf.restFirstRep.resource}">
+		<th:block th:unless="${conf.rest.empty}" th:each="resource, resIterStat : ${conf.rest[0].resource}">
 			<li th:class="${resourceName} == ${resource.typeElement.valueAsString} ? 'active' : ''">
 				<a href="#" th:onclick="'doAction(this, \'resource\', \'' + ${resource.typeElement.valueAsString} + '\');'">
 					<th:block th:text="${resource.typeElement.valueAsString}" >Patient</th:block>

@@ -9,19 +9,14 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-<<<<<<< HEAD
 import java.util.Set;
-||||||| merged common ancestors
-=======
 import java.util.zip.GZIPInputStream;
->>>>>>> 7005cd52d907eb7dbbfea6d181ad3f4c8870c03f
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu21.hapi.validation.DefaultProfileValidationSupport;
