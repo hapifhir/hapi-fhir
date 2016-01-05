@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu21;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu21;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
@@ -120,6 +121,7 @@ public class TestDstu21Config extends BaseJavaConfigDstu21 {
 		responseValidator.addValidatorModule(myQuestionnaireResponseValidatorDstu21);
 		responseValidator.setResponseHeaderValueNoIssues("Validation did not detect any issues");
 		responseValidator.setFailOnSeverity(null);
+		responseValidator.addExcludeOperationType(RestOperationTypeEnum.METADATA);
 		return responseValidator;
 	}
 

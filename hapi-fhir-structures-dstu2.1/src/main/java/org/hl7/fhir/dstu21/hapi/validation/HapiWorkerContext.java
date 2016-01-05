@@ -2,7 +2,9 @@ package org.hl7.fhir.dstu21.hapi.validation;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu21.formats.IParser;
@@ -33,6 +35,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
 	private final FhirContext myCtx;
 	private IValidationSupport myValidationSupport;
+	private Map<String, Resource> myFetchedResourceCache = new HashMap<String, Resource>();
 
 	public HapiWorkerContext(FhirContext theCtx, IValidationSupport theValidationSupport) {
 		myCtx = theCtx;
@@ -58,7 +61,15 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (myValidationSupport == null) {
 			return null;
 		} else {
-			return myValidationSupport.fetchResource(myCtx, theClass, theUri);
+			@SuppressWarnings("unchecked")
+			T retVal = (T) myFetchedResourceCache.get(theUri);
+			if (retVal == null) {
+				retVal = myValidationSupport.fetchResource(myCtx, theClass, theUri);
+				if (retVal != null) {
+					myFetchedResourceCache.put(theUri, retVal);
+				}
+			}
+			return retVal;
 		}
 	}
 
@@ -132,7 +143,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		}
 
 		for (ConceptSetComponent nextComposeConceptSet : theVs.getCompose().getInclude()) {
-			if (StringUtils.equals(theSystem, nextComposeConceptSet.getSystem())) {
+			if (theSystem == null || StringUtils.equals(theSystem, nextComposeConceptSet.getSystem())) {
 				for (ConceptReferenceComponent nextComposeCode : nextComposeConceptSet.getConcept()) {
 					ConceptDefinitionComponent conceptDef = new ConceptDefinitionComponent();
 					conceptDef.setCode(nextComposeCode.getCode());

@@ -27,7 +27,7 @@
   POSSIBILITY OF SUCH DAMAGE.
   
 
-  Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0 
+  Generated on Tue, Jan 5, 2016 07:13-0500 for FHIR v1.2.0 
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.2.0">
   <!-- Note: When using this schema with some tools, it may also be necessary to declare xmlns:xml="http://www.w3.org/XML/1998/namespace", however this causes performance issues with other tools and thus is not in the base schemas. -->
@@ -3679,6 +3679,37 @@
     <xs:complexContent>
       <xs:extension base="DomainResource">
         <xs:sequence>
+          <xs:element name="event" type="AuditEvent.Event" minOccurs="1" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the name, action type, time, and disposition of the audited event.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="participant" type="AuditEvent.Participant" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A person, a hardware device or software process.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="source" type="AuditEvent.Source" minOccurs="1" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Application systems and processes.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="object" type="AuditEvent.Object" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Specific instances of data or objects that have been accessed.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AuditEvent.Event">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
           <xs:element name="type" minOccurs="1" maxOccurs="1" type="Coding">
             <xs:annotation>
               <xs:documentation xml:lang="en">Identifier for a family of the event.  For example, a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function.</xs:documentation>
@@ -3694,7 +3725,7 @@
               <xs:documentation xml:lang="en">Indicator for type of action performed during the event that generated the audit.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="recorded" minOccurs="1" maxOccurs="1" type="instant">
+          <xs:element name="dateTime" minOccurs="1" maxOccurs="1" type="instant">
             <xs:annotation>
               <xs:documentation xml:lang="en">The time when the event occurred on the source.</xs:documentation>
            </xs:annotation>
@@ -3714,26 +3745,11 @@
               <xs:documentation xml:lang="en">The purposeOfUse (reason) that was used during the event being recorded.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="agent" type="AuditEvent.Agent" minOccurs="1" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">A person, a hardware device or software process.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="source" type="AuditEvent.Source" minOccurs="1" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Application systems and processes.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="entity" type="AuditEvent.Entity" minOccurs="0" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Specific instances of data or objects that have been accessed.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="AuditEvent.Agent">
+  <xs:complexType name="AuditEvent.Participant">
     <xs:annotation>
       <xs:documentation xml:lang="en">A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.</xs:documentation>
     </xs:annotation>
@@ -3747,7 +3763,7 @@
           </xs:element>
           <xs:element name="reference" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Direct reference to a resource that identifies the agent.</xs:documentation>
+              <xs:documentation xml:lang="en">Direct reference to a resource that identifies the participant.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="userId" minOccurs="0" maxOccurs="1" type="Identifier">
@@ -3757,7 +3773,7 @@
           </xs:element>
           <xs:element name="altId" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Alternative agent Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.</xs:documentation>
+              <xs:documentation xml:lang="en">Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
@@ -3792,7 +3808,7 @@
           </xs:element>
           <xs:element name="purposeOfUse" minOccurs="0" maxOccurs="unbounded" type="Coding">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The reason (purpose of use), specific to this agent, that was used during the event being recorded.</xs:documentation>
+              <xs:documentation xml:lang="en">The reason (purpose of use), specific to this participant, that was used during the event being recorded.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -3846,7 +3862,7 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="AuditEvent.Entity">
+  <xs:complexType name="AuditEvent.Object">
     <xs:annotation>
       <xs:documentation xml:lang="en">A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.</xs:documentation>
     </xs:annotation>
@@ -3855,12 +3871,12 @@
         <xs:sequence>
           <xs:element name="identifier" minOccurs="0" maxOccurs="1" type="Identifier">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Identifies a specific instance of the entity. The reference should always be version specific.</xs:documentation>
+              <xs:documentation xml:lang="en">Identifies a specific instance of the participant object. The reference should always be version specific.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="reference" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Identifies a specific instance of the entity. The reference should always be version specific.</xs:documentation>
+              <xs:documentation xml:lang="en">Identifies a specific instance of the participant object. The reference should always be version specific.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="type" minOccurs="0" maxOccurs="1" type="Coding">
@@ -3870,37 +3886,37 @@
           </xs:element>
           <xs:element name="role" minOccurs="0" maxOccurs="1" type="Coding">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Code representing the role the entity played in the event being audited.</xs:documentation>
+              <xs:documentation xml:lang="en">Code representing the functional application role of Participant Object being audited.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="lifecycle" minOccurs="0" maxOccurs="1" type="Coding">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Identifier for the data life-cycle stage for the entity.</xs:documentation>
+              <xs:documentation xml:lang="en">Identifier for the data life-cycle stage for the participant object.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="securityLabel" minOccurs="0" maxOccurs="unbounded" type="Coding">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Denotes security labels for the identified entity.</xs:documentation>
+              <xs:documentation xml:lang="en">Denotes security labels for the identified object.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation xml:lang="en">A name of the entity in the audit event.</xs:documentation>
+              <xs:documentation xml:lang="en">An instance-specific descriptor of the Participant Object ID audited, such as a person's name.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Text that describes the entity in more detail.</xs:documentation>
+              <xs:documentation xml:lang="en">Text that describes the object in more detail.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="query" minOccurs="0" maxOccurs="1" type="base64Binary">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The query parameters for a query-type entities.</xs:documentation>
+              <xs:documentation xml:lang="en">The actual query for a query-type participant object.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="detail" type="AuditEvent.Detail" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Additional Information about the entity.</xs:documentation>
+              <xs:documentation xml:lang="en">Additional Information about the Object.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -21596,12 +21612,12 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
               <xs:documentation xml:lang="en">The instant of time at which the activity was recorded.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="reason" minOccurs="0" maxOccurs="unbounded" type="Coding">
+          <xs:element name="reason" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
             <xs:annotation>
               <xs:documentation xml:lang="en">The reason that the activity was taking place.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="activity" minOccurs="0" maxOccurs="1" type="Coding">
+          <xs:element name="activity" minOccurs="0" maxOccurs="1" type="CodeableConcept">
             <xs:annotation>
               <xs:documentation xml:lang="en">An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.</xs:documentation>
            </xs:annotation>
@@ -21616,7 +21632,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
               <xs:documentation xml:lang="en">Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="agent" type="Provenance.Agent" minOccurs="1" maxOccurs="unbounded">
+          <xs:element name="agent" type="Provenance.Agent" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
               <xs:documentation xml:lang="en">An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility.</xs:documentation>
            </xs:annotation>

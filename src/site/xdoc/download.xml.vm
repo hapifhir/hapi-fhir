@@ -20,7 +20,7 @@
 				<tbody>
 					<tr>
 						<td rowspan="1">hapi-fhir-structures-dstu</td>
-						<td>1.1 - 1.3</td>
+						<td>1.1 - 1.4</td>
 						<td><a href="http://www.hl7.org/fhir/DSTU1/index.html">DSTU1 0.0.82</a></td>
 					</tr>
 					<tr>
@@ -33,7 +33,7 @@
 						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.0</a></td>
 					</tr>
 					<tr>
-						<td>1.3</td>
+						<td>1.3, 1.4</td>
 						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.2</a></td>
 					</tr>
 					<tr>
@@ -46,8 +46,13 @@
 						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.0</a></td>
 					</tr>
 					<tr>
-						<td>1.3</td>
+						<td>1.3, 1.4</td>
 						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.2</a></td>
+					</tr>
+					<tr>
+						<td rowspan="1">hapi-fhir-structures-dstu2.1</td>
+						<td>1.4</td>
+						<td><a href="http://hl7-fhir.github.io/">DSTU2 1.2.0 Snapshot</a> (SVN 7507)</td>
 					</tr>
 				</tbody>
 			</table>

@@ -21,6 +21,7 @@ import org.hl7.fhir.dstu21.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.dstu21.model.Enumerations.BindingStrength;
 import org.hl7.fhir.dstu21.model.Extension;
 import org.hl7.fhir.dstu21.model.HumanName;
+import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.Identifier;
 import org.hl7.fhir.dstu21.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu21.model.OperationOutcome.IssueType;
@@ -946,11 +947,15 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
     WrapperElement we = resolve(ref, stack);
     String ft;
-    if (we != null)
+    boolean hint;
+    if (we != null) {
       ft = we.getResourceType();
-    else
+      hint = hint(errors, IssueType.STRUCTURE, element.line(), element.col(), path, ft != null, "Unable to determine type of target resource");
+    } else {
       ft = tryParse(ref);
-    if (hint(errors, IssueType.STRUCTURE, element.line(), element.col(), path, ft != null, "Unable to determine type of target resource")) {
+      hint = hint(errors, IssueType.STRUCTURE, element.line(), element.col(), path, ft != null, "Unable to determine type of target resource in: {0}", ref);
+    }
+    if (hint) {
       boolean ok = false;
       CommaSeparatedStringBuilder b = new CommaSeparatedStringBuilder();
       for (TypeRefComponent type : container.getType()) {
@@ -1493,18 +1498,11 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
 
   private String tryParse(String ref)  {
-    String[] parts = ref.split("\\/");
-    switch (parts.length) {
-    case 1:
+    IdType id = new IdType(ref);
+    if (!id.hasResourceType()) {
       return null;
-    case 2:
-      return checkResourceType(parts[0]);
-    default:
-      if (parts[parts.length - 2].equals("_history"))
-        return checkResourceType(parts[parts.length - 4]);
-      else
-        return checkResourceType(parts[parts.length - 2]);
     }
+    return checkResourceType(id.getResourceType());
   }
 
   private boolean typesAreAllReference(List<TypeRefComponent> theType) {

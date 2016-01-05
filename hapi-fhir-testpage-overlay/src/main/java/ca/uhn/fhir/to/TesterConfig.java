@@ -99,7 +99,7 @@ public class TesterConfig {
 				Validate.notBlank(nextSplit[3], "theServerBase can not be blank");
 				myIdToServerName.put(nextSplit[0].trim(), nextSplit[2].trim());
 				myIdToServerBase.put(nextSplit[0].trim(), nextSplit[3].trim());
-				myIdToFhirVersion.put(nextSplit[0].trim(), FhirVersionEnum.valueOf(nextSplit[1].trim().toUpperCase()));
+				myIdToFhirVersion.put(nextSplit[0].trim(), FhirVersionEnum.valueOf(nextSplit[1].trim().toUpperCase().replace('.', '_')));
 			}
 		}
 	}

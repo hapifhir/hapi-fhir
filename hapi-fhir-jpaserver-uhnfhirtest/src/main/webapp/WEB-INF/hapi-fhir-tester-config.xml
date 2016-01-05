@@ -12,14 +12,14 @@
 	<bean class="ca.uhn.fhir.to.TesterConfig">
 		<property name="servers">
 			<list>
-				<value>home_dev , DSTU2 , UHN/HAPI Server (DSTU2 FHIR)                 , http://fhirtest.uhn.ca/baseDstu2</value>
-				<value>home_21  , DSTU2 , UHN/HAPI Server (DSTU2.1 FHIR)               , http://fhirtest.uhn.ca/baseDstu2.1</value>
-				<value>home     , DSTU1 , UHN/HAPI Server (DSTU1 FHIR)                 , http://fhirtest.uhn.ca/baseDstu1</value>
-				<value>hidev    , DSTU2 , Health Intersections (DSTU2 FHIR)            , http://fhir-dev.healthintersections.com.au/open</value>
-				<value>hi       , DSTU1 , Health Intersections (DSTU1 FHIR)            , http://fhir.healthintersections.com.au/open</value>
-				<value>furored2 , DSTU2 , Spark - Furore (DSTU2 FHIR)                  , http://spark-dstu2.furore.com/fhir</value>
-				<value>furore   , DSTU1 , Spark - Furore (DSTU1 FHIR)                  , http://spark.furore.com/fhir</value>
-				<value>sof      , DSTU2 , SQL on FHIR - HealthConnex (DSTU2 FHIR)      , http://sqlonfhir.azurewebsites.net/fhir</value>
+				<value>home_dev , DSTU2   , UHN/HAPI Server (DSTU2 FHIR)                 , http://fhirtest.uhn.ca/baseDstu2</value>
+				<value>home_21  , DSTU2_1 , UHN/HAPI Server (DSTU2.1 FHIR)               , http://fhirtest.uhn.ca/baseDstu2.1</value>
+				<value>home     , DSTU1   , UHN/HAPI Server (DSTU1 FHIR)                 , http://fhirtest.uhn.ca/baseDstu1</value>
+				<value>hidev    , DSTU2   , Health Intersections (DSTU2 FHIR)            , http://fhir-dev.healthintersections.com.au/open</value>
+				<value>hi       , DSTU1   , Health Intersections (DSTU1 FHIR)            , http://fhir.healthintersections.com.au/open</value>
+				<value>furored2 , DSTU2   , Spark - Furore (DSTU2 FHIR)                  , http://spark-dstu2.furore.com/fhir</value>
+				<value>furore   , DSTU1   , Spark - Furore (DSTU1 FHIR)                  , http://spark.furore.com/fhir</value>
+				<value>sof      , DSTU2   , SQL on FHIR - HealthConnex (DSTU2 FHIR)      , http://sqlonfhir.azurewebsites.net/fhir</value>
 				<!--
 				<value>blaze    , DSTU1 , Blaze (Orion Health)                         , https://fhir.orionhealth.com/blaze/fhir</value>
 				<value>oridashi , DSTU1 , Oridashi                                     , http://demo.oridashi.com.au:8190</value>
