@@ -273,7 +273,9 @@
 				</p>
 				<p>
 					See the <a href="./doc_validation.html">Validation Page</a> for information on
-					available IValidationModule validation modules. Any of the <b>Resource Validators</b>
+					available 
+					<a href="./apidocs/ca/uhn/fhir/validation/IValidatorModule.html">IValidatorModule</a> 
+					validation modules. Any of the <b>Resource Validators</b>
 					listed on that page can be enabled in these interceptors (note that the <b>Parser Validators</b>
 					can not).					
 				</p>

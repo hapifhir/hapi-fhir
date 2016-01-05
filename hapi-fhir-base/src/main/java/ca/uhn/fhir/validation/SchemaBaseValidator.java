@@ -75,7 +75,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 	private Map<String, Schema> myKeyToSchema = new HashMap<String, Schema>();
 	private FhirContext myCtx;
 
-	SchemaBaseValidator(FhirContext theContext) {
+	public SchemaBaseValidator(FhirContext theContext) {
 		myCtx = theContext;
 	}
 

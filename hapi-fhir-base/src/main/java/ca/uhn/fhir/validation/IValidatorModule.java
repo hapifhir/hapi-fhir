@@ -26,12 +26,28 @@ import ca.uhn.fhir.model.api.Bundle;
  */
 
 /**
- * Registers 
+ * An individual validation module, which applies validation rules against
+ * resources and adds failure/informational messages as it goes.
+ * 
+ * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_validation.html">Validation</a>
+ * for a list of available modules. You may also create your own.
  */
 public interface IValidatorModule {
 
+	/**
+	 * Validate the actual resource.
+	 * 
+	 * The {@link IValidationContext} can be used to access the resource being validated,
+	 * and is populated with the results.
+	 */
 	void validateResource(IValidationContext<IBaseResource> theCtx);
 
+	/**
+	 * This method applies only to DSTU1 Atom Bundles. All other validation will pass through
+	 * {@link #validateResource(IValidationContext)} inclusing DSTU2+ Bundle resources. If you
+	 * will not be validating DSTU1 Bundles, you may implement this method as
+	 * a NO-OP.
+	 */
 	void validateBundle(IValidationContext<Bundle> theContext);
 
 }

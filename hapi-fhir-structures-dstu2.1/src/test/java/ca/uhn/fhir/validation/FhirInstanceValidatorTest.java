@@ -11,8 +11,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu21.hapi.validation.DefaultProfileValidationSupport;
@@ -51,9 +53,11 @@ public class FhirInstanceValidatorTest {
 
 	private FhirValidator myVal;
 	private ArrayList<String> myValidConcepts;
+	private Set<String> myValidSystems = new HashSet<String>();
 	private Map<String, ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
 
 	private void addValidConcept(String theSystem, String theCode) {
+		myValidSystems.add(theSystem);
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
 
@@ -87,8 +91,8 @@ public class FhirInstanceValidatorTest {
 		when(myMockSupport.isCodeSystemSupported(any(FhirContext.class), any(String.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock theInvocation) throws Throwable {
-				boolean retVal = mySupportedCodeSystemsForExpansion.containsKey(theInvocation.getArguments()[0]);
-				ourLog.info("isCodeSystemSupported({}) : {}", new Object[] { theInvocation.getArguments()[0], retVal });
+				boolean retVal = myValidSystems.contains(theInvocation.getArguments()[1]);
+				ourLog.info("isCodeSystemSupported({}) : {}", new Object[] { theInvocation.getArguments()[1], retVal });
 				return retVal;
 			}
 		});
@@ -287,6 +291,27 @@ public class FhirInstanceValidatorTest {
 		assertThat(errors.toString(), containsString("Element encounter @ /f:Observation: max allowed = 0, but found 1"));
 		assertThat(errors.toString(), containsString("Element '/f:Observation.device': minimum required = 1, but only found 0"));
 		assertThat(errors.toString(), containsString(""));
+	}
+
+	@Test
+	public void testValidateResourceContainingLoincCode() {
+		addValidConcept("http://loinc.org", "1234567");
+
+		Observation input = new Observation();
+//		input.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/devicemetricobservation");
+
+		input.addIdentifier().setSystem("http://acme").setValue("12345");
+		input.getEncounter().setReference("http://foo.com/Encounter/9");
+		input.setStatus(ObservationStatus.FINAL);
+		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
+
+		myInstanceVal.setValidationSupport(myMockSupport);
+		ValidationResult output = myVal.validateWithResult(input);
+		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
+		
+		assertThat(errors.toString(), containsString("information"));
+		assertThat(errors.toString(), containsString("Unknown code: http://loinc.org / 12345"));
+		assertEquals(1, errors.size());
 	}
 
 	@Test
