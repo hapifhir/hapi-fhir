@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
 import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 
 @Configuration
 @Import(CommonConfig.class)
@@ -107,7 +108,10 @@ public class TestDstu21Config extends BaseJavaConfigDstu21 {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
 		requestValidator.addValidatorModule(myInstanceValidatorDstu21);
 		requestValidator.addValidatorModule(myQuestionnaireResponseValidatorDstu21);
-		requestValidator.setResponseHeaderValueNoIssues("Validation did not detect any issues");
+		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
+		requestValidator.setAddResponseHeaderOnSeverity(null);
+		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+
 		return requestValidator;
 	}
 
@@ -121,7 +125,18 @@ public class TestDstu21Config extends BaseJavaConfigDstu21 {
 		responseValidator.addValidatorModule(myQuestionnaireResponseValidatorDstu21);
 		responseValidator.setResponseHeaderValueNoIssues("Validation did not detect any issues");
 		responseValidator.setFailOnSeverity(null);
+		responseValidator.setAddResponseHeaderOnSeverity(null);
+		responseValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 		responseValidator.addExcludeOperationType(RestOperationTypeEnum.METADATA);
+		responseValidator.addExcludeOperationType(RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE);
+		responseValidator.addExcludeOperationType(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER);
+		responseValidator.addExcludeOperationType(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
+		responseValidator.addExcludeOperationType(RestOperationTypeEnum.GET_PAGE);
+		responseValidator.addExcludeOperationType(RestOperationTypeEnum.HISTORY_INSTANCE);
+		responseValidator.addExcludeOperationType(RestOperationTypeEnum.HISTORY_SYSTEM);
+		responseValidator.addExcludeOperationType(RestOperationTypeEnum.HISTORY_TYPE);
+		responseValidator.addExcludeOperationType(RestOperationTypeEnum.SEARCH_SYSTEM);
+		responseValidator.addExcludeOperationType(RestOperationTypeEnum.SEARCH_TYPE);
 		return responseValidator;
 	}
 

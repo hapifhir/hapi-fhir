@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 
 public class RequestValidatingInterceptorDstu21Test {
 	private static CloseableHttpClient ourClient;
@@ -79,6 +80,8 @@ public class RequestValidatingInterceptorDstu21Test {
 
 	@Test
 	public void testCreateJsonInvalidNoValidatorsSpecified() throws Exception {
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		patient.setGender(AdministrativeGender.MALE);
@@ -97,14 +100,15 @@ public class RequestValidatingInterceptorDstu21Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), containsString("X-HAPI-Request-Validation"));
+		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
 		assertThat(responseContent, containsString("<severity value=\"error\"/>"));
 	}
 
 	@Test
 	public void testCreateJsonInvalidNoFailure() throws Exception {
 		myInterceptor.setFailOnSeverity(null);
-		
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		patient.setGender(AdministrativeGender.MALE);
@@ -123,7 +127,7 @@ public class RequestValidatingInterceptorDstu21Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), containsString("X-HAPI-Request-Validation"));
+		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
 		assertThat(responseContent, not(containsString("<severity value=\"error\"/>")));
 	}
 	
@@ -146,13 +150,14 @@ public class RequestValidatingInterceptorDstu21Test {
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), not(containsString("X-HAPI-Request-Validation")));
+		assertThat(status.toString(), not(containsString("X-FHIR-Request-Validation")));
 	}
 
 	@Test
 	public void testCreateJsonValidNoValidatorsSpecifiedDefaultMessage() throws Exception {
 		myInterceptor.setResponseHeaderValueNoIssues("NO ISSUES");
-		
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		patient.setGender(AdministrativeGender.MALE);
@@ -170,11 +175,13 @@ public class RequestValidatingInterceptorDstu21Test {
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), (containsString("X-HAPI-Request-Validation: NO ISSUES")));
+		assertThat(status.toString(), (containsString("X-FHIR-Request-Validation: NO ISSUES")));
 	}
 	
 	@Test
 	public void testCreateXmlInvalidNoValidatorsSpecified() throws Exception {
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		patient.setGender(AdministrativeGender.MALE);
@@ -193,14 +200,44 @@ public class RequestValidatingInterceptorDstu21Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), containsString("X-HAPI-Request-Validation"));
+		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
+	}
+
+
+	@Test
+	public void testCreateXmlInvalidNoValidatorsSpecifiedOutcomeHeader() throws Exception {
+		myInterceptor.setAddResponseHeaderOnSeverity(null);
+		myInterceptor.setFailOnSeverity(null);
+		myInterceptor.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+		patient.setGender(AdministrativeGender.MALE);
+		patient.addContact().addRelationship().setText("FOO");
+		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
+		
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertThat(status.toString(), containsString("X-FHIR-Request-Validation: {\"resourceType\":\"OperationOutcome"));
 	}
 
 	@Test
 	public void testCreateXmlInvalidInstanceValidator() throws Exception {
 		IValidatorModule module = new FhirInstanceValidator();
 		myInterceptor.addValidatorModule(module);
-		
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		patient.setGender(AdministrativeGender.MALE);
@@ -219,7 +256,7 @@ public class RequestValidatingInterceptorDstu21Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), containsString("X-HAPI-Request-Validation"));
+		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
 	}
 	
 	@Test
@@ -235,7 +272,7 @@ public class RequestValidatingInterceptorDstu21Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), not(containsString("X-HAPI-Request-Validation")));
+		assertThat(status.toString(), not(containsString("X-FHIR-Request-Validation")));
 		assertEquals(true, ourLastRequestWasSearch);
 	}
 
@@ -258,7 +295,7 @@ public class RequestValidatingInterceptorDstu21Test {
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), not(containsString("X-HAPI-Request-Validation")));
+		assertThat(status.toString(), not(containsString("X-FHIR-Request-Validation")));
 	}
 	
 	@AfterClass

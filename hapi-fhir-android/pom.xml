@@ -15,6 +15,18 @@
 	<name>HAPI FHIR - Android</name>
 
 	<dependencies>
+	
+		<!-- 
+		This is here, at the top, for the unit tests because otherwise the
+		logger spews out all kinds of junk during unit tests 
+		-->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+	
+	
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>

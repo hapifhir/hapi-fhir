@@ -25,7 +25,7 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 	/**
 	 * X-HAPI-Request-Validation
 	 */
-	public static final String DEFAULT_RESPONSE_HEADER_NAME = "X-HAPI-Request-Validation";
+	public static final String DEFAULT_RESPONSE_HEADER_NAME = "X-FHIR-Request-Validation";
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptor.class);
 

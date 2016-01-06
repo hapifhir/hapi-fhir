@@ -9,6 +9,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -34,27 +35,28 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseValidatingInterceptor.class);
 
-	private Integer myAddResponseHeaderOnSeverity = ResultSeverityEnum.INFORMATION.ordinal();
+	private Integer myAddResponseIssueHeaderOnSeverity = null;
+	private Integer myAddResponseOutcomeHeaderOnSeverity = null;
 	private Integer myFailOnSeverity = ResultSeverityEnum.ERROR.ordinal();
-	private String myResponseHeaderName = provideDefaultResponseHeaderName();
-	private String myResponseHeaderValue = DEFAULT_RESPONSE_HEADER_VALUE;
-	private String myResponseHeaderValueNoIssues = null;
-	
+	private String myResponseIssueHeaderName = provideDefaultResponseHeaderName();
+	private String myResponseIssueHeaderValue = DEFAULT_RESPONSE_HEADER_VALUE;
+	private String myResponseIssueHeaderValueNoIssues = null;
+	private String myResponseOutcomeHeaderName = provideDefaultResponseHeaderName();
 	private List<IValidatorModule> myValidatorModules;
 
-	private void addResponseHeader(RequestDetails theRequestDetails, SingleValidationMessage theNext) {
+	private void addResponseIssueHeader(RequestDetails theRequestDetails, SingleValidationMessage theNext) {
 		// Perform any string substitutions from the message format
 		StrLookup<?> lookup = new MyLookup(theNext);
 		StrSubstitutor subs = new StrSubstitutor(lookup, "${", "}", '\\');
 
 		// Log the header
-		String headerValue = subs.replace(myResponseHeaderValue);
+		String headerValue = subs.replace(myResponseIssueHeaderValue);
 		ourLog.trace("Adding header to response: {}", headerValue);
 
-		theRequestDetails.getResponse().addHeader(myResponseHeaderName, headerValue);
+		theRequestDetails.getResponse().addHeader(myResponseIssueHeaderName, headerValue);
 	}
 
-	public BaseValidatingInterceptor addValidatorModule(IValidatorModule theModule) {
+	public BaseValidatingInterceptor<T> addValidatorModule(IValidatorModule theModule) {
 		Validate.notNull(theModule, "theModule must not be null");
 		if (getValidatorModules() == null) {
 			setValidatorModules(new ArrayList<IValidatorModule>());
@@ -64,7 +66,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	}
 
 	abstract ValidationResult doValidate(FhirValidator theValidator, T theRequest);
-
+	
 	/**
 	 * Fail the request by throwing an {@link UnprocessableEntityException} as a result of a validation failure.
 	 * Subclasses may change this behaviour by providing alternate behaviour.
@@ -73,8 +75,24 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 		throw new UnprocessableEntityException(theRequestDetails.getServer().getFhirContext(), theValidationResult.toOperationOutcome());
 	}
 
+	/**
+	 * The name of the header specified by {@link #setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum)}
+	 */
+	public String getResponseOutcomeHeaderName() {
+		return myResponseOutcomeHeaderName;
+	}
+
 	public List<IValidatorModule> getValidatorModules() {
 		return myValidatorModules;
+	}
+
+	/**
+	 * If the validation produces a result with at least the given severity, a header with the name
+	 * specified by {@link #setResponseOutcomeHeaderName(String)} will be added containing a JSON encoded
+	 * OperationOutcome resource containing the validation results.
+	 */
+	public ResultSeverityEnum getAddResponseOutcomeHeaderOnSeverity() {
+		return myAddResponseOutcomeHeaderOnSeverity != null ? ResultSeverityEnum.values()[myAddResponseOutcomeHeaderOnSeverity] : null;
 	}
 
 	abstract String provideDefaultResponseHeaderName();
@@ -87,7 +105,16 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	 * @see #setResponseHeaderValue(String)
 	 */
 	public void setAddResponseHeaderOnSeverity(ResultSeverityEnum theSeverity) {
-		myAddResponseHeaderOnSeverity = theSeverity != null ? theSeverity.ordinal() : null;
+		myAddResponseIssueHeaderOnSeverity = theSeverity != null ? theSeverity.ordinal() : null;
+	}
+
+	/**
+	 * If the validation produces a result with at least the given severity, a header with the name
+	 * specified by {@link #setResponseOutcomeHeaderName(String)} will be added containing a JSON encoded
+	 * OperationOutcome resource containing the validation results.
+	 */
+	public void setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum theAddResponseOutcomeHeaderOnSeverity) {
+		myAddResponseOutcomeHeaderOnSeverity = theAddResponseOutcomeHeaderOnSeverity != null ? theAddResponseOutcomeHeaderOnSeverity.ordinal() : null;
 	}
 
 	/**
@@ -105,7 +132,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	 */
 	protected void setResponseHeaderName(String theResponseHeaderName) {
 		Validate.notBlank(theResponseHeaderName, "theResponseHeaderName must not be blank or null");
-		myResponseHeaderName = theResponseHeaderName;
+		myResponseIssueHeaderName = theResponseHeaderName;
 	}
 
 	/**
@@ -147,7 +174,7 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	 */
 	public void setResponseHeaderValue(String theResponseHeaderValue) {
 		Validate.notBlank(theResponseHeaderValue, "theResponseHeaderValue must not be blank or null");
-		myResponseHeaderValue = theResponseHeaderValue;
+		myResponseIssueHeaderValue = theResponseHeaderValue;
 	}
 
 	/**
@@ -155,7 +182,15 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	 * threshold specified by {@link #setAddResponseHeaderOnSeverity(ResultSeverityEnum)} 
 	 */
 	public void setResponseHeaderValueNoIssues(String theResponseHeaderValueNoIssues) {
-		myResponseHeaderValueNoIssues = theResponseHeaderValueNoIssues;
+		myResponseIssueHeaderValueNoIssues = theResponseHeaderValueNoIssues;
+	}
+
+	/**
+	 * The name of the header specified by {@link #setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum)}
+	 */
+	public void setResponseOutcomeHeaderName(String theResponseOutcomeHeaderName) {
+		Validate.notEmpty(theResponseOutcomeHeaderName, "theResponseOutcomeHeaderName can not be empty or null");
+		myResponseOutcomeHeaderName = theResponseOutcomeHeaderName;
 	}
 
 	public void setValidatorModules(List<IValidatorModule> theValidatorModules) {
@@ -172,17 +207,17 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 
 		ValidationResult validationResult = doValidate(validator, theRequest);
 		
-		if (myAddResponseHeaderOnSeverity != null) {
+		if (myAddResponseIssueHeaderOnSeverity != null) {
 			boolean found = false;
 			for (SingleValidationMessage next : validationResult.getMessages()) {
-				if (next.getSeverity().ordinal() >= myAddResponseHeaderOnSeverity) {
-					addResponseHeader(theRequestDetails, next);
+				if (next.getSeverity().ordinal() >= myAddResponseIssueHeaderOnSeverity) {
+					addResponseIssueHeader(theRequestDetails, next);
 					found = true;
 				}
 			}
 			if (!found) {
-				if (isNotBlank(myResponseHeaderValueNoIssues)) {
-					theRequestDetails.getResponse().addHeader(myResponseHeaderName, myResponseHeaderValueNoIssues);
+				if (isNotBlank(myResponseIssueHeaderValueNoIssues)) {
+					theRequestDetails.getResponse().addHeader(myResponseIssueHeaderName, myResponseIssueHeaderValueNoIssues);
 				}
 			}
 		}
@@ -195,6 +230,21 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 				}
 			}
 		}
+		
+		if (myAddResponseOutcomeHeaderOnSeverity != null) {
+			boolean add = false;
+			for (SingleValidationMessage next : validationResult.getMessages()) {
+				if (next.getSeverity().ordinal() >= myAddResponseOutcomeHeaderOnSeverity) {
+					add = true;
+				}
+			}
+			if (add) {
+				IParser parser = theRequestDetails.getServer().getFhirContext().newJsonParser().setPrettyPrint(false);
+				String encoded = parser.encodeResourceToString(validationResult.toOperationOutcome());
+				theRequestDetails.getResponse().addHeader(myResponseOutcomeHeaderName, encoded);
+			}
+		}
+		
 	}
 
 	private static class MyLookup extends StrLookup<String> {

@@ -335,7 +335,7 @@
 				<configuration>
 					<!-- These tests all use a shared database, so it's easier if they run in a predictable order -->
 					<runOrder>alphabetical</runOrder>
-					<reuseForks>false</reuseForks>
+					<!--<reuseForks>false</reuseForks>-->
 				</configuration>
 			</plugin>
 			<plugin>
