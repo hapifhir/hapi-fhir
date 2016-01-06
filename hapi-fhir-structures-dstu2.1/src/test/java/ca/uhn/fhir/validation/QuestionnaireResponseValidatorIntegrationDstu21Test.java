@@ -25,9 +25,9 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class QuestionnaireResponseValidatorIntegrationTest {
+public class QuestionnaireResponseValidatorIntegrationDstu21Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2_1();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorIntegrationTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorIntegrationDstu21Test.class);
 
 	private IValidationSupport myResourceLoaderMock;
 	private FhirValidator myVal;

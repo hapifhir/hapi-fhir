@@ -6,7 +6,7 @@ import org.hl7.fhir.dstu21.model.Bundle;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.junit.Test;
 
-public class RuntimeResourceDefinitionTest {
+public class RuntimeResourceDefinitionDstu21Test {
 
 	private FhirContext ourCtx = FhirContext.forDstu2_1();
 	

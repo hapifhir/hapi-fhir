@@ -34,10 +34,10 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class QuestionnaireResponseValidatorTest {
+public class QuestionnaireResponseValidatorDstu21Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2_1();
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorDstu21Test.class);
 	private QuestionnaireResponseValidator myVal;
 
 	private IWorkerContext myWorkerCtx;
@@ -323,7 +323,7 @@ public class QuestionnaireResponseValidatorTest {
 
 	// @Test
 	public void validateHealthConnexExample() throws Exception {
-		String input = IOUtils.toString(QuestionnaireResponseValidatorTest.class.getResourceAsStream("/questionnaireanswers-0f431c50ddbe4fff8e0dd6b7323625fc.xml"));
+		String input = IOUtils.toString(QuestionnaireResponseValidatorDstu21Test.class.getResourceAsStream("/questionnaireanswers-0f431c50ddbe4fff8e0dd6b7323625fc.xml"));
 
 		QuestionnaireResponse qa = ourCtx.newXmlParser().parseResource(QuestionnaireResponse.class, input);
 		ArrayList<ValidationMessage> errors = new ArrayList<ValidationMessage>();

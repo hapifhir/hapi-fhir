@@ -44,11 +44,11 @@ import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class FhirInstanceValidatorTest {
+public class FhirInstanceValidatorDstu21Test {
 
 	private static final DefaultProfileValidationSupport VALIDATION_SUPPORT = new DefaultProfileValidationSupport();
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu21Test.class);
 	private DefaultProfileValidationSupport myDefaultValidationSupport = VALIDATION_SUPPORT;
 	private FhirInstanceValidator myInstanceVal;
 	private IValidationSupport myMockSupport;
@@ -207,7 +207,7 @@ public class FhirInstanceValidatorTest {
 
 	@Test
 	public void testValidateBigRawJsonResource() throws Exception {
-		InputStream stream = FhirInstanceValidatorTest.class.getResourceAsStream("/conformance.json.gz");
+		InputStream stream = FhirInstanceValidatorDstu21Test.class.getResourceAsStream("/conformance.json.gz");
 		stream = new GZIPInputStream(stream);
 		String input = IOUtils.toString(stream);
 	
