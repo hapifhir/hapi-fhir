@@ -1045,7 +1045,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private Integer myCount;
 		private IIdType myId;
 		private Class<? extends IBaseBundle> myReturnType;
-		private InstantDt mySince;
+		private IPrimitiveType mySince;
 		private Class<? extends IBaseResource> myType;
 
 		@SuppressWarnings("unchecked")
@@ -1126,7 +1126,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IHistoryTyped since(InstantDt theCutoff) {
+		public IHistoryTyped since(IPrimitiveType theCutoff) {
 			mySince = theCutoff;
 			return this;
 		}

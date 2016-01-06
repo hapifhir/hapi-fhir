@@ -37,17 +37,13 @@ import ca.uhn.fhir.util.UrlUtil;
 public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IBaseResource> {
 
 	private RuntimeResourceDefinition myBaseDefinition;
+	private FhirContext myContext;
+	private String myId;
 	private Map<String, RuntimeSearchParam> myNameToSearchParam = new LinkedHashMap<String, RuntimeSearchParam>();
 	private IBaseResource myProfileDef;
 	private String myResourceProfile;
 	private List<RuntimeSearchParam> mySearchParams;
-	private FhirContext myContext;
-	private String myId;
 	private final FhirVersionEnum myStructureVersion;
-
-	public FhirVersionEnum getStructureVersion() {
-		return myStructureVersion;
-	}
 
 	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation, boolean theStandardType) {
 		super(theResourceName, theClass, theStandardType);
@@ -63,10 +59,6 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 			throw new ConfigurationException(myContext.getLocalizer().getMessage(getClass(), "nonInstantiableType", theClass.getName(), e.toString()), e);
 		}
 		
-	}
-
-	public String getId() {
-		return myId;
 	}
 
 	public void addSearchParam(RuntimeSearchParam theParam) {
@@ -89,6 +81,21 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	@Override
 	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
 		return ChildTypeEnum.RESOURCE;
+	}
+
+	public String getId() {
+		return myId;
+	}
+
+	/**
+	 * Express {@link #getImplementingClass()} as theClass (to prevent casting warnings)
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> Class<T> getImplementingClass(Class<T> theClass) {
+		if (!theClass.isAssignableFrom(getImplementingClass())) {
+			throw new ConfigurationException("Unable to convert " + getImplementingClass() + " to " + theClass);
+		}
+		return (Class<T>) getImplementingClass();
 	}
 
 	@Deprecated
@@ -125,6 +132,14 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 	public List<RuntimeSearchParam> getSearchParams() {
 		return mySearchParams;
+	}
+
+	public FhirVersionEnum getStructureVersion() {
+		return myStructureVersion;
+	}
+
+	public boolean isBundle() {
+		return "Bundle".equals(getName());
 	}
 
 	public boolean isStandardProfile() {
@@ -177,9 +192,5 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		myProfileDef = retVal;
 
 		return retVal;
-	}
-
-	public boolean isBundle() {
-		return "Bundle".equals(getName());
 	}
 }

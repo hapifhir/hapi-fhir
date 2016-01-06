@@ -22,7 +22,7 @@ package ca.uhn.fhir.rest.gclient;
 
 import java.util.Date;
 
-import ca.uhn.fhir.model.primitive.InstantDt;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public interface IHistoryTyped<T> extends IClientExecutable<IHistoryTyped<T>, T>  {
 
@@ -33,8 +33,12 @@ public interface IHistoryTyped<T> extends IClientExecutable<IHistoryTyped<T>, T>
 
 	/**
 	 * Request that the server return only resource versions that were created at or after the given time (inclusive)
+	 * <p>
+	 * Parameter theCutoff can be any priitive type which accepts a date, such as
+	 * a <code>DateTimeDt</code>, <code>InstantType</code>, etc.
+	 * </p>
 	 */
-	IHistoryTyped<T> since(InstantDt theCutoff);
+	IHistoryTyped<T> since(IPrimitiveType<Date> theCutoff);
 
 	/**
 	 * Request that the server return only up to <code>theCount</code> number of resources

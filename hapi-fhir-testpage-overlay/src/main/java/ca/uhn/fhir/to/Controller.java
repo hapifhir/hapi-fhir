@@ -22,11 +22,13 @@ import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestComponent;
 import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestResourceSearchParamComponent;
 import org.hl7.fhir.dstu21.model.StringType;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -45,6 +47,9 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IHistory;
+import ca.uhn.fhir.rest.gclient.IHistoryTyped;
+import ca.uhn.fhir.rest.gclient.IHistoryUntyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
@@ -454,6 +459,10 @@ public class Controller extends BaseController {
 			}
 		}
 
+		if (client.getFhirContext().getVersion().getVersion() != FhirVersionEnum.DSTU1) {
+			query.returnBundle(client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass());
+		}
+		
 		long start = System.currentTimeMillis();
 		ResultType returnsResource;
 		try {
@@ -646,7 +655,32 @@ public class Controller extends BaseController {
 		long start = System.currentTimeMillis();
 		try {
 			ourLog.info(logPrefix(theModel) + "Retrieving history for type {} ID {} since {}", new Object[] { type, id, since });
-			client.history(type, id, since, limit);
+			
+			IHistory hist0 = client.history();
+			IHistoryUntyped hist1;
+			if (isNotBlank(id)) {
+				hist1 = hist0.onInstance(new IdDt(theRequest.getResource(), id));
+			} else if (type != null) {
+				hist1 = hist0.onType(type);
+			} else {
+				hist1 = hist0.onServer();
+			}
+			
+			IHistoryTyped<?> hist2;
+			if (client.getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU1) {
+				hist2 = hist1.andReturnDstu1Bundle();
+			} else {
+				hist2 = hist1.andReturnBundle(client.getFhirContext().getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class));
+			}
+			
+			if (since != null) {
+				hist2.since(since);
+			}
+			if (limit != null) {
+				hist2.count(limit);
+			}
+			
+			hist2.execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}
