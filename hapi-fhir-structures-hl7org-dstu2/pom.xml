@@ -185,7 +185,6 @@
 					<runOrder>random</runOrder>
 					<argLine>-Dfile.encoding=UTF-8</argLine>
 					<reuseForks>false</reuseForks>
-					<argLine>-Xmx512m</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
