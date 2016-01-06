@@ -11,7 +11,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.ElementUtil;
 
 @ResourceDef(name = "Observation", id = "reportobservation")
-public class ReportObservation extends Observation {
+public class ReportObservationDstu21 extends Observation {
 
 	/**
 	 * Each extension is defined in a field. Any valid HAPI Data Type can be used for the field type. Note that the
@@ -62,7 +62,7 @@ public class ReportObservation extends Observation {
 	}
 
 	/** Setter for mandatory */
-	public ReportObservation setMandatory(Boolean isMandatory) {
+	public ReportObservationDstu21 setMandatory(Boolean isMandatory) {
 		mandatory = new BooleanType(isMandatory);
 		return this;
 	}
@@ -76,7 +76,7 @@ public class ReportObservation extends Observation {
 	}
 
 	/** Setter for readOnly */
-	public ReportObservation setReadOnly(Boolean isReadOnly) {
+	public ReportObservationDstu21 setReadOnly(Boolean isReadOnly) {
 		readOnly = new BooleanType(isReadOnly);
 		return this;
 	}
@@ -90,7 +90,7 @@ public class ReportObservation extends Observation {
 	}
 
 	/** Setter for defaultCursor */
-	public ReportObservation setDefaultCursor(Boolean isDefaultCursor) {
+	public ReportObservationDstu21 setDefaultCursor(Boolean isDefaultCursor) {
 		defaultCursor = new BooleanType(isDefaultCursor);
 		return this;
 	}
@@ -104,7 +104,7 @@ public class ReportObservation extends Observation {
 	}
 
 	/** Setter for sectionContentId */
-	public ReportObservation setSectionContentId(String sectionContentId) {
+	public ReportObservationDstu21 setSectionContentId(String sectionContentId) {
 		this.sectionContentId = new StringType(sectionContentId);
 		return this;
 	}

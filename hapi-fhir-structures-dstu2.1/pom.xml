@@ -184,7 +184,6 @@
 				<configuration>
 					<!--<redirectTestOutputToFile>false</redirectTestOutputToFile>-->
 					<runOrder>random</runOrder>
-					<argLine>-Dfile.encoding=UTF-8</argLine>
 					<reuseForks>false</reuseForks>
 				</configuration>
 			</plugin>

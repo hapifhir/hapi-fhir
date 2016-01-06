@@ -896,7 +896,7 @@ public class JsonParserDstu21Test {
 	@Test
 	public void testReportSerialize() {
 
-		ReportObservation obsv = new ReportObservation();
+		ReportObservationDstu21 obsv = new ReportObservationDstu21();
 		obsv.getCode().addCoding().setCode("name");
 		obsv.setValue(new StringType("value test"));
 		obsv.setStatus(ObservationStatus.FINAL);
@@ -918,7 +918,7 @@ public class JsonParserDstu21Test {
 	@Test
 	public void testReportSerializeWithMatchingId() {
 
-		ReportObservation obsv = new ReportObservation();
+		ReportObservationDstu21 obsv = new ReportObservationDstu21();
 		obsv.getCode().addCoding().setCode("name");
 		obsv.setValue(new StringType("value test"));
 		obsv.setStatus(ObservationStatus.FINAL);

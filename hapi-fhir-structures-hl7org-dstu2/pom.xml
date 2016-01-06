@@ -181,9 +181,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<redirectTestOutputToFile>true</redirectTestOutputToFile>
-					<runOrder>random</runOrder>
-					<argLine>-Dfile.encoding=UTF-8</argLine>
+					<!--<redirectTestOutputToFile>true</redirectTestOutputToFile>-->
 					<reuseForks>false</reuseForks>
 				</configuration>
 			</plugin>
