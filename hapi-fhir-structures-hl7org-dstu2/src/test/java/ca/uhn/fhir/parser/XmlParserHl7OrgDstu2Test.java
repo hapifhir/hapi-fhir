@@ -1199,7 +1199,7 @@ public class XmlParserHl7OrgDstu2Test {
 		Patient patient = ourCtx.newXmlParser().parseResource(Patient.class, msg);
 
 		assertEquals(NarrativeStatus.GENERATED, patient.getText().getStatus());
-		assertEquals(">John Cardinal:            444333333 <", patient.getText().getDiv().getValueAsString());
+		assertThat(patient.getText().getDiv().getValueAsString(), containsString(">John Cardinal:            444333333 <"));
 		assertEquals("PRP1660", patient.getIdentifier().get(0).getValue());
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
