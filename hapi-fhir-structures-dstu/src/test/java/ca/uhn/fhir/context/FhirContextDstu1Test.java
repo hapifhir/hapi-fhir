@@ -35,6 +35,21 @@ public class FhirContextDstu1Test {
 
 	@Test
 	public void testUnknownVersion() {
+		
+		try {
+			Class.forName("org.hl7.fhir.dstu21.model.Patient");
+			
+			/*
+			 * If we found this class, DSTU2.1 structures are on the classpath so we're probably doing
+			 * the cobertura tests.. This one won't work since all structures are on the classpath for 
+			 * cobertura tests
+			 */
+			return;
+			
+		} catch (ClassNotFoundException e1) {
+			// good
+		}
+		
 		try {
 			new FhirContext(FhirVersionEnum.DSTU2);
 			fail();

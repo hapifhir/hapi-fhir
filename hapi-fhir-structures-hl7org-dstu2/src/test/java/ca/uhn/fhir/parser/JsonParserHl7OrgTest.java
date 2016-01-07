@@ -1080,7 +1080,8 @@ public class JsonParserHl7OrgTest {
 		String value = div.getValueAsString();
 
 		assertNull(value);
-		assertTrue(div.getChildNodes().isEmpty());
+		List<XhtmlNode> childNodes = div.getChildNodes();
+    assertTrue(childNodes.isEmpty());
 	}
 
 	@Test
