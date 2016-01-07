@@ -24,12 +24,14 @@ import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.Header;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
@@ -150,7 +152,7 @@ public class ClientDstu1Test {
 
 		MethodOutcome response = client.createPatient(patient);
 
-		assertEquals(interceptor.getLastRequest().getURI().toASCIIString(), "http://foo/Patient");
+		assertEquals(((ApacheHttpRequestBase) interceptor.getLastRequest()).getApacheRequest().getURI().toASCIIString(), "http://foo/Patient");
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();

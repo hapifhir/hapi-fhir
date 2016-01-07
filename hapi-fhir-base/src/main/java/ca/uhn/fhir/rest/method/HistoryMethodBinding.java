@@ -142,7 +142,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		String historyId = id != null ? id.getIdPart() : null;
-		HttpGetClientInvocation retVal = createHistoryInvocation(resourceName, historyId, null, null);
+		HttpGetClientInvocation retVal = createHistoryInvocation(getContext(), resourceName, historyId, null, null);
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -206,7 +206,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		};
 	}
 
-	public static HttpGetClientInvocation createHistoryInvocation(String theResourceName, String theId, IPrimitiveType<Date> theSince, Integer theLimit) {
+	public static HttpGetClientInvocation createHistoryInvocation(FhirContext theFhirContext, String theResourceName, String theId, IPrimitiveType<Date> theSince, Integer theLimit) {
 		StringBuilder b = new StringBuilder();
 		if (theResourceName != null) {
 			b.append(theResourceName);
@@ -230,7 +230,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			b.append(Constants.PARAM_COUNT).append('=').append(theLimit);
 		}
 
-		HttpGetClientInvocation retVal = new HttpGetClientInvocation(b.toString());
+		HttpGetClientInvocation retVal = new HttpGetClientInvocation(theFhirContext, b.toString());
 		return retVal;
 	}
 

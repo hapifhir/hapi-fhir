@@ -22,19 +22,18 @@ package ca.uhn.fhir.rest.client;
 
 import java.io.IOException;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
+import ca.uhn.fhir.rest.api.IHttpRequestBase;
 
 public interface IClientInterceptor {
 
 	/**
 	 * Fired by the client just before invoking the HTTP client request
 	 */
-	void interceptRequest(HttpRequestBase theRequest);
+	void interceptRequest(IHttpRequestBase theRequest);
 	
 	/**
 	 * Fired by the client upon receiving an HTTP response, prior to processing that response
 	 */
-	void interceptResponse(HttpResponse theResponse) throws IOException;
+	void interceptResponse(IHttpResponse theResponse) throws IOException;
 
 }

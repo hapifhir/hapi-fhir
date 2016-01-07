@@ -22,10 +22,9 @@ package ca.uhn.fhir.rest.client.interceptor;
 
 import java.io.IOException;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
-
+import ca.uhn.fhir.rest.api.IHttpRequestBase;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
+import ca.uhn.fhir.rest.client.IHttpResponse;
 
 /**
  * HTTP interceptor to be used for adding HTTP headers containing user identifying info for auditing purposes to the request
@@ -48,14 +47,14 @@ public class UserInfoInterceptor implements IClientInterceptor {
 	}
 
 	@Override
-	public void interceptRequest(HttpRequestBase theRequest) {
+	public void interceptRequest(IHttpRequestBase theRequest) {
 		if(myUserId != null) theRequest.addHeader(HEADER_USER_ID, myUserId);
 		if(myUserName != null) theRequest.addHeader(HEADER_USER_NAME, myUserName);		
 		if(myAppName != null) theRequest.addHeader(HEADER_APPLICATION_NAME, myAppName);
 	}
 
 	@Override
-	public void interceptResponse(HttpResponse theResponse) throws IOException {
+	public void interceptResponse(IHttpResponse theResponse) throws IOException {
 		// nothing
 	}
 

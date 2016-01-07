@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.client.api;
  */
 
 
-import org.apache.http.client.HttpClient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -51,7 +50,7 @@ public interface IRestfulClient {
 	 * Do not call this method in client code. It is a part of the internal HAPI API and 
 	 * is subject to change!
 	 */
-	HttpClient getHttpClient();
+	IHttpClient getHttpClient();
 	
 	/**
 	 * Base URL for the server, with no trailing "/"

@@ -334,7 +334,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				IPrimitiveType<?> primitive = (IPrimitiveType<?>) value;
 				params.get(nextName).add(primitive.getValueAsString());
 			}
-			return new HttpGetClientInvocation(params, b.toString());
+			return new HttpGetClientInvocation(theContext, params, b.toString());
 		}
 	}
 

@@ -28,16 +28,23 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.http.Header;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.message.BasicHeader;
 
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.IHttpRequestBase;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.util.VersionUtil;
 
 public abstract class BaseHttpClientInvocation {
 
-	private List<Header> myHeaders;
+	protected List<Header> myHeaders;
+	private final FhirContext myContext;	
+
+	public BaseHttpClientInvocation(FhirContext myContext) {
+		this.myContext = myContext;
+	}
+	
 
 	public void addHeader(String theName, String theValue) {
 		if (myHeaders == null) {
@@ -57,15 +64,15 @@ public abstract class BaseHttpClientInvocation {
 	 *            The encoding to use for any serialized content sent to the
 	 *            server
 	 */
-	public abstract HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint);
+	public abstract IHttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint);
 
-	protected static void appendExtraParamsWithQuestionMark(Map<String, List<String>> theExtraParams, StringBuilder theUrlBuilder, boolean theWithQuestionMark) {
+	public static void appendExtraParamsWithQuestionMark(Map<String, List<String>> theExtraParams, StringBuilder theUrlBuilder, boolean theWithQuestionMark) {
 		if (theExtraParams == null) {
 			return;
 		}
 		boolean first = theWithQuestionMark;
 
-		if (theExtraParams != null && theExtraParams.isEmpty() == false) {
+		if (theExtraParams.isEmpty() == false) {
 			for (Entry<String, List<String>> next : theExtraParams.entrySet()) {
 				for (String nextValue : next.getValue()) {
 					if (first) {
@@ -86,24 +93,25 @@ public abstract class BaseHttpClientInvocation {
 		}
 	}
 
-	public void addHeadersToRequest(HttpRequestBase theHttpRequest, EncodingEnum theEncoding) {
-		if (myHeaders != null) {
-			for (Header next : myHeaders) {
-				theHttpRequest.addHeader(next);
-			}
-		}
-		
-		theHttpRequest.addHeader("User-Agent", "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client)");
-		theHttpRequest.addHeader("Accept-Charset", "utf-8");
-		theHttpRequest.addHeader("Accept-Encoding", "gzip");
-		
-		if (theEncoding == null) {
-			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_ALL);
-		} else if (theEncoding == EncodingEnum.JSON) {
-			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
-		} else if (theEncoding == EncodingEnum.XML) {
-			theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
-		}  
+	/**
+	 * Get thre restful client factory
+	 * @return
+	 */
+	public IRestfulClientFactory getRestfulClientFactory() {
+		return myContext.getRestfulClientFactory();
+	}
+
+	public IHttpRequestBase createHttpRequest(String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
+		IHttpClient httpClient = getRestfulClientFactory().getHttpClient(new StringBuilder(theUrl), null, null, theEncoding, theRequestType, myHeaders);
+		return httpClient.createGetRequest(theEncoding);
+	}
+
+	/**
+	 * Get the myContext
+	 * @return the myContext
+	 */
+	public FhirContext getContext() {
+		return myContext;
 	}
 
 }

@@ -24,29 +24,27 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.http.client.HttpClient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
-class ClientInvocationHandlerFactory {
+public class ClientInvocationHandlerFactory {
 
 	private final Map<Method, BaseMethodBinding<?>> myBindings = new HashMap<Method, BaseMethodBinding<?>>();
-	private final HttpClient myClient;
-	private final FhirContext myContext;
+	private final IHttpClient myClient;
 	private final Map<Method, ILambda> myMethodToLambda = new HashMap<Method, ILambda>();
 	private final Map<Method, Object> myMethodToReturnValue = new HashMap<Method, Object>();
 	private final String myUrlBase;
 
-	public ClientInvocationHandlerFactory(HttpClient theClient, FhirContext theContext, String theUrlBase, Class<? extends IRestfulClient> theClientType) {
+	public ClientInvocationHandlerFactory(IHttpClient theClient, FhirContext theContext, String theUrlBase, Class<? extends IRestfulClient> theClientType) {
 		myClient = theClient;
 		myUrlBase = theUrlBase;
-		myContext = theContext;
 
 		try {
 			myMethodToReturnValue.put(theClientType.getMethod("getFhirContext"), theContext);
@@ -72,10 +70,10 @@ class ClientInvocationHandlerFactory {
 	}
 
 	ClientInvocationHandler newInvocationHandler(RestfulClientFactory theRestfulClientFactory) {
-		return new ClientInvocationHandler(myClient, myContext, myUrlBase, myMethodToReturnValue, myBindings, myMethodToLambda, theRestfulClientFactory);
+		return theRestfulClientFactory.newInvocationHandler(myClient, myUrlBase, myMethodToReturnValue, myBindings, myMethodToLambda);
 	}
 
-	interface ILambda {
+	public interface ILambda {
 		Object handle(ClientInvocationHandler theTarget, Object[] theArgs);
 	}
 

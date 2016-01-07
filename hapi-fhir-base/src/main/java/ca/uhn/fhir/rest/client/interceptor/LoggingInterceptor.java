@@ -24,6 +24,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -35,7 +39,9 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.HttpEntityWrapper;
 import org.slf4j.Logger;
 
+import ca.uhn.fhir.rest.api.IHttpRequestBase;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
+import ca.uhn.fhir.rest.client.IHttpResponse;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class LoggingInterceptor implements IClientInterceptor {
@@ -74,20 +80,13 @@ public class LoggingInterceptor implements IClientInterceptor {
 	}
 
 	@Override
-	public void interceptRequest(HttpRequestBase theRequest) {
+	public void interceptRequest(IHttpRequestBase theRequest) {
 		if (myLogRequestSummary) {
 			myLog.info("Client request: {}", theRequest);
 		}
 
 		if (myLogRequestHeaders) {
-			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < theRequest.getAllHeaders().length; i++) {
-				Header next = theRequest.getAllHeaders()[i];
-				b.append(next.getName() + ": " + next.getValue());
-				if (i + 1 < theRequest.getAllHeaders().length) {
-					b.append('\n');
-				}
-			}
+			StringBuilder b = getHeaderString(theRequest.getAllHeaders());
 			myLog.info("Client request headers:\n{}", b.toString());
 		}
 
@@ -110,23 +109,14 @@ public class LoggingInterceptor implements IClientInterceptor {
 	}
 
 	@Override
-	public void interceptResponse(HttpResponse theResponse) throws IOException {
+	public void interceptResponse(IHttpResponse theResponse) throws IOException {
 		if (myLogResponseSummary) {
-			String message = "HTTP " + theResponse.getStatusLine().getStatusCode() + " " + theResponse.getStatusLine().getReasonPhrase();
+			String message = "HTTP " + theResponse.getStatus() + " " + theResponse.getStatusInfo();
 			myLog.info("Client response: {}", message);
 		}
 
 		if (myLogResponseHeaders) {
-			StringBuilder b = new StringBuilder();
-			if (theResponse.getAllHeaders() != null) {
-				for (int i = 0; i < theResponse.getAllHeaders().length; i++) {
-					Header next = theResponse.getAllHeaders()[i];
-					b.append(next.getName() + ": " + next.getValue());
-					if (i + 1 < theResponse.getAllHeaders().length) {
-						b.append('\n');
-					}
-				}
-			}
+			StringBuilder b = getHeaderString(theResponse.getAllHeaders());
 			// if (theResponse.getEntity() != null && theResponse.getEntity().getContentEncoding() != null) {
 			// Header next = theResponse.getEntity().getContentEncoding();
 			// b.append(next.getName() + ": " + next.getValue());
@@ -143,21 +133,39 @@ public class LoggingInterceptor implements IClientInterceptor {
 		}
 
 		if (myLogResponseBody) {
-			HttpEntity respEntity = theResponse.getEntity();
+			theResponse.bufferEntitity();
+			InputStream respEntity = theResponse.readEntity();
 			if (respEntity != null) {
-			final byte[] bytes;
-			try {
-				bytes = IOUtils.toByteArray(respEntity.getContent());
-			} catch (IllegalStateException e) {
-				throw new InternalErrorException(e);
-			}
-
-			myLog.info("Client response body:\n{}", new String(bytes, "UTF-8"));
-			theResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
+				final byte[] bytes;
+				try {
+					bytes = IOUtils.toByteArray(respEntity);
+				} catch (IllegalStateException e) {
+					throw new InternalErrorException(e);
+				}
+				myLog.info("Client response body:\n{}", new String(bytes, "UTF-8"));
 			} else {
 				myLog.info("Client response body: (none)");
 			}
 		}
+	}
+
+	private StringBuilder getHeaderString(Map<String, List<String>> allHeaders) {
+		StringBuilder b = new StringBuilder();
+		if (allHeaders != null && !allHeaders.isEmpty()) {
+			Iterator<String> nameEntries = allHeaders.keySet().iterator();
+			while(nameEntries.hasNext()) {
+				String key = nameEntries.next();
+				Iterator<String> values = allHeaders.get(key).iterator();
+				while(values.hasNext()) {
+					String value = values.next();
+						b.append(key + ": " + value);
+						if (nameEntries.hasNext() || values.hasNext()) {
+							b.append('\n');
+						}
+					}
+			}
+		}
+		return b;
 	}
 
 	/**
@@ -212,27 +220,6 @@ public class LoggingInterceptor implements IClientInterceptor {
 	 */
 	public void setLogResponseSummary(boolean theValue) {
 		myLogResponseSummary = theValue;
-	}
-
-	private static class MyEntityWrapper extends HttpEntityWrapper {
-
-		private byte[] myBytes;
-
-		public MyEntityWrapper(HttpEntity theWrappedEntity, byte[] theBytes) {
-			super(theWrappedEntity);
-			myBytes = theBytes;
-		}
-
-		@Override
-		public InputStream getContent() throws IOException {
-			return new ByteArrayInputStream(myBytes);
-		}
-
-		@Override
-		public void writeTo(OutputStream theOutstream) throws IOException {
-			theOutstream.write(myBytes);
-		}
-
 	}
 
 }

@@ -1,5 +1,11 @@
 package ca.uhn.fhir.rest.client;
 
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.http.Header;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -23,7 +29,11 @@ package ca.uhn.fhir.rest.client;
 import org.apache.http.client.HttpClient;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public interface IRestfulClientFactory {
 
@@ -70,7 +80,7 @@ public interface IRestfulClientFactory {
 	 * 
 	 * @see #setHttpClient(HttpClient)
 	 */
-	HttpClient getHttpClient();
+	IHttpClient getHttpClient(StringBuilder url, Map<String, List<String>> myIfNoneExistParams, String myIfNoneExistString, EncodingEnum theEncoding, RequestTypeEnum theRequestType, List<Header> myHeaders);
 
 	/**
 	 * @deprecated Use {@link #getServerValidationMode()} instead
@@ -120,6 +130,19 @@ public interface IRestfulClientFactory {
 	 * @return A newly created client
 	 */
 	IGenericClient newGenericClient(String theServerBase);
+	
+	 /**
+	 * Instantiates a new client invocation handler
+	 * @param theClient 
+	 * 				the client which will invoke the call
+	 * @param myUrlBase 
+	 * 				the url base
+	 * @param myMethodToReturnValue
+	 * @param myBindings
+	 * @param myMethodToLambda
+	 * @return a newly created client invocation handler
+	 */
+	ClientInvocationHandler newInvocationHandler(IHttpClient theClient, String myUrlBase, Map<Method, Object> myMethodToReturnValue, Map<Method, BaseMethodBinding<?>> myBindings, Map<Method, ClientInvocationHandlerFactory.ILambda> myMethodToLambda);	
 
 	/**
 	 * Sets the connection request timeout, in milliseconds. This is the amount of time that the HTTPClient connection
@@ -146,7 +169,7 @@ public interface IRestfulClientFactory {
 	 * @param theHttpClient
 	 *            An HTTP client instance to use, or <code>null</code>
 	 */
-	void setHttpClient(HttpClient theHttpClient);
+	<T> void setHttpClient(T theHttpClient);
 
 	/**
 	 * Sets the HTTP proxy to use for outgoing connections
@@ -192,5 +215,9 @@ public interface IRestfulClientFactory {
 	 * </p>
 	 */
 	void setSocketTimeout(int theSocketTimeout);
+
+	void validateServerBase(String theServerBase, IHttpClient theHttpClient, BaseClient theClient);
+
+	void validateServerBaseIfConfiguredToDoSo(String theServerBase, IHttpClient theHttpClient, BaseClient theClient);
 
 }

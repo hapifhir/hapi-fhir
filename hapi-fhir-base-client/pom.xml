@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -8,16 +7,20 @@
 		<version>1.4-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
-
-	<artifactId>hapi-fhir-base-core</artifactId>
+	
+	<artifactId>hapi-fhir-base</artifactId>
 	<packaging>jar</packaging>
 
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
 
-	<name>HAPI FHIR - Core Library</name>
+	<name>HAPI FHIR - Core Client</name>
 
 	<dependencies>
-
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>hapi-fhir-base-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<!-- JSON -->
 		<dependency>
 			<groupId>javax.json</groupId>
@@ -38,11 +41,6 @@
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.javassist</groupId>
-			<artifactId>javassist</artifactId>
 			<optional>true</optional>
 		</dependency>
 
@@ -115,6 +113,7 @@
 			<artifactId>httpcore</artifactId>
 		</dependency>
 
+		<!--
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
@@ -126,7 +125,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
+		-->
 		<!-- Server -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -137,20 +136,6 @@
 	</dependencies>
 
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -158,67 +143,5 @@
 			</resource>
 		</resources>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>MINI</id>
-		</profile>
-		<profile>
-			<id>SITE</id>
-			<reporting>
-				<plugins>
-					<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> 
-						<reportSets> <reportSet> <reports> <report>checkstyle</report> </reports> 
-						</reportSet> </reportSets> <configuration> <linkXRef>false</linkXRef> <sourceDirectories> 
-						<sourceDirectory>hapi-fhir-base/src/main/java</sourceDirectory> </sourceDirectories> 
-						</configuration> </plugin> -->
-					<!--<plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>findbugs-maven-plugin</artifactId> 
-						<version>3.0.0</version> <configuration> </configuration> </plugin> -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jxr-plugin</artifactId>
-						<version>${maven_jxr_plugin_version}</version>
-						<reportSets>
-							<reportSet>
-								<id>normal</id>
-								<reports>
-									<report>jxr</report>
-								</reports>
-							</reportSet>
-							<!-- <reportSet> <id>restful-server-example</id> <reports> <report>jxr</report> 
-								</reports> <configuration> <sourcePath>../restful-server-example/src/main/java</sourcePath> 
-								<destDir>${project.reporting.outputDirectory}/rse-xref</destDir> <outputDirectory>tmp</outputDirectory> 
-								<reportOutputDirectory>rse-xref</reportOutputDirectory> </configuration> 
-								</reportSet> -->
-						</reportSets>
-					</plugin>
-					<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> 
-						<version>1.1</version> <configuration> <forceSite>false</forceSite> </configuration> 
-						</plugin> -->
-
-
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-checkstyle-plugin</artifactId>
-						<reportSets>
-							<reportSet>
-								<reports>
-									<report>checkstyle</report>
-								</reports>
-							</reportSet>
-						</reportSets>
-						<configuration>
-							<linkXRef>false</linkXRef>
-							<configLocation>${project.basedir}/../src/checkstyle/checkstyle.xml</configLocation>
-							<!--<sourceDirectories> <sourceDirectory> ${project.basedir}/../hapi-fhir-base/src/main/java 
-								</sourceDirectory> </sourceDirectories> -->
-						</configuration>
-					</plugin>
-
-
-				</plugins>
-			</reporting>
-		</profile>
-	</profiles>
 
 </project>

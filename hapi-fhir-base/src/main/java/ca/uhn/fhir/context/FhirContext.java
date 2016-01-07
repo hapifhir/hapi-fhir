@@ -294,9 +294,26 @@ public class FhirContext {
 		return myIdToResourceDefinition.values();
 	}
 
+	/**
+	 * Set the restful client factory
+	 * @param theRestfulClientFactory
+	 */
+	public void setRestfulClientFactory(IRestfulClientFactory theRestfulClientFactory) {
+		this.myRestfulClientFactory = theRestfulClientFactory;
+	}
+
+	/**
+	 * Get the restful client factory. The default method will create this based upon the apache restful client factory
+	 * @return the factory used to create the restful clients
+	 */
 	public IRestfulClientFactory getRestfulClientFactory() {
 		if (myRestfulClientFactory == null) {
-			myRestfulClientFactory = new RestfulClientFactory(this);
+			try {
+				myRestfulClientFactory = (IRestfulClientFactory) Class.forName("ca.uhn.fhir.rest.client.ApacheRestfulClientFactory").getConstructor(getClass()).newInstance(this);
+			}
+			catch (Exception e) {
+				throw new RuntimeException("Could not create the RestfulClientFactory", e);
+			}
 		}
 		return myRestfulClientFactory;
 	}
