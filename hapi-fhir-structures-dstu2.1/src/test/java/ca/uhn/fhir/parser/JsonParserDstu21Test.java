@@ -10,6 +10,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +27,7 @@ import org.hl7.fhir.dstu21.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu21.model.Conformance;
 import org.hl7.fhir.dstu21.model.DateTimeType;
 import org.hl7.fhir.dstu21.model.DateType;
+import org.hl7.fhir.dstu21.model.DecimalType;
 import org.hl7.fhir.dstu21.model.DiagnosticReport;
 import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu21.model.Extension;
@@ -37,6 +39,7 @@ import org.hl7.fhir.dstu21.model.MedicationOrder;
 import org.hl7.fhir.dstu21.model.Observation;
 import org.hl7.fhir.dstu21.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.Quantity;
 import org.hl7.fhir.dstu21.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu21.model.Reference;
 import org.hl7.fhir.dstu21.model.StringType;
@@ -90,6 +93,42 @@ public class JsonParserDstu21Test {
 		assertThat(actual, not(containsString("78ef6f64c2f2")));
 	}
 
+	@Test
+	public void testExponentDoesntGetEncodedAsSuch() {
+		Observation obs = new Observation();
+		obs.setValue(new Quantity().setValue(new BigDecimal("0.000000000000000100")));
+		
+		String str = ourCtx.newJsonParser().encodeResourceToString(obs);
+		ourLog.info(str);
+		
+		assertEquals("{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.000000000000000100}}", str);
+	}
+
+	@Test
+	public void testExponentParseWorks() {
+		String input = "{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.0000000000000001}}";
+		Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, input);
+		
+		assertEquals("0.0000000000000001", ((Quantity)obs.getValue()).getValueElement().getValueAsString());
+
+		String str = ourCtx.newJsonParser().encodeResourceToString(obs);
+		ourLog.info(str);
+		assertEquals("{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.0000000000000001}}", str);
+	}
+
+	@Test
+	public void testParseWithPrecision() {
+		String input = "{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.000000000000000100}}";
+		Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, input);
+		
+		DecimalType valueElement = ((Quantity)obs.getValue()).getValueElement();
+		assertEquals("0.000000000000000100", valueElement.getValueAsString());
+
+		String str = ourCtx.newJsonParser().encodeResourceToString(obs);
+		ourLog.info(str);
+		assertEquals("{\"resourceType\":\"Observation\",\"valueQuantity\":{\"value\":0.000000000000000100}}", str);
+	}
+	
 	@Test
 	public void testEncodeEmptyBinary() {
 		String output = ourCtx.newJsonParser().encodeResourceToString(new Binary());

@@ -27,6 +27,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -405,7 +406,7 @@ public class JsonParser extends BaseParser implements IParser {
 			break;
 		}
 		case PRIMITIVE_DATATYPE: {
-			IPrimitiveType<?> value = (IPrimitiveType<?>) theNextValue;
+			final IPrimitiveType<?> value = (IPrimitiveType<?>) theNextValue;
 			if (isBlank(value.getValueAsString())) {
 				break;
 			}
@@ -417,10 +418,18 @@ public class JsonParser extends BaseParser implements IParser {
 					theWriter.write(((IBaseIntegerDatatype) value).getValue());
 				}
 			} else if (value instanceof IBaseDecimalDatatype) {
+				BigDecimal decimalValue = ((IBaseDecimalDatatype) value).getValue();
+				decimalValue = new BigDecimal(decimalValue.toString()) {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public String toString() {
+						return value.getValueAsString();
+					}};
 				if (theChildName != null) {
-					theWriter.write(theChildName, ((IBaseDecimalDatatype) value).getValue());
+					theWriter.write(theChildName, decimalValue);
 				} else {
-					theWriter.write(((IBaseDecimalDatatype) value).getValue());
+					theWriter.write(decimalValue);
 				}
 			} else if (value instanceof IBaseBooleanDatatype) {
 				if (theChildName != null) {
@@ -1205,6 +1214,12 @@ public class JsonParser extends BaseParser implements IParser {
 			break;
 		}
 		case NUMBER:
+			JsonNumber nextValNumber = (JsonNumber) theJsonVal;
+			theState.enteringNewElement(null, theName);
+			theState.attributeValue("value", nextValNumber.bigDecimalValue().toPlainString());
+			parseAlternates(theAlternateVal, theState, theAlternateName);
+			theState.endingElement();
+			break;
 		case FALSE:
 		case TRUE:
 			theState.enteringNewElement(null, theName);

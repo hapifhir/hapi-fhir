@@ -110,6 +110,14 @@
 				Server-generated conformance statements incorrectly used /Profile/ instead
 				of /StructureDefinition/ in URL links to structures.
 			</action>
+			<action type="add">
+				JsonParser has been changed so that when serializing numbers it will use
+				plain format (0.001) instead of scientific format (1e-3). The latter is
+				valid JSON, and the parser will still correctly parse either format (all
+				clients should be prepared to) but this change makes serialized
+				resources appear more consistent between XML and JSON. As a result of this
+				change, trailing zeros will now be preserved when serializing as well.
+			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">
