@@ -1533,6 +1533,7 @@ public class XmlParserHl7OrgDstu2Test {
 	}
 
 	@Test
+	@Ignore
 	public void testParseNarrative() throws Exception {
 		//@formatter:off
 		String htmlNoNs = "<div>AAA<b>BBB</b>CCC</div>";

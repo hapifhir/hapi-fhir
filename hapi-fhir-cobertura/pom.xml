@@ -209,7 +209,7 @@
 							<format>html</format>
 							<format>xml</format>
 						</formats>
-						<maxmem>256m</maxmem>
+						<maxmem>512m</maxmem>
 						<instrumentation>
 							<ignores>
 								<ignore>ca.uhn.fhir.model.dstu.valueset.*</ignore>
