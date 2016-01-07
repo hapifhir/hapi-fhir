@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.dao;
 
 import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.Questionnaire;
 import org.hl7.fhir.dstu21.model.StructureDefinition;
 import org.hl7.fhir.dstu21.model.ValueSet;
 import org.hl7.fhir.dstu21.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu21.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 /*
  * #%L
@@ -48,6 +50,10 @@ public class JpaValidationSupportDstu21 implements IJpaValidationSupportDstu21 {
 	private IFhirResourceDao<ValueSet> myValueSetDao;
 
 	@Autowired
+	@Qualifier("myQuestionnaireDaoDstu21")
+	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
+
+	@Autowired
 	@Qualifier("myFhirContextDstu21")
 	private FhirContext myDstu21Ctx;
 
@@ -73,12 +79,14 @@ public class JpaValidationSupportDstu21 implements IJpaValidationSupportDstu21 {
 		IBundleProvider search;
 		if ("ValueSet".equals(resourceName)) {
 			if (localReference) {
-				search = myValueSetDao.search(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_RES_ID, new StringParam(theUri));
+				search = myValueSetDao.search(IAnyResource.SP_RES_ID, new StringParam(theUri));
 			} else {
-				search = myValueSetDao.search(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_URL, new UriParam(theUri));
+				search = myValueSetDao.search(ValueSet.SP_URL, new UriParam(theUri));
 			}
 		} else if ("StructureDefinition".equals(resourceName)) {
-			search = myStructureDefinitionDao.search(ca.uhn.fhir.model.dstu2.resource.StructureDefinition.SP_URL, new UriParam(theUri));
+			search = myStructureDefinitionDao.search(StructureDefinition.SP_URL, new UriParam(theUri));
+		} else if ("Questionnaire".equals(resourceName)) {
+			search = myQuestionnaireDao.search(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));
 		} else {
 			throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 		}

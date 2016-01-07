@@ -42,6 +42,7 @@ public abstract class BaseResourceProviderDstu21Test extends BaseJpaDstu21Test {
 	protected static int ourPort;
 	private static Server ourServer;
 	protected static String ourServerBase;
+	protected static RestfulServer ourRestServer;
 
 	public BaseResourceProviderDstu21Test() {
 		super();
@@ -81,21 +82,21 @@ public abstract class BaseResourceProviderDstu21Test extends BaseJpaDstu21Test {
 		if (ourServer == null) {
 			ourPort = RandomServerPortProvider.findFreePort();
 	
-			RestfulServer restServer = new RestfulServer(myFhirCtx);
+			ourRestServer = new RestfulServer(myFhirCtx);
 	
 			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 	
-			restServer.setResourceProviders((List)myResourceProviders);
+			ourRestServer.setResourceProviders((List)myResourceProviders);
 	
-			restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 	
-			restServer.setPlainProviders(mySystemProvider);
+			ourRestServer.setPlainProviders(mySystemProvider);
 	
-			JpaConformanceProviderDstu21 confProvider = new JpaConformanceProviderDstu21(restServer, mySystemDao, myDaoConfig);
+			JpaConformanceProviderDstu21 confProvider = new JpaConformanceProviderDstu21(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
-			restServer.setServerConformanceProvider(confProvider);
+			ourRestServer.setServerConformanceProvider(confProvider);
 	
-			restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
+			ourRestServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 	
 			Server server = new Server(ourPort);
 	
@@ -103,7 +104,7 @@ public abstract class BaseResourceProviderDstu21Test extends BaseJpaDstu21Test {
 			proxyHandler.setContextPath("/");
 	
 			ServletHolder servletHolder = new ServletHolder();
-			servletHolder.setServlet(restServer);
+			servletHolder.setServlet(ourRestServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 	
 			GenericWebApplicationContext webApplicationContext = new GenericWebApplicationContext();

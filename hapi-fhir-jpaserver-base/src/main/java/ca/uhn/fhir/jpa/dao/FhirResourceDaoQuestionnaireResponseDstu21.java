@@ -69,8 +69,7 @@ public class FhirResourceDaoQuestionnaireResponseDstu21 extends FhirResourceDaoD
 			return;
 		}
 		
-		QuestionnaireResponse qa = (QuestionnaireResponse) theResource;
-		if (qa == null || qa.getQuestionnaire() == null || qa.getQuestionnaire().getReference() == null || qa.getQuestionnaire().getReference().isEmpty()) {
+		if (theResource == null || theResource.getQuestionnaire() == null || theResource.getQuestionnaire().getReference() == null || theResource.getQuestionnaire().getReference().isEmpty()) {
 			return;
 		}
 
@@ -80,7 +79,7 @@ public class FhirResourceDaoQuestionnaireResponseDstu21 extends FhirResourceDaoD
 
 		val.registerValidatorModule(myQuestionnaireResponseValidatorDstu21);
 
-		ValidationResult result = val.validateWithResult(getContext().newJsonParser().parseResource(getContext().newJsonParser().encodeResourceToString(qa)));
+		ValidationResult result = val.validateWithResult(getContext().newJsonParser().parseResource(getContext().newJsonParser().encodeResourceToString(theResource)));
 		if (!result.isSuccessful()) {
 			IBaseOperationOutcome oo = getContext().newJsonParser().parseResource(OperationOutcome.class, getContext().newJsonParser().encodeResourceToString(result.toOperationOutcome()));
 			throw new UnprocessableEntityException(getContext(), oo);

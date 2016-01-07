@@ -2,6 +2,7 @@ package ca.uhn.fhirtest.config;
 
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -43,13 +45,19 @@ public class TestDstu21Config extends BaseJavaConfigDstu21 {
 	private String myFhirLuceneLocation;
 
 	@Autowired
-	@Qualifier("myInstanceValidatorDstu21")
-	private IValidatorModule myInstanceValidatorDstu21;
+	private ApplicationContext myApplicationCtx;
+	
+	@PostConstruct
+	public void postConstruct() {
+		IValidatorModule next = myApplicationCtx.getBean("myQuestionnaireResponseValidatorDstu21", IValidatorModule.class);
+		requestValidatingInterceptor().addValidatorModule(next);
+		responseValidatingInterceptor().addValidatorModule(next);
 
-	@Autowired
-	@Qualifier("myQuestionnaireResponseValidatorDstu21")
-	private IValidatorModule myQuestionnaireResponseValidatorDstu21;
-
+		next = myApplicationCtx.getBean("myInstanceValidatorDstu21", IValidatorModule.class);
+		requestValidatingInterceptor().addValidatorModule(next);
+		responseValidatingInterceptor().addValidatorModule(next);
+	}
+	
 	@Bean()
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
@@ -104,10 +112,8 @@ public class TestDstu21Config extends BaseJavaConfigDstu21 {
 	 * Bean which validates incoming requests
 	 */
 	@Bean
-	public IServerInterceptor requestValidatingInterceptor() {
+	public RequestValidatingInterceptor requestValidatingInterceptor() {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
-		requestValidator.addValidatorModule(myInstanceValidatorDstu21);
-		requestValidator.addValidatorModule(myQuestionnaireResponseValidatorDstu21);
 		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
@@ -119,10 +125,8 @@ public class TestDstu21Config extends BaseJavaConfigDstu21 {
 	 * Bean which validates outgoing responses
 	 */
 	@Bean
-	public IServerInterceptor responseValidatingInterceptor() {
+	public ResponseValidatingInterceptor responseValidatingInterceptor() {
 		ResponseValidatingInterceptor responseValidator = new ResponseValidatingInterceptor();
-		responseValidator.addValidatorModule(myInstanceValidatorDstu21);
-		responseValidator.addValidatorModule(myQuestionnaireResponseValidatorDstu21);
 		responseValidator.setResponseHeaderValueNoIssues("Validation did not detect any issues");
 		responseValidator.setFailOnSeverity(null);
 		responseValidator.setAddResponseHeaderOnSeverity(null);
