@@ -28,10 +28,13 @@ import java.util.List;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -252,15 +255,22 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 		}
 		
 		if (myAddResponseOutcomeHeaderOnSeverity != null) {
-			boolean add = false;
+			IBaseOperationOutcome outcome = null;
 			for (SingleValidationMessage next : validationResult.getMessages()) {
 				if (next.getSeverity().ordinal() >= myAddResponseOutcomeHeaderOnSeverity) {
-					add = true;
+					outcome = validationResult.toOperationOutcome();
+					break;
 				}
 			}
-			if (add) {
+			if (outcome == null && myAddResponseOutcomeHeaderOnSeverity != null && myAddResponseOutcomeHeaderOnSeverity == ResultSeverityEnum.INFORMATION.ordinal()) {
+				FhirContext ctx = theRequestDetails.getServer().getFhirContext();
+				outcome = OperationOutcomeUtil.newInstance(ctx);
+				OperationOutcomeUtil.addIssue(ctx, outcome, "information", "No issues detected", "", "informational");
+			}
+			
+			if (outcome != null) {
 				IParser parser = theRequestDetails.getServer().getFhirContext().newJsonParser().setPrettyPrint(false);
-				String encoded = parser.encodeResourceToString(validationResult.toOperationOutcome());
+				String encoded = parser.encodeResourceToString(outcome);
 				theRequestDetails.getResponse().addHeader(myResponseOutcomeHeaderName, encoded);
 			}
 		}

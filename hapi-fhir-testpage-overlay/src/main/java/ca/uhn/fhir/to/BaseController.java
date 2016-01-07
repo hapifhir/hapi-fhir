@@ -32,7 +32,9 @@ import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestComponent;
 import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.dstu21.model.DecimalType;
 import org.hl7.fhir.dstu21.model.Extension;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
 import org.thymeleaf.TemplateEngine;
@@ -492,8 +494,16 @@ public class BaseController {
 
 	private String parseNarrative(HomeRequest theRequest, EncodingEnum theCtEnum, String theResultBody) {
 		try {
-			IResource resource = (IResource) theCtEnum.newParser(getContext(theRequest)).parseResource(theResultBody);
-			String retVal = resource.getText().getDiv().getValueAsString();
+			IBaseResource par = theCtEnum.newParser(getContext(theRequest)).parseResource(theResultBody);
+			String retVal;
+			if (par instanceof IResource) {
+				IResource resource = (IResource) par;
+				retVal = resource.getText().getDiv().getValueAsString();
+			} else if (par instanceof IDomainResource) {
+				retVal = ((IDomainResource)par).getText().getDivAsString();
+			} else {
+				retVal = null;
+			}
 			return StringUtils.defaultString(retVal);
 		} catch (Exception e) {
 			ourLog.error("Failed to parse resource", e);
@@ -553,7 +563,9 @@ public class BaseController {
 	
 			StringBuilder resultDescription = new StringBuilder();
 			Bundle bundle = null;
+			IBaseResource riBundle = null;
 	
+			FhirContext context = getContext(theRequest);
 			if (ctEnum == null) {
 				resultDescription.append("Non-FHIR response");
 			} else {
@@ -564,7 +576,11 @@ public class BaseController {
 						resultDescription.append("JSON resource");
 					} else if (theResultType == ResultType.BUNDLE) {
 						resultDescription.append("JSON bundle");
-						bundle = getContext(theRequest).newJsonParser().parseBundle(resultBody);
+						if (context.getVersion().getVersion().isRi()) {
+							riBundle = context.newJsonParser().parseResource(resultBody);
+						} else {
+							bundle = context.newJsonParser().parseBundle(resultBody);
+						}
 					}
 					break;
 				case XML:
@@ -574,7 +590,11 @@ public class BaseController {
 						resultDescription.append("XML resource");
 					} else if (theResultType == ResultType.BUNDLE) {
 						resultDescription.append("XML bundle");
-						bundle = getContext(theRequest).newXmlParser().parseBundle(resultBody);
+						if (context.getVersion().getVersion().isRi()) {
+							riBundle = context.newXmlParser().parseResource(resultBody);
+						} else {
+							bundle = context.newXmlParser().parseBundle(resultBody);
+						}
 					}
 					break;
 				}
@@ -584,7 +604,7 @@ public class BaseController {
 			 * DSTU2 no longer has a title in the bundle format, but it's still useful here..
 			 */
 			if (bundle != null) {
-				INarrativeGenerator gen = getContext(theRequest).getNarrativeGenerator();
+				INarrativeGenerator gen = context.getNarrativeGenerator();
 				if (gen != null) {
 					for (BundleEntry next : bundle.getEntries()) {
 						if (next.getTitle().isEmpty() && next.getResource() != null) {
@@ -604,6 +624,7 @@ public class BaseController {
 			theModelMap.put("resultDescription", resultDescription.toString());
 			theModelMap.put("action", action);
 			theModelMap.put("bundle", bundle);
+			theModelMap.put("riBundle", riBundle);
 			theModelMap.put("resultStatus", resultStatus);
 	
 			theModelMap.put("requestUrl", requestUrl);

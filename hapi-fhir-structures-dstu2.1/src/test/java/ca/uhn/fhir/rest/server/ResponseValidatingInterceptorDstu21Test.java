@@ -39,7 +39,7 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 
 public class ResponseValidatingInterceptorDstu21Test {
 	private static CloseableHttpClient ourClient;
-	
+
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseValidatingInterceptorDstu21Test.class);
 	private static int ourPort;
@@ -251,6 +251,29 @@ public class ResponseValidatingInterceptorDstu21Test {
 		assertThat(status.toString(), not(containsString("X-FHIR-Response-Validation")));
 	}
 	
+	@Test
+	public void testOperationOutcome() throws Exception {
+		myInterceptor.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+		patient.setGender(AdministrativeGender.MALE);
+		myReturnResource = patient;
+		
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", status);
+		ourLog.trace("Response was:\n{}", responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.toString(), (containsString("X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}")));
+	}
+
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();

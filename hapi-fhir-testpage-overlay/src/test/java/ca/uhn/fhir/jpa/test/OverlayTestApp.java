@@ -120,7 +120,7 @@ public class OverlayTestApp {
 
 			Organization o1 = new Organization();
 			o1.getName().setValue("Some Org");
-			MethodOutcome create = client.create(o1);
+			MethodOutcome create = client.create().resource(o1).execute();
 			IdDt orgId = (IdDt) create.getId();
 
 			Patient p1 = new Patient();
@@ -132,24 +132,24 @@ public class OverlayTestApp {
 			TagList list = new TagList();
 			list.addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
 			ResourceMetadataKeyEnum.TAG_LIST.put(p1, list);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
 
 			client.setLogRequestAndResponse(true);
-			client.create(p1);
+			client.create().resource(p1).execute();
 
 		}
 
