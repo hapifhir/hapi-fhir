@@ -41,6 +41,9 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.ClientInvocationHandler;
+import ca.uhn.fhir.rest.client.ClientInvocationHandlerFactory;
+import ca.uhn.fhir.rest.client.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.EncodingEnum;

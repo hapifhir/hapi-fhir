@@ -31,9 +31,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.IHttpRequestBase;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.client.api.IHttpRequestBase;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
 /**

@@ -27,9 +27,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.IHttpRequestBase;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.client.api.IHttpRequestBase;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public class HttpSimpleGetClientInvocation extends BaseHttpClientInvocation {

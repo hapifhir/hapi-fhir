@@ -28,9 +28,9 @@ import java.util.Map;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 
-import ca.uhn.fhir.rest.api.IHttpRequestBase;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.IHttpResponse;
+import ca.uhn.fhir.rest.client.api.IHttpRequestBase;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
 /**
  * A Http Request based on JaxRs. This is an adapter around the class {@link javax.ws.rs.client.Invocation Invocation}

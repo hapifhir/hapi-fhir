@@ -30,7 +30,8 @@ import org.apache.http.Header;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 
-import ca.uhn.fhir.rest.api.IHttpRequestBase;
+import ca.uhn.fhir.rest.client.api.IHttpRequestBase;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
 /**
  * A Http Request based on Apache. This is an adapter around the class {@link org.apache.http.client.methods.HttpRequestBase HttpRequestBase}

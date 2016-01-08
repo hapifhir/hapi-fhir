@@ -22,9 +22,9 @@ package ca.uhn.fhir.rest.client.interceptor;
 
 import java.io.IOException;
 
-import ca.uhn.fhir.rest.api.IHttpRequestBase;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
-import ca.uhn.fhir.rest.client.IHttpResponse;
+import ca.uhn.fhir.rest.client.api.IHttpRequestBase;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
 /**
  * HTTP interceptor to be used for adding HTTP headers containing user identifying info for auditing purposes to the request

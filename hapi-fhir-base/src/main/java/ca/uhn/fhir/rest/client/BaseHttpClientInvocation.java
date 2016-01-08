@@ -31,9 +31,9 @@ import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.IHttpRequestBase;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequestBase;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public abstract class BaseHttpClientInvocation {

@@ -34,7 +34,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.http.entity.ContentType;
 
-import ca.uhn.fhir.rest.client.IHttpResponse;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
 /**
  * A Http Response based on JaxRs. This is an adapter around the class {@link javax.ws.rs.core.Response Response}

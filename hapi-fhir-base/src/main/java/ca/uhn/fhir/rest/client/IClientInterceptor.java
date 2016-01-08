@@ -22,7 +22,8 @@ package ca.uhn.fhir.rest.client;
 
 import java.io.IOException;
 
-import ca.uhn.fhir.rest.api.IHttpRequestBase;
+import ca.uhn.fhir.rest.client.api.IHttpRequestBase;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
 public interface IClientInterceptor {
 

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.api;
+package ca.uhn.fhir.rest.client.api;
 
 /*
  * #%L
@@ -23,8 +23,6 @@ package ca.uhn.fhir.rest.api;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
-import ca.uhn.fhir.rest.client.IHttpResponse;
 
 /**
  * Http Base Request. Allows addition of headers and execution of the request.

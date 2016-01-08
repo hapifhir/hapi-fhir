@@ -39,9 +39,9 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.HttpEntityWrapper;
 import org.slf4j.Logger;
 
-import ca.uhn.fhir.rest.api.IHttpRequestBase;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
-import ca.uhn.fhir.rest.client.IHttpResponse;
+import ca.uhn.fhir.rest.client.api.IHttpRequestBase;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class LoggingInterceptor implements IClientInterceptor {

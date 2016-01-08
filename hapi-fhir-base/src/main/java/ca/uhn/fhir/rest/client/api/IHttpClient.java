@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
-import ca.uhn.fhir.rest.api.IHttpRequestBase;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
 /**

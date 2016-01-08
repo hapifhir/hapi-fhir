@@ -22,9 +22,9 @@ package ca.uhn.fhir.rest.client.interceptor;
 
 import org.apache.commons.lang3.Validate;
 
-import ca.uhn.fhir.rest.api.IHttpRequestBase;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
-import ca.uhn.fhir.rest.client.IHttpResponse;
+import ca.uhn.fhir.rest.client.api.IHttpRequestBase;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 
