@@ -47,7 +47,7 @@ public class JpaServerDemo extends RestfulServer {
 		 *
 		 * If you want to use DSTU1 instead, change the following line, and change the 2 occurrences of dstu2 in web.xml to dstu1
 		 */
-		FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU2_1;
+		FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU2;
 		setFhirContext(new FhirContext(fhirVersion));
 
 		// Get the spring context from the web container (it's declared in web.xml)
@@ -79,7 +79,7 @@ public class JpaServerDemo extends RestfulServer {
 		if (fhirVersion == FhirVersionEnum.DSTU1) {
 			systemProvider = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
 		} else if (fhirVersion == FhirVersionEnum.DSTU2) {
-			systemProvider = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu2.class);
+			systemProvider = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
 		} else if (fhirVersion == FhirVersionEnum.DSTU2_1) {
 			systemProvider = myAppCtx.getBean("mySystemProviderDstu21", JpaSystemProviderDstu21.class);
 		} else {
