@@ -9,6 +9,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import org.hl7.fhir.dstu21.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu21.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu21.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu21.hapi.validation.IValidationSupport.CodeValidationResult;
+import org.hl7.fhir.dstu21.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu21.model.CodeType;
 import org.hl7.fhir.dstu21.model.Observation;
 import org.hl7.fhir.dstu21.model.Observation.ObservationStatus;
@@ -33,6 +35,7 @@ import org.hl7.fhir.dstu21.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu21.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu21.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -62,6 +65,11 @@ public class FhirInstanceValidatorDstu21Test {
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
 
+	@After
+	public void after() {
+		myDefaultValidationSupport.flush();
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Before
 	public void before() {
@@ -69,14 +77,17 @@ public class FhirInstanceValidatorDstu21Test {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		myInstanceVal = new FhirInstanceValidator(myDefaultValidationSupport);
+		myMockSupport = mock(IValidationSupport.class);
+		ValidationSupportChain validationSupport = new ValidationSupportChain(myMockSupport, myDefaultValidationSupport);
+		myInstanceVal = new FhirInstanceValidator(validationSupport);
+		
 		myVal.registerValidatorModule(myInstanceVal);
 
 		mySupportedCodeSystemsForExpansion = new HashMap<String, ValueSet.ValueSetExpansionComponent>();
 
 		myValidConcepts = new ArrayList<String>();
 
-		myMockSupport = mock(IValidationSupport.class);
+		
 		when(myMockSupport.expandValueSet(any(FhirContext.class), any(ConceptSetComponent.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
 			@Override
 			public ValueSetExpansionComponent answer(InvocationOnMock theInvocation) throws Throwable {
@@ -100,9 +111,14 @@ public class FhirInstanceValidatorDstu21Test {
 		when(myMockSupport.fetchResource(any(FhirContext.class), any(Class.class), any(String.class))).thenAnswer(new Answer<IBaseResource>() {
 			@Override
 			public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
-				IBaseResource retVal = myDefaultValidationSupport.fetchResource((FhirContext) theInvocation.getArguments()[0], (Class<IBaseResource>) theInvocation.getArguments()[1],
-						(String) theInvocation.getArguments()[2]);
-				ourLog.info("fetchResource({}, {}) : {}", new Object[] { theInvocation.getArguments()[1], theInvocation.getArguments()[2], retVal });
+				IBaseResource retVal;
+				String id = (String) theInvocation.getArguments()[2];
+				if ("Questionnaire/q_jon".equals(id)) {
+					retVal = ourCtx.newJsonParser().parseResource(IOUtils.toString(FhirInstanceValidatorDstu21Test.class.getResourceAsStream("/q_jon.json")));
+				} else {
+					retVal = myDefaultValidationSupport.fetchResource((FhirContext) theInvocation.getArguments()[0], (Class<IBaseResource>) theInvocation.getArguments()[1], id);
+				}
+				ourLog.info("fetchResource({}, {}) : {}", new Object[] { theInvocation.getArguments()[1], id, retVal });
 				return retVal;
 			}
 		});
@@ -209,20 +225,20 @@ public class FhirInstanceValidatorDstu21Test {
 		InputStream stream = FhirInstanceValidatorDstu21Test.class.getResourceAsStream("/conformance.json.gz");
 		stream = new GZIPInputStream(stream);
 		String input = IOUtils.toString(stream);
-	
+
 		long start = System.currentTimeMillis();
 		ValidationResult output = null;
 		int passes = 1;
 		for (int i = 0; i < passes; i++) {
-			ourLog.info("Pass {}", i+1);
+			ourLog.info("Pass {}", i + 1);
 			output = myVal.validateWithResult(input);
 		}
-		
+
 		long delay = System.currentTimeMillis() - start;
 		long per = delay / passes;
 
 		logResultsAndReturnAll(output);
-		
+
 		ourLog.info("Took {} ms -- {}ms / pass", delay, per);
 	}
 
@@ -239,6 +255,16 @@ public class FhirInstanceValidatorDstu21Test {
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("/f:Patient/f:foo", output.getMessages().get(0).getLocationString());
 		assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
+	}
+
+	@Test
+	public void testValidateQuestionnaireResponse() throws IOException {
+		String input = IOUtils.toString(FhirInstanceValidatorDstu21Test.class.getResourceAsStream("/qr_jon.xml"));
+
+		ValidationResult output = myVal.validateWithResult(input);
+		assertEquals(output.toString(), 12, output.getMessages().size());
+		ourLog.info(output.getMessages().get(0).getLocationString());
+		ourLog.info(output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -322,7 +348,7 @@ public class FhirInstanceValidatorDstu21Test {
 		addValidConcept("http://loinc.org", "1234567");
 
 		Observation input = new Observation();
-//		input.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/devicemetricobservation");
+		// input.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/devicemetricobservation");
 
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
 		input.getEncounter().setReference("http://foo.com/Encounter/9");
@@ -332,7 +358,7 @@ public class FhirInstanceValidatorDstu21Test {
 		myInstanceVal.setValidationSupport(myMockSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
-		
+
 		assertThat(errors.toString(), containsString("information"));
 		assertThat(errors.toString(), containsString("Unknown code: http://loinc.org / 12345"));
 		assertEquals(1, errors.size());

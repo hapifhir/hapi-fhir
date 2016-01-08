@@ -66,7 +66,7 @@ public class ResourceProviderQuestionnaireResponseDstu21Test extends BaseResourc
 			ourClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.toString(), containsString("Answer to question with linkId[link1] found of type [DecimalType] but this is invalid for question of type [string]"));
+			assertThat(e.toString(), containsString("Answer value must be of type string"));
 		}
 	}
 	
@@ -88,7 +88,7 @@ public class ResourceProviderQuestionnaireResponseDstu21Test extends BaseResourc
 			ourClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.toString(), containsString("Answer to question with linkId[link1] found of type [DecimalType] but this is invalid for question of type [string]"));
+			assertThat(e.toString(), containsString("Answer value must be of type string"));
 		}
 	}
 

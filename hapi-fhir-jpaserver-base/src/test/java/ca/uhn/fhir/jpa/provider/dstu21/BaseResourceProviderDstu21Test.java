@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.config.WebsocketDstu21Config;
 import ca.uhn.fhir.jpa.dao.dstu21.BaseJpaDstu21Test;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu21;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu21;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
@@ -46,7 +47,7 @@ public abstract class BaseResourceProviderDstu21Test extends BaseJpaDstu21Test {
 	private static Server ourServer;
 	protected static String ourServerBase;
 	protected static RestfulServer ourRestServer;
-	private static DefaultProfileValidationSupport myValidationSupport;
+	private static JpaValidationSupportChainDstu21 myValidationSupport;
 
 	public BaseResourceProviderDstu21Test() {
 		super();
@@ -133,7 +134,7 @@ public abstract class BaseResourceProviderDstu21Test extends BaseJpaDstu21Test {
 			server.start();
 			
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
-			myValidationSupport = wac.getBean(DefaultProfileValidationSupport.class);
+			myValidationSupport = wac.getBean(JpaValidationSupportChainDstu21.class);
 	
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 			ourClient.registerInterceptor(new LoggingInterceptor(true));

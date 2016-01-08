@@ -1,9 +1,12 @@
 package org.hl7.fhir.dstu21.validation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu21.exceptions.DefinitionException;
 import org.hl7.fhir.dstu21.exceptions.FHIRException;
 import org.hl7.fhir.dstu21.formats.FormatUtilities;
@@ -13,6 +16,7 @@ import org.hl7.fhir.dstu21.model.Base;
 import org.hl7.fhir.dstu21.model.CodeableConcept;
 import org.hl7.fhir.dstu21.model.Coding;
 import org.hl7.fhir.dstu21.model.ContactPoint;
+import org.hl7.fhir.dstu21.model.DomainResource;
 import org.hl7.fhir.dstu21.model.ElementDefinition;
 import org.hl7.fhir.dstu21.model.ElementDefinition.ConstraintSeverity;
 import org.hl7.fhir.dstu21.model.ElementDefinition.ElementDefinitionBindingComponent;
@@ -28,6 +32,9 @@ import org.hl7.fhir.dstu21.model.OperationOutcome.IssueType;
 import org.hl7.fhir.dstu21.model.Period;
 import org.hl7.fhir.dstu21.model.Property;
 import org.hl7.fhir.dstu21.model.Quantity;
+import org.hl7.fhir.dstu21.model.Questionnaire;
+import org.hl7.fhir.dstu21.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.dstu21.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu21.model.Range;
 import org.hl7.fhir.dstu21.model.Ratio;
 import org.hl7.fhir.dstu21.model.Reference;
@@ -461,7 +468,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       ElementDefinitionBindingComponent binding = theElementCntext.getBinding();
       if (warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, binding != null, "Binding for " + path + " missing (cc)")) {
         if (binding.hasValueSet() && binding.getValueSet() instanceof Reference) {
-          ValueSet valueset = resolveBindingReference(binding.getValueSet());
+					ValueSet valueset = resolveBindingReference(profile, binding.getValueSet());
           if (warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, valueset != null, "ValueSet " + describeReference(binding.getValueSet()) + " not found")) {
           	try {
               CodeableConcept cc = readAsCodeableConcept(element);
@@ -532,7 +539,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
           ElementDefinitionBindingComponent binding = theElementCntext.getBinding();
           if (warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, binding != null, "Binding for " + path + " missing")) {
             if (binding.hasValueSet() && binding.getValueSet() instanceof Reference) {
-              ValueSet valueset = resolveBindingReference(binding.getValueSet());
+							ValueSet valueset = resolveBindingReference(profile, binding.getValueSet());
               if (warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, valueset != null, "ValueSet " + describeReference(binding.getValueSet()) + " not found")) {
               	try {
                   Coding c = readAsCoding(element);
@@ -848,7 +855,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     checkFixedValue(errors, path + ".end", focus.getNamedChild("end"), fixed.getEndElement(), "end");
   }
 
-	private void checkPrimitive(List<ValidationMessage> errors, String path, String type, ElementDefinition context, WrapperElement e) {
+	private void checkPrimitive(List<ValidationMessage> errors, String path, String type, ElementDefinition context, WrapperElement e, StructureDefinition profile) {
     if (type.equals("uri")) {
       rule(errors, IssueType.INVALID, e.line(), e.col(), path, !e.getAttribute("value").startsWith("oid:"), "URI values cannot start with oid:");
       rule(errors, IssueType.INVALID, e.line(), e.col(), path, !e.getAttribute("value").startsWith("uuid:"), "URI values cannot start with uuid:");
@@ -882,13 +889,13 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
 
     if (context.hasBinding()) {
-      checkPrimitiveBinding(errors, path, type, context, e);
+      checkPrimitiveBinding(errors, path, type, context, e, profile);
     }
     // for nothing to check
   }
 
   // note that we don't check the type here; it could be string, uri or code.
-	private void checkPrimitiveBinding(List<ValidationMessage> errors, String path, String type, ElementDefinition elementContext, WrapperElement element) {
+	private void checkPrimitiveBinding(List<ValidationMessage> errors, String path, String type, ElementDefinition elementContext, WrapperElement element, StructureDefinition profile) {
     if (!element.hasAttribute("value"))
       return;
 
@@ -898,7 +905,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     // firstly, resolve the value set
     ElementDefinitionBindingComponent binding = elementContext.getBinding();
     if (binding.hasValueSet() && binding.getValueSet() instanceof Reference) {
-      ValueSet vs = resolveBindingReference(binding.getValueSet());
+			ValueSet vs = resolveBindingReference(profile, binding.getValueSet());
       if (warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, vs != null, "ValueSet {0} not found", describeReference(binding.getValueSet()))) {
         ValidationResult vr = context.validateCode(null, value, null, vs);
       	if (!vr.isOk()) {
@@ -1157,6 +1164,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 	private ElementDefinition getCriteriaForDiscriminator(String path, ElementDefinition ed, String discriminator, StructureDefinition profile) throws DefinitionException {
     List<ElementDefinition> childDefinitions = getChildMap(profile, ed);
     List<ElementDefinition> snapshot = null;
+    int index;
     if (childDefinitions.isEmpty()) {
       // going to look at the type
       if (ed.getType().size() == 0)
@@ -1173,14 +1181,14 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         type = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + ed.getType().get(0).getCode());
       snapshot = type.getSnapshot().getElement();
       ed = snapshot.get(0);
+			index = 0;
     } else {
-      snapshot = profile.getSnapshot().getElement();
+			snapshot = childDefinitions;
+			index = -1;
     }
     String originalPath = ed.getPath();
     String goal = originalPath + "." + discriminator;
 
-    int index = snapshot.indexOf(ed);
-    assert(index > -1);
     index++;
     while (index < snapshot.size() && !snapshot.get(index).getPath().equals(originalPath)) {
       if (snapshot.get(index).getPath().equals(goal))
@@ -1344,11 +1352,20 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
   }
 
-  private ValueSet resolveBindingReference(Type reference) {
+	private ValueSet resolveBindingReference(DomainResource ctxt, Type reference) {
     if (reference instanceof UriType)
       return context.fetchResource(ValueSet.class, ((UriType) reference).getValue().toString());
-    else if (reference instanceof Reference)
+	  else if (reference instanceof Reference) {
+	    String s = ((Reference) reference).getReference();
+	    if (s.startsWith("#")) {
+	      for (Resource c : ctxt.getContained()) {
+	        if (c.getId().equals(s.substring(1)) && (c instanceof ValueSet))
+	          return (ValueSet) c;
+	      }
+	      return null;
+	    } else
       return context.fetchResource(ValueSet.class, ((Reference) reference).getReference());
+	  }
     else
       return null;
   }
@@ -1490,8 +1507,238 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         validateBundle(errors, element, stack);
       if (element.getResourceType().equals("Observation"))
         validateObservation(errors, element, stack);
+      if (element.getResourceType().equals("QuestionnaireResponse"))
+        validateQuestionannaireResponse(errors, element, stack);
+		}
+	}
+
+	private void validateQuestionannaireResponse(List<ValidationMessage> errors, WrapperElement element, NodeStack stack) {
+	  WrapperElement q = element.getNamedChild("questionnaire");
+	  if (hint(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), q != null, "No questionnaire is identified, so no validation can be performed against the base questionnaire")) {
+	    Questionnaire qsrc = context.fetchResource(Questionnaire.class, q.getNamedChildValue("reference"));
+      if (warning(errors, IssueType.REQUIRED, q.line(), q.col(), stack.getLiteralPath(), qsrc != null, "The questionnaire could not be resolved, so no validation can be performed against the base questionnaire"))
+	        validateQuestionannaireResponseItems(qsrc, qsrc.getItem(), errors, element, stack);
+	  }
+	}
+	
+	private void validateQuestionannaireResponseItem(Questionnaire qsrc, QuestionnaireItemComponent qItem, List<ValidationMessage> errors, WrapperElement element, NodeStack stack) {
+	  String text = element.getNamedChildValue("text");
+	  rule(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), Utilities.noString(text) || text.equals(qItem.getText()), "If text exists, it must match the questionnaire definition for linkId "+qItem.getLinkId());
+
+	  List<WrapperElement> answers = new ArrayList<InstanceValidator.WrapperElement>();
+    element.getNamedChildren("answer", answers);
+    rule(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), (answers.size() > 0) || !qItem.getRequired(), "No response answer found for required item "+qItem.getLinkId());
+    if (answers.size() > 1)
+      rule(errors, IssueType.INVALID, answers.get(1).line(), answers.get(1).col(), stack.getLiteralPath(), qItem.getRepeats(), "Only one response answer item with this linkId allowed");
+
+	    for (WrapperElement answer : answers) {
+	      NodeStack ns = stack.push(answer, -1, null, null);
+	        switch (qItem.getType()) {
+	        case GROUP: 
+	          rule(errors, IssueType.STRUCTURE, answer.line(), answer.col(), stack.getLiteralPath(), false, "Items of type group should not have answers"); 
+	          break;
+	        case DISPLAY:  // nothing
+            break;
+	        case BOOLEAN:       
+	          validateQuestionnaireResponseItemType(errors, answer, ns, "boolean");
+            break;
+	        case DECIMAL:       
+	          validateQuestionnaireResponseItemType(errors, answer, ns, "decimal");
+            break;
+	        case INTEGER:       
+	          validateQuestionnaireResponseItemType(errors, answer, ns, "integer");
+            break;
+	        case DATE:          
+	          validateQuestionnaireResponseItemType(errors, answer, ns, "date");
+            break;
+	        case DATETIME:      
+	          validateQuestionnaireResponseItemType(errors, answer, ns, "dateTime");
+            break;
+	        case INSTANT:       
+	          validateQuestionnaireResponseItemType(errors, answer, ns, "instant");
+            break;
+	        case TIME:          
+	          validateQuestionnaireResponseItemType(errors, answer, ns, "time");
+            break;
+	        case STRING:        
+	          validateQuestionnaireResponseItemType(errors, answer, ns, "string");
+            break;
+	        case TEXT:          
+	          validateQuestionnaireResponseItemType(errors, answer, ns, "text");
+            break;
+	        case URL:           
+	          validateQuestionnaireResponseItemType(errors, answer, ns, "uri");
+            break;
+	        case ATTACHMENT:    
+	          validateQuestionnaireResponseItemType(errors, answer, ns, "Attachment");
+            break;
+	        case REFERENCE:     
+	          validateQuestionnaireResponseItemType(errors, answer, ns, "Reference");
+            break;
+	        case QUANTITY:   
+	          if (validateQuestionnaireResponseItemType(errors, answer, ns, "Quantity").equals("Quantity"))
+	            if (qItem.hasExtension("???"))
+	              validateQuestionnaireResponseItemQuantity(errors, answer, ns);
+	              break;
+	        case CHOICE:     
+	          if (validateQuestionnaireResponseItemType(errors, answer, ns, "Coding").equals("Coding"))
+	            validateAnswerCode(errors, answer, ns, qsrc, qItem);
+	            break;
+	         case OPENCHOICE: 
+	           if (validateQuestionnaireResponseItemType(errors, answer, ns, "Coding", "string").equals("Coding"))
+	            validateAnswerCode(errors, answer, ns, qsrc, qItem);
+              break;
+	        }
+	        validateQuestionannaireResponseItems(qsrc, qItem.getItem(), errors, answer, stack);
+	    }
+	  if (qItem.getType() == QuestionnaireItemType.GROUP)
+	    validateQuestionannaireResponseItems(qsrc, qItem.getItem(), errors, element, stack);
+	  else {
+	    List<WrapperElement> items = new ArrayList<InstanceValidator.WrapperElement>();
+      element.getNamedChildren("item", items);
+      for (WrapperElement item : items) {
+	        NodeStack ns = stack.push(item, -1, null, null);
+	          rule(errors, IssueType.STRUCTURE, answers.get(0).line(), answers.get(0).col(), stack.getLiteralPath(), false, "Items not of type group should not have items");
+	      }
+	  }
+	}
+
+	private void validateQuestionannaireResponseItem(Questionnaire qsrc, QuestionnaireItemComponent qItem, List<ValidationMessage> errors, List<WrapperElement> elements, NodeStack stack) {
+	  if (elements.size() > 1)
+	    rule(errors, IssueType.INVALID, elements.get(1).line(), elements.get(1).col(), stack.getLiteralPath(), qItem.getRepeats(), "Only one response item with this linkId allowed");
+	  for (WrapperElement element : elements) {
+	    NodeStack ns = stack.push(element, -1, null, null);
+	    validateQuestionannaireResponseItem(qsrc, qItem, errors, element, ns);
+	  }
+	}
+
+	private int getLinkIdIndex(List<QuestionnaireItemComponent> qItems, String linkId) {
+	  for (int i = 0; i < qItems.size(); i++) {
+	    if (linkId.equals(qItems.get(i).getLinkId()))
+	      return i;
+	  }
+	  return -1;
+	}
+
+	private void validateQuestionannaireResponseItems(Questionnaire qsrc, List<QuestionnaireItemComponent> qItems, List<ValidationMessage> errors, WrapperElement element, NodeStack stack) {
+	  List<WrapperElement> items = new ArrayList<WrapperElement>();
+	  element.getNamedChildren("item", items);
+	  // now, sort into stacks
+	  Map<String, List<WrapperElement>> map = new HashMap<String, List<WrapperElement>>();
+	  int lastIndex = -1;
+	  for (WrapperElement item : items) {
+	    String linkId = item.getNamedChildValue("linkId");
+	    if (rule(errors, IssueType.REQUIRED, item.line(), item.col(), stack.getLiteralPath(), !Utilities.noString(linkId), "No LinkId, so can't be validated")) {
+	      int index = getLinkIdIndex(qItems, linkId);
+	      if (index == -1) {
+	        QuestionnaireItemComponent qItem = findQuestionnaireItem(qsrc, linkId);
+	        if (qItem != null) {
+	          rule(errors, IssueType.STRUCTURE, item.line(), item.col(), stack.getLiteralPath(), index > -1, "Structural Error: item is in the wrong place");
+	          NodeStack ns = stack.push(item, -1, null, null);
+	          validateQuestionannaireResponseItem(qsrc, qItem, errors, element, ns);
+	        }
+	        else
+	          rule(errors, IssueType.NOTFOUND, item.line(), item.col(), stack.getLiteralPath(), index > -1, "LinkId \""+linkId+"\" not found in questionnaire");
+	      }
+	      else
+	      {
+	        rule(errors, IssueType.STRUCTURE, item.line(), item.col(), stack.getLiteralPath(), index >= lastIndex, "Structural Error: items are out of order");
+	        lastIndex = index;
+	        List<WrapperElement> mapItem = map.get(linkId);
+	        if (mapItem == null) {
+	          mapItem = new ArrayList<WrapperElement>();
+	          map.put(linkId, mapItem);
+	        }
+	        mapItem.add(item);
+	      }
+	    }
+	  }
+
+	  // ok, now we have a list of known items, grouped by linkId. We"ve made an error for anything out of order
+	  for (QuestionnaireItemComponent qItem : qItems) {
+	    List<WrapperElement> mapItem = map.get(qItem.getLinkId());
+	    if (mapItem != null)
+	      validateQuestionannaireResponseItem(qsrc, qItem, errors, mapItem, stack);
+	    else
+	      rule(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), !qItem.getRequired(), "No response found for required item "+qItem.getLinkId());
     }
   }
+
+	private void validateQuestionnaireResponseItemQuantity( List<ValidationMessage> errors, WrapperElement answer, NodeStack stack)	{
+
+	}
+
+	private String validateQuestionnaireResponseItemType(List<ValidationMessage> errors, WrapperElement element, NodeStack stack, String... types) {
+	  List<WrapperElement> values = new ArrayList<WrapperElement>();
+	  element.getNamedChildrenWithWildcard("value[x]", values);
+	  if (values.size() > 0) {
+	    NodeStack ns = stack.push(values.get(0), -1, null, null);
+	    CommaSeparatedStringBuilder l = new CommaSeparatedStringBuilder();
+	    for (String s : types)  {
+	      l.append(s);
+	      if (values.get(0).getName().equals("value"+Utilities.capitalize(s))) 
+	        return(s);
+	    }
+	    if (types.length == 1)
+	      rule(errors, IssueType.STRUCTURE, values.get(0).line(), values.get(0).col(), ns.getLiteralPath(), false, "Answer value must be of type "+types[0]);
+	    else
+	      rule(errors, IssueType.STRUCTURE, values.get(0).line(), values.get(0).col(), ns.getLiteralPath(), false, "Answer value must be one of the types "+l.toString());
+	  }
+	  return null;
+	}
+
+	private QuestionnaireItemComponent findQuestionnaireItem(Questionnaire qSrc, String linkId) {
+	  return findItem(qSrc.getItem(), linkId);
+	}
+
+	private QuestionnaireItemComponent findItem(List<QuestionnaireItemComponent> list, String linkId) {
+	  for (QuestionnaireItemComponent item : list) {
+	    if (linkId.equals(item.getLinkId()))
+	      return item;
+	    QuestionnaireItemComponent result = findItem(item.getItem(), linkId);
+	    if (result != null)
+	      return result;
+	  }
+	  return null;
+	}
+
+	private void validateAnswerCode(List<ValidationMessage> errors, WrapperElement value, NodeStack stack, List<Coding> optionList) {
+	  String system = value.getNamedChildValue("system");
+	  String code = value.getNamedChildValue("code");
+	  boolean found = false;
+	  for (Coding c : optionList) {
+	    if (StringUtils.equals(c.getSystem(), system) && StringUtils.equals(c.getCode(), code)) {
+	      found = true;
+	      break;
+	    }
+	  }
+	  rule(errors, IssueType.STRUCTURE, value.line(), value.col(), stack.getLiteralPath(), found, "The code "+system+"::"+code+" is not a valid option");
+	}
+
+	private void validateAnswerCode(List<ValidationMessage> errors, WrapperElement value, NodeStack stack, Questionnaire qSrc, Reference ref) {
+	  ValueSet vs = resolveBindingReference(qSrc, ref);
+	  if (warning(errors, IssueType.CODEINVALID, value.line(), value.col(), stack.getLiteralPath(), vs != null, "ValueSet " + describeReference(ref) + " not found"))  {
+	    try {
+	      Coding c = readAsCoding(value);
+	      ValidationResult res = context.validateCode(c, vs);
+	      if (!res.isOk())
+	        rule(errors, IssueType.CODEINVALID, value.line(), value.col(), stack.getLiteralPath(), false, "The value provided is not in the options value set in the questionnaire");
+	    } catch (Exception e) {
+	      warning(errors, IssueType.CODEINVALID, value.line(), value.col(), stack.getLiteralPath(), false, "Error " + e.getMessage() + " validating Coding against Questionnaire Options");
+	    }
+	  }
+	}
+
+	private void validateAnswerCode( List<ValidationMessage> errors, WrapperElement answer, NodeStack stack, Questionnaire qSrc, QuestionnaireItemComponent qItem) {
+	  WrapperElement v = answer.getNamedChild("valueCoding");
+	  NodeStack ns = stack.push(v, -1, null, null);
+	  if (qItem.getOption().size() > 0)
+	    validateAnswerCode(errors, v, stack, qItem.getOption());
+	  else if (qItem.hasOptions())
+	    validateAnswerCode(errors, v, stack, qSrc, qItem.getOptions());
+	  else
+	    hint(errors, IssueType.STRUCTURE, v.line(), v.col(), stack.getLiteralPath(), false, "Cannot validate options because no option or options are provided");
+	}
 
   private String tail(String path) {
     return path.substring(path.lastIndexOf(".") + 1);
@@ -1895,8 +2142,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     if (rule(errors, IssueType.INVALID, composition.line(), composition.col(), stack.getLiteralPath(), composition.getResourceType().equals("Composition"),
         "The first entry in a document must be a composition")) {
       // the composition subject and section references must resolve in the bundle
-      validateBundleReference(errors, entries, composition.getNamedChild("subject"), "Composition Subject", stack.push(composition.getNamedChild("subject"), -1, null, null), fullUrl, "Composition",
-          id);
+			WrapperElement elem = composition.getNamedChild("subject");
+			if (rule(errors, IssueType.INVALID, composition.line(), composition.col(), stack.getLiteralPath(), elem == null, "A document composition must have a subject"))
+        validateBundleReference(errors, entries, elem, "Composition Subject", stack.push(elem, -1, null, null), fullUrl, "Composition", id);
       validateSections(errors, entries, composition, stack, fullUrl, id);
     }
   }
@@ -1922,7 +2170,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
     rule(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), !empty(element), "Elements must have some content (@value, extensions, or children elements)");
 
-		checkInvariants(errors, stack.literalPath, profile, definition, null, null, resource, element);
+		checkInvariants(errors, stack.getLiteralPath(), profile, definition, null, null, resource, element);
 
     // get the list of direct defined children, including slices
     List<ElementDefinition> childDefinitions = getChildMap(profile, definition.getName(), definition.getPath(), definition.getNameReference());
@@ -2039,7 +2287,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
         if (type != null) {
           if (isPrimitiveType(type))
-            checkPrimitive(errors, ei.path, type, ei.definition, ei.element);
+            checkPrimitive(errors, ei.path, type, ei.definition, ei.element, profile);
           else {
             if (type.equals("Identifier"))
               checkIdentifier(errors, ei.path, ei.element, ei.definition);

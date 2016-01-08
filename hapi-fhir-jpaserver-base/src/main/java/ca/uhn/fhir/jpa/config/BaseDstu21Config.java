@@ -1,10 +1,8 @@
 package ca.uhn.fhir.jpa.config;
 
-import org.hl7.fhir.dstu21.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu21.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu21.hapi.validation.FhirQuestionnaireResponseValidator;
 import org.hl7.fhir.dstu21.hapi.validation.IValidationSupport;
-import org.hl7.fhir.dstu21.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu21.validation.IResourceValidator.BestPracticeWarningLevel;
 
 /*
@@ -28,8 +26,6 @@ import org.hl7.fhir.dstu21.validation.IResourceValidator.BestPracticeWarningLeve
  */
 
 import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -40,6 +36,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.FhirSearchDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.ISearchDao;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu21;
 import ca.uhn.fhir.validation.IValidatorModule;
 
 @Configuration
@@ -94,15 +91,9 @@ public class BaseDstu21Config extends BaseConfig {
 		return module;
 	}
 
-	@Bean
+	@Bean(autowire=Autowire.BY_NAME)
 	public IValidationSupport validationSupportChainDstu21() {
-		return new ValidationSupportChain(defaultProfileValidationSupport(), jpaValidationSupportDstu21());
-//		return new ValidationSupportChain();
-	}
-
-	@Bean(destroyMethod="flush")
-	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
-		return new DefaultProfileValidationSupport();
+		return new JpaValidationSupportChainDstu21();
 	}
 
 }
