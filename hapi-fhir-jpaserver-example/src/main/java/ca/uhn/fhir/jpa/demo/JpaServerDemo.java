@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 
+import org.hl7.fhir.dstu21.model.Meta;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -14,8 +15,10 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
+import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu21;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
+import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu21;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -44,7 +47,7 @@ public class JpaServerDemo extends RestfulServer {
 		 *
 		 * If you want to use DSTU1 instead, change the following line, and change the 2 occurrences of dstu2 in web.xml to dstu1
 		 */
-		FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU2;
+		FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU2_1;
 		setFhirContext(new FhirContext(fhirVersion));
 
 		// Get the spring context from the web container (it's declared in web.xml)
@@ -55,7 +58,16 @@ public class JpaServerDemo extends RestfulServer {
 		 * file which is automatically generated as a part of hapi-fhir-jpaserver-base and
 		 * contains bean definitions for a resource provider for each resource type
 		 */
-		String resourceProviderBeanName = "myResourceProvidersDstu" + (fhirVersion == FhirVersionEnum.DSTU1 ? "1" : "2");
+		String resourceProviderBeanName;
+		if (fhirVersion == FhirVersionEnum.DSTU1) {
+			resourceProviderBeanName = "myResourceProvidersDstu1";
+		} else if (fhirVersion == FhirVersionEnum.DSTU2) {
+			resourceProviderBeanName = "myResourceProvidersDstu2";
+		} else if (fhirVersion == FhirVersionEnum.DSTU2_1) {
+			resourceProviderBeanName = "myResourceProvidersDstu21";
+		} else {
+			throw new IllegalStateException();
+		}
 		List<IResourceProvider> beans = myAppCtx.getBean(resourceProviderBeanName, List.class);
 		setResourceProviders(beans);
 		
@@ -66,8 +78,12 @@ public class JpaServerDemo extends RestfulServer {
 		Object systemProvider;
 		if (fhirVersion == FhirVersionEnum.DSTU1) {
 			systemProvider = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
+		} else if (fhirVersion == FhirVersionEnum.DSTU2) {
+			systemProvider = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu2.class);
+		} else if (fhirVersion == FhirVersionEnum.DSTU2_1) {
+			systemProvider = myAppCtx.getBean("mySystemProviderDstu21", JpaSystemProviderDstu21.class);
 		} else {
-			systemProvider = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
+			throw new IllegalStateException();
 		}
 		setPlainProviders(systemProvider);
 
@@ -77,15 +93,26 @@ public class JpaServerDemo extends RestfulServer {
 		 * is a nice addition.
 		 */
 		if (fhirVersion == FhirVersionEnum.DSTU1) {
-			IFhirSystemDao<List<IResource>, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
+			IFhirSystemDao<List<IResource>, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu1",
+					IFhirSystemDao.class);
 			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
-		} else {
+		} else if (fhirVersion == FhirVersionEnum.DSTU2) {
 			IFhirSystemDao<Bundle, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
-			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(DaoConfig.class));
+			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao,
+					myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
+		} else if (fhirVersion == FhirVersionEnum.DSTU2_1) {
+			IFhirSystemDao<org.hl7.fhir.dstu21.model.Bundle, Meta> systemDao = myAppCtx
+					.getBean("mySystemDaoDstu21", IFhirSystemDao.class);
+			JpaConformanceProviderDstu21 confProvider = new JpaConformanceProviderDstu21(this, systemDao,
+					myAppCtx.getBean(DaoConfig.class));
+			confProvider.setImplementationDescription("Example Server");
+			setServerConformanceProvider(confProvider);
+		} else {
+			throw new IllegalStateException();
 		}
 
 		/*
