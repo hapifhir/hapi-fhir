@@ -96,8 +96,13 @@ public class BaseDstu21Config extends BaseConfig {
 
 	@Bean
 	public IValidationSupport validationSupportChainDstu21() {
-		return new ValidationSupportChain(new DefaultProfileValidationSupport(), jpaValidationSupportDstu21());
+		return new ValidationSupportChain(defaultProfileValidationSupport(), jpaValidationSupportDstu21());
 //		return new ValidationSupportChain();
+	}
+
+	@Bean(destroyMethod="flush")
+	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
+		return new DefaultProfileValidationSupport();
 	}
 
 }

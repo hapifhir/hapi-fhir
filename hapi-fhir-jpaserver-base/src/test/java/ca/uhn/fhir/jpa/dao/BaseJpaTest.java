@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,6 +87,7 @@ public class BaseJpaTest {
 
 	@AfterClass
 	public static void afterClassShutdownDerby() throws SQLException {
+//		DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		// try {
 		// DriverManager.getConnection("jdbc:derby:memory:myUnitTestDB;drop=true");
 		// } catch (SQLNonTransientConnectionException e) {

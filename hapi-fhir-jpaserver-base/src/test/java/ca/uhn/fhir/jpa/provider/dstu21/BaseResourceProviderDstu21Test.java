@@ -12,16 +12,19 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.dstu21.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu21.model.Bundle;
 import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.springframework.jdbc.support.incrementer.MySQLMaxValueIncrementer;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import ca.uhn.fhir.jpa.config.WebsocketDstu21Config;
@@ -43,6 +46,7 @@ public abstract class BaseResourceProviderDstu21Test extends BaseJpaDstu21Test {
 	private static Server ourServer;
 	protected static String ourServerBase;
 	protected static RestfulServer ourRestServer;
+	private static DefaultProfileValidationSupport myValidationSupport;
 
 	public BaseResourceProviderDstu21Test() {
 		super();
@@ -66,6 +70,7 @@ public abstract class BaseResourceProviderDstu21Test extends BaseJpaDstu21Test {
 		ourHttpClient.close();
 		ourServer = null;
 		ourHttpClient = null;
+		myValidationSupport.flush();
 	}
 
 	@After
@@ -126,6 +131,9 @@ public abstract class BaseResourceProviderDstu21Test extends BaseJpaDstu21Test {
 			
 			server.setHandler(proxyHandler);
 			server.start();
+			
+			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
+			myValidationSupport = wac.getBean(DefaultProfileValidationSupport.class);
 	
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 			ourClient.registerInterceptor(new LoggingInterceptor(true));

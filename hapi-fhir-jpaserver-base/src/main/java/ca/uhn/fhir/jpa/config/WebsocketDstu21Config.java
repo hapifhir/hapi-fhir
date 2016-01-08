@@ -47,7 +47,7 @@ public class WebsocketDstu21Config implements WebSocketConfigurer {
 		return new PerConnectionWebSocketHandler(SubscriptionWebsocketHandlerDstu21.class);
 	}
 
-	@Bean
+	@Bean(destroyMethod="destroy")
 	public TaskScheduler websocketTaskScheduler() {
 		ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler();
 		retVal.setPoolSize(5);

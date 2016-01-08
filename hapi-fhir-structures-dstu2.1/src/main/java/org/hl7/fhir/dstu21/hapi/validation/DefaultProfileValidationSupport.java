@@ -27,8 +27,8 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultProfileValidationSupport.class);
+	
 	private Map<String, ValueSet> myCodeSystems;
-
 	private Map<String, ValueSet> myDefaultValueSets;
 
 	@Override
@@ -151,6 +151,11 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		}
 		
 		return new CodeValidationResult(IssueSeverity.INFORMATION, "Unknown code: " + theCodeSystem + " / " + theCode);
+	}
+
+	public void flush() {
+		myCodeSystems = null;
+		myDefaultValueSets = null;
 	}
 
 }
