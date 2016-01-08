@@ -212,6 +212,10 @@
 			<id>petervanhoute</id>
 			<name>Peter Van Houte</name>
 		</developer>
+		<developer>
+			<id>karlmdavis</id>
+			<name>Karl M. Davis</name>
+		</developer>
 	</developers>
 
 	<licenses>
