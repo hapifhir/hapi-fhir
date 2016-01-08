@@ -296,7 +296,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>-Xmx1024m</argLine>
+					<argLine>-Xmx1324m</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
