@@ -48,6 +48,7 @@ import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.RestfulClientFactory;
+import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
@@ -308,12 +309,7 @@ public class FhirContext {
 	 */
 	public IRestfulClientFactory getRestfulClientFactory() {
 		if (myRestfulClientFactory == null) {
-			try {
-				myRestfulClientFactory = (IRestfulClientFactory) Class.forName("ca.uhn.fhir.rest.client.ApacheRestfulClientFactory").getConstructor(getClass()).newInstance(this);
-			}
-			catch (Exception e) {
-				throw new RuntimeException("Could not create the RestfulClientFactory", e);
-			}
+			myRestfulClientFactory = new ApacheRestfulClientFactory(this);
 		}
 		return myRestfulClientFactory;
 	}
