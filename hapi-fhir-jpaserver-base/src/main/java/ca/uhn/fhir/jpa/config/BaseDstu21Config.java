@@ -66,7 +66,7 @@ public class BaseDstu21Config extends BaseConfig {
 	}
 
 	@Bean(name = "myJpaValidationSupportDstu21", autowire = Autowire.BY_NAME)
-	public static ca.uhn.fhir.jpa.dao.IJpaValidationSupportDstu21 jpaValidationSupportDstu21() {
+	public ca.uhn.fhir.jpa.dao.IJpaValidationSupportDstu21 jpaValidationSupportDstu21() {
 		ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu21 retVal = new ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu21();
 		return retVal;
 	}
@@ -95,7 +95,7 @@ public class BaseDstu21Config extends BaseConfig {
 	}
 
 	@Bean
-	public static IValidationSupport validationSupportChainDstu21() {
+	public IValidationSupport validationSupportChainDstu21() {
 		return new ValidationSupportChain(new DefaultProfileValidationSupport(), jpaValidationSupportDstu21());
 //		return new ValidationSupportChain();
 	}

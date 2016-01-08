@@ -57,6 +57,11 @@ public class JpaValidationSupportDstu21 implements IJpaValidationSupportDstu21 {
 	@Qualifier("myFhirContextDstu21")
 	private FhirContext myDstu21Ctx;
 
+	public JpaValidationSupportDstu21() {
+		super();
+	}
+	
+	
 	@Override
 	public ValueSetExpansionComponent expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
 		return null;

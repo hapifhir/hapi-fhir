@@ -44,20 +44,6 @@ public class TestDstu21Config extends BaseJavaConfigDstu21 {
 	@Value("${fhir.lucene.location.dstu21}")
 	private String myFhirLuceneLocation;
 
-	@Autowired
-	private ApplicationContext myApplicationCtx;
-	
-	@PostConstruct
-	public void postConstruct() {
-		IValidatorModule next = myApplicationCtx.getBean("myQuestionnaireResponseValidatorDstu21", IValidatorModule.class);
-		requestValidatingInterceptor().addValidatorModule(next);
-		responseValidatingInterceptor().addValidatorModule(next);
-
-		next = myApplicationCtx.getBean("myInstanceValidatorDstu21", IValidatorModule.class);
-		requestValidatingInterceptor().addValidatorModule(next);
-		responseValidatingInterceptor().addValidatorModule(next);
-	}
-	
 	@Bean()
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
@@ -117,6 +103,8 @@ public class TestDstu21Config extends BaseJavaConfigDstu21 {
 		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		requestValidator.addValidatorModule(questionnaireResponseValidatorDstu21());
+		requestValidator.addValidatorModule(instanceValidatorDstu21());
 
 		return requestValidator;
 	}
@@ -141,6 +129,8 @@ public class TestDstu21Config extends BaseJavaConfigDstu21 {
 		responseValidator.addExcludeOperationType(RestOperationTypeEnum.HISTORY_TYPE);
 		responseValidator.addExcludeOperationType(RestOperationTypeEnum.SEARCH_SYSTEM);
 		responseValidator.addExcludeOperationType(RestOperationTypeEnum.SEARCH_TYPE);
+		responseValidator.addValidatorModule(questionnaireResponseValidatorDstu21());
+		responseValidator.addValidatorModule(instanceValidatorDstu21());
 		return responseValidator;
 	}
 
