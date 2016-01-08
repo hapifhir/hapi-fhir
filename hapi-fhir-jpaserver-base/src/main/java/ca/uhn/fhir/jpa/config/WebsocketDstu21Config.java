@@ -57,7 +57,7 @@ public class WebsocketDstu21Config implements WebSocketConfigurer {
 			public void afterPropertiesSet() {
 				super.afterPropertiesSet();
 				getScheduledThreadPoolExecutor().setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-				getScheduledThreadPoolExecutor().setRemoveOnCancelPolicy(true);
+//				getScheduledThreadPoolExecutor().setRemoveOnCancelPolicy(true);
 				getScheduledThreadPoolExecutor().setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
 			}
 		};

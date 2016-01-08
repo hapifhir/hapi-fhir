@@ -296,8 +296,8 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<!--<argLine>-Xmx1324m</argLine>-->
-					<argLine>-Xmx600m -XX:+HeapDumpOnOutOfMemoryError</argLine>
+					<argLine>-Xmx1624m</argLine>
+					<!--<argLine>-Xmx600m -XX:+HeapDumpOnOutOfMemoryError</argLine>-->
 				</configuration>
 			</plugin>
 			<plugin>
