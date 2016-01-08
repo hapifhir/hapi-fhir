@@ -44,13 +44,26 @@ public class WebsocketDstu21Config implements WebSocketConfigurer {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public WebSocketHandler subscriptionWebSocketHandler() {
-		return new PerConnectionWebSocketHandler(SubscriptionWebsocketHandlerDstu21.class);
+		PerConnectionWebSocketHandler retVal = new PerConnectionWebSocketHandler(SubscriptionWebsocketHandlerDstu21.class);
+		return retVal;
 	}
 
 	@Bean(destroyMethod="destroy")
 	public TaskScheduler websocketTaskScheduler() {
-		ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler();
+		final ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void afterPropertiesSet() {
+				super.afterPropertiesSet();
+				getScheduledThreadPoolExecutor().setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+				getScheduledThreadPoolExecutor().setRemoveOnCancelPolicy(true);
+				getScheduledThreadPoolExecutor().setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
+			}
+		};
+		retVal.setThreadNamePrefix("ws-dstu21-");
 		retVal.setPoolSize(5);
+		
 		return retVal;
 	}
 
