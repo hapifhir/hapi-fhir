@@ -127,20 +127,6 @@ public class JpaServerDemo extends RestfulServer {
 		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 		/*
-		 * This tells the server to use "browser friendly" MIME types if it 
-		 * detects that the request is coming from a browser, in the hopes that the 
-		 * browser won't just treat the content as a binary payload and try 
-		 * to download it (which is what generally happens if you load a 
-		 * FHIR URL in a browser). 
-		 * 
-		 * This means that the server isn't technically complying with the 
-		 * FHIR specification for direct browser requests, but this mode
-		 * is very helpful for testing and troubleshooting since it means 
-		 * you can look at FHIR URLs directly in a browser.  
-		 */
-		setUseBrowserFriendlyContentTypes(true);
-
-		/*
 		 * Default to XML and pretty printing
 		 */
 		setDefaultPrettyPrint(true);

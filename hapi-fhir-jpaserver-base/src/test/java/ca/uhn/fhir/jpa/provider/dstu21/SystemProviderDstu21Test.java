@@ -13,18 +13,24 @@ import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.dstu21.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu21.model.Bundle;
 import org.hl7.fhir.dstu21.model.Bundle.BundleType;
 import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu21.model.DecimalType;
+import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.Observation;
 import org.hl7.fhir.dstu21.model.OperationDefinition;
@@ -33,6 +39,7 @@ import org.hl7.fhir.dstu21.model.Parameters;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,16 +48,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.dstu21.BaseJpaDstu21Test;
+import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.rp.dstu21.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu21.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu21.PatientResourceProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 
 public class SystemProviderDstu21Test extends BaseJpaDstu21Test {
 
@@ -113,6 +124,62 @@ public class SystemProviderDstu21Test extends BaseJpaDstu21Test {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
+	@After
+	public void after() {
+		myRestServer.setUseBrowserFriendlyContentTypes(true);
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Test
+	public void testResponseUsesCorrectContentType() throws Exception {
+		myRestServer.setUseBrowserFriendlyContentTypes(true);
+		myRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
+
+		HttpGet get = new HttpGet(ourServerBase);
+//		get.addHeader("Accept", "application/xml, text/html");
+		CloseableHttpResponse http = ourHttpClient.execute(get);
+		assertThat(http.getFirstHeader("Content-Type").getValue(), containsString("application/json+fhir"));
+	}
+	
+
+	
+	@Test
+	public void testValidateUsingIncomingResources() throws Exception {
+		FhirInstanceValidator val = new FhirInstanceValidator(myValidationSupport);
+		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
+		interceptor.addValidatorModule(val);
+		interceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
+		interceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		myRestServer.registerInterceptor(interceptor);
+		try {
+	
+			InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
+			String bundleStr = IOUtils.toString(bundleRes);
+	
+			HttpPost req = new HttpPost(ourServerBase);
+			req.setEntity(new StringEntity(bundleStr, ContentType.parse(Constants.CT_FHIR_XML + "; charset=utf-8")));
+			
+			CloseableHttpResponse resp = ourHttpClient.execute(req);
+	
+			String encoded = IOUtils.toString(resp.getEntity().getContent());
+			IOUtils.closeQuietly(resp.getEntity().getContent());
+			ourLog.info(encoded);
+	
+			//@formatter:off
+			assertThat(encoded, containsString("Questionnaire/54127-6/_history/")); 
+			//@formatter:on
+
+			for (Header next : resp.getHeaders(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_NAME)) {
+				ourLog.info(next.toString());
+			}
+			
+		} finally {
+			myRestServer.unregisterInterceptor(interceptor);
+		}
+	}
+	
+	
 	@Test
 	public void testEverythingReturnsCorrectFormatInPagingLink() throws Exception {
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
@@ -129,6 +196,7 @@ public class SystemProviderDstu21Test extends BaseJpaDstu21Test {
 		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
 		get.addHeader("Accept", "application/xml, text/html");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
+		
 		try {
 			String response = IOUtils.toString(http.getEntity().getContent());
 			ourLog.info(response);
@@ -280,6 +348,23 @@ public class SystemProviderDstu21Test extends BaseJpaDstu21Test {
 		String bundle = IOUtils.toString(bundleRes);
 		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
+	}
+
+	@Test
+	public void testTransactionWithIncompleteBundle() throws Exception {
+		Patient patient = new Patient();
+		patient.setGender(AdministrativeGender.MALE);
+		
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient);
+		
+		try {
+			ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.toString(), containsString(""));
+		}
 	}
 
 	@Test

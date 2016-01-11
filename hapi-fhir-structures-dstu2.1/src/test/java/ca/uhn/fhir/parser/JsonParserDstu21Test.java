@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu21.model.Medication;
 import org.hl7.fhir.dstu21.model.MedicationOrder;
 import org.hl7.fhir.dstu21.model.Observation;
 import org.hl7.fhir.dstu21.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu21.model.Parameters;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.Quantity;
 import org.hl7.fhir.dstu21.model.QuestionnaireResponse;
@@ -45,11 +46,14 @@ import org.hl7.fhir.dstu21.model.Reference;
 import org.hl7.fhir.dstu21.model.StringType;
 import org.hl7.fhir.dstu21.model.UriType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.Constants;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
@@ -59,6 +63,39 @@ public class JsonParserDstu21Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2_1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu21Test.class);
 
+	@Test
+	public void testEncodeParametersWithId() {
+		Parameters reqParms = new Parameters();
+		IdType patient = new IdType(1);
+		reqParms.addParameter().setName("patient").setValue(patient);
+		
+		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(reqParms);
+		ourLog.info(enc);
+
+		assertThat(enc, containsString("\"valueId\":\"1\""));
+}
+
+	@Test
+	public void testEncodeWithNarrative() {
+		Patient p = new Patient();
+		p.addName().addFamily("Smith").addGiven("John");
+		
+		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		
+		String output = ourCtx.newJsonParser().encodeResourceToString(p);
+		ourLog.info(output);
+		
+		assertThat(output, containsString("\"text\":{\"status\":\"generated\",\"div\":\"<div><div class=\\\"hapiHeaderText\\\"> John <b>SMITH </b></div>"));
+	}
+	
+	@After
+	public void after() {
+		ourCtx.setNarrativeGenerator(null);
+	}
+	
+
+	
+	
 	// FIXME: this should pass
 	@Test
 	@Ignore

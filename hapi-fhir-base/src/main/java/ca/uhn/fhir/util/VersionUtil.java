@@ -61,4 +61,8 @@ public class VersionUtil {
 			}
 		}
 	}
+	
+	public static void main(String[] args) {
+		getVersion();
+	}
 }

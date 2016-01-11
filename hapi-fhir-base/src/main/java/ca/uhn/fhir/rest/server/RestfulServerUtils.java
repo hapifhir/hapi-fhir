@@ -545,8 +545,7 @@ public class RestfulServerUtils {
 		return prettyPrint;
 	}
 
-	public static Object streamResponseAsBundle(IRestfulServerDefaults theServer, Bundle bundle, Set<SummaryEnum> theSummaryMode,
-			boolean theRequestIsBrowser, boolean respondGzip, RequestDetails theRequestDetails)
+	public static Object streamResponseAsBundle(IRestfulServerDefaults theServer, Bundle bundle, Set<SummaryEnum> theSummaryMode, boolean respondGzip, RequestDetails theRequestDetails)
 					throws IOException {
 
 		int status = 200;
@@ -554,12 +553,7 @@ public class RestfulServerUtils {
 		// Determine response encoding
 		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails);
 
-		String contentType;
-		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
-			contentType = responseEncoding.getBrowserFriendlyBundleContentType();
-		} else {
-			contentType = responseEncoding.getBundleContentType();
-		}
+		String contentType = responseEncoding.getBundleContentType();
 
 		String charset = Constants.CHARSET_NAME_UTF8;
 		Writer writer = theRequestDetails.getResponse().getResponseWriter(status, contentType, charset, respondGzip);
@@ -577,8 +571,8 @@ public class RestfulServerUtils {
 		return theRequestDetails.getResponse().sendWriterResponse(status, contentType, charset, writer);
 	}
 
-	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, boolean theRequestIsBrowser, Set<SummaryEnum> theSummaryMode,
-			int stausCode, boolean theRespondGzip, boolean theAddContentLocationHeader, boolean respondGzip,
+	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode,
+			int stausCode, boolean theAddContentLocationHeader, boolean respondGzip,
 			RequestDetails theRequestDetails)
 					throws IOException {
 		IRestfulResponse restUtil = theRequestDetails.getResponse();
@@ -637,9 +631,7 @@ public class RestfulServerUtils {
 			}
 		}
 
-		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
-			contentType = responseEncoding.getBrowserFriendlyBundleContentType();
-		} else if (encodingDomainResourceAsText) {
+		if (encodingDomainResourceAsText) {
 			contentType = Constants.CT_HTML;
 		} else {
 			contentType = responseEncoding.getResourceContentType();
@@ -668,18 +660,15 @@ public class RestfulServerUtils {
 		}
 
 		Writer writer = restUtil.getResponseWriter(stausCode, contentType, charset, respondGzip);
-		try {
-			if (encodingDomainResourceAsText && theResource instanceof IResource) {
-				writer.append(((IResource) theResource).getText().getDiv().getValueAsString());
-			} else {
-				IParser parser = getNewParser(theServer.getFhirContext(), theRequestDetails);
-				parser.encodeResourceToWriter(theResource, writer);
-			}
-		} catch (Exception e) {
-			//always send a response, even if the parsing went wrong
+		
+		if (encodingDomainResourceAsText && theResource instanceof IResource) {
+			writer.append(((IResource) theResource).getText().getDiv().getValueAsString());
+		} else {
+			IParser parser = getNewParser(theServer.getFhirContext(), theRequestDetails);
+			parser.encodeResourceToWriter(theResource, writer);
 		}
+		
 		return restUtil.sendWriterResponse(stausCode, contentType, charset, writer);
-
 	}
 
 	// static Integer tryToExtractNamedParameter(HttpServletRequest theRequest, String name) {

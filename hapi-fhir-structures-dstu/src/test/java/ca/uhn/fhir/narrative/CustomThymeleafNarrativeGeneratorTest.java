@@ -19,7 +19,6 @@ public class CustomThymeleafNarrativeGeneratorTest {
 	public void testGenerator() {
 
 		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative/customnarrative.properties");
-		gen.setFhirContext(ourCtx);
 
 		Practitioner p = new Practitioner();
 		p.addIdentifier("sys", "val1");
@@ -28,7 +27,7 @@ public class CustomThymeleafNarrativeGeneratorTest {
 		p.getName().addFamily("fam1").addGiven("given");
 
 		NarrativeDt narrative = new NarrativeDt();
-		gen.generateNarrative(p, narrative);
+		gen.generateNarrative(ourCtx, p, narrative);
 
 		String actual = narrative.getDiv().getValueAsString();
 		ourLog.info(actual);

@@ -105,37 +105,34 @@ public class XmlParserDstu2Test {
 			"        </extension>\n" + 
 			"</Patient>";
 		//@formatter:on
-		
+
 		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, input);
 		assertEquals(1, parsed.getUndeclaredExtensions().size());
 		ExtensionDt ext = parsed.getUndeclaredExtensions().get(0);
 		assertEquals("http://example.com", ext.getUrl());
-		assertEquals("THIS IS MARKDOWN", ((MarkdownDt)ext.getValue()).getValue());
-		
+		assertEquals("THIS IS MARKDOWN", ((MarkdownDt) ext.getValue()).getValue());
+
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		assertThat(encoded, containsString("<valueMarkdown value=\"THIS IS MARKDOWN\"/>"));
 	}
-	
-	
+
 	@Test
 	public void testChoiceTypeWithProfiledType2() {
 		Parameters par = new Parameters();
-		par.addParameter().setValue((StringDt)new StringDt().setValue("ST"));
-		par.addParameter().setValue((MarkdownDt)new MarkdownDt().setValue("MD"));
-		
+		par.addParameter().setValue((StringDt) new StringDt().setValue("ST"));
+		par.addParameter().setValue((MarkdownDt) new MarkdownDt().setValue("MD"));
+
 		String str = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(par);
 		ourLog.info(str);
-		
+
 		assertThat(str, stringContainsInOrder("<valueString value=\"ST\"/>", "<valueMarkdown value=\"MD\"/>"));
-		
+
 		par = ourCtx.newXmlParser().parseResource(Parameters.class, str);
 		assertEquals(2, par.getParameter().size());
 		assertEquals(StringDt.class, par.getParameter().get(0).getValue().getClass());
 		assertEquals(MarkdownDt.class, par.getParameter().get(1).getValue().getClass());
 	}
-	
-	
-	
+
 	@Test
 	public void testBundleWithBinary() {
 		//@formatter:off
@@ -167,7 +164,7 @@ public class XmlParserDstu2Test {
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
 
 	}
-	
+
 	@Test
 	public void testEncodeEmptyBinary() {
 		String output = ourCtx.newXmlParser().encodeResourceToString(new Binary());
@@ -184,18 +181,16 @@ public class XmlParserDstu2Test {
 		ourCtx.newJsonParser().parseResource(encoded);
 	}
 
-	
 	@Test
 	public void testEncodeDoesntIncludeUuidId() {
 		Patient p = new Patient();
 		p.setId(new IdDt("urn:uuid:42795ed8-041f-4ebf-b6f4-78ef6f64c2f2"));
 		p.addIdentifier().setSystem("ACME");
-		
+
 		String actual = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
 		assertThat(actual, not(containsString("78ef6f64c2f2")));
 	}
-	
-	
+
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
 		Patient p = new Patient();
@@ -339,7 +334,6 @@ public class XmlParserDstu2Test {
 		assertEquals("ORG", o.getName());
 
 	}
-
 
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
@@ -566,7 +560,7 @@ public class XmlParserDstu2Test {
 	}
 
 	/**
-	 * Test for #233 - This was reversed after a conversation with Grahame
+	 * Test for #233
 	 */
 	@Test
 	public void testEncodeAndParseProfiledDatatype() {
@@ -574,7 +568,7 @@ public class XmlParserDstu2Test {
 		mo.addDosageInstruction().getTiming().getRepeat().setBounds(new DurationDt().setCode("code"));
 		String out = ourCtx.newXmlParser().encodeResourceToString(mo);
 		ourLog.info(out);
-		assertThat(out, containsString("</boundsDuration>"));
+		assertThat(out, containsString("</boundsQuantity>"));
 
 		mo = ourCtx.newXmlParser().parseResource(MedicationOrder.class, out);
 		DurationDt duration = (DurationDt) mo.getDosageInstruction().get(0).getTiming().getRepeat().getBounds();
@@ -587,7 +581,6 @@ public class XmlParserDstu2Test {
 	 * Disabled because we reverted this change after a conversation with Grahame
 	 */
 	@Test
-	@Ignore
 	public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
 		IParser xmlParser = ourCtx.newXmlParser();
 
@@ -597,7 +590,7 @@ public class XmlParserDstu2Test {
 		assertEquals("1", q.getValueElement().getValueAsString());
 
 		String output = xmlParser.encodeResourceToString(ms);
-		assertThat(output, containsString("<quantitySimpleQuantity><value value=\"1\"/></quantitySimpleQuantity>"));
+		assertThat(output, containsString("<quantityQuantity><value value=\"1\"/></quantityQuantity>"));
 	}
 
 	@Test

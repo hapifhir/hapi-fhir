@@ -1527,7 +1527,14 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
 	  List<WrapperElement> answers = new ArrayList<InstanceValidator.WrapperElement>();
     element.getNamedChildren("answer", answers);
-    rule(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), (answers.size() > 0) || !qItem.getRequired(), "No response answer found for required item "+qItem.getLinkId());
+    switch (qItem.getType()) {
+    case NULL:
+    case GROUP:
+    case DISPLAY:
+      break;
+    default:
+      rule(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), (answers.size() > 0) || !qItem.getRequired(), "No response answer found for required item "+qItem.getLinkId());
+    }
     if (answers.size() > 1)
       rule(errors, IssueType.INVALID, answers.get(1).line(), answers.get(1).col(), stack.getLiteralPath(), qItem.getRepeats(), "Only one response answer item with this linkId allowed");
 
@@ -1564,7 +1571,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 	          validateQuestionnaireResponseItemType(errors, answer, ns, "string");
             break;
 	        case TEXT:          
-	          validateQuestionnaireResponseItemType(errors, answer, ns, "text");
+	          validateQuestionnaireResponseItemType(errors, answer, ns, "string");
             break;
 	        case URL:           
 	          validateQuestionnaireResponseItemType(errors, answer, ns, "uri");

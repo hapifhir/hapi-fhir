@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
+import org.hl7.fhir.dstu21.hapi.validation.IValidationSupport;
 import org.hl7.fhir.dstu21.model.Bundle;
 import org.hl7.fhir.dstu21.model.CodeableConcept;
 import org.hl7.fhir.dstu21.model.Coding;
@@ -86,7 +87,9 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 @ContextConfiguration(classes= {TestDstu21Config.class})
 //@formatter:on
 public abstract class BaseJpaDstu21Test extends BaseJpaTest {
-
+	@Autowired
+	@Qualifier("myJpaValidationSupportChainDstu21")
+	protected IValidationSupport myValidationSupport;
 	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired

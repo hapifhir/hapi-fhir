@@ -52,6 +52,7 @@ import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.VersionUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 
 /**
@@ -113,6 +114,8 @@ public class FhirContext {
 	}
 
 	private FhirContext(FhirVersionEnum theVersion, Collection<Class<? extends IBaseResource>> theResourceTypes) {
+		VersionUtil.getVersion();
+		
 		if (theVersion != null) {
 			if (!theVersion.isPresentOnClasspath()) {
 				throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructuresForSpecifiedVersion", theVersion.name()));
@@ -465,9 +468,6 @@ public class FhirContext {
 	}
 
 	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
-		if (theNarrativeGenerator != null) {
-			theNarrativeGenerator.setFhirContext(this);
-		}
 		myNarrativeGenerator = theNarrativeGenerator;
 	}
 
@@ -509,6 +509,8 @@ public class FhirContext {
 
 	/**
 	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU2_1 DSTU 2.1}
+	 * 
+	 * @since 1.4
 	 */
 	public static FhirContext forDstu2_1() {
 		return new FhirContext(FhirVersionEnum.DSTU2_1);

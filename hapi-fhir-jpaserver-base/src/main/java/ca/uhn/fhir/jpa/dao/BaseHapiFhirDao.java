@@ -355,6 +355,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 						nextEntity = new ResourceLink(nextPath, theEntity, target);
 					} else {
 						if (!multiType) {
+							if (nextSpDef.getName().equals("sourceuri")) {
+								continue; // TODO: disable this eventually - ConceptMap:sourceuri is of type reference but points to a URI
+							}
 							throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
 						} else {
 							continue;

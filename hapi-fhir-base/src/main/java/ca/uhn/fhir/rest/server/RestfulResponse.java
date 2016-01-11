@@ -43,15 +43,14 @@ public abstract class RestfulResponse<T extends RequestDetails> implements IRest
 	public final Object streamResponseAsResource(IBaseResource resource, boolean prettyPrint, Set<SummaryEnum> summaryMode,
 			int statusCode, boolean respondGzip, boolean addContentLocationHeader)
 					throws IOException {
-		return RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), resource, prettyPrint, summaryMode, statusCode, respondGzip, addContentLocationHeader,
-				respondGzip, getRequestDetails());
+		return RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), resource, summaryMode, statusCode, addContentLocationHeader, respondGzip, getRequestDetails());
 
 	}
 
 	@Override
 	public Object streamResponseAsBundle(Bundle bundle, Set<SummaryEnum> summaryMode, boolean respondGzip, boolean requestIsBrowser)
 					throws IOException {
-		return RestfulServerUtils.streamResponseAsBundle(theRequestDetails.getServer(), bundle, summaryMode, requestIsBrowser, respondGzip, getRequestDetails());
+		return RestfulServerUtils.streamResponseAsBundle(theRequestDetails.getServer(), bundle, summaryMode, respondGzip, getRequestDetails());
 	}
 
 	@Override

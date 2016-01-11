@@ -54,7 +54,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.BundleInclusionRule;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -86,6 +85,22 @@ public class ResponseHighlightingInterceptorTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent, stringContainsInOrder("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle"));
+
+	}
+
+	@Test
+	public void testGetInvalidResourceNoAcceptHeader() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Foobar/123");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Resp: {}", responseContent);
+		assertEquals(400, status.getStatusLine().getStatusCode());
+
+		assertThat(responseContent, not(stringContainsInOrder("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle")));
+		assertThat(responseContent, (stringContainsInOrder("Unknown resource type 'Foobar'")));
+		assertThat(status.getFirstHeader("Content-Type").getValue(), containsString("application/xml+fhir"));
 
 	}
 

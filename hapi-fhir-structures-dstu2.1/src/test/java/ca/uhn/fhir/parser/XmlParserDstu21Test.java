@@ -32,7 +32,6 @@ import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.dstu21.model.Address.AddressUse;
 import org.hl7.fhir.dstu21.model.AllergyIntolerance;
 import org.hl7.fhir.dstu21.model.Annotation;
-import org.hl7.fhir.dstu21.model.Attachment;
 import org.hl7.fhir.dstu21.model.Binary;
 import org.hl7.fhir.dstu21.model.Bundle;
 import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
@@ -77,13 +76,14 @@ import org.hl7.fhir.dstu21.model.StringType;
 import org.hl7.fhir.dstu21.model.UriType;
 import org.hl7.fhir.dstu21.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.Constants;
@@ -122,6 +122,24 @@ public class XmlParserDstu21Test {
 		Binary bin = (Binary) b.getEntry().get(0).getResource();
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
 
+	}
+	
+	@Test
+	public void testEncodeWithNarrative() {
+		Patient p = new Patient();
+		p.addName().addFamily("Smith").addGiven("John");
+		
+		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		
+		String output = ourCtx.newXmlParser().encodeResourceToString(p);
+		ourLog.info(output);
+		
+		assertThat(output, containsString("<text><status value=\"generated\"/><div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"> John <b>SMITH </b>"));
+	}
+	
+	@After
+	public void after() {
+		ourCtx.setNarrativeGenerator(null);
 	}
 	
 	@Test
@@ -541,7 +559,7 @@ public class XmlParserDstu21Test {
 		mo.addDosageInstruction().getTiming().getRepeat().setBounds(new Duration().setCode("code"));
 		String out = ourCtx.newXmlParser().encodeResourceToString(mo);
 		ourLog.info(out);
-		assertThat(out, containsString("</boundsDuration>"));
+		assertThat(out, containsString("</boundsQuantity>"));
 
 		mo = ourCtx.newXmlParser().parseResource(MedicationOrder.class, out);
 		Duration duration = (Duration) mo.getDosageInstruction().get(0).getTiming().getRepeat().getBounds();
@@ -551,17 +569,15 @@ public class XmlParserDstu21Test {
 	/**
 	 * See #216 - Profiled datatypes should use their unprofiled parent type as the choice[x] name
 	 */
-	@Test @Ignore
+	@Test
 	public void testEncodeAndParseProfiledDatatypeChoice() throws Exception {
 		IParser xmlParser = ourCtx.newXmlParser();
 
-		String input = IOUtils.toString(XmlParser.class.getResourceAsStream("/medicationstatement_invalidelement.xml"));
-		MedicationStatement ms = xmlParser.parseResource(MedicationStatement.class, input);
-		SimpleQuantity q = (SimpleQuantity) ms.getDosage().get(0).getQuantity();
-		assertEquals("1", q.getValueElement().getValueAsString());
+		MedicationStatement ms = new MedicationStatement();
+		ms.addDosage().setQuantity(new SimpleQuantity().setValue(123));
 
 		String output = xmlParser.encodeResourceToString(ms);
-		assertThat(output, containsString("<quantityQuantity><value value=\"1\"/></quantityQuantity>"));
+		assertThat(output, containsString("<quantityQuantity><value value=\"123\"/></quantityQuantity>"));
 	}
 
 	@Test
@@ -1588,7 +1604,7 @@ public class XmlParserDstu21Test {
 	/**
 	 * See #191
 	 */
-	@Test @Ignore
+	@Test
 	public void testParseBundleWithLinksOfUnknownRelation() throws Exception {
 		String input = IOUtils.toString(XmlParserDstu21Test.class.getResourceAsStream("/bundle_orion.xml"));
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, input);

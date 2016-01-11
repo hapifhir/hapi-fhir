@@ -292,6 +292,15 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		Map<IdType, IdType> idSubstitutions = new HashMap<IdType, IdType>();
 		Map<IdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<IdType, DaoMethodOutcome>();
 
+		// Do all entries have a verb?
+		for (int i = 0; i < theRequest.getEntry().size(); i++) {
+			BundleEntryComponent nextReqEntry = theRequest.getEntry().get(i);
+			HTTPVerb verb = nextReqEntry.getRequest().getMethodElement().getValue();
+			if (verb == null) {
+				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextReqEntry.getRequest().getMethod(), i));
+			}
+		}
+		
 		/*
 		 * We want to execute the transaction request bundle elements in the order
 		 * specified by the FHIR specification (see TransactionSorter) so we save the 
@@ -366,9 +375,6 @@ public class FhirSystemDaoDstu21 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			}
 
 			HTTPVerb verb = nextReqEntry.getRequest().getMethodElement().getValue();
-			if (verb == null) {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextReqEntry.getRequest().getMethod()));
-			}
 
 			String resourceType = res != null ? getContext().getResourceDefinition(res).getName() : null;
 			BundleEntryComponent nextRespEntry = response.getEntry().get(originalRequestOrder.get(nextReqEntry));

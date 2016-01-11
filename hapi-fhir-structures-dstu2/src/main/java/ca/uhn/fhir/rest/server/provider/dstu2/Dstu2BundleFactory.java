@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -92,16 +91,6 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 				if (nextContained.getId().isEmpty() == false) {
 					containedIds.add(nextContained.getId().getValue());
 				}
-			}
-
-			if (myContext.getNarrativeGenerator() != null) {
-				String title = myContext.getNarrativeGenerator().generateTitle(next);
-				ourLog.trace("Narrative generator created title: {}", title);
-				if (StringUtils.isNotBlank(title)) {
-					ResourceMetadataKeyEnum.TITLE.put(next, title);
-				}
-			} else {
-				ourLog.trace("No narrative generator specified");
 			}
 
 			List<BaseResourceReferenceDt> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
@@ -188,16 +177,6 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 				if (nextContained.getId().isEmpty() == false) {
 					containedIds.add(nextContained.getId().getValue());
 				}
-			}
-
-			if (myContext.getNarrativeGenerator() != null) {
-				String title = myContext.getNarrativeGenerator().generateTitle(next);
-				ourLog.trace("Narrative generator created title: {}", title);
-				if (StringUtils.isNotBlank(title)) {
-					ResourceMetadataKeyEnum.TITLE.put(next, title);
-				}
-			} else {
-				ourLog.trace("No narrative generator specified");
 			}
 
 			List<ResourceReferenceInfo> references = myContext.newTerser().getAllResourceReferences(next);

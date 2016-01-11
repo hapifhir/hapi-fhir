@@ -30,8 +30,10 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -108,6 +110,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			} else {
 				nextDef = theClassToElementDefinitions.get(next);
 				BaseRuntimeElementDefinition<?> nextDefForChoice = nextDef;
+
 				/*
 				 * In HAPI 1.3 the following applied:
 				 * Elements which are called foo[x] and have a choice which is a profiled datatype must use the
@@ -115,19 +118,19 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 				 * element fooString when encoded, because markdown is a profile of string. This is according to the
 				 * FHIR spec
 				 * 
-				 * As of HAPI 1.4 this has been disabled after conversation with Grahame. It appears
-				 * that it is not correct behaviour.
+				 * Note that as of HAPI 1.4 this applies only to non-primitive datatypes after discussion
+				 * with Grahame.
 				 */
-//				if (nextDef instanceof IRuntimeDatatypeDefinition) {
-//					IRuntimeDatatypeDefinition nextDefDatatype = (IRuntimeDatatypeDefinition) nextDef;
-//					if (nextDefDatatype.getProfileOf() != null) {
-//						nextDefForChoice = null;
-//						nonPreferred = true;
-//						Class<? extends IBaseDatatype> profileType = nextDefDatatype.getProfileOf();
-//						BaseRuntimeElementDefinition<?> elementDef = theClassToElementDefinitions.get(profileType);
-//						elementName = getElementName() + StringUtils.capitalize(elementDef.getName());
-//					}
-//				}
+				if (nextDef instanceof IRuntimeDatatypeDefinition) {
+					IRuntimeDatatypeDefinition nextDefDatatype = (IRuntimeDatatypeDefinition) nextDef;
+					if (nextDefDatatype.getProfileOf() != null && !IPrimitiveType.class.isAssignableFrom(next)) {
+						nextDefForChoice = null;
+						nonPreferred = true;
+						Class<? extends IBaseDatatype> profileType = nextDefDatatype.getProfileOf();
+						BaseRuntimeElementDefinition<?> elementDef = theClassToElementDefinitions.get(profileType);
+						elementName = getElementName() + StringUtils.capitalize(elementDef.getName());
+					}
+				}
 				if (nextDefForChoice != null) {
 					elementName = getElementName() + StringUtils.capitalize(nextDefForChoice.getName());
 				}

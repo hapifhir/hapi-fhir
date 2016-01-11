@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.base.composite;
 
+import org.hl7.fhir.instance.model.api.INarrative;
+
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -28,9 +30,30 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
 /**
  * @param <T> The narrative status enum type  
  */
-public abstract class BaseNarrativeDt<T extends Enum<?>> extends BaseIdentifiableElement implements ICompositeDatatype {
+public abstract class BaseNarrativeDt<T extends Enum<?>> extends BaseIdentifiableElement implements ICompositeDatatype, INarrative {
 
-	public abstract BoundCodeDt<T> getStatus();  
+	public abstract BoundCodeDt<T> getStatus();
+
+	@Override
+	public void setDivAsString(String theString)  {
+		getDiv().setValueAsString(theString);
+	}
+
+	@Override
+	public String getDivAsString() {
+		return getDiv().getValueAsString();
+	}
+
+	@Override
+	public INarrative setStatusAsString(String theString) {
+		getStatus().setValueAsString(theString);
+		return this;
+	}
+
+	@Override
+	public String getStatusAsString() {
+		return getStatus().getValueAsString();
+	}
 
 	public abstract XhtmlDt getDiv();
 	

@@ -91,7 +91,7 @@ public class BaseDstu21Config extends BaseConfig {
 		return module;
 	}
 
-	@Bean(autowire=Autowire.BY_NAME)
+	@Bean(autowire=Autowire.BY_NAME, name="myJpaValidationSupportChainDstu21")
 	public IValidationSupport validationSupportChainDstu21() {
 		return new JpaValidationSupportChainDstu21();
 	}

@@ -8,36 +8,36 @@ import static org.junit.Assert.assertTrue;
 import java.util.Date;
 
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu21.model.CodeableConcept;
+import org.hl7.fhir.dstu21.model.Coding;
+import org.hl7.fhir.dstu21.model.DateTimeType;
+import org.hl7.fhir.dstu21.model.DiagnosticReport;
+import org.hl7.fhir.dstu21.model.DiagnosticReport.DiagnosticReportStatus;
+import org.hl7.fhir.dstu21.model.Encounter;
+import org.hl7.fhir.dstu21.model.Encounter.EncounterClass;
+import org.hl7.fhir.dstu21.model.Medication;
+import org.hl7.fhir.dstu21.model.MedicationOrder;
+import org.hl7.fhir.dstu21.model.MedicationOrder.MedicationOrderStatus;
+import org.hl7.fhir.dstu21.model.Narrative;
+import org.hl7.fhir.dstu21.model.Observation;
+import org.hl7.fhir.dstu21.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu21.model.OperationOutcome;
+import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.Period;
+import org.hl7.fhir.dstu21.model.Quantity;
+import org.hl7.fhir.dstu21.model.Reference;
+import org.hl7.fhir.dstu21.model.SimpleQuantity;
+import org.hl7.fhir.dstu21.model.StringType;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.NarrativeDt;
-import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.composite.SimpleQuantityDt;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu2.resource.Encounter;
-import ca.uhn.fhir.model.dstu2.resource.Medication;
-import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.DiagnosticReportStatusEnum;
-import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu2.valueset.MedicationOrderStatusEnum;
-import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
-public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
-	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorTestDstu2.class);
+public class DefaultThymeleafNarrativeGeneratorDstu21Test {
+	private static FhirContext ourCtx = FhirContext.forDstu2_1();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorDstu21Test.class);
 	private DefaultThymeleafNarrativeGenerator myGen;
 
 	@Before
@@ -56,12 +56,15 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 
 		value.addIdentifier().setSystem("urn:names").setValue("123456");
 		value.addName().addFamily("blow").addGiven("joe").addGiven((String) null).addGiven("john");
-		value.getAddressFirstRep().addLine("123 Fake Street").addLine("Unit 1");
-		value.getAddressFirstRep().setCity("Toronto").setState("ON").setCountry("Canada");
+		//@formatter:off
+		value.addAddress()
+			.addLine("123 Fake Street").addLine("Unit 1")
+			.setCity("Toronto").setState("ON").setCountry("Canada");
+		//@formatter:on
 
-		value.setBirthDate(new Date(), TemporalPrecisionEnum.DAY);
+		value.setBirthDate(new Date());
 
-		NarrativeDt narrative = new NarrativeDt();
+		Narrative narrative = new Narrative();
 		myGen.generateNarrative(ourCtx, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
 		ourLog.info(output);
@@ -69,22 +72,23 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 
 	}
 
+
 	@Test
-	@Ignore
-	public void testGenerateEncounter() throws DataFormatException {
-		Encounter enc = new Encounter();
+	public void testGenerateDiagnosticReport() throws DataFormatException {
+		DiagnosticReport value = new DiagnosticReport();
+		value.getCode().setText("Some Diagnostic Report");
 
-		enc.addIdentifier().setSystem("urn:visits").setValue("1234567");
-		enc.setClassElement(EncounterClassEnum.AMBULATORY);
-		enc.setPeriod(new PeriodDt().setStart(new DateTimeDt("2001-01-02T11:11:00")));
-		enc.setType(ca.uhn.fhir.model.dstu2.valueset.EncounterTypeEnum.ANNUAL_DIABETES_MELLITUS_SCREENING);
+		value.addResult().setReference("Observation/1");
+		value.addResult().setReference("Observation/2");
+		value.addResult().setReference("Observation/3");
 
-		NarrativeDt narrative = new NarrativeDt();
-		myGen.generateNarrative(ourCtx, enc, narrative);
-		
-		assertEquals("", narrative.getDivAsString());
+		Narrative narrative = new Narrative();
+		myGen.generateNarrative(ourCtx, value, narrative);
+		String output = narrative.getDiv().getValueAsString();
+
+		ourLog.info(output);
+		assertThat(output, StringContains.containsString(value.getCode().getTextElement().getValue()));
 	}
-
 
 	@Test
 	public void testGenerateOperationOutcome() {
@@ -107,7 +111,7 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 		// ourLog.info(output);
 		// assertEquals("Operation Outcome (2 issues)", output);
 
-		NarrativeDt narrative = new NarrativeDt();
+		Narrative narrative = new Narrative();
 		myGen.generateNarrative(ourCtx, oo, narrative);
 		String output = narrative.getDiv().getValueAsString();
 
@@ -116,48 +120,44 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 		assertThat(output, containsString("<td><pre>YThis is a warning</pre></td>"));
 	}
 
+
 	@Test
 	public void testGenerateDiagnosticReportWithObservations() throws DataFormatException {
 		DiagnosticReport value = new DiagnosticReport();
 
 		value.getIssuedElement().setValueAsString("2011-02-22T11:13:00");
-		value.setStatus(DiagnosticReportStatusEnum.FINAL);
+		value.setStatus(DiagnosticReportStatus.FINAL);
 
 		value.getCode().setText("Some & Diagnostic Report");
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("1938HB").setDisplay("Hemoglobin");
-			obs.setValue(new QuantityDt(null, 2.223, "mg/L"));
-			obs.addReferenceRange().setLow(new SimpleQuantityDt(2.20)).setHigh(new SimpleQuantityDt(2.99));
-			obs.setStatus(ObservationStatusEnum.FINAL);
+			obs.setValue(new Quantity(null, 2.223, null, null, "mg/L"));
+			obs.addReferenceRange().setLow((SimpleQuantity) new SimpleQuantity().setValue(2.20)).setHigh((SimpleQuantity) new SimpleQuantity().setValue(2.99));
+			obs.setStatus(ObservationStatus.FINAL);
 			obs.setComments("This is a result comment");
 
-			ResourceReferenceDt result = value.addResult();
+			Reference result = value.addResult();
 			result.setResource(obs);
 		}
 		{
 			Observation obs = new Observation();
-			obs.setValue(new StringDt("HELLO!"));
+			obs.setValue(new StringType("HELLO!"));
 			value.addResult().setResource(obs);
 		}
 		{
 			Observation obs = new Observation();
-			obs.setCode(new CodeableConceptDt("AA", "BB"));
+			obs.setCode(new CodeableConcept().addCoding(new Coding("AA", "BB", null)));
 			value.addResult().setResource(obs);
 		}
 
-		NarrativeDt narrative = new NarrativeDt();
+		Narrative narrative = new Narrative();
 		myGen.generateNarrative(ourCtx, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
 
-		// Now try it with the parser
-
-		output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value);
-		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
 	}
 
 	@Test
@@ -167,12 +167,12 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 		mp.setId("12345");
 		Medication med = new Medication();
 		med.getCode().setText("ciproflaxin");
-		ResourceReferenceDt medRef = new ResourceReferenceDt(med);
+		Reference medRef = new Reference(med);
 		mp.setMedication(medRef);
-		mp.setStatus(MedicationOrderStatusEnum.ACTIVE);
-		mp.setDateWritten(new DateTimeDt("2014-09-01"));
+		mp.setStatus(MedicationOrderStatus.ACTIVE);
+		mp.setDateWrittenElement(new DateTimeType("2014-09-01"));
 
-		NarrativeDt narrative = new NarrativeDt();
+		Narrative narrative = new Narrative();
 		myGen.generateNarrative(ourCtx, mp, narrative);
 
 		assertTrue("Expected medication name of ciprofloaxin within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ciprofloaxin") > -1);
@@ -185,10 +185,10 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 		Medication med = new Medication();
 		med.getCode().setText("ciproflaxin");
 
-		NarrativeDt narrative = new NarrativeDt();
+		Narrative narrative = new Narrative();
 		myGen.generateNarrative(ourCtx, med, narrative);
 
-		String string = narrative.getDiv().toString();
+		String string = narrative.getDiv().getValueAsString();
 		assertThat(string, containsString("ciproflaxin"));
 
 	}

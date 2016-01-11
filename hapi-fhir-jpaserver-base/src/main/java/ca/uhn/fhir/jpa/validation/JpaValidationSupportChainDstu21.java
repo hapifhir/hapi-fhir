@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 public class JpaValidationSupportChainDstu21 extends ValidationSupportChain {
 
+	private DefaultProfileValidationSupport myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
+	
 	@Autowired
 	@Qualifier("myJpaValidationSupportDstu21")
 	public ca.uhn.fhir.jpa.dao.IJpaValidationSupportDstu21 myJpaValidationSupportDstu21;
@@ -17,15 +19,13 @@ public class JpaValidationSupportChainDstu21 extends ValidationSupportChain {
 		super();
 	}
 	
-	private DefaultProfileValidationSupport myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
-	
+	public void flush() {
+		myDefaultProfileValidationSupport.flush();
+	}
+
 	@PostConstruct
 	public void postConstruct() {
 		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupportDstu21);
-	}
-
-	public void flush() {
-		myDefaultProfileValidationSupport.flush();
 	}
 }

@@ -129,6 +129,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 			Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
 			for (BundleEntryComponent next : bundle.getEntry()) {
 				ValueSet nextValueSet = (ValueSet) next.getResource();
+				nextValueSet.getText().setDivAsString("");
 				String system = nextValueSet.getCodeSystem().getSystem();
 				if (isNotBlank(system)) {
 					theCodeSystems.put(system, nextValueSet);

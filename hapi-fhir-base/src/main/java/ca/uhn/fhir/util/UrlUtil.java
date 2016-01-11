@@ -1,11 +1,14 @@
 package ca.uhn.fhir.util;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -35,10 +38,9 @@ public class UrlUtil {
 	public static void main(String[] args) {
 		System.out.println(escape("http://snomed.info/sct?fhir_vs=isa/126851005"));
 	}
-	
+
 	/**
-	 * Resolve a relative URL - THIS METHOD WILL NOT FAIL but will log a warning and return theEndpoint if the input is
-	 * invalid.
+	 * Resolve a relative URL - THIS METHOD WILL NOT FAIL but will log a warning and return theEndpoint if the input is invalid.
 	 */
 	public static String constructAbsoluteUrl(String theBase, String theEndpoint) {
 		if (theEndpoint == null) {
@@ -161,7 +163,7 @@ public class UrlUtil {
 			throw new Error("UTF-8 not supported on this platform");
 		}
 	}
-	
+
 	//@formatter:off
 	/** 
 	 * Parse a URL in one of the following forms:
@@ -174,45 +176,61 @@ public class UrlUtil {
 	//@formatter:on
 	public static UrlParts parseUrl(String theUrl) {
 		String url = theUrl;
-		if (url.matches("\\/[a-zA-Z]+\\?.*")) {
-			url = url.substring(1);
-		}
-		
 		UrlParts retVal = new UrlParts();
-
-		int nextStart = 0;
-		boolean nextIsHistory = false;
-
-		for (int idx = 0; idx < url.length(); idx++) {
-			char nextChar = url.charAt(idx);
-			boolean atEnd = (idx + 1) == url.length();
-			if (nextChar == '?' || nextChar == '/' || atEnd) {
-				int endIdx = (atEnd && nextChar != '?') ? idx + 1 : idx;
-				String nextSubstring = url.substring(nextStart, endIdx);
-				if (retVal.getResourceType() == null) {
-					retVal.setResourceType(nextSubstring);
-				} else if (retVal.getResourceId() == null) {
-					retVal.setResourceId(nextSubstring);
-				} else if (nextIsHistory) {
-					retVal.setVersionId(nextSubstring);
-				} else {
-					if (nextSubstring.equals(Constants.URL_TOKEN_HISTORY)) {
-						nextIsHistory = true;
-					} else {
-						throw new InvalidRequestException("Invalid FHIR resource URL: " + url);
-					}
-				}
-				if (nextChar == '?') {
-					if (url.length() > idx + 1) {
-						retVal.setParams(url.substring(idx + 1, url.length()));
-					}
-					break;
-				}
-				nextStart = idx + 1;
+		if (url.startsWith("http")) {
+			if (url.startsWith("/")) {
+				url = url.substring(1);
 			}
-		}
 
-		return retVal;
+			int qmIdx = url.indexOf('?');
+			if (qmIdx != -1) {
+				retVal.setParams(defaultIfBlank(url.substring(qmIdx + 1), null));
+				url = url.substring(0, qmIdx);
+			}
+
+			IdDt id = new IdDt(url);
+			retVal.setResourceType(id.getResourceType());
+			retVal.setResourceId(id.getIdPart());
+			retVal.setVersionId(id.getVersionIdPart());
+			return retVal;
+		} else {
+			if (url.matches("\\/[a-zA-Z]+\\?.*")) {
+				url = url.substring(1);
+			}
+			int nextStart = 0;
+			boolean nextIsHistory = false;
+
+			for (int idx = 0; idx < url.length(); idx++) {
+				char nextChar = url.charAt(idx);
+				boolean atEnd = (idx + 1) == url.length();
+				if (nextChar == '?' || nextChar == '/' || atEnd) {
+					int endIdx = (atEnd && nextChar != '?') ? idx + 1 : idx;
+					String nextSubstring = url.substring(nextStart, endIdx);
+					if (retVal.getResourceType() == null) {
+						retVal.setResourceType(nextSubstring);
+					} else if (retVal.getResourceId() == null) {
+						retVal.setResourceId(nextSubstring);
+					} else if (nextIsHistory) {
+						retVal.setVersionId(nextSubstring);
+					} else {
+						if (nextSubstring.equals(Constants.URL_TOKEN_HISTORY)) {
+							nextIsHistory = true;
+						} else {
+							throw new InvalidRequestException("Invalid FHIR resource URL: " + url);
+						}
+					}
+					if (nextChar == '?') {
+						if (url.length() > idx + 1) {
+							retVal.setParams(url.substring(idx + 1, url.length()));
+						}
+						break;
+					}
+					nextStart = idx + 1;
+				}
+			}
+
+			return retVal;
+		}
 	}
 
 	public static class UrlParts {

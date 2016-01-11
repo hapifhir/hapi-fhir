@@ -18,7 +18,6 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.IGenericClient;
 
 public class ValidationDataUploader extends BaseCommand {
@@ -64,7 +63,8 @@ public class ValidationDataUploader extends BaseCommand {
 
 		String vsContents;
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/valuesets.xml"), "UTF-8");
+			ctx.getVersion().getPathToSchemaDefinitions();
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/"+"valuesets.xml"), "UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(e.toString());
 		}
@@ -83,7 +83,7 @@ public class ValidationDataUploader extends BaseCommand {
 		}
 
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/v3-codesystems.xml"), "UTF-8");
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/"+"v3-codesystems.xml"), "UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(e.toString());
 		}
@@ -102,7 +102,7 @@ public class ValidationDataUploader extends BaseCommand {
 		}
 
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/v2-tables.xml"), "UTF-8");
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/"+"v2-tables.xml"), "UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(e.toString());
 		}
@@ -123,7 +123,7 @@ public class ValidationDataUploader extends BaseCommand {
 		ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
 		Resource[] mappingLocations;
 		try {
-			mappingLocations = patternResolver.getResources("classpath*:org/hl7/fhir/instance/model/profile/*.profile.xml");
+			mappingLocations = patternResolver.getResources("classpath*:org/hl7/fhir/instance/model/profile/"+"*.profile.xml");
 		} catch (IOException e) {
 			throw new CommandFailureException(e.toString());
 		}

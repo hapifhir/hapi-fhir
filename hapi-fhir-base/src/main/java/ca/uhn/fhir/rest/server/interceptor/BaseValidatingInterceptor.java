@@ -61,12 +61,12 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	private Integer myAddResponseIssueHeaderOnSeverity = null;
 	private Integer myAddResponseOutcomeHeaderOnSeverity = null;
 	private Integer myFailOnSeverity = ResultSeverityEnum.ERROR.ordinal();
+	private int myMaximumHeaderLength = 200;
 	private String myResponseIssueHeaderName = provideDefaultResponseHeaderName();
 	private String myResponseIssueHeaderValue = DEFAULT_RESPONSE_HEADER_VALUE;
 	private String myResponseIssueHeaderValueNoIssues = null;
 	private String myResponseOutcomeHeaderName = provideDefaultResponseHeaderName();
 	private List<IValidatorModule> myValidatorModules;
-
 	private void addResponseIssueHeader(RequestDetails theRequestDetails, SingleValidationMessage theNext) {
 		// Perform any string substitutions from the message format
 		StrLookup<?> lookup = new MyLookup(theNext);
@@ -78,7 +78,6 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 
 		theRequestDetails.getResponse().addHeader(myResponseIssueHeaderName, headerValue);
 	}
-
 	public BaseValidatingInterceptor<T> addValidatorModule(IValidatorModule theModule) {
 		Validate.notNull(theModule, "theModule must not be null");
 		if (getValidatorModules() == null) {
@@ -89,13 +88,30 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	}
 
 	abstract ValidationResult doValidate(FhirValidator theValidator, T theRequest);
-	
+
 	/**
 	 * Fail the request by throwing an {@link UnprocessableEntityException} as a result of a validation failure.
 	 * Subclasses may change this behaviour by providing alternate behaviour.
 	 */
 	protected void fail(RequestDetails theRequestDetails, ValidationResult theValidationResult) {
 		throw new UnprocessableEntityException(theRequestDetails.getServer().getFhirContext(), theValidationResult.toOperationOutcome());
+	}
+
+	/**
+	 * If the validation produces a result with at least the given severity, a header with the name
+	 * specified by {@link #setResponseOutcomeHeaderName(String)} will be added containing a JSON encoded
+	 * OperationOutcome resource containing the validation results.
+	 */
+	public ResultSeverityEnum getAddResponseOutcomeHeaderOnSeverity() {
+		return myAddResponseOutcomeHeaderOnSeverity != null ? ResultSeverityEnum.values()[myAddResponseOutcomeHeaderOnSeverity] : null;
+	}
+	
+	/**
+	 * The maximum length for an individual header. If an individual header would be written exceeding this length,
+	 * the header value will be truncated.
+	 */
+	public int getMaximumHeaderLength() {
+		return myMaximumHeaderLength;
 	}
 
 	/**
@@ -107,15 +123,6 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 
 	public List<IValidatorModule> getValidatorModules() {
 		return myValidatorModules;
-	}
-
-	/**
-	 * If the validation produces a result with at least the given severity, a header with the name
-	 * specified by {@link #setResponseOutcomeHeaderName(String)} will be added containing a JSON encoded
-	 * OperationOutcome resource containing the validation results.
-	 */
-	public ResultSeverityEnum getAddResponseOutcomeHeaderOnSeverity() {
-		return myAddResponseOutcomeHeaderOnSeverity != null ? ResultSeverityEnum.values()[myAddResponseOutcomeHeaderOnSeverity] : null;
 	}
 
 	abstract String provideDefaultResponseHeaderName();
@@ -146,6 +153,15 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 	 */
 	public void setFailOnSeverity(ResultSeverityEnum theSeverity) {
 		myFailOnSeverity = theSeverity != null ? theSeverity.ordinal() : null;
+	}
+
+	/**
+	 * The maximum length for an individual header. If an individual header would be written exceeding this length,
+	 * the header value will be truncated. Value must be greater than 100.
+	 */
+	public void setMaximumHeaderLength(int theMaximumHeaderLength) {
+		Validate.isTrue(theMaximumHeaderLength >= 100, "theMaximumHeadeerLength must be >= 100");
+		myMaximumHeaderLength = theMaximumHeaderLength;
 	}
 
 	/**
@@ -271,6 +287,9 @@ abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
 			if (outcome != null) {
 				IParser parser = theRequestDetails.getServer().getFhirContext().newJsonParser().setPrettyPrint(false);
 				String encoded = parser.encodeResourceToString(outcome);
+				if (encoded.length() > getMaximumHeaderLength()) {
+					encoded = encoded.substring(0, getMaximumHeaderLength() - 3) + "...";
+				}
 				theRequestDetails.getResponse().addHeader(myResponseOutcomeHeaderName, encoded);
 			}
 		}

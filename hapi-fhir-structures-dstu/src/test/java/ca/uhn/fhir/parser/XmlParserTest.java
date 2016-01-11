@@ -21,6 +21,7 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.INarrative;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -1246,30 +1247,15 @@ public class XmlParserTest {
 		INarrativeGenerator gen = new INarrativeGenerator() {
 
 			@Override
-			public void generateNarrative(IBaseResource theResource, BaseNarrativeDt<?> theNarrative) {
-				throw new UnsupportedOperationException();
+			public void generateNarrative(FhirContext theContext, IBaseResource theResource, INarrative theNarrative) {
+				try {
+					theNarrative.setDivAsString("<div>help</div>");
+				} catch (Exception e) {
+					throw new Error(e);
+				}
+				theNarrative.setStatusAsString("generated");
 			}
 
-			@Override
-			public void generateNarrative(String theProfile, IBaseResource theResource, BaseNarrativeDt<?> theNarrative) throws DataFormatException {
-				theNarrative.getDiv().setValueAsString("<div>help</div>");
-				theNarrative.getStatus().setValueAsString("generated");
-			}
-
-			@Override
-			public String generateTitle(IBaseResource theResource) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public String generateTitle(String theProfile, IBaseResource theResource) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public void setFhirContext(FhirContext theFhirContext) {
-				// nothing
-			}
 		};
 
 		try {

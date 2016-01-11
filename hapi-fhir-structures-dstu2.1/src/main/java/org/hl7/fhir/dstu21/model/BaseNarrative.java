@@ -36,4 +36,17 @@ public abstract class BaseNarrative extends Type implements INarrative {
 
 	protected abstract XhtmlNode getDiv();
 
+   public abstract Enumeration<?> getStatusElement();
+
+	@Override
+	public INarrative setStatusAsString(String theString) {
+		getStatusElement().setValueAsString(theString);
+		return this;
+	}
+
+	@Override
+	public String getStatusAsString() {
+		return getStatusElement().getValueAsString();
+	} 
+
 }

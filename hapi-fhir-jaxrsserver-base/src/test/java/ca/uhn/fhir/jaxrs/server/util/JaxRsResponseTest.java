@@ -45,24 +45,13 @@ public class JaxRsResponseTest {
 		boolean theRequestIsBrowser = false;
 		boolean respondGzip = false;
 		Set<SummaryEnum> theSummaryMode = Collections.<SummaryEnum>emptySet();
-		Response result = (Response) RestfulServerUtils.streamResponseAsBundle(request.getServer(), bundle, theSummaryMode, theRequestIsBrowser, respondGzip, request);
+		Response result = (Response) RestfulServerUtils.streamResponseAsBundle(request.getServer(), bundle, theSummaryMode, respondGzip, request);
 		assertEquals(200, result.getStatus());
 		assertEquals(Constants.CT_FHIR_JSON+Constants.CHARSET_UTF8_CTSUFFIX, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 		assertTrue(result.getEntity().toString().contains("Patient"));
 		assertTrue(result.getEntity().toString().contains("15"));
 	}
 
-	@Test
-	public void testGetResponseWriterBrowserNoZip() throws IOException {
-		boolean theRequestIsBrowser = true;
-		boolean respondGzip = false;
-		Response result = (Response) RestfulServerUtils.streamResponseAsBundle(request.getServer(), bundle, theSummaryMode, theRequestIsBrowser, respondGzip, request);
-		assertEquals(200, result.getStatus());
-		assertEquals(Constants.CT_JSON+Constants.CHARSET_UTF8_CTSUFFIX, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-		assertTrue(result.getEntity().toString().contains("Patient"));
-		assertTrue(result.getEntity().toString().contains("15"));
-	}
-	
 	@Test
 	public void testSendAttachmentResponse() throws IOException {
 		boolean theRequestIsBrowser = true;
@@ -73,7 +62,7 @@ public class JaxRsResponseTest {
 		binary.setContentType(contentType);
 		binary.setContent(content);
 		boolean theAddContentLocationHeader = false;
-		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theRequestIsBrowser, theSummaryMode, 200, respondGzip, theAddContentLocationHeader, respondGzip, this.request);
+		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
 		assertEquals(contentType, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 		assertEquals(content, result.getEntity());
@@ -86,7 +75,7 @@ public class JaxRsResponseTest {
 		IBaseBinary binary = new Binary();
 		binary.setContent(new byte[]{});
 		boolean theAddContentLocationHeader = false;
-		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theRequestIsBrowser, theSummaryMode, 200, respondGzip, theAddContentLocationHeader, respondGzip, this.request);
+		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
 		assertEquals(null, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 		assertEquals(null, result.getEntity());
@@ -98,7 +87,7 @@ public class JaxRsResponseTest {
 		boolean respondGzip = true;
 		IBaseBinary binary = new Binary();
 		boolean theAddContentLocationHeader = false;
-		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theRequestIsBrowser, theSummaryMode, 200, respondGzip, theAddContentLocationHeader, respondGzip, this.request);
+		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
 		assertEquals(null, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 		assertEquals(null, result.getEntity());

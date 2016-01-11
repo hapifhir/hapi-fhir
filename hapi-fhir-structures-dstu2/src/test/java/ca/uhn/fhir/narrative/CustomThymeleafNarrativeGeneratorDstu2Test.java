@@ -29,7 +29,7 @@ public class CustomThymeleafNarrativeGeneratorDstu2Test {
 		p.getName().addFamily("fam1").addGiven("given");
 
 		NarrativeDt narrative = new NarrativeDt();
-		gen.generateNarrative(p, narrative);
+		gen.generateNarrative(ourCtx, p, narrative);
 
 		String actual = narrative.getDiv().getValueAsString();
 		ourLog.info(actual);

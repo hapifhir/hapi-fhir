@@ -27,14 +27,14 @@ import ca.uhn.fhir.parser.IParser;
 
 public enum EncodingEnum {
 
-	XML(Constants.CT_FHIR_XML, Constants.CT_ATOM_XML, "application/xml", Constants.FORMAT_XML) {
+	XML(Constants.CT_FHIR_XML, Constants.CT_ATOM_XML, Constants.FORMAT_XML) {
 		@Override
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newXmlParser();
 		}
 	},
 
-	JSON(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON, Constants.CT_JSON, Constants.FORMAT_JSON) {
+	JSON(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON, Constants.FORMAT_JSON) {
 		@Override
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newJsonParser();
@@ -50,7 +50,6 @@ public enum EncodingEnum {
 		for (EncodingEnum next : values()) {
 			ourContentTypeToEncoding.put(next.getBundleContentType(), next);
 			ourContentTypeToEncoding.put(next.getResourceContentType(), next);
-			ourContentTypeToEncoding.put(next.getBrowserFriendlyBundleContentType(), next);
 		}
 
 		/*
@@ -67,13 +66,11 @@ public enum EncodingEnum {
 
 	private String myResourceContentType;
 	private String myBundleContentType;
-	private String myBrowserFriendlyContentType;
 	private String myFormatContentType;
 
-	EncodingEnum(String theResourceContentType, String theBundleContentType, String theBrowserFriendlyContentType, String theFormatContentType) {
+	EncodingEnum(String theResourceContentType, String theBundleContentType, String theFormatContentType) {
 		myResourceContentType = theResourceContentType;
 		myBundleContentType = theBundleContentType;
-		myBrowserFriendlyContentType = theBrowserFriendlyContentType;
 		myFormatContentType = theFormatContentType;
 	}
 
@@ -89,10 +86,6 @@ public enum EncodingEnum {
 
 	public String getResourceContentType() {
 		return myResourceContentType;
-	}
-
-	public String getBrowserFriendlyBundleContentType() {
-		return myBrowserFriendlyContentType;
 	}
 
 	public static EncodingEnum forContentType(String theContentType) {

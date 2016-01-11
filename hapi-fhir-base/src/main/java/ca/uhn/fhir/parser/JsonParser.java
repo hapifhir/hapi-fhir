@@ -62,7 +62,9 @@ import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -504,7 +506,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 		case PRIMITIVE_XHTML_HL7ORG:
 		case PRIMITIVE_XHTML: {
-			if (!getSuppressNarratives()) {
+			if (!isSuppressNarratives()) {
 				IPrimitiveType<?> dt = (IPrimitiveType<?>) theNextValue;
 				if (theChildName != null) {
 					theWriter.write(theChildName, dt.getValueAsString());
@@ -539,10 +541,17 @@ public class JsonParser extends BaseParser implements IParser {
 			BaseRuntimeChildDefinition nextChild = nextChildElem.getDef();
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
-				if (gen != null && theResource instanceof IResource) {
-					BaseNarrativeDt<?> narr = ((IResource) theResource).getText();
-					if (narr.getDiv().isEmpty()) {
-						gen.generateNarrative(theResDef.getResourceProfile(), theResource, narr);
+				if (gen != null) {
+					INarrative narr;
+					if (theResource instanceof IResource) {
+						narr = ((IResource) theResource).getText();
+					} else if (theResource instanceof IDomainResource) {
+						narr = ((IDomainResource)theResource).getText();
+					} else {
+						narr = null;
+					}
+					if (narr != null && narr.isEmpty()) {
+						gen.generateNarrative(myContext, theResource, narr);
 						if (narr != null && !narr.isEmpty()) {
 							RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 							String childName = nextChild.getChildNameByDatatype(child.getDatatype());

@@ -298,7 +298,6 @@ public class SearchSearchServerDstu1Test {
 
 		Patient p = bundle.getResources(Patient.class).get(0);
 		assertEquals("idaaa", p.getNameFirstRep().getFamilyAsSingleString());
-		assertEquals("IDAAA (identifier123)", bundle.getEntries().get(0).getTitle().getValue());
 	}
 
 	@Test
@@ -310,7 +309,6 @@ public class SearchSearchServerDstu1Test {
 
 		Patient p = bundle.getResources(Patient.class).get(0);
 		assertEquals("idaaa", p.getNameFirstRep().getFamilyAsSingleString());
-		assertEquals("IDAAA (identifier123)", bundle.getEntries().get(0).getTitle().getValue());
 	}
 
 	@Test
@@ -364,7 +362,6 @@ public class SearchSearchServerDstu1Test {
 
 		Patient p = bundle.getResources(Patient.class).get(0);
 		assertEquals("idaaa", p.getNameFirstRep().getFamilyAsSingleString());
-		assertEquals("IDAAA (identifier123)", bundle.getEntries().get(0).getTitle().getValue());
 	}
 
 	/**

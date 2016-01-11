@@ -37,6 +37,7 @@ import org.hl7.fhir.dstu21.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -170,13 +171,17 @@ public class FhirInstanceValidatorDstu21Test {
 
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
-			ourLog.info("Result {}: {} - {} - {}", new Object[] { index, next.getSeverity(), next.getLocationString(), next.getMessage() });
+			ourLog.info("Result {}: {} - {}:{} {} - {}", new Object[] { index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage() });
 			index++;
 
 			retVal.add(next);
 		}
 
 		return retVal;
+	}
+
+	private Object defaultString(Integer theLocationLine) {
+		return theLocationLine != null ? theLocationLine.toString() : "";
 	}
 
 	@Rule
@@ -262,7 +267,22 @@ public class FhirInstanceValidatorDstu21Test {
 		String input = IOUtils.toString(FhirInstanceValidatorDstu21Test.class.getResourceAsStream("/qr_jon.xml"));
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.toString(), 12, output.getMessages().size());
+		logResultsAndReturnAll(output);
+
+		assertEquals(output.toString(), 3, output.getMessages().size());
+		ourLog.info(output.getMessages().get(0).getLocationString());
+		ourLog.info(output.getMessages().get(0).getMessage());
+	}
+
+	@Test
+	@Ignore
+	public void testValidateStructureDefinition() throws IOException {
+		String input = IOUtils.toString(FhirInstanceValidatorDstu21Test.class.getResourceAsStream("/sdc-questionnaire.profile.xml"));
+
+		ValidationResult output = myVal.validateWithResult(input);
+		logResultsAndReturnAll(output);
+
+		assertEquals(output.toString(), 3, output.getMessages().size());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 	}

@@ -122,6 +122,23 @@
 				Add DSTU2.1 example to hpia-fhir-jpaserver-example. Thanks to Karl 
 				Davis for the Pull Request!
 			</action>
+			<action type="add">
+				RestfulServer#setUseBrowserFriendlyContentTypes has been deprecated and its
+				functionality removed. The intention of this feature was that if it 
+				detected a request coming in from a browser, it would serve up JSON/XML 
+				using content types that caused the browsers to pretty print. But 
+				each browser has different rules for when to pretty print, and 
+				after we wrote that feature both Chrome and FF changed their rules to break it anyhow.
+				ResponseHighlightingInterceptor provides a better implementation of
+				this functionality and should be used instead.
+			</action>
+			<action type="remove">
+				Narrative generator framework has removed the
+				ability to generate resource titles. This
+				functionality was only useful for DSTU1
+				implementations and wasn't compatible
+				with coming changes to that API.
+			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">

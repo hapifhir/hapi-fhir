@@ -335,8 +335,8 @@
 			</dependency>
 			<dependency>
 				<groupId>javax.transaction</groupId>
-				<artifactId>jta</artifactId>
-				<version>1.1</version>
+				<artifactId>javax.transaction-api</artifactId>
+				<version>1.2</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.validation</groupId>
@@ -556,7 +556,7 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-search-orm</artifactId>
-				<version>5.5.1.Final</version>
+				<version>5.5.2.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.javassist</groupId>
@@ -941,7 +941,7 @@
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
-							<version>6.13</version>
+							<version>6.14.1</version>
 						</dependency>
 					</dependencies>
 					<configuration>

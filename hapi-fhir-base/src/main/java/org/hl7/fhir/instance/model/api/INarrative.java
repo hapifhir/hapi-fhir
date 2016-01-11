@@ -31,4 +31,8 @@ public interface INarrative extends ICompositeType {
 	// TODO: use less broad exception type here
 	public String getDivAsString() throws Exception;
 
+	public INarrative setStatusAsString(String theString);
+
+	public String getStatusAsString();
+
 }

@@ -600,21 +600,6 @@ public class BaseController {
 				}
 			}
 	
-			/*
-			 * DSTU2 no longer has a title in the bundle format, but it's still useful here..
-			 */
-			if (bundle != null) {
-				INarrativeGenerator gen = context.getNarrativeGenerator();
-				if (gen != null) {
-					for (BundleEntry next : bundle.getEntries()) {
-						if (next.getTitle().isEmpty() && next.getResource() != null) {
-							String title = gen.generateTitle(next.getResource());
-							next.getTitle().setValue(title);
-						}
-					}
-				}
-			}
-	
 			resultDescription.append(" (").append(resultBody.length() + " bytes)");
 	
 			Header[] requestHeaders = lastRequest != null ? applyHeaderFilters(lastRequest.getAllHeaders()) : new Header[0];

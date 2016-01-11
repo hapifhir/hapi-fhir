@@ -876,6 +876,43 @@ public class FhirSystemDaoDstu21Test extends BaseJpaDstu21SystemTest {
 	}
 
 	@Test
+	public void testTransactionWithBundledValidationSourceAndTarget() throws Exception {
+
+		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
+		String bundleStr = IOUtils.toString(bundleRes);
+		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, bundleStr);
+
+		Bundle resp = mySystemDao.transaction(myRequestDetails, bundle);
+
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp);
+		ourLog.info(encoded);
+
+		encoded = myFhirCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(resp);
+		//@formatter:off
+		assertThat(encoded, containsString("\"response\":{" + 
+				"\"status\":\"201 Created\"," + 
+				"\"location\":\"Questionnaire/54127-6/_history/1\",")); 
+		//@formatter:on
+		
+		/*
+		 * Upload again to update
+		 */
+		
+		resp = mySystemDao.transaction(myRequestDetails, bundle);
+
+		encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp);
+		ourLog.info(encoded);
+
+		encoded = myFhirCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(resp);
+		//@formatter:off
+		assertThat(encoded, containsString("\"response\":{" + 
+				"\"status\":\"200 OK\"," + 
+				"\"location\":\"Questionnaire/54127-6/_history/2\",")); 
+		//@formatter:on
+
+	}
+
+	@Test
 	public void testTransactionFromBundle6() throws Exception {
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/simone_bundle3.xml");
 		String bundle = IOUtils.toString(bundleRes);

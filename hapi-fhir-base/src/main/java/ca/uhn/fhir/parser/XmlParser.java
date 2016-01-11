@@ -56,7 +56,9 @@ import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -576,21 +578,23 @@ public class XmlParser extends BaseParser implements IParser {
 
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
+				INarrative narr;
 				if (theResource instanceof IResource) {
-					BaseNarrativeDt<?> narr = ((IResource) theResource).getText();
-					if (gen != null && narr.isEmpty()) {
-						String resourceProfile = myContext.getResourceDefinition(theResource).getResourceProfile();
-						gen.generateNarrative(resourceProfile, theResource, narr);
-					}
-					if (narr.isEmpty() == false) {
-						RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
-						String childName = nextChild.getChildNameByDatatype(child.getDatatype());
-						BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
-						encodeChildElementToStreamWriter(theResource, theEventWriter, narr, childName, type, null, theContainedResource, nextChildElem);
-						continue;
-					}
+					narr = ((IResource) theResource).getText();
+				} else if (theResource instanceof IDomainResource) {
+					narr = ((IDomainResource)theResource).getText();
 				} else {
-					// Narrative generation not currently supported for HL7org structures
+					narr = null;
+				}
+				if (gen != null && narr.isEmpty()) {
+					gen.generateNarrative(myContext, theResource, narr);
+				}
+				if (narr != null && narr.isEmpty() == false) {
+					RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
+					String childName = nextChild.getChildNameByDatatype(child.getDatatype());
+					BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
+					encodeChildElementToStreamWriter(theResource, theEventWriter, narr, childName, type, null, theContainedResource, nextChildElem);
+					continue;
 				}
 			}
 

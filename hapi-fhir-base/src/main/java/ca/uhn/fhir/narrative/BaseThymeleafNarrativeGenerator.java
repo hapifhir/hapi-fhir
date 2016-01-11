@@ -35,7 +35,9 @@ import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.INarrative;
 import org.thymeleaf.Arguments;
 import org.thymeleaf.Configuration;
 import org.thymeleaf.TemplateEngine;
@@ -62,7 +64,7 @@ import org.thymeleaf.templateresolver.TemplateResolver;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
@@ -77,10 +79,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	private boolean myIgnoreMissingTemplates = true;
 	private volatile boolean myInitialized;
 	private HashMap<String, String> myNameToNarrativeTemplate;
-	private HashMap<String, String> myNameToTitleTemplate;
 	private TemplateEngine myProfileTemplateEngine;
-	private HashMap<String, String> myProfileToName;
-	private TemplateEngine myTitleTemplateEngine;
 
 	public BaseThymeleafNarrativeGenerator() {
 		myThymeleafConfig = new Configuration();
@@ -90,44 +89,31 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		myThymeleafConfig.initialize();
 	}
 
-	@Override
-	public void generateNarrative(IBaseResource theResource, BaseNarrativeDt<?> theNarrative) {
-		generateNarrative(null, theResource, theNarrative);
-	}
+
 
 	@Override
-	public void setFhirContext(FhirContext theFhirContext) {
-		if (theFhirContext == null) {
-			throw new NullPointerException("Can not set theFhirContext to null");
-		}
-		if (myFhirContext != null && myFhirContext != theFhirContext) {
-			throw new IllegalStateException("Narrative generators may not be reused/shared across multiple FhirContext instances");
-		}
-		myFhirContext = theFhirContext;
-	}
-
-	@Override
-	public void generateNarrative(String theProfile, IBaseResource theResource, BaseNarrativeDt<?> theNarrative) {
+	public void generateNarrative(FhirContext theContext, IBaseResource theResource, INarrative theNarrative) {
 		if (!myInitialized) {
-			initialize();
+			initialize(theContext);
 		}
 
 		String name = null;
-		if (StringUtils.isNotBlank(theProfile)) {
-			name = myProfileToName.get(theProfile);
-		}
 		if (name == null) {
 			name = myClassToName.get(theResource.getClass());
 		}
 		if (name == null) {
-			name = myFhirContext.getResourceDefinition(theResource).getName().toLowerCase();
+			name = theContext.getResourceDefinition(theResource).getName().toLowerCase();
 		}
 
 		if (name == null) {
 			if (myIgnoreMissingTemplates) {
-				ourLog.debug("No narrative template available for profile: {}", theProfile);
-				theNarrative.getDiv().setValueAsString("<div>No narrative template available for resource profile: " + theProfile + "</div>");
-				theNarrative.getStatus().setValueAsString("empty");
+				ourLog.debug("No narrative template available for resorce: {}", name);
+				try {
+					theNarrative.setDivAsString("<div>No narrative template available for resource : " + name + "</div>");
+				} catch (Exception e) {
+					// last resort..
+				}
+				theNarrative.setStatusAsString("empty");
 				return;
 			} else {
 				throw new DataFormatException("No narrative template for class " + theResource.getClass().getCanonicalName());
@@ -137,7 +123,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		try {
 			Context context = new Context();
 			context.setVariable("resource", theResource);
-			context.setVariable("fhirVersion", myFhirContext.getVersion().getVersion().name());
+			context.setVariable("fhirVersion", theContext.getVersion().getVersion().name());
 
 			String result = myProfileTemplateEngine.process(name, context);
 
@@ -151,14 +137,18 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				return;
 			}
 
-			theNarrative.getDiv().setValueAsString(result);
-			theNarrative.getStatus().setValueAsString("generated");
+			theNarrative.setDivAsString(result);
+			theNarrative.setStatusAsString("generated");
 			return;
 		} catch (Exception e) {
 			if (myIgnoreFailures) {
 				ourLog.error("Failed to generate narrative", e);
-				theNarrative.getDiv().setValueAsString("<div>No narrative available - Error: " + e.getMessage() + "</div>");
-				theNarrative.getStatus().setValueAsString("empty");
+				try {
+					theNarrative.setDivAsString("<div>No narrative available - Error: " + e.getMessage() + "</div>");
+				} catch (Exception e1) {
+					// last resort..
+				}
+				theNarrative.setStatusAsString("empty");
 				return;
 			} else {
 				throw new DataFormatException(e);
@@ -166,98 +156,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		}
 	}
 
-	@Override
-	public String generateTitle(IBaseResource theResource) {
-		return generateTitle( null, theResource);
-	}
 
-	@Override
-	public String generateTitle(String theProfile, IBaseResource theResource) {
-		if (!myInitialized) {
-			initialize();
-		}
-
-		ourLog.trace("Generating resource title {}", theResource);
-
-		String name = null;
-		if (StringUtils.isNotBlank(theProfile)) {
-			name = myProfileToName.get(theProfile);
-		}
-		if (name == null) {
-			name = myClassToName.get(theResource.getClass());
-		}
-		if (name == null) {
-			name = myFhirContext.getResourceDefinition(theResource).getName().toLowerCase();
-		}
-
-		ourLog.trace("Template name is {}", name);
-
-		if (name == null) {
-			if (myIgnoreMissingTemplates) {
-				ourLog.debug("No title template available for profile: {}", theProfile);
-				return null;
-			} else {
-				throw new DataFormatException("No title template for class " + theResource.getClass().getCanonicalName());
-			}
-		}
-
-		try {
-			Context context = new Context();
-			context.setVariable("resource", theResource);
-			context.setVariable("fhirVersion", myFhirContext.getVersion().getVersion().name());
-
-			String result = myTitleTemplateEngine.process(name, context);
-
-			ourLog.trace("Produced {}", result);
-
-			StringBuilder b = new StringBuilder();
-			boolean inTag = false;
-			for (int i = 0; i < result.length(); i++) {
-				char nextChar = result.charAt(i);
-				char prevChar = i > 0 ? result.charAt(i - 1) : '\n';
-				if (nextChar == '<') {
-					inTag = true;
-					continue;
-				} else if (inTag) {
-					if (nextChar == '>') {
-						inTag = false;
-					}
-					continue;
-				} else if (nextChar <= ' ') {
-					if (prevChar <= ' ' || prevChar == '>') {
-						continue;
-					} else {
-						b.append(' ');
-					}
-				} else {
-					b.append(nextChar);
-				}
-			}
-
-			while (b.length() > 0 && b.charAt(b.length() - 1) == ' ') {
-				b.setLength(b.length() - 1);
-			}
-
-			result = b.toString();
-			if (result.startsWith("<") && result.contains(">")) {
-				result = result.substring(result.indexOf('>') + 1);
-			}
-			if (result.endsWith(">") && result.contains("<")) {
-				result = result.substring(0, result.lastIndexOf('<'));
-			}
-
-			result = result.replace("&gt;", ">").replace("&lt;", "<").replace("&amp;", "&");
-
-			return result;
-		} catch (Exception e) {
-			if (myIgnoreFailures) {
-				ourLog.error("Failed to generate narrative", e);
-				return "No title available - Error: " + e.getMessage();
-			} else {
-				throw new DataFormatException(e);
-			}
-		}
-	}
 
 	protected abstract List<String> getPropertyFile();
 
@@ -270,17 +169,15 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		}
 	}
 
-	private synchronized void initialize() {
+	private synchronized void initialize(FhirContext theContext) {
 		if (myInitialized) {
 			return;
 		}
 
 		ourLog.info("Initializing narrative generator");
 
-		myProfileToName = new HashMap<String, String>();
 		myClassToName = new HashMap<Class<?>, String>();
 		myNameToNarrativeTemplate = new HashMap<String, String>();
-		myNameToTitleTemplate = new HashMap<String, String>();
 
 		List<String> propFileName = getPropertyFile();
 
@@ -303,22 +200,10 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 			myProfileTemplateEngine.setTemplateResolver(resolver);
 			StandardDialect dialect = new StandardDialect();
 			HashSet<IProcessor> additionalProcessors = new HashSet<IProcessor>();
-			additionalProcessors.add(new NarrativeAttributeProcessor());
+			additionalProcessors.add(new NarrativeAttributeProcessor(theContext));
 			dialect.setAdditionalProcessors(additionalProcessors);
 			myProfileTemplateEngine.setDialect(dialect);
 			myProfileTemplateEngine.initialize();
-		}
-		{
-			myTitleTemplateEngine = new TemplateEngine();
-			TemplateResolver resolver = new TemplateResolver();
-			resolver.setResourceResolver(new TitleResourceResolver());
-			myTitleTemplateEngine.setTemplateResolver(resolver);
-			StandardDialect dialect = new StandardDialect();
-			HashSet<IProcessor> additionalProcessors = new HashSet<IProcessor>();
-			additionalProcessors.add(new NarrativeAttributeProcessor());
-			dialect.setAdditionalProcessors(additionalProcessors);
-			myTitleTemplateEngine.setDialect(dialect);
-			myTitleTemplateEngine.initialize();
 		}
 
 		myInitialized = true;
@@ -369,21 +254,13 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 
 				String narrativePropName = name + ".narrative";
 				String narrativeName = file.getProperty(narrativePropName);
-				String titlePropName = name + ".title";
-				String titleName = file.getProperty(titlePropName);
-				if (isBlank(narrativeName) && isBlank(titleName)) {
-					throw new ConfigurationException("Found property '" + nextKey + "' but no corresponding property '" + narrativePropName + "' or '" + titlePropName + "' in file " + propFileName);
+				if (isBlank(narrativeName)) {
+					throw new ConfigurationException("Found property '" + nextKey + "' but no corresponding property '" + narrativePropName + "' in file " + propFileName);
 				}
-
-				myProfileToName.put(file.getProperty(nextKey), name);
 
 				if (StringUtils.isNotBlank(narrativeName)) {
 					String narrative = IOUtils.toString(loadResource(narrativeName));
 					myNameToNarrativeTemplate.put(name, narrative);
-				}
-				if (StringUtils.isNotBlank(titleName)) {
-					String title = IOUtils.toString(loadResource(titleName));
-					myNameToTitleTemplate.put(name, title);
 				}
 
 			} else if (nextKey.endsWith(".class")) {
@@ -403,10 +280,6 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 					clazz = null;
 				}
 
-//				if (isBlank(narrativeName) && isBlank(titleName)) {
-//					throw new ConfigurationException("Found property '" + nextKey + "' but no corresponding property '" + narrativePropName + "' or '" + titlePropName + "' in file " + propFileName);
-//				}
-
 				if (clazz != null) {
 					myClassToName.put(clazz, name);
 				}
@@ -424,18 +297,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				}
 				continue;
 			} else if (nextKey.endsWith(".title")) {
-				String name = nextKey.substring(0, nextKey.indexOf(".title"));
-				if (isBlank(name)) {
-					continue;
-				}
-				
-				String titlePropName = name + ".title";
-				String titleName = file.getProperty(titlePropName);
-				if (StringUtils.isNotBlank(titleName)) {
-					String title = IOUtils.toString(loadResource(titleName));
-					myNameToTitleTemplate.put(name, title);
-				}
-				continue;
+				ourLog.debug("Ignoring title property as narrative generator no longer generates titles: {}", nextKey);
 			} else {
 				throw new ConfigurationException("Invalid property name: " + nextKey);
 			}
@@ -555,13 +417,13 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		return b.toString();
 	}
 	
-	private FhirContext myFhirContext;
-
 	public class NarrativeAttributeProcessor extends AbstractAttrProcessor {
 
+		private FhirContext myContext;
 
-		protected NarrativeAttributeProcessor() {
+		protected NarrativeAttributeProcessor(FhirContext theContext) {
 			super("narrative");
+			myContext = theContext;
 		}
 
 		@Override
@@ -569,6 +431,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 			return 0;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected ProcessorResult processAttribute(Arguments theArguments, Element theElement, String theAttributeName) {
 			final String attributeValue = theElement.getAttributeValue(theAttributeName);
@@ -587,6 +450,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 			}
 
 			Context context = new Context();
+			context.setVariable("fhirVersion", myContext.getVersion().getVersion().name());
 			context.setVariable("resource", value);
 
 			String name = null;
@@ -599,10 +463,15 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				
 				if (name == null) {
 					if (value instanceof IBaseResource) {
-						name = myFhirContext.getResourceDefinition((IBaseResource)value).getName();
+						name = myContext.getResourceDefinition((Class<? extends IBaseResource>) value).getName();
 					} else if (value instanceof IDatatype) {
 						name = value.getClass().getSimpleName();
 						name = name.substring(0, name.length() - 2);
+					} else if (value instanceof IBaseDatatype) {
+						name = value.getClass().getSimpleName();
+						if (name.endsWith("Type")) {
+							name = name.substring(0, name.length() - 4);
+						}
 					} else {
 						throw new DataFormatException("Don't know how to determine name for type: " + value.getClass());
 					}
@@ -677,20 +546,4 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		}
 	}
 
-	private final class TitleResourceResolver implements IResourceResolver {
-		@Override
-		public String getName() {
-			return getClass().getCanonicalName();
-		}
-
-		@Override
-		public InputStream getResourceAsStream(TemplateProcessingParameters theTemplateProcessingParameters, String theName) {
-			String template = myNameToTitleTemplate.get(theName);
-			if (template == null) {
-				ourLog.info("No narative template for resource profile: {}", theName);
-				return new ReaderInputStream(new StringReader(""));
-			}
-			return new ReaderInputStream(new StringReader(template));
-		}
-	}
 }
