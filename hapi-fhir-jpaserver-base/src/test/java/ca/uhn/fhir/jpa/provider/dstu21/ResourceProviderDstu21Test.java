@@ -1771,12 +1771,12 @@ public class ResourceProviderDstu21Test extends BaseResourceProviderDstu21Test {
 		String methodName = "testSearchWithMissing";
 
 		Organization org = new Organization();
-		IIdType deletedIdMissingTrue = (IdType) ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		IIdType deletedIdMissingTrue = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
 		ourClient.delete().resourceById(deletedIdMissingTrue).execute();
 
 		org = new Organization();
 		org.setName("Help I'm a Bug");
-		IIdType deletedIdMissingFalse = (IdType) ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		IIdType deletedIdMissingFalse = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
 		ourClient.delete().resourceById(deletedIdMissingFalse).execute();
 
 		List<IBaseResource> resources = new ArrayList<IBaseResource>();

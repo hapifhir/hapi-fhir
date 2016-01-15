@@ -186,11 +186,13 @@ public class FhirValidator {
 			next.validateBundle(ctx);
 		}
 
-		IBaseOperationOutcome oo = ctx.toResult().toOperationOutcome();
-		if (oo != null && OperationOutcomeUtil.hasIssues(myContext, oo)) {
-			throw new ValidationFailureException(myContext, oo);
+		if (ctx.toResult().isSuccessful() == false ) {
+			IBaseOperationOutcome oo = ctx.toResult().toOperationOutcome();
+			if (oo != null && OperationOutcomeUtil.hasIssues(myContext, oo)) {
+				throw new ValidationFailureException(myContext, oo);
+			}
 		}
-
+		
 	}
 
 	private void applyDefaultValidators() {
