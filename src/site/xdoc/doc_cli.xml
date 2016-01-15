@@ -13,7 +13,7 @@
 				<b>hapi-fhir-cli</b> is the HAPI FHIR Command Line tool. It features a number of HAPI's
 				built-in features as easy to use command line options. 
 			</p>
-			
+
 			<subsection name="Download and Installation">
 				<p>
 					You can get the tool by downloading it from our
@@ -35,7 +35,12 @@
 			
 			<subsection name="Troubleshooting">
 				<p>
-					The tool should work correctly on any system that has Java 6 (or newer) installed. If
+					<b>Note on Java version support:</b> The HAPI library is designed to
+					work in Java 6+, but the Command Line Tool required a minimum of Java 8. This
+					is because the Jetty Web Server that is used within the tool has this requirement. 
+				</p>
+				<p>
+					The tool should work correctly on any system that has Java 8 (or newer) installed. If
 					it is not working correctly, first try the following command to test if Java is installed:<br/>
 					<code>$ java -version</code>
 				</p>

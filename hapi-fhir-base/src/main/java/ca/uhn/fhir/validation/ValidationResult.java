@@ -111,6 +111,11 @@ public class ValidationResult {
 			OperationOutcomeUtil.addIssue(myCtx, oo, severity, next.getMessage(), location, ExceptionHandlingInterceptor.PROCESSING);
 		}
 
+		if (myMessages.isEmpty()) {
+			String message = myCtx.getLocalizer().getMessage(ValidationResult.class, "noIssuesDetected");
+			OperationOutcomeUtil.addIssue(myCtx, oo, "information", message, null, "informational");
+		}
+
 		return oo;
 	}
 
