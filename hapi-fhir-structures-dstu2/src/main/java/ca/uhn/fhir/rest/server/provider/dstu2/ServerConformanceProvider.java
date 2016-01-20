@@ -206,7 +206,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				String resourceName = nextEntry.getKey();
 				RuntimeResourceDefinition def = myServerConfiguration.getFhirContext().getResourceDefinition(resourceName);
 				resource.getTypeElement().setValue(def.getName());
-	            ServletContext servletContext  = theRequest == null ? null : theRequest.getServletContext();
+				ServletContext servletContext  = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
 	            String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
 				resource.getProfile().setReference(new IdDt(def.getResourceProfile(serverBase)));
 

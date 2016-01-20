@@ -36,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestQuery;
@@ -156,7 +155,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			String resourceName = next.getResourceName();
 			RuntimeResourceDefinition def = myServerConfiguration.getFhirContext().getResourceDefinition(resourceName);
 			resource.getType().setValue(def.getName());
-			ServletContext servletContext  = theRequest == null ? null : theRequest.getServletContext();
+			ServletContext servletContext  = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
 			String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
             resource.getProfile().setReference(new IdDt(def.getResourceProfile(serverBase)));
 

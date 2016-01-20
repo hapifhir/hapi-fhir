@@ -81,6 +81,12 @@ import ca.uhn.fhir.util.VersionUtil;
 public class RestfulServer extends HttpServlet implements IRestfulServer<ServletRequestDetails> {
 
 	/**
+	 * Requests will have an HttpServletRequest attribute set with this name, containing the servlet
+	 * context, in order to avoid a dependency on Servlet-API 3.0+ 
+	 */
+	public static final String SERVLET_CONTEXT_ATTRIBUTE = "ca.uhn.fhir.rest.server.RestfulServer.servlet_context";
+	
+	/**
 	 * Default setting for {@link #setETagSupport(ETagSupportEnum) ETag Support}: {@link ETagSupportEnum#ENABLED}
 	 */
 	public static final ETagSupportEnum DEFAULT_ETAG_SUPPORT = ETagSupportEnum.ENABLED;
@@ -517,6 +523,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		requestDetails.setRequestType(theRequestType);
 		requestDetails.setServletRequest(theRequest);
 		requestDetails.setServletResponse(theResponse);
+		
+		theRequest.setAttribute(SERVLET_CONTEXT_ATTRIBUTE, getServletContext());
 
 		try {
 
