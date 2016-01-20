@@ -38,7 +38,17 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
+			<version>1.4-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
+			<version>1.4-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources-dstu2.1</artifactId>
 			<version>1.4-SNAPSHOT</version>
 		</dependency>
 
@@ -87,10 +97,11 @@
 									<fileset dir="../hapi-fhir-base/src/main/java" />
 									<fileset dir="../hapi-fhir-structures-dstu/src/main/java" />
 									<fileset dir="../hapi-fhir-structures-dstu/target/generated-sources/tinder" />
-									<fileset dir="../hapi-fhir-structures-dstu/src/main/java" />
 									<fileset dir="../hapi-fhir-structures-dstu2/src/main/java" />
 									<fileset dir="../hapi-fhir-structures-dstu2/target/generated-sources/tinder" />
 									<fileset dir="../hapi-fhir-structures-hl7org-dstu2/src/main/java" />
+									<fileset dir="../hapi-fhir-structures-dstu2.1/src/main/java" />
+								<!--<fileset dir="../hapi-fhir-structures-dstu2.1/target/generated-sources/tinder" /> -->
 								</copy>
 							</target>
 						</configuration>
@@ -124,12 +135,28 @@
 						<!--<Export-Package>ca.uhn.fhir</Export-Package> <Export-Package>org.hl7.fhir</Export-Package> -->
 						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 						<!--<Embed-Dependency>*;scope=!provided|test</Embed-Dependency> <Embed-Directory>lib</Embed-Directory> <Embed-Transitive>true</Embed-Transitive> -->
+						<_nouses>true</_nouses>
 						<_removeheaders>Built-By, Include-Resource, Private-Package</_removeheaders>
 						<!-- <Private-Package>org.foo.myproject.*</Private-Package> <Bundle-Activator>org.foo.myproject.impl1.Activator</Bundle-Activator> -->
 						<!-- <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=hapi-fhir-*</Embed-Dependency> -->
 						<Import-Package>
 							!ca.uhn.*,
 							!org.hl7.*,
+							com.ctc.wstx.api;version="4.4";resolution:=optional,
+							com.ctc.wstx.*;version="4.4";resolution:=optional,
+							com.google.*;resolution:=optional;-remove-attribute:=version,
+							com.phloc.commons;resolution:=optional;-remove-attribute:=version,
+							com.phloc.*;resolution:=optional;-remove-attribute:=version,
+							javax.*;-remove-attribute:=version,
+							net.sf.saxon;resolution:=optional,
+							org.apache.commons.*;-remove-attribute:=version,
+							org.apache.http.client.protocol;version="4.0",
+							org.apache.http.*;version="4.0",
+							org.codehaus.stax2;resolution:=optional;-remove-attribute:=version,
+							org.codehaus.stax2.*;resolution:=optional;-remove-attribute:=version,
+							org.oclc.purl.*;-remove-attribute:=version,
+							org.slf4j.*;-remove-attribute:=version,
+                            org.xmlpull.v1;resolution:=optional,
 							*
 						</Import-Package>
 					</instructions>
@@ -188,7 +215,25 @@
 				<filtering>false</filtering>
 			</resource>
 			<resource>
-				<directory>../hapi-fhir-structures-hl7org-dstu2/src/resources/java</directory>
+				<directory>../hapi-fhir-structures-hl7org-dstu2/src/main/resources</directory>
+				<filtering>false</filtering>
+			</resource>
+			<resource>
+				<directory>../hapi-fhir-structures-dstu2.1/src/main/resources</directory>
+				<filtering>false</filtering>
+			</resource>
+			<!--
+			<resource>
+				<directory>../hapi-fhir-structures-dstu2.1/target/generated-resources/tinder</directory>
+				<filtering>false</filtering>
+			</resource>
+			-->
+			<resource>
+				<directory>../hapi-fhir-validation-resources-dstu2/src/main/resources</directory>
+				<filtering>false</filtering>
+			</resource>
+			<resource>
+				<directory>../hapi-fhir-validation-resources-dstu2.1/src/main/resources</directory>
 				<filtering>false</filtering>
 			</resource>
 		</resources>
