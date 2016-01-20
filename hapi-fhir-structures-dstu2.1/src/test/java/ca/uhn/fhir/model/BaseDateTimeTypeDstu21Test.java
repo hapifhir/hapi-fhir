@@ -1,7 +1,8 @@
-package ca.uhn.fhir.model.primitive;
+package ca.uhn.fhir.model;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -9,15 +10,16 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.hl7.fhir.dstu21.model.DateTimeType;
+import org.hl7.fhir.dstu21.model.DateType;
+import org.hl7.fhir.dstu21.model.TemporalPrecisionEnum;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-
-public class BaseDateTimeDtDstu2Test {
+public class BaseDateTimeTypeDstu21Test {
 	private static Locale ourDefaultLocale;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtDstu2Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeTypeDstu21Test.class);
 	private SimpleDateFormat myDateInstantParser;
 
 	@Before
@@ -36,7 +38,7 @@ public class BaseDateTimeDtDstu2Test {
 
 		Date time = cal.getTime();
 
-		DateDt date = new DateDt();
+		DateType date = new DateType();
 		date.setValue(time);
 		assertEquals("2012-01-02", date.getValueAsString());
 	}
@@ -47,7 +49,7 @@ public class BaseDateTimeDtDstu2Test {
 		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 		cal.set(1990, Calendar.JANUARY, 3, 3, 22, 11);
 		
-		DateTimeDt date = new DateTimeDt();
+		DateTimeType date = new DateTimeType();
 		date.setValue(cal.getTime(), TemporalPrecisionEnum.MINUTE);
 		date.setTimeZone(TimeZone.getTimeZone("EST"));
 		assertEquals("1990-01-02T21:22-05:00", date.getValueAsString());
@@ -67,14 +69,14 @@ public class BaseDateTimeDtDstu2Test {
 
 		Date time = cal.getTime();
 
-		DateDt date = new DateDt();
+		DateType date = new DateType();
 		date.setValue(time, TemporalPrecisionEnum.DAY);
 		assertEquals("2012-01-02", date.getValueAsString());
 	}
 
 	@Test
 	public void testToHumanDisplay() {
-		DateTimeDt dt = new DateTimeDt("2012-01-05T12:00:00-08:00");
+		DateTimeType dt = new DateTimeType("2012-01-05T12:00:00-08:00");
 		String human = dt.toHumanDisplay();
 		ourLog.info(human);
 		assertThat(human, containsString("2012"));
