@@ -57,8 +57,8 @@ import org.hl7.fhir.instance.model.UriType;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetCodeSystemComponent;
+import org.hl7.fhir.instance.utilities.Utilities;
 import org.hl7.fhir.instance.validation.ValidationMessage.Source;
-import org.hl7.fhir.utilities.Utilities;
 
 
 public class ToolingExtensions {

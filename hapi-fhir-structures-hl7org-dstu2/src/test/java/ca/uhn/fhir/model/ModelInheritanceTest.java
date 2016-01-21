@@ -59,7 +59,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.hl7.fhir.instance.utilities.xhtml.XhtmlNode;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;

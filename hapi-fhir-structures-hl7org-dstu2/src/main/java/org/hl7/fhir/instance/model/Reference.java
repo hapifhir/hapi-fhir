@@ -35,7 +35,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.utilities.Utilities;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;

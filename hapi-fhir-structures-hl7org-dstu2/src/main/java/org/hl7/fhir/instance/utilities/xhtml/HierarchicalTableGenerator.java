@@ -1,4 +1,4 @@
-package org.hl7.fhir.utilities.xhtml;
+package org.hl7.fhir.instance.utilities.xhtml;
 
 /*
 Copyright (c) 2011+, HL7, Inc
@@ -46,7 +46,7 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
-import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.utilities.Utilities;
 
 
 public class HierarchicalTableGenerator  {

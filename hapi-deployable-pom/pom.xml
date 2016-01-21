@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -13,6 +12,9 @@
 	<packaging>pom</packaging>
 
 	<name>HAPI FHIR - Deployable Artifact Parent POM</name>
+
+	<dependencies>
+	</dependencies>
 
 	<build>
 		<plugins>
@@ -53,7 +55,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>${maven_project_info_plugin_version}</version>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
@@ -61,7 +62,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>${maven_javadoc_plugin_version}</version>
 				<reportSets>
 					<reportSet>
 						<id>default</id>
@@ -110,7 +110,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
-						<version>${maven_source_plugin_version}</version>
 						<executions>
 							<execution>
 								<phase>package</phase>
@@ -123,7 +122,6 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>license-maven-plugin</artifactId>
-						<version>${maven_license_plugin_version}</version>
 						<executions>
 							<execution>
 								<id>first</id>

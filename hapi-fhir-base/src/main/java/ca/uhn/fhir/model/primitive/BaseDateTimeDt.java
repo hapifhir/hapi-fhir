@@ -68,6 +68,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	private static final FastDateFormat ourHumanDateFormat = FastDateFormat.getDateInstance(FastDateFormat.MEDIUM);
 	private static final Pattern ourYearMonthPattern = Pattern.compile("[0-9]{4}[0-9]{2}");
 	private static final Pattern ourYearPattern = Pattern.compile("[0-9]{4}");
+	private static final FastDateFormat ourYearMonthDayTimeMinsFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm");
+	private static final FastDateFormat ourYearMonthDayTimeMinsZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mmZZ");
 
 	static {
 		ArrayList<FastDateFormat> formatters = new ArrayList<FastDateFormat>();
@@ -185,36 +187,40 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		if (theValue == null) {
 			return null;
 		} else {
+			GregorianCalendar cal;
+			if (myTimeZoneZulu) {
+				cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+			} else if (myTimeZone != null) {
+				cal = new GregorianCalendar(myTimeZone);
+			} else {
+				cal = new GregorianCalendar();
+			}
+			cal.setTime(theValue);
+
 			switch (myPrecision) {
 			case DAY:
-				return ourYearMonthDayFormat.format(theValue);
+				return ourYearMonthDayFormat.format(cal);
 			case MONTH:
-				return ourYearMonthFormat.format(theValue);
+				return ourYearMonthFormat.format(cal);
 			case YEAR:
-				return ourYearFormat.format(theValue);
+				return ourYearFormat.format(cal);
+			case MINUTE:
+				if (myTimeZoneZulu) {
+					return ourYearMonthDayTimeMinsFormat.format(cal) + "Z";
+				} else {
+					return ourYearMonthDayTimeMinsZoneFormat.format(cal);
+				}
 			case SECOND:
 				if (myTimeZoneZulu) {
-					GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-					cal.setTime(theValue);
 					return ourYearMonthDayTimeFormat.format(cal) + "Z";
-				} else if (myTimeZone != null) {
-					GregorianCalendar cal = new GregorianCalendar(myTimeZone);
-					cal.setTime(theValue);
-					return ourYearMonthDayTimeZoneFormat.format(cal);
 				} else {
-					return ourYearMonthDayTimeFormat.format(theValue);
+					return ourYearMonthDayTimeZoneFormat.format(cal);
 				}
 			case MILLI:
 				if (myTimeZoneZulu) {
-					GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-					cal.setTime(theValue);
 					return ourYearMonthDayTimeMilliFormat.format(cal) + "Z";
-				} else if (myTimeZone != null) {
-					GregorianCalendar cal = new GregorianCalendar(myTimeZone);
-					cal.setTime(theValue);
-					return ourYearMonthDayTimeMilliZoneFormat.format(cal);
 				} else {
-					return ourYearMonthDayTimeMilliFormat.format(theValue);
+					return ourYearMonthDayTimeMilliZoneFormat.format(cal);
 				}
 			}
 			throw new IllegalStateException("Invalid precision (this is a HAPI bug, shouldn't happen): " + myPrecision);

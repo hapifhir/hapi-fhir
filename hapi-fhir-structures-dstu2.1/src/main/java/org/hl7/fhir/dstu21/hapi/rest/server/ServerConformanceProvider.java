@@ -85,8 +85,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
  * 
  * <p>
- * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is always returned unless {@link #setCache(boolean)} is called with a value of
- * <code>false</code>. This means that if you are adding anything to the returned conformance instance on each call you should call <code>setCache(false)</code> in your provider constructor.
+ * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is
+ * always returned unless {@link #setCache(boolean)} is called with a value of <code>false</code>. This means that if
+ * you are adding anything to the returned conformance instance on each call you should call
+ * <code>setCache(false)</code> in your provider constructor.
  * </p>
  */
 public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
@@ -101,22 +103,20 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	public ServerConformanceProvider(RestfulServer theRestfulServer) {
 		this.myServerConfiguration = theRestfulServer.createConfiguration();
 	}
-	
+
 	public ServerConformanceProvider(RestulfulServerConfiguration theServerConfiguration) {
-	    this.myServerConfiguration = theServerConfiguration;
+		this.myServerConfiguration = theServerConfiguration;
 	}
-	
+
 	/*
-	 * Add a no-arg constructor and seetter so that the
-	 * ServerConfirmanceProvider can be Spring-wired with
-	 * the RestfulService avoiding the potential reference
-	 * cycle that would happen.
+	 * Add a no-arg constructor and seetter so that the ServerConfirmanceProvider can be Spring-wired with the
+	 * RestfulService avoiding the potential reference cycle that would happen.
 	 */
-	public ServerConformanceProvider () {
+	public ServerConformanceProvider() {
 		super();
 	}
-	
-	public void setRestfulServer (RestfulServer theRestfulServer) {
+
+	public void setRestfulServer(RestfulServer theRestfulServer) {
 		myServerConfiguration = theRestfulServer.createConfiguration();
 	}
 
@@ -167,8 +167,9 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	/**
-	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
-	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
+	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a
+	 * mandatory element, the value should not be null (although this is not enforced). The value defaults to
+	 * "Not provided" but may be set to null, which will cause this element to be omitted.
 	 */
 	public String getPublisher() {
 		return myPublisher;
@@ -186,7 +187,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		retVal.setPublisher(myPublisher);
 		retVal.setDateElement(conformanceDate());
 		retVal.setFhirVersion("1.0.2"); // TODO: pull from model
-		retVal.setAcceptUnknown(UnknownContentCode.EXTENSIONS); // TODO: make this configurable - this is a fairly big effort since the parser
+		retVal.setAcceptUnknown(UnknownContentCode.EXTENSIONS); // TODO: make this configurable - this is a fairly big
+																					// effort since the parser
 		// needs to be modified to actually allow it
 
 		retVal.getImplementation().setDescription(myServerConfiguration.getImplementationDescription());
@@ -211,8 +213,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				String resourceName = nextEntry.getKey();
 				RuntimeResourceDefinition def = myServerConfiguration.getFhirContext().getResourceDefinition(resourceName);
 				resource.getTypeElement().setValue(def.getName());
-	            ServletContext servletContext  = theRequest == null ? null : theRequest.getServletContext();
-	            String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
+				ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
+				String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
 				resource.getProfile().setReference((def.getResourceProfile(serverBase)));
 
 				TreeSet<String> includes = new TreeSet<String>();
@@ -441,7 +443,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 					if (targetDef != null) {
 						ResourceType code;
 						try {
-						code = ResourceType.fromCode(targetDef.getName());
+							code = ResourceType.fromCode(targetDef.getName());
 						} catch (FHIRException e) {
 							code = null;
 						}
@@ -561,8 +563,9 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	/**
-	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
-	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
+	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a
+	 * mandatory element, the value should not be null (although this is not enforced). The value defaults to
+	 * "Not provided" but may be set to null, which will cause this element to be omitted.
 	 */
 	public void setPublisher(String thePublisher) {
 		myPublisher = thePublisher;

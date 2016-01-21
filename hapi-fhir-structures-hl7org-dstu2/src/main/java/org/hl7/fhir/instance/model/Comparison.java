@@ -2,7 +2,7 @@ package org.hl7.fhir.instance.model;
 
 import java.util.List;
 
-import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.utilities.Utilities;
 
 /**
  * See http://www.healthintersections.com.au/?p=1941

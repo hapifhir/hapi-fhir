@@ -1,4 +1,4 @@
-package org.hl7.fhir.utilities;
+package org.hl7.fhir.instance.utilities;
 
 /**
  * Encapsulates StringBuilder to build strings of values separated by comma

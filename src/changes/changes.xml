@@ -139,6 +139,12 @@
 				implementations and wasn't compatible
 				with coming changes to that API.
 			</action>
+			<action type="fix" issue="283">
+				Remove dependency on Servlet-API 3.0+ by using methods available in 2.5 where possible.
+				Note that we continue to use Servlet-API 3.0+ features in some parts of the JPA API, so
+				running in an old serlvet container should be tested well before use. Thanks to Bill Denton
+				for reporting!
+			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">

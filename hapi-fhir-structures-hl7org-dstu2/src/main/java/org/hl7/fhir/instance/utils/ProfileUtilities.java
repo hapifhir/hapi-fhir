@@ -37,24 +37,24 @@ import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.instance.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
+import org.hl7.fhir.instance.utilities.CommaSeparatedStringBuilder;
+import org.hl7.fhir.instance.utilities.TextStreamWriter;
+import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.instance.utilities.xhtml.HierarchicalTableGenerator;
+import org.hl7.fhir.instance.utilities.xhtml.XhtmlNode;
+import org.hl7.fhir.instance.utilities.xhtml.HierarchicalTableGenerator.Cell;
+import org.hl7.fhir.instance.utilities.xhtml.HierarchicalTableGenerator.Piece;
+import org.hl7.fhir.instance.utilities.xhtml.HierarchicalTableGenerator.Row;
+import org.hl7.fhir.instance.utilities.xhtml.HierarchicalTableGenerator.TableModel;
+import org.hl7.fhir.instance.utilities.xml.SchematronWriter;
+import org.hl7.fhir.instance.utilities.xml.SchematronWriter.Assert;
+import org.hl7.fhir.instance.utilities.xml.SchematronWriter.Rule;
+import org.hl7.fhir.instance.utilities.xml.SchematronWriter.SchematronType;
+import org.hl7.fhir.instance.utilities.xml.SchematronWriter.Section;
 import org.hl7.fhir.instance.utils.ProfileUtilities.ExtensionContext;
 import org.hl7.fhir.instance.utils.ProfileUtilities.ProfileKnowledgeProvider.BindingResolution;
 import org.hl7.fhir.instance.validation.ValidationMessage;
 import org.hl7.fhir.instance.validation.ValidationMessage.Source;
-import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
-import org.hl7.fhir.utilities.TextStreamWriter;
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.utilities.xhtml.HierarchicalTableGenerator;
-import org.hl7.fhir.utilities.xhtml.HierarchicalTableGenerator.Cell;
-import org.hl7.fhir.utilities.xhtml.HierarchicalTableGenerator.Piece;
-import org.hl7.fhir.utilities.xhtml.HierarchicalTableGenerator.Row;
-import org.hl7.fhir.utilities.xhtml.HierarchicalTableGenerator.TableModel;
-import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.hl7.fhir.utilities.xml.SchematronWriter;
-import org.hl7.fhir.utilities.xml.SchematronWriter.Assert;
-import org.hl7.fhir.utilities.xml.SchematronWriter.Rule;
-import org.hl7.fhir.utilities.xml.SchematronWriter.SchematronType;
-import org.hl7.fhir.utilities.xml.SchematronWriter.Section;
 
 /**
  * This class provides a set of utility operations for working with Profiles.

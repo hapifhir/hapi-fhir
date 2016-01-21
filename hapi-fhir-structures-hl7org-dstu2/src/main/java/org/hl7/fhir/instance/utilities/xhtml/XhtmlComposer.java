@@ -26,7 +26,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 */
-package org.hl7.fhir.utilities.xhtml;
+package org.hl7.fhir.instance.utilities.xhtml;
 
 /*
  * #%L
@@ -55,8 +55,8 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.utilities.xml.IXMLWriter;
+import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.instance.utilities.xml.IXMLWriter;
 
 public class XhtmlComposer {
 

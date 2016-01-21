@@ -109,7 +109,6 @@ public class Controller extends BaseController {
 		return "result";
 	}
 
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/delete" })
 	public String actionDelete(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
 		addCommonParams(theReq, theRequest, theModel);

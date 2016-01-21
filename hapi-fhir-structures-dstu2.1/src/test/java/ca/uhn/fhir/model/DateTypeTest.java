@@ -1,16 +1,15 @@
-package ca.uhn.fhir.model.primitive;
+package ca.uhn.fhir.model;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.util.TreeSet;
 
+import org.hl7.fhir.dstu21.model.DateType;
 import org.junit.Test;
 
-public class DateDtTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateDtTest.class);
+public class DateTypeTest {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateTypeTest.class);
 
 	@Test
 	public void testPrecision() {
@@ -22,7 +21,7 @@ public class DateDtTest {
 		cal.set(1990, Calendar.JANUARY, 1, 0, 0, 0);
 		ourLog.info("Time: {}", cal); // 631152000775
 
-		DateDt dateDt = new DateDt(cal.getTime());
+		DateType dateDt = new DateType(cal.getTime());
 		long time = dateDt.getValue().getTime();
 		ourLog.info("Time: {}", time); // 631152000775
 		ourLog.info("Time: {}", dateDt.getValue()); // 631152000775
@@ -43,13 +42,11 @@ public class DateDtTest {
 		final Calendar cal = Calendar.getInstance();
 		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 		cal.set(1990, Calendar.JANUARY, 5, 0, 0, 0);
-		DateDt dateDt = new DateDt(cal);
+		DateType dateDt = new DateType(cal);
 		assertEquals("1990-01-05", dateDt.getValueAsString());
 
-		dateDt = new DateDt(1990, 0, 5);
+		dateDt = new DateType(1990, 0, 5);
 		assertEquals("1990-01-05", dateDt.getValueAsString());
 	}
-	
-	
 	
 }
