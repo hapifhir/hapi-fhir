@@ -35,7 +35,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.utilities.Utilities;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;

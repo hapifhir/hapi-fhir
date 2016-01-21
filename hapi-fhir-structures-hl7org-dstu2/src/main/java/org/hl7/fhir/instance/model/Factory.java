@@ -6,8 +6,8 @@ import java.util.UUID;
 
 import org.hl7.fhir.instance.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.utilities.xhtml.XhtmlParser;
+import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.instance.utilities.xhtml.XhtmlParser;
 
 /*
 Copyright (c) 2011+, HL7, Inc

@@ -3,7 +3,7 @@ package org.hl7.fhir.instance.model;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.instance.model.api.INarrative;
-import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.hl7.fhir.instance.utilities.xhtml.XhtmlNode;
 
 public abstract class BaseNarrative extends Type implements INarrative {
 
