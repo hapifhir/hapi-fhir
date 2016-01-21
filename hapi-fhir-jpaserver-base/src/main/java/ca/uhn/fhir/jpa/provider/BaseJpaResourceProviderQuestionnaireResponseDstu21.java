@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
+import org.hl7.fhir.dstu21.model.QuestionnaireResponse;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -20,9 +22,7 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
-import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
-
-public class BaseJpaResourceProviderQuestionnaireResponseDstu21 extends JpaResourceProviderDstu2<QuestionnaireResponse> {
+public class BaseJpaResourceProviderQuestionnaireResponseDstu21 extends JpaResourceProviderDstu21<QuestionnaireResponse> {
 
 	// nothing yet
 

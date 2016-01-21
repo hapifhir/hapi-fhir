@@ -20,9 +20,14 @@
 			<version>1.4-SNAPSHOT</version>
 		</dependency>
 
+		<!-- 
+		The JPA project uses a newer API but we'll try to hold to this version
+		as much as possible. See #283.
+		-->
 		<dependency>
 			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
 			<scope>provided</scope>
 		</dependency>
 

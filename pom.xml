@@ -248,7 +248,6 @@
 		<hibernate_version>5.0.6.Final</hibernate_version>
 		<hibernate_validator_version>5.2.2.Final</hibernate_validator_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
-		<maven_failsafe_plugin_version>2.18.1</maven_failsafe_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<maven_site_plugin_version>3.4</maven_site_plugin_version>
 		<maven_source_plugin_version>2.4</maven_source_plugin_version>
@@ -731,7 +730,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.19</version>
+					<version>2.19.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -741,7 +740,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.19</version>
+					<version>2.19.1</version>
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
@@ -1314,7 +1313,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>2.19</version>
+				<version>2.19.1</version>
 				<reportSets>
 					<reportSet>
 						<reports>

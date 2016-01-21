@@ -88,6 +88,7 @@ public class FhirServerConfigDstu21 extends BaseJavaConfigDstu21 {
 		extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
 		extraProperties.put("hibernate.search.default.indexBase", "target/lucenefiles");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
+//		extraProperties.put("hibernate.search.default.worker.execution", "async");
 		return extraProperties;
 	}
 

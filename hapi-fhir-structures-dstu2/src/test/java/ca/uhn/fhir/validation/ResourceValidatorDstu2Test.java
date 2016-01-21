@@ -132,7 +132,7 @@ public class ResourceValidatorDstu2Test {
 		
 		assertTrue(result.toString(), result.isSuccessful());
 		assertNotNull(operationOutcome);
-		assertEquals(0, operationOutcome.getIssue().size());
+		assertEquals(1, operationOutcome.getIssue().size());
 	}
 
 	@SuppressWarnings("deprecation")

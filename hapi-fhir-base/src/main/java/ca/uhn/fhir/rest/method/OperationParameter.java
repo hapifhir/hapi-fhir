@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.method;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -82,8 +83,6 @@ public class OperationParameter implements IParameter {
 		myContext = theCtx;
 	}
 
-
-
 	protected FhirContext getContext() {
 		return myContext;
 	}
@@ -109,22 +108,22 @@ public class OperationParameter implements IParameter {
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (getContext().getVersion().getVersion().isRi()) {
 			if (IDatatype.class.isAssignableFrom(theParameterType)) {
-				throw new ConfigurationException("Incorrect use of type " + theParameterType.getSimpleName() + " as parameter type for method when context is for version " + getContext().getVersion().getVersion().name() + " in method: " + theMethod.toString());
+				throw new ConfigurationException("Incorrect use of type " + theParameterType.getSimpleName() + " as parameter type for method when context is for version "
+						+ getContext().getVersion().getVersion().name() + " in method: " + theMethod.toString());
 			}
 		}
-		
+
 		myParameterType = theParameterType;
 		if (theInnerCollectionType != null) {
 			myInnerCollectionType = CollectionBinder.getInstantiableCollectionType(theInnerCollectionType, myName);
 		} else {
 			myMax = 1;
 		}
-		
+
 		myAllowGet = IPrimitiveType.class.isAssignableFrom(myParameterType) || String.class.equals(myParameterType);
-		
+
 		/*
-		 * The parameter can be of type string for validation methods - This is a bit
-		 * weird. See ValidateDstu2Test. We should probably clean this up..
+		 * The parameter can be of type string for validation methods - This is a bit weird. See ValidateDstu2Test. We should probably clean this up..
 		 */
 		if (!myParameterType.equals(IBase.class) && !myParameterType.equals(String.class)) {
 			if (IBaseResource.class.isAssignableFrom(myParameterType) && myParameterType.isInterface()) {
@@ -150,7 +149,8 @@ public class OperationParameter implements IParameter {
 	}
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource)
+			throws InternalErrorException {
 		assert theTargetResource != null;
 		Object sourceClientArgument = theSourceClientArgument;
 		if (sourceClientArgument == null) {
@@ -173,7 +173,7 @@ public class OperationParameter implements IParameter {
 			String[] paramValues = theRequest.getParameters().get(myName);
 			if (paramValues != null && paramValues.length > 0) {
 				if (myAllowGet) {
-					
+
 					if (DateRangeParam.class.isAssignableFrom(myParameterType)) {
 						List<QualifiedParamList> parameters = new ArrayList<QualifiedParamList>();
 						parameters.add(QualifiedParamList.singleton(paramValues[0]));
@@ -184,11 +184,11 @@ public class OperationParameter implements IParameter {
 						dateRangeParam.setValuesAsQueryTokens(parameters);
 						matchingParamValues.add(dateRangeParam);
 					} else if (String.class.isAssignableFrom(myParameterType)) {
-						
+
 						for (String next : paramValues) {
 							matchingParamValues.add(next);
 						}
-						
+
 					} else {
 						for (String nextValue : paramValues) {
 							FhirContext ctx = theRequest.getServer().getFhirContext();
@@ -212,42 +212,51 @@ public class OperationParameter implements IParameter {
 				return null;
 			}
 
-			Class<? extends IBaseResource> wantedResourceType = theMethodBinding.getContext().getResourceDefinition("Parameters").getImplementingClass();
+			// Class<? extends IBaseResource> wantedResourceType = theMethodBinding.getContext().getResourceDefinition("Parameters").getImplementingClass();
+			Class<IBaseResource> wantedResourceType = null;
 			IBaseResource requestContents = ResourceParameter.loadResourceFromRequest(theRequest, theMethodBinding, wantedResourceType);
 
 			RuntimeResourceDefinition def = ctx.getResourceDefinition(requestContents);
+			if (def.getName().equals("Parameters")) {
 
-			BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
-			BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+				BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
+				BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
 
-			RuntimeChildPrimitiveDatatypeDefinition nameChild = (RuntimeChildPrimitiveDatatypeDefinition) paramChildElem.getChildByName("name");
-			BaseRuntimeChildDefinition valueChild = paramChildElem.getChildByName("value[x]");
-			BaseRuntimeChildDefinition resourceChild = paramChildElem.getChildByName("resource");
+				RuntimeChildPrimitiveDatatypeDefinition nameChild = (RuntimeChildPrimitiveDatatypeDefinition) paramChildElem.getChildByName("name");
+				BaseRuntimeChildDefinition valueChild = paramChildElem.getChildByName("value[x]");
+				BaseRuntimeChildDefinition resourceChild = paramChildElem.getChildByName("resource");
 
-			IAccessor paramChildAccessor = paramChild.getAccessor();
-			List<IBase> values = paramChildAccessor.getValues(requestContents);
-			for (IBase nextParameter : values) {
-				List<IBase> nextNames = nameChild.getAccessor().getValues(nextParameter);
-				if (nextNames != null && nextNames.size() > 0) {
-					IPrimitiveType<?> nextName = (IPrimitiveType<?>) nextNames.get(0);
-					if (myName.equals(nextName.getValueAsString())) {
+				IAccessor paramChildAccessor = paramChild.getAccessor();
+				List<IBase> values = paramChildAccessor.getValues(requestContents);
+				for (IBase nextParameter : values) {
+					List<IBase> nextNames = nameChild.getAccessor().getValues(nextParameter);
+					if (nextNames != null && nextNames.size() > 0) {
+						IPrimitiveType<?> nextName = (IPrimitiveType<?>) nextNames.get(0);
+						if (myName.equals(nextName.getValueAsString())) {
 
-						if (myParameterType.isAssignableFrom(nextParameter.getClass())) {
-							matchingParamValues.add(nextParameter);
-						} else {
-							List<IBase> paramValues = valueChild.getAccessor().getValues(nextParameter);
-							List<IBase> paramResources = resourceChild.getAccessor().getValues(nextParameter);
-							if (paramValues != null && paramValues.size() > 0) {
-								tryToAddValues(paramValues, matchingParamValues);
-							} else if (paramResources != null && paramResources.size() > 0) {
-								tryToAddValues(paramResources, matchingParamValues);
+							if (myParameterType.isAssignableFrom(nextParameter.getClass())) {
+								matchingParamValues.add(nextParameter);
+							} else {
+								List<IBase> paramValues = valueChild.getAccessor().getValues(nextParameter);
+								List<IBase> paramResources = resourceChild.getAccessor().getValues(nextParameter);
+								if (paramValues != null && paramValues.size() > 0) {
+									tryToAddValues(paramValues, matchingParamValues);
+								} else if (paramResources != null && paramResources.size() > 0) {
+									tryToAddValues(paramResources, matchingParamValues);
+								}
 							}
-						}
 
+						}
 					}
 				}
-			}
 
+			} else {
+				
+				if (myParameterType.isAssignableFrom(requestContents.getClass())) {
+					tryToAddValues(Arrays.asList((IBase) requestContents), matchingParamValues);
+				}
+
+			}
 		}
 
 		if (matchingParamValues.isEmpty()) {
