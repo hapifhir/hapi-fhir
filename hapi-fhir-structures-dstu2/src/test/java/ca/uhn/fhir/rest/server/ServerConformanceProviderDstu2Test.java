@@ -54,6 +54,7 @@ import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -393,6 +394,36 @@ public class ServerConformanceProviderDstu2Test {
 	}
 
 	@Test
+	public void testSearchReferenceParameterDocumentation() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new PatientResourceProvider());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		boolean found = false;
+		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
+		for (ResourceBinding resourceBinding : resourceBindings) {
+			if (resourceBinding.getResourceName().equals("Patient")) {
+				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
+				SearchParameter param = (SearchParameter) binding.getParameters().get(25);
+				assertEquals("The organization at which this person is a patient", param.getDescription());
+				found = true;
+			}
+		}
+		assertTrue(found);
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+	}
+
+	@Test
 	public void testSystemHistorySupported() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -582,7 +613,19 @@ public class ServerConformanceProviderDstu2Test {
 	public static class SearchProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+		public Patient findPatient1(
+				@Description(shortDefinition = "The patient's identifier (MRN or other card number)") 
+				@RequiredParam(name = Patient.SP_IDENTIFIER) 
+				IdentifierDt theIdentifier) {
+			return null;
+		}
+
+		@Search(type = Patient.class)
+		public Patient findPatient2(
+				@Description(shortDefinition="All patients linked to the given patient")
+				@OptionalParam(name="link", targetTypes={  Patient.class   } )
+				ReferenceAndListParam theLink 
+			) {
 			return null;
 		}
 
