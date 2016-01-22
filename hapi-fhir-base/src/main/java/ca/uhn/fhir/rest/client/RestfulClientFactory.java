@@ -68,7 +68,9 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	private ServerValidationModeEnum myServerValidationMode = DEFAULT_SERVER_VALIDATION_MODE;
 	private int mySocketTimeout = DEFAULT_SOCKET_TIMEOUT;
 	private Set<String> myValidatedServerBaseUrls = Collections.synchronizedSet(new HashSet<String>());
-
+	private int myPoolMaxTotal = DEFAULT_POOL_MAX;
+	private int myPoolMaxPerRoute = DEFAULT_POOL_MAX_PER_ROUTE;
+	
 	/**
 	 * Constructor
 	 */
@@ -100,7 +102,9 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		if (myHttpClient == null) {
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-
+			connectionManager.setMaxTotal(myPoolMaxTotal);
+			connectionManager.setDefaultMaxPerRoute(myPoolMaxPerRoute);
+			
 			//@formatter:off
 			RequestConfig defaultRequestConfig = RequestConfig.custom()
 				    .setSocketTimeout(mySocketTimeout)
@@ -147,6 +151,16 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public int getSocketTimeout() {
 		return mySocketTimeout;
+	}
+
+	@Override
+	public int getPoolMaxTotal() {
+		return myPoolMaxTotal;
+	}
+
+	@Override
+	public int getPoolMaxPerRoute() {
+		return myPoolMaxPerRoute;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -273,6 +287,18 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public synchronized void setSocketTimeout(int theSocketTimeout) {
 		mySocketTimeout = theSocketTimeout;
+		myHttpClient = null;
+	}
+
+	@Override
+	public synchronized void setPoolMaxTotal(int thePoolMaxTotal) {
+		myPoolMaxTotal = thePoolMaxTotal;
+		myHttpClient = null;
+	}
+
+	@Override
+	public synchronized void setPoolMaxPerRoute(int thePoolMaxPerRoute) {
+		myPoolMaxPerRoute = thePoolMaxPerRoute;
 		myHttpClient = null;
 	}
 
