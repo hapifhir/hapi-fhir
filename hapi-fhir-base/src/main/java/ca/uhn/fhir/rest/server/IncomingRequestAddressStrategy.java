@@ -73,7 +73,12 @@ public class IncomingRequestAddressStrategy implements IServerAddressStrategy {
 		}
 
 		String fhirServerBase;
-		int length = contextIndex + servletPath.length();
+		int length;
+		if (servletContextPath.length() == 0 || servletContextPath.equals("/")) {
+			length = contextIndex + servletPath.length();
+		} else {
+			length = contextIndex + servletPath.length() + servletContextPath.length();
+		}
 		if (length > requestUrlLength) {
 			length = requestUrlLength;
 		}
