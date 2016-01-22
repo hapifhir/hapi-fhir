@@ -216,6 +216,10 @@
 			<id>karlmdavis</id>
 			<name>Karl M. Davis</name>
 		</developer>
+		<developer>
+			<id>matt-blanchette</id>
+			<name>Matt Blanchette</name>
+		</developer>
 	</developers>
 
 	<licenses>

@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -236,16 +237,19 @@ public class ServerConformanceProviderDstu2Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
-				assertEquals("The patient's identifier (MRN or other card number)", param.getDescription());
-				found = true;
+				for (IParameter next : binding.getParameters()) {
+					SearchParameter param = (SearchParameter) next;
+					if (param.getDescription().contains("The patient's identifier (MRN or other card number")) {
+						found = true;
+					}
+				}
 			}
 		}
 		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
-		ourLog.info(conf);
+		ourLog.info("AAAAAA" + conf);
 
 		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
@@ -377,8 +381,12 @@ public class ServerConformanceProviderDstu2Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
-				assertEquals("The patient's identifier (MRN or other card number)", param.getDescription());
+				for (IParameter next : binding.getParameters()) {
+					SearchParameter param = (SearchParameter) next;
+					if (param.getDescription().contains("The patient's identifier (MRN or other card number")) {
+						found = true;
+					}
+				}
 				found = true;
 			}
 		}
@@ -522,8 +530,7 @@ public class ServerConformanceProviderDstu2Test {
 	public static class MultiOptionalProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier,
-				@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringDt theName) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier, @Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringDt theName) {
 			return null;
 		}
 
@@ -556,8 +563,7 @@ public class ServerConformanceProviderDstu2Test {
 	public static class PlainProviderWithExtendedOperationOnNoType {
 
 		@Operation(name = "plain", idempotent = true, returnParameters = { @OperationParam(min = 1, max = 2, name = "out1", type = StringDt.class) })
-		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId,
-				@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
 			return null;
 		}
 
@@ -566,8 +572,7 @@ public class ServerConformanceProviderDstu2Test {
 	public static class ProviderWithExtendedOperationReturningBundle implements IResourceProvider {
 
 		@Operation(name = "everything", idempotent = true)
-		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId,
-				@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
 			return null;
 		}
 
@@ -582,9 +587,8 @@ public class ServerConformanceProviderDstu2Test {
 
 		@Description(shortDefinition = "This is a search for stuff!")
 		@Search
-		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId,
-				@OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
-				@IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
+		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
+				@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange, @IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
 			return null;
 		}
 
@@ -613,19 +617,12 @@ public class ServerConformanceProviderDstu2Test {
 	public static class SearchProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient1(
-				@Description(shortDefinition = "The patient's identifier (MRN or other card number)") 
-				@RequiredParam(name = Patient.SP_IDENTIFIER) 
-				IdentifierDt theIdentifier) {
+		public Patient findPatient1(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
 			return null;
 		}
 
 		@Search(type = Patient.class)
-		public Patient findPatient2(
-				@Description(shortDefinition="All patients linked to the given patient")
-				@OptionalParam(name="link", targetTypes={  Patient.class   } )
-				ReferenceAndListParam theLink 
-			) {
+		public Patient findPatient2(@Description(shortDefinition = "All patients linked to the given patient") @OptionalParam(name = "link", targetTypes = { Patient.class }) ReferenceAndListParam theLink) {
 			return null;
 		}
 
