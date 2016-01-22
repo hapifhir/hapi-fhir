@@ -145,6 +145,11 @@
 				running in an old serlvet container should be tested well before use. Thanks to Bill Denton
 				for reporting!
 			</action>
+			<action type="add" issue="288">
+				Add new methods to RestfulClientFactory allowing you to configure the size of the
+				client pool used by Apache HttpClient. Thanks to Matt Blanchette for the pull
+				request!
+			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">
