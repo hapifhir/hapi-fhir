@@ -754,6 +754,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 *           The resource that is about to be stored
 	 */
 	protected void preProcessResourceForStorage(T theResource) {
+		String type = getContext().getResourceDefinition(theResource).getName();
+		if (!getResourceName().equals(type)) {
+			throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "incorrectResourceType", type, getResourceName()));
+		}
+		
 		if (theResource.getIdElement().hasIdPart()) {
 			if (!theResource.getIdElement().isIdPartValid()) {
 				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));

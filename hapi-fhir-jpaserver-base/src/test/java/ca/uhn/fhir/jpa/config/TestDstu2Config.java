@@ -51,7 +51,6 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setPackagesToScan("ca.uhn.fhir.jpa.entity");
 		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
 		retVal.setJpaProperties(jpaProperties());
-		retVal.afterPropertiesSet();
 		return retVal;
 	}
 

@@ -26,6 +26,7 @@ import org.hl7.fhir.dstu21.model.Media;
 import org.hl7.fhir.dstu21.model.Medication;
 import org.hl7.fhir.dstu21.model.MedicationOrder;
 import org.hl7.fhir.dstu21.model.Meta;
+import org.hl7.fhir.dstu21.model.NamingSystem;
 import org.hl7.fhir.dstu21.model.Observation;
 import org.hl7.fhir.dstu21.model.Organization;
 import org.hl7.fhir.dstu21.model.Patient;
@@ -141,6 +142,9 @@ public abstract class BaseJpaDstu21Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myPatientDaoDstu21")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
+	@Autowired
+	@Qualifier("myNamingSystemDaoDstu21")
+	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
 	@Autowired
 	@Qualifier("myMediaDaoDstu21")
 	protected IFhirResourceDao<Media> myMediaDao;

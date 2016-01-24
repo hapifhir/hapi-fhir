@@ -139,6 +139,12 @@
 				implementations and wasn't compatible
 				with coming changes to that API.
 			</action>
+			<action type="fix">
+				Remove afterPropertiesSet() call in Java config for JPA
+				server's EntityManagerFactory. This doesn't need to be called
+				manually, the the manual call led to a warning about
+				the EntityManager being created twice.
+			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">

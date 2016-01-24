@@ -49,6 +49,7 @@ import org.hl7.fhir.dstu21.model.Encounter;
 import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.Meta;
+import org.hl7.fhir.dstu21.model.NamingSystem;
 import org.hl7.fhir.dstu21.model.Observation;
 import org.hl7.fhir.dstu21.model.OperationOutcome;
 import org.hl7.fhir.dstu21.model.OperationOutcome.IssueSeverity;
@@ -71,6 +72,8 @@ import org.mockito.ArgumentCaptor;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.FhirResourceDaoDstu21;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
@@ -326,6 +329,51 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 		}
 	}
 
+	@Test
+	public void testCreateLongString() {
+		//@formatter:off
+		String input = "<NamingSystem>\n" + 
+				"        <name value=\"NDF-RT (National Drug File – Reference Terminology)\"/>\n" + 
+				"        <status value=\"draft\"/>\n" + 
+				"        <kind value=\"codesystem\"/>\n" + 
+				"        <publisher value=\"HL7, Inc\"/>\n" + 
+				"        <date value=\"2015-08-21\"/>\n" + 
+				"        <uniqueId>\n" + 
+				"          <type value=\"uri\"/>\n" + 
+				"          <value value=\"http://hl7.org/fhir/ndfrt\"/>\n" + 
+				"          <preferred value=\"true\"/>\n" + 
+				"        </uniqueId>\n" + 
+				"        <uniqueId>\n" + 
+				"          <type value=\"oid\"/>\n" + 
+				"          <value value=\"2.16.840.1.113883.6.209\"/>\n" + 
+				"          <preferred value=\"false\"/>\n" + 
+				"        </uniqueId>\n" + 
+				"      </NamingSystem>";
+		//@formatter:on
+
+		NamingSystem res = myFhirCtx.newXmlParser().parseResource(NamingSystem.class, input);
+		IIdType id = myNamingSystemDao.create(res).getId().toUnqualifiedVersionless();
+		
+		assertThat(toUnqualifiedVersionlessIdValues(myNamingSystemDao.search(NamingSystem.SP_NAME, new StringParam("NDF"))), contains(id.getValue()));
+	}
+
+	@Test
+	public void testCreateWrongType() {
+
+		// Lose typing so we can put the wrong type in
+		@SuppressWarnings("rawtypes")
+		IFhirResourceDao dao = myNamingSystemDao;
+		
+		Patient resource = new Patient();
+		resource.addName().addFamily("My Name");
+		try {
+			dao.create(resource);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Incorrect resource type detected for endpoint, found Patient but expected NamingSystem", e.getMessage());
+		}
+	}
+	
 	@Test
 	public void testCreateTextIdFails() {
 		Patient p = new Patient();
@@ -829,8 +877,7 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 
 		assertGone(id);
 	}
-	
-	
+
 	@Test
 	public void testDeleteWithMatchUrlChainedIdentifier() {
 		String methodName = "testDeleteWithMatchUrlChainedIdentifer";
@@ -850,13 +897,12 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 		myPatientDao.deleteByUrl("Patient?organization.identifier=http://example.com|" + methodName);
 		assertGone(id);
 		assertNotGone(orgId);
-		
+
 		myOrganizationDao.deleteByUrl("Organization?identifier=http://example.com|" + methodName);
 		assertGone(id);
 		assertGone(orgId);
 
 	}
-	
 
 	@Test
 	public void testDeleteWithMatchUrlChainedTag() {
@@ -864,9 +910,9 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 
 		Organization org = new Organization();
 		org.getMeta().addTag().setSystem("http://foo").setCode("term");
-		
+
 		org.setName(methodName);
-		
+
 		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
@@ -878,7 +924,7 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 
 		myPatientDao.deleteByUrl("Patient?organization._tag=http://foo|term");
 		assertGone(id);
-		
+
 		myOrganizationDao.deleteByUrl("Organization?_tag=http://foo|term");
 		try {
 			myOrganizationDao.read(orgId);
@@ -903,7 +949,6 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 
 	}
 
-	
 	@Test
 	public void testDeleteWithMatchUrlQualifierMissing() {
 		String methodName = "testDeleteWithMatchUrlChainedProfile";
@@ -924,9 +969,9 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 		/*
 		 * Org 2 has a name
 		 */
-		
+
 		Organization org2 = new Organization();
-		org2.setName(methodName);		
+		org2.setName(methodName);
 		org2.addIdentifier().setValue(methodName);
 		IIdType org2Id = myOrganizationDao.create(org2).getId().toUnqualifiedVersionless();
 
@@ -939,13 +984,13 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 		ourLog.info("Org ID 1 : {}", org1Id);
 		ourLog.info("Pat ID 2 : {}", patId2);
 		ourLog.info("Org ID 2 : {}", org2Id);
-		
+
 		myPatientDao.deleteByUrl("Patient?organization.name:missing=true");
 		assertGone(patId1);
 		assertNotGone(patId2);
 		assertNotGone(org1Id);
 		assertNotGone(org2Id);
-		
+
 		myOrganizationDao.deleteByUrl("Organization?name:missing=true");
 		assertGone(patId1);
 		assertNotGone(patId2);
@@ -957,7 +1002,7 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 		assertGone(patId2);
 		assertGone(org1Id);
 		assertNotGone(org2Id);
-		
+
 		myOrganizationDao.deleteByUrl("Organization?name:missing=false");
 		assertGone(patId1);
 		assertGone(patId2);
@@ -971,12 +1016,13 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 	private void assertNotGone(IIdType theId) {
 		if ("Patient".equals(theId.getResourceType())) {
 			myPatientDao.read(theId);
-		} else if ("Organization".equals(theId.getResourceType())){
+		} else if ("Organization".equals(theId.getResourceType())) {
 			myOrganizationDao.read(theId);
 		} else {
 			fail("No type");
 		}
 	}
+
 	private void assertGone(IIdType theId) {
 		try {
 			assertNotGone(theId);
@@ -986,19 +1032,17 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 		}
 	}
 
-	
-	
 	@Test
 	public void testDeleteWithMatchUrlChainedProfile() {
 		String methodName = "testDeleteWithMatchUrlChainedProfile";
 
 		List<IdType> profileList = new ArrayList<IdType>();
-		
+
 		Organization org = new Organization();
-		
-		org.getMeta().getProfile().add(new IdType("http://foo"));		
+
+		org.getMeta().getProfile().add(new IdType("http://foo"));
 		org.setName(methodName);
-		
+
 		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
@@ -1010,7 +1054,7 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 
 		myPatientDao.deleteByUrl("Patient?organization._profile=http://foo");
 		assertGone(id);
-		
+
 		myOrganizationDao.deleteByUrl("Organization?_profile=http://foo");
 		try {
 			myOrganizationDao.read(orgId);
@@ -1995,7 +2039,7 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 			patient.getMeta().addTag(null, "Dog", "Puppies");
 
 			patient.getMeta().addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1");
-			
+
 			patient.getMeta().addProfile(("http://profile/1"));
 
 			id1 = myPatientDao.create(patient).getId();
@@ -2741,7 +2785,7 @@ public class FhirResourceDaoDstu21Test extends BaseJpaDstu21Test {
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
 
-		List<Patient> search = toList(myPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam(patient.getIdentifier().get(0).getSystem(),patient.getIdentifier().get(0).getValue())));
+		List<Patient> search = toList(myPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam(patient.getIdentifier().get(0).getSystem(), patient.getIdentifier().get(0).getValue())));
 		assertEquals(1, search.size());
 		retrieved = search.get(0);
 
