@@ -69,16 +69,12 @@ public class IncomingRequestAddressStrategy implements IServerAddressStrategy {
 				contextIndex = requestUrl.indexOf(requestPath, startOfPath);
 			}
 		} else {
-			contextIndex = requestUrl.indexOf(servletPath, startOfPath);
+			//servletContextPath can start with servletPath 
+			contextIndex = requestUrl.indexOf(servletPath + "/", startOfPath);
 		}
 
 		String fhirServerBase;
-		int length;
-		if (servletContextPath.length() == 0 || servletContextPath.equals("/")) {
-			length = contextIndex + servletPath.length();
-		} else {
-			length = contextIndex + servletPath.length() + servletContextPath.length();
-		}
+		int length = contextIndex + servletPath.length();
 		if (length > requestUrlLength) {
 			length = requestUrlLength;
 		}
