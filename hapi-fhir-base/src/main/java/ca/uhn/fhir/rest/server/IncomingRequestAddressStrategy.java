@@ -71,6 +71,9 @@ public class IncomingRequestAddressStrategy implements IServerAddressStrategy {
 		} else {
 			//servletContextPath can start with servletPath 
 			contextIndex = requestUrl.indexOf(servletPath + "/", startOfPath);
+			if (contextIndex == -1) {
+				contextIndex = requestUrl.indexOf(servletPath, startOfPath);
+			}
 		}
 
 		String fhirServerBase;
