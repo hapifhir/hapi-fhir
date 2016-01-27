@@ -1,4 +1,4 @@
-package ca.uhn.fhir.osgi.impl;
+package ca.uhn.fhir.osgi;
 
 /*
  * #%L
@@ -22,8 +22,6 @@ package ca.uhn.fhir.osgi.impl;
 
 
 import java.util.Collection;
-
-import ca.uhn.fhir.osgi.FhirProviderBundle;
 
 /**
  *
