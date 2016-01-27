@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
@@ -218,4 +219,35 @@ public class TokenParameterTest {
 
 	}
 
+	
+	@Test
+	public void testGetModifiersNone() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=a%7Cb");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals(1, ourLastOrList.getListAsCodings().size());
+		assertEquals(null, ourLastOrList.getValuesAsQueryTokens().get(0).getModifier());
+		assertEquals("a", ourLastOrList.getListAsCodings().get(0).getSystemElement().getValue());
+		assertEquals("b", ourLastOrList.getListAsCodings().get(0).getCodeElement().getValue());
+		assertEquals("a", ourLastOrList.getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("b", ourLastOrList.getValuesAsQueryTokens().get(0).getValue());
+	}
+
+	@Test
+	public void testGetModifiersText() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier:text=a%7Cb");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals(1, ourLastOrList.getListAsCodings().size());
+		assertEquals(TokenParamModifier.TEXT, ourLastOrList.getValuesAsQueryTokens().get(0).getModifier());
+		assertEquals(null, ourLastOrList.getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("a|b", ourLastOrList.getValuesAsQueryTokens().get(0).getValue());
+	}
+	
 }

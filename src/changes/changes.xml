@@ -150,6 +150,10 @@
 				client pool used by Apache HttpClient. Thanks to Matt Blanchette for the pull
 				request!
 			</action>
+			<action type="add">
+				Add support for new modifier types on Token search params in Server and 
+				annotation client.
+			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">
