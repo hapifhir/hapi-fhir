@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.server;
+package org.hl7.fhir.dstu21.hapi.rest.server;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -16,26 +16,25 @@ import java.util.Set;
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 
+import org.hl7.fhir.dstu21.model.Conformance;
+import org.hl7.fhir.dstu21.model.Conformance.ConditionalDeleteStatus;
+import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestComponent;
+import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestResourceComponent;
+import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestResourceSearchParamComponent;
+import org.hl7.fhir.dstu21.model.Conformance.SystemRestfulInteraction;
+import org.hl7.fhir.dstu21.model.Conformance.TypeRestfulInteraction;
+import org.hl7.fhir.dstu21.model.DateType;
+import org.hl7.fhir.dstu21.model.DiagnosticReport;
+import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.OperationDefinition;
+import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.resource.Conformance;
-import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
-import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource;
-import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.ConditionalDeleteStatusEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SystemRestfulInteractionEnum;
-import ca.uhn.fhir.model.dstu2.valueset.TypeRestfulInteractionEnum;
-import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -57,14 +56,18 @@ import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.ResourceBinding;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.validation.ValidationResult;
 
-public class ServerConformanceProviderDstu2Test {
+public class ServerConformanceProviderDstu21Test {
 
-	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderDstu2Test.class);
+	private static FhirContext ourCtx = FhirContext.forDstu2_1();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderDstu21Test.class);
 
 	private HttpServletRequest createHttpServletRequest() {
 		HttpServletRequest req = mock(HttpServletRequest.class);
@@ -96,11 +99,11 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		RestResource res = conformance.getRest().get(0).getResource().get(1);
+		ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertEquals("Patient", res.getType());
 
 		assertTrue(res.getConditionalCreate());
-		assertEquals(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED, res.getConditionalDeleteElement().getValueAsEnum());
+		assertEquals(ConditionalDeleteStatus.MULTIPLE, res.getConditionalDelete());
 		assertTrue(res.getConditionalUpdate());
 	}
 
@@ -122,7 +125,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		assertEquals(1, conformance.getRest().get(0).getOperation().size());
 		assertEquals("$everything", conformance.getRest().get(0).getOperation().get(0).getName());
-		assertEquals("OperationDefinition/everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
+		assertEquals("OperationDefinition/everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReferenceElement().getValue());
 	}
 
 	@Test
@@ -137,13 +140,13 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/everything"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/everything"));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
 
 		assertEquals("$everything", opDef.getCode());
-		assertEquals(true, opDef.getIdempotent().booleanValue());
+		assertEquals(true, opDef.getIdempotent());
 	}
 
 	@Test
@@ -162,7 +165,7 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteractionEnum.HISTORY_INSTANCE.getCode() + "\"/></interaction>"));
+		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYINSTANCE.toCode() + "\"/></interaction>"));
 	}
 
 	@Test
@@ -213,12 +216,12 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		RestResource res = conformance.getRest().get(0).getResource().get(1);
+		ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertEquals("Patient", res.getType());
 
-		assertNull(res.getConditionalCreate());
-		assertNull(res.getConditionalDelete());
-		assertNull(res.getConditionalUpdate());
+		assertNull(res.getConditionalCreateElement().getValue());
+		assertNull(res.getConditionalDeleteElement().getValue());
+		assertNull(res.getConditionalUpdateElement().getValue());
 	}
 
 	@Test
@@ -273,23 +276,23 @@ public class ServerConformanceProviderDstu2Test {
 		rs.init(createServletConfig());
 
 		Conformance sconf = sc.getServerConformance(createHttpServletRequest());
-		assertEquals("OperationDefinition/plain", sconf.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
+		assertEquals("OperationDefinition/plain", sconf.getRest().get(0).getOperation().get(0).getDefinition().getReferenceElement().getValue());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/plain"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/plain"));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
 
 		assertEquals("$plain", opDef.getCode());
-		assertEquals(true, opDef.getIdempotent().booleanValue());
+		assertEquals(true, opDef.getIdempotent());
 		assertEquals(3, opDef.getParameter().size());
 		assertEquals("start", opDef.getParameter().get(0).getName());
-		assertEquals("in", opDef.getParameter().get(0).getUse());
+		assertEquals("in", opDef.getParameter().get(0).getUse().toCode());
 		assertEquals("0", opDef.getParameter().get(0).getMinElement().getValueAsString());
 		assertEquals("date", opDef.getParameter().get(0).getTypeElement().getValueAsString());
 
 		assertEquals("out1", opDef.getParameter().get(2).getName());
-		assertEquals("out", opDef.getParameter().get(2).getUse());
+		assertEquals("out", opDef.getParameter().get(2).getUse().toCode());
 		assertEquals("1", opDef.getParameter().get(2).getMinElement().getValueAsString());
 		assertEquals("2", opDef.getParameter().get(2).getMaxElement().getValueAsString());
 		assertEquals("string", opDef.getParameter().get(2).getTypeElement().getValueAsString());
@@ -310,8 +313,8 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		Rest rest = conformance.getRestFirstRep();
-		RestResource res = rest.getResourceFirstRep();
+		ConformanceRestComponent rest = conformance.getRest().get(0);
+		ConformanceRestResourceComponent res = rest.getResource().get(0);
 		assertEquals("DiagnosticReport", res.getType());
 
 		assertEquals(DiagnosticReport.SP_SUBJECT, res.getSearchParam().get(0).getName());
@@ -322,7 +325,7 @@ public class ServerConformanceProviderDstu2Test {
 		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
 
 		assertEquals(1, res.getSearchInclude().size());
-		assertEquals("DiagnosticReport.result", res.getSearchIncludeFirstRep().getValue());
+		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());
 	}
 
 	@Test
@@ -433,17 +436,17 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		RestResource resource = findRestResource(conformance, "Patient");
+		ConformanceRestResourceComponent resource = findRestResource(conformance, "Patient");
 		
-		RestResourceSearchParam param = resource.getSearchParam().get(0);
+		ConformanceRestResourceSearchParamComponent param = resource.getSearchParam().get(0);
 		assertEquals("bar", param.getChain().get(0).getValue());
 		assertEquals("foo", param.getChain().get(1).getValue());
 		assertEquals(2, param.getChain().size());
 	}
 
-	private RestResource findRestResource(Conformance conformance, String wantResource) throws Exception {
-		RestResource resource = null;
-		for (RestResource next : conformance.getRest().get(0).getResource()) {
+	private ConformanceRestResourceComponent findRestResource(Conformance conformance, String wantResource) throws Exception {
+		ConformanceRestResourceComponent resource = null;
+		for (ConformanceRestResourceComponent next : conformance.getRest().get(0).getResource()) {
 			if (next.getType().equals(wantResource)) {
 				resource = next;
 			}
@@ -503,7 +506,7 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + SystemRestfulInteractionEnum.HISTORY_SYSTEM.getCode() + "\"/></interaction>"));
+		assertThat(conf, containsString("<interaction><code value=\"" + SystemRestfulInteraction.HISTORYSYSTEM.toCode() + "\"/></interaction>"));
 	}
 
 	@Test
@@ -522,7 +525,7 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteractionEnum.HISTORY_TYPE.getCode() + "\"/></interaction>"));
+		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYTYPE.toCode() + "\"/></interaction>"));
 	}
 
 	@Test
@@ -551,7 +554,7 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 		@Delete
-		public MethodOutcome delete(@IdParam IdDt theId, @ConditionalUrlParam(supportsMultiple = true) String theConditionalUrl) {
+		public MethodOutcome delete(@IdParam IdType theId, @ConditionalUrlParam(supportsMultiple = true) String theConditionalUrl) {
 			return null;
 		}
 
@@ -561,7 +564,7 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 		@Update
-		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
+		public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
 			return null;
 		}
 
@@ -574,7 +577,7 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 		@History
-		public List<IBaseResource> history(@IdParam IdDt theId) {
+		public List<IBaseResource> history(@IdParam IdType theId) {
 			return null;
 		}
 
@@ -586,7 +589,7 @@ public class ServerConformanceProviderDstu2Test {
 	public static class MultiOptionalProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier, @Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringDt theName) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier, @Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringParam theName) {
 			return null;
 		}
 
@@ -600,7 +603,7 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 		@Delete
-		public MethodOutcome delete(@IdParam IdDt theId) {
+		public MethodOutcome delete(@IdParam IdType theId) {
 			return null;
 		}
 
@@ -610,7 +613,7 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 		@Update
-		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
+		public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient thePatient) {
 			return null;
 		}
 
@@ -618,8 +621,8 @@ public class ServerConformanceProviderDstu2Test {
 
 	public static class PlainProviderWithExtendedOperationOnNoType {
 
-		@Operation(name = "plain", idempotent = true, returnParameters = { @OperationParam(min = 1, max = 2, name = "out1", type = StringDt.class) })
-		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		@Operation(name = "plain", idempotent = true, returnParameters = { @OperationParam(min = 1, max = 2, name = "out1", type = StringType.class) })
+		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart, @OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
 
@@ -628,7 +631,7 @@ public class ServerConformanceProviderDstu2Test {
 	public static class ProviderWithExtendedOperationReturningBundle implements IResourceProvider {
 
 		@Operation(name = "everything", idempotent = true)
-		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart, @OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
 
@@ -643,7 +646,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		@Description(shortDefinition = "This is a search for stuff!")
 		@Search
-		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
+		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) TokenParam thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
 				@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange, @IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
 			return null;
 		}
@@ -656,12 +659,12 @@ public class ServerConformanceProviderDstu2Test {
 	public static class ReadProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
 			return null;
 		}
 
 		@Read(version = false)
-		public Patient readPatient(@IdParam IdDt theId) {
+		public Patient readPatient(@IdParam IdType theId) {
 			return null;
 		}
 
@@ -670,7 +673,7 @@ public class ServerConformanceProviderDstu2Test {
 	public static class SearchProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient1(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+		public Patient findPatient1(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
 			return null;
 		}
 
@@ -722,12 +725,12 @@ public class ServerConformanceProviderDstu2Test {
 	public static class VreadProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
 			return null;
 		}
 
 		@Read(version = true)
-		public Patient readPatient(@IdParam IdDt theId) {
+		public Patient readPatient(@IdParam IdType theId) {
 			return null;
 		}
 

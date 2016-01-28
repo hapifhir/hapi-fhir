@@ -72,6 +72,7 @@ import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.method.OperationMethodBinding.ReturnType;
 import ca.uhn.fhir.rest.method.OperationParameter;
+import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.server.Constants;
@@ -434,6 +435,15 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				if (StringUtils.isNotBlank(chain)) {
 					param.addChain(chain);
 				}
+				
+				if (nextParameter.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+					for (String nextWhitelist : new TreeSet<String>(nextParameter.getQualifierWhitelist())) {
+						if (nextWhitelist.startsWith(".")) {
+							param.addChain(nextWhitelist.substring(1));
+						}
+					}
+				}
+				
 				param.setDocumentation(nextParamDescription);
 				if (nextParameter.getParamType() != null) {
 					param.getTypeElement().setValueAsString(nextParameter.getParamType().getCode());
