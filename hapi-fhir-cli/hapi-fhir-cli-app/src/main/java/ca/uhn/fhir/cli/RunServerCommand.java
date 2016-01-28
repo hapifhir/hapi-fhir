@@ -6,13 +6,25 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.EventListener;
+
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.springframework.web.context.ContextLoader;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+
+import ca.uhn.fhir.jpa.demo.ContextHolder;
+import ca.uhn.fhir.jpa.demo.FhirServerConfig;
+import ca.uhn.fhir.jpa.demo.FhirServerConfigDstu21;
 
 public class RunServerCommand extends BaseCommand {
 
@@ -32,6 +44,7 @@ public class RunServerCommand extends BaseCommand {
 	@Override
 	public Options getOptions() {
 		Options options = new Options();
+		addFhirVersionOption(options);
 		options.addOption(OPTION_P, "port", true, "The port to listen on (default is " + DEFAULT_PORT + ")");
 		return options;
 	}
@@ -47,6 +60,8 @@ public class RunServerCommand extends BaseCommand {
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException {
 		myPort = parseOptionInteger(theCommandLine, OPTION_P, DEFAULT_PORT);
+		
+		ContextHolder.setCtx(getSpecVersionContext(theCommandLine));
 
 //		((ch.qos.logback.classic.Logger)LoggerFactory.getLogger("/")).setLevel(Level.ERROR);
 
@@ -56,7 +71,7 @@ public class RunServerCommand extends BaseCommand {
 			tempWarFile = File.createTempFile("hapi-fhir", ".war");
 			tempWarFile.deleteOnExit();
 			
-			InputStream inStream = RunServerCommand.class.getResourceAsStream("/hapi-fhir-jpaserver-example.war");
+			InputStream inStream = RunServerCommand.class.getResourceAsStream("/hapi-fhir-cli-jpaserver.war");
 			OutputStream outStream = new BufferedOutputStream(new FileOutputStream(tempWarFile, false));
 			IOUtils.copy(inStream, outStream);
 		} catch (IOException e) {
@@ -64,12 +79,37 @@ public class RunServerCommand extends BaseCommand {
 			return;
 		}
 
-		ourLog.info("Starting HAPI FHIR JPA server");
+		final ContextLoaderListener cll = new ContextLoaderListener();
+		
+		ourLog.info("Starting HAPI FHIR JPA server in {} mode", ContextHolder.getCtx().getVersion().getVersion());
 		WebAppContext root = new WebAppContext();
 		root.setAllowDuplicateFragmentNames(true);
 		root.setWar(tempWarFile.getAbsolutePath());
 		root.setParentLoaderPriority(true);
 		root.setContextPath("/");
+		root.addEventListener(new ServletContextListener() {
+			@Override
+			public void contextInitialized(ServletContextEvent theSce) {
+				theSce.getServletContext().setInitParameter(ContextLoader.CONTEXT_CLASS_PARAM, AnnotationConfigWebApplicationContext.class.getName());
+				switch (ContextHolder.getCtx().getVersion().getVersion()) {
+				case DSTU2:
+					theSce.getServletContext().setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, FhirServerConfig.class.getName());
+					break;
+				case DSTU2_1:
+					theSce.getServletContext().setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, FhirServerConfigDstu21.class.getName());
+					break;
+				}
+				cll.contextInitialized(theSce);
+			}
+
+			@Override
+			public void contextDestroyed(ServletContextEvent theSce) {
+				cll.contextDestroyed(theSce);
+			}
+		});
+		
+		String path = ContextHolder.getPath();
+		root.addServlet("ca.uhn.fhir.jpa.demo.JpaServerDemo", path + "*");
 		
 		myServer = new Server(myPort);
 		myServer.setHandler(root);
@@ -82,7 +122,7 @@ public class RunServerCommand extends BaseCommand {
 
 		ourLog.info("Server started on port {}", myPort);
 		ourLog.info("Web Testing UI : http://localhost:{}/", myPort);
-		ourLog.info("Server Base URL: http://localhost:{}/baseDstu2/", myPort);
+		ourLog.info("Server Base URL: http://localhost:{}{}", myPort, path);
 		
 		
 	}

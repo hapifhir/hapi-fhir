@@ -11,11 +11,11 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
-public class LoadingValidationSupport implements IValidationSupport {
+public class LoadingValidationSupportDstu21 implements IValidationSupport {
 
-	private static FhirContext myCtx = FhirContext.forDstu2Hl7Org();
+	private static FhirContext myCtx = FhirContext.forDstu2_1();
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupport.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportDstu21.class);
 
 	@Override
 	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {

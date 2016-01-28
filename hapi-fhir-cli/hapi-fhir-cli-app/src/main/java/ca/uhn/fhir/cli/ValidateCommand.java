@@ -24,6 +24,7 @@ import org.hl7.fhir.dstu21.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu21.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu21.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu21.model.StructureDefinition;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import com.phloc.commons.io.file.FileUtils;
 
@@ -51,6 +52,7 @@ public class ValidateCommand extends BaseCommand {
 	@Override
 	public Options getOptions() {
 		Options retVal = new Options();
+		addFhirVersionOption(retVal);
 
 		OptionGroup source = new OptionGroup();
 		source.addOption(new Option("f", "file", true, "The name of the file to validate"));
@@ -60,7 +62,8 @@ public class ValidateCommand extends BaseCommand {
 		retVal.addOption("x", "xsd", false, "Validate using Schemas");
 		retVal.addOption("s", "sch", false, "Validate using Schematrons");
 		retVal.addOption("p", "profile", false, "Validate using Profiles (StructureDefinition / ValueSet)");
-		retVal.addOption("r", "fetch-remote", false, "Allow fetching remote resources (in other words, if a resource being validated refers to an external StructureDefinition, Questionnaire, etc. this flag allows the validator to access the internet to try and fetch this resource)");
+		retVal.addOption("r", "fetch-remote", false,
+				"Allow fetching remote resources (in other words, if a resource being validated refers to an external StructureDefinition, Questionnaire, etc. this flag allows the validator to access the internet to try and fetch this resource)");
 		retVal.addOption(new Option("l", "fetch-local", true, "Fetch a profile locally and use it if referenced"));
 		retVal.addOption("e", "encoding", false, "File encoding (default is UTF-8)");
 
@@ -91,28 +94,55 @@ public class ValidateCommand extends BaseCommand {
 			throw new ParseException("Could not detect encoding (json/xml) of contents");
 		}
 
-		FhirValidator val = getFhirCtx().newValidator();
+		FhirContext ctx = getSpecVersionContext(theCommandLine);
+		FhirValidator val = ctx.newValidator();
+
+		IBaseResource localProfileResource = null;
+		if (theCommandLine.hasOption("l")) {
+			String localProfile = theCommandLine.getOptionValue("l");
+			ourLog.info("Loading profile: {}", localProfile);
+			String input;
+			try {
+				input = IOUtils.toString(new FileReader(new File(localProfile)));
+			} catch (IOException e) {
+				throw new ParseException("Failed to load file '" + localProfile + "' - Error: " + e.toString());
+			}
+
+			localProfileResource = MethodUtil.detectEncodingNoDefault(input).newParser(ctx).parseResource(input);
+		}
+
 		if (theCommandLine.hasOption("p")) {
-			FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
-			val.registerValidatorModule(instanceValidator);
-			ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport());
-			if (theCommandLine.hasOption("l")) {
-				String localProfile = theCommandLine.getOptionValue("l");
-				ourLog.info("Loading profile: {}", localProfile);
-				String input;
-				try {
-					input = IOUtils.toString(new FileReader(new File(localProfile)));
-				} catch (IOException e) {
-					throw new ParseException("Failed to load file '" + localProfile + "' - Error: " + e.toString());
+			switch (ctx.getVersion().getVersion()) {
+			case DSTU2: {
+				org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator instanceValidator = new org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator();
+				val.registerValidatorModule(instanceValidator);
+				org.hl7.fhir.instance.hapi.validation.ValidationSupportChain validationSupport = new org.hl7.fhir.instance.hapi.validation.ValidationSupportChain(
+						new org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport());
+				if (localProfileResource != null) {
+					instanceValidator.setStructureDefintion((org.hl7.fhir.instance.model.StructureDefinition) localProfileResource);
 				}
-				
-				StructureDefinition sd = (StructureDefinition) MethodUtil.detectEncodingNoDefault(input).newParser(getFhirCtx()).parseResource(input);
-				instanceValidator.setStructureDefintion(sd);
+				if (theCommandLine.hasOption("r")) {
+					validationSupport.addValidationSupport(new LoadingValidationSupportDstu2());
+				}
+				instanceValidator.setValidationSupport(validationSupport);
+				break;
 			}
-			if (theCommandLine.hasOption("r")) {
-				validationSupport.addValidationSupport(new LoadingValidationSupport());
+			case DSTU2_1: {
+				FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+				val.registerValidatorModule(instanceValidator);
+				ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport());
+				if (localProfileResource != null) {
+					instanceValidator.setStructureDefintion((StructureDefinition) localProfileResource);
+				}
+				if (theCommandLine.hasOption("r")) {
+					validationSupport.addValidationSupport(new LoadingValidationSupportDstu21());
+				}
+				instanceValidator.setValidationSupport(validationSupport);
+				break;
 			}
-			instanceValidator.setValidationSupport(validationSupport);
+			default:
+				throw new ParseException("Profile validation (-p) is not supported for this FHIR version");
+			}
 		}
 
 		val.setValidateAgainstStandardSchema(theCommandLine.hasOption("x"));
@@ -125,7 +155,7 @@ public class ValidateCommand extends BaseCommand {
 		for (SingleValidationMessage next : results.getMessages()) {
 			count++;
 			b.append(App.LINESEP);
-			String leftString = "Issue "+count+": ";
+			String leftString = "Issue " + count + ": ";
 			int leftWidth = leftString.length();
 			b.append(ansi().fg(Color.GREEN)).append(leftString);
 			if (next.getSeverity() != null) {

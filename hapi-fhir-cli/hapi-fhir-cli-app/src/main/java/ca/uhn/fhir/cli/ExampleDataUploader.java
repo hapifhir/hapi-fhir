@@ -47,7 +47,6 @@ import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 public class ExampleDataUploader extends BaseCommand {
 
-	private static final String SPEC_DEFAULT_VERSION = "dstu2";
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExampleDataUploader.class);
 
@@ -66,10 +65,8 @@ public class ExampleDataUploader extends BaseCommand {
 		Options options = new Options();
 		Option opt;
 
-		opt = new Option("f", "fhirversion", true, "Spec version to upload (default is '" + SPEC_DEFAULT_VERSION + "')");
-		opt.setRequired(false);
-		options.addOption(opt);
-
+		addFhirVersionOption(options);
+		
 		opt = new Option("t", "target", true, "Base URL for the target server (e.g. \"http://example.com/fhir\")");
 		opt.setRequired(true);
 		options.addOption(opt);
@@ -87,7 +84,8 @@ public class ExampleDataUploader extends BaseCommand {
 
 	@Override
 	public void run(CommandLine theCommandLine) throws Exception {
-		String specVersion = theCommandLine.getOptionValue("f", SPEC_DEFAULT_VERSION);
+		FhirContext ctx = getSpecVersionContext(theCommandLine);
+		
 		String targetServer = theCommandLine.getOptionValue("t");
 		if (isBlank(targetServer)) {
 			throw new ParseException("No target server (-t) specified");
@@ -104,17 +102,17 @@ public class ExampleDataUploader extends BaseCommand {
 			}
 		}
 
-		FhirContext ctx;
 		String specUrl;
 
-		if (SPEC_DEFAULT_VERSION.equals(specVersion)) {
-			ctx = FhirContext.forDstu2();
-			specUrl = "http://hl7.org/fhir/" + specVersion + "/examples-json.zip";
-		} else if ("dstu2.1".equals(specVersion)) {
-			ctx = FhirContext.forDstu2_1();
+		switch (ctx.getVersion().getVersion()) {
+		case DSTU2:
+			specUrl = "http://hl7.org/fhir/dstu2/examples-json.zip";
+			break;
+		case DSTU2_1:
 			specUrl = "http://hl7-fhir.github.io/examples-json.zip";
-		} else {
-			throw new ParseException("Unknown spec version: " + specVersion);
+			break;
+		default:
+			throw new ParseException("Invalid spec version for this command: " + ctx.getVersion().getVersion());
 		}
 
 		ourLog.info("HTTP fetching: {}", specUrl);

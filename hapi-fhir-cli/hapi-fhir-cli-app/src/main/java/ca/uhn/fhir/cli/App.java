@@ -117,6 +117,7 @@ public class App {
 		System.out.println("\ud83d\udd25 " + ansi().bold() + "HAPI FHIR" + ansi().boldOff() + " " + VersionUtil.getVersion() + " - Command Line Tool");
 		System.out.println("------------------------------------------------------------");
 		System.out.println("Max configured JVM memory (Xmx): " + FileUtils.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
+		System.out.println("Detected Java version: " + System.getProperty("java.version"));
 		System.out.println("------------------------------------------------------------");
 	}
 
@@ -172,6 +173,7 @@ public class App {
 		CommandLine parsedOptions;
 		
 		logAppHeader();
+		validateJavaVersion();
 		loggingConfigOn();
 		
 		try {
@@ -195,6 +197,18 @@ public class App {
 			ourLog.error("Error during execution: ", e);
 		}
 
+	}
+
+	private static void validateJavaVersion() {
+		String specVersion = System.getProperty("java.specification.version");
+		double version = Double.parseDouble(specVersion);
+		if (version < 1.8) {
+			System.err.flush();
+			System.err.println("HAPI-CLI requires Java 1.8+ to run (detected " + specVersion + ")");
+			System.err.println("Note that the HAPI library requires only Java 1.6, but you must install");
+			System.err.println("a newer JVM in order to use the HAPI CLI tool.");
+			System.exit(1);
+		}
 	}
 
 }

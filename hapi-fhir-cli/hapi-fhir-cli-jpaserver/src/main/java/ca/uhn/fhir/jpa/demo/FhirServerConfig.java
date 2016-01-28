@@ -15,23 +15,16 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu21;
+import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu21;
+import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 
-/**
- * This class isn't used by default by the example, but 
- * you can use it as a config if you want to support DSTU2.1
- * instead of DSTU2 in your server.
- * 
- * See https://github.com/jamesagnew/hapi-fhir/issues/278
- */
 @Configuration
 @EnableTransactionManagement()
-public class FhirServerConfigDstu21 extends BaseJavaConfigDstu21 {
+public class FhirServerConfig extends BaseJavaConfigDstu2 {
 
 	/**
 	 * Configure FHIR properties around the the JPA server via this bean
@@ -87,7 +80,6 @@ public class FhirServerConfigDstu21 extends BaseJavaConfigDstu21 {
 		extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
 		extraProperties.put("hibernate.search.default.indexBase", "target/lucenefiles");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
-//		extraProperties.put("hibernate.search.default.worker.execution", "async");
 		return extraProperties;
 	}
 
@@ -115,7 +107,7 @@ public class FhirServerConfigDstu21 extends BaseJavaConfigDstu21 {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IServerInterceptor subscriptionSecurityInterceptor() {
-		SubscriptionsRequireManualActivationInterceptorDstu21 retVal = new SubscriptionsRequireManualActivationInterceptorDstu21();
+		SubscriptionsRequireManualActivationInterceptorDstu2 retVal = new SubscriptionsRequireManualActivationInterceptorDstu2();
 		return retVal;
 	}
 
