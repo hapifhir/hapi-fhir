@@ -163,6 +163,9 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		return StringUtils.isEmpty(myValue);
 	}
 
+	/**
+	 * Returns true if {@link #getModifier()} returns {@link TokenParamModifier#TEXT}
+	 */
 	public boolean isText() {
 		return myModifier == TokenParamModifier.TEXT;
 	}
@@ -178,8 +181,9 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	}
 
 	/**
-	 * @deprecated Use
+	 * @deprecated Use {@link #setModifier(TokenParamModifier)} instead
 	 */
+	@Deprecated
 	public TokenParam setText(boolean theText) {
 		if (theText) {
 			myModifier = TokenParamModifier.TEXT;

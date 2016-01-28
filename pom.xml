@@ -245,11 +245,10 @@
 		<!-- Dependency Versions -->
 		<derby_version>10.12.1.1</derby_version>
 		<jersey_version>2.22.1</jersey_version>
-		<!--<jetty_version>9.2.14.v20151106</jetty_version> -->
-		<jetty_version>9.3.6.v20151106</jetty_version> 
+		<jetty_version>9.3.7.v20160115 </jetty_version> 
 		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this version with caution! Also note that if 
 			you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration for that plugin... -->
-		<hibernate_version>5.0.6.Final</hibernate_version>
+		<hibernate_version>5.0.7.Final</hibernate_version>
 		<hibernate_validator_version>5.2.2.Final</hibernate_validator_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
@@ -569,17 +568,17 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-android</artifactId>
-				<version>1.7.13</version>
+				<version>1.7.14</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.7.13</version>
+				<version>1.7.14</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>jcl-over-slf4j</artifactId>
-				<version>1.7.13</version>
+				<version>1.7.14</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
@@ -680,7 +679,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.3</version>
+					<version>3.5</version>
 					<configuration>
 						<source>1.6</source>
 						<target>1.6</target>
@@ -697,12 +696,12 @@
 						<dependency>
 							<groupId>org.codehaus.plexus</groupId>
 							<artifactId>plexus-compiler-javac</artifactId>
-							<version>2.6</version>
+							<version>2.7</version>
 						</dependency>
 						<dependency>
 							<groupId>org.codehaus.plexus</groupId>
 							<artifactId>plexus-compiler-javac-errorprone</artifactId>
-							<version>2.6</version>
+							<version>2.7</version>
 						</dependency>
 					</dependencies>
 				</plugin>

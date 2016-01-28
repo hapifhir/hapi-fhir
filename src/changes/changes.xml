@@ -12,11 +12,12 @@
             latest versions (dependent HAPI modules listed in brackets):
             <![CDATA[
                <ul>
-                  <li>Hibernate (JPA, Web Tester): 5.0.3 -&gt; 5.0.6</li>
+                  <li>Hibernate (JPA, Web Tester): 5.0.3 -&gt; 5.0.7</li>
                   <li>Springframework (JPA, Web Tester): 4.2.2 -&gt; 4.2.4</li>
 						<li>Phloc-Commons (Schematron Validator): 4.3.6 -&gt; 4.4.4</li>
 						<li>Apache httpclient (Client): 4.4 -&gt; 4.5.1</li>
 						<li>Apache httpcore (Client): 4.4 -&gt; 4.4.4</li>
+						<li>SLF4j (All): 1.7.13 -&gt; 1.7.14</li>
                </ul>
             ]]>
 			</action>
