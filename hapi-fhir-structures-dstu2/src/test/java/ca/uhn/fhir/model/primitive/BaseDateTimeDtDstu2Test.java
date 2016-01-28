@@ -41,6 +41,21 @@ public class BaseDateTimeDtDstu2Test {
 		assertEquals("2012-01-02", date.getValueAsString());
 	}
 
+	@Test
+	public void testMinutePrecisionEncode() throws Exception {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+		cal.set(1990, Calendar.JANUARY, 3, 3, 22, 11);
+		
+		DateTimeDt date = new DateTimeDt();
+		date.setValue(cal.getTime(), TemporalPrecisionEnum.MINUTE);
+		date.setTimeZone(TimeZone.getTimeZone("EST"));
+		assertEquals("1990-01-02T21:22-05:00", date.getValueAsString());
+
+		date.setTimeZoneZulu(true);
+		assertEquals("1990-01-03T02:22Z", date.getValueAsString());
+	}
+
 	/**
 	 * See HAPI #101 - https://github.com/jamesagnew/hapi-fhir/issues/101
 	 */

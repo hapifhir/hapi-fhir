@@ -48,6 +48,16 @@ public interface IRestfulClientFactory {
 	public static final int DEFAULT_SOCKET_TIMEOUT = 10000;
 	
 	/**
+	 * Default value for {@link #getPoolMaxTotal() ()}
+	 */
+	public static final int DEFAULT_POOL_MAX = 20;
+	
+	/**
+	 * Default value for {@link #getPoolMaxPerRoute() }
+	 */
+	public static final int DEFAULT_POOL_MAX_PER_ROUTE = DEFAULT_POOL_MAX;
+	
+	/**
 	 * Gets the connection request timeout, in milliseconds. This is the amount of time that the HTTPClient connection
 	 * pool may wait for an available connection before failing. This setting typically does not need to be adjusted.
 	 * <p>
@@ -99,6 +109,22 @@ public interface IRestfulClientFactory {
 	 */
 	int getSocketTimeout();
 
+	/**
+	 * Gets the maximum number of connections allowed in the pool.
+	 * <p>
+	 * The default value for this setting is defined by {@link #DEFAULT_POOL_MAX}
+	 * </p>
+	 */
+	int getPoolMaxTotal();
+
+	/**
+	 * Gets the maximum number of connections per route allowed in the pool.
+	 * <p>
+	 * The default value for this setting is defined by {@link #DEFAULT_POOL_MAX_PER_ROUTE}
+	 * </p>
+	 */
+	int getPoolMaxPerRoute();
+	
 	/**
 	 * Instantiates a new client instance
 	 * 
@@ -193,4 +219,19 @@ public interface IRestfulClientFactory {
 	 */
 	void setSocketTimeout(int theSocketTimeout);
 
+	/**
+	 * Sets the maximum number of connections allowed in the pool.
+	 * <p>
+	 * The default value for this setting is defined by {@link #DEFAULT_POOL_MAX}
+	 * </p>
+	 */
+	void setPoolMaxTotal(int thePoolMaxTotal);
+
+	/**
+	 * Sets the maximum number of connections per route allowed in the pool.
+	 * <p>
+	 * The default value for this setting is defined by {@link #DEFAULT_POOL_MAX_PER_ROUTE}
+	 * </p>
+	 */
+	void setPoolMaxPerRoute(int thePoolMaxPerRoute);
 }

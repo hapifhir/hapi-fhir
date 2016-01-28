@@ -119,6 +119,16 @@
 					
 			</subsection>
 
+			<subsection name="Fetch all Pages of a Bundle">
+				
+				<p>
+					<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/examples/src/main/java/example/BundleFetcher.java">This example</a>
+					shows how to load all pages of a bundle by fetching each page one-after-the-other and then
+					joining the resuts.
+				</p>
+			
+			</subsection>
+
 		</section>
 
 	</body>

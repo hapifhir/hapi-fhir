@@ -30,12 +30,11 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.server.Constants;
 
 public class TokenParam extends BaseParam implements IQueryParameterType {
 
+	private TokenParamModifier myModifier;
 	private String mySystem;
-	private boolean myText;
 	private String myValue;
 
 	/**
@@ -46,8 +45,8 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	}
 
 	/**
-	 * Constructor which copies the {@link InternalCodingDt#getSystemElement() system} and {@link InternalCodingDt#getCodeElement() code} from a {@link InternalCodingDt} instance and adds it as a
-	 * parameter
+	 * Constructor which copies the {@link InternalCodingDt#getSystemElement() system} and
+	 * {@link InternalCodingDt#getCodeElement() code} from a {@link InternalCodingDt} instance and adds it as a parameter
 	 * 
 	 * @param theCodingDt
 	 *           The coding
@@ -57,7 +56,8 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	}
 
 	/**
-	 * Constructor which copies the {@link BaseIdentifierDt#getSystemElement() system} and {@link BaseIdentifierDt#getValueElement() value} from a {@link BaseIdentifierDt} instance and adds it as a
+	 * Constructor which copies the {@link BaseIdentifierDt#getSystemElement() system} and
+	 * {@link BaseIdentifierDt#getValueElement() value} from a {@link BaseIdentifierDt} instance and adds it as a
 	 * parameter
 	 * 
 	 * @param theIdentifierDt
@@ -74,8 +74,7 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 
 	public TokenParam(String theSystem, String theValue, boolean theText) {
 		if (theText && isNotBlank(theSystem)) {
-			throw new IllegalArgumentException(
-					"theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
+			throw new IllegalArgumentException("theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
 		}
 		setSystem(theSystem);
 		setValue(theValue);
@@ -84,8 +83,8 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 
 	@Override
 	String doGetQueryParameterQualifier() {
-		if (isText()) {
-			return Constants.PARAMQUALIFIER_TOKEN_TEXT;
+		if (getModifier() != null) {
+			return getModifier().getValue();
 		} else {
 			return null;
 		}
@@ -108,25 +107,46 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	 */
 	@Override
 	void doSetValueAsQueryToken(String theQualifier, String theParameter) {
-		setText(Constants.PARAMQUALIFIER_TOKEN_TEXT.equals(theQualifier));
-		setSystem(null);
-		if (theParameter == null) {
-			setValue(null);
+		setModifier(null);
+		if (theQualifier != null) {
+			TokenParamModifier modifier = TokenParamModifier.forValue(theQualifier);
+			setModifier(modifier);
+			setSystem(null);
+			setValue(ParameterUtil.unescape(theParameter));
 		} else {
-			int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
-			if (barIndex != -1) {
-				setSystem(theParameter.substring(0, barIndex));
-				setValue(ParameterUtil.unescape(theParameter.substring(barIndex + 1)));
+			setSystem(null);
+			if (theParameter == null) {
+				setValue(null);
 			} else {
-				setValue(ParameterUtil.unescape(theParameter));
+				int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
+				if (barIndex != -1) {
+					setSystem(theParameter.substring(0, barIndex));
+					setValue(ParameterUtil.unescape(theParameter.substring(barIndex + 1)));
+				} else {
+					setValue(ParameterUtil.unescape(theParameter));
+				}
 			}
 		}
 	}
 
+	/**
+	 * Returns the modifier for this token
+	 */
+	public TokenParamModifier getModifier() {
+		return myModifier;
+	}
+
+	/**
+	 * Returns the system for this token. Note that if a {@link #getModifier()} is being used, the entire value of the
+	 * parameter will be placed in {@link #getValue() value} and this method will return <code>null</code>.
+	 */
 	public String getSystem() {
 		return mySystem;
 	}
 
+	/**
+	 * Returns the value for the token
+	 */
 	public String getValue() {
 		return myValue;
 	}
@@ -143,8 +163,16 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		return StringUtils.isEmpty(myValue);
 	}
 
+	/**
+	 * Returns true if {@link #getModifier()} returns {@link TokenParamModifier#TEXT}
+	 */
 	public boolean isText() {
-		return myText;
+		return myModifier == TokenParamModifier.TEXT;
+	}
+
+	public TokenParam setModifier(TokenParamModifier theModifier) {
+		myModifier = theModifier;
+		return this;
 	}
 
 	public TokenParam setSystem(String theSystem) {
@@ -152,8 +180,16 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		return this;
 	}
 
+	/**
+	 * @deprecated Use {@link #setModifier(TokenParamModifier)} instead
+	 */
+	@Deprecated
 	public TokenParam setText(boolean theText) {
-		myText = theText;
+		if (theText) {
+			myModifier = TokenParamModifier.TEXT;
+		} else {
+			myModifier = null;
+		}
 		return this;
 	}
 
@@ -166,10 +202,10 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		builder.append("system", defaultString(getSystem()));
-		builder.append("value", getValue());
-		if (myText) {
-			builder.append(":text", myText);
+		if (myModifier != null) {
+			builder.append(":" + myModifier.getValue());
 		}
+		builder.append("value", getValue());
 		if (getMissing() != null) {
 			builder.append(":missing", getMissing());
 		}

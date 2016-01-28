@@ -72,6 +72,7 @@ import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.method.OperationMethodBinding.ReturnType;
 import ca.uhn.fhir.rest.method.OperationParameter;
+import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.server.Constants;
@@ -206,7 +207,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				String resourceName = nextEntry.getKey();
 				RuntimeResourceDefinition def = myServerConfiguration.getFhirContext().getResourceDefinition(resourceName);
 				resource.getTypeElement().setValue(def.getName());
-	            ServletContext servletContext  = theRequest == null ? null : theRequest.getServletContext();
+				ServletContext servletContext  = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
 	            String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
 				resource.getProfile().setReference(new IdDt(def.getResourceProfile(serverBase)));
 
@@ -423,6 +424,15 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				if (StringUtils.isNotBlank(chain)) {
 					param.addChain(chain);
 				}
+				
+				if (nextParameter.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+					for (String nextWhitelist : new TreeSet<String>(nextParameter.getQualifierWhitelist())) {
+						if (nextWhitelist.startsWith(".")) {
+							param.addChain(nextWhitelist.substring(1));
+						}
+					}
+				}
+				
 				param.setDocumentation(nextParamDescription);
 				if (nextParameter.getParamType() != null) {
 					param.getTypeElement().setValueAsString(nextParameter.getParamType().getCode());

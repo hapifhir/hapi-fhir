@@ -39,7 +39,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.Enumerations.RemittanceOutcome;
 import org.hl7.fhir.instance.model.Enumerations.RemittanceOutcomeEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.utilities.Utilities;
 
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;

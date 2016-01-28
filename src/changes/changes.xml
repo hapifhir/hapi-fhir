@@ -12,11 +12,12 @@
             latest versions (dependent HAPI modules listed in brackets):
             <![CDATA[
                <ul>
-                  <li>Hibernate (JPA, Web Tester): 5.0.3 -&gt; 5.0.6</li>
+                  <li>Hibernate (JPA, Web Tester): 5.0.3 -&gt; 5.0.7</li>
                   <li>Springframework (JPA, Web Tester): 4.2.2 -&gt; 4.2.4</li>
 						<li>Phloc-Commons (Schematron Validator): 4.3.6 -&gt; 4.4.4</li>
 						<li>Apache httpclient (Client): 4.4 -&gt; 4.5.1</li>
 						<li>Apache httpcore (Client): 4.4 -&gt; 4.4.4</li>
+						<li>SLF4j (All): 1.7.13 -&gt; 1.7.14</li>
                </ul>
             ]]>
 			</action>
@@ -138,6 +139,26 @@
 				functionality was only useful for DSTU1
 				implementations and wasn't compatible
 				with coming changes to that API.
+			</action>
+			<action type="fix" issue="283">
+				Remove dependency on Servlet-API 3.0+ by using methods available in 2.5 where possible.
+				Note that we continue to use Servlet-API 3.0+ features in some parts of the JPA API, so
+				running in an old serlvet container should be tested well before use. Thanks to Bill Denton
+				for reporting!
+			</action>
+			<action type="add" issue="288">
+				Add new methods to RestfulClientFactory allowing you to configure the size of the
+				client pool used by Apache HttpClient. Thanks to Matt Blanchette for the pull
+				request!
+			</action>
+			<action type="add">
+				Add support for new modifier types on Token search params in Server and 
+				annotation client.
+			</action>
+			<action type="fix" issue="286">
+				Server conformance statement should include search parameter chains if the
+				chains are explicitly defined via @Search(whitelist={....}). Thanks to lcamilo15
+				for reporting!
 			</action>
 			<action type="fix">
 				Remove afterPropertiesSet() call in Java config for JPA

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.primitive;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -36,4 +38,18 @@ public class DateDtTest {
 
 	}
 
+	@Test
+	public void testConstructors() {
+		final Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+		cal.set(1990, Calendar.JANUARY, 5, 0, 0, 0);
+		DateDt dateDt = new DateDt(cal);
+		assertEquals("1990-01-05", dateDt.getValueAsString());
+
+		dateDt = new DateDt(1990, 0, 5);
+		assertEquals("1990-01-05", dateDt.getValueAsString());
+	}
+	
+	
+	
 }

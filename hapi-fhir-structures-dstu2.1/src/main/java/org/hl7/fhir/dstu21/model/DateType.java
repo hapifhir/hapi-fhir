@@ -29,11 +29,14 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package org.hl7.fhir.dstu21.model;
 
+import java.util.Calendar;
+
 /**
  * Primitive type "date" in FHIR: any day in a gregorian calendar
  */
 
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -93,6 +96,33 @@ public class DateType extends BaseDateTimeType {
 	 */
 	public DateType(String theDate) {
 		super(theDate);
+	}
+
+	/**
+	 * Constructor which accepts a date value and uses the {@link #DEFAULT_PRECISION} for this type.
+	 */
+	public DateType(Calendar theCalendar) {
+		super(theCalendar.getTime(), DEFAULT_PRECISION);
+		setTimeZone(theCalendar.getTimeZone());
+	}
+
+	/**
+	 * Constructor which accepts a date value and uses the {@link #DEFAULT_PRECISION} for this type.
+	 * 
+	 * @param theYear The year, e.g. 2015
+	 * @param theMonth The month, e.g. 0 for January
+	 * @param theDay The day (1 indexed) e.g. 1 for the first day of the month
+	 */
+	public DateType(int theYear, int theMonth, int theDay) {
+		this(toCalendarZulu(theYear, theMonth, theDay));
+	}
+
+	private static GregorianCalendar toCalendarZulu(int theYear, int theMonth, int theDay) {
+		GregorianCalendar retVal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+		retVal.set(Calendar.YEAR, theYear);
+		retVal.set(Calendar.MONTH, theMonth);
+		retVal.set(Calendar.DATE, theDay);
+		return retVal;
 	}
 
 	@Override

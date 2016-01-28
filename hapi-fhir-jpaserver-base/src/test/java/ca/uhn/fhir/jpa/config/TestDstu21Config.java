@@ -61,6 +61,7 @@ public class TestDstu21Config extends BaseJavaConfigDstu21 {
 		extraProperties.put("hibernate.search.default.directory_provider" ,"filesystem");
 		extraProperties.put("hibernate.search.default.indexBase", "target/lucene_index_dstu21");
 		extraProperties.put("hibernate.search.lucene_version","LUCENE_CURRENT");
+		extraProperties.put("hibernate.search.autoregister_listeners", "true");
 		return extraProperties;
 	}
 
