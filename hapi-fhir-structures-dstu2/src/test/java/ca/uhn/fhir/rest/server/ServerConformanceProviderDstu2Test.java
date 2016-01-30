@@ -232,21 +232,6 @@ public class ServerConformanceProviderDstu2Test {
 
 		rs.init(createServletConfig());
 
-		boolean found = false;
-		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
-		for (ResourceBinding resourceBinding : resourceBindings) {
-			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
-				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				for (IParameter next : binding.getParameters()) {
-					SearchParameter param = (SearchParameter) next;
-					if (param.getDescription().contains("The patient's identifier (MRN or other card number")) {
-						found = true;
-					}
-				}
-			}
-		}
-		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
