@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu21.model;
 
-import java.math.BigDecimal;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -31,19 +29,19 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
 
-import org.hl7.fhir.dstu21.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 /**
  * Variation and Sequence data.
  */
@@ -179,11 +177,11 @@ public class Sequence extends DomainResource {
         /**
          * The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.
          */
-        @Child(name = "genomeBuild", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "genomeBuild", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'", formalDefinition="The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used." )
-        protected CodeableConcept genomeBuild;
+        protected StringType genomeBuild;
 
-        private static final long serialVersionUID = -1915314744L;
+        private static final long serialVersionUID = 1604914542L;
 
     /**
      * Constructor
@@ -307,15 +305,19 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return {@link #genomeBuild} (The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.)
+         * @return {@link #genomeBuild} (The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.). This is the underlying object with id, value and extensions. The accessor "getGenomeBuild" gives direct access to the value
          */
-        public CodeableConcept getGenomeBuild() { 
+        public StringType getGenomeBuildElement() { 
           if (this.genomeBuild == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SequenceCoordinateComponent.genomeBuild");
             else if (Configuration.doAutoCreate())
-              this.genomeBuild = new CodeableConcept(); // cc
+              this.genomeBuild = new StringType(); // bb
           return this.genomeBuild;
+        }
+
+        public boolean hasGenomeBuildElement() { 
+          return this.genomeBuild != null && !this.genomeBuild.isEmpty();
         }
 
         public boolean hasGenomeBuild() { 
@@ -323,10 +325,31 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value {@link #genomeBuild} (The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.)
+         * @param value {@link #genomeBuild} (The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.). This is the underlying object with id, value and extensions. The accessor "getGenomeBuild" gives direct access to the value
          */
-        public SequenceCoordinateComponent setGenomeBuild(CodeableConcept value) { 
+        public SequenceCoordinateComponent setGenomeBuildElement(StringType value) { 
           this.genomeBuild = value;
+          return this;
+        }
+
+        /**
+         * @return The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.
+         */
+        public String getGenomeBuild() { 
+          return this.genomeBuild == null ? null : this.genomeBuild.getValue();
+        }
+
+        /**
+         * @param value The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.
+         */
+        public SequenceCoordinateComponent setGenomeBuild(String value) { 
+          if (Utilities.noString(value))
+            this.genomeBuild = null;
+          else {
+            if (this.genomeBuild == null)
+              this.genomeBuild = new StringType();
+            this.genomeBuild.setValue(value);
+          }
           return this;
         }
 
@@ -335,7 +358,7 @@ public class Sequence extends DomainResource {
           childrenList.add(new Property("chromosome", "CodeableConcept", "The chromosome containing the genetic finding. The value set will be 1-22, X, Y when the species is human without chromosome abnormality. Otherwise,  NCBI-Gene code system should be used.", 0, java.lang.Integer.MAX_VALUE, chromosome));
           childrenList.add(new Property("start", "integer", "Inclusive 0-based nucleotide position for start of genomic finding on the positive (+) genomics strand.", 0, java.lang.Integer.MAX_VALUE, start));
           childrenList.add(new Property("end", "integer", "Exclusive 0-based nucleotide position for end of genomic finding on the positive (+) genomic strand.", 0, java.lang.Integer.MAX_VALUE, end));
-          childrenList.add(new Property("genomeBuild", "CodeableConcept", "The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.", 0, java.lang.Integer.MAX_VALUE, genomeBuild));
+          childrenList.add(new Property("genomeBuild", "string", "The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.", 0, java.lang.Integer.MAX_VALUE, genomeBuild));
         }
 
       @Override
@@ -347,7 +370,7 @@ public class Sequence extends DomainResource {
         else if (name.equals("end"))
           this.end = castToInteger(value); // IntegerType
         else if (name.equals("genomeBuild"))
-          this.genomeBuild = castToCodeableConcept(value); // CodeableConcept
+          this.genomeBuild = castToString(value); // StringType
         else
           super.setProperty(name, value);
       }
@@ -365,8 +388,7 @@ public class Sequence extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type Sequence.end");
         }
         else if (name.equals("genomeBuild")) {
-          this.genomeBuild = new CodeableConcept();
-          return this.genomeBuild;
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.genomeBuild");
         }
         else
           return super.addChild(name);
@@ -400,7 +422,8 @@ public class Sequence extends DomainResource {
         if (!(other instanceof SequenceCoordinateComponent))
           return false;
         SequenceCoordinateComponent o = (SequenceCoordinateComponent) other;
-        return compareValues(start, o.start, true) && compareValues(end, o.end, true);
+        return compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(genomeBuild, o.genomeBuild, true)
+          ;
       }
 
       public boolean isEmpty() {
@@ -441,11 +464,11 @@ public class Sequence extends DomainResource {
         /**
          * Platform.
          */
-        @Child(name = "platform", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "platform", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Platform", formalDefinition="Platform." )
-        protected CodeableConcept platform;
+        protected StringType platform;
 
-        private static final long serialVersionUID = -803889230L;
+        private static final long serialVersionUID = 1391681700L;
 
     /**
      * Constructor
@@ -569,15 +592,19 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return {@link #platform} (Platform.)
+         * @return {@link #platform} (Platform.). This is the underlying object with id, value and extensions. The accessor "getPlatform" gives direct access to the value
          */
-        public CodeableConcept getPlatform() { 
+        public StringType getPlatformElement() { 
           if (this.platform == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SequenceQualityComponent.platform");
             else if (Configuration.doAutoCreate())
-              this.platform = new CodeableConcept(); // cc
+              this.platform = new StringType(); // bb
           return this.platform;
+        }
+
+        public boolean hasPlatformElement() { 
+          return this.platform != null && !this.platform.isEmpty();
         }
 
         public boolean hasPlatform() { 
@@ -585,10 +612,31 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value {@link #platform} (Platform.)
+         * @param value {@link #platform} (Platform.). This is the underlying object with id, value and extensions. The accessor "getPlatform" gives direct access to the value
          */
-        public SequenceQualityComponent setPlatform(CodeableConcept value) { 
+        public SequenceQualityComponent setPlatformElement(StringType value) { 
           this.platform = value;
+          return this;
+        }
+
+        /**
+         * @return Platform.
+         */
+        public String getPlatform() { 
+          return this.platform == null ? null : this.platform.getValue();
+        }
+
+        /**
+         * @param value Platform.
+         */
+        public SequenceQualityComponent setPlatform(String value) { 
+          if (Utilities.noString(value))
+            this.platform = null;
+          else {
+            if (this.platform == null)
+              this.platform = new StringType();
+            this.platform.setValue(value);
+          }
           return this;
         }
 
@@ -597,7 +645,7 @@ public class Sequence extends DomainResource {
           childrenList.add(new Property("start", "integer", "0-based start position (inclusive) of the sequence.", 0, java.lang.Integer.MAX_VALUE, start));
           childrenList.add(new Property("end", "integer", "0-based end position (exclusive) of the sequence.", 0, java.lang.Integer.MAX_VALUE, end));
           childrenList.add(new Property("score", "Quantity", "Quality score.", 0, java.lang.Integer.MAX_VALUE, score));
-          childrenList.add(new Property("platform", "CodeableConcept", "Platform.", 0, java.lang.Integer.MAX_VALUE, platform));
+          childrenList.add(new Property("platform", "string", "Platform.", 0, java.lang.Integer.MAX_VALUE, platform));
         }
 
       @Override
@@ -609,7 +657,7 @@ public class Sequence extends DomainResource {
         else if (name.equals("score"))
           this.score = castToQuantity(value); // Quantity
         else if (name.equals("platform"))
-          this.platform = castToCodeableConcept(value); // CodeableConcept
+          this.platform = castToString(value); // StringType
         else
           super.setProperty(name, value);
       }
@@ -627,8 +675,7 @@ public class Sequence extends DomainResource {
           return this.score;
         }
         else if (name.equals("platform")) {
-          this.platform = new CodeableConcept();
-          return this.platform;
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.platform");
         }
         else
           return super.addChild(name);
@@ -662,7 +709,8 @@ public class Sequence extends DomainResource {
         if (!(other instanceof SequenceQualityComponent))
           return false;
         SequenceQualityComponent o = (SequenceQualityComponent) other;
-        return compareValues(start, o.start, true) && compareValues(end, o.end, true);
+        return compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(platform, o.platform, true)
+          ;
       }
 
       public boolean isEmpty() {
@@ -2272,7 +2320,7 @@ public class Sequence extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="coordinate", path="", description="Genomic coordinate of the sequence. For example, a search for sequence in region 1:123-345 can be represented as `coordinate=1$lt345$gt123`", type="composite" )
+  @SearchParamDefinition(name="coordinate", path="", description="Genomic coordinate of the sequence. For example, a search for sequence in region 1:123-345 can be represented as `coordinate=1$lt345$gt123`", type="composite", compositeOf={"chromosome", "start"} )
   public static final String SP_COORDINATE = "coordinate";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>coordinate</b>
@@ -2282,7 +2330,7 @@ public class Sequence extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam COORDINATE = new ca.uhn.fhir.rest.gclient.CompositeClientParam(SP_COORDINATE);
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.NumberClientParam> COORDINATE = new ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.NumberClientParam>(SP_COORDINATE);
 
  /**
    * Search parameter: <b>variationid</b>

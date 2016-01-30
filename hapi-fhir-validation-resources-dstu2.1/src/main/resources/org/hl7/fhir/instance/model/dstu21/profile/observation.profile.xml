@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Observation"/>
   <meta>
-    <lastUpdated value="2015-12-19T16:00:42.735-05:00"/>
+    <lastUpdated value="2016-01-20T08:16:20.857-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -1041,10 +1041,10 @@
       <value value="http://www.hl7.org/Special/committees/orders/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-19T16:00:42-05:00"/>
+  <date value="2016-01-20T08:16:20-05:00"/>
   <description value="Base StructureDefinition for Observation Resource"/>
   <requirements value="Observations are a key aspect of healthcare.  This resource is used to capture those that do not require more sophisticated mechanisms."/>
-  <fhirVersion value="1.2.0"/>
+  <fhirVersion value="1.3.0"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -1796,6 +1796,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -1968,6 +1969,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -2086,6 +2088,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>

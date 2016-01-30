@@ -1,5 +1,38 @@
 package org.hl7.fhir.dstu21.model;
 
+/*
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+*/
+
+// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
+
+
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.dstu21.exceptions.FHIRException;
 
 public class Enumerations {
@@ -2044,6 +2077,10 @@ public class Enumerations {
          */
         CLINICALIMPRESSION, 
         /**
+         * A code system specifies a set of codes drawn from one or more code systems.
+         */
+        CODESYSTEM, 
+        /**
          * An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.
          */
         COMMUNICATION, 
@@ -2212,6 +2249,10 @@ public class Enumerations {
          */
         LIBRARY, 
         /**
+         * Identifies two or more records (resource instances) that are referring to the same real-world "occurrence".
+         */
+        LINKAGE, 
+        /**
          * A set of information summarized from a list of other resources.
          */
         LIST, 
@@ -2335,6 +2376,10 @@ public class Enumerations {
          * This resource provides processing status, errors and notes from the processing of a resource.
          */
         PROCESSRESPONSE, 
+        /**
+         * A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.
+         */
+        PROTOCOL, 
         /**
          * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.
          */
@@ -2540,6 +2585,8 @@ public class Enumerations {
           return CLAIMRESPONSE;
         if ("ClinicalImpression".equals(codeString))
           return CLINICALIMPRESSION;
+        if ("CodeSystem".equals(codeString))
+          return CODESYSTEM;
         if ("Communication".equals(codeString))
           return COMMUNICATION;
         if ("CommunicationRequest".equals(codeString))
@@ -2624,6 +2671,8 @@ public class Enumerations {
           return IMPLEMENTATIONGUIDE;
         if ("Library".equals(codeString))
           return LIBRARY;
+        if ("Linkage".equals(codeString))
+          return LINKAGE;
         if ("List".equals(codeString))
           return LIST;
         if ("Location".equals(codeString))
@@ -2686,6 +2735,8 @@ public class Enumerations {
           return PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return PROCESSRESPONSE;
+        if ("Protocol".equals(codeString))
+          return PROTOCOL;
         if ("Provenance".equals(codeString))
           return PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -2789,6 +2840,7 @@ public class Enumerations {
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
             case CLINICALIMPRESSION: return "ClinicalImpression";
+            case CODESYSTEM: return "CodeSystem";
             case COMMUNICATION: return "Communication";
             case COMMUNICATIONREQUEST: return "CommunicationRequest";
             case COMPOSITION: return "Composition";
@@ -2831,6 +2883,7 @@ public class Enumerations {
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
             case IMPLEMENTATIONGUIDE: return "ImplementationGuide";
             case LIBRARY: return "Library";
+            case LINKAGE: return "Linkage";
             case LIST: return "List";
             case LOCATION: return "Location";
             case MEASURE: return "Measure";
@@ -2862,6 +2915,7 @@ public class Enumerations {
             case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
+            case PROTOCOL: return "Protocol";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
@@ -2946,6 +3000,7 @@ public class Enumerations {
             case CLAIM: return "http://hl7.org/fhir/resource-types";
             case CLAIMRESPONSE: return "http://hl7.org/fhir/resource-types";
             case CLINICALIMPRESSION: return "http://hl7.org/fhir/resource-types";
+            case CODESYSTEM: return "http://hl7.org/fhir/resource-types";
             case COMMUNICATION: return "http://hl7.org/fhir/resource-types";
             case COMMUNICATIONREQUEST: return "http://hl7.org/fhir/resource-types";
             case COMPOSITION: return "http://hl7.org/fhir/resource-types";
@@ -2988,6 +3043,7 @@ public class Enumerations {
             case IMMUNIZATIONRECOMMENDATION: return "http://hl7.org/fhir/resource-types";
             case IMPLEMENTATIONGUIDE: return "http://hl7.org/fhir/resource-types";
             case LIBRARY: return "http://hl7.org/fhir/resource-types";
+            case LINKAGE: return "http://hl7.org/fhir/resource-types";
             case LIST: return "http://hl7.org/fhir/resource-types";
             case LOCATION: return "http://hl7.org/fhir/resource-types";
             case MEASURE: return "http://hl7.org/fhir/resource-types";
@@ -3019,6 +3075,7 @@ public class Enumerations {
             case PROCEDUREREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSRESPONSE: return "http://hl7.org/fhir/resource-types";
+            case PROTOCOL: return "http://hl7.org/fhir/resource-types";
             case PROVENANCE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRERESPONSE: return "http://hl7.org/fhir/resource-types";
@@ -3103,6 +3160,7 @@ public class Enumerations {
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
             case CLAIMRESPONSE: return "This resource provides the adjudication details from the processing of a Claim resource.";
             case CLINICALIMPRESSION: return "A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called \"ClinicalImpression\" rather than \"ClinicalAssessment\" to avoid confusion with the recording of assessment tools such as Apgar score.";
+            case CODESYSTEM: return "A code system specifies a set of codes drawn from one or more code systems.";
             case COMMUNICATION: return "An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.";
             case COMMUNICATIONREQUEST: return "A request to convey information; e.g. the CDS system proposes that an alert be sent to a responsible provider, the CDS system proposes that the public health agency be notified about a reportable condition.";
             case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.";
@@ -3145,6 +3203,7 @@ public class Enumerations {
             case IMMUNIZATIONRECOMMENDATION: return "A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.";
             case IMPLEMENTATIONGUIDE: return "A set of rules or how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole, and to publish a computable definition of all the parts.";
             case LIBRARY: return "The Library resource provides a representation container for knowledge artifact component definitions. It is effectively an exposure of the header information for a CQL/ELM library.";
+            case LINKAGE: return "Identifies two or more records (resource instances) that are referring to the same real-world \"occurrence\".";
             case LIST: return "A set of information summarized from a list of other resources.";
             case LOCATION: return "Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.";
             case MEASURE: return "The Measure resource provides the definition of a quality measure.";
@@ -3176,6 +3235,7 @@ public class Enumerations {
             case PROCEDUREREQUEST: return "A request for a procedure to be performed. May be a proposal or an order.";
             case PROCESSREQUEST: return "This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.";
             case PROCESSRESPONSE: return "This resource provides processing status, errors and notes from the processing of a resource.";
+            case PROTOCOL: return "A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.";
             case PROVENANCE: return "Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.";
             case QUESTIONNAIRE: return "A structured set of questions intended to guide the collection of answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.";
             case QUESTIONNAIRERESPONSE: return "A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.";
@@ -3260,6 +3320,7 @@ public class Enumerations {
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
             case CLINICALIMPRESSION: return "ClinicalImpression";
+            case CODESYSTEM: return "CodeSystem";
             case COMMUNICATION: return "Communication";
             case COMMUNICATIONREQUEST: return "CommunicationRequest";
             case COMPOSITION: return "Composition";
@@ -3302,6 +3363,7 @@ public class Enumerations {
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
             case IMPLEMENTATIONGUIDE: return "ImplementationGuide";
             case LIBRARY: return "Library";
+            case LINKAGE: return "Linkage";
             case LIST: return "List";
             case LOCATION: return "Location";
             case MEASURE: return "Measure";
@@ -3333,6 +3395,7 @@ public class Enumerations {
             case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
+            case PROTOCOL: return "Protocol";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
@@ -3481,6 +3544,8 @@ public class Enumerations {
           return FHIRDefinedType.CLAIMRESPONSE;
         if ("ClinicalImpression".equals(codeString))
           return FHIRDefinedType.CLINICALIMPRESSION;
+        if ("CodeSystem".equals(codeString))
+          return FHIRDefinedType.CODESYSTEM;
         if ("Communication".equals(codeString))
           return FHIRDefinedType.COMMUNICATION;
         if ("CommunicationRequest".equals(codeString))
@@ -3565,6 +3630,8 @@ public class Enumerations {
           return FHIRDefinedType.IMPLEMENTATIONGUIDE;
         if ("Library".equals(codeString))
           return FHIRDefinedType.LIBRARY;
+        if ("Linkage".equals(codeString))
+          return FHIRDefinedType.LINKAGE;
         if ("List".equals(codeString))
           return FHIRDefinedType.LIST;
         if ("Location".equals(codeString))
@@ -3627,6 +3694,8 @@ public class Enumerations {
           return FHIRDefinedType.PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return FHIRDefinedType.PROCESSRESPONSE;
+        if ("Protocol".equals(codeString))
+          return FHIRDefinedType.PROTOCOL;
         if ("Provenance".equals(codeString))
           return FHIRDefinedType.PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -3793,6 +3862,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CLAIMRESPONSE);
         if ("ClinicalImpression".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CLINICALIMPRESSION);
+        if ("CodeSystem".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.CODESYSTEM);
         if ("Communication".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.COMMUNICATION);
         if ("CommunicationRequest".equals(codeString))
@@ -3877,6 +3948,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.IMPLEMENTATIONGUIDE);
         if ("Library".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.LIBRARY);
+        if ("Linkage".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.LINKAGE);
         if ("List".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.LIST);
         if ("Location".equals(codeString))
@@ -3939,6 +4012,8 @@ public class Enumerations {
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.PROCESSREQUEST);
         if ("ProcessResponse".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.PROCESSRESPONSE);
+        if ("Protocol".equals(codeString))
+          return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.PROTOCOL);
         if ("Provenance".equals(codeString))
           return new Enumeration<FHIRDefinedType>(this, FHIRDefinedType.PROVENANCE);
         if ("Questionnaire".equals(codeString))
@@ -4100,6 +4175,8 @@ public class Enumerations {
         return "ClaimResponse";
       if (code == FHIRDefinedType.CLINICALIMPRESSION)
         return "ClinicalImpression";
+      if (code == FHIRDefinedType.CODESYSTEM)
+        return "CodeSystem";
       if (code == FHIRDefinedType.COMMUNICATION)
         return "Communication";
       if (code == FHIRDefinedType.COMMUNICATIONREQUEST)
@@ -4184,6 +4261,8 @@ public class Enumerations {
         return "ImplementationGuide";
       if (code == FHIRDefinedType.LIBRARY)
         return "Library";
+      if (code == FHIRDefinedType.LINKAGE)
+        return "Linkage";
       if (code == FHIRDefinedType.LIST)
         return "List";
       if (code == FHIRDefinedType.LOCATION)
@@ -4246,6 +4325,8 @@ public class Enumerations {
         return "ProcessRequest";
       if (code == FHIRDefinedType.PROCESSRESPONSE)
         return "ProcessResponse";
+      if (code == FHIRDefinedType.PROTOCOL)
+        return "Protocol";
       if (code == FHIRDefinedType.PROVENANCE)
         return "Provenance";
       if (code == FHIRDefinedType.QUESTIONNAIRE)
@@ -4295,6 +4376,10 @@ public class Enumerations {
 
     public enum MessageEvent {
         /**
+         * The definition of a code system is used to create a simple collection of codes suitable for use for data entry or validation. An expanded code system will be returned, or an error message.
+         */
+        CODESYSTEMEXPAND, 
+        /**
          * Change the status of a Medication Administration to show that it is complete.
          */
         MEDICATIONADMINISTRATIONCOMPLETE, 
@@ -4341,6 +4426,8 @@ public class Enumerations {
         public static MessageEvent fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("CodeSystem-expand".equals(codeString))
+          return CODESYSTEMEXPAND;
         if ("MedicationAdministration-Complete".equals(codeString))
           return MEDICATIONADMINISTRATIONCOMPLETE;
         if ("MedicationAdministration-Nullification".equals(codeString))
@@ -4365,6 +4452,7 @@ public class Enumerations {
         }
         public String toCode() {
           switch (this) {
+            case CODESYSTEMEXPAND: return "CodeSystem-expand";
             case MEDICATIONADMINISTRATIONCOMPLETE: return "MedicationAdministration-Complete";
             case MEDICATIONADMINISTRATIONNULLIFICATION: return "MedicationAdministration-Nullification";
             case MEDICATIONADMINISTRATIONRECORDING: return "MedicationAdministration-Recording";
@@ -4380,6 +4468,7 @@ public class Enumerations {
         }
         public String getSystem() {
           switch (this) {
+            case CODESYSTEMEXPAND: return "http://hl7.org/fhir/message-events";
             case MEDICATIONADMINISTRATIONCOMPLETE: return "http://hl7.org/fhir/message-events";
             case MEDICATIONADMINISTRATIONNULLIFICATION: return "http://hl7.org/fhir/message-events";
             case MEDICATIONADMINISTRATIONRECORDING: return "http://hl7.org/fhir/message-events";
@@ -4395,6 +4484,7 @@ public class Enumerations {
         }
         public String getDefinition() {
           switch (this) {
+            case CODESYSTEMEXPAND: return "The definition of a code system is used to create a simple collection of codes suitable for use for data entry or validation. An expanded code system will be returned, or an error message.";
             case MEDICATIONADMINISTRATIONCOMPLETE: return "Change the status of a Medication Administration to show that it is complete.";
             case MEDICATIONADMINISTRATIONNULLIFICATION: return "Someone wishes to record that the record of administration of a medication is in error and should be ignored.";
             case MEDICATIONADMINISTRATIONRECORDING: return "Indicates that a medication has been recorded against the patient's record.";
@@ -4410,6 +4500,7 @@ public class Enumerations {
         }
         public String getDisplay() {
           switch (this) {
+            case CODESYSTEMEXPAND: return "CodeSystem-expand";
             case MEDICATIONADMINISTRATIONCOMPLETE: return "MedicationAdministration-Complete";
             case MEDICATIONADMINISTRATIONNULLIFICATION: return "MedicationAdministration-Nullification";
             case MEDICATIONADMINISTRATIONRECORDING: return "MedicationAdministration-Recording";
@@ -4430,6 +4521,8 @@ public class Enumerations {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("CodeSystem-expand".equals(codeString))
+          return MessageEvent.CODESYSTEMEXPAND;
         if ("MedicationAdministration-Complete".equals(codeString))
           return MessageEvent.MEDICATIONADMINISTRATIONCOMPLETE;
         if ("MedicationAdministration-Nullification".equals(codeString))
@@ -4458,6 +4551,8 @@ public class Enumerations {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
+        if ("CodeSystem-expand".equals(codeString))
+          return new Enumeration<MessageEvent>(this, MessageEvent.CODESYSTEMEXPAND);
         if ("MedicationAdministration-Complete".equals(codeString))
           return new Enumeration<MessageEvent>(this, MessageEvent.MEDICATIONADMINISTRATIONCOMPLETE);
         if ("MedicationAdministration-Nullification".equals(codeString))
@@ -4481,6 +4576,8 @@ public class Enumerations {
         throw new FHIRException("Unknown MessageEvent code '"+codeString+"'");
         }
     public String toCode(MessageEvent code) {
+      if (code == MessageEvent.CODESYSTEMEXPAND)
+        return "CodeSystem-expand";
       if (code == MessageEvent.MEDICATIONADMINISTRATIONCOMPLETE)
         return "MedicationAdministration-Complete";
       if (code == MessageEvent.MEDICATIONADMINISTRATIONNULLIFICATION)
@@ -4752,6 +4849,10 @@ public class Enumerations {
          */
         CLINICALIMPRESSION, 
         /**
+         * A code system specifies a set of codes drawn from one or more code systems.
+         */
+        CODESYSTEM, 
+        /**
          * An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.
          */
         COMMUNICATION, 
@@ -4920,6 +5021,10 @@ public class Enumerations {
          */
         LIBRARY, 
         /**
+         * Identifies two or more records (resource instances) that are referring to the same real-world "occurrence".
+         */
+        LINKAGE, 
+        /**
          * A set of information summarized from a list of other resources.
          */
         LIST, 
@@ -5044,6 +5149,10 @@ public class Enumerations {
          */
         PROCESSRESPONSE, 
         /**
+         * A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.
+         */
+        PROTOCOL, 
+        /**
          * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.
          */
         PROVENANCE, 
@@ -5156,6 +5265,8 @@ public class Enumerations {
           return CLAIMRESPONSE;
         if ("ClinicalImpression".equals(codeString))
           return CLINICALIMPRESSION;
+        if ("CodeSystem".equals(codeString))
+          return CODESYSTEM;
         if ("Communication".equals(codeString))
           return COMMUNICATION;
         if ("CommunicationRequest".equals(codeString))
@@ -5240,6 +5351,8 @@ public class Enumerations {
           return IMPLEMENTATIONGUIDE;
         if ("Library".equals(codeString))
           return LIBRARY;
+        if ("Linkage".equals(codeString))
+          return LINKAGE;
         if ("List".equals(codeString))
           return LIST;
         if ("Location".equals(codeString))
@@ -5302,6 +5415,8 @@ public class Enumerations {
           return PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return PROCESSRESPONSE;
+        if ("Protocol".equals(codeString))
+          return PROTOCOL;
         if ("Provenance".equals(codeString))
           return PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -5359,6 +5474,7 @@ public class Enumerations {
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
             case CLINICALIMPRESSION: return "ClinicalImpression";
+            case CODESYSTEM: return "CodeSystem";
             case COMMUNICATION: return "Communication";
             case COMMUNICATIONREQUEST: return "CommunicationRequest";
             case COMPOSITION: return "Composition";
@@ -5401,6 +5517,7 @@ public class Enumerations {
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
             case IMPLEMENTATIONGUIDE: return "ImplementationGuide";
             case LIBRARY: return "Library";
+            case LINKAGE: return "Linkage";
             case LIST: return "List";
             case LOCATION: return "Location";
             case MEASURE: return "Measure";
@@ -5432,6 +5549,7 @@ public class Enumerations {
             case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
+            case PROTOCOL: return "Protocol";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
@@ -5470,6 +5588,7 @@ public class Enumerations {
             case CLAIM: return "http://hl7.org/fhir/resource-types";
             case CLAIMRESPONSE: return "http://hl7.org/fhir/resource-types";
             case CLINICALIMPRESSION: return "http://hl7.org/fhir/resource-types";
+            case CODESYSTEM: return "http://hl7.org/fhir/resource-types";
             case COMMUNICATION: return "http://hl7.org/fhir/resource-types";
             case COMMUNICATIONREQUEST: return "http://hl7.org/fhir/resource-types";
             case COMPOSITION: return "http://hl7.org/fhir/resource-types";
@@ -5512,6 +5631,7 @@ public class Enumerations {
             case IMMUNIZATIONRECOMMENDATION: return "http://hl7.org/fhir/resource-types";
             case IMPLEMENTATIONGUIDE: return "http://hl7.org/fhir/resource-types";
             case LIBRARY: return "http://hl7.org/fhir/resource-types";
+            case LINKAGE: return "http://hl7.org/fhir/resource-types";
             case LIST: return "http://hl7.org/fhir/resource-types";
             case LOCATION: return "http://hl7.org/fhir/resource-types";
             case MEASURE: return "http://hl7.org/fhir/resource-types";
@@ -5543,6 +5663,7 @@ public class Enumerations {
             case PROCEDUREREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSREQUEST: return "http://hl7.org/fhir/resource-types";
             case PROCESSRESPONSE: return "http://hl7.org/fhir/resource-types";
+            case PROTOCOL: return "http://hl7.org/fhir/resource-types";
             case PROVENANCE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRE: return "http://hl7.org/fhir/resource-types";
             case QUESTIONNAIRERESPONSE: return "http://hl7.org/fhir/resource-types";
@@ -5581,6 +5702,7 @@ public class Enumerations {
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
             case CLAIMRESPONSE: return "This resource provides the adjudication details from the processing of a Claim resource.";
             case CLINICALIMPRESSION: return "A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called \"ClinicalImpression\" rather than \"ClinicalAssessment\" to avoid confusion with the recording of assessment tools such as Apgar score.";
+            case CODESYSTEM: return "A code system specifies a set of codes drawn from one or more code systems.";
             case COMMUNICATION: return "An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.";
             case COMMUNICATIONREQUEST: return "A request to convey information; e.g. the CDS system proposes that an alert be sent to a responsible provider, the CDS system proposes that the public health agency be notified about a reportable condition.";
             case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.";
@@ -5623,6 +5745,7 @@ public class Enumerations {
             case IMMUNIZATIONRECOMMENDATION: return "A patient's point-in-time immunization and recommendation (i.e. forecasting a patient's immunization eligibility according to a published schedule) with optional supporting justification.";
             case IMPLEMENTATIONGUIDE: return "A set of rules or how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole, and to publish a computable definition of all the parts.";
             case LIBRARY: return "The Library resource provides a representation container for knowledge artifact component definitions. It is effectively an exposure of the header information for a CQL/ELM library.";
+            case LINKAGE: return "Identifies two or more records (resource instances) that are referring to the same real-world \"occurrence\".";
             case LIST: return "A set of information summarized from a list of other resources.";
             case LOCATION: return "Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.";
             case MEASURE: return "The Measure resource provides the definition of a quality measure.";
@@ -5654,6 +5777,7 @@ public class Enumerations {
             case PROCEDUREREQUEST: return "A request for a procedure to be performed. May be a proposal or an order.";
             case PROCESSREQUEST: return "This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.";
             case PROCESSRESPONSE: return "This resource provides processing status, errors and notes from the processing of a resource.";
+            case PROTOCOL: return "A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.";
             case PROVENANCE: return "Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.";
             case QUESTIONNAIRE: return "A structured set of questions intended to guide the collection of answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.";
             case QUESTIONNAIRERESPONSE: return "A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.";
@@ -5692,6 +5816,7 @@ public class Enumerations {
             case CLAIM: return "Claim";
             case CLAIMRESPONSE: return "ClaimResponse";
             case CLINICALIMPRESSION: return "ClinicalImpression";
+            case CODESYSTEM: return "CodeSystem";
             case COMMUNICATION: return "Communication";
             case COMMUNICATIONREQUEST: return "CommunicationRequest";
             case COMPOSITION: return "Composition";
@@ -5734,6 +5859,7 @@ public class Enumerations {
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
             case IMPLEMENTATIONGUIDE: return "ImplementationGuide";
             case LIBRARY: return "Library";
+            case LINKAGE: return "Linkage";
             case LIST: return "List";
             case LOCATION: return "Location";
             case MEASURE: return "Measure";
@@ -5765,6 +5891,7 @@ public class Enumerations {
             case PROCEDUREREQUEST: return "ProcedureRequest";
             case PROCESSREQUEST: return "ProcessRequest";
             case PROCESSRESPONSE: return "ProcessResponse";
+            case PROTOCOL: return "Protocol";
             case PROVENANCE: return "Provenance";
             case QUESTIONNAIRE: return "Questionnaire";
             case QUESTIONNAIRERESPONSE: return "QuestionnaireResponse";
@@ -5821,6 +5948,8 @@ public class Enumerations {
           return ResourceType.CLAIMRESPONSE;
         if ("ClinicalImpression".equals(codeString))
           return ResourceType.CLINICALIMPRESSION;
+        if ("CodeSystem".equals(codeString))
+          return ResourceType.CODESYSTEM;
         if ("Communication".equals(codeString))
           return ResourceType.COMMUNICATION;
         if ("CommunicationRequest".equals(codeString))
@@ -5905,6 +6034,8 @@ public class Enumerations {
           return ResourceType.IMPLEMENTATIONGUIDE;
         if ("Library".equals(codeString))
           return ResourceType.LIBRARY;
+        if ("Linkage".equals(codeString))
+          return ResourceType.LINKAGE;
         if ("List".equals(codeString))
           return ResourceType.LIST;
         if ("Location".equals(codeString))
@@ -5967,6 +6098,8 @@ public class Enumerations {
           return ResourceType.PROCESSREQUEST;
         if ("ProcessResponse".equals(codeString))
           return ResourceType.PROCESSRESPONSE;
+        if ("Protocol".equals(codeString))
+          return ResourceType.PROTOCOL;
         if ("Provenance".equals(codeString))
           return ResourceType.PROVENANCE;
         if ("Questionnaire".equals(codeString))
@@ -6041,6 +6174,8 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.CLAIMRESPONSE);
         if ("ClinicalImpression".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.CLINICALIMPRESSION);
+        if ("CodeSystem".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.CODESYSTEM);
         if ("Communication".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.COMMUNICATION);
         if ("CommunicationRequest".equals(codeString))
@@ -6125,6 +6260,8 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.IMPLEMENTATIONGUIDE);
         if ("Library".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.LIBRARY);
+        if ("Linkage".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.LINKAGE);
         if ("List".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.LIST);
         if ("Location".equals(codeString))
@@ -6187,6 +6324,8 @@ public class Enumerations {
           return new Enumeration<ResourceType>(this, ResourceType.PROCESSREQUEST);
         if ("ProcessResponse".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.PROCESSRESPONSE);
+        if ("Protocol".equals(codeString))
+          return new Enumeration<ResourceType>(this, ResourceType.PROTOCOL);
         if ("Provenance".equals(codeString))
           return new Enumeration<ResourceType>(this, ResourceType.PROVENANCE);
         if ("Questionnaire".equals(codeString))
@@ -6256,6 +6395,8 @@ public class Enumerations {
         return "ClaimResponse";
       if (code == ResourceType.CLINICALIMPRESSION)
         return "ClinicalImpression";
+      if (code == ResourceType.CODESYSTEM)
+        return "CodeSystem";
       if (code == ResourceType.COMMUNICATION)
         return "Communication";
       if (code == ResourceType.COMMUNICATIONREQUEST)
@@ -6340,6 +6481,8 @@ public class Enumerations {
         return "ImplementationGuide";
       if (code == ResourceType.LIBRARY)
         return "Library";
+      if (code == ResourceType.LINKAGE)
+        return "Linkage";
       if (code == ResourceType.LIST)
         return "List";
       if (code == ResourceType.LOCATION)
@@ -6402,6 +6545,8 @@ public class Enumerations {
         return "ProcessRequest";
       if (code == ResourceType.PROCESSRESPONSE)
         return "ProcessResponse";
+      if (code == ResourceType.PROTOCOL)
+        return "Protocol";
       if (code == ResourceType.PROVENANCE)
         return "Provenance";
       if (code == ResourceType.QUESTIONNAIRE)

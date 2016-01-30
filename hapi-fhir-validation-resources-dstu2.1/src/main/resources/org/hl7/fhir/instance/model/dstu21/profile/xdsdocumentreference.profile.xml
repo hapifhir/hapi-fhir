@@ -18,7 +18,7 @@
   </contact>
   <date value="2012-06-24"/>
   <description value="XDSDocumentEntry"/>
-  <fhirVersion value="1.2.0"/>
+  <fhirVersion value="1.3.0"/>
   <kind value="resource"/>
   <constrainedType value="DocumentReference"/>
   <abstract value="false"/>
@@ -708,6 +708,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -918,6 +919,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -1306,6 +1308,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -1569,6 +1572,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>

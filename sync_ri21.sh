@@ -40,7 +40,7 @@ cp $FHIRTRUNK/build/publish/xml.xsd ./hapi-fhir-validation-resources-$PROJVERSIO
 
 # Copy Model
 #TODO reenable
-#cp -fvR $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/model hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/
+cp -fvR $FHIRTRUNK/build/implementations/java/org.hl7.fhir.$PACKAGEVERSION/src/org/hl7/fhir/$PACKAGEVERSION/model/*.java hapi-fhir-structures-$PROJVERSION/src/main/java/org/hl7/fhir/$PACKAGEVERSION/model/
 #find hapi-fhir-structures-$PROJVERSION/src -name "*.class" | xargs rm -v
 
 # Exception class

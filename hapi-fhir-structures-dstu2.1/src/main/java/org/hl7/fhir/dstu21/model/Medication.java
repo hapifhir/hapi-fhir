@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
 
-import org.hl7.fhir.dstu21.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 /**
  * This resource is primarily used for the identification and definition of a medication. It covers the ingredients and the packaging for a medication.
  */
@@ -802,7 +800,7 @@ public class Medication extends DomainResource {
          * Identifies one of the items in the package.
          */
         @Child(name = "item", type = {Medication.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="A product in the package", formalDefinition="Identifies one of the items in the package." )
+        @Description(shortDefinition="The item in the package", formalDefinition="Identifies one of the items in the package." )
         protected Reference item;
 
         /**
@@ -1371,30 +1369,30 @@ public class Medication extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam FORM = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_FORM);
 
  /**
-   * Search parameter: <b>content</b>
+   * Search parameter: <b>packageitem</b>
    * <p>
-   * Description: <b>A product in the package</b><br>
+   * Description: <b>The item in the package</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Medication.package.content.item</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="content", path="Medication.package.content.item", description="A product in the package", type="reference" )
-  public static final String SP_CONTENT = "content";
+  @SearchParamDefinition(name="packageitem", path="Medication.package.content.item", description="The item in the package", type="reference" )
+  public static final String SP_PACKAGEITEM = "packageitem";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>content</b>
+   * <b>Fluent Client</b> search parameter constant for <b>packageitem</b>
    * <p>
-   * Description: <b>A product in the package</b><br>
+   * Description: <b>The item in the package</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Medication.package.content.item</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONTENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONTENT);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PACKAGEITEM = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PACKAGEITEM);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Medication:content</b>".
+   * the path value of "<b>Medication:packageitem</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTENT = new ca.uhn.fhir.model.api.Include("Medication:content").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PACKAGEITEM = new ca.uhn.fhir.model.api.Include("Medication:packageitem").toLocked();
 
  /**
    * Search parameter: <b>manufacturer</b>

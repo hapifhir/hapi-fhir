@@ -2,7 +2,7 @@ package org.hl7.fhir.dstu21.model;
 
 import org.hl7.fhir.dstu21.exceptions.FHIRException;
 
-// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
+// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
 
 public enum ResourceType {
     Account,
@@ -18,6 +18,7 @@ public enum ResourceType {
     Claim,
     ClaimResponse,
     ClinicalImpression,
+    CodeSystem,
     Communication,
     CommunicationRequest,
     Composition,
@@ -59,6 +60,7 @@ public enum ResourceType {
     ImmunizationRecommendation,
     ImplementationGuide,
     Library,
+    Linkage,
     List,
     Location,
     Measure,
@@ -90,6 +92,7 @@ public enum ResourceType {
     ProcedureRequest,
     ProcessRequest,
     ProcessResponse,
+    Protocol,
     Provenance,
     Questionnaire,
     QuestionnaireResponse,
@@ -139,6 +142,8 @@ public enum ResourceType {
       return "claimresponse";
     case ClinicalImpression:
       return "clinicalimpression";
+    case CodeSystem:
+      return "codesystem";
     case Communication:
       return "communication";
     case CommunicationRequest:
@@ -221,6 +226,8 @@ public enum ResourceType {
       return "implementationguide";
     case Library:
       return "library";
+    case Linkage:
+      return "linkage";
     case List:
       return "list";
     case Location:
@@ -283,6 +290,8 @@ public enum ResourceType {
       return "processrequest";
     case ProcessResponse:
       return "processresponse";
+    case Protocol:
+      return "protocol";
     case Provenance:
       return "provenance";
     case Questionnaire:
@@ -353,6 +362,8 @@ public enum ResourceType {
       return ClaimResponse;
     if ("ClinicalImpression".equals(code))
       return ClinicalImpression;
+    if ("CodeSystem".equals(code))
+      return CodeSystem;
     if ("Communication".equals(code))
       return Communication;
     if ("CommunicationRequest".equals(code))
@@ -435,6 +446,8 @@ public enum ResourceType {
       return ImplementationGuide;
     if ("Library".equals(code))
       return Library;
+    if ("Linkage".equals(code))
+      return Linkage;
     if ("List".equals(code))
       return List;
     if ("Location".equals(code))
@@ -497,6 +510,8 @@ public enum ResourceType {
       return ProcessRequest;
     if ("ProcessResponse".equals(code))
       return ProcessResponse;
+    if ("Protocol".equals(code))
+      return Protocol;
     if ("Provenance".equals(code))
       return Provenance;
     if ("Questionnaire".equals(code))

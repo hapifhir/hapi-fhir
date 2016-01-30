@@ -29,25 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
 
-import org.hl7.fhir.dstu21.exceptions.FHIRException;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.dstu21.model.Enumerations.SearchParamType;
-import org.hl7.fhir.dstu21.model.Enumerations.SearchParamTypeEnumFactory;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 /**
  * A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
  */
@@ -5192,7 +5186,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
          * An endpoint (network accessible address) to which messages and/or replies are to be sent.
          */
         @Child(name = "endpoint", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="A messaging service end-point", formalDefinition="An endpoint (network accessible address) to which messages and/or replies are to be sent." )
+        @Description(shortDefinition="Where messages should be sent", formalDefinition="An endpoint (network accessible address) to which messages and/or replies are to be sent." )
         protected List<ConformanceMessagingEndpointComponent> endpoint;
 
         /**
@@ -6454,25 +6448,25 @@ public class Conformance extends DomainResource implements IBaseConformance {
     protected BooleanType experimental;
 
     /**
+     * The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.
+     */
+    @Child(name = "date", type = {DateTimeType.class}, order=5, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Publication Date(/time)", formalDefinition="The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes." )
+    protected DateTimeType date;
+
+    /**
      * The name of the individual or organization that published the conformance.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "publisher", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the conformance." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<ConformanceContactComponent> contact;
-
-    /**
-     * The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.
-     */
-    @Child(name = "date", type = {DateTimeType.class}, order=7, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Publication Date(/time)", formalDefinition="The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes." )
-    protected DateTimeType date;
 
     /**
      * A free text natural language description of the conformance statement and its use. Typically, this is used when the conformance statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP.
@@ -6570,7 +6564,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
     @Description(shortDefinition="Document definition", formalDefinition="A document definition." )
     protected List<ConformanceDocumentComponent> document;
 
-    private static final long serialVersionUID = 1863739648L;
+    private static final long serialVersionUID = 1969977598L;
 
   /**
    * Constructor
@@ -6832,6 +6826,51 @@ public class Conformance extends DomainResource implements IBaseConformance {
     }
 
     /**
+     * @return {@link #date} (The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Conformance.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public Conformance setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.
+     */
+    public Conformance setDate(Date value) { 
+        if (this.date == null)
+          this.date = new DateTimeType();
+        this.date.setValue(value);
+      return this;
+    }
+
+    /**
      * @return {@link #publisher} (The name of the individual or organization that published the conformance.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
@@ -6917,51 +6956,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
       if (this.contact == null)
         this.contact = new ArrayList<ConformanceContactComponent>();
       this.contact.add(t);
-      return this;
-    }
-
-    /**
-     * @return {@link #date} (The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public DateTimeType getDateElement() { 
-      if (this.date == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Conformance.date");
-        else if (Configuration.doAutoCreate())
-          this.date = new DateTimeType(); // bb
-      return this.date;
-    }
-
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    /**
-     * @param value {@link #date} (The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public Conformance setDateElement(DateTimeType value) { 
-      this.date = value;
-      return this;
-    }
-
-    /**
-     * @return The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.
-     */
-    public Date getDate() { 
-      return this.date == null ? null : this.date.getValue();
-    }
-
-    /**
-     * @param value The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.
-     */
-    public Conformance setDate(Date value) { 
-        if (this.date == null)
-          this.date = new DateTimeType();
-        this.date.setValue(value);
       return this;
     }
 
@@ -7537,9 +7531,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
         childrenList.add(new Property("name", "string", "A free text natural language name identifying the conformance statement.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("status", "code", "The status of this conformance statement.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the conformance.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("description", "string", "A free text natural language description of the conformance statement and its use. Typically, this is used when the conformance statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("requirements", "string", "Explains why this conformance statement is needed and why it's been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
         childrenList.add(new Property("copyright", "string", "A copyright statement relating to the conformance statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.", 0, java.lang.Integer.MAX_VALUE, copyright));
@@ -7567,12 +7561,12 @@ public class Conformance extends DomainResource implements IBaseConformance {
           this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
         else if (name.equals("experimental"))
           this.experimental = castToBoolean(value); // BooleanType
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("publisher"))
           this.publisher = castToString(value); // StringType
         else if (name.equals("contact"))
           this.getContact().add((ConformanceContactComponent) value);
-        else if (name.equals("date"))
-          this.date = castToDateTime(value); // DateTimeType
         else if (name.equals("description"))
           this.description = castToString(value); // StringType
         else if (name.equals("requirements"))
@@ -7620,14 +7614,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
         else if (name.equals("experimental")) {
           throw new FHIRException("Cannot call addChild on a primitive type Conformance.experimental");
         }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Conformance.date");
+        }
         else if (name.equals("publisher")) {
           throw new FHIRException("Cannot call addChild on a primitive type Conformance.publisher");
         }
         else if (name.equals("contact")) {
           return addContact();
-        }
-        else if (name.equals("date")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Conformance.date");
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type Conformance.description");
@@ -7687,13 +7681,13 @@ public class Conformance extends DomainResource implements IBaseConformance {
         dst.name = name == null ? null : name.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
+        dst.date = date == null ? null : date.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
           dst.contact = new ArrayList<ConformanceContactComponent>();
           for (ConformanceContactComponent i : contact)
             dst.contact.add(i.copy());
         };
-        dst.date = date == null ? null : date.copy();
         dst.description = description == null ? null : description.copy();
         dst.requirements = requirements == null ? null : requirements.copy();
         dst.copyright = copyright == null ? null : copyright.copy();
@@ -7742,8 +7736,8 @@ public class Conformance extends DomainResource implements IBaseConformance {
           return false;
         Conformance o = (Conformance) other;
         return compareDeep(url, o.url, true) && compareDeep(version, o.version, true) && compareDeep(name, o.name, true)
-           && compareDeep(status, o.status, true) && compareDeep(experimental, o.experimental, true) && compareDeep(publisher, o.publisher, true)
-           && compareDeep(contact, o.contact, true) && compareDeep(date, o.date, true) && compareDeep(description, o.description, true)
+           && compareDeep(status, o.status, true) && compareDeep(experimental, o.experimental, true) && compareDeep(date, o.date, true)
+           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(description, o.description, true)
            && compareDeep(requirements, o.requirements, true) && compareDeep(copyright, o.copyright, true)
            && compareDeep(kind, o.kind, true) && compareDeep(software, o.software, true) && compareDeep(implementation, o.implementation, true)
            && compareDeep(fhirVersion, o.fhirVersion, true) && compareDeep(acceptUnknown, o.acceptUnknown, true)
@@ -7759,8 +7753,8 @@ public class Conformance extends DomainResource implements IBaseConformance {
           return false;
         Conformance o = (Conformance) other;
         return compareValues(url, o.url, true) && compareValues(version, o.version, true) && compareValues(name, o.name, true)
-           && compareValues(status, o.status, true) && compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
-           && compareValues(date, o.date, true) && compareValues(description, o.description, true) && compareValues(requirements, o.requirements, true)
+           && compareValues(status, o.status, true) && compareValues(experimental, o.experimental, true) && compareValues(date, o.date, true)
+           && compareValues(publisher, o.publisher, true) && compareValues(description, o.description, true) && compareValues(requirements, o.requirements, true)
            && compareValues(copyright, o.copyright, true) && compareValues(kind, o.kind, true) && compareValues(fhirVersion, o.fhirVersion, true)
            && compareValues(acceptUnknown, o.acceptUnknown, true) && compareValues(format, o.format, true);
       }
@@ -7768,7 +7762,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
       public boolean isEmpty() {
         return super.isEmpty() && (url == null || url.isEmpty()) && (version == null || version.isEmpty())
            && (name == null || name.isEmpty()) && (status == null || status.isEmpty()) && (experimental == null || experimental.isEmpty())
-           && (publisher == null || publisher.isEmpty()) && (contact == null || contact.isEmpty()) && (date == null || date.isEmpty())
+           && (date == null || date.isEmpty()) && (publisher == null || publisher.isEmpty()) && (contact == null || contact.isEmpty())
            && (description == null || description.isEmpty()) && (requirements == null || requirements.isEmpty())
            && (copyright == null || copyright.isEmpty()) && (kind == null || kind.isEmpty()) && (software == null || software.isEmpty())
            && (implementation == null || implementation.isEmpty()) && (fhirVersion == null || fhirVersion.isEmpty())
@@ -7841,32 +7835,6 @@ public class Conformance extends DomainResource implements IBaseConformance {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam RESOURCE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_RESOURCE);
-
- /**
-   * Search parameter: <b>profile</b>
-   * <p>
-   * Description: <b>A profile id invoked in a conformance statement</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Conformance.rest.resource.profile</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="profile", path="Conformance.rest.resource.profile", description="A profile id invoked in a conformance statement", type="reference" )
-  public static final String SP_PROFILE = "profile";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>profile</b>
-   * <p>
-   * Description: <b>A profile id invoked in a conformance statement</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Conformance.rest.resource.profile</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PROFILE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PROFILE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Conformance:profile</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PROFILE = new ca.uhn.fhir.model.api.Include("Conformance:profile").toLocked();
 
  /**
    * Search parameter: <b>format</b>
@@ -7949,6 +7917,26 @@ public class Conformance extends DomainResource implements IBaseConformance {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam VERSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VERSION);
 
  /**
+   * Search parameter: <b>securityservice</b>
+   * <p>
+   * Description: <b>OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.rest.security.service</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="securityservice", path="Conformance.rest.security.service", description="OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates", type="token" )
+  public static final String SP_SECURITYSERVICE = "securityservice";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>securityservice</b>
+   * <p>
+   * Description: <b>OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Conformance.rest.security.service</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SECURITYSERVICE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SECURITYSERVICE);
+
+ /**
    * Search parameter: <b>url</b>
    * <p>
    * Description: <b>The uri that identifies the conformance statement</b><br>
@@ -8015,24 +8003,30 @@ public class Conformance extends DomainResource implements IBaseConformance {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam MODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_MODE);
 
  /**
-   * Search parameter: <b>security</b>
+   * Search parameter: <b>resourceprofile</b>
    * <p>
-   * Description: <b>OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Conformance.rest.security.service</b><br>
+   * Description: <b>A profile id invoked in a conformance statement</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Conformance.rest.resource.profile</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="security", path="Conformance.rest.security.service", description="OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates", type="token" )
-  public static final String SP_SECURITY = "security";
+  @SearchParamDefinition(name="resourceprofile", path="Conformance.rest.resource.profile", description="A profile id invoked in a conformance statement", type="reference" )
+  public static final String SP_RESOURCEPROFILE = "resourceprofile";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>security</b>
+   * <b>Fluent Client</b> search parameter constant for <b>resourceprofile</b>
    * <p>
-   * Description: <b>OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Conformance.rest.security.service</b><br>
+   * Description: <b>A profile id invoked in a conformance statement</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Conformance.rest.resource.profile</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SECURITY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SECURITY);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam RESOURCEPROFILE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_RESOURCEPROFILE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Conformance:resourceprofile</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_RESOURCEPROFILE = new ca.uhn.fhir.model.api.Include("Conformance:resourceprofile").toLocked();
 
  /**
    * Search parameter: <b>name</b>

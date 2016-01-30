@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
 
-import org.hl7.fhir.dstu21.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 /**
  * Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.
  */
@@ -763,41 +762,48 @@ public class Group extends DomainResource {
     protected BooleanType actual;
 
     /**
+     * Indicates whether the record for the group is available for use or is merely being retained for historical purposes.
+     */
+    @Child(name = "active", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Whether this group's record is in active use", formalDefinition="Indicates whether the record for the group is available for use or is merely being retained for historical purposes." )
+    protected BooleanType active;
+
+    /**
      * Provides a specific type of resource the group includes; e.g. "cow", "syringe", etc.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "code", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Kind of Group members", formalDefinition="Provides a specific type of resource the group includes; e.g. \"cow\", \"syringe\", etc." )
     protected CodeableConcept code;
 
     /**
      * A label assigned to the group for human identification and communication.
      */
-    @Child(name = "name", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "name", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Label for Group", formalDefinition="A label assigned to the group for human identification and communication." )
     protected StringType name;
 
     /**
      * A count of the number of resource instances that are part of the group.
      */
-    @Child(name = "quantity", type = {UnsignedIntType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "quantity", type = {UnsignedIntType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Number of members", formalDefinition="A count of the number of resource instances that are part of the group." )
     protected UnsignedIntType quantity;
 
     /**
      * Identifies the traits shared by members of the group.
      */
-    @Child(name = "characteristic", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "characteristic", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Trait of group members", formalDefinition="Identifies the traits shared by members of the group." )
     protected List<GroupCharacteristicComponent> characteristic;
 
     /**
      * Identifies the resource instances that are members of the group.
      */
-    @Child(name = "member", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "member", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Who or what is in group", formalDefinition="Identifies the resource instances that are members of the group." )
     protected List<GroupMemberComponent> member;
 
-    private static final long serialVersionUID = 1401345819L;
+    private static final long serialVersionUID = -437086579L;
 
   /**
    * Constructor
@@ -942,6 +948,51 @@ public class Group extends DomainResource {
         if (this.actual == null)
           this.actual = new BooleanType();
         this.actual.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #active} (Indicates whether the record for the group is available for use or is merely being retained for historical purposes.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     */
+    public BooleanType getActiveElement() { 
+      if (this.active == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Group.active");
+        else if (Configuration.doAutoCreate())
+          this.active = new BooleanType(); // bb
+      return this.active;
+    }
+
+    public boolean hasActiveElement() { 
+      return this.active != null && !this.active.isEmpty();
+    }
+
+    public boolean hasActive() { 
+      return this.active != null && !this.active.isEmpty();
+    }
+
+    /**
+     * @param value {@link #active} (Indicates whether the record for the group is available for use or is merely being retained for historical purposes.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     */
+    public Group setActiveElement(BooleanType value) { 
+      this.active = value;
+      return this;
+    }
+
+    /**
+     * @return Indicates whether the record for the group is available for use or is merely being retained for historical purposes.
+     */
+    public boolean getActive() { 
+      return this.active == null || this.active.isEmpty() ? false : this.active.getValue();
+    }
+
+    /**
+     * @param value Indicates whether the record for the group is available for use or is merely being retained for historical purposes.
+     */
+    public Group setActive(boolean value) { 
+        if (this.active == null)
+          this.active = new BooleanType();
+        this.active.setValue(value);
       return this;
     }
 
@@ -1148,6 +1199,7 @@ public class Group extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "A unique business identifier for this group.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("type", "code", "Identifies the broad classification of the kind of resources the group includes.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("actual", "boolean", "If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.", 0, java.lang.Integer.MAX_VALUE, actual));
+        childrenList.add(new Property("active", "boolean", "Indicates whether the record for the group is available for use or is merely being retained for historical purposes.", 0, java.lang.Integer.MAX_VALUE, active));
         childrenList.add(new Property("code", "CodeableConcept", "Provides a specific type of resource the group includes; e.g. \"cow\", \"syringe\", etc.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("name", "string", "A label assigned to the group for human identification and communication.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("quantity", "unsignedInt", "A count of the number of resource instances that are part of the group.", 0, java.lang.Integer.MAX_VALUE, quantity));
@@ -1163,6 +1215,8 @@ public class Group extends DomainResource {
           this.type = new GroupTypeEnumFactory().fromType(value); // Enumeration<GroupType>
         else if (name.equals("actual"))
           this.actual = castToBoolean(value); // BooleanType
+        else if (name.equals("active"))
+          this.active = castToBoolean(value); // BooleanType
         else if (name.equals("code"))
           this.code = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("name"))
@@ -1187,6 +1241,9 @@ public class Group extends DomainResource {
         }
         else if (name.equals("actual")) {
           throw new FHIRException("Cannot call addChild on a primitive type Group.actual");
+        }
+        else if (name.equals("active")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Group.active");
         }
         else if (name.equals("code")) {
           this.code = new CodeableConcept();
@@ -1223,6 +1280,7 @@ public class Group extends DomainResource {
         };
         dst.type = type == null ? null : type.copy();
         dst.actual = actual == null ? null : actual.copy();
+        dst.active = active == null ? null : active.copy();
         dst.code = code == null ? null : code.copy();
         dst.name = name == null ? null : name.copy();
         dst.quantity = quantity == null ? null : quantity.copy();
@@ -1251,8 +1309,9 @@ public class Group extends DomainResource {
           return false;
         Group o = (Group) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(actual, o.actual, true)
-           && compareDeep(code, o.code, true) && compareDeep(name, o.name, true) && compareDeep(quantity, o.quantity, true)
-           && compareDeep(characteristic, o.characteristic, true) && compareDeep(member, o.member, true);
+           && compareDeep(active, o.active, true) && compareDeep(code, o.code, true) && compareDeep(name, o.name, true)
+           && compareDeep(quantity, o.quantity, true) && compareDeep(characteristic, o.characteristic, true)
+           && compareDeep(member, o.member, true);
       }
 
       @Override
@@ -1262,14 +1321,14 @@ public class Group extends DomainResource {
         if (!(other instanceof Group))
           return false;
         Group o = (Group) other;
-        return compareValues(type, o.type, true) && compareValues(actual, o.actual, true) && compareValues(name, o.name, true)
-           && compareValues(quantity, o.quantity, true);
+        return compareValues(type, o.type, true) && compareValues(actual, o.actual, true) && compareValues(active, o.active, true)
+           && compareValues(name, o.name, true) && compareValues(quantity, o.quantity, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (type == null || type.isEmpty())
-           && (actual == null || actual.isEmpty()) && (code == null || code.isEmpty()) && (name == null || name.isEmpty())
-           && (quantity == null || quantity.isEmpty()) && (characteristic == null || characteristic.isEmpty())
+           && (actual == null || actual.isEmpty()) && (active == null || active.isEmpty()) && (code == null || code.isEmpty())
+           && (name == null || name.isEmpty()) && (quantity == null || quantity.isEmpty()) && (characteristic == null || characteristic.isEmpty())
            && (member == null || member.isEmpty());
       }
 
@@ -1326,7 +1385,7 @@ public class Group extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="characteristic-value", path="", description="A composite of both characteristic and value", type="composite" )
+  @SearchParamDefinition(name="characteristic-value", path="", description="A composite of both characteristic and value", type="composite", compositeOf={"characteristic", "value"} )
   public static final String SP_CHARACTERISTIC_VALUE = "characteristic-value";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>characteristic-value</b>
@@ -1336,7 +1395,7 @@ public class Group extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam CHARACTERISTIC_VALUE = new ca.uhn.fhir.rest.gclient.CompositeClientParam(SP_CHARACTERISTIC_VALUE);
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.TokenClientParam> CHARACTERISTIC_VALUE = new ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.TokenClientParam>(SP_CHARACTERISTIC_VALUE);
 
  /**
    * Search parameter: <b>code</b>

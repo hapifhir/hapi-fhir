@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Practitioner"/>
   <meta>
-    <lastUpdated value="2015-12-19T16:00:42.735-05:00"/>
+    <lastUpdated value="2016-01-20T08:16:20.857-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -466,10 +466,10 @@
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-19T16:00:42-05:00"/>
+  <date value="2016-01-20T08:16:20-05:00"/>
   <description value="Base StructureDefinition for Practitioner Resource"/>
   <requirements value="Need to track doctors, staff, locums etc. for both healthcare practitioners, funders, etc."/>
-  <fhirVersion value="1.2.0"/>
+  <fhirVersion value="1.3.0"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -905,6 +905,7 @@ If the practitioner is not in use by one organization, then it should mark the p
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -1121,6 +1122,7 @@ If the practitioner is not in use by one organization, then it should mark the p
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>

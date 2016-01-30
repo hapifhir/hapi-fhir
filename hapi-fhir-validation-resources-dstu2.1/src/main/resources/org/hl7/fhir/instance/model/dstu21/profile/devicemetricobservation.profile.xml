@@ -18,7 +18,7 @@
   </contact>
   <date value="2014-11-17"/>
   <description value="This profile describes the direct or derived, qualitative or quantitative physiological measurement, setting, or calculation data produced by a medical device or a device component."/>
-  <fhirVersion value="1.2.0"/>
+  <fhirVersion value="1.3.0"/>
   <kind value="resource"/>
   <constrainedType value="Observation"/>
   <abstract value="false"/>
@@ -908,6 +908,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -1126,6 +1127,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -1272,6 +1274,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>

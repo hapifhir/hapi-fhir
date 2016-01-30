@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
 
-import org.hl7.fhir.dstu21.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 /**
  * Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.
  */
@@ -190,7 +188,7 @@ public class MedicationDispense extends DomainResource {
          * Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication.
          */
         @Child(name = "text", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Dosage Instructions", formalDefinition="Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication." )
+        @Description(shortDefinition="Free text dosage instructions e.g. SIG", formalDefinition="Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication." )
         protected StringType text;
 
         /**
@@ -785,7 +783,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
          * A code signifying whether a different drug was dispensed from what was prescribed.
          */
         @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Type of substitution", formalDefinition="A code signifying whether a different drug was dispensed from what was prescribed." )
+        @Description(shortDefinition="Code signifying whether a different drug was dispensed from what was prescribed", formalDefinition="A code signifying whether a different drug was dispensed from what was prescribed." )
         protected CodeableConcept type;
 
         /**
@@ -1049,9 +1047,16 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     protected Enumeration<MedicationDispenseStatus> status;
 
     /**
+     * Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.
+     */
+    @Child(name = "medication", type = {CodeableConcept.class, Medication.class}, order=2, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="What medication was supplied", formalDefinition="Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications." )
+    protected Type medication;
+
+    /**
      * A link to a resource representing the person to whom the medication will be given.
      */
-    @Child(name = "patient", type = {Patient.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "patient", type = {Patient.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who the dispense is for", formalDefinition="A link to a resource representing the person to whom the medication will be given." )
     protected Reference patient;
 
@@ -1063,7 +1068,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     /**
      * The individual responsible for dispensing the medication.
      */
-    @Child(name = "dispenser", type = {Practitioner.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "dispenser", type = {Practitioner.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Practitioner responsible for dispensing medication", formalDefinition="The individual responsible for dispensing the medication." )
     protected Reference dispenser;
 
@@ -1075,7 +1080,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     /**
      * Indicates the medication order that is being dispensed against.
      */
-    @Child(name = "authorizingPrescription", type = {MedicationOrder.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "authorizingPrescription", type = {MedicationOrder.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Medication order that authorizes the dispense", formalDefinition="Indicates the medication order that is being dispensed against." )
     protected List<Reference> authorizingPrescription;
     /**
@@ -1087,30 +1092,23 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     /**
      * Indicates the type of dispensing event that is performed. For example, Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Trial fill, partial fill, emergency fill, etc.", formalDefinition="Indicates the type of dispensing event that is performed. For example, Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc." )
     protected CodeableConcept type;
 
     /**
      * The amount of medication that has been dispensed. Includes unit of measure.
      */
-    @Child(name = "quantity", type = {SimpleQuantity.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "quantity", type = {SimpleQuantity.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Amount dispensed", formalDefinition="The amount of medication that has been dispensed. Includes unit of measure." )
     protected SimpleQuantity quantity;
 
     /**
      * The amount of medication expressed as a timing amount.
      */
-    @Child(name = "daysSupply", type = {SimpleQuantity.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Days Supply", formalDefinition="The amount of medication expressed as a timing amount." )
+    @Child(name = "daysSupply", type = {SimpleQuantity.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Amount of medication expressed as a timing amount", formalDefinition="The amount of medication expressed as a timing amount." )
     protected SimpleQuantity daysSupply;
-
-    /**
-     * Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.
-     */
-    @Child(name = "medication", type = {CodeableConcept.class, Medication.class}, order=8, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="What medication was supplied", formalDefinition="Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications." )
-    protected Type medication;
 
     /**
      * The time when the dispensed product was packaged and reviewed.
@@ -1153,9 +1151,9 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     /**
      * Extra information about the dispense that could not be conveyed in the other attributes.
      */
-    @Child(name = "note", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "note", type = {Annotation.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Information about the dispense", formalDefinition="Extra information about the dispense that could not be conveyed in the other attributes." )
-    protected StringType note;
+    protected List<Annotation> note;
 
     /**
      * Indicates how the medication is to be used by the patient.
@@ -1171,7 +1169,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     @Description(shortDefinition="Deals with substitution of one medicine for another", formalDefinition="Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but does not happen, in other cases substitution is not expected but does happen.  This block explains what substitution did or did not happen and why." )
     protected MedicationDispenseSubstitutionComponent substitution;
 
-    private static final long serialVersionUID = -2071218407L;
+    private static final long serialVersionUID = -634238241L;
 
   /**
    * Constructor
@@ -1258,6 +1256,51 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           this.status = new Enumeration<MedicationDispenseStatus>(new MedicationDispenseStatusEnumFactory());
         this.status.setValue(value);
       }
+      return this;
+    }
+
+    /**
+     * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
+     */
+    public Type getMedication() { 
+      return this.medication;
+    }
+
+    /**
+     * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
+     */
+    public CodeableConcept getMedicationCodeableConcept() throws FHIRException { 
+      if (!(this.medication instanceof CodeableConcept))
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.medication.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.medication;
+    }
+
+    public boolean hasMedicationCodeableConcept() { 
+      return this.medication instanceof CodeableConcept;
+    }
+
+    /**
+     * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
+     */
+    public Reference getMedicationReference() throws FHIRException { 
+      if (!(this.medication instanceof Reference))
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
+      return (Reference) this.medication;
+    }
+
+    public boolean hasMedicationReference() { 
+      return this.medication instanceof Reference;
+    }
+
+    public boolean hasMedication() { 
+      return this.medication != null && !this.medication.isEmpty();
+    }
+
+    /**
+     * @param value {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
+     */
+    public MedicationDispense setMedication(Type value) { 
+      this.medication = value;
       return this;
     }
 
@@ -1483,51 +1526,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     }
 
     /**
-     * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
-     */
-    public Type getMedication() { 
-      return this.medication;
-    }
-
-    /**
-     * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
-     */
-    public CodeableConcept getMedicationCodeableConcept() throws FHIRException { 
-      if (!(this.medication instanceof CodeableConcept))
-        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.medication.getClass().getName()+" was encountered");
-      return (CodeableConcept) this.medication;
-    }
-
-    public boolean hasMedicationCodeableConcept() { 
-      return this.medication instanceof CodeableConcept;
-    }
-
-    /**
-     * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
-     */
-    public Reference getMedicationReference() throws FHIRException { 
-      if (!(this.medication instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
-      return (Reference) this.medication;
-    }
-
-    public boolean hasMedicationReference() { 
-      return this.medication instanceof Reference;
-    }
-
-    public boolean hasMedication() { 
-      return this.medication != null && !this.medication.isEmpty();
-    }
-
-    /**
-     * @param value {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
-     */
-    public MedicationDispense setMedication(Type value) { 
-      this.medication = value;
-      return this;
-    }
-
-    /**
      * @return {@link #whenPrepared} (The time when the dispensed product was packaged and reviewed.). This is the underlying object with id, value and extensions. The accessor "getWhenPrepared" gives direct access to the value
      */
     public DateTimeType getWhenPreparedElement() { 
@@ -1719,51 +1717,42 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     }
 
     /**
-     * @return {@link #note} (Extra information about the dispense that could not be conveyed in the other attributes.). This is the underlying object with id, value and extensions. The accessor "getNote" gives direct access to the value
+     * @return {@link #note} (Extra information about the dispense that could not be conveyed in the other attributes.)
      */
-    public StringType getNoteElement() { 
+    public List<Annotation> getNote() { 
       if (this.note == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationDispense.note");
-        else if (Configuration.doAutoCreate())
-          this.note = new StringType(); // bb
+        this.note = new ArrayList<Annotation>();
       return this.note;
     }
 
-    public boolean hasNoteElement() { 
-      return this.note != null && !this.note.isEmpty();
-    }
-
     public boolean hasNote() { 
-      return this.note != null && !this.note.isEmpty();
+      if (this.note == null)
+        return false;
+      for (Annotation item : this.note)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #note} (Extra information about the dispense that could not be conveyed in the other attributes.). This is the underlying object with id, value and extensions. The accessor "getNote" gives direct access to the value
+     * @return {@link #note} (Extra information about the dispense that could not be conveyed in the other attributes.)
      */
-    public MedicationDispense setNoteElement(StringType value) { 
-      this.note = value;
-      return this;
+    // syntactic sugar
+    public Annotation addNote() { //3
+      Annotation t = new Annotation();
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return t;
     }
 
-    /**
-     * @return Extra information about the dispense that could not be conveyed in the other attributes.
-     */
-    public String getNote() { 
-      return this.note == null ? null : this.note.getValue();
-    }
-
-    /**
-     * @param value Extra information about the dispense that could not be conveyed in the other attributes.
-     */
-    public MedicationDispense setNote(String value) { 
-      if (Utilities.noString(value))
-        this.note = null;
-      else {
-        if (this.note == null)
-          this.note = new StringType();
-        this.note.setValue(value);
-      }
+    // syntactic sugar
+    public MedicationDispense addNote(Annotation t) { //3
+      if (t == null)
+        return this;
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
       return this;
     }
 
@@ -1835,18 +1824,18 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "A code specifying the state of the set of dispense events.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, java.lang.Integer.MAX_VALUE, medication));
         childrenList.add(new Property("patient", "Reference(Patient)", "A link to a resource representing the person to whom the medication will be given.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("dispenser", "Reference(Practitioner)", "The individual responsible for dispensing the medication.", 0, java.lang.Integer.MAX_VALUE, dispenser));
         childrenList.add(new Property("authorizingPrescription", "Reference(MedicationOrder)", "Indicates the medication order that is being dispensed against.", 0, java.lang.Integer.MAX_VALUE, authorizingPrescription));
         childrenList.add(new Property("type", "CodeableConcept", "Indicates the type of dispensing event that is performed. For example, Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("quantity", "SimpleQuantity", "The amount of medication that has been dispensed. Includes unit of measure.", 0, java.lang.Integer.MAX_VALUE, quantity));
         childrenList.add(new Property("daysSupply", "SimpleQuantity", "The amount of medication expressed as a timing amount.", 0, java.lang.Integer.MAX_VALUE, daysSupply));
-        childrenList.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, java.lang.Integer.MAX_VALUE, medication));
         childrenList.add(new Property("whenPrepared", "dateTime", "The time when the dispensed product was packaged and reviewed.", 0, java.lang.Integer.MAX_VALUE, whenPrepared));
         childrenList.add(new Property("whenHandedOver", "dateTime", "The time the dispensed product was provided to the patient or their representative.", 0, java.lang.Integer.MAX_VALUE, whenHandedOver));
         childrenList.add(new Property("destination", "Reference(Location)", "Identification of the facility/location where the medication was shipped to, as part of the dispense event.", 0, java.lang.Integer.MAX_VALUE, destination));
         childrenList.add(new Property("receiver", "Reference(Patient|Practitioner)", "Identifies the person who picked up the medication.  This will usually be a patient or their caregiver, but some cases exist where it can be a healthcare professional.", 0, java.lang.Integer.MAX_VALUE, receiver));
-        childrenList.add(new Property("note", "string", "Extra information about the dispense that could not be conveyed in the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
+        childrenList.add(new Property("note", "Annotation", "Extra information about the dispense that could not be conveyed in the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("dosageInstruction", "", "Indicates how the medication is to be used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosageInstruction));
         childrenList.add(new Property("substitution", "", "Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but does not happen, in other cases substitution is not expected but does happen.  This block explains what substitution did or did not happen and why.", 0, java.lang.Integer.MAX_VALUE, substitution));
       }
@@ -1857,6 +1846,8 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           this.identifier = castToIdentifier(value); // Identifier
         else if (name.equals("status"))
           this.status = new MedicationDispenseStatusEnumFactory().fromType(value); // Enumeration<MedicationDispenseStatus>
+        else if (name.equals("medication[x]"))
+          this.medication = (Type) value; // Type
         else if (name.equals("patient"))
           this.patient = castToReference(value); // Reference
         else if (name.equals("dispenser"))
@@ -1869,8 +1860,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           this.quantity = castToSimpleQuantity(value); // SimpleQuantity
         else if (name.equals("daysSupply"))
           this.daysSupply = castToSimpleQuantity(value); // SimpleQuantity
-        else if (name.equals("medication[x]"))
-          this.medication = (Type) value; // Type
         else if (name.equals("whenPrepared"))
           this.whenPrepared = castToDateTime(value); // DateTimeType
         else if (name.equals("whenHandedOver"))
@@ -1880,7 +1869,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         else if (name.equals("receiver"))
           this.getReceiver().add(castToReference(value));
         else if (name.equals("note"))
-          this.note = castToString(value); // StringType
+          this.getNote().add(castToAnnotation(value));
         else if (name.equals("dosageInstruction"))
           this.getDosageInstruction().add((MedicationDispenseDosageInstructionComponent) value);
         else if (name.equals("substitution"))
@@ -1897,6 +1886,14 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type MedicationDispense.status");
+        }
+        else if (name.equals("medicationCodeableConcept")) {
+          this.medication = new CodeableConcept();
+          return this.medication;
+        }
+        else if (name.equals("medicationReference")) {
+          this.medication = new Reference();
+          return this.medication;
         }
         else if (name.equals("patient")) {
           this.patient = new Reference();
@@ -1921,14 +1918,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           this.daysSupply = new SimpleQuantity();
           return this.daysSupply;
         }
-        else if (name.equals("medicationCodeableConcept")) {
-          this.medication = new CodeableConcept();
-          return this.medication;
-        }
-        else if (name.equals("medicationReference")) {
-          this.medication = new Reference();
-          return this.medication;
-        }
         else if (name.equals("whenPrepared")) {
           throw new FHIRException("Cannot call addChild on a primitive type MedicationDispense.whenPrepared");
         }
@@ -1943,7 +1932,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           return addReceiver();
         }
         else if (name.equals("note")) {
-          throw new FHIRException("Cannot call addChild on a primitive type MedicationDispense.note");
+          return addNote();
         }
         else if (name.equals("dosageInstruction")) {
           return addDosageInstruction();
@@ -1966,6 +1955,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.status = status == null ? null : status.copy();
+        dst.medication = medication == null ? null : medication.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.dispenser = dispenser == null ? null : dispenser.copy();
         if (authorizingPrescription != null) {
@@ -1976,7 +1966,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         dst.type = type == null ? null : type.copy();
         dst.quantity = quantity == null ? null : quantity.copy();
         dst.daysSupply = daysSupply == null ? null : daysSupply.copy();
-        dst.medication = medication == null ? null : medication.copy();
         dst.whenPrepared = whenPrepared == null ? null : whenPrepared.copy();
         dst.whenHandedOver = whenHandedOver == null ? null : whenHandedOver.copy();
         dst.destination = destination == null ? null : destination.copy();
@@ -1985,7 +1974,11 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           for (Reference i : receiver)
             dst.receiver.add(i.copy());
         };
-        dst.note = note == null ? null : note.copy();
+        if (note != null) {
+          dst.note = new ArrayList<Annotation>();
+          for (Annotation i : note)
+            dst.note.add(i.copy());
+        };
         if (dosageInstruction != null) {
           dst.dosageInstruction = new ArrayList<MedicationDispenseDosageInstructionComponent>();
           for (MedicationDispenseDosageInstructionComponent i : dosageInstruction)
@@ -2006,13 +1999,13 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         if (!(other instanceof MedicationDispense))
           return false;
         MedicationDispense o = (MedicationDispense) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(patient, o.patient, true)
-           && compareDeep(dispenser, o.dispenser, true) && compareDeep(authorizingPrescription, o.authorizingPrescription, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(medication, o.medication, true)
+           && compareDeep(patient, o.patient, true) && compareDeep(dispenser, o.dispenser, true) && compareDeep(authorizingPrescription, o.authorizingPrescription, true)
            && compareDeep(type, o.type, true) && compareDeep(quantity, o.quantity, true) && compareDeep(daysSupply, o.daysSupply, true)
-           && compareDeep(medication, o.medication, true) && compareDeep(whenPrepared, o.whenPrepared, true)
-           && compareDeep(whenHandedOver, o.whenHandedOver, true) && compareDeep(destination, o.destination, true)
-           && compareDeep(receiver, o.receiver, true) && compareDeep(note, o.note, true) && compareDeep(dosageInstruction, o.dosageInstruction, true)
-           && compareDeep(substitution, o.substitution, true);
+           && compareDeep(whenPrepared, o.whenPrepared, true) && compareDeep(whenHandedOver, o.whenHandedOver, true)
+           && compareDeep(destination, o.destination, true) && compareDeep(receiver, o.receiver, true) && compareDeep(note, o.note, true)
+           && compareDeep(dosageInstruction, o.dosageInstruction, true) && compareDeep(substitution, o.substitution, true)
+          ;
       }
 
       @Override
@@ -2023,16 +2016,17 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           return false;
         MedicationDispense o = (MedicationDispense) other;
         return compareValues(status, o.status, true) && compareValues(whenPrepared, o.whenPrepared, true) && compareValues(whenHandedOver, o.whenHandedOver, true)
-           && compareValues(note, o.note, true);
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
-           && (patient == null || patient.isEmpty()) && (dispenser == null || dispenser.isEmpty()) && (authorizingPrescription == null || authorizingPrescription.isEmpty())
+           && (medication == null || medication.isEmpty()) && (patient == null || patient.isEmpty())
+           && (dispenser == null || dispenser.isEmpty()) && (authorizingPrescription == null || authorizingPrescription.isEmpty())
            && (type == null || type.isEmpty()) && (quantity == null || quantity.isEmpty()) && (daysSupply == null || daysSupply.isEmpty())
-           && (medication == null || medication.isEmpty()) && (whenPrepared == null || whenPrepared.isEmpty())
-           && (whenHandedOver == null || whenHandedOver.isEmpty()) && (destination == null || destination.isEmpty())
-           && (receiver == null || receiver.isEmpty()) && (note == null || note.isEmpty()) && (dosageInstruction == null || dosageInstruction.isEmpty())
+           && (whenPrepared == null || whenPrepared.isEmpty()) && (whenHandedOver == null || whenHandedOver.isEmpty())
+           && (destination == null || destination.isEmpty()) && (receiver == null || receiver.isEmpty())
+           && (note == null || note.isEmpty()) && (dosageInstruction == null || dosageInstruction.isEmpty())
            && (substitution == null || substitution.isEmpty());
       }
 

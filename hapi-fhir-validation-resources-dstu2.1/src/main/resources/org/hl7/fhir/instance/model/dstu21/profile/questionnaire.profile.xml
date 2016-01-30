@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Questionnaire"/>
   <meta>
-    <lastUpdated value="2015-12-19T16:00:42.735-05:00"/>
+    <lastUpdated value="2016-01-20T08:16:20.857-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -466,10 +466,10 @@
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-19T16:00:42-05:00"/>
+  <date value="2016-01-20T08:16:20-05:00"/>
   <description value="Base StructureDefinition for Questionnaire Resource"/>
   <requirements value="To support structured, hierarchical registration of data gathered using digital forms and other questionnaires."/>
-  <fhirVersion value="1.2.0"/>
+  <fhirVersion value="1.3.0"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
@@ -934,6 +934,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>

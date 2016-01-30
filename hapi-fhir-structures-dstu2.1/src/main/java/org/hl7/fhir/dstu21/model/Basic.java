@@ -29,17 +29,17 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
 
-import org.hl7.fhir.dstu21.exceptions.FHIRException;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 /**
  * Basic is used for handling concepts not yet defined in FHIR, narrative-only resources that don't map to an existing resource, and custom resources not appropriate for inclusion in the FHIR specification.
  */
@@ -73,9 +73,16 @@ public class Basic extends DomainResource {
     protected Resource subjectTarget;
 
     /**
+     * Identifies when the resource was first created.
+     */
+    @Child(name = "created", type = {DateType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="When created", formalDefinition="Identifies when the resource was first created." )
+    protected DateType created;
+
+    /**
      * Indicates who was responsible for creating the resource instance.
      */
-    @Child(name = "author", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "author", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who created", formalDefinition="Indicates who was responsible for creating the resource instance." )
     protected Reference author;
 
@@ -84,14 +91,7 @@ public class Basic extends DomainResource {
      */
     protected Resource authorTarget;
 
-    /**
-     * Identifies when the resource was first created.
-     */
-    @Child(name = "created", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="When created", formalDefinition="Identifies when the resource was first created." )
-    protected DateType created;
-
-    private static final long serialVersionUID = 916539354L;
+    private static final long serialVersionUID = 650756402L;
 
   /**
    * Constructor
@@ -212,45 +212,6 @@ public class Basic extends DomainResource {
     }
 
     /**
-     * @return {@link #author} (Indicates who was responsible for creating the resource instance.)
-     */
-    public Reference getAuthor() { 
-      if (this.author == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Basic.author");
-        else if (Configuration.doAutoCreate())
-          this.author = new Reference(); // cc
-      return this.author;
-    }
-
-    public boolean hasAuthor() { 
-      return this.author != null && !this.author.isEmpty();
-    }
-
-    /**
-     * @param value {@link #author} (Indicates who was responsible for creating the resource instance.)
-     */
-    public Basic setAuthor(Reference value) { 
-      this.author = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates who was responsible for creating the resource instance.)
-     */
-    public Resource getAuthorTarget() { 
-      return this.authorTarget;
-    }
-
-    /**
-     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates who was responsible for creating the resource instance.)
-     */
-    public Basic setAuthorTarget(Resource value) { 
-      this.authorTarget = value;
-      return this;
-    }
-
-    /**
      * @return {@link #created} (Identifies when the resource was first created.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
      */
     public DateType getCreatedElement() { 
@@ -299,13 +260,52 @@ public class Basic extends DomainResource {
       return this;
     }
 
+    /**
+     * @return {@link #author} (Indicates who was responsible for creating the resource instance.)
+     */
+    public Reference getAuthor() { 
+      if (this.author == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Basic.author");
+        else if (Configuration.doAutoCreate())
+          this.author = new Reference(); // cc
+      return this.author;
+    }
+
+    public boolean hasAuthor() { 
+      return this.author != null && !this.author.isEmpty();
+    }
+
+    /**
+     * @param value {@link #author} (Indicates who was responsible for creating the resource instance.)
+     */
+    public Basic setAuthor(Reference value) { 
+      this.author = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates who was responsible for creating the resource instance.)
+     */
+    public Resource getAuthorTarget() { 
+      return this.authorTarget;
+    }
+
+    /**
+     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates who was responsible for creating the resource instance.)
+     */
+    public Basic setAuthorTarget(Resource value) { 
+      this.authorTarget = value;
+      return this;
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Identifier assigned to the resource for business purposes, outside the context of FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("code", "CodeableConcept", "Identifies the 'type' of resource - equivalent to the resource name for other resources.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("subject", "Reference(Any)", "Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resource.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("author", "Reference(Practitioner|Patient|RelatedPerson)", "Indicates who was responsible for creating the resource instance.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("created", "date", "Identifies when the resource was first created.", 0, java.lang.Integer.MAX_VALUE, created));
+        childrenList.add(new Property("author", "Reference(Practitioner|Patient|RelatedPerson)", "Indicates who was responsible for creating the resource instance.", 0, java.lang.Integer.MAX_VALUE, author));
       }
 
       @Override
@@ -316,10 +316,10 @@ public class Basic extends DomainResource {
           this.code = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("subject"))
           this.subject = castToReference(value); // Reference
-        else if (name.equals("author"))
-          this.author = castToReference(value); // Reference
         else if (name.equals("created"))
           this.created = castToDate(value); // DateType
+        else if (name.equals("author"))
+          this.author = castToReference(value); // Reference
         else
           super.setProperty(name, value);
       }
@@ -337,12 +337,12 @@ public class Basic extends DomainResource {
           this.subject = new Reference();
           return this.subject;
         }
+        else if (name.equals("created")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Basic.created");
+        }
         else if (name.equals("author")) {
           this.author = new Reference();
           return this.author;
-        }
-        else if (name.equals("created")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Basic.created");
         }
         else
           return super.addChild(name);
@@ -363,8 +363,8 @@ public class Basic extends DomainResource {
         };
         dst.code = code == null ? null : code.copy();
         dst.subject = subject == null ? null : subject.copy();
-        dst.author = author == null ? null : author.copy();
         dst.created = created == null ? null : created.copy();
+        dst.author = author == null ? null : author.copy();
         return dst;
       }
 
@@ -380,7 +380,7 @@ public class Basic extends DomainResource {
           return false;
         Basic o = (Basic) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(code, o.code, true) && compareDeep(subject, o.subject, true)
-           && compareDeep(author, o.author, true) && compareDeep(created, o.created, true);
+           && compareDeep(created, o.created, true) && compareDeep(author, o.author, true);
       }
 
       @Override
@@ -395,7 +395,7 @@ public class Basic extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (code == null || code.isEmpty())
-           && (subject == null || subject.isEmpty()) && (author == null || author.isEmpty()) && (created == null || created.isEmpty())
+           && (subject == null || subject.isEmpty()) && (created == null || created.isEmpty()) && (author == null || author.isEmpty())
           ;
       }
 

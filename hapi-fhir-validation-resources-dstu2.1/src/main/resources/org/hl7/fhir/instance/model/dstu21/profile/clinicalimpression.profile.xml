@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="ClinicalImpression"/>
   <meta>
-    <lastUpdated value="2015-12-19T16:00:42.735-05:00"/>
+    <lastUpdated value="2016-01-20T08:16:20.857-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -262,7 +262,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="hierarchy">A name/code for the set
             <br/>
-            <a href="valueset-investigation-sets.html" title="A name/code for a set of investigations.">Condition/Diagnosis Certainty</a> (
+            <a href="valueset-investigation-sets.html" title="A name/code for a set of investigations.">Investigation Type</a> (
             <a href="terminologies.html#example" title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included.">Example</a>)
           </td>
         </tr>
@@ -547,9 +547,9 @@
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-19T16:00:42-05:00"/>
+  <date value="2016-01-20T08:16:20-05:00"/>
   <description value="Base StructureDefinition for ClinicalImpression Resource"/>
-  <fhirVersion value="1.2.0"/>
+  <fhirVersion value="1.3.0"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -920,6 +920,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -1050,6 +1051,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -1159,6 +1161,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>

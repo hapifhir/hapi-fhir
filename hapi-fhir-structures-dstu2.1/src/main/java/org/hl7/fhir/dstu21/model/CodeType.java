@@ -35,7 +35,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 /**
  * Primitive type "code" in FHIR, when not bound to an enumerated list of codes
  */
-@DatatypeDef(name="code")
+@DatatypeDef(name="code", profileOf=StringType.class)
 public class CodeType extends StringType implements Comparable<CodeType>  {
 
 	private static final long serialVersionUID = 3L;

@@ -29,19 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
 
-import org.hl7.fhir.dstu21.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 /**
  * A record of a request for a diagnostic investigation service to be performed.
  */
@@ -102,6 +101,10 @@ public class DiagnosticOrder extends DomainResource {
          */
         FAILED, 
         /**
+         * The request was entered in error and voided.
+         */
+        ENTEREDINERROR, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -134,6 +137,8 @@ public class DiagnosticOrder extends DomainResource {
           return REJECTED;
         if ("failed".equals(codeString))
           return FAILED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         throw new FHIRException("Unknown DiagnosticOrderStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -151,6 +156,7 @@ public class DiagnosticOrder extends DomainResource {
             case SUSPENDED: return "suspended";
             case REJECTED: return "rejected";
             case FAILED: return "failed";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -169,6 +175,7 @@ public class DiagnosticOrder extends DomainResource {
             case SUSPENDED: return "http://hl7.org/fhir/diagnostic-order-status";
             case REJECTED: return "http://hl7.org/fhir/diagnostic-order-status";
             case FAILED: return "http://hl7.org/fhir/diagnostic-order-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/diagnostic-order-status";
             default: return "?";
           }
         }
@@ -187,6 +194,7 @@ public class DiagnosticOrder extends DomainResource {
             case SUSPENDED: return "The request has been held by originating system/user request.";
             case REJECTED: return "The receiving system has declined to fulfill the request.";
             case FAILED: return "The diagnostic investigation was attempted, but due to some procedural error, it could not be completed.";
+            case ENTEREDINERROR: return "The request was entered in error and voided.";
             default: return "?";
           }
         }
@@ -205,6 +213,7 @@ public class DiagnosticOrder extends DomainResource {
             case SUSPENDED: return "Suspended";
             case REJECTED: return "Rejected";
             case FAILED: return "Failed";
+            case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
           }
         }
@@ -241,6 +250,8 @@ public class DiagnosticOrder extends DomainResource {
           return DiagnosticOrderStatus.REJECTED;
         if ("failed".equals(codeString))
           return DiagnosticOrderStatus.FAILED;
+        if ("entered-in-error".equals(codeString))
+          return DiagnosticOrderStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown DiagnosticOrderStatus code '"+codeString+"'");
         }
         public Enumeration<DiagnosticOrderStatus> fromType(Base code) throws FHIRException {
@@ -275,6 +286,8 @@ public class DiagnosticOrder extends DomainResource {
           return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.REJECTED);
         if ("failed".equals(codeString))
           return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.FAILED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<DiagnosticOrderStatus>(this, DiagnosticOrderStatus.ENTEREDINERROR);
         throw new FHIRException("Unknown DiagnosticOrderStatus code '"+codeString+"'");
         }
     public String toCode(DiagnosticOrderStatus code) {
@@ -304,6 +317,8 @@ public class DiagnosticOrder extends DomainResource {
         return "rejected";
       if (code == DiagnosticOrderStatus.FAILED)
         return "failed";
+      if (code == DiagnosticOrderStatus.ENTEREDINERROR)
+        return "entered-in-error";
       return "?";
       }
     public String toSystem(DiagnosticOrderStatus code) {
@@ -436,7 +451,7 @@ public class DiagnosticOrder extends DomainResource {
          * The status for the event.
          */
         @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", formalDefinition="The status for the event." )
+        @Description(shortDefinition="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", formalDefinition="The status for the event." )
         protected Enumeration<DiagnosticOrderStatus> status;
 
         /**
@@ -753,7 +768,7 @@ public class DiagnosticOrder extends DomainResource {
          * The status of this individual item within the order.
          */
         @Child(name = "status", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", formalDefinition="The status of this individual item within the order." )
+        @Description(shortDefinition="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", formalDefinition="The status of this individual item within the order." )
         protected Enumeration<DiagnosticOrderStatus> status;
 
         /**
@@ -1157,7 +1172,7 @@ public class DiagnosticOrder extends DomainResource {
      * The status of the order.
      */
     @Child(name = "status", type = {CodeType.class}, order=7, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", formalDefinition="The status of the order." )
+    @Description(shortDefinition="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", formalDefinition="The status of the order." )
     protected Enumeration<DiagnosticOrderStatus> status;
 
     /**
@@ -1927,17 +1942,17 @@ public class DiagnosticOrder extends DomainResource {
  /**
    * Search parameter: <b>item-past-status</b>
    * <p>
-   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>DiagnosticOrder.item.event.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="item-past-status", path="DiagnosticOrder.item.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
+  @SearchParamDefinition(name="item-past-status", path="DiagnosticOrder.item.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", type="token" )
   public static final String SP_ITEM_PAST_STATUS = "item-past-status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>item-past-status</b>
    * <p>
-   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>DiagnosticOrder.item.event.status</b><br>
    * </p>
@@ -2032,7 +2047,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="event-status-date", path="", description="A combination of past-status and date", type="composite" )
+  @SearchParamDefinition(name="event-status-date", path="", description="A combination of past-status and date", type="composite", compositeOf={"event-status", "event-date"} )
   public static final String SP_EVENT_STATUS_DATE = "event-status-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>event-status-date</b>
@@ -2042,7 +2057,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam EVENT_STATUS_DATE = new ca.uhn.fhir.rest.gclient.CompositeClientParam(SP_EVENT_STATUS_DATE);
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.DateClientParam> EVENT_STATUS_DATE = new ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.DateClientParam>(SP_EVENT_STATUS_DATE);
 
  /**
    * Search parameter: <b>subject</b>
@@ -2104,7 +2119,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.event.actor, DiagnosticOrder.item.event.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor|DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference" )
+  @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference" )
   public static final String SP_ACTOR = "actor";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>actor</b>
@@ -2150,7 +2165,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="item-status-date", path="", description="A combination of item-past-status and item-date", type="composite" )
+  @SearchParamDefinition(name="item-status-date", path="", description="A combination of item-past-status and item-date", type="composite", compositeOf={"item-past-status", "item-date"} )
   public static final String SP_ITEM_STATUS_DATE = "item-status-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>item-status-date</b>
@@ -2160,22 +2175,22 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b></b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam ITEM_STATUS_DATE = new ca.uhn.fhir.rest.gclient.CompositeClientParam(SP_ITEM_STATUS_DATE);
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.DateClientParam> ITEM_STATUS_DATE = new ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.DateClientParam>(SP_ITEM_STATUS_DATE);
 
  /**
    * Search parameter: <b>event-status</b>
    * <p>
-   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>DiagnosticOrder.event.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
+  @SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", type="token" )
   public static final String SP_EVENT_STATUS = "event-status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>event-status</b>
    * <p>
-   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>DiagnosticOrder.event.status</b><br>
    * </p>
@@ -2185,17 +2200,17 @@ public class DiagnosticOrder extends DomainResource {
  /**
    * Search parameter: <b>item-status</b>
    * <p>
-   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>DiagnosticOrder.item.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="item-status", path="DiagnosticOrder.item.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
+  @SearchParamDefinition(name="item-status", path="DiagnosticOrder.item.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", type="token" )
   public static final String SP_ITEM_STATUS = "item-status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>item-status</b>
    * <p>
-   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>DiagnosticOrder.item.status</b><br>
    * </p>
@@ -2262,7 +2277,7 @@ public class DiagnosticOrder extends DomainResource {
    * Path: <b>DiagnosticOrder.specimen, DiagnosticOrder.item.specimen</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="specimen", path="DiagnosticOrder.specimen|DiagnosticOrder.item.specimen", description="If the whole order relates to specific specimens", type="reference" )
+  @SearchParamDefinition(name="specimen", path="DiagnosticOrder.specimen | DiagnosticOrder.item.specimen", description="If the whole order relates to specific specimens", type="reference" )
   public static final String SP_SPECIMEN = "specimen";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
@@ -2283,17 +2298,17 @@ public class DiagnosticOrder extends DomainResource {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>DiagnosticOrder.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
+  @SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed</b><br>
+   * Description: <b>proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed | entered-in-error</b><br>
    * Type: <b>token</b><br>
    * Path: <b>DiagnosticOrder.status</b><br>
    * </p>

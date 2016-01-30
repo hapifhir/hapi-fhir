@@ -7,10 +7,10 @@
  xmlns:html="http://www.w3.org/TR/REC-html40">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
-  <LastAuthor>Lloyd</LastAuthor>
+  <LastAuthor>Moehrke, John (GE Healthcare)</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2015-09-17T19:09:15Z</LastSaved>
-  <Version>15.00</Version>
+  <LastSaved>2015-12-15T23:37:14Z</LastSaved>
+  <Version>14.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
@@ -20,7 +20,7 @@
   <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>2</ActiveSheet>
+  <ActiveSheet>3</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -877,7 +877,7 @@
   <Table ss:ExpandedColumnCount="27" ss:ExpandedRowCount="104" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s69" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s70" ss:Width="227.25"/>
-   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="77.25"/>
+   <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="90"/>
    <Column ss:StyleID="s69" ss:Width="29.25"/>
    <Column ss:StyleID="s69" ss:Width="34.5"/>
    <Column ss:StyleID="s69" ss:AutoFitWidth="0" ss:Width="119.25"/>
@@ -1045,7 +1045,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.event</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">!AuditEvent.event</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">1..1</Data><NamedCell
@@ -1083,7 +1083,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="105">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.event.type</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">1..1</Data><NamedCell
@@ -1115,7 +1115,8 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">EventId</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Activity</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1123,7 +1124,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="75">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.event.subtype</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.subtype</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..*</Data><NamedCell
@@ -1163,7 +1164,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.event.action</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.action</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1186,7 +1187,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Indicator for type of action performed during the event that generated the audit</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">This broadly indicates what kind of action was done on the Participant Object</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">This broadly indicates what kind of action was done on the AuditEvent.entity by the AuditEvent.agent</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1203,7 +1204,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="150">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.event.dateTime</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.recorded</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">1..1</Data><NamedCell
@@ -1245,7 +1246,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="135">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.event.outcome</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.outcome</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1285,7 +1286,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.event.outcomeDesc</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.outcomeDesc</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1323,7 +1324,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="195">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.event.purposeOfEvent</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.purposeOfEvent</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..*</Data><NamedCell
@@ -1347,7 +1348,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">The purposeOfUse (reason) that was used during the event being recorded. </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Use participant.purposeOfUse when you know that is specific to the participant, otherwise use event.purposeOfEvent. For example, during a machine-to-machine transfer it might not be obvious to the audit system who caused the event, but it does know why.</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Use AuditEvent.agent.purposeOfUse when you know that is specific to the agent, otherwise use AuditEvent.purposeOfEvent. For example, during a machine-to-machine transfer it might not be obvious to the audit system who caused the event, but it does know why.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">* .reasonCode [ControlActReason when Act.class = CACT Control Act]&#10;*.outboundRelationship[typeCode=RSON].target</Data><NamedCell
@@ -1365,9 +1366,10 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="180">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">ActiveParticipant</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">1..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1384,7 +1386,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">A person, a hardware device or software process</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">The event has one or more active participants</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">The event has one or more active agents</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">There may be more than one user per event, for example, in cases of actions initiated by one user for other users, or in events that involve more than one user, hardware device, or system process. However, only one user may be the initiator/requestor for the event</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1405,7 +1407,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="135">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant.role</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent.role</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..*</Data><NamedCell
@@ -1446,7 +1448,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant.reference</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent.reference</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1466,7 +1468,7 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Direct reference to resource</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Direct reference to a resource that identifies the participant</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Direct reference to a resource that identifies the agent</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">This field ties an audit event to a specific resource</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1486,7 +1488,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="120">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant.userId</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent.userId</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1528,7 +1530,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="270">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant.altId</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent.altId</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1547,7 +1549,7 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Alternative User id e.g. authentication</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Alternative agent Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">In some situations a human user may authenticate with one identity but, to access a specific application system, may use a synonymous identify. For example, some &quot;single sign on&quot; implementations will do this. The alternative identifier would then be the original identify  used for authentication, and the User ID is the one known to and used by the application</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1567,7 +1569,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="120">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant.name</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent.name</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1606,7 +1608,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="120">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant.requestor</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent.requestor</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">1..1</Data><NamedCell
@@ -1629,7 +1631,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">This value is used to distinguish between requestor-users and recipient-users. For example, one person may initiate a report-output to be sent to another user </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">There can only be one initiator. If the initiator is not clear, then do not choose any one participant as the initiator</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">There can only be one initiator. If the initiator is not clear, then do not choose any one agent as the initiator</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">If participation.typeCode was author, then true</Data><NamedCell
@@ -1645,7 +1647,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="120">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant.location</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent.location</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1683,7 +1685,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="120">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant.policy</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent.policy</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..*</Data><NamedCell
@@ -1723,7 +1725,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="90">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant.media</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent.media</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1763,7 +1765,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant.network</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent.network</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1799,7 +1801,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="210">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant.network.address</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent.network.address</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1839,7 +1841,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="180">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant.network.type</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent.network.type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -1878,7 +1880,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="195">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.participant.purposeOfUse</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.agent.purposeOfUse</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..*</Data><NamedCell
@@ -1898,10 +1900,10 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Reason given for this user</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">The reason (purpose of use), specific to this participant, that was used during the event being recorded. </Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">The reason (purpose of use), specific to this agent, that was used during the event being recorded. </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Use participant.purposeOfUse when you know that is specific to the participant, otherwise use event.purposeOfEvent. For example, during a machine-to-machine transfer it might not be obvious to the audit system who caused the event, but it does know why.</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Use AuditEvent.agent.purposeOfUse when you know that is specific to the agent, otherwise use AuditEvent.purposeOfEvent. For example, during a machine-to-machine transfer it might not be obvious to the audit system who caused the event, but it does know why.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">*.reasonCode [ActHealthInformationPurposeOfUseReason codes/v:PurposeOfUse&#10;(2.16.840.1.113883.1.11.20448)&#10;* .outboundRelationship[typeCode=RSON or SUBJ].target</Data><NamedCell
@@ -2106,9 +2108,10 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="165">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.object</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.entity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">ParticipantObject</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..*</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2126,9 +2129,9 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Specific instances of data or objects that have been accessed</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">The event may have other objects involved</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">The event may have other entities involved</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Required unless the values for Event Identification, Active Participant Identification, and Audit Source Identification are sufficient to document the entire auditable event. Because events may have more than one participant object, this group can be a repeating set of values.</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Required unless the values for event identification, agent identification, and audit source identification are sufficient to document the entire auditable event. Because events may have more than one entity, this group can be a repeating set of values.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">.outboundRelationship[typeCode=SUBJ].target  or  .participation[typeCode=SBJ].role</Data><NamedCell
@@ -2147,7 +2150,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.object.identifier</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.entity.identifier</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2167,10 +2170,10 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Specific instance of object (e.g. versioned)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Identifies a specific instance of the participant object. The reference should always be version specific</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Identifies a specific instance of the entity. The reference should always be version specific</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Identifier detail depends on object type</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Identifier detail depends on entity type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">.id.extension</Data><NamedCell
@@ -2186,7 +2189,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.object.reference</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.entity.reference</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2206,7 +2209,7 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Specific instance of resource (e.g. versioned)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Identifies a specific instance of the participant object. The reference should always be version specific</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Identifies a specific instance of the entity. The reference should always be version specific</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2225,7 +2228,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">!AuditEvent.object.idType</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">!AuditEvent.entity.idType</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">1..1</Data><NamedCell
@@ -2244,7 +2247,7 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Describes the identifier</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Describes the identifier that is contained in Participant Object ID</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Describes the identifier that is contained in entity.identifier</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2262,7 +2265,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="135">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.object.type</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.entity.type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2286,7 +2289,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">To describe the object being acted upon. In addition to queries on the subject of the action in an auditable event, it is also important to be able to query on the object type for the action </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">This value is distinct from the user's role or any user relationship to the participant object</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">This value is distinct from the user's role or any user relationship to the entity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">[self::Act].code or role.player.code</Data><NamedCell
@@ -2304,7 +2307,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="120">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.object.role</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.entity.role</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2322,14 +2325,13 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">What role the Object played </Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">What role the entity played </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Code representing the functional application role of Participant Object being audited</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Code representing the role the entity played in the event being audited</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">For some detailed audit analysis it may be necessary to indicate a more granular type of participant, based on the application role it serves</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">For some detailed audit analysis it may be necessary to indicate a more granular type of entity, based on the application role it serves</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">See RFC 3881 for rules concerning matches between role and type</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">role.code (not sure what this would mean for an Act)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -2344,7 +2346,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="150">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.object.lifecycle</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.entity.lifecycle</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2364,7 +2366,7 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Life-cycle stage for the object</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Identifier for the data life-cycle stage for the participant object</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Identifier for the data life-cycle stage for the entity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">Institutional policies for privacy and security may optionally fall under different accountability rules based on data life cycle. This provides a differentiating value for those cases</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -2386,7 +2388,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="135">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.object.securityLabel</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.entity.securityLabel</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..*</Data><NamedCell
@@ -2406,7 +2408,7 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Security labels applied to the object</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Denotes security labels for the identified object. </Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Denotes security labels for the identified entity. </Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">This field identifies the security labels for a specific instance of an object, such as a patient, to detect/track privacy and security issues</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -2425,7 +2427,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="150">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.object.name</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.entity.name</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2444,12 +2446,13 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Instance-specific descriptor for Object</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Descriptor for entity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">An instance-specific descriptor of the Participant Object ID audited, such as a person's name</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">A name of the entity in the audit event.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">This field may be used in a query/report to identify audit events for a specific person.  For example, where multiple synonymous Participant Object IDs (patient number, medical record number, encounter number, etc.) have been used</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Use only where entity can't be identified with an identifier.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">This field may be used in a query/report to identify audit events for a specific person.  For example, where multiple synonymous entity identifers (patient number, medical record number, encounter number, etc.) have been used</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">.title</Data><NamedCell
@@ -2465,8 +2468,8 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.object.description</Data><NamedCell
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.entity.description</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2485,9 +2488,10 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Descriptive text</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Text that describes the object in more detail</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Text that describes the entity in more detail</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Use only where entity can't be identified with an identifier.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">.text</Data><NamedCell
@@ -2503,7 +2507,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="270">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.object.query</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.entity.query</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2522,9 +2526,9 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Actual query for object</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Query parameters</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">The actual query for a query-type participant object</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">The query parameters for a query-type entities</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">For query events it may be necessary to capture the actual query input to the query process in order to identify the specific event. Because of differences among query implementations and data encoding for them, this is a base 64 encoded data blob. It may be subsequently decoded or interpreted by downstream audit analysis processing</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -2543,7 +2547,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.object.detail</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.entity.detail</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">0..*</Data><NamedCell
@@ -2559,7 +2563,7 @@
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Additional Information about the Object</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Additional Information about the entity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2579,7 +2583,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.object.detail.type</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.entity.detail.type</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">1..1</Data><NamedCell
@@ -2615,7 +2619,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.object.detail.value</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">AuditEvent.entity.detail.value</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">1..1</Data><NamedCell
@@ -4435,9 +4439,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>34</TopRowBottomPane>
+   <TopRowBottomPane>37</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>14</LeftColumnRightPane>
+   <LeftColumnRightPane>13</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -4453,8 +4457,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>38</ActiveRow>
-     <ActiveCol>16</ActiveCol>
+     <ActiveRow>40</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4513,7 +4516,7 @@
     <Cell ss:StyleID="s85"><Data ss:Type="String">Object Name</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s85"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s85"><Data ss:Type="String">AuditEvent.object</Data><NamedCell
+    <Cell ss:StyleID="s85"><Data ss:Type="String">AuditEvent.entity</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s85"><Data ss:Type="String">Either a name or a query (NOT both)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -4527,7 +4530,7 @@
       ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Object Identification</Data></Cell>
     <Cell ss:StyleID="s92"/>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">AuditEvent.object</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">AuditEvent.entity</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Either an identifier or a reference, (or both)</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">identifier or reference</Data></Cell>
     <Cell ss:StyleID="s111"><Data ss:Type="String">exists(f:identifier) or exists(f:reference)</Data></Cell>
@@ -4537,7 +4540,7 @@
       ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Participant Identification</Data></Cell>
     <Cell ss:StyleID="s92"/>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">AuditEvent.participant</Data></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">AuditEvent.agent</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Either a userId or a reference, (or both)</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">userId or reference</Data></Cell>
     <Cell ss:StyleID="s111"><Data ss:Type="String">exists(f:userId) or exists(f:reference)</Data></Cell>
@@ -4970,7 +4973,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4990,8 +4992,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>4</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>3</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -5010,7 +5012,7 @@
    <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="70.5"/>
    <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="57"/>
    <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="109.5"/>
-   <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="210"/>
+   <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="364.5"/>
    <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="382.5"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s116">
     <Cell ss:StyleID="s105"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
@@ -5037,49 +5039,49 @@
     <Cell ss:StyleID="s117"><Data ss:Type="String">type</Data></Cell>
     <Cell ss:StyleID="s79"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s79"/>
-    <Cell ss:StyleID="s118"><Data ss:Type="String">AuditEvent.event.type</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">AuditEvent.type</Data></Cell>
     <Cell ss:StyleID="s119"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"><Data ss:Type="String">action</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.event.action</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.action</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"><Data ss:Type="String">date</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">date</Data></Cell>
     <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.event.dateTime</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.recorded</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"><Data ss:Type="String">subtype</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.event.subtype</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.subtype</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"><Data ss:Type="String">user</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.participant.userId</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.agent.userId</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"><Data ss:Type="String">name</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">string</Data></Cell>
     <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.participant.name</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.agent.name</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"><Data ss:Type="String">address</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.participant.network.address</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.agent.network.address</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5100,56 +5102,56 @@
     <Cell ss:StyleID="s120"><Data ss:Type="String">object-type</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.object.type</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.entity.type</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"><Data ss:Type="String">identity</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.object.identifier</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.entity.identifier</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.object.reference</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.entity.reference</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"><Data ss:Type="String">desc</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">string</Data></Cell>
     <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.object.name</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.entity.name</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"><Data ss:Type="String">patient</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Patient</Data></Cell>
-    <Cell ss:StyleID="s123"><Data ss:Type="String">AuditEvent.participant.reference | AuditEvent.object.reference</Data></Cell>
+    <Cell ss:StyleID="s123"><Data ss:Type="String">AuditEvent.agent.reference | AuditEvent.entity.reference</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"><Data ss:Type="String">altid</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.participant.altId</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.agent.altId</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"><Data ss:Type="String">participant</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.participant.reference</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.agent.reference</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"><Data ss:Type="String">policy</Data></Cell>
     <Cell><Data ss:Type="String">uri</Data></Cell>
     <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.participant.policy</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">AuditEvent.agent.policy</Data></Cell>
     <Cell ss:StyleID="s122"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5238,10 +5240,11 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>7</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -5254,11 +5257,10 @@
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>8</ActiveRow>
+     <ActiveRow>3</ActiveRow>
      <ActiveCol>3</ActiveCol>
     </Pane>
    </Panes>
@@ -6938,7 +6940,7 @@
    <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="395.25"/>
    <Column ss:StyleID="s115" ss:Width="51"/>
    <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="60.75"/>
-   <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="184.5"/>
+   <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="238.5"/>
    <Column ss:StyleID="s115" ss:Width="172.5"/>
    <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="97.5"/>
    <Column ss:StyleID="s115" ss:AutoFitWidth="0" ss:Width="88.5"/>

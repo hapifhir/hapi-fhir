@@ -18,7 +18,7 @@
   </contact>
   <date value="2014-01-31"/>
   <description value="A set of resources composed into a single coherent clinical statement with clinical attestation"/>
-  <fhirVersion value="1.2.0"/>
+  <fhirVersion value="1.3.0"/>
   <kind value="resource"/>
   <constrainedType value="Composition"/>
   <abstract value="false"/>
@@ -625,6 +625,7 @@ Some reporting work flows require that the original narrative of a final documen
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -841,6 +842,7 @@ Some reporting work flows require that the original narrative of a final documen
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -1067,6 +1069,7 @@ Some reporting work flows require that the original narrative of a final documen
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>

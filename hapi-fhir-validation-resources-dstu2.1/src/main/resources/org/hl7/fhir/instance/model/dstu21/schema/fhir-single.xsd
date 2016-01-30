@@ -27,9 +27,9 @@
   POSSIBILITY OF SUCH DAMAGE.
   
 
-  Generated on Tue, Jan 5, 2016 07:13-0500 for FHIR v1.2.0 
+  Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0 
 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.2.0">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.3.0">
   <!-- Note: When using this schema with some tools, it may also be necessary to declare xmlns:xml="http://www.w3.org/XML/1998/namespace", however this causes performance issues with other tools and thus is not in the base schemas. -->
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
   <xs:import namespace="http://www.w3.org/1999/xhtml" schemaLocation="fhir-xhtml.xsd"/>
@@ -334,6 +334,7 @@
       <xs:element ref="Claim"/>
       <xs:element ref="ClaimResponse"/>
       <xs:element ref="ClinicalImpression"/>
+      <xs:element ref="CodeSystem"/>
       <xs:element ref="Communication"/>
       <xs:element ref="CommunicationRequest"/>
       <xs:element ref="Composition"/>
@@ -375,6 +376,7 @@
       <xs:element ref="ImmunizationRecommendation"/>
       <xs:element ref="ImplementationGuide"/>
       <xs:element ref="Library"/>
+      <xs:element ref="Linkage"/>
       <xs:element ref="List"/>
       <xs:element ref="Location"/>
       <xs:element ref="Measure"/>
@@ -405,6 +407,7 @@
       <xs:element ref="ProcedureRequest"/>
       <xs:element ref="ProcessRequest"/>
       <xs:element ref="ProcessResponse"/>
+      <xs:element ref="Protocol"/>
       <xs:element ref="Provenance"/>
       <xs:element ref="Questionnaire"/>
       <xs:element ref="QuestionnaireResponse"/>
@@ -3679,37 +3682,6 @@
     <xs:complexContent>
       <xs:extension base="DomainResource">
         <xs:sequence>
-          <xs:element name="event" type="AuditEvent.Event" minOccurs="1" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Identifies the name, action type, time, and disposition of the audited event.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="participant" type="AuditEvent.Participant" minOccurs="1" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">A person, a hardware device or software process.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="source" type="AuditEvent.Source" minOccurs="1" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Application systems and processes.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="object" type="AuditEvent.Object" minOccurs="0" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Specific instances of data or objects that have been accessed.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="AuditEvent.Event">
-    <xs:annotation>
-      <xs:documentation xml:lang="en">A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="BackboneElement">
-        <xs:sequence>
           <xs:element name="type" minOccurs="1" maxOccurs="1" type="Coding">
             <xs:annotation>
               <xs:documentation xml:lang="en">Identifier for a family of the event.  For example, a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function.</xs:documentation>
@@ -3725,7 +3697,7 @@
               <xs:documentation xml:lang="en">Indicator for type of action performed during the event that generated the audit.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="dateTime" minOccurs="1" maxOccurs="1" type="instant">
+          <xs:element name="recorded" minOccurs="1" maxOccurs="1" type="instant">
             <xs:annotation>
               <xs:documentation xml:lang="en">The time when the event occurred on the source.</xs:documentation>
            </xs:annotation>
@@ -3745,11 +3717,26 @@
               <xs:documentation xml:lang="en">The purposeOfUse (reason) that was used during the event being recorded.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="agent" type="AuditEvent.Agent" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A person, a hardware device or software process.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="source" type="AuditEvent.Source" minOccurs="1" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Application systems and processes.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="entity" type="AuditEvent.Entity" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Specific instances of data or objects that have been accessed.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="AuditEvent.Participant">
+  <xs:complexType name="AuditEvent.Agent">
     <xs:annotation>
       <xs:documentation xml:lang="en">A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.</xs:documentation>
     </xs:annotation>
@@ -3763,7 +3750,7 @@
           </xs:element>
           <xs:element name="reference" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Direct reference to a resource that identifies the participant.</xs:documentation>
+              <xs:documentation xml:lang="en">Direct reference to a resource that identifies the agent.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="userId" minOccurs="0" maxOccurs="1" type="Identifier">
@@ -3773,7 +3760,7 @@
           </xs:element>
           <xs:element name="altId" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.</xs:documentation>
+              <xs:documentation xml:lang="en">Alternative agent Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
@@ -3808,7 +3795,7 @@
           </xs:element>
           <xs:element name="purposeOfUse" minOccurs="0" maxOccurs="unbounded" type="Coding">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The reason (purpose of use), specific to this participant, that was used during the event being recorded.</xs:documentation>
+              <xs:documentation xml:lang="en">The reason (purpose of use), specific to this agent, that was used during the event being recorded.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -3862,7 +3849,7 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="AuditEvent.Object">
+  <xs:complexType name="AuditEvent.Entity">
     <xs:annotation>
       <xs:documentation xml:lang="en">A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.</xs:documentation>
     </xs:annotation>
@@ -3871,12 +3858,12 @@
         <xs:sequence>
           <xs:element name="identifier" minOccurs="0" maxOccurs="1" type="Identifier">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Identifies a specific instance of the participant object. The reference should always be version specific.</xs:documentation>
+              <xs:documentation xml:lang="en">Identifies a specific instance of the entity. The reference should always be version specific.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="reference" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Identifies a specific instance of the participant object. The reference should always be version specific.</xs:documentation>
+              <xs:documentation xml:lang="en">Identifies a specific instance of the entity. The reference should always be version specific.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="type" minOccurs="0" maxOccurs="1" type="Coding">
@@ -3886,37 +3873,37 @@
           </xs:element>
           <xs:element name="role" minOccurs="0" maxOccurs="1" type="Coding">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Code representing the functional application role of Participant Object being audited.</xs:documentation>
+              <xs:documentation xml:lang="en">Code representing the role the entity played in the event being audited.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="lifecycle" minOccurs="0" maxOccurs="1" type="Coding">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Identifier for the data life-cycle stage for the participant object.</xs:documentation>
+              <xs:documentation xml:lang="en">Identifier for the data life-cycle stage for the entity.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="securityLabel" minOccurs="0" maxOccurs="unbounded" type="Coding">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Denotes security labels for the identified object.</xs:documentation>
+              <xs:documentation xml:lang="en">Denotes security labels for the identified entity.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation xml:lang="en">An instance-specific descriptor of the Participant Object ID audited, such as a person's name.</xs:documentation>
+              <xs:documentation xml:lang="en">A name of the entity in the audit event.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Text that describes the object in more detail.</xs:documentation>
+              <xs:documentation xml:lang="en">Text that describes the entity in more detail.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="query" minOccurs="0" maxOccurs="1" type="base64Binary">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The actual query for a query-type participant object.</xs:documentation>
+              <xs:documentation xml:lang="en">The query parameters for a query-type entities.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="detail" type="AuditEvent.Detail" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Additional Information about the Object.</xs:documentation>
+              <xs:documentation xml:lang="en">Additional Information about the entity.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -4087,14 +4074,14 @@
               <xs:documentation xml:lang="en">Identifies the patient, practitioner, device or any other resource that is the &quot;focus&quot; of this resource.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="author" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Indicates who was responsible for creating the resource instance.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
           <xs:element name="created" minOccurs="0" maxOccurs="1" type="date">
             <xs:annotation>
               <xs:documentation xml:lang="en">Identifies when the resource was first created.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="author" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Indicates who was responsible for creating the resource instance.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -6252,6 +6239,368 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+  <xs:element name="CodeSystem" type="CodeSystem">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A code system specifies a set of codes drawn from one or more code systems.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="CodeSystem">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A code system specifies a set of codes drawn from one or more code systems.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="url" minOccurs="0" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An absolute URL that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. This is used in [Coding]{datatypes.html#Coding}.system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="1" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="version" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Used to identify this version of the code system when it is referenced in a specification, model, design or instance (e.g. Coding.version). This is an arbitrary value managed by the profile author manually and the value should be a timestamp. This is used in [Coding]{datatypes.html#Coding}.version.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A free text natural language name describing the code system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="status" minOccurs="1" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The status of the code system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="experimental" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">This CodeSystem was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="publisher" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The name of the individual or organization that published the code system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="contact" type="CodeSystem.Contact" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Contacts to assist a user in finding and communicating with the publisher.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="date" minOccurs="0" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date that the code system status was last changed. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the implementation guide changes (e.g. the 'content logical definition').</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A free text natural language description of the use of the code system - reason for definition, &quot;the semantic space&quot; to be included in the code system, conditions of use, etc. The description may include a list of expected usages for the code system and can also describe the approach taken to build the code system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="useContext" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="requirements" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Explains why this code system is needed and why it has been constrained as it has.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="copyright" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A copyright statement relating to the code system and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the code system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="caseSensitive" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">If code comparison is case sensitive when codes within this system are compared to each other.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="compositional" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">True If code system defines a post-composition grammar.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="versionNeeded" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="content" minOccurs="1" maxOccurs="1" type="CodeSystemContentMode">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">How much of the content of the code system - the concepts and codes it defines - are represented in this resource.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="count" minOccurs="0" maxOccurs="1" type="unsignedInt">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="filter" type="CodeSystem.Filter" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A filter that can be used in a value set compose statement when selecting concepts using a filter.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="property" type="CodeSystem.Property" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A property defines an additional slot through which additional information can be provided about a concept.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="concept" type="CodeSystem.Concept" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CodeSystem.Contact">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A code system specifies a set of codes drawn from one or more code systems.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The name of an individual to contact regarding the code system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="telecom" minOccurs="0" maxOccurs="unbounded" type="ContactPoint">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Contact details for individual (if a name was provided) or the publisher.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CodeSystem.Filter">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A code system specifies a set of codes drawn from one or more code systems.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The code that identifies thise filter when it is used in the instance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A description of how or why the filter is used.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="operator" minOccurs="1" maxOccurs="unbounded" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A list of operators that can be used with the filter.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="value" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A description of what the value for the filter should be.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CodeSystem.Property">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A code system specifies a set of codes drawn from one or more code systems.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code that is used to identify the property. The code is used internally (in CodeSystem.concept.property.code) and also externally, such as in property filters.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A description of the property- why it is defined, and how it's value might be used.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="PropertyType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of the property value.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CodeSystem.Concept">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A code system specifies a set of codes drawn from one or more code systems.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code - a text symbol - that uniquely identifies the concept within the code system.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="display" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A human readable string that is the recommended default way to present this concept to a user.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="definition" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The formal definition of the concept. The code system resource does not make formal definitions required, because of the prevalence of legacy systems. However, they are highly recommended, as without them there is no formal meaning associated with the concept.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="designation" type="CodeSystem.Designation" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="property" type="CodeSystem.Property1" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A property value for this concept.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="concept" type="CodeSystem.Concept" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Defines children of a concept to produce a hierarchy of concepts. The nature of the relationships is variable (is-a/contains/categorizes) and can only be determined by examining the definitions of the concepts.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CodeSystem.Designation">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A code system specifies a set of codes drawn from one or more code systems.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="language" minOccurs="0" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The language this designation is defined for.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="use" minOccurs="0" maxOccurs="1" type="Coding">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code that details how this designation would be used.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="value" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The text value for this designation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CodeSystem.Property1">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A code system specifies a set of codes drawn from one or more code systems.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="code" minOccurs="1" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code that is a reference to CodeSystem.property.code.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="1" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The value of this property.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="valueCode" type="code"/>
+            <xs:element name="valueCoding" type="Coding"/>
+            <xs:element name="valueString" type="string"/>
+            <xs:element name="valueInteger" type="integer"/>
+          </xs:choice>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="PropertyType-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="code">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The property value is a code that identifies a concept defined in the code system</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Coding">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The property  value is a code defined in an external code system. This may be used for translations, but is not the intent</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="string">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The property value is a string</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="integer">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The property value is a string (often used to assign ranking values to concepts for supporting score assessments)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="PropertyType">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The type of a property value</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="PropertyType-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="CodeSystemContentMode-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="not-present">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">None of the concepts defined by the code system are included in the code system resource</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="examplar">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">A few representative concepts are included in the code system resource</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="fragment">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">A subset of the code system concepts are included in the code system resource</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="complete">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">All the concepts defined by the code system are included in the code system resource</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="CodeSystemContentMode">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">How much of the content of the code system - the concepts and codes it defines - are represented in a code system resource</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="CodeSystemContentMode-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
   <xs:element name="Communication" type="Communication">
     <xs:annotation>
       <xs:documentation xml:lang="en">An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.</xs:documentation>
@@ -7274,6 +7623,11 @@
               <xs:documentation xml:lang="en">A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="date" minOccurs="1" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="publisher" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
               <xs:documentation xml:lang="en">The name of the individual or organization that published the conformance.</xs:documentation>
@@ -7282,11 +7636,6 @@
           <xs:element name="contact" type="Conformance.Contact" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
               <xs:documentation xml:lang="en">Contacts to assist a user in finding and communicating with the publisher.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="date" minOccurs="1" maxOccurs="1" type="dateTime">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the conformance statement changes.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
@@ -8321,9 +8670,9 @@
               <xs:documentation xml:lang="en">Reason for action stipulated by this Contract.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="actor" type="Contract.Actor" minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="party" type="Contract.Party" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
-              <xs:documentation xml:lang="en">List of Contract actors.</xs:documentation>
+              <xs:documentation xml:lang="en">List of parties to the Contract.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="valuedItem" type="Contract.ValuedItem" minOccurs="0" maxOccurs="unbounded">
@@ -8367,7 +8716,7 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="Contract.Actor">
+  <xs:complexType name="Contract.Party">
     <xs:annotation>
       <xs:documentation xml:lang="en">A formal agreement between parties regarding the conduct of business, exchange of information or other matters.</xs:documentation>
     </xs:annotation>
@@ -8376,12 +8725,12 @@
         <xs:sequence>
           <xs:element name="entity" minOccurs="1" maxOccurs="1" type="Reference">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Who or what actors are assigned roles in this Contract.</xs:documentation>
+              <xs:documentation xml:lang="en">Who or what parties are assigned roles in this Contract.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="role" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Role type of actors assigned roles in this Contract.</xs:documentation>
+              <xs:documentation xml:lang="en">Role type of party assigned roles in this Contract.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -8499,6 +8848,11 @@
               <xs:documentation xml:lang="en">Subtype of this Contract Provision, e.g. life time maximum payment for a contract term for specific valued item, e.g. disability payment.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="topic" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The matter under consideration about which this Contract forms an agreement under which the disposition of this matter is governed in accordance to the Contract.terms, such as privileges and delegation of privileges, rights in property such as real estate, intellectual property or a patient’s information, a relationship or partnership, or valued items such as goods and services.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="subject" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation xml:lang="en">Who or what this Contract Provision is about.</xs:documentation>
@@ -8514,9 +8868,9 @@
               <xs:documentation xml:lang="en">Reason or purpose for the action stipulated by this Contract Provision.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="actor" type="Contract.Actor1" minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="party" type="Contract.Party1" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
-              <xs:documentation xml:lang="en">List of actors participating in this Contract Provision.</xs:documentation>
+              <xs:documentation xml:lang="en">Parties to the Contract, specifically, the grantor(s) and grantee(s) such as a person or an organization which is bound by the contract to the actions specified on the Contract.topic and the terms of the Contract that either extend or restrict the overall action on the topic by, for example, stipulating specific policies or obligations constraining actions and action reasons permitted or denied on a subset of the Contract topic, actors, subject(s), and extending or limiting the Contract.period of applicability or valuation of items under consideration.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="text" minOccurs="0" maxOccurs="1" type="string">
@@ -8538,7 +8892,7 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="Contract.Actor1">
+  <xs:complexType name="Contract.Party1">
     <xs:annotation>
       <xs:documentation xml:lang="en">A formal agreement between parties regarding the conduct of business, exchange of information or other matters.</xs:documentation>
     </xs:annotation>
@@ -8547,12 +8901,12 @@
         <xs:sequence>
           <xs:element name="entity" minOccurs="1" maxOccurs="1" type="Reference">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The actor assigned a role in this Contract Provision.</xs:documentation>
+              <xs:documentation xml:lang="en">The party assigned a role in this Contract Provision.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="role" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Role played by the actor assigned this role in this Contract Provision.</xs:documentation>
+              <xs:documentation xml:lang="en">Role played by the party assigned this role in the execution of this Contract Provision.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -10534,6 +10888,11 @@
       <xs:enumeration value="failed">
         <xs:annotation>
           <xs:documentation xml:lang="en">The diagnostic investigation was attempted, but due to some procedural error, it could not be completed.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="entered-in-error">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The request was entered in error and voided.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
     </xs:restriction>
@@ -13793,6 +14152,11 @@ Not to be used when the patient is currently at the location</xs:documentation>
               <xs:documentation xml:lang="en">If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="active" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Indicates whether the record for the group is available for use or is merely being retained for historical purposes.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="code" minOccurs="0" maxOccurs="1" type="CodeableConcept">
             <xs:annotation>
               <xs:documentation xml:lang="en">Provides a specific type of resource the group includes; e.g. &quot;cow&quot;, &quot;syringe&quot;, etc.</xs:documentation>
@@ -15196,7 +15560,7 @@ Not to be used when the patient is currently at the location</xs:documentation>
           </xs:element>
           <xs:element name="fhirVersion" minOccurs="0" maxOccurs="1" type="id">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.2.0 for this version.</xs:documentation>
+              <xs:documentation xml:lang="en">The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.3.0 for this version.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="dependency" type="ImplementationGuide.Dependency" minOccurs="0" maxOccurs="unbounded">
@@ -15573,6 +15937,84 @@ Not to be used when the patient is currently at the location</xs:documentation>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+  <xs:element name="Linkage" type="Linkage">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Identifies two or more records (resource instances) that are referring to the same real-world &quot;occurrence&quot;.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="Linkage">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Identifies two or more records (resource instances) that are referring to the same real-world &quot;occurrence&quot;.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="author" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="item" type="Linkage.Item" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items hould be evaluated within the collection of linked items.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Linkage.Item">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Identifies two or more records (resource instances) that are referring to the same real-world &quot;occurrence&quot;.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="LinkageType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Distinguishes which item is &quot;source of truth&quot; (if any) and which items are no longer considered to be current representations.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="resource" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The resource instance being linked as part of the group.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="LinkageType-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="source">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The record represents the &quot;source of truth&quot; (from the perspective of this Linkage resource) for the underlying event/condition/etc.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="alternate">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The record represents the alternative view of the underlying event/condition/etc.  The record may still be actively maintained, even though it is not considered to be the source of truth.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="historical">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The record represents an obsolete record of the underlyng event/condition/etc.  It is not expected to be actively maintained.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="LinkageType">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Used to distinguish different roles a resource can play within a set of linked resources</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="LinkageType-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
   <xs:element name="List" type="List">
     <xs:annotation>
       <xs:documentation xml:lang="en">A set of information summarized from a list of other resources.</xs:documentation>
@@ -15591,6 +16033,16 @@ Not to be used when the patient is currently at the location</xs:documentation>
               <xs:documentation xml:lang="en">Identifier for the List assigned for business purposes outside the context of FHIR.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="status" minOccurs="1" maxOccurs="1" type="ListStatus">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Indicates the current state of this list.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="mode" minOccurs="1" maxOccurs="1" type="ListMode">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="title" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
               <xs:documentation xml:lang="en">A label for the list assigned by the author.</xs:documentation>
@@ -15606,19 +16058,9 @@ Not to be used when the patient is currently at the location</xs:documentation>
               <xs:documentation xml:lang="en">The common subject (or patient) of the resources that are in the list, if there is one.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="source" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
           <xs:element name="encounter" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation xml:lang="en">The encounter that is the context in which this list was created.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="status" minOccurs="1" maxOccurs="1" type="ListStatus">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Indicates the current state of this list.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="date" minOccurs="0" maxOccurs="1" type="dateTime">
@@ -15626,17 +16068,17 @@ Not to be used when the patient is currently at the location</xs:documentation>
               <xs:documentation xml:lang="en">The date that the list was prepared.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="source" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="orderedBy" minOccurs="0" maxOccurs="1" type="CodeableConcept">
             <xs:annotation>
               <xs:documentation xml:lang="en">What order applies to the items in the list.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="mode" minOccurs="1" maxOccurs="1" type="ListMode">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="note" minOccurs="0" maxOccurs="1" type="string">
+          <xs:element name="note" minOccurs="0" maxOccurs="unbounded" type="Annotation">
             <xs:annotation>
               <xs:documentation xml:lang="en">Comments that apply to the overall list.</xs:documentation>
            </xs:annotation>
@@ -16060,6 +16502,11 @@ Not to be used when the patient is currently at the location</xs:documentation>
     <xs:complexContent>
       <xs:extension base="DomainResource">
         <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="type" minOccurs="1" maxOccurs="1" type="DigitalMediaType">
             <xs:annotation>
               <xs:documentation xml:lang="en">Whether the media is a photo (still image), an audio recording, or a video recording.</xs:documentation>
@@ -16070,9 +16517,9 @@ Not to be used when the patient is currently at the location</xs:documentation>
               <xs:documentation xml:lang="en">Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+          <xs:element name="view" minOccurs="0" maxOccurs="1" type="CodeableConcept">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.</xs:documentation>
+              <xs:documentation xml:lang="en">The name of the imaging view e.g. Lateral or Antero-posterior (AP).</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="subject" minOccurs="0" maxOccurs="1" type="Reference">
@@ -16083,11 +16530,6 @@ Not to be used when the patient is currently at the location</xs:documentation>
           <xs:element name="operator" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation xml:lang="en">The person who administered the collection of the image.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="view" minOccurs="0" maxOccurs="1" type="CodeableConcept">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The name of the imaging view e.g. Lateral or Antero-posterior (AP).</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="deviceName" minOccurs="0" maxOccurs="1" type="string">
@@ -16329,19 +16771,33 @@ Not to be used when the patient is currently at the location</xs:documentation>
               <xs:documentation xml:lang="en">Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:choice minOccurs="1" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="medicationCodeableConcept" type="CodeableConcept"/>
+            <xs:element name="medicationReference" type="Reference"/>
+          </xs:choice>
           <xs:element name="patient" minOccurs="1" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation xml:lang="en">The person or animal receiving the medication.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="practitioner" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The individual who was responsible for giving the medication to the patient.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
           <xs:element name="encounter" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation xml:lang="en">The visit, admission or other contact between patient and health care provider the medication administration was performed as part of.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="1" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="effectiveTimeDateTime" type="dateTime"/>
+            <xs:element name="effectiveTimePeriod" type="Period"/>
+          </xs:choice>
+          <xs:element name="practitioner" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The individual who was responsible for giving the medication to the patient.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="prescription" minOccurs="0" maxOccurs="1" type="Reference">
@@ -16364,26 +16820,12 @@ Not to be used when the patient is currently at the location</xs:documentation>
               <xs:documentation xml:lang="en">A code indicating why the medication was given.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:choice minOccurs="1" maxOccurs="1" >
-            <xs:annotation>
-              <xs:documentation xml:lang="en">A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.</xs:documentation>
-            </xs:annotation>
-            <xs:element name="effectiveTimeDateTime" type="dateTime"/>
-            <xs:element name="effectiveTimePeriod" type="Period"/>
-          </xs:choice>
-          <xs:choice minOccurs="1" maxOccurs="1" >
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.</xs:documentation>
-            </xs:annotation>
-            <xs:element name="medicationCodeableConcept" type="CodeableConcept"/>
-            <xs:element name="medicationReference" type="Reference"/>
-          </xs:choice>
           <xs:element name="device" minOccurs="0" maxOccurs="unbounded" type="Reference">
             <xs:annotation>
               <xs:documentation xml:lang="en">The device used in administering the medication to the patient.  For example, a particular infusion pump.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="note" minOccurs="0" maxOccurs="1" type="string">
+          <xs:element name="note" minOccurs="0" maxOccurs="unbounded" type="Annotation">
             <xs:annotation>
               <xs:documentation xml:lang="en">Extra information about the medication administration that is not conveyed by the other attributes.</xs:documentation>
            </xs:annotation>
@@ -16505,6 +16947,13 @@ Not to be used when the patient is currently at the location</xs:documentation>
               <xs:documentation xml:lang="en">A code specifying the state of the set of dispense events.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:choice minOccurs="1" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="medicationCodeableConcept" type="CodeableConcept"/>
+            <xs:element name="medicationReference" type="Reference"/>
+          </xs:choice>
           <xs:element name="patient" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation xml:lang="en">A link to a resource representing the person to whom the medication will be given.</xs:documentation>
@@ -16535,13 +16984,6 @@ Not to be used when the patient is currently at the location</xs:documentation>
               <xs:documentation xml:lang="en">The amount of medication expressed as a timing amount.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:choice minOccurs="1" maxOccurs="1" >
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.</xs:documentation>
-            </xs:annotation>
-            <xs:element name="medicationCodeableConcept" type="CodeableConcept"/>
-            <xs:element name="medicationReference" type="Reference"/>
-          </xs:choice>
           <xs:element name="whenPrepared" minOccurs="0" maxOccurs="1" type="dateTime">
             <xs:annotation>
               <xs:documentation xml:lang="en">The time when the dispensed product was packaged and reviewed.</xs:documentation>
@@ -16562,7 +17004,7 @@ Not to be used when the patient is currently at the location</xs:documentation>
               <xs:documentation xml:lang="en">Identifies the person who picked up the medication.  This will usually be a patient or their caregiver, but some cases exist where it can be a healthcare professional.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="note" minOccurs="0" maxOccurs="1" type="string">
+          <xs:element name="note" minOccurs="0" maxOccurs="unbounded" type="Annotation">
             <xs:annotation>
               <xs:documentation xml:lang="en">Extra information about the dispense that could not be conveyed in the other attributes.</xs:documentation>
            </xs:annotation>
@@ -16736,16 +17178,45 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
               <xs:documentation xml:lang="en">External identifier - one that would be used by another non-FHIR system - for example a re-imbursement system might issue its own id for each prescription that is created.  This is particularly important where FHIR only provides part of an entire workflow process where records have to be tracked through an entire system.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="dateWritten" minOccurs="0" maxOccurs="1" type="dateTime">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The date (and perhaps time) when the prescription was written.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
           <xs:element name="status" minOccurs="0" maxOccurs="1" type="MedicationOrderStatus">
             <xs:annotation>
               <xs:documentation xml:lang="en">A code specifying the state of the order.  Generally this will be active or completed state.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:choice minOccurs="1" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="medicationCodeableConcept" type="CodeableConcept"/>
+            <xs:element name="medicationReference" type="Reference"/>
+          </xs:choice>
+          <xs:element name="patient" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A link to a resource representing the person to whom the medication will be given.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="encounter" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A link to a resource that identifies the particular occurrence of contact between patient and health care provider.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="dateWritten" minOccurs="0" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The date (and perhaps time) when the prescription was written.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="prescriber" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The healthcare professional responsible for authorizing the prescription.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="0" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Can be the reason or the indication for writing the prescription.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="reasonCodeableConcept" type="CodeableConcept"/>
+            <xs:element name="reasonReference" type="Reference"/>
+          </xs:choice>
           <xs:element name="dateEnded" minOccurs="0" maxOccurs="1" type="dateTime">
             <xs:annotation>
               <xs:documentation xml:lang="en">The date (and perhaps time) when the prescription was stopped.</xs:documentation>
@@ -16756,40 +17227,11 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
               <xs:documentation xml:lang="en">The reason why the prescription was stopped, if it was.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="patient" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">A link to a resource representing the person to whom the medication will be given.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="prescriber" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The healthcare professional responsible for authorizing the prescription.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="encounter" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">A link to a resource that identifies the particular occurrence of contact between patient and health care provider.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:choice minOccurs="0" maxOccurs="1" >
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Can be the reason or the indication for writing the prescription.</xs:documentation>
-            </xs:annotation>
-            <xs:element name="reasonCodeableConcept" type="CodeableConcept"/>
-            <xs:element name="reasonReference" type="Reference"/>
-          </xs:choice>
-          <xs:element name="note" minOccurs="0" maxOccurs="1" type="string">
+          <xs:element name="note" minOccurs="0" maxOccurs="unbounded" type="Annotation">
             <xs:annotation>
               <xs:documentation xml:lang="en">Extra information about the prescription that could not be conveyed by the other attributes.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:choice minOccurs="1" maxOccurs="1" >
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.</xs:documentation>
-            </xs:annotation>
-            <xs:element name="medicationCodeableConcept" type="CodeableConcept"/>
-            <xs:element name="medicationReference" type="Reference"/>
-          </xs:choice>
           <xs:element name="dosageInstruction" type="MedicationOrder.DosageInstruction" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
               <xs:documentation xml:lang="en">Indicates how the medication is to be used by the patient.</xs:documentation>
@@ -17005,11 +17447,30 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
               <xs:documentation xml:lang="en">External identifier - FHIR will generate its own internal identifiers (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event.  Particularly important if these records have to be updated.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="status" minOccurs="1" maxOccurs="1" type="MedicationStatementStatus">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code representing the patient or other source's judgment about the state of the medication used that this statement is about.  Generally this will be active or completed.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="1" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="medicationCodeableConcept" type="CodeableConcept"/>
+            <xs:element name="medicationReference" type="Reference"/>
+          </xs:choice>
           <xs:element name="patient" minOccurs="1" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation xml:lang="en">The person or animal who is/was taking the medication.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:choice minOccurs="0" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The interval of time during which it is being asserted that the patient was taking the medication (or was not taking, when the wasNotGiven element is true).</xs:documentation>
+            </xs:annotation>
+            <xs:element name="effectiveDateTime" type="dateTime"/>
+            <xs:element name="effectivePeriod" type="Period"/>
+          </xs:choice>
           <xs:element name="informationSource" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation xml:lang="en">The person who provided the information about the taking of this medication.</xs:documentation>
@@ -17018,11 +17479,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           <xs:element name="dateAsserted" minOccurs="0" maxOccurs="1" type="dateTime">
             <xs:annotation>
               <xs:documentation xml:lang="en">The date when the medication statement was asserted by the information source.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="status" minOccurs="1" maxOccurs="1" type="MedicationStatementStatus">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">A code representing the patient or other source's judgment about the state of the medication used that this statement is about.  Generally this will be active or completed.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="wasNotTaken" minOccurs="0" maxOccurs="1" type="boolean">
@@ -17042,14 +17498,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
             <xs:element name="reasonForUseCodeableConcept" type="CodeableConcept"/>
             <xs:element name="reasonForUseReference" type="Reference"/>
           </xs:choice>
-          <xs:choice minOccurs="0" maxOccurs="1" >
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The interval of time during which it is being asserted that the patient was taking the medication (or was not taking, when the wasNotGiven element is true).</xs:documentation>
-            </xs:annotation>
-            <xs:element name="effectiveDateTime" type="dateTime"/>
-            <xs:element name="effectivePeriod" type="Period"/>
-          </xs:choice>
-          <xs:element name="note" minOccurs="0" maxOccurs="1" type="string">
+          <xs:element name="note" minOccurs="0" maxOccurs="unbounded" type="Annotation">
             <xs:annotation>
               <xs:documentation xml:lang="en">Provides extra information about the medication statement that is not conveyed by the other attributes.</xs:documentation>
            </xs:annotation>
@@ -17059,13 +17508,6 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
               <xs:documentation xml:lang="en">Allows linking the MedicationStatement to the underlying MedicationOrder, or to other information that supports the MedicationStatement.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:choice minOccurs="1" maxOccurs="1" >
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.</xs:documentation>
-            </xs:annotation>
-            <xs:element name="medicationCodeableConcept" type="CodeableConcept"/>
-            <xs:element name="medicationReference" type="Reference"/>
-          </xs:choice>
           <xs:element name="dosage" type="MedicationStatement.Dosage" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
               <xs:documentation xml:lang="en">Indicates how the medication is/was used by the patient.</xs:documentation>
@@ -18576,6 +19018,11 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       <xs:enumeration value="cancelled">
         <xs:annotation>
           <xs:documentation xml:lang="en">The request has been withdrawn and is no longer actionable.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="entered-in-error">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The request was entered in error and voided.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
     </xs:restriction>
@@ -21584,6 +22031,446 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+  <xs:element name="Protocol" type="Protocol">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="Protocol">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A unique identifier for the protocol instance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="title" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Name of protocol.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="status" minOccurs="1" maxOccurs="1" type="ProtocolStatus">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The status of the protocol.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="ProtocolType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code that classifies the general type of context to which these behavior definitions apply.  This is used for searching, sorting and display purposes.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="subject" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">What does protocol deal with?</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="group" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">To whom does Protocol apply?</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="purpose" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">When is protocol to be used?</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="author" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Who wrote protocol?</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="step" type="Protocol.Step" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">What's done as part of protocol.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Protocol.Step">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Label for step.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Human description of activity.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="duration" minOccurs="0" maxOccurs="1" type="Duration">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">How long does step last?</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="precondition" type="Protocol.Precondition" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Rules prior to execution.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="exit" type="Protocol.Precondition" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Indicates the conditions that must be met for activities that are part of this time point to terminate.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="firstActivity" minOccurs="0" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">First activity within timepoint.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="activity" type="Protocol.Activity" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Activities that occur within timepoint.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="next" type="Protocol.Next" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">What happens next?</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Protocol.Precondition">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Human-readable description of the condition.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="condition" type="Protocol.Condition" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Defines the name/value pair that must hold for the condition to be met.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="intersection" type="Protocol.Precondition" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Lists a set of conditions that must all be met.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="union" type="Protocol.Precondition" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Lists alternative conditions, at least one of must be met.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="exclude" type="Protocol.Precondition" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Lists conditions of which none must be met.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Protocol.Condition">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of observation, test or other assertion being evaluated by the condition.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="1" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Indicates what value the observation/test/assertion must have in order for the condition to be considered to be satisfied.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="valueCodeableConcept" type="CodeableConcept"/>
+            <xs:element name="valueBoolean" type="boolean"/>
+            <xs:element name="valueQuantity" type="SimpleQuantity"/>
+            <xs:element name="valueRange" type="Range"/>
+          </xs:choice>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Protocol.Activity">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="alternative" minOccurs="0" maxOccurs="unbounded" type="uri">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">What can be done instead?</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="component" type="Protocol.Component" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Activities that are part of this activity.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="following" minOccurs="0" maxOccurs="unbounded" type="uri">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">What happens next.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="wait" minOccurs="0" maxOccurs="1" type="Duration">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Indicates the length of time to wait between the conditions being satisfied for the activity to start and the actual start of the activity.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="detail" type="Protocol.Detail" minOccurs="1" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Information about the nature of the activity, including type, timing and other qualifiers.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Protocol.Component">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="sequence" minOccurs="0" maxOccurs="1" type="integer">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Order of occurrence.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="activity" minOccurs="1" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Component activity.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Protocol.Detail">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="category" minOccurs="0" maxOccurs="1" type="ActivityDefinitionCategory">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">High-level categorization of the type of activity.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="code" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Detailed description of the type of activity; e.g. What lab test, what procedure, what kind of encounter.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:choice minOccurs="0" maxOccurs="1" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The period, timing or frequency upon which the described activity is to occur.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="timingCodeableConcept" type="CodeableConcept"/>
+            <xs:element name="timingTiming" type="Timing"/>
+          </xs:choice>
+          <xs:element name="location" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="performer" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies who's expected to be involved in the activity.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="product" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the food, drug or other product being consumed or supplied in the activity.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="quantity" minOccurs="0" maxOccurs="1" type="SimpleQuantity">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Identifies the quantity expected to be consumed at once (per dose, per meal, etc.).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">This provides a textual description of constraints on the activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Protocol.Next">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A definition of behaviors to be taken in particular circumstances, often including conditions, options and other decision points.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Description of what happens next.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="reference" minOccurs="0" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Id of following step.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="condition" type="Protocol.Precondition" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Condition in which next step is executed.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ProtocolType-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="condition">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The protocol describes the steps to manage a particular health condition including monitoring, treatment, mitigation and/or follow-up</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="device">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The protocol describes the appropriate use of a particular device (medical device, software, etc.)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="drug">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The protocol describes the appropriate use of a particular medication including indications for use, dosages, treatment cycles, etc.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="study">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The protocol describes the set of steps to occur for study subjects enrolled in an interventional study</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ProtocolType">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">High-level categorization of the protocol</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="ProtocolType-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ActivityDefinitionCategory-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="diet">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">To consume food of a specified nature</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="drug">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">To consume/receive a drug, vaccine or other product</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="encounter">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">To meet or communicate with the patient (in-patient, out-patient, phone call, etc.)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="observation">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">To capture information about a patient (vitals, labs, diagnostic images, etc.)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="procedure">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">To modify the patient in some way (surgery, physiotherapy, education, counseling, etc.)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="supply">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">To provide something to the patient (medication, medical supply, etc.)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="other">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Some other form of action</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ActivityDefinitionCategory">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">High-level categorization of the type of activity in a protocol.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="ActivityDefinitionCategory-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ProtocolStatus-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="draft">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">This protocol is still under development</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="testing">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">This protocol was authored for testing purposes (or education/evaluation/marketing)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="review">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">This protocol is undergoing review to check that it is ready for production use</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="active">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">This protocol is ready for use in production systems</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="withdrawn">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">This protocol has been withdrawn and should no longer be used</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="superseded">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">This protocol has been replaced and a different protocol should be used in its place</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ProtocolStatus">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The lifecycle status of a Protocol</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="ProtocolStatus-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
   <xs:element name="Provenance" type="Provenance">
     <xs:annotation>
       <xs:documentation xml:lang="en">Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.</xs:documentation>
@@ -21612,12 +22499,12 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
               <xs:documentation xml:lang="en">The instant of time at which the activity was recorded.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="reason" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+          <xs:element name="reason" minOccurs="0" maxOccurs="unbounded" type="Coding">
             <xs:annotation>
               <xs:documentation xml:lang="en">The reason that the activity was taking place.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="activity" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+          <xs:element name="activity" minOccurs="0" maxOccurs="1" type="Coding">
             <xs:annotation>
               <xs:documentation xml:lang="en">An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.</xs:documentation>
            </xs:annotation>
@@ -21632,7 +22519,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
               <xs:documentation xml:lang="en">Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="agent" type="Provenance.Agent" minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="agent" type="Provenance.Agent" minOccurs="1" maxOccurs="unbounded">
             <xs:annotation>
               <xs:documentation xml:lang="en">An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility.</xs:documentation>
            </xs:annotation>
@@ -22830,7 +23717,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
               <xs:documentation xml:lang="en">Exclusive 0-based nucleotide position for end of genomic finding on the positive (+) genomic strand.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="genomeBuild" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+          <xs:element name="genomeBuild" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
               <xs:documentation xml:lang="en">The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.</xs:documentation>
            </xs:annotation>
@@ -22861,7 +23748,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
               <xs:documentation xml:lang="en">Quality score.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="platform" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+          <xs:element name="platform" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
               <xs:documentation xml:lang="en">Platform.</xs:documentation>
            </xs:annotation>
@@ -23358,7 +24245,7 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           </xs:element>
           <xs:element name="fhirVersion" minOccurs="0" maxOccurs="1" type="id">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.2.0 for this version.</xs:documentation>
+              <xs:documentation xml:lang="en">The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 1.3.0 for this version.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="mapping" type="StructureDefinition.Mapping" minOccurs="0" maxOccurs="unbounded">

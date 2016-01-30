@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
 
-import org.hl7.fhir.dstu21.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 /**
  * A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.
  */
@@ -83,6 +81,10 @@ public class NutritionOrder extends DomainResource {
          */
         CANCELLED, 
         /**
+         * The request was entered in error and voided.
+         */
+        ENTEREDINERROR, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -105,6 +107,8 @@ public class NutritionOrder extends DomainResource {
           return COMPLETED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         throw new FHIRException("Unknown NutritionOrderStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -117,6 +121,7 @@ public class NutritionOrder extends DomainResource {
             case ONHOLD: return "on-hold";
             case COMPLETED: return "completed";
             case CANCELLED: return "cancelled";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -130,6 +135,7 @@ public class NutritionOrder extends DomainResource {
             case ONHOLD: return "http://hl7.org/fhir/nutrition-order-status";
             case COMPLETED: return "http://hl7.org/fhir/nutrition-order-status";
             case CANCELLED: return "http://hl7.org/fhir/nutrition-order-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/nutrition-order-status";
             default: return "?";
           }
         }
@@ -143,6 +149,7 @@ public class NutritionOrder extends DomainResource {
             case ONHOLD: return "Actions implied by the request have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
             case COMPLETED: return "All actions that are implied by the order have occurred and no continuation is planned (this will rarely be made explicit).";
             case CANCELLED: return "The request has been withdrawn and is no longer actionable.";
+            case ENTEREDINERROR: return "The request was entered in error and voided.";
             default: return "?";
           }
         }
@@ -156,6 +163,7 @@ public class NutritionOrder extends DomainResource {
             case ONHOLD: return "On-Hold";
             case COMPLETED: return "Completed";
             case CANCELLED: return "Cancelled";
+            case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
           }
         }
@@ -182,6 +190,8 @@ public class NutritionOrder extends DomainResource {
           return NutritionOrderStatus.COMPLETED;
         if ("cancelled".equals(codeString))
           return NutritionOrderStatus.CANCELLED;
+        if ("entered-in-error".equals(codeString))
+          return NutritionOrderStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown NutritionOrderStatus code '"+codeString+"'");
         }
         public Enumeration<NutritionOrderStatus> fromType(Base code) throws FHIRException {
@@ -206,6 +216,8 @@ public class NutritionOrder extends DomainResource {
           return new Enumeration<NutritionOrderStatus>(this, NutritionOrderStatus.COMPLETED);
         if ("cancelled".equals(codeString))
           return new Enumeration<NutritionOrderStatus>(this, NutritionOrderStatus.CANCELLED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<NutritionOrderStatus>(this, NutritionOrderStatus.ENTEREDINERROR);
         throw new FHIRException("Unknown NutritionOrderStatus code '"+codeString+"'");
         }
     public String toCode(NutritionOrderStatus code) {
@@ -225,6 +237,8 @@ public class NutritionOrder extends DomainResource {
         return "completed";
       if (code == NutritionOrderStatus.CANCELLED)
         return "cancelled";
+      if (code == NutritionOrderStatus.ENTEREDINERROR)
+        return "entered-in-error";
       return "?";
       }
     public String toSystem(NutritionOrderStatus code) {
@@ -2046,7 +2060,7 @@ public class NutritionOrder extends DomainResource {
      * The workflow status of the nutrition order/request.
      */
     @Child(name = "status", type = {CodeType.class}, order=5, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="proposed | draft | planned | requested | active | on-hold | completed | cancelled", formalDefinition="The workflow status of the nutrition order/request." )
+    @Description(shortDefinition="proposed | draft | planned | requested | active | on-hold | completed | cancelled | entered-in-error", formalDefinition="The workflow status of the nutrition order/request." )
     protected Enumeration<NutritionOrderStatus> status;
 
     /**

@@ -29,17 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
-import java.util.ArrayList;
-import java.util.List;
+// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
 
-import org.hl7.fhir.dstu21.exceptions.FHIRException;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 /**
  * A photo, video, or audio recording acquired or used in healthcare. The actual content may be inline or provided by direct reference.
  */
@@ -150,30 +151,37 @@ public class Media extends DomainResource {
     }
 
     /**
+     * Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.
+     */
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Identifier(s) for the image", formalDefinition="Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers." )
+    protected List<Identifier> identifier;
+
+    /**
      * Whether the media is a photo (still image), an audio recording, or a video recording.
      */
-    @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="photo | video | audio", formalDefinition="Whether the media is a photo (still image), an audio recording, or a video recording." )
     protected Enumeration<DigitalMediaType> type;
 
     /**
      * Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality.
      */
-    @Child(name = "subtype", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subtype", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The type of acquisition equipment/process", formalDefinition="Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality." )
     protected CodeableConcept subtype;
 
     /**
-     * Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.
+     * The name of the imaging view e.g. Lateral or Antero-posterior (AP).
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Identifier(s) for the image", formalDefinition="Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers." )
-    protected List<Identifier> identifier;
+    @Child(name = "view", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Imaging view, e.g. Lateral or Antero-posterior", formalDefinition="The name of the imaging view e.g. Lateral or Antero-posterior (AP)." )
+    protected CodeableConcept view;
 
     /**
      * Who/What this Media is a record of.
      */
-    @Child(name = "subject", type = {Patient.class, Practitioner.class, Group.class, Device.class, Specimen.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Practitioner.class, Group.class, Device.class, Specimen.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who/What this Media is a record of", formalDefinition="Who/What this Media is a record of." )
     protected Reference subject;
 
@@ -185,7 +193,7 @@ public class Media extends DomainResource {
     /**
      * The person who administered the collection of the image.
      */
-    @Child(name = "operator", type = {Practitioner.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "operator", type = {Practitioner.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The person who generated the image", formalDefinition="The person who administered the collection of the image." )
     protected Reference operator;
 
@@ -193,13 +201,6 @@ public class Media extends DomainResource {
      * The actual object that is the target of the reference (The person who administered the collection of the image.)
      */
     protected Practitioner operatorTarget;
-
-    /**
-     * The name of the imaging view e.g. Lateral or Antero-posterior (AP).
-     */
-    @Child(name = "view", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Imaging view, e.g. Lateral or Antero-posterior", formalDefinition="The name of the imaging view e.g. Lateral or Antero-posterior (AP)." )
-    protected CodeableConcept view;
 
     /**
      * The name of the device / manufacturer of the device  that was used to make the recording.
@@ -243,7 +244,7 @@ public class Media extends DomainResource {
     @Description(shortDefinition="Actual Media - reference or data", formalDefinition="The actual content of the media - inline or by direct reference to the media source file." )
     protected Attachment content;
 
-    private static final long serialVersionUID = -280764739L;
+    private static final long serialVersionUID = -2144305643L;
 
   /**
    * Constructor
@@ -259,6 +260,46 @@ public class Media extends DomainResource {
       super();
       this.type = type;
       this.content = content;
+    }
+
+    /**
+     * @return {@link #identifier} (Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.)
+     */
+    public List<Identifier> getIdentifier() { 
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      return this.identifier;
+    }
+
+    public boolean hasIdentifier() { 
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #identifier} (Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.)
+     */
+    // syntactic sugar
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public Media addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
@@ -331,42 +372,26 @@ public class Media extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.)
+     * @return {@link #view} (The name of the imaging view e.g. Lateral or Antero-posterior (AP).)
      */
-    public List<Identifier> getIdentifier() { 
-      if (this.identifier == null)
-        this.identifier = new ArrayList<Identifier>();
-      return this.identifier;
+    public CodeableConcept getView() { 
+      if (this.view == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Media.view");
+        else if (Configuration.doAutoCreate())
+          this.view = new CodeableConcept(); // cc
+      return this.view;
     }
 
-    public boolean hasIdentifier() { 
-      if (this.identifier == null)
-        return false;
-      for (Identifier item : this.identifier)
-        if (!item.isEmpty())
-          return true;
-      return false;
+    public boolean hasView() { 
+      return this.view != null && !this.view.isEmpty();
     }
 
     /**
-     * @return {@link #identifier} (Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.)
+     * @param value {@link #view} (The name of the imaging view e.g. Lateral or Antero-posterior (AP).)
      */
-    // syntactic sugar
-    public Identifier addIdentifier() { //3
-      Identifier t = new Identifier();
-      if (this.identifier == null)
-        this.identifier = new ArrayList<Identifier>();
-      this.identifier.add(t);
-      return t;
-    }
-
-    // syntactic sugar
-    public Media addIdentifier(Identifier t) { //3
-      if (t == null)
-        return this;
-      if (this.identifier == null)
-        this.identifier = new ArrayList<Identifier>();
-      this.identifier.add(t);
+    public Media setView(CodeableConcept value) { 
+      this.view = value;
       return this;
     }
 
@@ -450,30 +475,6 @@ public class Media extends DomainResource {
      */
     public Media setOperatorTarget(Practitioner value) { 
       this.operatorTarget = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #view} (The name of the imaging view e.g. Lateral or Antero-posterior (AP).)
-     */
-    public CodeableConcept getView() { 
-      if (this.view == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Media.view");
-        else if (Configuration.doAutoCreate())
-          this.view = new CodeableConcept(); // cc
-      return this.view;
-    }
-
-    public boolean hasView() { 
-      return this.view != null && !this.view.isEmpty();
-    }
-
-    /**
-     * @param value {@link #view} (The name of the imaging view e.g. Lateral or Antero-posterior (AP).)
-     */
-    public Media setView(CodeableConcept value) { 
-      this.view = value;
       return this;
     }
 
@@ -732,12 +733,12 @@ public class Media extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
+        childrenList.add(new Property("identifier", "Identifier", "Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("type", "code", "Whether the media is a photo (still image), an audio recording, or a video recording.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("subtype", "CodeableConcept", "Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality.", 0, java.lang.Integer.MAX_VALUE, subtype));
-        childrenList.add(new Property("identifier", "Identifier", "Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("view", "CodeableConcept", "The name of the imaging view e.g. Lateral or Antero-posterior (AP).", 0, java.lang.Integer.MAX_VALUE, view));
         childrenList.add(new Property("subject", "Reference(Patient|Practitioner|Group|Device|Specimen)", "Who/What this Media is a record of.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("operator", "Reference(Practitioner)", "The person who administered the collection of the image.", 0, java.lang.Integer.MAX_VALUE, operator));
-        childrenList.add(new Property("view", "CodeableConcept", "The name of the imaging view e.g. Lateral or Antero-posterior (AP).", 0, java.lang.Integer.MAX_VALUE, view));
         childrenList.add(new Property("deviceName", "string", "The name of the device / manufacturer of the device  that was used to make the recording.", 0, java.lang.Integer.MAX_VALUE, deviceName));
         childrenList.add(new Property("height", "positiveInt", "Height of the image in pixels (photo/video).", 0, java.lang.Integer.MAX_VALUE, height));
         childrenList.add(new Property("width", "positiveInt", "Width of the image in pixels (photo/video).", 0, java.lang.Integer.MAX_VALUE, width));
@@ -748,18 +749,18 @@ public class Media extends DomainResource {
 
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("type"))
           this.type = new DigitalMediaTypeEnumFactory().fromType(value); // Enumeration<DigitalMediaType>
         else if (name.equals("subtype"))
           this.subtype = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("identifier"))
-          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("view"))
+          this.view = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("subject"))
           this.subject = castToReference(value); // Reference
         else if (name.equals("operator"))
           this.operator = castToReference(value); // Reference
-        else if (name.equals("view"))
-          this.view = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("deviceName"))
           this.deviceName = castToString(value); // StringType
         else if (name.equals("height"))
@@ -778,15 +779,19 @@ public class Media extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("type")) {
           throw new FHIRException("Cannot call addChild on a primitive type Media.type");
         }
         else if (name.equals("subtype")) {
           this.subtype = new CodeableConcept();
           return this.subtype;
         }
-        else if (name.equals("identifier")) {
-          return addIdentifier();
+        else if (name.equals("view")) {
+          this.view = new CodeableConcept();
+          return this.view;
         }
         else if (name.equals("subject")) {
           this.subject = new Reference();
@@ -795,10 +800,6 @@ public class Media extends DomainResource {
         else if (name.equals("operator")) {
           this.operator = new Reference();
           return this.operator;
-        }
-        else if (name.equals("view")) {
-          this.view = new CodeableConcept();
-          return this.view;
         }
         else if (name.equals("deviceName")) {
           throw new FHIRException("Cannot call addChild on a primitive type Media.deviceName");
@@ -831,16 +832,16 @@ public class Media extends DomainResource {
       public Media copy() {
         Media dst = new Media();
         copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        dst.subtype = subtype == null ? null : subtype.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
+        dst.type = type == null ? null : type.copy();
+        dst.subtype = subtype == null ? null : subtype.copy();
+        dst.view = view == null ? null : view.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.operator = operator == null ? null : operator.copy();
-        dst.view = view == null ? null : view.copy();
         dst.deviceName = deviceName == null ? null : deviceName.copy();
         dst.height = height == null ? null : height.copy();
         dst.width = width == null ? null : width.copy();
@@ -861,8 +862,8 @@ public class Media extends DomainResource {
         if (!(other instanceof Media))
           return false;
         Media o = (Media) other;
-        return compareDeep(type, o.type, true) && compareDeep(subtype, o.subtype, true) && compareDeep(identifier, o.identifier, true)
-           && compareDeep(subject, o.subject, true) && compareDeep(operator, o.operator, true) && compareDeep(view, o.view, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(subtype, o.subtype, true)
+           && compareDeep(view, o.view, true) && compareDeep(subject, o.subject, true) && compareDeep(operator, o.operator, true)
            && compareDeep(deviceName, o.deviceName, true) && compareDeep(height, o.height, true) && compareDeep(width, o.width, true)
            && compareDeep(frames, o.frames, true) && compareDeep(duration, o.duration, true) && compareDeep(content, o.content, true)
           ;
@@ -881,9 +882,9 @@ public class Media extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (subtype == null || subtype.isEmpty())
-           && (identifier == null || identifier.isEmpty()) && (subject == null || subject.isEmpty())
-           && (operator == null || operator.isEmpty()) && (view == null || view.isEmpty()) && (deviceName == null || deviceName.isEmpty())
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (type == null || type.isEmpty())
+           && (subtype == null || subtype.isEmpty()) && (view == null || view.isEmpty()) && (subject == null || subject.isEmpty())
+           && (operator == null || operator.isEmpty()) && (deviceName == null || deviceName.isEmpty())
            && (height == null || height.isEmpty()) && (width == null || width.isEmpty()) && (frames == null || frames.isEmpty())
            && (duration == null || duration.isEmpty()) && (content == null || content.isEmpty());
       }

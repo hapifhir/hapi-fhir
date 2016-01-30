@@ -29,20 +29,18 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
 
-import org.hl7.fhir.dstu21.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 /**
  * A set of information summarized from a list of other resources.
  */
@@ -557,23 +555,37 @@ public class ListResource extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
+     * Indicates the current state of this list.
+     */
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="current | retired | entered-in-error", formalDefinition="Indicates the current state of this list." )
+    protected Enumeration<ListStatus> status;
+
+    /**
+     * How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
+     */
+    @Child(name = "mode", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="working | snapshot | changes", formalDefinition="How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted." )
+    protected Enumeration<ListMode> mode;
+
+    /**
      * A label for the list assigned by the author.
      */
-    @Child(name = "title", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "title", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Descriptive name for the list", formalDefinition="A label for the list assigned by the author." )
     protected StringType title;
 
     /**
      * This code defines the purpose of the list - why it was created.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "code", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What the purpose of this list is", formalDefinition="This code defines the purpose of the list - why it was created." )
     protected CodeableConcept code;
 
     /**
      * The common subject (or patient) of the resources that are in the list, if there is one.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Location.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Location.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If all resources have the same subject", formalDefinition="The common subject (or patient) of the resources that are in the list, if there is one." )
     protected Reference subject;
 
@@ -583,21 +595,9 @@ public class ListResource extends DomainResource {
     protected Resource subjectTarget;
 
     /**
-     * The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.
-     */
-    @Child(name = "source", type = {Practitioner.class, Patient.class, Device.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who and/or what defined the list contents (aka Author)", formalDefinition="The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list." )
-    protected Reference source;
-
-    /**
-     * The actual object that is the target of the reference (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
-     */
-    protected Resource sourceTarget;
-
-    /**
      * The encounter that is the context in which this list was created.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "encounter", type = {Encounter.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Context in which list created", formalDefinition="The encounter that is the context in which this list was created." )
     protected Reference encounter;
 
@@ -607,13 +607,6 @@ public class ListResource extends DomainResource {
     protected Encounter encounterTarget;
 
     /**
-     * Indicates the current state of this list.
-     */
-    @Child(name = "status", type = {CodeType.class}, order=6, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="current | retired | entered-in-error", formalDefinition="Indicates the current state of this list." )
-    protected Enumeration<ListStatus> status;
-
-    /**
      * The date that the list was prepared.
      */
     @Child(name = "date", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
@@ -621,25 +614,30 @@ public class ListResource extends DomainResource {
     protected DateTimeType date;
 
     /**
+     * The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.
+     */
+    @Child(name = "source", type = {Practitioner.class, Patient.class, Device.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Who and/or what defined the list contents (aka Author)", formalDefinition="The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list." )
+    protected Reference source;
+
+    /**
+     * The actual object that is the target of the reference (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
+     */
+    protected Resource sourceTarget;
+
+    /**
      * What order applies to the items in the list.
      */
-    @Child(name = "orderedBy", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "orderedBy", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="What order the list has", formalDefinition="What order applies to the items in the list." )
     protected CodeableConcept orderedBy;
 
     /**
-     * How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
-     */
-    @Child(name = "mode", type = {CodeType.class}, order=9, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="working | snapshot | changes", formalDefinition="How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted." )
-    protected Enumeration<ListMode> mode;
-
-    /**
      * Comments that apply to the overall list.
      */
-    @Child(name = "note", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Comments about the list", formalDefinition="Comments that apply to the overall list." )
-    protected StringType note;
+    protected List<Annotation> note;
 
     /**
      * Entries in this list.
@@ -655,7 +653,7 @@ public class ListResource extends DomainResource {
     @Description(shortDefinition="Why list is empty", formalDefinition="If the list is empty, why the list is empty." )
     protected CodeableConcept emptyReason;
 
-    private static final long serialVersionUID = 1819128642L;
+    private static final long serialVersionUID = 2071342704L;
 
   /**
    * Constructor
@@ -710,6 +708,96 @@ public class ListResource extends DomainResource {
       if (this.identifier == null)
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #status} (Indicates the current state of this list.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<ListStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ListResource.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<ListStatus>(new ListStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (Indicates the current state of this list.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public ListResource setStatusElement(Enumeration<ListStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return Indicates the current state of this list.
+     */
+    public ListStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value Indicates the current state of this list.
+     */
+    public ListResource setStatus(ListStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<ListStatus>(new ListStatusEnumFactory());
+        this.status.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #mode} (How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
+     */
+    public Enumeration<ListMode> getModeElement() { 
+      if (this.mode == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ListResource.mode");
+        else if (Configuration.doAutoCreate())
+          this.mode = new Enumeration<ListMode>(new ListModeEnumFactory()); // bb
+      return this.mode;
+    }
+
+    public boolean hasModeElement() { 
+      return this.mode != null && !this.mode.isEmpty();
+    }
+
+    public boolean hasMode() { 
+      return this.mode != null && !this.mode.isEmpty();
+    }
+
+    /**
+     * @param value {@link #mode} (How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
+     */
+    public ListResource setModeElement(Enumeration<ListMode> value) { 
+      this.mode = value;
+      return this;
+    }
+
+    /**
+     * @return How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
+     */
+    public ListMode getMode() { 
+      return this.mode == null ? null : this.mode.getValue();
+    }
+
+    /**
+     * @param value How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
+     */
+    public ListResource setMode(ListMode value) { 
+        if (this.mode == null)
+          this.mode = new Enumeration<ListMode>(new ListModeEnumFactory());
+        this.mode.setValue(value);
       return this;
     }
 
@@ -826,45 +914,6 @@ public class ListResource extends DomainResource {
     }
 
     /**
-     * @return {@link #source} (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
-     */
-    public Reference getSource() { 
-      if (this.source == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ListResource.source");
-        else if (Configuration.doAutoCreate())
-          this.source = new Reference(); // cc
-      return this.source;
-    }
-
-    public boolean hasSource() { 
-      return this.source != null && !this.source.isEmpty();
-    }
-
-    /**
-     * @param value {@link #source} (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
-     */
-    public ListResource setSource(Reference value) { 
-      this.source = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #source} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
-     */
-    public Resource getSourceTarget() { 
-      return this.sourceTarget;
-    }
-
-    /**
-     * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
-     */
-    public ListResource setSourceTarget(Resource value) { 
-      this.sourceTarget = value;
-      return this;
-    }
-
-    /**
      * @return {@link #encounter} (The encounter that is the context in which this list was created.)
      */
     public Reference getEncounter() { 
@@ -905,51 +954,6 @@ public class ListResource extends DomainResource {
      */
     public ListResource setEncounterTarget(Encounter value) { 
       this.encounterTarget = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #status} (Indicates the current state of this list.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
-     */
-    public Enumeration<ListStatus> getStatusElement() { 
-      if (this.status == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ListResource.status");
-        else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<ListStatus>(new ListStatusEnumFactory()); // bb
-      return this.status;
-    }
-
-    public boolean hasStatusElement() { 
-      return this.status != null && !this.status.isEmpty();
-    }
-
-    public boolean hasStatus() { 
-      return this.status != null && !this.status.isEmpty();
-    }
-
-    /**
-     * @param value {@link #status} (Indicates the current state of this list.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
-     */
-    public ListResource setStatusElement(Enumeration<ListStatus> value) { 
-      this.status = value;
-      return this;
-    }
-
-    /**
-     * @return Indicates the current state of this list.
-     */
-    public ListStatus getStatus() { 
-      return this.status == null ? null : this.status.getValue();
-    }
-
-    /**
-     * @param value Indicates the current state of this list.
-     */
-    public ListResource setStatus(ListStatus value) { 
-        if (this.status == null)
-          this.status = new Enumeration<ListStatus>(new ListStatusEnumFactory());
-        this.status.setValue(value);
       return this;
     }
 
@@ -1003,6 +1007,45 @@ public class ListResource extends DomainResource {
     }
 
     /**
+     * @return {@link #source} (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
+     */
+    public Reference getSource() { 
+      if (this.source == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ListResource.source");
+        else if (Configuration.doAutoCreate())
+          this.source = new Reference(); // cc
+      return this.source;
+    }
+
+    public boolean hasSource() { 
+      return this.source != null && !this.source.isEmpty();
+    }
+
+    /**
+     * @param value {@link #source} (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
+     */
+    public ListResource setSource(Reference value) { 
+      this.source = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #source} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
+     */
+    public Resource getSourceTarget() { 
+      return this.sourceTarget;
+    }
+
+    /**
+     * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
+     */
+    public ListResource setSourceTarget(Resource value) { 
+      this.sourceTarget = value;
+      return this;
+    }
+
+    /**
      * @return {@link #orderedBy} (What order applies to the items in the list.)
      */
     public CodeableConcept getOrderedBy() { 
@@ -1027,96 +1070,42 @@ public class ListResource extends DomainResource {
     }
 
     /**
-     * @return {@link #mode} (How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
+     * @return {@link #note} (Comments that apply to the overall list.)
      */
-    public Enumeration<ListMode> getModeElement() { 
-      if (this.mode == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ListResource.mode");
-        else if (Configuration.doAutoCreate())
-          this.mode = new Enumeration<ListMode>(new ListModeEnumFactory()); // bb
-      return this.mode;
-    }
-
-    public boolean hasModeElement() { 
-      return this.mode != null && !this.mode.isEmpty();
-    }
-
-    public boolean hasMode() { 
-      return this.mode != null && !this.mode.isEmpty();
-    }
-
-    /**
-     * @param value {@link #mode} (How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
-     */
-    public ListResource setModeElement(Enumeration<ListMode> value) { 
-      this.mode = value;
-      return this;
-    }
-
-    /**
-     * @return How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
-     */
-    public ListMode getMode() { 
-      return this.mode == null ? null : this.mode.getValue();
-    }
-
-    /**
-     * @param value How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
-     */
-    public ListResource setMode(ListMode value) { 
-        if (this.mode == null)
-          this.mode = new Enumeration<ListMode>(new ListModeEnumFactory());
-        this.mode.setValue(value);
-      return this;
-    }
-
-    /**
-     * @return {@link #note} (Comments that apply to the overall list.). This is the underlying object with id, value and extensions. The accessor "getNote" gives direct access to the value
-     */
-    public StringType getNoteElement() { 
+    public List<Annotation> getNote() { 
       if (this.note == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ListResource.note");
-        else if (Configuration.doAutoCreate())
-          this.note = new StringType(); // bb
+        this.note = new ArrayList<Annotation>();
       return this.note;
     }
 
-    public boolean hasNoteElement() { 
-      return this.note != null && !this.note.isEmpty();
-    }
-
     public boolean hasNote() { 
-      return this.note != null && !this.note.isEmpty();
+      if (this.note == null)
+        return false;
+      for (Annotation item : this.note)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #note} (Comments that apply to the overall list.). This is the underlying object with id, value and extensions. The accessor "getNote" gives direct access to the value
+     * @return {@link #note} (Comments that apply to the overall list.)
      */
-    public ListResource setNoteElement(StringType value) { 
-      this.note = value;
-      return this;
+    // syntactic sugar
+    public Annotation addNote() { //3
+      Annotation t = new Annotation();
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return t;
     }
 
-    /**
-     * @return Comments that apply to the overall list.
-     */
-    public String getNote() { 
-      return this.note == null ? null : this.note.getValue();
-    }
-
-    /**
-     * @param value Comments that apply to the overall list.
-     */
-    public ListResource setNote(String value) { 
-      if (Utilities.noString(value))
-        this.note = null;
-      else {
-        if (this.note == null)
-          this.note = new StringType();
-        this.note.setValue(value);
-      }
+    // syntactic sugar
+    public ListResource addNote(Annotation t) { //3
+      if (t == null)
+        return this;
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
       return this;
     }
 
@@ -1187,16 +1176,16 @@ public class ListResource extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Identifier for the List assigned for business purposes outside the context of FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("status", "code", "Indicates the current state of this list.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("mode", "code", "How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.", 0, java.lang.Integer.MAX_VALUE, mode));
         childrenList.add(new Property("title", "string", "A label for the list assigned by the author.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("code", "CodeableConcept", "This code defines the purpose of the list - why it was created.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The common subject (or patient) of the resources that are in the list, if there is one.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("source", "Reference(Practitioner|Patient|Device)", "The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "The encounter that is the context in which this list was created.", 0, java.lang.Integer.MAX_VALUE, encounter));
-        childrenList.add(new Property("status", "code", "Indicates the current state of this list.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("date", "dateTime", "The date that the list was prepared.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("source", "Reference(Practitioner|Patient|Device)", "The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("orderedBy", "CodeableConcept", "What order applies to the items in the list.", 0, java.lang.Integer.MAX_VALUE, orderedBy));
-        childrenList.add(new Property("mode", "code", "How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.", 0, java.lang.Integer.MAX_VALUE, mode));
-        childrenList.add(new Property("note", "string", "Comments that apply to the overall list.", 0, java.lang.Integer.MAX_VALUE, note));
+        childrenList.add(new Property("note", "Annotation", "Comments that apply to the overall list.", 0, java.lang.Integer.MAX_VALUE, note));
         childrenList.add(new Property("entry", "", "Entries in this list.", 0, java.lang.Integer.MAX_VALUE, entry));
         childrenList.add(new Property("emptyReason", "CodeableConcept", "If the list is empty, why the list is empty.", 0, java.lang.Integer.MAX_VALUE, emptyReason));
       }
@@ -1205,26 +1194,26 @@ public class ListResource extends DomainResource {
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier"))
           this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("status"))
+          this.status = new ListStatusEnumFactory().fromType(value); // Enumeration<ListStatus>
+        else if (name.equals("mode"))
+          this.mode = new ListModeEnumFactory().fromType(value); // Enumeration<ListMode>
         else if (name.equals("title"))
           this.title = castToString(value); // StringType
         else if (name.equals("code"))
           this.code = castToCodeableConcept(value); // CodeableConcept
         else if (name.equals("subject"))
           this.subject = castToReference(value); // Reference
-        else if (name.equals("source"))
-          this.source = castToReference(value); // Reference
         else if (name.equals("encounter"))
           this.encounter = castToReference(value); // Reference
-        else if (name.equals("status"))
-          this.status = new ListStatusEnumFactory().fromType(value); // Enumeration<ListStatus>
         else if (name.equals("date"))
           this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("source"))
+          this.source = castToReference(value); // Reference
         else if (name.equals("orderedBy"))
           this.orderedBy = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("mode"))
-          this.mode = new ListModeEnumFactory().fromType(value); // Enumeration<ListMode>
         else if (name.equals("note"))
-          this.note = castToString(value); // StringType
+          this.getNote().add(castToAnnotation(value));
         else if (name.equals("entry"))
           this.getEntry().add((ListEntryComponent) value);
         else if (name.equals("emptyReason"))
@@ -1238,6 +1227,12 @@ public class ListResource extends DomainResource {
         if (name.equals("identifier")) {
           return addIdentifier();
         }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ListResource.status");
+        }
+        else if (name.equals("mode")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ListResource.mode");
+        }
         else if (name.equals("title")) {
           throw new FHIRException("Cannot call addChild on a primitive type ListResource.title");
         }
@@ -1249,29 +1244,23 @@ public class ListResource extends DomainResource {
           this.subject = new Reference();
           return this.subject;
         }
-        else if (name.equals("source")) {
-          this.source = new Reference();
-          return this.source;
-        }
         else if (name.equals("encounter")) {
           this.encounter = new Reference();
           return this.encounter;
         }
-        else if (name.equals("status")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ListResource.status");
-        }
         else if (name.equals("date")) {
           throw new FHIRException("Cannot call addChild on a primitive type ListResource.date");
+        }
+        else if (name.equals("source")) {
+          this.source = new Reference();
+          return this.source;
         }
         else if (name.equals("orderedBy")) {
           this.orderedBy = new CodeableConcept();
           return this.orderedBy;
         }
-        else if (name.equals("mode")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ListResource.mode");
-        }
         else if (name.equals("note")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ListResource.note");
+          return addNote();
         }
         else if (name.equals("entry")) {
           return addEntry();
@@ -1297,16 +1286,20 @@ public class ListResource extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
+        dst.status = status == null ? null : status.copy();
+        dst.mode = mode == null ? null : mode.copy();
         dst.title = title == null ? null : title.copy();
         dst.code = code == null ? null : code.copy();
         dst.subject = subject == null ? null : subject.copy();
-        dst.source = source == null ? null : source.copy();
         dst.encounter = encounter == null ? null : encounter.copy();
-        dst.status = status == null ? null : status.copy();
         dst.date = date == null ? null : date.copy();
+        dst.source = source == null ? null : source.copy();
         dst.orderedBy = orderedBy == null ? null : orderedBy.copy();
-        dst.mode = mode == null ? null : mode.copy();
-        dst.note = note == null ? null : note.copy();
+        if (note != null) {
+          dst.note = new ArrayList<Annotation>();
+          for (Annotation i : note)
+            dst.note.add(i.copy());
+        };
         if (entry != null) {
           dst.entry = new ArrayList<ListEntryComponent>();
           for (ListEntryComponent i : entry)
@@ -1327,10 +1320,10 @@ public class ListResource extends DomainResource {
         if (!(other instanceof ListResource))
           return false;
         ListResource o = (ListResource) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(title, o.title, true) && compareDeep(code, o.code, true)
-           && compareDeep(subject, o.subject, true) && compareDeep(source, o.source, true) && compareDeep(encounter, o.encounter, true)
-           && compareDeep(status, o.status, true) && compareDeep(date, o.date, true) && compareDeep(orderedBy, o.orderedBy, true)
-           && compareDeep(mode, o.mode, true) && compareDeep(note, o.note, true) && compareDeep(entry, o.entry, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(mode, o.mode, true)
+           && compareDeep(title, o.title, true) && compareDeep(code, o.code, true) && compareDeep(subject, o.subject, true)
+           && compareDeep(encounter, o.encounter, true) && compareDeep(date, o.date, true) && compareDeep(source, o.source, true)
+           && compareDeep(orderedBy, o.orderedBy, true) && compareDeep(note, o.note, true) && compareDeep(entry, o.entry, true)
            && compareDeep(emptyReason, o.emptyReason, true);
       }
 
@@ -1341,15 +1334,15 @@ public class ListResource extends DomainResource {
         if (!(other instanceof ListResource))
           return false;
         ListResource o = (ListResource) other;
-        return compareValues(title, o.title, true) && compareValues(status, o.status, true) && compareValues(date, o.date, true)
-           && compareValues(mode, o.mode, true) && compareValues(note, o.note, true);
+        return compareValues(status, o.status, true) && compareValues(mode, o.mode, true) && compareValues(title, o.title, true)
+           && compareValues(date, o.date, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (title == null || title.isEmpty())
-           && (code == null || code.isEmpty()) && (subject == null || subject.isEmpty()) && (source == null || source.isEmpty())
-           && (encounter == null || encounter.isEmpty()) && (status == null || status.isEmpty()) && (date == null || date.isEmpty())
-           && (orderedBy == null || orderedBy.isEmpty()) && (mode == null || mode.isEmpty()) && (note == null || note.isEmpty())
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
+           && (mode == null || mode.isEmpty()) && (title == null || title.isEmpty()) && (code == null || code.isEmpty())
+           && (subject == null || subject.isEmpty()) && (encounter == null || encounter.isEmpty()) && (date == null || date.isEmpty())
+           && (source == null || source.isEmpty()) && (orderedBy == null || orderedBy.isEmpty()) && (note == null || note.isEmpty())
            && (entry == null || entry.isEmpty()) && (emptyReason == null || emptyReason.isEmpty());
       }
 
@@ -1377,6 +1370,26 @@ public class ListResource extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
+
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>Business identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>List.identifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="identifier", path="List.identifier", description="Business identifier", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>Business identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>List.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
    * Search parameter: <b>item</b>

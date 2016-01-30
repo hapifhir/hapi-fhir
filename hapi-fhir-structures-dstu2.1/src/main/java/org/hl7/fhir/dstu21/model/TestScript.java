@@ -29,22 +29,19 @@ package org.hl7.fhir.dstu21.model;
   
 */
 
-// Generated on Mon, Dec 21, 2015 20:18-0500 for FHIR v1.2.0
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Sat, Jan 30, 2016 09:18-0500 for FHIR v1.3.0
 
-import org.hl7.fhir.dstu21.exceptions.FHIRException;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu21.model.Enumerations.ConformanceResourceStatusEnumFactory;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import java.util.*;
+
 import org.hl7.fhir.utilities.Utilities;
-
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.dstu21.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Block;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 /**
  * TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.
  */
@@ -3011,9 +3008,9 @@ public class TestScript extends DomainResource {
          */
         @Child(name = "action", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="A setup operation or assert to perform", formalDefinition="Action would contain either an operation or an assertion." )
-        protected List<TestScriptSetupActionComponent> action;
+        protected List<SetupActionComponent> action;
 
-        private static final long serialVersionUID = -1836543723L;
+        private static final long serialVersionUID = 9850834L;
 
     /**
      * Constructor
@@ -3049,16 +3046,16 @@ public class TestScript extends DomainResource {
         /**
          * @return {@link #action} (Action would contain either an operation or an assertion.)
          */
-        public List<TestScriptSetupActionComponent> getAction() { 
+        public List<SetupActionComponent> getAction() { 
           if (this.action == null)
-            this.action = new ArrayList<TestScriptSetupActionComponent>();
+            this.action = new ArrayList<SetupActionComponent>();
           return this.action;
         }
 
         public boolean hasAction() { 
           if (this.action == null)
             return false;
-          for (TestScriptSetupActionComponent item : this.action)
+          for (SetupActionComponent item : this.action)
             if (!item.isEmpty())
               return true;
           return false;
@@ -3068,20 +3065,20 @@ public class TestScript extends DomainResource {
          * @return {@link #action} (Action would contain either an operation or an assertion.)
          */
     // syntactic sugar
-        public TestScriptSetupActionComponent addAction() { //3
-          TestScriptSetupActionComponent t = new TestScriptSetupActionComponent();
+        public SetupActionComponent addAction() { //3
+          SetupActionComponent t = new SetupActionComponent();
           if (this.action == null)
-            this.action = new ArrayList<TestScriptSetupActionComponent>();
+            this.action = new ArrayList<SetupActionComponent>();
           this.action.add(t);
           return t;
         }
 
     // syntactic sugar
-        public TestScriptSetupComponent addAction(TestScriptSetupActionComponent t) { //3
+        public TestScriptSetupComponent addAction(SetupActionComponent t) { //3
           if (t == null)
             return this;
           if (this.action == null)
-            this.action = new ArrayList<TestScriptSetupActionComponent>();
+            this.action = new ArrayList<SetupActionComponent>();
           this.action.add(t);
           return this;
         }
@@ -3097,7 +3094,7 @@ public class TestScript extends DomainResource {
         if (name.equals("metadata"))
           this.metadata = (TestScriptMetadataComponent) value; // TestScriptMetadataComponent
         else if (name.equals("action"))
-          this.getAction().add((TestScriptSetupActionComponent) value);
+          this.getAction().add((SetupActionComponent) value);
         else
           super.setProperty(name, value);
       }
@@ -3120,8 +3117,8 @@ public class TestScript extends DomainResource {
         copyValues(dst);
         dst.metadata = metadata == null ? null : metadata.copy();
         if (action != null) {
-          dst.action = new ArrayList<TestScriptSetupActionComponent>();
-          for (TestScriptSetupActionComponent i : action)
+          dst.action = new ArrayList<SetupActionComponent>();
+          for (SetupActionComponent i : action)
             dst.action.add(i.copy());
         };
         return dst;
@@ -3160,39 +3157,39 @@ public class TestScript extends DomainResource {
   }
 
     @Block()
-    public static class TestScriptSetupActionComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SetupActionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The operation to perform.
          */
         @Child(name = "operation", type = {}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The setup operation to perform", formalDefinition="The operation to perform." )
-        protected TestScriptSetupActionOperationComponent operation;
+        protected SetupActionOperationComponent operation;
 
         /**
          * Evaluates the results of previous operations to determine if the server under test behaves appropriately.
          */
         @Child(name = "assert", type = {}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The assertion to perform", formalDefinition="Evaluates the results of previous operations to determine if the server under test behaves appropriately." )
-        protected TestScriptSetupActionAssertComponent assert_;
+        protected SetupActionAssertComponent assert_;
 
-        private static final long serialVersionUID = 1411550037L;
+        private static final long serialVersionUID = -252088305L;
 
     /**
      * Constructor
      */
-      public TestScriptSetupActionComponent() {
+      public SetupActionComponent() {
         super();
       }
 
         /**
          * @return {@link #operation} (The operation to perform.)
          */
-        public TestScriptSetupActionOperationComponent getOperation() { 
+        public SetupActionOperationComponent getOperation() { 
           if (this.operation == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionComponent.operation");
+              throw new Error("Attempt to auto-create SetupActionComponent.operation");
             else if (Configuration.doAutoCreate())
-              this.operation = new TestScriptSetupActionOperationComponent(); // cc
+              this.operation = new SetupActionOperationComponent(); // cc
           return this.operation;
         }
 
@@ -3203,7 +3200,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #operation} (The operation to perform.)
          */
-        public TestScriptSetupActionComponent setOperation(TestScriptSetupActionOperationComponent value) { 
+        public SetupActionComponent setOperation(SetupActionOperationComponent value) { 
           this.operation = value;
           return this;
         }
@@ -3211,12 +3208,12 @@ public class TestScript extends DomainResource {
         /**
          * @return {@link #assert_} (Evaluates the results of previous operations to determine if the server under test behaves appropriately.)
          */
-        public TestScriptSetupActionAssertComponent getAssert() { 
+        public SetupActionAssertComponent getAssert() { 
           if (this.assert_ == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionComponent.assert_");
+              throw new Error("Attempt to auto-create SetupActionComponent.assert_");
             else if (Configuration.doAutoCreate())
-              this.assert_ = new TestScriptSetupActionAssertComponent(); // cc
+              this.assert_ = new SetupActionAssertComponent(); // cc
           return this.assert_;
         }
 
@@ -3227,7 +3224,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #assert_} (Evaluates the results of previous operations to determine if the server under test behaves appropriately.)
          */
-        public TestScriptSetupActionComponent setAssert(TestScriptSetupActionAssertComponent value) { 
+        public SetupActionComponent setAssert(SetupActionAssertComponent value) { 
           this.assert_ = value;
           return this;
         }
@@ -3241,9 +3238,9 @@ public class TestScript extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("operation"))
-          this.operation = (TestScriptSetupActionOperationComponent) value; // TestScriptSetupActionOperationComponent
+          this.operation = (SetupActionOperationComponent) value; // SetupActionOperationComponent
         else if (name.equals("assert"))
-          this.assert_ = (TestScriptSetupActionAssertComponent) value; // TestScriptSetupActionAssertComponent
+          this.assert_ = (SetupActionAssertComponent) value; // SetupActionAssertComponent
         else
           super.setProperty(name, value);
       }
@@ -3251,19 +3248,19 @@ public class TestScript extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("operation")) {
-          this.operation = new TestScriptSetupActionOperationComponent();
+          this.operation = new SetupActionOperationComponent();
           return this.operation;
         }
         else if (name.equals("assert")) {
-          this.assert_ = new TestScriptSetupActionAssertComponent();
+          this.assert_ = new SetupActionAssertComponent();
           return this.assert_;
         }
         else
           return super.addChild(name);
       }
 
-      public TestScriptSetupActionComponent copy() {
-        TestScriptSetupActionComponent dst = new TestScriptSetupActionComponent();
+      public SetupActionComponent copy() {
+        SetupActionComponent dst = new SetupActionComponent();
         copyValues(dst);
         dst.operation = operation == null ? null : operation.copy();
         dst.assert_ = assert_ == null ? null : assert_.copy();
@@ -3274,9 +3271,9 @@ public class TestScript extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof TestScriptSetupActionComponent))
+        if (!(other instanceof SetupActionComponent))
           return false;
-        TestScriptSetupActionComponent o = (TestScriptSetupActionComponent) other;
+        SetupActionComponent o = (SetupActionComponent) other;
         return compareDeep(operation, o.operation, true) && compareDeep(assert_, o.assert_, true);
       }
 
@@ -3284,9 +3281,9 @@ public class TestScript extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof TestScriptSetupActionComponent))
+        if (!(other instanceof SetupActionComponent))
           return false;
-        TestScriptSetupActionComponent o = (TestScriptSetupActionComponent) other;
+        SetupActionComponent o = (SetupActionComponent) other;
         return true;
       }
 
@@ -3303,7 +3300,7 @@ public class TestScript extends DomainResource {
   }
 
     @Block()
-    public static class TestScriptSetupActionOperationComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SetupActionOperationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Server interaction or operation type.
          */
@@ -3379,7 +3376,7 @@ public class TestScript extends DomainResource {
          */
         @Child(name = "requestHeader", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Each operation can have one ore more header elements", formalDefinition="Header elements would be used to set HTTP headers." )
-        protected List<TestScriptSetupActionOperationRequestHeaderComponent> requestHeader;
+        protected List<SetupActionOperationRequestHeaderComponent> requestHeader;
 
         /**
          * The fixture id (maybe new) to map to the response.
@@ -3409,12 +3406,12 @@ public class TestScript extends DomainResource {
         @Description(shortDefinition="Request URL", formalDefinition="Complete request URL." )
         protected StringType url;
 
-        private static final long serialVersionUID = 808886214L;
+        private static final long serialVersionUID = 606457859L;
 
     /**
      * Constructor
      */
-      public TestScriptSetupActionOperationComponent() {
+      public SetupActionOperationComponent() {
         super();
       }
 
@@ -3424,7 +3421,7 @@ public class TestScript extends DomainResource {
         public Coding getType() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.type");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.type");
             else if (Configuration.doAutoCreate())
               this.type = new Coding(); // cc
           return this.type;
@@ -3437,7 +3434,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #type} (Server interaction or operation type.)
          */
-        public TestScriptSetupActionOperationComponent setType(Coding value) { 
+        public SetupActionOperationComponent setType(Coding value) { 
           this.type = value;
           return this;
         }
@@ -3448,7 +3445,7 @@ public class TestScript extends DomainResource {
         public CodeType getResourceElement() { 
           if (this.resource == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.resource");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.resource");
             else if (Configuration.doAutoCreate())
               this.resource = new CodeType(); // bb
           return this.resource;
@@ -3465,7 +3462,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #resource} (The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.). This is the underlying object with id, value and extensions. The accessor "getResource" gives direct access to the value
          */
-        public TestScriptSetupActionOperationComponent setResourceElement(CodeType value) { 
+        public SetupActionOperationComponent setResourceElement(CodeType value) { 
           this.resource = value;
           return this;
         }
@@ -3480,7 +3477,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.
          */
-        public TestScriptSetupActionOperationComponent setResource(String value) { 
+        public SetupActionOperationComponent setResource(String value) { 
           if (Utilities.noString(value))
             this.resource = null;
           else {
@@ -3497,7 +3494,7 @@ public class TestScript extends DomainResource {
         public StringType getLabelElement() { 
           if (this.label == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.label");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.label");
             else if (Configuration.doAutoCreate())
               this.label = new StringType(); // bb
           return this.label;
@@ -3514,7 +3511,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #label} (The label would be used for tracking/logging purposes by test engines.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
          */
-        public TestScriptSetupActionOperationComponent setLabelElement(StringType value) { 
+        public SetupActionOperationComponent setLabelElement(StringType value) { 
           this.label = value;
           return this;
         }
@@ -3529,7 +3526,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The label would be used for tracking/logging purposes by test engines.
          */
-        public TestScriptSetupActionOperationComponent setLabel(String value) { 
+        public SetupActionOperationComponent setLabel(String value) { 
           if (Utilities.noString(value))
             this.label = null;
           else {
@@ -3546,7 +3543,7 @@ public class TestScript extends DomainResource {
         public StringType getDescriptionElement() { 
           if (this.description == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.description");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.description");
             else if (Configuration.doAutoCreate())
               this.description = new StringType(); // bb
           return this.description;
@@ -3563,7 +3560,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #description} (The description would be used by test engines for tracking and reporting purposes.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
-        public TestScriptSetupActionOperationComponent setDescriptionElement(StringType value) { 
+        public SetupActionOperationComponent setDescriptionElement(StringType value) { 
           this.description = value;
           return this;
         }
@@ -3578,7 +3575,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The description would be used by test engines for tracking and reporting purposes.
          */
-        public TestScriptSetupActionOperationComponent setDescription(String value) { 
+        public SetupActionOperationComponent setDescription(String value) { 
           if (Utilities.noString(value))
             this.description = null;
           else {
@@ -3595,7 +3592,7 @@ public class TestScript extends DomainResource {
         public Enumeration<ContentType> getAcceptElement() { 
           if (this.accept == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.accept");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.accept");
             else if (Configuration.doAutoCreate())
               this.accept = new Enumeration<ContentType>(new ContentTypeEnumFactory()); // bb
           return this.accept;
@@ -3612,7 +3609,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #accept} (The content-type or mime-type to use for RESTful operation in the 'Accept' header.). This is the underlying object with id, value and extensions. The accessor "getAccept" gives direct access to the value
          */
-        public TestScriptSetupActionOperationComponent setAcceptElement(Enumeration<ContentType> value) { 
+        public SetupActionOperationComponent setAcceptElement(Enumeration<ContentType> value) { 
           this.accept = value;
           return this;
         }
@@ -3627,7 +3624,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The content-type or mime-type to use for RESTful operation in the 'Accept' header.
          */
-        public TestScriptSetupActionOperationComponent setAccept(ContentType value) { 
+        public SetupActionOperationComponent setAccept(ContentType value) { 
           if (value == null)
             this.accept = null;
           else {
@@ -3644,7 +3641,7 @@ public class TestScript extends DomainResource {
         public Enumeration<ContentType> getContentTypeElement() { 
           if (this.contentType == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.contentType");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.contentType");
             else if (Configuration.doAutoCreate())
               this.contentType = new Enumeration<ContentType>(new ContentTypeEnumFactory()); // bb
           return this.contentType;
@@ -3661,7 +3658,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #contentType} (The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
          */
-        public TestScriptSetupActionOperationComponent setContentTypeElement(Enumeration<ContentType> value) { 
+        public SetupActionOperationComponent setContentTypeElement(Enumeration<ContentType> value) { 
           this.contentType = value;
           return this;
         }
@@ -3676,7 +3673,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.
          */
-        public TestScriptSetupActionOperationComponent setContentType(ContentType value) { 
+        public SetupActionOperationComponent setContentType(ContentType value) { 
           if (value == null)
             this.contentType = null;
           else {
@@ -3693,7 +3690,7 @@ public class TestScript extends DomainResource {
         public IntegerType getDestinationElement() { 
           if (this.destination == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.destination");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.destination");
             else if (Configuration.doAutoCreate())
               this.destination = new IntegerType(); // bb
           return this.destination;
@@ -3710,7 +3707,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #destination} (The server where the request message is destined for.  Must be one of the server numbers listed in TestScript.destination section.). This is the underlying object with id, value and extensions. The accessor "getDestination" gives direct access to the value
          */
-        public TestScriptSetupActionOperationComponent setDestinationElement(IntegerType value) { 
+        public SetupActionOperationComponent setDestinationElement(IntegerType value) { 
           this.destination = value;
           return this;
         }
@@ -3725,7 +3722,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The server where the request message is destined for.  Must be one of the server numbers listed in TestScript.destination section.
          */
-        public TestScriptSetupActionOperationComponent setDestination(int value) { 
+        public SetupActionOperationComponent setDestination(int value) { 
             if (this.destination == null)
               this.destination = new IntegerType();
             this.destination.setValue(value);
@@ -3738,7 +3735,7 @@ public class TestScript extends DomainResource {
         public BooleanType getEncodeRequestUrlElement() { 
           if (this.encodeRequestUrl == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.encodeRequestUrl");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.encodeRequestUrl");
             else if (Configuration.doAutoCreate())
               this.encodeRequestUrl = new BooleanType(); // bb
           return this.encodeRequestUrl;
@@ -3755,7 +3752,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #encodeRequestUrl} (Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.). This is the underlying object with id, value and extensions. The accessor "getEncodeRequestUrl" gives direct access to the value
          */
-        public TestScriptSetupActionOperationComponent setEncodeRequestUrlElement(BooleanType value) { 
+        public SetupActionOperationComponent setEncodeRequestUrlElement(BooleanType value) { 
           this.encodeRequestUrl = value;
           return this;
         }
@@ -3770,7 +3767,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.
          */
-        public TestScriptSetupActionOperationComponent setEncodeRequestUrl(boolean value) { 
+        public SetupActionOperationComponent setEncodeRequestUrl(boolean value) { 
             if (this.encodeRequestUrl == null)
               this.encodeRequestUrl = new BooleanType();
             this.encodeRequestUrl.setValue(value);
@@ -3783,7 +3780,7 @@ public class TestScript extends DomainResource {
         public IntegerType getOriginElement() { 
           if (this.origin == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.origin");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.origin");
             else if (Configuration.doAutoCreate())
               this.origin = new IntegerType(); // bb
           return this.origin;
@@ -3800,7 +3797,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #origin} (The server where the request message originates from.  Must be one of the server numbers listed in TestScript.origin section.). This is the underlying object with id, value and extensions. The accessor "getOrigin" gives direct access to the value
          */
-        public TestScriptSetupActionOperationComponent setOriginElement(IntegerType value) { 
+        public SetupActionOperationComponent setOriginElement(IntegerType value) { 
           this.origin = value;
           return this;
         }
@@ -3815,7 +3812,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The server where the request message originates from.  Must be one of the server numbers listed in TestScript.origin section.
          */
-        public TestScriptSetupActionOperationComponent setOrigin(int value) { 
+        public SetupActionOperationComponent setOrigin(int value) { 
             if (this.origin == null)
               this.origin = new IntegerType();
             this.origin.setValue(value);
@@ -3828,7 +3825,7 @@ public class TestScript extends DomainResource {
         public StringType getParamsElement() { 
           if (this.params == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.params");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.params");
             else if (Configuration.doAutoCreate())
               this.params = new StringType(); // bb
           return this.params;
@@ -3845,7 +3842,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #params} (Path plus parameters after [type].  Used to set parts of the request URL explicitly.). This is the underlying object with id, value and extensions. The accessor "getParams" gives direct access to the value
          */
-        public TestScriptSetupActionOperationComponent setParamsElement(StringType value) { 
+        public SetupActionOperationComponent setParamsElement(StringType value) { 
           this.params = value;
           return this;
         }
@@ -3860,7 +3857,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value Path plus parameters after [type].  Used to set parts of the request URL explicitly.
          */
-        public TestScriptSetupActionOperationComponent setParams(String value) { 
+        public SetupActionOperationComponent setParams(String value) { 
           if (Utilities.noString(value))
             this.params = null;
           else {
@@ -3874,16 +3871,16 @@ public class TestScript extends DomainResource {
         /**
          * @return {@link #requestHeader} (Header elements would be used to set HTTP headers.)
          */
-        public List<TestScriptSetupActionOperationRequestHeaderComponent> getRequestHeader() { 
+        public List<SetupActionOperationRequestHeaderComponent> getRequestHeader() { 
           if (this.requestHeader == null)
-            this.requestHeader = new ArrayList<TestScriptSetupActionOperationRequestHeaderComponent>();
+            this.requestHeader = new ArrayList<SetupActionOperationRequestHeaderComponent>();
           return this.requestHeader;
         }
 
         public boolean hasRequestHeader() { 
           if (this.requestHeader == null)
             return false;
-          for (TestScriptSetupActionOperationRequestHeaderComponent item : this.requestHeader)
+          for (SetupActionOperationRequestHeaderComponent item : this.requestHeader)
             if (!item.isEmpty())
               return true;
           return false;
@@ -3893,20 +3890,20 @@ public class TestScript extends DomainResource {
          * @return {@link #requestHeader} (Header elements would be used to set HTTP headers.)
          */
     // syntactic sugar
-        public TestScriptSetupActionOperationRequestHeaderComponent addRequestHeader() { //3
-          TestScriptSetupActionOperationRequestHeaderComponent t = new TestScriptSetupActionOperationRequestHeaderComponent();
+        public SetupActionOperationRequestHeaderComponent addRequestHeader() { //3
+          SetupActionOperationRequestHeaderComponent t = new SetupActionOperationRequestHeaderComponent();
           if (this.requestHeader == null)
-            this.requestHeader = new ArrayList<TestScriptSetupActionOperationRequestHeaderComponent>();
+            this.requestHeader = new ArrayList<SetupActionOperationRequestHeaderComponent>();
           this.requestHeader.add(t);
           return t;
         }
 
     // syntactic sugar
-        public TestScriptSetupActionOperationComponent addRequestHeader(TestScriptSetupActionOperationRequestHeaderComponent t) { //3
+        public SetupActionOperationComponent addRequestHeader(SetupActionOperationRequestHeaderComponent t) { //3
           if (t == null)
             return this;
           if (this.requestHeader == null)
-            this.requestHeader = new ArrayList<TestScriptSetupActionOperationRequestHeaderComponent>();
+            this.requestHeader = new ArrayList<SetupActionOperationRequestHeaderComponent>();
           this.requestHeader.add(t);
           return this;
         }
@@ -3917,7 +3914,7 @@ public class TestScript extends DomainResource {
         public IdType getResponseIdElement() { 
           if (this.responseId == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.responseId");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.responseId");
             else if (Configuration.doAutoCreate())
               this.responseId = new IdType(); // bb
           return this.responseId;
@@ -3934,7 +3931,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #responseId} (The fixture id (maybe new) to map to the response.). This is the underlying object with id, value and extensions. The accessor "getResponseId" gives direct access to the value
          */
-        public TestScriptSetupActionOperationComponent setResponseIdElement(IdType value) { 
+        public SetupActionOperationComponent setResponseIdElement(IdType value) { 
           this.responseId = value;
           return this;
         }
@@ -3949,7 +3946,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The fixture id (maybe new) to map to the response.
          */
-        public TestScriptSetupActionOperationComponent setResponseId(String value) { 
+        public SetupActionOperationComponent setResponseId(String value) { 
           if (Utilities.noString(value))
             this.responseId = null;
           else {
@@ -3966,7 +3963,7 @@ public class TestScript extends DomainResource {
         public IdType getSourceIdElement() { 
           if (this.sourceId == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.sourceId");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.sourceId");
             else if (Configuration.doAutoCreate())
               this.sourceId = new IdType(); // bb
           return this.sourceId;
@@ -3983,7 +3980,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #sourceId} (The id of the fixture used as the body of a PUT or POST request.). This is the underlying object with id, value and extensions. The accessor "getSourceId" gives direct access to the value
          */
-        public TestScriptSetupActionOperationComponent setSourceIdElement(IdType value) { 
+        public SetupActionOperationComponent setSourceIdElement(IdType value) { 
           this.sourceId = value;
           return this;
         }
@@ -3998,7 +3995,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The id of the fixture used as the body of a PUT or POST request.
          */
-        public TestScriptSetupActionOperationComponent setSourceId(String value) { 
+        public SetupActionOperationComponent setSourceId(String value) { 
           if (Utilities.noString(value))
             this.sourceId = null;
           else {
@@ -4015,7 +4012,7 @@ public class TestScript extends DomainResource {
         public IdType getTargetIdElement() { 
           if (this.targetId == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.targetId");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.targetId");
             else if (Configuration.doAutoCreate())
               this.targetId = new IdType(); // bb
           return this.targetId;
@@ -4032,7 +4029,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #targetId} (Id of fixture used for extracting the [id],  [type], and [vid] for GET requests.). This is the underlying object with id, value and extensions. The accessor "getTargetId" gives direct access to the value
          */
-        public TestScriptSetupActionOperationComponent setTargetIdElement(IdType value) { 
+        public SetupActionOperationComponent setTargetIdElement(IdType value) { 
           this.targetId = value;
           return this;
         }
@@ -4047,7 +4044,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value Id of fixture used for extracting the [id],  [type], and [vid] for GET requests.
          */
-        public TestScriptSetupActionOperationComponent setTargetId(String value) { 
+        public SetupActionOperationComponent setTargetId(String value) { 
           if (Utilities.noString(value))
             this.targetId = null;
           else {
@@ -4064,7 +4061,7 @@ public class TestScript extends DomainResource {
         public StringType getUrlElement() { 
           if (this.url == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.url");
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.url");
             else if (Configuration.doAutoCreate())
               this.url = new StringType(); // bb
           return this.url;
@@ -4081,7 +4078,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #url} (Complete request URL.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
          */
-        public TestScriptSetupActionOperationComponent setUrlElement(StringType value) { 
+        public SetupActionOperationComponent setUrlElement(StringType value) { 
           this.url = value;
           return this;
         }
@@ -4096,7 +4093,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value Complete request URL.
          */
-        public TestScriptSetupActionOperationComponent setUrl(String value) { 
+        public SetupActionOperationComponent setUrl(String value) { 
           if (Utilities.noString(value))
             this.url = null;
           else {
@@ -4149,7 +4146,7 @@ public class TestScript extends DomainResource {
         else if (name.equals("params"))
           this.params = castToString(value); // StringType
         else if (name.equals("requestHeader"))
-          this.getRequestHeader().add((TestScriptSetupActionOperationRequestHeaderComponent) value);
+          this.getRequestHeader().add((SetupActionOperationRequestHeaderComponent) value);
         else if (name.equals("responseId"))
           this.responseId = castToId(value); // IdType
         else if (name.equals("sourceId"))
@@ -4214,8 +4211,8 @@ public class TestScript extends DomainResource {
           return super.addChild(name);
       }
 
-      public TestScriptSetupActionOperationComponent copy() {
-        TestScriptSetupActionOperationComponent dst = new TestScriptSetupActionOperationComponent();
+      public SetupActionOperationComponent copy() {
+        SetupActionOperationComponent dst = new SetupActionOperationComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
         dst.resource = resource == null ? null : resource.copy();
@@ -4228,8 +4225,8 @@ public class TestScript extends DomainResource {
         dst.origin = origin == null ? null : origin.copy();
         dst.params = params == null ? null : params.copy();
         if (requestHeader != null) {
-          dst.requestHeader = new ArrayList<TestScriptSetupActionOperationRequestHeaderComponent>();
-          for (TestScriptSetupActionOperationRequestHeaderComponent i : requestHeader)
+          dst.requestHeader = new ArrayList<SetupActionOperationRequestHeaderComponent>();
+          for (SetupActionOperationRequestHeaderComponent i : requestHeader)
             dst.requestHeader.add(i.copy());
         };
         dst.responseId = responseId == null ? null : responseId.copy();
@@ -4243,9 +4240,9 @@ public class TestScript extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof TestScriptSetupActionOperationComponent))
+        if (!(other instanceof SetupActionOperationComponent))
           return false;
-        TestScriptSetupActionOperationComponent o = (TestScriptSetupActionOperationComponent) other;
+        SetupActionOperationComponent o = (SetupActionOperationComponent) other;
         return compareDeep(type, o.type, true) && compareDeep(resource, o.resource, true) && compareDeep(label, o.label, true)
            && compareDeep(description, o.description, true) && compareDeep(accept, o.accept, true) && compareDeep(contentType, o.contentType, true)
            && compareDeep(destination, o.destination, true) && compareDeep(encodeRequestUrl, o.encodeRequestUrl, true)
@@ -4258,9 +4255,9 @@ public class TestScript extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof TestScriptSetupActionOperationComponent))
+        if (!(other instanceof SetupActionOperationComponent))
           return false;
-        TestScriptSetupActionOperationComponent o = (TestScriptSetupActionOperationComponent) other;
+        SetupActionOperationComponent o = (SetupActionOperationComponent) other;
         return compareValues(resource, o.resource, true) && compareValues(label, o.label, true) && compareValues(description, o.description, true)
            && compareValues(accept, o.accept, true) && compareValues(contentType, o.contentType, true) && compareValues(destination, o.destination, true)
            && compareValues(encodeRequestUrl, o.encodeRequestUrl, true) && compareValues(origin, o.origin, true)
@@ -4286,7 +4283,7 @@ public class TestScript extends DomainResource {
   }
 
     @Block()
-    public static class TestScriptSetupActionOperationRequestHeaderComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SetupActionOperationRequestHeaderComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The HTTP header field e.g. "Accept".
          */
@@ -4306,14 +4303,14 @@ public class TestScript extends DomainResource {
     /**
      * Constructor
      */
-      public TestScriptSetupActionOperationRequestHeaderComponent() {
+      public SetupActionOperationRequestHeaderComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public TestScriptSetupActionOperationRequestHeaderComponent(StringType field, StringType value) {
+      public SetupActionOperationRequestHeaderComponent(StringType field, StringType value) {
         super();
         this.field = field;
         this.value = value;
@@ -4325,7 +4322,7 @@ public class TestScript extends DomainResource {
         public StringType getFieldElement() { 
           if (this.field == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationRequestHeaderComponent.field");
+              throw new Error("Attempt to auto-create SetupActionOperationRequestHeaderComponent.field");
             else if (Configuration.doAutoCreate())
               this.field = new StringType(); // bb
           return this.field;
@@ -4342,7 +4339,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #field} (The HTTP header field e.g. "Accept".). This is the underlying object with id, value and extensions. The accessor "getField" gives direct access to the value
          */
-        public TestScriptSetupActionOperationRequestHeaderComponent setFieldElement(StringType value) { 
+        public SetupActionOperationRequestHeaderComponent setFieldElement(StringType value) { 
           this.field = value;
           return this;
         }
@@ -4357,7 +4354,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The HTTP header field e.g. "Accept".
          */
-        public TestScriptSetupActionOperationRequestHeaderComponent setField(String value) { 
+        public SetupActionOperationRequestHeaderComponent setField(String value) { 
             if (this.field == null)
               this.field = new StringType();
             this.field.setValue(value);
@@ -4370,7 +4367,7 @@ public class TestScript extends DomainResource {
         public StringType getValueElement() { 
           if (this.value == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionOperationRequestHeaderComponent.value");
+              throw new Error("Attempt to auto-create SetupActionOperationRequestHeaderComponent.value");
             else if (Configuration.doAutoCreate())
               this.value = new StringType(); // bb
           return this.value;
@@ -4387,7 +4384,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #value} (The value of the header e.g. "application/xml".). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
          */
-        public TestScriptSetupActionOperationRequestHeaderComponent setValueElement(StringType value) { 
+        public SetupActionOperationRequestHeaderComponent setValueElement(StringType value) { 
           this.value = value;
           return this;
         }
@@ -4402,7 +4399,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The value of the header e.g. "application/xml".
          */
-        public TestScriptSetupActionOperationRequestHeaderComponent setValue(String value) { 
+        public SetupActionOperationRequestHeaderComponent setValue(String value) { 
             if (this.value == null)
               this.value = new StringType();
             this.value.setValue(value);
@@ -4437,8 +4434,8 @@ public class TestScript extends DomainResource {
           return super.addChild(name);
       }
 
-      public TestScriptSetupActionOperationRequestHeaderComponent copy() {
-        TestScriptSetupActionOperationRequestHeaderComponent dst = new TestScriptSetupActionOperationRequestHeaderComponent();
+      public SetupActionOperationRequestHeaderComponent copy() {
+        SetupActionOperationRequestHeaderComponent dst = new SetupActionOperationRequestHeaderComponent();
         copyValues(dst);
         dst.field = field == null ? null : field.copy();
         dst.value = value == null ? null : value.copy();
@@ -4449,9 +4446,9 @@ public class TestScript extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof TestScriptSetupActionOperationRequestHeaderComponent))
+        if (!(other instanceof SetupActionOperationRequestHeaderComponent))
           return false;
-        TestScriptSetupActionOperationRequestHeaderComponent o = (TestScriptSetupActionOperationRequestHeaderComponent) other;
+        SetupActionOperationRequestHeaderComponent o = (SetupActionOperationRequestHeaderComponent) other;
         return compareDeep(field, o.field, true) && compareDeep(value, o.value, true);
       }
 
@@ -4459,9 +4456,9 @@ public class TestScript extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof TestScriptSetupActionOperationRequestHeaderComponent))
+        if (!(other instanceof SetupActionOperationRequestHeaderComponent))
           return false;
-        TestScriptSetupActionOperationRequestHeaderComponent o = (TestScriptSetupActionOperationRequestHeaderComponent) other;
+        SetupActionOperationRequestHeaderComponent o = (SetupActionOperationRequestHeaderComponent) other;
         return compareValues(field, o.field, true) && compareValues(value, o.value, true);
       }
 
@@ -4478,7 +4475,7 @@ public class TestScript extends DomainResource {
   }
 
     @Block()
-    public static class TestScriptSetupActionAssertComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SetupActionAssertComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The label would be used for tracking/logging purposes by test engines.
          */
@@ -4610,7 +4607,7 @@ public class TestScript extends DomainResource {
     /**
      * Constructor
      */
-      public TestScriptSetupActionAssertComponent() {
+      public SetupActionAssertComponent() {
         super();
       }
 
@@ -4620,7 +4617,7 @@ public class TestScript extends DomainResource {
         public StringType getLabelElement() { 
           if (this.label == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.label");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.label");
             else if (Configuration.doAutoCreate())
               this.label = new StringType(); // bb
           return this.label;
@@ -4637,7 +4634,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #label} (The label would be used for tracking/logging purposes by test engines.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setLabelElement(StringType value) { 
+        public SetupActionAssertComponent setLabelElement(StringType value) { 
           this.label = value;
           return this;
         }
@@ -4652,7 +4649,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The label would be used for tracking/logging purposes by test engines.
          */
-        public TestScriptSetupActionAssertComponent setLabel(String value) { 
+        public SetupActionAssertComponent setLabel(String value) { 
           if (Utilities.noString(value))
             this.label = null;
           else {
@@ -4669,7 +4666,7 @@ public class TestScript extends DomainResource {
         public StringType getDescriptionElement() { 
           if (this.description == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.description");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.description");
             else if (Configuration.doAutoCreate())
               this.description = new StringType(); // bb
           return this.description;
@@ -4686,7 +4683,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #description} (The description would be used by test engines for tracking and reporting purposes.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setDescriptionElement(StringType value) { 
+        public SetupActionAssertComponent setDescriptionElement(StringType value) { 
           this.description = value;
           return this;
         }
@@ -4701,7 +4698,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The description would be used by test engines for tracking and reporting purposes.
          */
-        public TestScriptSetupActionAssertComponent setDescription(String value) { 
+        public SetupActionAssertComponent setDescription(String value) { 
           if (Utilities.noString(value))
             this.description = null;
           else {
@@ -4718,7 +4715,7 @@ public class TestScript extends DomainResource {
         public Enumeration<AssertionDirectionType> getDirectionElement() { 
           if (this.direction == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.direction");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.direction");
             else if (Configuration.doAutoCreate())
               this.direction = new Enumeration<AssertionDirectionType>(new AssertionDirectionTypeEnumFactory()); // bb
           return this.direction;
@@ -4735,7 +4732,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #direction} (The direction to use for the assertion.). This is the underlying object with id, value and extensions. The accessor "getDirection" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setDirectionElement(Enumeration<AssertionDirectionType> value) { 
+        public SetupActionAssertComponent setDirectionElement(Enumeration<AssertionDirectionType> value) { 
           this.direction = value;
           return this;
         }
@@ -4750,7 +4747,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The direction to use for the assertion.
          */
-        public TestScriptSetupActionAssertComponent setDirection(AssertionDirectionType value) { 
+        public SetupActionAssertComponent setDirection(AssertionDirectionType value) { 
           if (value == null)
             this.direction = null;
           else {
@@ -4767,7 +4764,7 @@ public class TestScript extends DomainResource {
         public StringType getCompareToSourceIdElement() { 
           if (this.compareToSourceId == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.compareToSourceId");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.compareToSourceId");
             else if (Configuration.doAutoCreate())
               this.compareToSourceId = new StringType(); // bb
           return this.compareToSourceId;
@@ -4784,7 +4781,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #compareToSourceId} (Id of fixture used to compare the "sourceId/path" evaluations to.). This is the underlying object with id, value and extensions. The accessor "getCompareToSourceId" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setCompareToSourceIdElement(StringType value) { 
+        public SetupActionAssertComponent setCompareToSourceIdElement(StringType value) { 
           this.compareToSourceId = value;
           return this;
         }
@@ -4799,7 +4796,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value Id of fixture used to compare the "sourceId/path" evaluations to.
          */
-        public TestScriptSetupActionAssertComponent setCompareToSourceId(String value) { 
+        public SetupActionAssertComponent setCompareToSourceId(String value) { 
           if (Utilities.noString(value))
             this.compareToSourceId = null;
           else {
@@ -4816,7 +4813,7 @@ public class TestScript extends DomainResource {
         public StringType getCompareToSourcePathElement() { 
           if (this.compareToSourcePath == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.compareToSourcePath");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.compareToSourcePath");
             else if (Configuration.doAutoCreate())
               this.compareToSourcePath = new StringType(); // bb
           return this.compareToSourcePath;
@@ -4833,7 +4830,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #compareToSourcePath} (XPath or JSONPath expression against fixture used to compare the "sourceId/path" evaluations to.). This is the underlying object with id, value and extensions. The accessor "getCompareToSourcePath" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setCompareToSourcePathElement(StringType value) { 
+        public SetupActionAssertComponent setCompareToSourcePathElement(StringType value) { 
           this.compareToSourcePath = value;
           return this;
         }
@@ -4848,7 +4845,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value XPath or JSONPath expression against fixture used to compare the "sourceId/path" evaluations to.
          */
-        public TestScriptSetupActionAssertComponent setCompareToSourcePath(String value) { 
+        public SetupActionAssertComponent setCompareToSourcePath(String value) { 
           if (Utilities.noString(value))
             this.compareToSourcePath = null;
           else {
@@ -4865,7 +4862,7 @@ public class TestScript extends DomainResource {
         public Enumeration<ContentType> getContentTypeElement() { 
           if (this.contentType == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.contentType");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.contentType");
             else if (Configuration.doAutoCreate())
               this.contentType = new Enumeration<ContentType>(new ContentTypeEnumFactory()); // bb
           return this.contentType;
@@ -4882,7 +4879,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #contentType} (The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setContentTypeElement(Enumeration<ContentType> value) { 
+        public SetupActionAssertComponent setContentTypeElement(Enumeration<ContentType> value) { 
           this.contentType = value;
           return this;
         }
@@ -4897,7 +4894,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.
          */
-        public TestScriptSetupActionAssertComponent setContentType(ContentType value) { 
+        public SetupActionAssertComponent setContentType(ContentType value) { 
           if (value == null)
             this.contentType = null;
           else {
@@ -4914,7 +4911,7 @@ public class TestScript extends DomainResource {
         public StringType getHeaderFieldElement() { 
           if (this.headerField == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.headerField");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.headerField");
             else if (Configuration.doAutoCreate())
               this.headerField = new StringType(); // bb
           return this.headerField;
@@ -4931,7 +4928,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #headerField} (The HTTP header field name e.g. 'Location'.). This is the underlying object with id, value and extensions. The accessor "getHeaderField" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setHeaderFieldElement(StringType value) { 
+        public SetupActionAssertComponent setHeaderFieldElement(StringType value) { 
           this.headerField = value;
           return this;
         }
@@ -4946,7 +4943,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The HTTP header field name e.g. 'Location'.
          */
-        public TestScriptSetupActionAssertComponent setHeaderField(String value) { 
+        public SetupActionAssertComponent setHeaderField(String value) { 
           if (Utilities.noString(value))
             this.headerField = null;
           else {
@@ -4963,7 +4960,7 @@ public class TestScript extends DomainResource {
         public StringType getMinimumIdElement() { 
           if (this.minimumId == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.minimumId");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.minimumId");
             else if (Configuration.doAutoCreate())
               this.minimumId = new StringType(); // bb
           return this.minimumId;
@@ -4980,7 +4977,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #minimumId} (The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.). This is the underlying object with id, value and extensions. The accessor "getMinimumId" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setMinimumIdElement(StringType value) { 
+        public SetupActionAssertComponent setMinimumIdElement(StringType value) { 
           this.minimumId = value;
           return this;
         }
@@ -4995,7 +4992,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.
          */
-        public TestScriptSetupActionAssertComponent setMinimumId(String value) { 
+        public SetupActionAssertComponent setMinimumId(String value) { 
           if (Utilities.noString(value))
             this.minimumId = null;
           else {
@@ -5012,7 +5009,7 @@ public class TestScript extends DomainResource {
         public BooleanType getNavigationLinksElement() { 
           if (this.navigationLinks == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.navigationLinks");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.navigationLinks");
             else if (Configuration.doAutoCreate())
               this.navigationLinks = new BooleanType(); // bb
           return this.navigationLinks;
@@ -5029,7 +5026,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #navigationLinks} (Whether or not the test execution performs validation on the bundle navigation links.). This is the underlying object with id, value and extensions. The accessor "getNavigationLinks" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setNavigationLinksElement(BooleanType value) { 
+        public SetupActionAssertComponent setNavigationLinksElement(BooleanType value) { 
           this.navigationLinks = value;
           return this;
         }
@@ -5044,7 +5041,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value Whether or not the test execution performs validation on the bundle navigation links.
          */
-        public TestScriptSetupActionAssertComponent setNavigationLinks(boolean value) { 
+        public SetupActionAssertComponent setNavigationLinks(boolean value) { 
             if (this.navigationLinks == null)
               this.navigationLinks = new BooleanType();
             this.navigationLinks.setValue(value);
@@ -5057,7 +5054,7 @@ public class TestScript extends DomainResource {
         public Enumeration<AssertionOperatorType> getOperatorElement() { 
           if (this.operator == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.operator");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.operator");
             else if (Configuration.doAutoCreate())
               this.operator = new Enumeration<AssertionOperatorType>(new AssertionOperatorTypeEnumFactory()); // bb
           return this.operator;
@@ -5074,7 +5071,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #operator} (The operator type.). This is the underlying object with id, value and extensions. The accessor "getOperator" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setOperatorElement(Enumeration<AssertionOperatorType> value) { 
+        public SetupActionAssertComponent setOperatorElement(Enumeration<AssertionOperatorType> value) { 
           this.operator = value;
           return this;
         }
@@ -5089,7 +5086,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The operator type.
          */
-        public TestScriptSetupActionAssertComponent setOperator(AssertionOperatorType value) { 
+        public SetupActionAssertComponent setOperator(AssertionOperatorType value) { 
           if (value == null)
             this.operator = null;
           else {
@@ -5106,7 +5103,7 @@ public class TestScript extends DomainResource {
         public StringType getPathElement() { 
           if (this.path == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.path");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.path");
             else if (Configuration.doAutoCreate())
               this.path = new StringType(); // bb
           return this.path;
@@ -5123,7 +5120,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #path} (The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setPathElement(StringType value) { 
+        public SetupActionAssertComponent setPathElement(StringType value) { 
           this.path = value;
           return this;
         }
@@ -5138,7 +5135,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server.
          */
-        public TestScriptSetupActionAssertComponent setPath(String value) { 
+        public SetupActionAssertComponent setPath(String value) { 
           if (Utilities.noString(value))
             this.path = null;
           else {
@@ -5155,7 +5152,7 @@ public class TestScript extends DomainResource {
         public CodeType getResourceElement() { 
           if (this.resource == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.resource");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.resource");
             else if (Configuration.doAutoCreate())
               this.resource = new CodeType(); // bb
           return this.resource;
@@ -5172,7 +5169,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #resource} (The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.). This is the underlying object with id, value and extensions. The accessor "getResource" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setResourceElement(CodeType value) { 
+        public SetupActionAssertComponent setResourceElement(CodeType value) { 
           this.resource = value;
           return this;
         }
@@ -5187,7 +5184,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.
          */
-        public TestScriptSetupActionAssertComponent setResource(String value) { 
+        public SetupActionAssertComponent setResource(String value) { 
           if (Utilities.noString(value))
             this.resource = null;
           else {
@@ -5204,7 +5201,7 @@ public class TestScript extends DomainResource {
         public Enumeration<AssertionResponseTypes> getResponseElement() { 
           if (this.response == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.response");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.response");
             else if (Configuration.doAutoCreate())
               this.response = new Enumeration<AssertionResponseTypes>(new AssertionResponseTypesEnumFactory()); // bb
           return this.response;
@@ -5221,7 +5218,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #response} (okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.). This is the underlying object with id, value and extensions. The accessor "getResponse" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setResponseElement(Enumeration<AssertionResponseTypes> value) { 
+        public SetupActionAssertComponent setResponseElement(Enumeration<AssertionResponseTypes> value) { 
           this.response = value;
           return this;
         }
@@ -5236,7 +5233,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.
          */
-        public TestScriptSetupActionAssertComponent setResponse(AssertionResponseTypes value) { 
+        public SetupActionAssertComponent setResponse(AssertionResponseTypes value) { 
           if (value == null)
             this.response = null;
           else {
@@ -5253,7 +5250,7 @@ public class TestScript extends DomainResource {
         public StringType getResponseCodeElement() { 
           if (this.responseCode == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.responseCode");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.responseCode");
             else if (Configuration.doAutoCreate())
               this.responseCode = new StringType(); // bb
           return this.responseCode;
@@ -5270,7 +5267,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #responseCode} (The value of the HTTP response code to be tested.). This is the underlying object with id, value and extensions. The accessor "getResponseCode" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setResponseCodeElement(StringType value) { 
+        public SetupActionAssertComponent setResponseCodeElement(StringType value) { 
           this.responseCode = value;
           return this;
         }
@@ -5285,7 +5282,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The value of the HTTP response code to be tested.
          */
-        public TestScriptSetupActionAssertComponent setResponseCode(String value) { 
+        public SetupActionAssertComponent setResponseCode(String value) { 
           if (Utilities.noString(value))
             this.responseCode = null;
           else {
@@ -5302,7 +5299,7 @@ public class TestScript extends DomainResource {
         public IdType getSourceIdElement() { 
           if (this.sourceId == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.sourceId");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.sourceId");
             else if (Configuration.doAutoCreate())
               this.sourceId = new IdType(); // bb
           return this.sourceId;
@@ -5319,7 +5316,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #sourceId} (Fixture to evaluate the XPath/JSONPath expression or the headerField  against.). This is the underlying object with id, value and extensions. The accessor "getSourceId" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setSourceIdElement(IdType value) { 
+        public SetupActionAssertComponent setSourceIdElement(IdType value) { 
           this.sourceId = value;
           return this;
         }
@@ -5334,7 +5331,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value Fixture to evaluate the XPath/JSONPath expression or the headerField  against.
          */
-        public TestScriptSetupActionAssertComponent setSourceId(String value) { 
+        public SetupActionAssertComponent setSourceId(String value) { 
           if (Utilities.noString(value))
             this.sourceId = null;
           else {
@@ -5351,7 +5348,7 @@ public class TestScript extends DomainResource {
         public IdType getValidateProfileIdElement() { 
           if (this.validateProfileId == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.validateProfileId");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.validateProfileId");
             else if (Configuration.doAutoCreate())
               this.validateProfileId = new IdType(); // bb
           return this.validateProfileId;
@@ -5368,7 +5365,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #validateProfileId} (The ID of the Profile to validate against.). This is the underlying object with id, value and extensions. The accessor "getValidateProfileId" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setValidateProfileIdElement(IdType value) { 
+        public SetupActionAssertComponent setValidateProfileIdElement(IdType value) { 
           this.validateProfileId = value;
           return this;
         }
@@ -5383,7 +5380,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The ID of the Profile to validate against.
          */
-        public TestScriptSetupActionAssertComponent setValidateProfileId(String value) { 
+        public SetupActionAssertComponent setValidateProfileId(String value) { 
           if (Utilities.noString(value))
             this.validateProfileId = null;
           else {
@@ -5400,7 +5397,7 @@ public class TestScript extends DomainResource {
         public StringType getValueElement() { 
           if (this.value == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.value");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.value");
             else if (Configuration.doAutoCreate())
               this.value = new StringType(); // bb
           return this.value;
@@ -5417,7 +5414,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #value} (The value to compare to.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setValueElement(StringType value) { 
+        public SetupActionAssertComponent setValueElement(StringType value) { 
           this.value = value;
           return this;
         }
@@ -5432,7 +5429,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value The value to compare to.
          */
-        public TestScriptSetupActionAssertComponent setValue(String value) { 
+        public SetupActionAssertComponent setValue(String value) { 
           if (Utilities.noString(value))
             this.value = null;
           else {
@@ -5449,7 +5446,7 @@ public class TestScript extends DomainResource {
         public BooleanType getWarningOnlyElement() { 
           if (this.warningOnly == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.warningOnly");
+              throw new Error("Attempt to auto-create SetupActionAssertComponent.warningOnly");
             else if (Configuration.doAutoCreate())
               this.warningOnly = new BooleanType(); // bb
           return this.warningOnly;
@@ -5466,7 +5463,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #warningOnly} (Whether or not the test execution will produce a warning only on error for this assert.). This is the underlying object with id, value and extensions. The accessor "getWarningOnly" gives direct access to the value
          */
-        public TestScriptSetupActionAssertComponent setWarningOnlyElement(BooleanType value) { 
+        public SetupActionAssertComponent setWarningOnlyElement(BooleanType value) { 
           this.warningOnly = value;
           return this;
         }
@@ -5481,7 +5478,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value Whether or not the test execution will produce a warning only on error for this assert.
          */
-        public TestScriptSetupActionAssertComponent setWarningOnly(boolean value) { 
+        public SetupActionAssertComponent setWarningOnly(boolean value) { 
             if (this.warningOnly == null)
               this.warningOnly = new BooleanType();
             this.warningOnly.setValue(value);
@@ -5612,8 +5609,8 @@ public class TestScript extends DomainResource {
           return super.addChild(name);
       }
 
-      public TestScriptSetupActionAssertComponent copy() {
-        TestScriptSetupActionAssertComponent dst = new TestScriptSetupActionAssertComponent();
+      public SetupActionAssertComponent copy() {
+        SetupActionAssertComponent dst = new SetupActionAssertComponent();
         copyValues(dst);
         dst.label = label == null ? null : label.copy();
         dst.description = description == null ? null : description.copy();
@@ -5640,9 +5637,9 @@ public class TestScript extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof TestScriptSetupActionAssertComponent))
+        if (!(other instanceof SetupActionAssertComponent))
           return false;
-        TestScriptSetupActionAssertComponent o = (TestScriptSetupActionAssertComponent) other;
+        SetupActionAssertComponent o = (SetupActionAssertComponent) other;
         return compareDeep(label, o.label, true) && compareDeep(description, o.description, true) && compareDeep(direction, o.direction, true)
            && compareDeep(compareToSourceId, o.compareToSourceId, true) && compareDeep(compareToSourcePath, o.compareToSourcePath, true)
            && compareDeep(contentType, o.contentType, true) && compareDeep(headerField, o.headerField, true)
@@ -5657,9 +5654,9 @@ public class TestScript extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof TestScriptSetupActionAssertComponent))
+        if (!(other instanceof SetupActionAssertComponent))
           return false;
-        TestScriptSetupActionAssertComponent o = (TestScriptSetupActionAssertComponent) other;
+        SetupActionAssertComponent o = (SetupActionAssertComponent) other;
         return compareValues(label, o.label, true) && compareValues(description, o.description, true) && compareValues(direction, o.direction, true)
            && compareValues(compareToSourceId, o.compareToSourceId, true) && compareValues(compareToSourcePath, o.compareToSourcePath, true)
            && compareValues(contentType, o.contentType, true) && compareValues(headerField, o.headerField, true)
@@ -5717,9 +5714,9 @@ public class TestScript extends DomainResource {
          */
         @Child(name = "action", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="A test operation or assert to perform", formalDefinition="Action would contain either an operation or an assertion." )
-        protected List<TestScriptTestActionComponent> action;
+        protected List<TestActionComponent> action;
 
-        private static final long serialVersionUID = 408339297L;
+        private static final long serialVersionUID = -1607790780L;
 
     /**
      * Constructor
@@ -5853,16 +5850,16 @@ public class TestScript extends DomainResource {
         /**
          * @return {@link #action} (Action would contain either an operation or an assertion.)
          */
-        public List<TestScriptTestActionComponent> getAction() { 
+        public List<TestActionComponent> getAction() { 
           if (this.action == null)
-            this.action = new ArrayList<TestScriptTestActionComponent>();
+            this.action = new ArrayList<TestActionComponent>();
           return this.action;
         }
 
         public boolean hasAction() { 
           if (this.action == null)
             return false;
-          for (TestScriptTestActionComponent item : this.action)
+          for (TestActionComponent item : this.action)
             if (!item.isEmpty())
               return true;
           return false;
@@ -5872,20 +5869,20 @@ public class TestScript extends DomainResource {
          * @return {@link #action} (Action would contain either an operation or an assertion.)
          */
     // syntactic sugar
-        public TestScriptTestActionComponent addAction() { //3
-          TestScriptTestActionComponent t = new TestScriptTestActionComponent();
+        public TestActionComponent addAction() { //3
+          TestActionComponent t = new TestActionComponent();
           if (this.action == null)
-            this.action = new ArrayList<TestScriptTestActionComponent>();
+            this.action = new ArrayList<TestActionComponent>();
           this.action.add(t);
           return t;
         }
 
     // syntactic sugar
-        public TestScriptTestComponent addAction(TestScriptTestActionComponent t) { //3
+        public TestScriptTestComponent addAction(TestActionComponent t) { //3
           if (t == null)
             return this;
           if (this.action == null)
-            this.action = new ArrayList<TestScriptTestActionComponent>();
+            this.action = new ArrayList<TestActionComponent>();
           this.action.add(t);
           return this;
         }
@@ -5907,7 +5904,7 @@ public class TestScript extends DomainResource {
         else if (name.equals("metadata"))
           this.metadata = (TestScriptMetadataComponent) value; // TestScriptMetadataComponent
         else if (name.equals("action"))
-          this.getAction().add((TestScriptTestActionComponent) value);
+          this.getAction().add((TestActionComponent) value);
         else
           super.setProperty(name, value);
       }
@@ -5938,8 +5935,8 @@ public class TestScript extends DomainResource {
         dst.description = description == null ? null : description.copy();
         dst.metadata = metadata == null ? null : metadata.copy();
         if (action != null) {
-          dst.action = new ArrayList<TestScriptTestActionComponent>();
-          for (TestScriptTestActionComponent i : action)
+          dst.action = new ArrayList<TestActionComponent>();
+          for (TestActionComponent i : action)
             dst.action.add(i.copy());
         };
         return dst;
@@ -5979,39 +5976,39 @@ public class TestScript extends DomainResource {
   }
 
     @Block()
-    public static class TestScriptTestActionComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class TestActionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An operation would involve a REST request to a server.
          */
-        @Child(name = "operation", type = {TestScriptSetupActionOperationComponent.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "operation", type = {SetupActionOperationComponent.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The setup operation to perform", formalDefinition="An operation would involve a REST request to a server." )
-        protected TestScriptSetupActionOperationComponent operation;
+        protected SetupActionOperationComponent operation;
 
         /**
          * Evaluates the results of previous operations to determine if the server under test behaves appropriately.
          */
-        @Child(name = "assert", type = {TestScriptSetupActionAssertComponent.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "assert", type = {SetupActionAssertComponent.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The setup assertion to perform", formalDefinition="Evaluates the results of previous operations to determine if the server under test behaves appropriately." )
-        protected TestScriptSetupActionAssertComponent assert_;
+        protected SetupActionAssertComponent assert_;
 
-        private static final long serialVersionUID = 1411550037L;
+        private static final long serialVersionUID = -252088305L;
 
     /**
      * Constructor
      */
-      public TestScriptTestActionComponent() {
+      public TestActionComponent() {
         super();
       }
 
         /**
          * @return {@link #operation} (An operation would involve a REST request to a server.)
          */
-        public TestScriptSetupActionOperationComponent getOperation() { 
+        public SetupActionOperationComponent getOperation() { 
           if (this.operation == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptTestActionComponent.operation");
+              throw new Error("Attempt to auto-create TestActionComponent.operation");
             else if (Configuration.doAutoCreate())
-              this.operation = new TestScriptSetupActionOperationComponent(); // cc
+              this.operation = new SetupActionOperationComponent(); // cc
           return this.operation;
         }
 
@@ -6022,7 +6019,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #operation} (An operation would involve a REST request to a server.)
          */
-        public TestScriptTestActionComponent setOperation(TestScriptSetupActionOperationComponent value) { 
+        public TestActionComponent setOperation(SetupActionOperationComponent value) { 
           this.operation = value;
           return this;
         }
@@ -6030,12 +6027,12 @@ public class TestScript extends DomainResource {
         /**
          * @return {@link #assert_} (Evaluates the results of previous operations to determine if the server under test behaves appropriately.)
          */
-        public TestScriptSetupActionAssertComponent getAssert() { 
+        public SetupActionAssertComponent getAssert() { 
           if (this.assert_ == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptTestActionComponent.assert_");
+              throw new Error("Attempt to auto-create TestActionComponent.assert_");
             else if (Configuration.doAutoCreate())
-              this.assert_ = new TestScriptSetupActionAssertComponent(); // cc
+              this.assert_ = new SetupActionAssertComponent(); // cc
           return this.assert_;
         }
 
@@ -6046,7 +6043,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #assert_} (Evaluates the results of previous operations to determine if the server under test behaves appropriately.)
          */
-        public TestScriptTestActionComponent setAssert(TestScriptSetupActionAssertComponent value) { 
+        public TestActionComponent setAssert(SetupActionAssertComponent value) { 
           this.assert_ = value;
           return this;
         }
@@ -6060,9 +6057,9 @@ public class TestScript extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("operation"))
-          this.operation = (TestScriptSetupActionOperationComponent) value; // TestScriptSetupActionOperationComponent
+          this.operation = (SetupActionOperationComponent) value; // SetupActionOperationComponent
         else if (name.equals("assert"))
-          this.assert_ = (TestScriptSetupActionAssertComponent) value; // TestScriptSetupActionAssertComponent
+          this.assert_ = (SetupActionAssertComponent) value; // SetupActionAssertComponent
         else
           super.setProperty(name, value);
       }
@@ -6070,19 +6067,19 @@ public class TestScript extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("operation")) {
-          this.operation = new TestScriptSetupActionOperationComponent();
+          this.operation = new SetupActionOperationComponent();
           return this.operation;
         }
         else if (name.equals("assert")) {
-          this.assert_ = new TestScriptSetupActionAssertComponent();
+          this.assert_ = new SetupActionAssertComponent();
           return this.assert_;
         }
         else
           return super.addChild(name);
       }
 
-      public TestScriptTestActionComponent copy() {
-        TestScriptTestActionComponent dst = new TestScriptTestActionComponent();
+      public TestActionComponent copy() {
+        TestActionComponent dst = new TestActionComponent();
         copyValues(dst);
         dst.operation = operation == null ? null : operation.copy();
         dst.assert_ = assert_ == null ? null : assert_.copy();
@@ -6093,9 +6090,9 @@ public class TestScript extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof TestScriptTestActionComponent))
+        if (!(other instanceof TestActionComponent))
           return false;
-        TestScriptTestActionComponent o = (TestScriptTestActionComponent) other;
+        TestActionComponent o = (TestActionComponent) other;
         return compareDeep(operation, o.operation, true) && compareDeep(assert_, o.assert_, true);
       }
 
@@ -6103,9 +6100,9 @@ public class TestScript extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof TestScriptTestActionComponent))
+        if (!(other instanceof TestActionComponent))
           return false;
-        TestScriptTestActionComponent o = (TestScriptTestActionComponent) other;
+        TestActionComponent o = (TestActionComponent) other;
         return true;
       }
 
@@ -6128,9 +6125,9 @@ public class TestScript extends DomainResource {
          */
         @Child(name = "action", type = {}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="One or more teardown operations to perform", formalDefinition="The teardown action will only contain an operation." )
-        protected List<TestScriptTeardownActionComponent> action;
+        protected List<TeardownActionComponent> action;
 
-        private static final long serialVersionUID = 1850225254L;
+        private static final long serialVersionUID = 1168638089L;
 
     /**
      * Constructor
@@ -6142,16 +6139,16 @@ public class TestScript extends DomainResource {
         /**
          * @return {@link #action} (The teardown action will only contain an operation.)
          */
-        public List<TestScriptTeardownActionComponent> getAction() { 
+        public List<TeardownActionComponent> getAction() { 
           if (this.action == null)
-            this.action = new ArrayList<TestScriptTeardownActionComponent>();
+            this.action = new ArrayList<TeardownActionComponent>();
           return this.action;
         }
 
         public boolean hasAction() { 
           if (this.action == null)
             return false;
-          for (TestScriptTeardownActionComponent item : this.action)
+          for (TeardownActionComponent item : this.action)
             if (!item.isEmpty())
               return true;
           return false;
@@ -6161,20 +6158,20 @@ public class TestScript extends DomainResource {
          * @return {@link #action} (The teardown action will only contain an operation.)
          */
     // syntactic sugar
-        public TestScriptTeardownActionComponent addAction() { //3
-          TestScriptTeardownActionComponent t = new TestScriptTeardownActionComponent();
+        public TeardownActionComponent addAction() { //3
+          TeardownActionComponent t = new TeardownActionComponent();
           if (this.action == null)
-            this.action = new ArrayList<TestScriptTeardownActionComponent>();
+            this.action = new ArrayList<TeardownActionComponent>();
           this.action.add(t);
           return t;
         }
 
     // syntactic sugar
-        public TestScriptTeardownComponent addAction(TestScriptTeardownActionComponent t) { //3
+        public TestScriptTeardownComponent addAction(TeardownActionComponent t) { //3
           if (t == null)
             return this;
           if (this.action == null)
-            this.action = new ArrayList<TestScriptTeardownActionComponent>();
+            this.action = new ArrayList<TeardownActionComponent>();
           this.action.add(t);
           return this;
         }
@@ -6187,7 +6184,7 @@ public class TestScript extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("action"))
-          this.getAction().add((TestScriptTeardownActionComponent) value);
+          this.getAction().add((TeardownActionComponent) value);
         else
           super.setProperty(name, value);
       }
@@ -6205,8 +6202,8 @@ public class TestScript extends DomainResource {
         TestScriptTeardownComponent dst = new TestScriptTeardownComponent();
         copyValues(dst);
         if (action != null) {
-          dst.action = new ArrayList<TestScriptTeardownActionComponent>();
-          for (TestScriptTeardownActionComponent i : action)
+          dst.action = new ArrayList<TeardownActionComponent>();
+          for (TeardownActionComponent i : action)
             dst.action.add(i.copy());
         };
         return dst;
@@ -6244,32 +6241,32 @@ public class TestScript extends DomainResource {
   }
 
     @Block()
-    public static class TestScriptTeardownActionComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class TeardownActionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An operation would involve a REST request to a server.
          */
-        @Child(name = "operation", type = {TestScriptSetupActionOperationComponent.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "operation", type = {SetupActionOperationComponent.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The teardown operation to perform", formalDefinition="An operation would involve a REST request to a server." )
-        protected TestScriptSetupActionOperationComponent operation;
+        protected SetupActionOperationComponent operation;
 
-        private static final long serialVersionUID = 1684092023L;
+        private static final long serialVersionUID = -1099598054L;
 
     /**
      * Constructor
      */
-      public TestScriptTeardownActionComponent() {
+      public TeardownActionComponent() {
         super();
       }
 
         /**
          * @return {@link #operation} (An operation would involve a REST request to a server.)
          */
-        public TestScriptSetupActionOperationComponent getOperation() { 
+        public SetupActionOperationComponent getOperation() { 
           if (this.operation == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptTeardownActionComponent.operation");
+              throw new Error("Attempt to auto-create TeardownActionComponent.operation");
             else if (Configuration.doAutoCreate())
-              this.operation = new TestScriptSetupActionOperationComponent(); // cc
+              this.operation = new SetupActionOperationComponent(); // cc
           return this.operation;
         }
 
@@ -6280,7 +6277,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #operation} (An operation would involve a REST request to a server.)
          */
-        public TestScriptTeardownActionComponent setOperation(TestScriptSetupActionOperationComponent value) { 
+        public TeardownActionComponent setOperation(SetupActionOperationComponent value) { 
           this.operation = value;
           return this;
         }
@@ -6293,7 +6290,7 @@ public class TestScript extends DomainResource {
       @Override
       public void setProperty(String name, Base value) throws FHIRException {
         if (name.equals("operation"))
-          this.operation = (TestScriptSetupActionOperationComponent) value; // TestScriptSetupActionOperationComponent
+          this.operation = (SetupActionOperationComponent) value; // SetupActionOperationComponent
         else
           super.setProperty(name, value);
       }
@@ -6301,15 +6298,15 @@ public class TestScript extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("operation")) {
-          this.operation = new TestScriptSetupActionOperationComponent();
+          this.operation = new SetupActionOperationComponent();
           return this.operation;
         }
         else
           return super.addChild(name);
       }
 
-      public TestScriptTeardownActionComponent copy() {
-        TestScriptTeardownActionComponent dst = new TestScriptTeardownActionComponent();
+      public TeardownActionComponent copy() {
+        TeardownActionComponent dst = new TeardownActionComponent();
         copyValues(dst);
         dst.operation = operation == null ? null : operation.copy();
         return dst;
@@ -6319,9 +6316,9 @@ public class TestScript extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof TestScriptTeardownActionComponent))
+        if (!(other instanceof TeardownActionComponent))
           return false;
-        TestScriptTeardownActionComponent o = (TestScriptTeardownActionComponent) other;
+        TeardownActionComponent o = (TeardownActionComponent) other;
         return compareDeep(operation, o.operation, true);
       }
 
@@ -6329,9 +6326,9 @@ public class TestScript extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof TestScriptTeardownActionComponent))
+        if (!(other instanceof TeardownActionComponent))
           return false;
-        TestScriptTeardownActionComponent o = (TestScriptTeardownActionComponent) other;
+        TeardownActionComponent o = (TeardownActionComponent) other;
         return true;
       }
 

@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="ExpansionProfile"/>
   <meta>
-    <lastUpdated value="2015-12-19T16:00:42.735-05:00"/>
+    <lastUpdated value="2016-01-20T08:16:20.857-05:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -839,9 +839,9 @@
       <value value="http://www.hl7.org/Special/committees/Vocab/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-12-19T16:00:42-05:00"/>
+  <date value="2016-01-20T08:16:20-05:00"/>
   <description value="Base StructureDefinition for ExpansionProfile Resource"/>
-  <fhirVersion value="1.2.0"/>
+  <fhirVersion value="1.3.0"/>
   <mapping>
     <identity value="w5"/>
     <uri value="http://hl7.org/fhir/w5"/>
@@ -1156,6 +1156,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -1276,12 +1277,16 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="CodeSystemInclude"/>
+      </extension>
       <path value="ExpansionProfile.codeSystem.include"/>
       <short value="Code systems to be included"/>
       <definition value="Code systems to be included in value set expansions."/>
@@ -1338,12 +1343,16 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="CodeSystemIncludeCodeSystem"/>
+      </extension>
       <path value="ExpansionProfile.codeSystem.include.codeSystem"/>
       <short value="The code systems to be included"/>
       <definition value="A data group for each code system to be included."/>
@@ -1400,6 +1409,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -1430,6 +1440,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="CodeSystemExclude"/>
+      </extension>
       <path value="ExpansionProfile.codeSystem.exclude"/>
       <short value="Code systems to be excluded"/>
       <definition value="Code systems to be excluded from value set expansions."/>
@@ -1486,12 +1499,16 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="CodeSystemExcludeCodeSystem"/>
+      </extension>
       <path value="ExpansionProfile.codeSystem.exclude.codeSystem"/>
       <short value="The code systems to be excluded"/>
       <definition value="A data group for each code system to be excluded."/>
@@ -1548,6 +1565,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -1655,12 +1673,16 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="DesignationInclude"/>
+      </extension>
       <path value="ExpansionProfile.designation.include"/>
       <short value="Designations to be included"/>
       <definition value="Designations to be included."/>
@@ -1717,12 +1739,16 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="DesignationIncludeDesignation"/>
+      </extension>
       <path value="ExpansionProfile.designation.include.designation"/>
       <short value="The designation to be included"/>
       <definition value="A data group for each designation to be included."/>
@@ -1789,6 +1815,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -1831,6 +1858,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="DesignationExclude"/>
+      </extension>
       <path value="ExpansionProfile.designation.exclude"/>
       <short value="Designations to be excluded"/>
       <definition value="Designations to be excluded."/>
@@ -1887,12 +1917,16 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="DesignationExcludeDesignation"/>
+      </extension>
       <path value="ExpansionProfile.designation.exclude.designation"/>
       <short value="The designation to be excluded"/>
       <definition value="A data group for each designation to be excluded."/>
@@ -1959,6 +1993,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -2289,6 +2324,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="CodeSystemInclude"/>
+      </extension>
       <path value="ExpansionProfile.codeSystem.include"/>
       <short value="Code systems to be included"/>
       <definition value="Code systems to be included in value set expansions."/>
@@ -2300,6 +2338,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="CodeSystemIncludeCodeSystem"/>
+      </extension>
       <path value="ExpansionProfile.codeSystem.include.codeSystem"/>
       <short value="The code systems to be included"/>
       <definition value="A data group for each code system to be included."/>
@@ -2335,6 +2376,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="CodeSystemExclude"/>
+      </extension>
       <path value="ExpansionProfile.codeSystem.exclude"/>
       <short value="Code systems to be excluded"/>
       <definition value="Code systems to be excluded from value set expansions."/>
@@ -2346,6 +2390,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="CodeSystemExcludeCodeSystem"/>
+      </extension>
       <path value="ExpansionProfile.codeSystem.exclude.codeSystem"/>
       <short value="The code systems to be excluded"/>
       <definition value="A data group for each code system to be excluded."/>
@@ -2413,6 +2460,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="DesignationInclude"/>
+      </extension>
       <path value="ExpansionProfile.designation.include"/>
       <short value="Designations to be included"/>
       <definition value="Designations to be included."/>
@@ -2424,6 +2474,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="DesignationIncludeDesignation"/>
+      </extension>
       <path value="ExpansionProfile.designation.include.designation"/>
       <short value="The designation to be included"/>
       <definition value="A data group for each designation to be included."/>
@@ -2481,6 +2534,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="DesignationExclude"/>
+      </extension>
       <path value="ExpansionProfile.designation.exclude"/>
       <short value="Designations to be excluded"/>
       <definition value="Designations to be excluded."/>
@@ -2492,6 +2548,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="DesignationExcludeDesignation"/>
+      </extension>
       <path value="ExpansionProfile.designation.exclude.designation"/>
       <short value="The designation to be excluded"/>
       <definition value="A data group for each designation to be excluded."/>

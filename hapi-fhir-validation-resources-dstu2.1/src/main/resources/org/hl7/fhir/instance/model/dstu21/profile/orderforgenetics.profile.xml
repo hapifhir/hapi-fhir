@@ -18,7 +18,7 @@
   </contact>
   <date value="2015-10-20"/>
   <description value="Describes how the DiagnosticOrder resource is used to for genetics"/>
-  <fhirVersion value="1.2.0"/>
+  <fhirVersion value="1.3.0"/>
   <kind value="resource"/>
   <constrainedType value="DiagnosticOrder"/>
   <abstract value="false"/>
@@ -550,6 +550,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>
@@ -734,6 +735,7 @@
         <code value="Extension"/>
       </type>
       <isModifier value="true"/>
+      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="N/A"/>

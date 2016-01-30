@@ -29,6 +29,7 @@ POSSIBILITY OF SUCH DAMAGE.
 package org.hl7.fhir.utilities.xml;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -397,6 +398,13 @@ public class XMLUtil {
     return builder.parse(new ByteArrayInputStream(content.getBytes()));
   }
 
+  public static Document parseFileToDom(String filename) throws ParserConfigurationException, SAXException, IOException  {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    factory.setNamespaceAware(false);
+    DocumentBuilder builder = factory.newDocumentBuilder();
+    return builder.parse(new FileInputStream(filename));
+  }
+
   public static Element getLastChild(Element e) {
     if (e == null)
       return null;
@@ -411,6 +419,11 @@ public class XMLUtil {
     while (n != null && n.getNodeType() != Node.ELEMENT_NODE)
       n = n.getPreviousSibling();
     return (Element) n;
+  }
+
+  public static String getNamedChildAttribute(Element element, String name, String aname) {
+    Element e = getNamedChild(element, name);
+    return e == null ? null : e.getAttribute(aname);
   }
 
  	
