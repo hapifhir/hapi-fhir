@@ -42,7 +42,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-cli</artifactId>
+			<artifactId>hapi-fhir-cli-app</artifactId>
 			<version>1.4-SNAPSHOT</version>
 			<!-- Don't include in standard distribution -->
 			<scope>provided</scope>

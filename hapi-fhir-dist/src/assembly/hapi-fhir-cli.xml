@@ -12,7 +12,7 @@
 
 	<fileSets>
 		<fileSet>
-			<directory>${project.basedir}/../hapi-fhir-cli/target/</directory>
+			<directory>${project.basedir}/../hapi-fhir-cli/hapi-fhir-cli-app/target/</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>hapi-fhir-cli.jar</include>
