@@ -37,10 +37,10 @@ public class FhirContextDstu1Test {
 	public void testUnknownVersion() {
 		
 		try {
-			Class.forName("org.hl7.fhir.dstu21.model.Patient");
+			Class.forName("org.hl7.fhir.dstu3.model.Patient");
 			
 			/*
-			 * If we found this class, DSTU2.1 structures are on the classpath so we're probably doing
+			 * If we found this class, DSTU3 structures are on the classpath so we're probably doing
 			 * the cobertura tests.. This one won't work since all structures are on the classpath for 
 			 * cobertura tests
 			 */

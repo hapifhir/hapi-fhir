@@ -103,8 +103,8 @@ public class ValueSetGenerator {
 		if (version.equals("dstu2")) {
 			name = "/org/hl7/fhir/instance/model/valueset/valuesets.xml";
 		}
-		if (version.equals("dstu21")) {
-			name = "/org/hl7/fhir/instance/model/dstu21/valueset/valuesets.xml";
+		if (version.equals("dstu3")) {
+			name = "/org/hl7/fhir/instance/model/dstu3/valueset/valuesets.xml";
 		}
 		ourLog.info("Loading valuesets from: {}", name);
 		String vs = IOUtils.toString(ValueSetGenerator.class.getResourceAsStream(name));

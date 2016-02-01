@@ -53,9 +53,9 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu21.model.IdType;
-import org.hl7.fhir.dstu21.model.StringType;
+import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -82,6 +82,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseTag;
@@ -1113,8 +1114,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		case DSTU2:
 			mySearchParamExtractor = new SearchParamExtractorDstu2(theContext);
 			break;
-		case DSTU2_1:
-			mySearchParamExtractor = new SearchParamExtractorDstu21(theContext);
+		case DSTU3:
+			mySearchParamExtractor = new SearchParamExtractorDstu3(theContext);
 			break;
 		case DSTU2_HL7ORG:
 			throw new IllegalStateException("Don't know how to handle version: " + myContext.getVersion().getVersion());
@@ -1681,7 +1682,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
-	static String normalizeString(String theString) {
+	public static String normalizeString(String theString) {
 		char[] out = new char[theString.length()];
 		theString = Normalizer.normalize(theString, Normalizer.Form.NFD);
 		int j = 0;

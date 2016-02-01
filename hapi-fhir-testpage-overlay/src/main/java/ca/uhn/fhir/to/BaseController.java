@@ -28,10 +28,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.HttpEntityWrapper;
-import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestComponent;
-import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestResourceComponent;
-import org.hl7.fhir.dstu21.model.DecimalType;
-import org.hl7.fhir.dstu21.model.Extension;
+import org.hl7.fhir.dstu3.model.DecimalType;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
+import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -303,8 +303,8 @@ public class BaseController {
 			return loadAndAddConfDstu1(theServletRequest, theRequest, theModel);
 		case DSTU2:
 			return loadAndAddConfDstu2(theServletRequest, theRequest, theModel);
-		case DSTU2_1:
-			return loadAndAddConfDstu21(theServletRequest, theRequest, theModel);
+		case DSTU3:
+			return loadAndAddConfDstu3(theServletRequest, theRequest, theModel);
 		}
 		throw new IllegalStateException("Unknown version: " + theRequest.getFhirVersion(myConfig));
 	}
@@ -429,17 +429,17 @@ public class BaseController {
 		return conformance;
 	}
 
-	private IBaseResource loadAndAddConfDstu21(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+	private IBaseResource loadAndAddConfDstu3(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 	
-		org.hl7.fhir.dstu21.model.Conformance conformance;
+		org.hl7.fhir.dstu3.model.Conformance conformance;
 		try {
-			conformance = client.fetchConformance().ofType(org.hl7.fhir.dstu21.model.Conformance.class).execute();
+			conformance = client.fetchConformance().ofType(org.hl7.fhir.dstu3.model.Conformance.class).execute();
 		} catch (Exception e) {
 			ourLog.warn("Failed to load conformance statement", e);
 			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
-			conformance = new org.hl7.fhir.dstu21.model.Conformance();
+			conformance = new org.hl7.fhir.dstu3.model.Conformance();
 		}
 	
 		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(conformance));

@@ -20,10 +20,10 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi.Color;
-import org.hl7.fhir.dstu21.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu21.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu21.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.dstu21.model.StructureDefinition;
+import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import com.phloc.commons.io.file.FileUtils;
@@ -127,7 +127,7 @@ public class ValidateCommand extends BaseCommand {
 				instanceValidator.setValidationSupport(validationSupport);
 				break;
 			}
-			case DSTU2_1: {
+			case DSTU3: {
 				FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
 				val.registerValidatorModule(instanceValidator);
 				ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport());
@@ -135,7 +135,7 @@ public class ValidateCommand extends BaseCommand {
 					instanceValidator.setStructureDefintion((StructureDefinition) localProfileResource);
 				}
 				if (theCommandLine.hasOption("r")) {
-					validationSupport.addValidationSupport(new LoadingValidationSupportDstu21());
+					validationSupport.addValidationSupport(new LoadingValidationSupportDstu3());
 				}
 				instanceValidator.setValidationSupport(validationSupport);
 				break;

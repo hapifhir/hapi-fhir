@@ -83,7 +83,7 @@
 		
 		</section>
 		
-		<section name="Upgrading Existing Applications to DSTU2.1">
+		<section name="Upgrading Existing Applications to DSTU3 Draft">
 		
 			<p>
 				If you have an existing application built using a version of previous 
@@ -104,10 +104,10 @@
 				if it's happening to you, it's happening to others. We're happy to help.
 			</p>
 			
-			<subsection name="Code changes in DSTU2.1 Structrues">
+			<subsection name="Code changes in DSTU3 Structrues">
 			
 				<p>
-					The following is a list of things that have changed in the DSTU2.1
+					The following is a list of things that have changed in the DSTU3
 					structures which you will need to accomodate in your code as you
 					upgrade: 
 				</p>
@@ -116,7 +116,7 @@
 				<ul>
 					<li>
 						Structures are all found in the 
-						<code>org.hl7.fhir.dstu21.model</code> package,
+						<code>org.hl7.fhir.dstu3.model</code> package,
 						instead of the <code>ca.uhn.fhir.model.dstu2.resource</code>,
 						<code>ca.uhn.fhir.model.dstu2.composite</code>, and
 						<code>ca.uhn.fhir.model.dstu2.valueset</code> packages.

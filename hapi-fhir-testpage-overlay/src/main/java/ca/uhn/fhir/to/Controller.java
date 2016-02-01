@@ -17,11 +17,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu21.model.CodeType;
-import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestComponent;
-import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestResourceComponent;
-import org.hl7.fhir.dstu21.model.Conformance.ConformanceRestResourceSearchParamComponent;
-import org.hl7.fhir.dstu21.model.StringType;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestComponent;
+import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceComponent;
+import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestResourceSearchParamComponent;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.ui.ModelMap;
@@ -320,8 +320,8 @@ public class Controller extends BaseController {
 		case DSTU2:
 			haveSearchParams = extractSearchParamsDstu2(conformance, resourceName, includes, revIncludes, sortParams, queries, haveSearchParams, queryIncludes);
 			break;
-		case DSTU2_1:
-			haveSearchParams = extractSearchParamsDstu21(conformance, resourceName, includes, revIncludes, sortParams, queries, haveSearchParams, queryIncludes);
+		case DSTU3:
+			haveSearchParams = extractSearchParamsDstu3(conformance, resourceName, includes, revIncludes, sortParams, queries, haveSearchParams, queryIncludes);
 			break;
 		default:
 			throw new IllegalStateException("Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
@@ -775,9 +775,9 @@ public class Controller extends BaseController {
 		return haveSearchParams;
 	}
 
-	private boolean extractSearchParamsDstu21(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
+	private boolean extractSearchParamsDstu3(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
 			List<List<String>> queryIncludes) {
-		org.hl7.fhir.dstu21.model.Conformance conformance = (org.hl7.fhir.dstu21.model.Conformance) theConformance;
+		org.hl7.fhir.dstu3.model.Conformance conformance = (org.hl7.fhir.dstu3.model.Conformance) theConformance;
 		for (ConformanceRestComponent nextRest : conformance.getRest()) {
 			for (ConformanceRestResourceComponent nextRes : nextRest.getResource()) {
 				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
@@ -787,7 +787,7 @@ public class Controller extends BaseController {
 						}
 					}
 					for (ConformanceRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValue() != org.hl7.fhir.dstu21.model.Enumerations.SearchParamType.COMPOSITE) {
+						if (next.getTypeElement().getValue() != org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.COMPOSITE) {
 							sortParams.add(next.getNameElement().getValue());
 						}
 					}
@@ -798,7 +798,7 @@ public class Controller extends BaseController {
 					// It's a different resource from the one we're searching, so
 					// scan for revinclude candidates
 					for (ConformanceRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValue() == org.hl7.fhir.dstu21.model.Enumerations.SearchParamType.REFERENCE) {
+						if (next.getTypeElement().getValue() == org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE) {
 							for (CodeType nextTargetType : next.getTarget()) {
 								if (nextTargetType.getValue().equals(resourceName)) {
 									theRevIncludes.add(nextRes.getTypeElement().getValue() + ":" + next.getName());

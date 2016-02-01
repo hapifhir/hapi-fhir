@@ -54,11 +54,12 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected FhirContext getSpecVersionContext(CommandLine theCommandLine) throws ParseException {
 		if (myFhirCtx == null) {
 			String specVersion = theCommandLine.getOptionValue("f", SPEC_DEFAULT_VERSION);
+			specVersion = specVersion.toLowerCase();
 			FhirVersionEnum version;
 			if ("dstu2".equals(specVersion)) {
 				version = FhirVersionEnum.DSTU2;
-			} else if ("dstu2.1".equals(specVersion)) {
-				version = FhirVersionEnum.DSTU2_1;
+			} else if ("dstu3".equals(specVersion)) {
+				version = FhirVersionEnum.DSTU3;
 			} else {
 				throw new ParseException("Unknown spec version: " + specVersion);
 			}

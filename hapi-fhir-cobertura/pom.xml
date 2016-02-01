@@ -33,7 +33,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
+			<artifactId>hapi-fhir-structures-dstu3</artifactId>
 			<version>1.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -48,7 +48,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-validation-resources-dstu2.1</artifactId>
+			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
 			<version>1.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -284,7 +284,7 @@
 								<source>../hapi-fhir-structures-dstu/src/test/java</source>
 								<source>../hapi-fhir-structures-dstu2/src/test/java</source>
 								<source>../hapi-fhir-structures-hl7org-dstu2/src/test/java</source>
-								<source>../hapi-fhir-structures-dstu2.1/src/test/java</source>
+								<source>../hapi-fhir-structures-dstu3/src/test/java</source>
 								<source>../hapi-fhir-jpaserver-base/src/test/java</source>
 							</sources>
 						</configuration>
@@ -354,7 +354,7 @@
 				<directory>../hapi-fhir-structures-hl7org-dstu2/src/test/resources</directory>
 			</testResource>
 			<testResource>
-				<directory>../hapi-fhir-structures-dstu2.1/src/test/resources</directory>
+				<directory>../hapi-fhir-structures-dstu3/src/test/resources</directory>
 			</testResource>
 		</testResources>
 	</build>

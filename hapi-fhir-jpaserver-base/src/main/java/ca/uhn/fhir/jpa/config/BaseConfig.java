@@ -43,41 +43,20 @@ import ca.uhn.fhir.context.FhirContext;
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 public class BaseConfig implements SchedulingConfigurer {
 
-	private static FhirContext ourFhirContextDstu21;
-	private static FhirContext ourFhirContextDstu2;
 	private static FhirContext ourFhirContextDstu1;
+	private static FhirContext ourFhirContextDstu2;
 	private static FhirContext ourFhirContextDstu2Hl7Org;
-
-	@Autowired
-	protected Environment myEnv;
-
-	/**
-	 * This lets the "@Value" fields reference properties from the properties file
-	 */
-	@Bean
-	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-		return new PropertySourcesPlaceholderConfigurer();
-	}
+	private static FhirContext ourFhirContextDstu3;
 
 	@Resource
 	private ApplicationContext myAppCtx;
 
-	@Bean(name = "myFhirContextDstu2")
-	@Lazy
-	public FhirContext fhirContextDstu2() {
-		if (ourFhirContextDstu2 == null) {
-			ourFhirContextDstu2 = FhirContext.forDstu2();
-		}
-		return ourFhirContextDstu2;
-	}
+	@Autowired
+	protected Environment myEnv;
 
-	@Bean(name = "myFhirContextDstu21")
-	@Lazy
-	public FhirContext fhirContextDstu21() {
-		if (ourFhirContextDstu21 == null) {
-			ourFhirContextDstu21 = FhirContext.forDstu2_1();
-		}
-		return ourFhirContextDstu21;
+	@Override
+	public void configureTasks(ScheduledTaskRegistrar theTaskRegistrar) {
+		theTaskRegistrar.setTaskScheduler(taskScheduler());
 	}
 
 	@Bean(name = "myFhirContextDstu1")
@@ -89,6 +68,15 @@ public class BaseConfig implements SchedulingConfigurer {
 		return ourFhirContextDstu1;
 	}
 
+	@Bean(name = "myFhirContextDstu2")
+	@Lazy
+	public FhirContext fhirContextDstu2() {
+		if (ourFhirContextDstu2 == null) {
+			ourFhirContextDstu2 = FhirContext.forDstu2();
+		}
+		return ourFhirContextDstu2;
+	}
+
 	@Bean(name = "myFhirContextDstu2Hl7Org")
 	@Lazy
 	public FhirContext fhirContextDstu2Hl7Org() {
@@ -98,9 +86,13 @@ public class BaseConfig implements SchedulingConfigurer {
 		return ourFhirContextDstu2Hl7Org;
 	}
 
-	@Override
-	public void configureTasks(ScheduledTaskRegistrar theTaskRegistrar) {
-		theTaskRegistrar.setTaskScheduler(taskScheduler());
+	@Bean(name = "myFhirContextDstu3")
+	@Lazy
+	public FhirContext fhirContextDstu3() {
+		if (ourFhirContextDstu3 == null) {
+			ourFhirContextDstu3 = FhirContext.forDstu3();
+		}
+		return ourFhirContextDstu3;
 	}
 
 	@Bean
@@ -108,6 +100,14 @@ public class BaseConfig implements SchedulingConfigurer {
 		ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler();
 		retVal.setPoolSize(5);
 		return retVal;
+	}
+
+	/**
+	 * This lets the "@Value" fields reference properties from the properties file
+	 */
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+		return new PropertySourcesPlaceholderConfigurer();
 	}
 
 	// @PostConstruct

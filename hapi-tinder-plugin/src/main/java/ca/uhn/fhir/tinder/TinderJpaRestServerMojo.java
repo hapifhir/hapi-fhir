@@ -69,12 +69,14 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		FhirContext fhirContext;
+		String packageSuffix = "";
 		if ("dstu".equals(version)) {
 			fhirContext = FhirContext.forDstu1();
 		} else if ("dstu2".equals(version)) {
 			fhirContext = FhirContext.forDstu2();
-		} else if ("dstu21".equals(version)) {
-			fhirContext = FhirContext.forDstu2_1();
+		} else if ("dstu3".equals(version)) {
+			fhirContext = FhirContext.forDstu3();
+			packageSuffix = ".dstu3";
 		} else {
 			throw new MojoFailureException("Unknown version configured: " + version);
 		}
@@ -148,6 +150,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			ctx.put("packageBase", packageBase);
 			ctx.put("configPackageBase", configPackageBase);
 			ctx.put("version", version);
+			ctx.put("package_suffix", packageSuffix);
 			ctx.put("esc", new EscapeTool());
 			if (BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi()) {
 				ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
@@ -217,7 +220,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 		TinderJpaRestServerMojo mojo = new TinderJpaRestServerMojo();
 		mojo.myProject = new MavenProject();
-		mojo.version = "dstu21";
+		mojo.version = "dstu3";
 		mojo.packageBase = "ca.uhn.test";
 		mojo.configPackageBase = "ca.uhn.test";
 //		mojo.baseResourceNames = new ArrayList<String>(Collections.singletonList("observation"));

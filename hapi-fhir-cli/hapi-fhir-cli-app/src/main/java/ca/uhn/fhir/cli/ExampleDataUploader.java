@@ -108,7 +108,7 @@ public class ExampleDataUploader extends BaseCommand {
 		case DSTU2:
 			specUrl = "http://hl7.org/fhir/dstu2/examples-json.zip";
 			break;
-		case DSTU2_1:
+		case DSTU3:
 			specUrl = "http://hl7-fhir.github.io/examples-json.zip";
 			break;
 		default:

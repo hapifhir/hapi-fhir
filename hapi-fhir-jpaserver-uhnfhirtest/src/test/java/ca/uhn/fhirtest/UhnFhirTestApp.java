@@ -25,12 +25,12 @@ public class UhnFhirTestApp {
 		//		new File("target/testdb").mkdirs();
 		System.setProperty("fhir.db.location", "./target/testdb");
 		System.setProperty("fhir.db.location.dstu2", "./target/testdb_dstu2");
-		System.setProperty("fhir.db.location.dstu21", "./target/testdb_dstu21");
+		System.setProperty("fhir.db.location.dstu3", "./target/testdb_dstu3");
 		System.setProperty("fhir.lucene.location.dstu2", "./target/testlucene_dstu2");
-		System.setProperty("fhir.lucene.location.dstu21", "./target/testlucene_dstu21");
+		System.setProperty("fhir.lucene.location.dstu3", "./target/testlucene_dstu3");
 		System.setProperty("fhir.baseurl.dstu1", base.replace("Dstu2", "Dstu1"));
 		System.setProperty("fhir.baseurl.dstu2", base);
-		System.setProperty("fhir.baseurl.dstu21", base.replace("Dstu2", "Dstu21"));
+		System.setProperty("fhir.baseurl.dstu3", base.replace("Dstu2", "Dstu3"));
 		
 		Server server = new Server(myPort);
 

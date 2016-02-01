@@ -120,7 +120,7 @@
 				change, trailing zeros will now be preserved when serializing as well.
 			</action>
 			<action type="add" issue="278">
-				Add DSTU2.1 example to hpia-fhir-jpaserver-example. Thanks to Karl 
+				Add DSTU3 example to hapi-fhir-jpaserver-example. Thanks to Karl 
 				Davis for the Pull Request!
 			</action>
 			<action type="add">

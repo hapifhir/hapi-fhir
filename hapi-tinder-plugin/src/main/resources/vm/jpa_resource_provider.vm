@@ -6,9 +6,9 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 
 #if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers'))
-import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider${className}${versionCapitalized};
+import ca.uhn.fhir.jpa.provider${package_suffix}.BaseJpaResourceProvider${className}${versionCapitalized};
 #else
-import ca.uhn.fhir.jpa.provider.JpaResourceProvider${versionCapitalized};
+import ca.uhn.fhir.jpa.provider${package_suffix}.JpaResourceProvider${versionCapitalized};
 #end 
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.api.IResource;

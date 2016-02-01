@@ -98,7 +98,7 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>fhirServletDstu21</servlet-name>
+		<servlet-name>fhirServletDstu3</servlet-name>
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
@@ -106,7 +106,7 @@
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
-			<param-value>DSTU21</param-value>
+			<param-value>DSTU3</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
@@ -127,8 +127,12 @@
 	</servlet-mapping>
 	
 	<servlet-mapping>
-		<servlet-name>fhirServletDstu21</servlet-name>
+		<servlet-name>fhirServletDstu3</servlet-name>
 		<url-pattern>/baseDstu2.1/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>fhirServletDstu3</servlet-name>
+		<url-pattern>/baseDstu3/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>

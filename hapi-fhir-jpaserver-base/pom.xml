@@ -50,7 +50,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
+			<artifactId>hapi-fhir-structures-dstu3</artifactId>
 			<version>1.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -65,7 +65,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-validation-resources-dstu2.1</artifactId>
+			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
 			<version>1.4-SNAPSHOT</version>
 		</dependency>
 
@@ -373,15 +373,15 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>build_dstu21</id>
+						<id>build_dstu3</id>
 						<goals>
 							<goal>generate-jparest-server</goal>
 						</goals>
 						<configuration>
-							<version>dstu21</version>
+							<version>dstu3</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
-							<packageBase>ca.uhn.fhir.jpa.rp.dstu21</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu21.xml</targetResourceSpringBeansFile>
+							<packageBase>ca.uhn.fhir.jpa.rp.dstu3</packageBase>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu3.xml</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>
 								<!-- <excludeResourceName>OperationDefinition</excludeResourceName> <excludeResourceName>OperationOutcome</excludeResourceName> -->
@@ -402,12 +402,12 @@
 					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
+						<artifactId>hapi-fhir-structures-dstu3</artifactId>
 						<version>1.4-SNAPSHOT</version>
 					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-validation-resources-dstu2.1</artifactId>
+						<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
 						<version>1.4-SNAPSHOT</version>
 					</dependency>
 				</dependencies>

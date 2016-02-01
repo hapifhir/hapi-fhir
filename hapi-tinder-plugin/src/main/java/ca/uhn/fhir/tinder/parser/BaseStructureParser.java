@@ -67,7 +67,7 @@ public abstract class BaseStructureParser {
 	public BaseStructureParser(String theVersion, String theBaseDir) {
 		myVersion = theVersion;
 		myBaseDir = theBaseDir;
-		myIsRi = myVersion.equals("dstu21");
+		myIsRi = myVersion.equals("dstu3");
 	}
 
 	public String getVersion() {
@@ -218,14 +218,14 @@ public abstract class BaseStructureParser {
 			if (theNextType.endsWith("Dt")) {
 				unqualifiedTypeName = theNextType.substring(0, theNextType.length() - 2);
 				try {
-					return Class.forName("org.hl7.fhir.dstu21.model." + unqualifiedTypeName + "Type").getName();
+					return Class.forName("org.hl7.fhir.dstu3.model." + unqualifiedTypeName + "Type").getName();
 				} catch (ClassNotFoundException e1) {
 					// not found
 				}
 			}
 			
 			try {
-				return Class.forName("org.hl7.fhir.dstu21.model." + unqualifiedTypeName).getName();
+				return Class.forName("org.hl7.fhir.dstu3.model." + unqualifiedTypeName).getName();
 			} catch (ClassNotFoundException e) {
 				// not found
 			}
@@ -434,9 +434,15 @@ public abstract class BaseStructureParser {
 			}
 		}
 
+		String packageSuffix = "";
+		if (determineVersionEnum().isRi()) {
+			packageSuffix = "." + myVersion;
+		}
+		
 		VelocityContext ctx = new VelocityContext();
 		ctx.put("includeDescriptionAnnotations", true);
 		ctx.put("packageBase", thePackageBase);
+		ctx.put("package_suffix", packageSuffix);
 		ctx.put("hash", "#");
 		ctx.put("imports", imports);
 		ctx.put("profile", theResource.getProfile());
@@ -545,6 +551,11 @@ public abstract class BaseStructureParser {
 
 				ourLog.debug("Writing file: {}", versionFile.getAbsolutePath());
 
+				String packageSuffix = "";
+				if (determineVersionEnum().isRi()) {
+					packageSuffix = "." + myVersion;
+				}
+				
 				VelocityContext ctx = new VelocityContext();
 				ctx.put("nameToResourceClass", myNameToResourceClass);
 				ctx.put("nameToDatatypeClass", myNameToDatatypeClass);
@@ -552,7 +563,7 @@ public abstract class BaseStructureParser {
 				ctx.put("versionEnumName", determineVersionEnum().name());
 				ctx.put("esc", new EscapeTool());
 				ctx.put("isRi", determineVersionEnum().isRi());
-
+				ctx.put("package_suffix", packageSuffix);
 				String capitalize = WordUtils.capitalize(myVersion);
 				if ("Dstu".equals(capitalize)) {
 					capitalize = "Dstu1";
@@ -585,8 +596,8 @@ public abstract class BaseStructureParser {
 			versionEnum = FhirVersionEnum.DSTU1;
 		} else if ("dstu2".equals(version)) {
 			versionEnum = FhirVersionEnum.DSTU2;
-		} else if ("dstu21".equals(version)) {
-			versionEnum = FhirVersionEnum.DSTU2_1;
+		} else if ("dstu3".equals(version)) {
+			versionEnum = FhirVersionEnum.DSTU3;
 		} else {
 			throw new MojoFailureException("Unknown version: " + version);
 		}

@@ -26,11 +26,11 @@ FhirContext ctxDstu2 = FhirContext.forDstu2();
    @SuppressWarnings("unused")
    public static void creatingContextHl7org() {
 // START SNIPPET: creatingContextHl7org
-// Create a context for DSTU2.1
-FhirContext ctx = FhirContext.forDstu2_1();
+// Create a context for DSTU3
+FhirContext ctx = FhirContext.forDstu3();
 
 // Working with RI structures is similar to how it works with the HAPI structures
-org.hl7.fhir.dstu21.model.Patient patient = new org.hl7.fhir.dstu21.model.Patient();
+org.hl7.fhir.dstu3.model.Patient patient = new org.hl7.fhir.dstu3.model.Patient();
 patient.addName().addGiven("John").addFamily("Smith");
 patient.getBirthDateElement().setValueAsString("1998-02-22");
 

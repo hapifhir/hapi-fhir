@@ -20,8 +20,8 @@ public class ContextHolder {
 		case DSTU2:
 			ourPath = "/baseDstu2/";
 			break;
-		case DSTU2_1:
-			ourPath = "/baseDstu2.1/";
+		case DSTU3:
+			ourPath = "/baseDstu3/";
 			break;
 		default:
 			throw new ParseException("FHIR version not supported by this command: " + ContextHolder.getCtx().getVersion().getVersion());

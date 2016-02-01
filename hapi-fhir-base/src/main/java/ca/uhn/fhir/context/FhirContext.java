@@ -508,12 +508,12 @@ public class FhirContext {
 	}
 
 	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU2_1 DSTU 2.1}
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU3 DSTU 3}
 	 * 
 	 * @since 1.4
 	 */
-	public static FhirContext forDstu2_1() {
-		return new FhirContext(FhirVersionEnum.DSTU2_1);
+	public static FhirContext forDstu3() {
+		return new FhirContext(FhirVersionEnum.DSTU3);
 	}
 
 	public static FhirContext forDstu2Hl7Org() {

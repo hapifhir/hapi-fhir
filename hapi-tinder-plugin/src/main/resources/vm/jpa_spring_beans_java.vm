@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 
 @Configuration
-public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jpa.config.Base${versionCapitalized}Config {
+public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jpa.config${package_suffix}.Base${versionCapitalized}Config {
 
 	@Bean(name="myResourceProviders${versionCapitalized}")
 	public List<IResourceProvider> resourceProviders${versionCapitalized}() {
@@ -50,11 +50,11 @@ public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jp
 	@Bean(name="my${res.name}Dao${versionCapitalized}", autowire=Autowire.BY_NAME)
 	@Lazy
 	public IFhirResourceDao<${resourcePackage}.${res.declaringClassNameComplete}> dao${res.declaringClassNameComplete}${versionCapitalized}() {
-		ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}<${resourcePackage}.${res.declaringClassNameComplete}> retVal;
+		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${versionCapitalized}<${resourcePackage}.${res.declaringClassNameComplete}> retVal;
 #if ( ${versionCapitalized} != 'Dstu1' && ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter'))
-		retVal = new ca.uhn.fhir.jpa.dao.FhirResourceDao${res.name}${versionCapitalized}();
+		retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
 #else
-		retVal = new ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}<${resourcePackage}.${res.declaringClassNameComplete}>();
+		retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${versionCapitalized}<${resourcePackage}.${res.declaringClassNameComplete}>();
 #end
 		retVal.setResourceType(${resourcePackage}.${res.declaringClassNameComplete}.class);
 		retVal.setContext(fhirContext${versionCapitalized}());

@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.EventListener;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -16,7 +15,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.ContextLoaderListener;
@@ -24,7 +22,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 
 import ca.uhn.fhir.jpa.demo.ContextHolder;
 import ca.uhn.fhir.jpa.demo.FhirServerConfig;
-import ca.uhn.fhir.jpa.demo.FhirServerConfigDstu21;
+import ca.uhn.fhir.jpa.demo.FhirServerConfigDstu3;
 
 public class RunServerCommand extends BaseCommand {
 
@@ -95,8 +93,8 @@ public class RunServerCommand extends BaseCommand {
 				case DSTU2:
 					theSce.getServletContext().setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, FhirServerConfig.class.getName());
 					break;
-				case DSTU2_1:
-					theSce.getServletContext().setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, FhirServerConfigDstu21.class.getName());
+				case DSTU3:
+					theSce.getServletContext().setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, FhirServerConfigDstu3.class.getName());
 					break;
 				}
 				cll.contextInitialized(theSce);

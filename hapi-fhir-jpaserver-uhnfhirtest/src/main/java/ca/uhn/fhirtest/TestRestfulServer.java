@@ -14,16 +14,16 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.WebsocketDstu21Config;
 import ca.uhn.fhir.jpa.config.WebsocketDstu2Config;
+import ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
-import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu21;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
-import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu21;
+import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
+import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -33,7 +33,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhirtest.config.TestDstu21Config;
+import ca.uhn.fhirtest.config.TestDstu3Config;
 import ca.uhn.fhirtest.config.TestDstu2Config;
 
 public class TestRestfulServer extends RestfulServer {
@@ -65,7 +65,7 @@ public class TestRestfulServer extends RestfulServer {
 		List<IResourceProvider> beans;
 		JpaSystemProviderDstu1 systemProviderDstu1 = null;
 		JpaSystemProviderDstu2 systemProviderDstu2 = null;
-		JpaSystemProviderDstu21 systemProviderDstu21 = null;
+		JpaSystemProviderDstu3 systemProviderDstu3 = null;
 		@SuppressWarnings("rawtypes")
 		IFhirSystemDao systemDao;
 		ETagSupportEnum etagSupport;
@@ -105,21 +105,21 @@ public class TestRestfulServer extends RestfulServer {
 			baseUrlProperty = "fhir.baseurl.dstu2";
 			break;
 		}
-		case "DSTU21": {
+		case "DSTU3": {
 			myAppCtx = new AnnotationConfigWebApplicationContext();
 			myAppCtx.setServletConfig(getServletConfig());
 			myAppCtx.setParent(parentAppCtx);
-			myAppCtx.register(TestDstu21Config.class, WebsocketDstu21Config.class);
+			myAppCtx.register(TestDstu3Config.class, WebsocketDstu3Config.class);
 			myAppCtx.refresh();
-			setFhirContext(FhirContext.forDstu2_1());
-			beans = myAppCtx.getBean("myResourceProvidersDstu21", List.class);
-			systemProviderDstu21 = myAppCtx.getBean("mySystemProviderDstu21", JpaSystemProviderDstu21.class);
-			systemDao = myAppCtx.getBean("mySystemDaoDstu21", IFhirSystemDao.class);
+			setFhirContext(FhirContext.forDstu3());
+			beans = myAppCtx.getBean("myResourceProvidersDstu3", List.class);
+			systemProviderDstu3 = myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class);
+			systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.ENABLED;
-			JpaConformanceProviderDstu21 confProvider = new JpaConformanceProviderDstu21(this, systemDao, myAppCtx.getBean(DaoConfig.class));
+			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
-			baseUrlProperty = "fhir.baseurl.dstu21";
+			baseUrlProperty = "fhir.baseurl.dstu3";
 			break;
 		}
 		default:
@@ -154,8 +154,8 @@ public class TestRestfulServer extends RestfulServer {
 		if (systemProviderDstu2 != null) {
 			provList.add(systemProviderDstu2);
 		}
-		if (systemProviderDstu21 != null) {
-			provList.add(systemProviderDstu21);
+		if (systemProviderDstu3 != null) {
+			provList.add(systemProviderDstu3);
 		}
 		setPlainProviders(provList);
 

@@ -38,7 +38,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
+			<artifactId>hapi-fhir-structures-dstu3</artifactId>
 			<version>1.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -48,7 +48,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-validation-resources-dstu2.1</artifactId>
+			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
 			<version>1.4-SNAPSHOT</version>
 		</dependency>
 
@@ -100,8 +100,8 @@
 									<fileset dir="../hapi-fhir-structures-dstu2/src/main/java" />
 									<fileset dir="../hapi-fhir-structures-dstu2/target/generated-sources/tinder" />
 									<fileset dir="../hapi-fhir-structures-hl7org-dstu2/src/main/java" />
-									<fileset dir="../hapi-fhir-structures-dstu2.1/src/main/java" />
-								<!--<fileset dir="../hapi-fhir-structures-dstu2.1/target/generated-sources/tinder" /> -->
+									<fileset dir="../hapi-fhir-structures-dstu3/src/main/java" />
+								<!--<fileset dir="../hapi-fhir-structures-dstu3/target/generated-sources/tinder" /> -->
 								</copy>
 							</target>
 						</configuration>
@@ -219,12 +219,12 @@
 				<filtering>false</filtering>
 			</resource>
 			<resource>
-				<directory>../hapi-fhir-structures-dstu2.1/src/main/resources</directory>
+				<directory>../hapi-fhir-structures-dstu3/src/main/resources</directory>
 				<filtering>false</filtering>
 			</resource>
 			<!--
 			<resource>
-				<directory>../hapi-fhir-structures-dstu2.1/target/generated-resources/tinder</directory>
+				<directory>../hapi-fhir-structures-dstu3/target/generated-resources/tinder</directory>
 				<filtering>false</filtering>
 			</resource>
 			-->
@@ -233,7 +233,7 @@
 				<filtering>false</filtering>
 			</resource>
 			<resource>
-				<directory>../hapi-fhir-validation-resources-dstu2.1/src/main/resources</directory>
+				<directory>../hapi-fhir-validation-resources-dstu3/src/main/resources</directory>
 				<filtering>false</filtering>
 			</resource>
 		</resources>
