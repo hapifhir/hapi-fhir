@@ -31,6 +31,9 @@ import java.lang.annotation.Target;
  * conditional "search" URL for the operation, if an incoming client invocation is
  * a conditional operation. For non-conditional invocations, the value will be set to
  * <code>null</code> so it is important to handle <code>null</code>.
+ * <p>
+ * Parameters annotated with this annotation <b>must be of type {@link String}</b>
+ * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
