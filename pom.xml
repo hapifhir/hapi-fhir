@@ -1024,11 +1024,11 @@
 								<copy todir="target/site/apidocs-dstu">
 									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs"/>
 								</copy>
-								<copy todir="target/site/apidocs-hl7org-dstu2">
-									<fileset dir="hapi-fhir-structures-hl7org-dstu2/target/site/apidocs"/>
-								</copy>
 								<copy todir="target/site/apidocs-dstu2">
 									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-dstu3">
+									<fileset dir="hapi-fhir-structures-dstu3/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>

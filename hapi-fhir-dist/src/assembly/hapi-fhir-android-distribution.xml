@@ -20,6 +20,8 @@
 				<include>hapi-fhir-android-${project.version}-dstu-sources.jar</include>
 				<include>hapi-fhir-android-${project.version}-dstu2.jar</include>
 				<include>hapi-fhir-android-${project.version}-dstu2-sources.jar</include>
+				<include>hapi-fhir-android-${project.version}-dstu3.jar</include>
+				<include>hapi-fhir-android-${project.version}-dstu3-sources.jar</include>
 			</includes>
 		</fileSet>
 	</fileSets>
@@ -39,8 +41,10 @@
 				<exclude>ca.uhn.hapi.fhir:hapi-fhir-base</exclude>
 				<exclude>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</exclude>
 				<exclude>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</exclude>
+				<exclude>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3</exclude>
 				<exclude>ca.uhn.hapi.fhir:hapi-fhir-structures-hl7org-dstu2</exclude>
 				<exclude>ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu2</exclude>
+				<exclude>ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu3</exclude>
 				<exclude>org.glassfish:javax.json</exclude>
 				<exclude>org.codehaus.woodstox:woodstox-core-asl</exclude>
 				<exclude>javax.xml.stream:stax-api</exclude>
