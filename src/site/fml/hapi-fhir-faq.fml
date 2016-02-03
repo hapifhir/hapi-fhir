@@ -2,6 +2,27 @@
 <faqs xmlns="http://maven.apache.org/FML/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/FML/1.0.1 http://maven.apache.org/xsd/fml-1.0.1.xsd"
 	title="Frequently Asked Questions" toplink="false">
+	<part id="Getting Help">
+		<title>Getting Help</title>
+		<faq id="getting_help">
+			<question>Where can I ask questions or get help?</question>
+			<answer>
+				<p>
+					We ask that any questions about how to use HAPI FHIR be directed to
+					the <a href="https://groups.google.com/d/forum/hapi-fhir">HAPI FHIR Google Group</a>.
+					This group is a great resource, with lots of helpful people who can assist. The
+					HAPI FHIR developers are regular contributors to this group.
+				</p>
+				<p>
+					If you have questions which are about FHIR itself (e.g. which resource should 
+					I use for a specific purpose, how to I model my data, etc.) you might want
+					to also consider posting on <a href="http://stackoverflow.com/questions/tagged/hl7_fhir">Stackoverflow</a>,
+					as there are a number of FHIR experts who aren't HAPI/Java users who monitor
+					that site.
+				</p>
+			</answer>
+		</faq>
+	</part>
 	<part id="JPA Server">
 		<title>JPA Server</title>
 		<faq id="access_underlying_derby_database">
