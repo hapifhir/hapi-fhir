@@ -101,7 +101,6 @@
 									<fileset dir="../hapi-fhir-structures-dstu2/target/generated-sources/tinder" />
 									<fileset dir="../hapi-fhir-structures-hl7org-dstu2/src/main/java" />
 									<fileset dir="../hapi-fhir-structures-dstu3/src/main/java" />
-								<!--<fileset dir="../hapi-fhir-structures-dstu3/target/generated-sources/tinder" /> -->
 								</copy>
 							</target>
 						</configuration>

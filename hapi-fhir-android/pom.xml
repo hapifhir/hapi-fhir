@@ -61,6 +61,12 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu3</artifactId>
+			<version>1.4-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient-android</artifactId>
 		</dependency>
@@ -135,7 +141,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.3</version>
 				<configuration>
 					<createDependencyReducedPom>true</createDependencyReducedPom>
 					<createSourcesJar>true</createSourcesJar>
@@ -246,6 +251,31 @@
 							<artifactSet>
 								<includes>
 									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</include>
+								</includes>
+							</artifactSet>
+							<!-- Exclude server side stuff, except exceptions which are used clientside -->
+							<!--filters>
+								<filter>
+									<artifact>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</artifact>
+									<excludes>
+										<exclude>ca/uhn/fhir/rest/server/**</exclude>
+									</excludes>
+								</filter>
+							</filters-->
+						</configuration>
+					</execution>
+					<!-- dstu3 jar -->
+					<execution>
+						<id>dstu3</id>
+						<phase>package</phase> 
+ 						<goals> 
+ 							<goal>shade</goal> 
+ 						</goals>
+						<configuration>
+							<shadedClassifierName>dstu3</shadedClassifierName>
+							<artifactSet>
+								<includes>
+									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3</include>
 								</includes>
 							</artifactSet>
 							<!-- Exclude server side stuff, except exceptions which are used clientside -->
