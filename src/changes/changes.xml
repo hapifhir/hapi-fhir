@@ -166,6 +166,11 @@
 				manually, the the manual call led to a warning about
 				the EntityManager being created twice.
 			</action>
+			<action type="add" issue="289">
+				Allow server to correctly figure out it's own address even if the container provides
+				a Servlet Context Path which does not include the root. Thanks to Petro Mykhaylyshyn
+				for the pull request!
+			</action>
 		</release>
 		<release version="1.3" date="2015-11-14">
 			<action type="add">

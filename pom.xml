@@ -208,6 +208,10 @@
 			<id>matt-blanchette</id>
 			<name>Matt Blanchette</name>
 		</developer>
+		<developer>
+			<id>petromykhailysyn</id>
+			<name>Petro Mykhaylyshyn</name>
+		</developer>
 	</developers>
 
 	<licenses>
