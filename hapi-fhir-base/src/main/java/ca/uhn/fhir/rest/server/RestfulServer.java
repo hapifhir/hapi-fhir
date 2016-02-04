@@ -115,6 +115,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private String myServerVersion = VersionUtil.getVersion();
 	private boolean myStarted;
 	private Map<String, IResourceProvider> myTypeToProvider = new HashMap<String, IResourceProvider>();
+	/** Hold the base class type for a Provider */
+	private Map<String, Class<? extends IResourceProvider>> myTypeToClass = new HashMap<String, Class<? extends IResourceProvider>>();
 	private boolean myUncompressIncomingContents = true;
 	private boolean myUseBrowserFriendlyContentTypes;
 
@@ -293,7 +295,19 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		ourLog.info("Scanning type for RESTful methods: {}", theProvider.getClass());
 		int count = 0;
 
-		Class<?> clazz = theProvider.getClass();
+		Class<?> clazz = null;
+		if (theProvider instanceof IResourceProvider) {
+			IResourceProvider theResourceProvider = (IResourceProvider) theProvider;
+			String resourceType = theResourceProvider.getResourceType().getName();			
+			if (this.myTypeToClass.containsKey(resourceType)) {
+				clazz = this.myTypeToClass.get(resourceType);
+			} else {
+				clazz = theProvider.getClass();	
+			}
+		} else {
+			clazz = theProvider.getClass();
+		}
+		
 		Class<?> supertype = clazz.getSuperclass();
 		while (!Object.class.equals(supertype)) {
 			count += findResourceMethods(theProvider, supertype);
@@ -1270,6 +1284,21 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 	}
 
+	/**
+	 * Add a ResourceProvider, optionally setting the class file for this provider if the instance is a Proxy.
+	 * 
+	 * @param theResourceProvider the ResourceProvider instance
+	 * @param theResourceProviderClass  the class for the ResourceProvider
+	 */
+	public void addResourceProviders(IResourceProvider theResourceProvider, Class<? extends IResourceProvider> theResourceProviderClass) {
+		if (theResourceProvider != null) {
+			myResourceProviders.add(theResourceProvider);
+			if (theResourceProviderClass != null) {
+				myTypeToClass.put(theResourceProvider.getResourceType().getName(), theResourceProviderClass);
+			}
+		}
+	}
+	
 	/**
 	 * Provide a server address strategy, which is used to determine what base URL to provide clients to refer to this server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
 	 */
