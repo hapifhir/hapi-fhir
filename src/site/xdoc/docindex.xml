@@ -46,6 +46,7 @@
 				<li><a href="./doc_cors.html">CORS Support</a></li>
 				<li><a href="./doc_rest_server_interceptor.html">Interceptors (server)</a></li>
 				<li><a href="./doc_server_tester.html">Web Testing UI</a></li>
+				<li><a href="./doc_rest_server_jaxrs.html">JAX-RS Support</a></li>
 			</ul>
 			
 			<h4>Other Features</h4>

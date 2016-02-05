@@ -25,7 +25,7 @@
 				in the <code>hapi-fhir-structures-dstu3-[version].jar</code>
 				library, with the associated Schemas, ValueSets, and other
 				textual resources being found in
-				<code>hapi-fhir-validation-resources-[version].jar</code>.
+				<code>hapi-fhir-validation-resources-dstu3-[version].jar</code>.
 				For information on where to find these libraries, see the
 				<a href="./downloads.html">Downloads</a> page.
 			</p>
@@ -73,7 +73,7 @@
 				<p>
 					A new interface has been added which serves as a master interface
 					for all resource classes: <code>org.hl7.fhir.instance.model.api.IBaseResource</code>.
-					All RI resource classes will be in the package <code>org.hl7.fhir.instance.model</code>,
+					All RI resource classes will be in the package <code>org.hl7.fhir.dstu3.model</code>,
 					as shown below.
 				</p>
 				<img src="./images/hapi-1.1-structs-resource.svg" alt="Structures"/>
