@@ -12,7 +12,7 @@
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * #%L</em>
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * HAPI FHIR JPA Server</em>
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2015 University Health Network</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2016 University Health Network</em>
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
@@ -93,7 +93,7 @@
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  		subscriptionEntity.setSubscriptionResource(theEntity);
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  		subscriptionEntity.setNextCheck(theEntity.getPublished().getValue());
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  		subscriptionEntity.setMostRecentMatch(theEntity.getPublished().getValue());
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  		subscriptionEntity.setStatus(theSubscription.getStatusElement().getValueAsEnum());
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  		subscriptionEntity.setStatus(theSubscription.getStatusElement().getValue());
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>  		myEntityManager.persist(subscriptionEntity);
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  	}
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  
@@ -133,7 +133,7 @@
 <a class="jxr_linenumber" name="L125" href="#L125">125</a> 
 <a class="jxr_linenumber" name="L126" href="#L126">126</a> 		<em class="jxr_comment">// SubscriptionCandidateResource</em>
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> 
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 		Collection&lt;Long&gt; subscriptions = mySubscriptionTableDao.finsSubscriptionsWhichNeedToBeChecked(SubscriptionStatusEnum.ACTIVE, <strong class="jxr_keyword">new</strong> Date());
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 		Collection&lt;Long&gt; subscriptions = mySubscriptionTableDao.findSubscriptionsWhichNeedToBeChecked(SubscriptionStatusEnum.ACTIVE.getCode(), <strong class="jxr_keyword">new</strong> Date());
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 
 <a class="jxr_linenumber" name="L130" href="#L130">130</a> 		TransactionTemplate txTemplate = <strong class="jxr_keyword">new</strong> TransactionTemplate(myTxManager);
 <a class="jxr_linenumber" name="L131" href="#L131">131</a> 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -266,7 +266,7 @@
 <a class="jxr_linenumber" name="L258" href="#L258">258</a> 	}
 <a class="jxr_linenumber" name="L259" href="#L259">259</a> 
 <a class="jxr_linenumber" name="L260" href="#L260">260</a> 	@Override
-<a class="jxr_linenumber" name="L261" href="#L261">261</a> 	<strong class="jxr_keyword">protected</strong> <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> updateEntity(IResource theResource, <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, <strong class="jxr_keyword">boolean</strong> theUpdateHistory, Date theDeletedTimestampOrNull, <strong class="jxr_keyword">boolean</strong> thePerformIndexing, <strong class="jxr_keyword">boolean</strong> theUpdateVersion,
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> 	<strong class="jxr_keyword">protected</strong> <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> updateEntity(IBaseResource theResource, <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, <strong class="jxr_keyword">boolean</strong> theUpdateHistory, Date theDeletedTimestampOrNull, <strong class="jxr_keyword">boolean</strong> thePerformIndexing, <strong class="jxr_keyword">boolean</strong> theUpdateVersion,
 <a class="jxr_linenumber" name="L262" href="#L262">262</a> 			Date theUpdateTime) {
 <a class="jxr_linenumber" name="L263" href="#L263">263</a> 		ResourceTable retVal = <strong class="jxr_keyword">super</strong>.updateEntity(theResource, theEntity, theUpdateHistory, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime);
 <a class="jxr_linenumber" name="L264" href="#L264">264</a> 
@@ -281,7 +281,7 @@
 <a class="jxr_linenumber" name="L273" href="#L273">273</a> 		} <strong class="jxr_keyword">else</strong> {
 <a class="jxr_linenumber" name="L274" href="#L274">274</a> 			Query q = myEntityManager.createNamedQuery(<span class="jxr_string">"Q_HFJ_SUBSCRIPTION_SET_STATUS"</span>);
 <a class="jxr_linenumber" name="L275" href="#L275">275</a> 			q.setParameter(<span class="jxr_string">"res_id"</span>, resourceId);
-<a class="jxr_linenumber" name="L276" href="#L276">276</a> 			q.setParameter(<span class="jxr_string">"status"</span>, resource.getStatusElement().getValueAsEnum());
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> 			q.setParameter(<span class="jxr_string">"status"</span>, resource.getStatusElement().getValue());
 <a class="jxr_linenumber" name="L277" href="#L277">277</a> 			<strong class="jxr_keyword">if</strong> (q.executeUpdate() &gt; 0) {
 <a class="jxr_linenumber" name="L278" href="#L278">278</a> 				ourLog.info(<span class="jxr_string">"Updated subscription status for subscription {} to {}"</span>, resourceId, resource.getStatusElement().getValueAsEnum());
 <a class="jxr_linenumber" name="L279" href="#L279">279</a> 			} <strong class="jxr_keyword">else</strong> {
@@ -341,7 +341,7 @@
 <a class="jxr_linenumber" name="L333" href="#L333">333</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

@@ -14,7 +14,7 @@
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * #%L</em>
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * HAPI FHIR JPA Server</em>
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2015 University Health Network</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2016 University Health Network</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
@@ -35,16 +35,16 @@
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.Set;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IIdType;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.BaseHasResource;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceTable;
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.TagTypeEnum;
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.util.DeleteConflict;
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IQueryParameterType;
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.TagList;
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.dstu2.composite.MetaDt;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseMetaType;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IIdType;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.BaseHasResource;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceTable;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.TagTypeEnum;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.util.DeleteConflict;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IQueryParameterType;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.TagList;
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.MethodOutcome;
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.ValidationModeEnum;
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.param.DateRangeParam;
@@ -105,22 +105,22 @@
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment">	 * Not supported in DSTU1!</em>
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 	MetaDt metaAddOperation(IIdType theId1, MetaDt theMetaAdd);
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 	&lt;MT <strong class="jxr_keyword">extends</strong> IBaseMetaType&gt; MT metaAddOperation(IIdType theId1, MT theMetaAdd);
 <a class="jxr_linenumber" name="L101" href="#L101">101</a> 
 <a class="jxr_linenumber" name="L102" href="#L102">102</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment">	 * Not supported in DSTU1!</em>
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	MetaDt metaDeleteOperation(IIdType theId1, MetaDt theMetaDel);
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	&lt;MT <strong class="jxr_keyword">extends</strong> IBaseMetaType&gt; MT metaDeleteOperation(IIdType theId1, MT theMetaDel);
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">	 * Not supported in DSTU1!</em>
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 	MetaDt metaGetOperation();
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 	&lt;MT <strong class="jxr_keyword">extends</strong> IBaseMetaType&gt; MT metaGetOperation(Class&lt;MT&gt; theType);
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment">	 * Not supported in DSTU1!</em>
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	MetaDt metaGetOperation(IIdType theId);
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	&lt;MT <strong class="jxr_keyword">extends</strong> IBaseMetaType&gt; MT metaGetOperation(Class&lt;MT&gt; theType, IIdType theId);
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 	Set&lt;Long&gt; processMatchUrl(String theMatchUrl);
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> 
@@ -186,7 +186,7 @@
 <a class="jxr_linenumber" name="L178" href="#L178">178</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

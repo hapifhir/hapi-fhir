@@ -19,7 +19,7 @@
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.Include;
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.*;
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.dstu.composite.*;
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.dstu.resource.*;
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.dstu.resource.*; <em class="jxr_comment">//</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.*;
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.param.*;
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.SortSpec;
@@ -32,7 +32,7 @@
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  	{
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  	@Override
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  	<strong class="jxr_keyword">public</strong> Class&lt;? <strong class="jxr_keyword">extends</strong> IResource&gt; getResourceType() {
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  	<strong class="jxr_keyword">public</strong> Class&lt;DeviceObservationReport&gt; getResourceType() {
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  		<strong class="jxr_keyword">return</strong> DeviceObservationReport.<strong class="jxr_keyword">class</strong>;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  	}
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  
@@ -98,7 +98,7 @@
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  			@Sort 
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  			SortSpec theSort,
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  			
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  			@Count
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  			@ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.Count
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>  			Integer theCount
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  	) {
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  		startRequest(theServletRequest);
@@ -130,7 +130,7 @@
 <a class="jxr_linenumber" name="L122" href="#L122">122</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

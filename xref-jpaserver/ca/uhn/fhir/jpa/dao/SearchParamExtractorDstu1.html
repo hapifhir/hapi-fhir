@@ -12,7 +12,7 @@
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * #%L</em>
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * HAPI FHIR JPA Server</em>
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2015 University Health Network</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2016 University Health Network</em>
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
@@ -43,23 +43,23 @@
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> javax.measure.unit.Unit;
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.tuple.Pair;
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.ConfigurationException;
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.FhirContext;
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.RuntimeResourceDefinition;
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.RuntimeSearchParam;
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamCoords;
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceTable;
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IDatatype;
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IPrimitiveDatatype;
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IResource;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.ConfigurationException;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.FhirContext;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.RuntimeResourceDefinition;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.RuntimeSearchParam;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamCoords;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceTable;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IDatatype;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IPrimitiveDatatype;
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.base.composite.BaseHumanNameDt;
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.dstu.composite.AddressDt;
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
@@ -83,12 +83,12 @@
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  	}
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  	@Override
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	<strong class="jxr_keyword">public</strong> Set&lt;ResourceIndexedSearchParamCoords&gt; extractSearchParamCoords(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IResource theResource) {
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	<strong class="jxr_keyword">public</strong> Set&lt;ResourceIndexedSearchParamCoords&gt; extractSearchParamCoords(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IBaseResource theResource) {
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  		<strong class="jxr_keyword">return</strong> Collections.emptySet();
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  	}
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  	@Override
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  	<strong class="jxr_keyword">public</strong> Set&lt;ResourceIndexedSearchParamDate&gt; extractSearchParamDates(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IResource theResource) {
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  	<strong class="jxr_keyword">public</strong> Set&lt;ResourceIndexedSearchParamDate&gt; extractSearchParamDates(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IBaseResource theResource) {
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  		HashSet&lt;ResourceIndexedSearchParamDate&gt; retVal = <strong class="jxr_keyword">new</strong> HashSet&lt;ResourceIndexedSearchParamDate&gt;();
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
@@ -143,7 +143,7 @@
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> 	}
 <a class="jxr_linenumber" name="L136" href="#L136">136</a> 
 <a class="jxr_linenumber" name="L137" href="#L137">137</a> 	@Override
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 	<strong class="jxr_keyword">public</strong> HashSet&lt;ResourceIndexedSearchParamNumber&gt; extractSearchParamNumber(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IResource theResource) {
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 	<strong class="jxr_keyword">public</strong> HashSet&lt;ResourceIndexedSearchParamNumber&gt; extractSearchParamNumber(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IBaseResource theResource) {
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> 		HashSet&lt;ResourceIndexedSearchParamNumber&gt; retVal = <strong class="jxr_keyword">new</strong> HashSet&lt;ResourceIndexedSearchParamNumber&gt;();
 <a class="jxr_linenumber" name="L140" href="#L140">140</a> 
 <a class="jxr_linenumber" name="L141" href="#L141">141</a> 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
@@ -238,7 +238,7 @@
 <a class="jxr_linenumber" name="L230" href="#L230">230</a> 	}
 <a class="jxr_linenumber" name="L231" href="#L231">231</a> 
 <a class="jxr_linenumber" name="L232" href="#L232">232</a> 	@Override
-<a class="jxr_linenumber" name="L233" href="#L233">233</a> 	<strong class="jxr_keyword">public</strong> Set&lt;ResourceIndexedSearchParamQuantity&gt; extractSearchParamQuantity(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IResource theResource) {
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> 	<strong class="jxr_keyword">public</strong> Set&lt;ResourceIndexedSearchParamQuantity&gt; extractSearchParamQuantity(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IBaseResource theResource) {
 <a class="jxr_linenumber" name="L234" href="#L234">234</a> 		HashSet&lt;ResourceIndexedSearchParamQuantity&gt; retVal = <strong class="jxr_keyword">new</strong> HashSet&lt;ResourceIndexedSearchParamQuantity&gt;();
 <a class="jxr_linenumber" name="L235" href="#L235">235</a> 
 <a class="jxr_linenumber" name="L236" href="#L236">236</a> 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
@@ -286,7 +286,7 @@
 <a class="jxr_linenumber" name="L278" href="#L278">278</a> 	}
 <a class="jxr_linenumber" name="L279" href="#L279">279</a> 
 <a class="jxr_linenumber" name="L280" href="#L280">280</a> 	@Override
-<a class="jxr_linenumber" name="L281" href="#L281">281</a> 	<strong class="jxr_keyword">public</strong> Set&lt;ResourceIndexedSearchParamString&gt; extractSearchParamStrings(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IResource theResource) {
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> 	<strong class="jxr_keyword">public</strong> Set&lt;ResourceIndexedSearchParamString&gt; extractSearchParamStrings(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IBaseResource theResource) {
 <a class="jxr_linenumber" name="L282" href="#L282">282</a> 		HashSet&lt;ResourceIndexedSearchParamString&gt; retVal = <strong class="jxr_keyword">new</strong> HashSet&lt;ResourceIndexedSearchParamString&gt;();
 <a class="jxr_linenumber" name="L283" href="#L283">283</a> 
 <a class="jxr_linenumber" name="L284" href="#L284">284</a> 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
@@ -372,7 +372,7 @@
 <a class="jxr_linenumber" name="L364" href="#L364">364</a> 	}
 <a class="jxr_linenumber" name="L365" href="#L365">365</a> 
 <a class="jxr_linenumber" name="L366" href="#L366">366</a> 	@Override
-<a class="jxr_linenumber" name="L367" href="#L367">367</a> 	<strong class="jxr_keyword">public</strong> Set&lt;BaseResourceIndexedSearchParam&gt; extractSearchParamTokens(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IResource theResource) {
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> 	<strong class="jxr_keyword">public</strong> Set&lt;BaseResourceIndexedSearchParam&gt; extractSearchParamTokens(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IBaseResource theResource) {
 <a class="jxr_linenumber" name="L368" href="#L368">368</a> 		HashSet&lt;BaseResourceIndexedSearchParam&gt; retVal = <strong class="jxr_keyword">new</strong> HashSet&lt;BaseResourceIndexedSearchParam&gt;();
 <a class="jxr_linenumber" name="L369" href="#L369">369</a> 
 <a class="jxr_linenumber" name="L370" href="#L370">370</a> 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
@@ -480,14 +480,14 @@
 <a class="jxr_linenumber" name="L472" href="#L472">472</a> 	}
 <a class="jxr_linenumber" name="L473" href="#L473">473</a> 
 <a class="jxr_linenumber" name="L474" href="#L474">474</a> 	@Override
-<a class="jxr_linenumber" name="L475" href="#L475">475</a> 	<strong class="jxr_keyword">public</strong> Set&lt;ResourceIndexedSearchParamUri&gt; extractSearchParamUri(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IResource theResource) {
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> 	<strong class="jxr_keyword">public</strong> Set&lt;ResourceIndexedSearchParamUri&gt; extractSearchParamUri(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceTable.html">ResourceTable</a> theEntity, IBaseResource theResource) {
 <a class="jxr_linenumber" name="L476" href="#L476">476</a> 		<strong class="jxr_keyword">return</strong> Collections.emptySet();
 <a class="jxr_linenumber" name="L477" href="#L477">477</a> 	}
 <a class="jxr_linenumber" name="L478" href="#L478">478</a> 
 <a class="jxr_linenumber" name="L479" href="#L479">479</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2016 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

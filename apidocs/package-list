@@ -23,6 +23,7 @@ ca.uhn.fhir.rest.server
 ca.uhn.fhir.rest.server.audit
 ca.uhn.fhir.rest.server.exceptions
 ca.uhn.fhir.rest.server.interceptor
+ca.uhn.fhir.rest.server.servlet
 ca.uhn.fhir.store
 ca.uhn.fhir.util
 ca.uhn.fhir.util.jar
