@@ -1396,7 +1396,6 @@
 			<id>SITE</id>
 			<modules>
 				<module>hapi-fhir-base</module>
-				<module>hapi-fhir-base-client</module>
 				<module>hapi-fhir-structures-dstu</module>
 				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-structures-hl7org-dstu2</module>
@@ -1433,7 +1432,6 @@
 			<modules>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
-				<module>hapi-fhir-base-client</module>
 				<!--<module>hapi-fhir-oauth2</module> -->
 				<module>hapi-fhir-base-test-mindeps-client</module>
 				<module>hapi-fhir-base-test-mindeps-server</module>
