@@ -11,7 +11,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>1.4-SNAPSHOT</version>
+	<version>1.4</version>
 	<name>HAPI-FHIR</name>
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
 
@@ -208,6 +208,10 @@
 			<id>matt-blanchette</id>
 			<name>Matt Blanchette</name>
 		</developer>
+		<developer>
+			<id>petromykhailysyn</id>
+			<name>Petro Mykhaylyshyn</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -222,7 +226,7 @@
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
 		<!-- This property is used in some of the site documentation where the version is shown, so that we can deploy the site even if the project is on a snapshot version. -->
-		<hapi_stable_version>1.3</hapi_stable_version>
+		<hapi_stable_version>1.4</hapi_stable_version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -1020,11 +1024,11 @@
 								<copy todir="target/site/apidocs-dstu">
 									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs"/>
 								</copy>
-								<copy todir="target/site/apidocs-hl7org-dstu2">
-									<fileset dir="hapi-fhir-structures-hl7org-dstu2/target/site/apidocs"/>
-								</copy>
 								<copy todir="target/site/apidocs-dstu2">
 									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-dstu3">
+									<fileset dir="hapi-fhir-structures-dstu3/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
