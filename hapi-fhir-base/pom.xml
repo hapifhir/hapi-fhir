@@ -9,7 +9,7 @@
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
-	<artifactId>hapi-fhir-base-core</artifactId>
+	<artifactId>hapi-fhir-base</artifactId>
 	<packaging>jar</packaging>
 
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
