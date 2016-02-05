@@ -58,7 +58,6 @@ import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 public class ExampleDataUploader extends BaseCommand {
 
-	private static final String SPEC_DEFAULT_VERSION = "dstu2";
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExampleDataUploader.class);
 
@@ -77,9 +76,7 @@ public class ExampleDataUploader extends BaseCommand {
 		Options options = new Options();
 		Option opt;
 
-		opt = new Option("f", "fhirversion", true, "Spec version to upload (default is '" + SPEC_DEFAULT_VERSION + "')");
-		opt.setRequired(false);
-		options.addOption(opt);
+		addFhirVersionOption(options);
 
 		opt = new Option("t", "target", true, "Base URL for the target server (e.g. \"http://example.com/fhir\")");
 		opt.setRequired(true);
@@ -88,15 +85,15 @@ public class ExampleDataUploader extends BaseCommand {
 		opt = new Option("l", "limit", true, "Sets a limit to the number of resources the uploader will try to upload");
 		opt.setRequired(false);
 		options.addOption(opt);
-		
+
 		opt = new Option("d", "data", true, "Local *.zip containing file to use to upload");
 		opt.setRequired(false);
 		options.addOption(opt);
-		
+
 		opt = new Option("c", "cache", false, "Cache the downloaded examples-json.zip file in the ~/.hapi-fhir-cli/cache directory. Use this file for 12 hours if it exists, instead of fetching it from the internet.");
 		opt.setRequired(false);
 		options.addOption(opt);
-		
+
 //		opt = new Option("c", "cache", true, "Store a copy of the downloaded example pack on the local disk using a file of the given name. Use this file instead of fetching it from the internet if the file already exists.");
 //		opt.setRequired(false);
 //		options.addOption(opt);
@@ -106,14 +103,15 @@ public class ExampleDataUploader extends BaseCommand {
 
 	@Override
 	public void run(CommandLine theCommandLine) throws Exception {
-		String specVersion = theCommandLine.getOptionValue("f", SPEC_DEFAULT_VERSION);
+		FhirContext ctx = getSpecVersionContext(theCommandLine);
+
 		String targetServer = theCommandLine.getOptionValue("t");
 		if (isBlank(targetServer)) {
 			throw new ParseException("No target server (-t) specified");
 		} else if (targetServer.startsWith("http") == false && targetServer.startsWith("file") == false) {
 			throw new ParseException("Invalid target server specified, must begin with 'http' or 'file'");
 		}
-		
+
 		Integer limit = null;
 		String limitString = theCommandLine.getOptionValue('l');
 		if (isNotBlank(limitString)) {
@@ -124,65 +122,66 @@ public class ExampleDataUploader extends BaseCommand {
 			}
 		}
 
-		FhirContext ctx = null;
 		String specUrl;
-		if (SPEC_DEFAULT_VERSION.equals(specVersion)) {
-			ctx = FhirContext.forDstu2();
-			specUrl = "http://hl7.org/fhir/" + specVersion + "/examples-json.zip";
-		} else if ("dstu2.1".equals(specVersion)) {
-			ctx = FhirContext.forDstu2_1();
-			specUrl = "http://hl7-fhir.github.io/examples-json.zip";
-		} else {
-			throw new ParseException("Unknown spec version: " + specVersion);
+
+		switch (ctx.getVersion().getVersion()) {
+			case DSTU2:
+				specUrl = "http://hl7.org/fhir/dstu2/examples-json.zip";
+				break;
+			case DSTU3:
+				specUrl = "http://hl7-fhir.github.io/examples-json.zip";
+				break;
+			default:
+				throw new ParseException("Invalid spec version for this command: " + ctx.getVersion().getVersion());
 		}
-		
+
 		String filepath = theCommandLine.getOptionValue('d');
-		
+
 		boolean cacheFile  = theCommandLine.hasOption('c');
-		
+
 		String userHomeDir = System.getProperty("user.home");
-		
+
 		File applicationDir = new File(userHomeDir + File.separator + "." + "hapi-fhir-cli");
 		FileUtils.forceMkdir(applicationDir);
-		
+
 		if (isNotBlank(filepath)) {
 			ourLog.info("Loading from local path: {}", filepath);
-			
+
 			if (filepath.startsWith("~" + File.separator)) {
 				filepath = userHomeDir + filepath.substring(1);
 			}
 
-			File suppliedFile = new File(FilenameUtils.normalize(filepath));			
-			 
+			File suppliedFile = new File(FilenameUtils.normalize(filepath));
+
 			if(suppliedFile.isDirectory()){
-				Collection<File> inputFiles;	
+				Collection<File> inputFiles;
 				inputFiles = FileUtils.listFiles(suppliedFile, new String[] {"zip"}, false);
-				
+
 				for (File inputFile : inputFiles) {
 					Bundle bundle = getBundleFromFile(limit, inputFile, ctx);
 					processBundle(ctx, bundle);
 					sendBundleToTarget(targetServer, ctx, bundle);
 				}
 			} else {
-			
+
 				Bundle bundle = getBundleFromFile(limit, suppliedFile, ctx);
 				processBundle(ctx, bundle);
 				sendBundleToTarget(targetServer, ctx, bundle);
 			}
-			
+
 		} else {
-			
+
 			File cacheDir = new File(applicationDir, "cache" );
 			FileUtils.forceMkdir(cacheDir);
-			
+
 			File inputFile = new File( cacheDir, "examples-json-" + specVersion + ".zip");
-			
+
 			Date cacheExpiryDate = DateUtils.addHours(new Date(), -12);
-			
+
 			if(!inputFile.exists() | (cacheFile && FileUtils.isFileOlder(inputFile, cacheExpiryDate))){
-				
+
 				File exampleFileDownloading = new File( cacheDir, "examples-json-" + specVersion + ".zip.partial");
-				
+
 				HttpGet get = new HttpGet(specUrl);
 				CloseableHttpClient client = HttpClientBuilder.create().build();
 				CloseableHttpResponse result = client.execute(get);
@@ -190,12 +189,12 @@ public class ExampleDataUploader extends BaseCommand {
 				if (result.getStatusLine().getStatusCode() != 200) {
 					throw new CommandFailureException("Got HTTP " + result.getStatusLine().getStatusCode() + " response code loading " + specUrl);
 				}
-				
+
 				ourLog.info("Downloading from remote url: {}", specUrl);
 				downloadFileFromInternet(result, exampleFileDownloading);
-				
+
 				FileUtils.moveFile(exampleFileDownloading, inputFile);
-				
+
 				if(!cacheFile) {
 					inputFile.deleteOnExit();
 				}
@@ -203,12 +202,12 @@ public class ExampleDataUploader extends BaseCommand {
 				ourLog.info("Successfully Loaded example pack ({})", FileUtils.byteCountToDisplaySize( FileUtils.sizeOf(inputFile)));
 				IOUtils.closeQuietly(result.getEntity().getContent());
 			}
-			
+
 			Bundle bundle = getBundleFromFile(limit, inputFile, ctx);
 			processBundle(ctx, bundle);
-			
+
 			sendBundleToTarget(targetServer, ctx, bundle);
-			
+
 		}
 
 	}
@@ -226,7 +225,6 @@ public class ExampleDataUploader extends BaseCommand {
 				throw new Exception("File already exists: " + file.getAbsolutePath());
 			}
 			FileWriter w = new FileWriter(file, false);
-			
 			w.append(encoded);
 			w.close();
 		} else {
@@ -243,14 +241,14 @@ public class ExampleDataUploader extends BaseCommand {
 		}
 	}
 
-	private void processBundle(FhirContext ctx, Bundle originalBundle) {
-		
+	private void processBundle(FhirContext ctx, Bundle bundle) {
+
 		Map<String, Integer> ids = new HashMap<String, Integer>();
 		Set<String> fullIds = new HashSet<String>();
-		
-		for (Iterator<Entry> iterator = originalBundle.getEntry().iterator(); iterator.hasNext();) {
+
+		for (Iterator<Entry> iterator = bundle.getEntry().iterator(); iterator.hasNext();) {
 			Entry next = iterator.next();
-			
+
 			// DataElement have giant IDs that seem invalid, need to investigate this..
 			if ("DataElement".equals(next.getResource().getResourceName()) || "OperationOutcome".equals(next.getResource().getResourceName()) || "OperationDefinition".equals(next.getResource().getResourceName())) {
 				ourLog.info("Skipping " + next.getResource().getResourceName() + " example");
@@ -278,7 +276,7 @@ public class ExampleDataUploader extends BaseCommand {
 		}
 		Set<String> qualIds = new HashSet<String>();
 		Map<String, String> renames = new HashMap<String, String>();
-		for (Iterator<Entry> iterator = originalBundle.getEntry().iterator(); iterator.hasNext();) {		
+		for (Iterator<Entry> iterator = bundle.getEntry().iterator(); iterator.hasNext();) {
 			Entry next = iterator.next();
 			if (next.getResource().getId().getIdPart() != null) {
 				String idPart = next.getResource().getId().getIdPart();
@@ -299,7 +297,7 @@ public class ExampleDataUploader extends BaseCommand {
 		}
 
 		int goodRefs = 0;
-		for (Entry next : originalBundle.getEntry()) {
+		for (Entry next : bundle.getEntry()) {
 			List<ResourceReferenceInfo> refs = ctx.newTerser().getAllResourceReferences(next.getResource());
 			for (ResourceReferenceInfo nextRef : refs) {
 				// if (nextRef.getResourceReference().getReferenceElement().isAbsolute()) {
@@ -321,23 +319,32 @@ public class ExampleDataUploader extends BaseCommand {
 					goodRefs++;
 				}
 			}
-		}		
-		
+		}
+
+		// for (Entry next : bundle.getEntry()) {
+		// if (next.getResource().getId().hasIdPart() &&
+		// Character.isLetter(next.getResource().getId().getIdPart().charAt(0))) {
+		// next.getTransaction().setUrl(next.getResource().getResourceName() + '/' +
+		// next.getResource().getId().getIdPart());
+		// next.getTransaction().setMethod(HTTPVerbEnum.PUT);
+		// }
+		// }
+
 		ourLog.info("{} good references", goodRefs);
 		System.gc();
-		
-		ourLog.info("Final bundle: {} entries", originalBundle.getEntry().size());
-		
+
+		ourLog.info("Final bundle: {} entries", bundle.getEntry().size());
+
 	}
 
 	private Bundle getBundleFromFile(Integer limit, File inputFile, FhirContext ctx)
-			throws IOException, UnsupportedEncodingException {
-		
+		throws IOException, UnsupportedEncodingException {
+
 		Bundle bundle = new Bundle();
-		
+
 		ZipInputStream zis = new ZipInputStream(FileUtils.openInputStream(inputFile));
 		byte[] buffer = new byte[2048];
-		
+
 		int count = 0;
 		while (true) {
 			count++;
@@ -349,7 +356,7 @@ public class ExampleDataUploader extends BaseCommand {
 			if (nextEntry == null) {
 				break;
 			}
-			
+
 			int len = 0;
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			while ((len = zis.read(buffer)) > 0) {
@@ -398,39 +405,39 @@ public class ExampleDataUploader extends BaseCommand {
 
 	private void downloadFileFromInternet(CloseableHttpResponse result, File localFile ) throws IOException {
 		FileOutputStream buffer = FileUtils.openOutputStream(localFile);
-		
+
 		long maxLength = result.getEntity().getContentLength();
 		long nextLog = -1;
 //		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		int nRead;
 		byte[] data = new byte[16384];
 		while ((nRead = result.getEntity().getContent().read(data, 0, data.length)) != -1) {
-		  buffer.write(data, 0, nRead);
-		  long fileSize = FileUtils.sizeOf(localFile);
-		  if (fileSize > nextLog) {
-			  System.err.print("\r" + Ansi.ansi().eraseLine());
-			  System.err.print(FileUtils.byteCountToDisplaySize(fileSize));
-			  if (maxLength > 0) {
-				  System.err.print(" [");
-				  int stars = (int)(50.0f * ((float)fileSize / (float)maxLength));
-				  for (int i = 0; i < stars; i++) {
-					  System.err.print("*");
-				  }
-				  for (int i = stars; i < 50; i++) {
-					  System.err.print(" ");
-				  }
-				  System.err.print("]");
-			  }
-			  System.err.flush();
-			  nextLog += 100000;
-		  }
+			buffer.write(data, 0, nRead);
+			long fileSize = FileUtils.sizeOf(localFile);
+			if (fileSize > nextLog) {
+				System.err.print("\r" + Ansi.ansi().eraseLine());
+				System.err.print(FileUtils.byteCountToDisplaySize(fileSize));
+				if (maxLength > 0) {
+					System.err.print(" [");
+					int stars = (int)(50.0f * ((float)fileSize / (float)maxLength));
+					for (int i = 0; i < stars; i++) {
+						System.err.print("*");
+					}
+					for (int i = stars; i < 50; i++) {
+						System.err.print(" ");
+					}
+					System.err.print("]");
+				}
+				System.err.flush();
+				nextLog += 100000;
+			}
 		}
 		buffer.flush();
-		
+
 		System.err.println();
 		System.err.flush();
-	}	
-	
+	}
+
 	private byte[] readStreamFromInternet(CloseableHttpResponse result) throws IOException {
 		byte[] inputBytes;
 		{
