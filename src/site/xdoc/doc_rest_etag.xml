@@ -79,7 +79,7 @@
 		<section name="Server Side ETags">
 		
 			<p>
-				As of HAPI 0.9, ETag support is automatically enabled in the RESTful server.
+				ETag support is automatically enabled in the RESTful server.
 				This has the following effects:
 			</p>
 			<ul>
