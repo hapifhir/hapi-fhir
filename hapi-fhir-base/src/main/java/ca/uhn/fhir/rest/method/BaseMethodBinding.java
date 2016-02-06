@@ -422,7 +422,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			// returns a bundle
 		} else if (Collection.class.isAssignableFrom(returnTypeFromMethod)) {
 			returnTypeFromMethod = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
-			if (!verifyIsValidResourceReturnType(returnTypeFromMethod) && !isResourceInterface(returnTypeFromMethod)) {
+			if (returnTypeFromMethod == null) {
+				ourLog.trace("Method {} returns a non-typed list, can't verify return type", theMethod);
+			} else if (!verifyIsValidResourceReturnType(returnTypeFromMethod) && !isResourceInterface(returnTypeFromMethod)) {
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName()
 						+ " returns a collection with generic type " + toLogString(returnTypeFromMethod)
 						+ " - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List<Patient> or List<IBaseResource> )");
