@@ -174,13 +174,13 @@ public class ExampleDataUploader extends BaseCommand {
 			File cacheDir = new File(applicationDir, "cache" );
 			FileUtils.forceMkdir(cacheDir);
 
-			File inputFile = new File( cacheDir, "examples-json-" + specVersion + ".zip");
+			File inputFile = new File( cacheDir, "examples-json-" + ctx.getVersion().getVersion() + ".zip");
 
 			Date cacheExpiryDate = DateUtils.addHours(new Date(), -12);
 
 			if(!inputFile.exists() | (cacheFile && FileUtils.isFileOlder(inputFile, cacheExpiryDate))){
 
-				File exampleFileDownloading = new File( cacheDir, "examples-json-" + specVersion + ".zip.partial");
+				File exampleFileDownloading = new File( cacheDir, "examples-json-" + ctx.getVersion().getVersion() + ".zip.partial");
 
 				HttpGet get = new HttpGet(specUrl);
 				CloseableHttpClient client = HttpClientBuilder.create().build();
