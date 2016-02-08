@@ -32,7 +32,7 @@
 				This is the homepage for the HAPI-FHIR library. We are developing 
 				an open-source implementation of the FHIR specification in Java.
 				<a href="http://hl7.org/implement/standards/fhir/">FHIR</a>
-				(Fast Healthcare Interoperable Resources)
+				(Fast Healthcare Interoperability Resources)
 				is a specification for exchanging healthcare data in a modern
 				and developer friendly way.
 			</p>
