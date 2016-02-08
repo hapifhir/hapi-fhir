@@ -61,6 +61,66 @@
 
 		<section name="Announcements">
 			<p>
+				<b>February 4, 2016 - HAPI FHIR 1.4 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and 
+				GitHub's releases section. 
+			</p>
+			<p>
+				This release has taken a lot longer than originally planned. Mainly this
+				is because we have taken a number of huge steps towards integrating
+				HAPI FHIR with the HL7.org Java Reference Implementation. This 
+				effort will mean great things for all Java FHIR developers from now
+				on, as it will bring a rich set of tools to everyone. See the
+				<a href="./doc_dstu2.html">DSTU3/RI page</a> for information on
+				this effort.
+			</p>
+			<p>
+				This release brings a number of bugfixes and a few bigger things.
+				As always, the <a href="./changes-report.html">changelog</a> has the full list
+				of changes in this version. Some changes of note include:
+			</p>
+			<ul>
+				<li>
+					This release adds support for the current draft DSTU3 structure definitions,
+					which were called DSTU2.1 until the decision in January by HL7 to call the
+					next release DSTU3. See the 
+					<a href="./downloads.html">downloads page</a> for information on the
+					various versions of FHIR supported by HAPI FHIR.
+				</li>
+				<li>
+					Two great new modules to HAPI FHIR have been contributed to the
+					project! A huge thanks to both contributors for their ongoing
+					efforts.
+					<li>
+						A new OSGi module (<a href="http://search.maven.org/#search|gav|1|g%3A%22ca.uhn.hapi.fhir%22%20AND%20a%3A%22hapi-fhir-osgi-core%22">hapi-fhir-osgi-core</a>) has been contributed
+						by
+						<a href="https://www.akana.com/">Akana</a>. This module was originally added in the 1.3 release cycle but
+						was cleaned up for use in 1.4.
+					</li> 
+					<li>
+						A new adapter 
+						(<a href="./doc_rest_server_jaxrs.html">hapi-fhir-jaxrsserver-base</a>)
+						which allows the RESTful server to be used in JAX-RS environment
+						was contributed by <a href="http://www.agfahealthcare.com/">AGFA Healthcare</a>.
+					</li>
+				</li>
+				<li>
+					The Command-Line tool (<a href="./doc_cli.html">hapi-fhir-cli</a>) has been
+					given options to start the server and uploader tools in either DSTU2
+					or DSTU3 mode. Both are supported by the same tool installation.
+				</li>
+				<li>
+					Several of HAPI's library dependencies have been upgraded to the latest version
+					(see the first entry in the <a href="./changes-report.html">changelog</a>)
+				</li>
+			</ul>
+			<p>
+				And just a reminder, if you haven't yet filled out the 
+				<a href="http://goo.gl/forms/R8Ifg2qvOY">HAPI FHIR Community Survey</a>, we
+				would really appreciate if you did so!
+			</p>
+			<!-- 
+			<p>
 				<b>November 15, 2015 - HAPI FHIR 1.3 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and 
 				GitHub's releases section. 
@@ -101,6 +161,7 @@
 				<a href="http://goo.gl/forms/R8Ifg2qvOY">HAPI FHIR Community Survey</a>, we
 				would really appreciate if you did so!
 			</p>
+			-->
 			<!-- 
 			<p>
 				<b>September 18, 2015 - HAPI FHIR 1.2 and Community Survey</b> -

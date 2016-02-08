@@ -773,11 +773,6 @@
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>cobertura-maven-plugin</artifactId>
-					<version>2.7</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
 					<version>1.14</version>
 				</plugin>
@@ -1418,7 +1413,7 @@
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-structures-dstu</module>
 				<module>hapi-fhir-structures-dstu2</module>
-				<module>hapi-fhir-structures-hl7org-dstu2</module>
+				<module>hapi-fhir-structures-dstu3</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<!-- <module>hapi-fhir-cobertura</module> -->

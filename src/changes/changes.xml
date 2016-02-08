@@ -6,7 +6,15 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="1.4" date="TBD">
+		<release version="1.5" date="TBD">
+			<action type="fix" issue="291">
+				Fix a failure starting the REST server if a method returns an untyped List, which
+				among other things prevented resource provider added to the server
+				as CDI beans in a JBoss enviroment. Thanks to GitHub user fw060 (Fei) for
+				reporting and figuring out exactly why this wasn't working!
+			</action>
+		</release>
+		<release version="1.4" date="2016-02-04">
 			<action type="add">
             Bump the version of a few dependencies to the
             latest versions (dependent HAPI modules listed in brackets):

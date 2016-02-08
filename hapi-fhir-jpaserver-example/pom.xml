@@ -157,7 +157,6 @@
 		<dependency>
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-schematron</artifactId>
-			<version>${phloc_schematron_version}</version>
 		</dependency>
 
 	</dependencies>
