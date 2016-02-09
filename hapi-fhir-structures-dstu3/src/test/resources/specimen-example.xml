@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><Specimen xmlns="http://hl7.org/fhir">
+	<id value="101"/>
+	<!--  text>
+    <status value="generated" />
+    <div xmlns="http://www.w3.org/1999/xhtml">[Put rendering here]</div>
+  </text>  -->
+	<text><status value="generated"/><div xmlns="http://www.w3.org/1999/xhtml"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: 101</p><p><b>contained</b>: </p><p><b>identifier</b>: 23234352356</p><p><b>status</b>: available</p><p><b>type</b>: Venous blood specimen <span>(Details : {SNOMED CT code &#39;122555007&#39; = &#39;122555007&#39;, given as &#39;Venous blood specimen&#39;})</span></p><p><b>subject</b>: <a>Peter Patient</a></p><p><b>accessionIdentifier</b>: X352356</p><p><b>receivedTime</b>: Mar 4, 2011 2:03:00 AM</p><h3>Collections</h3><table><tr><td>-</td><td><b>Collector</b></td><td><b>Comment</b></td><td><b>Collected[x]</b></td><td><b>Quantity</b></td><td><b>Method</b></td></tr><tr><td>*</td><td><a>Practitioner/example</a></td><td>Specimen is grossly lipemic</td><td>May 30, 2011 2:15:00 AM</td><td>6 mL</td><td>Line, Venous <span>(Details : {http://hl7.org/fhir/v2/0488 code &#39;LNV&#39; = &#39;Line, Venous)</span></td></tr></table><h3>Containers</h3><table><tr><td>-</td><td><b>Identifier</b></td><td><b>Description</b></td><td><b>Type</b></td><td><b>Capacity</b></td><td><b>SpecimenQuantity</b></td><td><b>Additive[x]</b></td></tr><tr><td>*</td><td>48736-15394-75465</td><td>Green Gel tube</td><td>Vacutainer <span>(Details )</span></td><td>10 mL</td><td>6 mL</td><td>id: hep; Lithium/Li Heparin <span>(Details : {http://hl7.org/fhir/v3/EntityCode code &#39;HEPL&#39; = &#39;Lithium/Li Heparin)</span></td></tr></table></div></text><contained>
+		<Substance>
+			<id value="hep"/>
+			<code>
+				<coding>
+					<system value="http://hl7.org/fhir/v3/EntityCode"/>
+					<code value="HEPL"/>
+				</coding>
+			</code>
+		</Substance>
+	</contained>
+	<!--   a specimen identifier - e.g. assigned when the specimen was taken
+     this is often not done   -->
+	<identifier>
+		<system value="http://ehr.acme.org/identifiers/collections"/>
+		<value value="23234352356"/>
+	</identifier>
+	<!--  status is really about the specimen availability and includes the concepts available - The physical specimen is present and in good condition entered-in-error - The specimen was entered in error and therefore nullified. unavailable - There is no physical specimen because it is either lost, destroyed or consumed. unsatisfactory - The specimen cannot be used because of either a quality issue such as a broken container, contamination, or too old.  -->
+	<status value="available"/>
+	<!--  
+   Type is a loosely defined field because there is such a lot of variation in how it is used.
+   The principal variation is how much information that could be represented elsewhere is also 
+   represented here. For instance, here's some possible types:
+     lithium heparin plasma   (+ .container.additive) (e.g. SNOMED CT 446272009)
+     transfusion bag of blood (+ container.type) 
+     Peritoneal lavage        (+ collection.bodySite)
+   If the type includes other fields, it would be normal not to populate the other fields
+
+   Note that this practice is so widespread that it's pointless to try and stop it   -->
+	<type>
+		<coding>
+			<system value="http://snomed.info/sct"/>
+			<code value="122555007"/>
+			<display value="Venous blood specimen"/>
+		</coding>
+	</type>
+	<subject>
+		<reference value="Patient/example"/>
+		<display value="Peter Patient"/>
+	</subject>
+	<!--   accession identifier - e.g. assigned by the labaratory when it is received.
+     This is common, unlike specimen identifier   -->
+	<accessionIdentifier>
+		<system value="http://lab.acme.org/specimens/2011"/>
+		<value value="X352356"/>
+	</accessionIdentifier>
+	<receivedTime value="2011-03-04T07:03:00Z"/>
+	<collection>
+		<collector>
+			<!--   in practice, collecter is almost always recorded   -->
+			<reference value="Practitioner/example"/>
+		</collector>
+		<comment value="Specimen is grossly lipemic"/>
+		<!--   the time of collection is usually required. Usually a point in time, but can be a period 
+      (collectedPeriod) if it's a timed collection (e.g. a 24 hour urine)   -->
+		<collectedDateTime value="2011-05-30T06:15:00Z"/>
+		<quantity>
+			<value value="6"/>
+			<unit value="mL"/>
+			<!--   e.g. full   -->
+		</quantity>
+		<!--   method is usually implied by type   -->
+		<method>
+			<coding>
+				<system value="http://hl7.org/fhir/v2/0488"/>
+				<code value="LNV"/>
+			</coding>
+		</method>
+	</collection>
+	<container>
+		<!--   
+      the container identifier is not the same as the specimen identifier
+      usually, it is pre-printed/implanted etc.on the container prior to 
+      use. It might a RFID in the container, or it might be a UDI 
+      (http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/) 
+      -->
+		<identifier>
+			<!--   this is a serial number off the tube - there's no context such as a system   -->
+			<value value="48736-15394-75465"/>
+		</identifier>
+		<description value="Green Gel tube"/>
+		<type>
+			<!--   again, this might easily be used to cover additives and capacity as well   -->
+			<text value="Vacutainer"/>
+		</type>
+		<capacity>
+			<value value="10"/>
+			<unit value="mL"/>
+		</capacity>
+		<!--   if there's only one container, then this value is the same 
+     as .collection.quantity (usually). This is for when there is more
+     than one container   -->
+		<specimenQuantity>
+			<value value="6"/>
+			<unit value="mL"/>
+		</specimenQuantity>
+		<additiveReference>
+			<reference value="#hep"/>
+		</additiveReference>
+	</container>
+</Specimen>

@@ -37,9 +37,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class ValidateDstu2Test {
 	private static CloseableHttpClient ourClient;
 	private static EncodingEnum ourLastEncoding;

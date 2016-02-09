@@ -384,11 +384,11 @@ public abstract class BaseParser implements IParser {
 		}
 	}
 
-	protected String fixContainedResourceId(String theValue) {
+	protected IdDt fixContainedResourceId(String theValue) {
 		if (StringUtils.isNotBlank(theValue) && theValue.charAt(0) == '#') {
-			return theValue.substring(1);
+			return new IdDt(theValue.substring(1));
 		}
-		return theValue;
+		return new IdDt(theValue);
 	}
 
 	ContainedResources getContainedResources() {

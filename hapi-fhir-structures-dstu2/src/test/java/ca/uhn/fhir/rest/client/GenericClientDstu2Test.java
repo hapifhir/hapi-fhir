@@ -1081,6 +1081,21 @@ public class GenericClientDstu2Test {
 			public boolean isEmpty() {
 				return false;
 			}
+
+			@Override
+			public boolean hasFormatComment() {
+				return false;
+			}
+
+			@Override
+			public List<String> getFormatCommentsPre() {
+				return null;
+			}
+
+			@Override
+			public List<String> getFormatCommentsPost() {
+				return null;
+			}
 		};
 
 		//@formatter:off

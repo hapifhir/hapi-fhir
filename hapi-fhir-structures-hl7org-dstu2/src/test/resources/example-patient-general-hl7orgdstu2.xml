@@ -1,5 +1,4 @@
 <Patient xmlns="http://hl7.org/fhir">
-<!--  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ./fhir-single.xsd">  -->
   	<extension url="urn:patientext:att">
 		<valueAttachment>
 			<contentType value="aaaa"/>
@@ -46,7 +45,6 @@
     </div>
   </text>
 
-  <!--   MRN assigned by ACME healthcare on 6-May 2001   -->
   <identifier>
     <use value="usual"/>
     <system value="urn:oid:1.2.36.146.595.217.0.1"/>
@@ -61,7 +59,6 @@
 
   <active value="true"/>
 
-  <!--   Peter James Chalmers, but called &quot;Jim&quot;   -->
   <name>
     <use value="official"/>
     <family value="Chalmers"/>
@@ -75,7 +72,6 @@
 
   <telecom>
     <use value="home"/>
-    <!--   home communication details aren't known   -->
   </telecom>
   <telecom>
     <system value="phone"/>
@@ -83,7 +79,6 @@
     <use value="work"/>
   </telecom>
 
-  <!--   use FHIR code system for male / female   -->
   <gender value="male"/>
   <birthDate value="1974-12-25"/>
   <deceasedBoolean value="false"/>
@@ -111,7 +106,6 @@
 
     <name>
       <family value="du">
-        <!--   the &quot;du&quot; part is a family name prefix (VV in iso 21090)   -->
         <extension url="http://hl7.org/fhir/Profile/iso-21090#qualifier">
           <valueCode value="VV"/>
         </extension>

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.not;
@@ -63,55 +64,6 @@ import net.sf.json.JsonConfig;
 public class JsonParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2Test.class);
-
-	@Test
-	public void testNamespacePreservationEncode() throws Exception {
-		//@formatter:off
-		String input = "<Patient xmlns=\"http://hl7.org/fhir\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">" + 
-				"<text>" + 
-				"<xhtml:div>" + 
-				"<xhtml:img src=\"foo\"/>" + 
-				"@fhirabend" + 
-				"</xhtml:div>" + 
-				"</text>" + 
-				"</Patient>";
-		//@formatter:on
-		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, input);
-
-		String expected = "<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>";
-		assertEquals(expected, parsed.getText().getDiv().getValueAsString());
-
-		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
-		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"div\":\"" + expected.replace("\"", "\\\"") + "\""));
-	}
-	
-	@Test
-	public void testEncodeDoesntIncludeUuidId() {
-		Patient p = new Patient();
-		p.setId(new IdDt("urn:uuid:42795ed8-041f-4ebf-b6f4-78ef6f64c2f2"));
-		p.addIdentifier().setSystem("ACME");
-		
-		String actual = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
-		assertThat(actual, not(containsString("78ef6f64c2f2")));
-	}
-
-	@Test
-	public void testEncodeEmptyBinary() {
-		String output = ourCtx.newJsonParser().encodeResourceToString(new Binary());
-		assertEquals("{\"resourceType\":\"Binary\"}", output);
-	}
-
-	@Test
-	public void testNamespacePreservationParse() throws Exception {
-		String input = "{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\"><xhtml:img src=\\\"foo\\\"/>@fhirabend</xhtml:div>\"}}";
-		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, input);
-		
-		assertEquals("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>", parsed.getText().getDiv().getValueAsString());
-		
-		String encoded = ourCtx.newXmlParser().encodeResourceToString(parsed);
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div></text></Patient>",encoded);
-	}
 
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
@@ -255,7 +207,7 @@ public class JsonParserDstu2Test {
 		assertEquals(new Tag("scheme1", "term1", "label1"), tagList.get(0));
 		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
 	}
-
+	
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
 		Patient p = new Patient();
@@ -376,6 +328,22 @@ public class JsonParserDstu2Test {
 		//@formatter:on
 	}
 
+	@Test
+	public void testEncodeDoesntIncludeUuidId() {
+		Patient p = new Patient();
+		p.setId(new IdDt("urn:uuid:42795ed8-041f-4ebf-b6f4-78ef6f64c2f2"));
+		p.addIdentifier().setSystem("ACME");
+		
+		String actual = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		assertThat(actual, not(containsString("78ef6f64c2f2")));
+	}
+
+	@Test
+	public void testEncodeEmptyBinary() {
+		String output = ourCtx.newJsonParser().encodeResourceToString(new Binary());
+		assertEquals("{\"resourceType\":\"Binary\"}", output);
+	}
+
 	/**
 	 * #158
 	 */
@@ -490,6 +458,22 @@ public class JsonParserDstu2Test {
 
 	}
 
+	// see #241
+	@Test
+	public void testEncodeThenParseShouldNotAddSpuriousId() throws Exception {
+		Condition condition = new Condition().setVerificationStatus(ConditionVerificationStatusEnum.CONFIRMED);
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		ca.uhn.fhir.model.dstu2.resource.Bundle.Entry entry = new ca.uhn.fhir.model.dstu2.resource.Bundle.Entry();
+		entry.setFullUrl(IdDt.newRandomUuid());
+		entry.setResource(condition);
+		bundle.getEntry().add(entry);
+		IParser parser = ourCtx.newJsonParser();
+		String json = parser.encodeResourceToString(bundle);
+		ourLog.info(json);
+		bundle = (ca.uhn.fhir.model.dstu2.resource.Bundle) parser.parseResource(json);
+		assertThat(json, not(containsString("\"id\"")));
+	}
+
 	@Test
 	public void testEncodingNullExtension() {
 		Patient p = new Patient();
@@ -525,6 +509,39 @@ public class JsonParserDstu2Test {
 		ourLog.info(encoded);
 		assertThat(encoded, containsString("{\"linkId\":\"value123\",\"_linkId\":{\"extension\":[{\"url\":\"http://123\",\"valueString\":\"HELLO\"}]}}"));
 
+	}
+
+	@Test
+	public void testNamespacePreservationEncode() throws Exception {
+		//@formatter:off
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">" + 
+				"<text>" + 
+				"<xhtml:div>" + 
+				"<xhtml:img src=\"foo\"/>" + 
+				"@fhirabend" + 
+				"</xhtml:div>" + 
+				"</text>" + 
+				"</Patient>";
+		//@formatter:on
+		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, input);
+
+		String expected = "<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>";
+		assertEquals(expected, parsed.getText().getDiv().getValueAsString());
+
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("\"div\":\"" + expected.replace("\"", "\\\"") + "\""));
+	}
+
+	@Test
+	public void testNamespacePreservationParse() throws Exception {
+		String input = "{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\"><xhtml:img src=\\\"foo\\\"/>@fhirabend</xhtml:div>\"}}";
+		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, input);
+		
+		assertEquals("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div>", parsed.getText().getDiv().getValueAsString());
+		
+		String encoded = ourCtx.newXmlParser().encodeResourceToString(parsed);
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:img src=\"foo\"/>@fhirabend</xhtml:div></text></Patient>",encoded);
 	}
 
 	@Test
@@ -806,6 +823,75 @@ public class JsonParserDstu2Test {
 	}
 
 	@Test
+	public void testParseAndEncodeComments() throws IOException {
+		//@formatter:off
+		String input = "{\n" + 
+				"  \"resourceType\": \"Patient\",\n" + 
+				"  \"id\": \"pat1\",\n" + 
+				"  \"text\": {\n" + 
+				"    \"status\": \"generated\",\n" + 
+				"    \"div\": \"<div>\\n      \\n      <p>Patient Donald DUCK @ Acme Healthcare, Inc. MR = 654321</p>\\n    \\n    </div>\"\n" + 
+				"  },\n" + 
+				"  \"identifier\": [\n" + 
+				"    {\n" + 
+				"      \"fhir_comments\":[\"identifier comment 1\",\"identifier comment 2\"],\n" +
+				"      \"use\": \"usual\",\n" + 
+				"      \"_use\": {\n" + 
+				"        \"fhir_comments\":[\"use comment 1\",\"use comment 2\"]\n" +
+				"      },\n" + 
+				"      \"type\": {\n" + 
+				"        \"coding\": [\n" + 
+				"          {\n" + 
+				"            \"system\": \"http://hl7.org/fhir/v2/0203\",\n" + 
+				"            \"code\": \"MR\"\n" + 
+				"          }\n" + 
+				"        ]\n" + 
+				"      },\n" + 
+				"      \"system\": \"urn:oid:0.1.2.3.4.5.6.7\",\n" + 
+				"      \"value\": \"654321\"\n" + 
+				"    }\n" + 
+				"  ],\n" + 
+				"  \"active\": true" +
+				"}";
+		//@formatter:off
+
+		Patient res = ourCtx.newJsonParser().parseResource(Patient.class, input);
+		res.getFormatCommentsPre();
+		assertEquals("Patient/pat1", res.getId().getValue());
+		assertEquals("654321", res.getIdentifier().get(0).getValue());
+		assertEquals(true, res.getActive());
+		
+		assertThat(res.getIdentifier().get(0).getFormatCommentsPre(), contains("identifier comment 1", "identifier comment 2"));
+		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre(), contains("use comment 1", "use comment 2"));
+		
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
+		ourLog.info(encoded);
+		
+		//@formatter:off
+		assertThat(encoded, stringContainsInOrder(
+				"\"identifier\":[", 
+				"{",
+				"\"fhir_comments\":",
+				"[",
+				"\"identifier comment 1\"",
+				",",
+				"\"identifier comment 2\"",
+				"]",
+				"\"use\":\"usual\",", 
+				"\"_use\":{", 
+				"\"fhir_comments\":",
+				"[",
+				"\"use comment 1\"",
+				",",
+				"\"use comment 2\"",
+				"]",
+				"},",
+				"\"type\"" 
+		));
+		//@formatter:off
+	}
+
+	@Test
 	public void testParseBundleWithBinary() {
 		Binary patient = new Binary();
 		patient.setId(new IdDt("http://base/Binary/11/_history/22"));
@@ -1036,21 +1122,5 @@ public class JsonParserDstu2Test {
 		String message = parser.encodeResourceToString(report);
 		ourLog.info(message);
 		Assert.assertThat(message, containsString("contained"));
-	}
-
-	// see #241
-	@Test
-	public void testEncodeThenParseShouldNotAddSpuriousId() throws Exception {
-		Condition condition = new Condition().setVerificationStatus(ConditionVerificationStatusEnum.CONFIRMED);
-		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		ca.uhn.fhir.model.dstu2.resource.Bundle.Entry entry = new ca.uhn.fhir.model.dstu2.resource.Bundle.Entry();
-		entry.setFullUrl(IdDt.newRandomUuid());
-		entry.setResource(condition);
-		bundle.getEntry().add(entry);
-		IParser parser = ourCtx.newJsonParser();
-		String json = parser.encodeResourceToString(bundle);
-		ourLog.info(json);
-		bundle = (ca.uhn.fhir.model.dstu2.resource.Bundle) parser.parseResource(json);
-		assertThat(json, not(containsString("\"id\"")));
 	}
 }

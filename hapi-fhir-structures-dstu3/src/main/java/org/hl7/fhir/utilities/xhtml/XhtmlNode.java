@@ -35,6 +35,8 @@ import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 
+import ca.uhn.fhir.util.CoverageIgnore;
+
 @ca.uhn.fhir.model.api.annotation.DatatypeDef(name="xhtml")
 public class XhtmlNode implements IBaseXhtml {
 
@@ -358,6 +360,33 @@ public String getValue() {
 public XhtmlNode setValue(String theValue) throws IllegalArgumentException {
 	setValueAsString(theValue);
 	return this;
+}
+
+/**
+ * Returns false
+ */
+@Override
+@CoverageIgnore
+public boolean hasFormatComment() {
+	return false;
+}
+
+/**
+ * NOT SUPPORTED - Throws {@link UnsupportedOperationException}
+ */
+@Override
+@CoverageIgnore
+public List<String> getFormatCommentsPre() {
+	throw new UnsupportedOperationException();
+}
+
+/**
+ * NOT SUPPORTED - Throws {@link UnsupportedOperationException}
+ */
+@Override
+@CoverageIgnore
+public List<String> getFormatCommentsPost() {
+	throw new UnsupportedOperationException();
 }
 
 }

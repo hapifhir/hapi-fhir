@@ -32,7 +32,7 @@ package org.hl7.fhir.instance.model.api;
  * which version of the strctures your application is using.   
  * </p>
  */
-public interface IIdType {
+public interface IIdType extends IBase {
 
 	void applyTo(IBaseResource theResource);
 

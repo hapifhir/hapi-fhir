@@ -29,14 +29,16 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
 public abstract class BaseElement implements IElement, ISupportsUndeclaredExtensions {
 
+	private List<String> myFormatCommentsPost;
+	private List<String> myFormatCommentsPre;
 	private List<ExtensionDt> myUndeclaredExtensions;
 	private List<ExtensionDt> myUndeclaredModifierExtensions;
 
 	@Override
-	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl, IBaseDatatype theValue) {
+	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl) {
 		Validate.notEmpty(theUrl, "URL must be populated");
-		Validate.notNull(theValue, "Value must not be null");
-		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl, theValue);
+
+		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl);
 		if (theIsModifier) {
 			getUndeclaredModifierExtensions();
 			myUndeclaredModifierExtensions.add(retVal);
@@ -48,10 +50,10 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 	}
 
 	@Override
-	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl) {
+	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl, IBaseDatatype theValue) {
 		Validate.notEmpty(theUrl, "URL must be populated");
-
-		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl);
+		Validate.notNull(theValue, "Value must not be null");
+		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl, theValue);
 		if (theIsModifier) {
 			getUndeclaredModifierExtensions();
 			myUndeclaredModifierExtensions.add(retVal);
@@ -87,6 +89,20 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 	}
 
 	@Override
+	public List<String> getFormatCommentsPost() {
+		if (myFormatCommentsPost == null)
+			myFormatCommentsPost = new ArrayList<String>();
+		return myFormatCommentsPost;
+	}
+
+	@Override
+	public List<String> getFormatCommentsPre() {
+		if (myFormatCommentsPre == null)
+			myFormatCommentsPre = new ArrayList<String>();
+		return myFormatCommentsPre;
+	}
+
+	@Override
 	public List<ExtensionDt> getUndeclaredExtensions() {
 		if (myUndeclaredExtensions == null) {
 			myUndeclaredExtensions = new ArrayList<ExtensionDt>();
@@ -114,9 +130,14 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		return (myUndeclaredModifierExtensions);
 	}
 
+	@Override
+	public boolean hasFormatComment() {
+		return (myFormatCommentsPre != null && !myFormatCommentsPre.isEmpty()) || (myFormatCommentsPost != null && !myFormatCommentsPost.isEmpty());
+	}
+
 	/**
-	 * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code> if all content in this superclass instance is empty per the semantics of
-	 * {@link #isEmpty()}.
+	 * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code> if all
+	 * content in this superclass instance is empty per the semantics of {@link #isEmpty()}.
 	 */
 	protected boolean isBaseEmpty() {
 		if (myUndeclaredExtensions != null) {

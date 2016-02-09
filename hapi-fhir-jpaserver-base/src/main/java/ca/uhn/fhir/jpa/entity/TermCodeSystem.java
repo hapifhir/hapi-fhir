@@ -26,34 +26,29 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 //@formatter:off
-@Table(name="TRM_VALUESET", uniqueConstraints= {
-	@UniqueConstraint(name="IDX_VS_URI", columnNames= {"VS_URI"})
+@Table(name="TRM_CODESYSTEM", uniqueConstraints= {
+	@UniqueConstraint(name="IDX_CS_RESOURCEPID", columnNames= {"RES_ID"})
 })
 @Entity()
 //@formatter:on
-public class TermValueSet implements Serializable {
+public class TermCodeSystem implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id()
-	@SequenceGenerator(name="SEQ_VALUESET_PID", sequenceName="SEQ_VALUESET_PID")
+	@SequenceGenerator(name="SEQ_CODESYSTEM_PID", sequenceName="SEQ_CODESYSTEM_PID")
 	@GeneratedValue()
 	@Column(name="PID")
 	private Long myPid;
 	
-	@Column(name="VS_URI", length=200)
-	private String myUri;
+	@OneToOne()
+	@JoinColumn(name="RES_ID", referencedColumnName="RES_ID", nullable=false, updatable=false)
+	private ResourceTable myResource;
 
-	public String getUri() {
-		return myUri;
-	}
-
-	public void setUri(String theUri) {
-		myUri = theUri;
-	}
-	
 }

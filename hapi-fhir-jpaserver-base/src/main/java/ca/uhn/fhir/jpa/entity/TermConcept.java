@@ -23,13 +23,17 @@ package ca.uhn.fhir.jpa.entity;
 import java.io.Serializable;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
+@Entity
+@Table(name="TRM_CONCEPT")
 public class TermConcept implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
@@ -40,7 +44,13 @@ public class TermConcept implements Serializable {
 	private Long myPid;
 
 	@ManyToOne()
-	@JoinColumn(name="VS_PID", referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_CONCEPT_PID_VS_PID"))
-	private TermValueSet myValueSet;
+	@JoinColumn(name="CODESYSTEM_PID", referencedColumnName="PID", foreignKey=@ForeignKey(name="FK_CONCEPT_PID_CS_PID"))
+	private TermCodeSystem myCodeSystem;
+	
+	@Column(name="CODE", length=100, nullable=false)
+	private String myCode;
+	
+	@Column(name="DISPLAY", length=200, nullable=true)
+	private String myDisplay;
 	
 }

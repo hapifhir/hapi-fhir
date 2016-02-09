@@ -158,6 +158,19 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
+	private void addToHeldComments(int valueIdx, List<String> theCommentsToAdd, ArrayList<ArrayList<String>> theListToAddTo) {
+		if (theCommentsToAdd.size() > 0) {
+			theListToAddTo.ensureCapacity(valueIdx);
+			while (theListToAddTo.size() <= valueIdx) {
+				theListToAddTo.add(null);
+			}
+			if (theListToAddTo.get(valueIdx) == null) {
+				theListToAddTo.set(valueIdx, new ArrayList<String>());
+			}
+			theListToAddTo.get(valueIdx).addAll(theCommentsToAdd);
+		}
+	}
+
 	private void assertObjectOfType(JsonValue theResourceTypeObj, ValueType theValueType, String thePosition) {
 		if (theResourceTypeObj == null) {
 			throw new DataFormatException("Invalid JSON content detected, missing required element: '" + thePosition + "'");
@@ -203,7 +216,7 @@ public class JsonParser extends BaseParser implements IParser {
 		try {
 			JsonReader reader = Json.createReader(theReader);
 			JsonObject object = reader.readObject();
-
+			
 			JsonValue resourceTypeObj = object.get("resourceType");
 			assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
 			String resourceType = ((JsonString) resourceTypeObj).getString();
@@ -536,6 +549,7 @@ public class JsonParser extends BaseParser implements IParser {
 
 	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theNextValue, JsonGenerator theEventWriter, List<? extends BaseRuntimeChildDefinition> theChildren, boolean theContainedResource, CompositeChildElement theParent)
 			throws IOException {
+		
 		for (CompositeChildElement nextChildElem : super.compositeChildIterator(theChildren, theContainedResource, theParent)) {
 
 			BaseRuntimeChildDefinition nextChild = nextChildElem.getDef();
@@ -580,6 +594,7 @@ public class JsonParser extends BaseParser implements IParser {
 
 			ArrayList<ArrayList<HeldExtension>> extensions = new ArrayList<ArrayList<HeldExtension>>(0);
 			ArrayList<ArrayList<HeldExtension>> modifierExtensions = new ArrayList<ArrayList<HeldExtension>>(0);
+			ArrayList<ArrayList<String>> comments = new ArrayList<ArrayList<String>>(0);
 
 			int valueIdx = 0;
 			for (IBase nextValue : values) {
@@ -654,6 +669,10 @@ public class JsonParser extends BaseParser implements IParser {
 								addToHeldExtensions(valueIdx, ext, extensions, true);
 							}
 						}
+						if (nextValue.hasFormatComment()) {
+							addToHeldComments(valueIdx, nextValue.getFormatCommentsPre(), comments);
+							addToHeldComments(valueIdx, nextValue.getFormatCommentsPost(), comments);
+						}
 					}
 
 				}
@@ -665,7 +684,7 @@ public class JsonParser extends BaseParser implements IParser {
 				theEventWriter.writeEnd();
 			}
 
-			if (extensions.size() > 0 || modifierExtensions.size() > 0) {
+			if (!extensions.isEmpty() || !modifierExtensions.isEmpty() || !comments.isEmpty()) {
 				if (inArray) {
 					// If this is a repeatable field, the extensions go in an array too
 					theEventWriter.writeStartArray('_' + currentChildName);
@@ -687,12 +706,29 @@ public class JsonParser extends BaseParser implements IParser {
 						haveContent = true;
 						heldModExts = modifierExtensions.get(i);
 					}
+					
+					ArrayList<String> nextComments;
+					if (comments.size() > i) {
+						nextComments = comments.get(i);
+					} else {
+						nextComments = null;
+					}
+					if (nextComments != null && nextComments.isEmpty() == false) {
+						haveContent = true;
+					}
 
 					if (!haveContent) {
 						theEventWriter.writeNull();
 					} else {
 						if (inArray) {
 							theEventWriter.writeStartObject();
+						}
+						if (nextComments != null && !nextComments.isEmpty()) {
+							theEventWriter.writeStartArray("fhir_comments");
+							for (String next : nextComments) {
+								theEventWriter.write(next);
+							}
+							theEventWriter.writeEnd();
 						}
 						writeExtensionsAsDirectChild(theResource, theEventWriter, theResDef, heldExts, heldModExts, null);
 						if (inArray) {
@@ -708,13 +744,35 @@ public class JsonParser extends BaseParser implements IParser {
 
 	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theNextValue, JsonGenerator theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef, boolean theContainedResource, CompositeChildElement theParent)
 			throws IOException, DataFormatException {
+
+		writeCommentsPreAndPost(theNextValue, theEventWriter);
+		
 		extractAndWriteExtensionsAsDirectChild(theNextValue, theEventWriter, resDef, theResDef, theResource, null);
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theNextValue, theEventWriter, resDef.getExtensions(), theContainedResource, theParent);
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theNextValue, theEventWriter, resDef.getChildren(), theContainedResource, theParent);
 	}
 
+	private void writeCommentsPreAndPost(IBase theNextValue, JsonGenerator theEventWriter) {
+		if (theNextValue.hasFormatComment()) {
+			theEventWriter.writeStartArray("fhir_comments");
+			List<String> pre = theNextValue.getFormatCommentsPre();
+			if (pre.isEmpty()==false) {
+				for (String next : pre) {
+					theEventWriter.write(next);
+				}
+			}
+			List<String> post = theNextValue.getFormatCommentsPost();
+			if (post.isEmpty()==false) {
+				for (String next : post) {
+					theEventWriter.write(next);
+				}
+			}
+			theEventWriter.writeEnd();
+		}
+	}
+
 	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theContainedResource) throws IOException {
-		String resourceId = null;
+		IIdType resourceId = null;
 //		if (theResource instanceof IResource) {
 //			IResource res = (IResource) theResource;
 //			if (StringUtils.isNotBlank(res.getId().getIdPart())) {
@@ -732,7 +790,7 @@ public class JsonParser extends BaseParser implements IParser {
 //		}
 
 		if (StringUtils.isNotBlank(theResource.getIdElement().getIdPart())) {
-			resourceId = theResource.getIdElement().getIdPart();
+			resourceId = theResource.getIdElement();
 			if (theResource.getIdElement().getValue().startsWith("urn:")) {
 				resourceId = null;
 			}
@@ -748,7 +806,7 @@ public class JsonParser extends BaseParser implements IParser {
 		encodeResourceToJsonStreamWriter(theResDef, theResource, theEventWriter, theObjectNameOrNull, theContainedResource, resourceId);
 	}
 
-	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theContainedResource, String theResourceId) throws IOException {
+	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theContainedResource, IIdType theResourceId) throws IOException {
 		if (!theContainedResource) {
 			super.containResourcesForEncoding(theResource);
 		}
@@ -762,8 +820,13 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 
 		theEventWriter.write("resourceType", resDef.getName());
-		if (theResourceId != null) {
-			theEventWriter.write("id", theResourceId);
+		if (theResourceId != null && theResourceId.hasIdPart()) {
+			theEventWriter.write("id", theResourceId.getIdPart());
+			if (theResourceId.hasFormatComment()) {
+				theEventWriter.writeStartObject("_id");
+				writeCommentsPreAndPost(theResourceId, theEventWriter);
+				theEventWriter.writeEnd();
+			}
 		}
 
 		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1) && theResource instanceof IResource) {
@@ -1001,6 +1064,8 @@ public class JsonParser extends BaseParser implements IParser {
 				default:
 					break;
 				}
+			} else if ("fhir_comments".equals(nextKey)) {
+				parseFhirComments(nextEntry.getValue(), theState);
 			}
 		}
 	}
@@ -1118,7 +1183,9 @@ public class JsonParser extends BaseParser implements IParser {
 
 	private void parseChildren(JsonObject theObject, ParserState<?> theState) {
 		String elementId = null;
-		for (String nextName : theObject.keySet()) {
+		
+		Set<String> keySet = theObject.keySet();
+		for (String nextName : keySet) {
 			if ("resourceType".equals(nextName)) {
 				continue;
 			} else if ("id".equals(nextName)) {
@@ -1146,6 +1213,9 @@ public class JsonParser extends BaseParser implements IParser {
 				JsonArray array = grabJsonArray(theObject, nextName, "modifierExtension");
 				parseExtension(theState, array, true);
 				continue;
+			} else if (nextName.equals("fhir_comments")) {
+				parseFhirComments(theObject.get(nextName), theState);
+				continue;
 			} else if (nextName.charAt(0) == '_') {
 				continue;
 			}
@@ -1164,6 +1234,19 @@ public class JsonParser extends BaseParser implements IParser {
 				((IIdentifiableElement) object).setElementSpecificId(elementId);
 			} else if (object instanceof IBaseResource) {
 				((IBaseResource) object).getIdElement().setValue(elementId);
+			}
+		}
+	}
+
+	private void parseFhirComments(JsonValue theObject, ParserState<?> theState) {
+		if (theObject.getValueType() == ValueType.ARRAY) {
+			for (JsonValue nextComment : ((JsonArray)theObject)) {
+				if (nextComment.getValueType() == ValueType.STRING) {
+					String commentText = ((JsonString)nextComment).getString();
+					if (commentText != null) {
+						theState.commentPre(commentText);
+					}
+				}
 			}
 		}
 	}
@@ -1467,6 +1550,9 @@ public class JsonParser extends BaseParser implements IParser {
 				writeUndeclaredExtInDstu1Format(theResDef, theResource, theEventWriter, myUndeclaredExtension);
 			} else {
 				theEventWriter.writeStartObject();
+				
+				writeCommentsPreAndPost(myValue, theEventWriter);
+
 				theEventWriter.write("url", myDef.getExtensionUrl());
 
 				BaseRuntimeElementDefinition<?> def = myDef.getChildElementDefinitionByDatatype(myValue.getClass());
@@ -1486,6 +1572,9 @@ public class JsonParser extends BaseParser implements IParser {
 			String extensionUrl = ext.getUrl();
 
 			theEventWriter.writeStartObject();
+			
+			writeCommentsPreAndPost(myUndeclaredExtension, theEventWriter);
+
 			theEventWriter.write("url", extensionUrl);
 
 			boolean noValue = value == null || value.isEmpty();

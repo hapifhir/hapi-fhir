@@ -1,6 +1,7 @@
 package org.hl7.fhir.instance.model.api;
 
 import java.io.Serializable;
+import java.util.List;
 
 /*
  * #%L
@@ -30,5 +31,29 @@ import java.io.Serializable;
 public interface IBase extends Serializable {
 
 	boolean isEmpty();
+
+	/**
+	 * Returns <code>true</code> if any comments would be returned by {@link #getFormatCommentsPre()}
+	 * or {@link #getFormatCommentsPost()}
+	 * 
+	 * @since 1.5
+	 */
+	boolean hasFormatComment();
+
+	/**
+	 * Returns a list of comments appearing immediately before this element within the serialized
+	 * form of the resource. Creates the list if it does not exist, so this method will not return <code>null</code>
+	 * 
+	 * @since 1.5
+	 */
+	List<String> getFormatCommentsPre();
+
+	/**
+	 * Returns a list of comments appearing immediately after this element within the serialized
+	 * form of the resource. Creates the list if it does not exist, so this method will not return <code>null</code>
+	 * 
+	 * @since 1.5
+	 */
+	List<String> getFormatCommentsPost();
 
 }

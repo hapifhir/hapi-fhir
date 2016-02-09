@@ -284,6 +284,21 @@ public class ServerInvalidDefinitionTest {
 				public IBaseResource setId(IIdType theId) {
 					return null;
 				}
+
+				@Override
+				public boolean hasFormatComment() {
+					return false;
+				}
+
+				@Override
+				public List<String> getFormatCommentsPre() {
+					return null;
+				}
+
+				@Override
+				public List<String> getFormatCommentsPost() {
+					return null;
+				}
 			}.getClass();
 		}
 

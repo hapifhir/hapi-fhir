@@ -59,6 +59,7 @@ import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 @DatatypeDef(name="xhtml")
 public class XhtmlNode implements IBaseXhtml {
@@ -370,4 +371,33 @@ public class XhtmlNode implements IBaseXhtml {
 		setValueAsString(theValue);
 		return this;
 	}
+	
+	
+	/**
+	 * Returns false
+	 */
+	@Override
+	@CoverageIgnore
+	public boolean hasFormatComment() {
+	  return false;
+	}
+
+	/**
+	 * NOT SUPPORTED - Throws {@link UnsupportedOperationException}
+	 */
+	@Override
+	@CoverageIgnore
+	public List<String> getFormatCommentsPre() {
+	  throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * NOT SUPPORTED - Throws {@link UnsupportedOperationException}
+	 */
+	@Override
+	@CoverageIgnore
+	public List<String> getFormatCommentsPost() {
+	  throw new UnsupportedOperationException();
+	}
+
 }

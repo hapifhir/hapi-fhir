@@ -121,6 +121,7 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 
 	@Override
 	public void writeComment(String theData) throws XMLStreamException {
+		indent();
 		myTarget.writeComment(theData);
 	}
 

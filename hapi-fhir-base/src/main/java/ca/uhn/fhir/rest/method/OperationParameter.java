@@ -132,6 +132,8 @@ public class OperationParameter implements IParameter {
 				myParamType = "date";
 				myMax = 2;
 				myAllowGet = true;
+			} else if (myParameterType.equals(ValidationModeEnum.class)) {
+				// this is ok
 			} else if (!IBase.class.isAssignableFrom(myParameterType) || myParameterType.isInterface() || Modifier.isAbstract(myParameterType.getModifiers())) {
 				throw new ConfigurationException("Invalid type for @OperationParam: " + myParameterType.getName());
 			} else if (myParameterType.equals(ValidationModeEnum.class)) {

@@ -68,16 +68,19 @@ private Map<String, Object> userData;
     return (Integer) getUserData(name);
   }
 
+  @Override
   public boolean hasFormatComment() {
   	return (formatCommentsPre != null && !formatCommentsPre.isEmpty()) || (formatCommentsPost != null && !formatCommentsPost.isEmpty());
   }
   
+  @Override
   public List<String> getFormatCommentsPre() {
     if (formatCommentsPre == null)
       formatCommentsPre = new ArrayList<String>();
     return formatCommentsPre;
   }
-  
+
+  @Override
   public List<String> getFormatCommentsPost() {
     if (formatCommentsPost == null)
       formatCommentsPost = new ArrayList<String>();
