@@ -212,6 +212,10 @@
 			<id>petromykhailysyn</id>
 			<name>Petro Mykhaylyshyn</name>
 		</developer>
+		<developer>
+			<id>adam-carbone</id>
+			<name>Adam Carbone</name>
+		</developer>
 	</developers>
 
 	<licenses>

@@ -13,6 +13,17 @@
 				as CDI beans in a JBoss enviroment. Thanks to GitHub user fw060 (Fei) for
 				reporting and figuring out exactly why this wasn't working!
 			</action>
+			<action type="add">
+				Support comments when parsing and encoding both JSON and XML. Comments are retrieved
+				and added to the newly created methods 
+				IBase#getFormatCommentsPre() and
+				IBase#getFormatCommentsPost()
+			</action>
+			<action type="add" issue="293">
+				Added options to the CLI upload-examples command which allow it to cache
+				the downloaded content file, or use an arbitrary one. Thanks to Adam Carbone
+				for the pull request!
+			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
 			<action type="add">
