@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.Constants;
@@ -59,7 +60,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	String doGetValueAsQueryToken() {
+	String doGetValueAsQueryToken(FhirContext theContext) {
 		return ParameterUtil.escape(myValue);
 	}
 

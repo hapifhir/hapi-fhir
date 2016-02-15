@@ -4,10 +4,13 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 
 public class CodingDtTest {
 
+	private static FhirContext ourCtx = FhirContext.forDstu1();
+	
 	@Test
 	public void testTokenNoSystem() {
 		CodingDt dt = new CodingDt();
@@ -15,7 +18,7 @@ public class CodingDtTest {
 		
 		assertEquals(null, dt.getSystem().getValueAsString());
 		assertEquals("c", dt.getCode().getValue());
-		assertEquals("c", dt.getValueAsQueryToken());
+		assertEquals("c", dt.getValueAsQueryToken(ourCtx));
 	}
 
 	@Test
@@ -25,7 +28,7 @@ public class CodingDtTest {
 		
 		assertEquals("a", dt.getSystem().getValueAsString());
 		assertEquals("b|c", dt.getCode().getValue());
-		assertEquals("a|b\\|c", dt.getValueAsQueryToken());
+		assertEquals("a|b\\|c", dt.getValueAsQueryToken(ourCtx));
 	}
 
 	@Test
@@ -36,7 +39,7 @@ public class CodingDtTest {
 		assertEquals("", dt.getSystem().getValueAsString());
 		assertEquals("b|c", dt.getCode().getValue());
 		
-		assertEquals("|b\\|c", dt.getValueAsQueryToken());
+		assertEquals("|b\\|c", dt.getValueAsQueryToken(ourCtx));
 	}
 
 	/**
@@ -50,6 +53,6 @@ public class CodingDtTest {
 		assertEquals("", dt.getSystem().getValueAsString());
 		assertEquals("b|c", dt.getCode().getValue());
 		
-		assertEquals("|b\\|c", dt.getValueAsQueryToken());
+		assertEquals("|b\\|c", dt.getValueAsQueryToken(ourCtx));
 	}
 }

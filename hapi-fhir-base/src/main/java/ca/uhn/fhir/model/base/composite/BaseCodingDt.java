@@ -22,6 +22,7 @@ package ca.uhn.fhir.model.base.composite;
 
 import org.apache.commons.lang3.StringUtils;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -81,7 +82,7 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getValueAsQueryToken() {
+	public String getValueAsQueryToken(FhirContext theContext) {
 		if (getSystemElement().getValueAsString() != null) {
 			return ParameterUtil.escape(StringUtils.defaultString(getSystemElement().getValueAsString())) + '|' + ParameterUtil.escape(getCodeElement().getValueAsString());
 		} else {

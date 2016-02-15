@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 
 /*
@@ -28,9 +30,11 @@ class QuantityCriterion implements ICriterion<QuantityClientParam>, ICriterionIn
 	private String myName;
 	private String mySystem;
 	private String myUnits;
+	private ParamPrefixEnum myPrefix;
 
-	public QuantityCriterion(String theParamName, String theValue, String theSystem, String theUnits) {
+	public QuantityCriterion(String theParamName, ParamPrefixEnum thePrefix, String theValue, String theSystem, String theUnits) {
 		myValue = theValue;
+		myPrefix = thePrefix;
 		myName = theParamName;
 		mySystem = theSystem;
 		myUnits = theUnits;
@@ -42,8 +46,17 @@ class QuantityCriterion implements ICriterion<QuantityClientParam>, ICriterionIn
 	}
 
 	@Override
-	public String getParameterValue() {
-		return ParameterUtil.escape(myValue) + '|' + ParameterUtil.escape(mySystem) + '|' + ParameterUtil.escape(myUnits);
+	public String getParameterValue(FhirContext theContext) {
+		StringBuilder b = new StringBuilder();
+		if (myPrefix != null) {
+			b.append(ParameterUtil.escapeWithDefault(myPrefix.getValueForContext(theContext)));
+		}
+		b.append(ParameterUtil.escapeWithDefault(myValue));
+		b.append('|');
+		b.append(ParameterUtil.escapeWithDefault(mySystem));
+		b.append('|');
+		b.append(ParameterUtil.escapeWithDefault(myUnits));
+		return b.toString();
 	}
 
 }

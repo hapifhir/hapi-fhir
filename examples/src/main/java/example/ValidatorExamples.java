@@ -11,7 +11,6 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
@@ -96,7 +95,6 @@ public class ValidatorExamples {
       
    }
    
-   @SuppressWarnings("unused")
    public void parserValidation() {
       // START SNIPPET: parserValidation
       FhirContext ctx = FhirContext.forDstu2();

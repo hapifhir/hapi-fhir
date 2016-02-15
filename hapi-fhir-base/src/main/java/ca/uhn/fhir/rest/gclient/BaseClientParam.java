@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
+import ca.uhn.fhir.context.FhirContext;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -39,7 +41,7 @@ abstract class BaseClientParam implements IParam {
 		}
 
 		@Override
-		public String getParameterValue() {
+		public String getParameterValue(FhirContext theContext) {
 			return myParameterValue;
 		}
 

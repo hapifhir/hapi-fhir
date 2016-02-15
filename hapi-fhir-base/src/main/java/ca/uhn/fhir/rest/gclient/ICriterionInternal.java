@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
+import ca.uhn.fhir.context.FhirContext;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,7 +24,7 @@ package ca.uhn.fhir.rest.gclient;
 
 public interface ICriterionInternal {
 
-	String getParameterValue();
+	String getParameterValue(FhirContext theContext);
 
 	String getParameterName();
 	

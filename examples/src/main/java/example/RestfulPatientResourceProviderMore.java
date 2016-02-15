@@ -1,6 +1,7 @@
 package example;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,7 +20,6 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -29,7 +29,6 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -67,6 +66,7 @@ import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -96,6 +96,8 @@ public abstract class RestfulPatientResourceProviderMore implements IResourcePro
 private boolean detectedVersionConflict;
 private boolean conflictHappened;
 private boolean couldntFindThisId;
+private FhirContext myContext;
+
 //START SNIPPET: searchAll
 @Search
 public List<Organization> getAllOrganizations() {
@@ -280,7 +282,7 @@ public List<Observation> findBySubject(
 
        // Because the chained parameter "subject.identifier" is actually of type
        // "token", we convert the value to a token before processing it. 
-       TokenParam tokenSubject = subject.toTokenParam();
+       TokenParam tokenSubject = subject.toTokenParam(myContext);
        String system = tokenSubject.getSystem();
        String identifier = tokenSubject.getValue();
        
@@ -290,7 +292,7 @@ public List<Observation> findBySubject(
 
           // Because the chained parameter "subject.birthdate" is actually of type
           // "date", we convert the value to a date before processing it. 
-          DateParam dateSubject = subject.toDateParam();
+          DateParam dateSubject = subject.toDateParam(myContext);
           DateTimeDt birthDate = dateSubject.getValueAsDateTimeDt();
           
           // TODO: populate all the observations for the birthdate
@@ -541,7 +543,7 @@ public List<Patient> searchByPatientAddress(
 //START SNIPPET: dates
 @Search()
 public List<Patient> searchByObservationNames( @RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theDate ) {
-   QuantityCompararatorEnum comparator = theDate.getComparator(); // e.g. <=
+   ParamPrefixEnum prefix = theDate.getPrefix(); // e.g. gt, le, etc..
    Date date = theDate.getValue(); // e.g. 2011-01-02
    TemporalPrecisionEnum precision = theDate.getPrecision(); // e.g. DAY
 	
@@ -554,7 +556,7 @@ public List<Patient> searchByObservationNames( @RequiredParam(name=Patient.SP_BI
 public void dateClientExample() {
 ITestClient client = provideTc();
 //START SNIPPET: dateClient
-DateParam param = new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02");
+DateParam param = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02");
 List<Patient> response = client.getPatientByDob(param);
 //END SNIPPET: dateClient
 }
@@ -670,8 +672,8 @@ public List<Observation> getObservationsByQuantity(
   
   List<Observation> retVal = new ArrayList<Observation>();
   
-  QuantityCompararatorEnum comparator = theQuantity.getComparator();
-  DecimalDt value = theQuantity.getValue();
+  ParamPrefixEnum prefix = theQuantity.getPrefix();
+  BigDecimal value = theQuantity.getValue();
   String units = theQuantity.getUnits();
   // .. Apply these parameters ..
   

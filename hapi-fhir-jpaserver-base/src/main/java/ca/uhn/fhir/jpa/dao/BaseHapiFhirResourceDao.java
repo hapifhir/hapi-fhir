@@ -55,6 +55,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseTag;
@@ -106,6 +107,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	protected ISearchDao mySearchDao;
 	@Autowired()
 	protected ISearchResultDao mySearchResultDao;
+	@Autowired()
+	protected IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 
 	private String mySecondaryPrimaryKeyParamName;
 
@@ -912,7 +915,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ActionRequestDetails requestDetails = new ActionRequestDetails(null, getResourceName(), getContext());
 		notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
 
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this);
+		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao);
 		builder.setType(getResourceType(), getResourceName());
 		return builder.search(theParams);
 	}
@@ -938,7 +941,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams, Collection<Long> theInitialPids, DateRangeParam theLastUpdated) {
-		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this);
+		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myPlatformTransactionManager, mySearchDao, mySearchResultDao, this, myResourceIndexedSearchParamUriDao);
 		builder.setType(getResourceType(), getResourceName());
 		return builder.searchForIdsWithAndOr(theParams, theInitialPids, theLastUpdated);
 	}

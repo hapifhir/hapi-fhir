@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model.api;
 
+import ca.uhn.fhir.context.FhirContext;
 
 /*
  * #%L
@@ -48,11 +49,12 @@ public interface IQueryParameterType {
 	 * See FHIR specification <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search
 	 * SearchParameter Types</a> for information on the <b>token</b> format
 	 * </p>
+	 * @param theContext TODO
 	 * 
 	 * @return Returns a representation of this parameter's value as it will be represented "over the wire". In other
 	 * words, how it will be presented in a URL (although not URL escaped) 
 	 */
-	public String getValueAsQueryToken();
+	public String getValueAsQueryToken(FhirContext theContext);
 	
 	/**
 	 * This method will return any qualifier that should be appended to the parameter name (e.g ":exact")

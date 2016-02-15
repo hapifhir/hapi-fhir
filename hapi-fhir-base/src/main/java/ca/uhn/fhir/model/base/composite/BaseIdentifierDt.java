@@ -22,6 +22,7 @@ package ca.uhn.fhir.model.base.composite;
 
 import org.apache.commons.lang3.StringUtils;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -59,7 +60,7 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getValueAsQueryToken() {
+	public String getValueAsQueryToken(FhirContext theContext) {
 			UriDt system = (UriDt) getSystemElement();
 			StringDt value = (StringDt) getValueElement();
 			if (system.getValueAsString() != null) {

@@ -234,6 +234,86 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testChoiceParamDateRange() {
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParamDateRange01");
+		o1.setEffective(new Period().setStartElement(new DateTimeType("2015-01-01T00:00:00Z")).setEndElement(new DateTimeType("2015-01-10T00:00:00Z")));
+		IIdType id1 = myObservationDao.create(o1).getId().toUnqualifiedVersionless();
+
+		Observation o2 = new Observation();
+		o2.getCode().addCoding().setSystem("foo").setCode("testChoiceParamDateRange02");
+		o2.setEffective(new Period().setStartElement(new DateTimeType("2015-01-05T00:00:00Z")).setEndElement(new DateTimeType("2015-01-15T00:00:00Z")));
+		IIdType id2 = myObservationDao.create(o2).getId().toUnqualifiedVersionless();
+
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_DATE, new DateParam("ge2015-01-02T00:00:00Z"));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, containsInAnyOrder(id1, id2));
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_DATE, new DateParam("gt2015-01-02T00:00:00Z"));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, containsInAnyOrder(id1, id2));
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_DATE, new DateParam("gt2015-01-10T00:00:00Z"));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, containsInAnyOrder(id2));
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_DATE, new DateParam("sa2015-01-02T00:00:00Z"));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, containsInAnyOrder(id2));
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_DATE, new DateParam("eb2015-01-13T00:00:00Z"));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, containsInAnyOrder(id1));
+		}
+	}
+
+	
+	@Test
+	public void testChoiceParamQuantityPrecision() {
+		Observation o3 = new Observation();
+		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
+		o3.setValue(new Quantity(null, 123.01, "foo", "bar", "bar"));
+		IIdType id3 = myObservationDao.create(o3).getId().toUnqualifiedVersionless();
+
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123", "foo", "bar"));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, containsInAnyOrder(id3));
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0", "foo", "bar"));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, containsInAnyOrder(id3));
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.01", "foo", "bar"));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, containsInAnyOrder(id3));
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.010", "foo", "bar"));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, containsInAnyOrder(id3));
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.02", "foo", "bar"));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, containsInAnyOrder());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.001", "foo", "bar"));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, containsInAnyOrder());
+		}
+	}
+	
+	
+	@Test
 	public void testChoiceParamQuantity() {
 		Observation o3 = new Observation();
 		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
@@ -246,18 +326,49 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("gt100", "foo", "bar"));
+			assertEquals(1, found.size());
+			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
+		}
+		{
 			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("<100", "foo", "bar"));
 			assertEquals(0, found.size());
 		}
 		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("lt100", "foo", "bar"));
+			assertEquals(0, found.size());
+		}
+		{
 			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0001", "foo", "bar"));
-			assertEquals(1, found.size());
-			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
+			assertEquals(0, found.size());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("~120", "foo", "bar"));
 			assertEquals(1, found.size());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("ap120", "foo", "bar"));
+			assertEquals(1, found.size());
+			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq123", "foo", "bar"));
+			assertEquals(1, found.size());
+			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq120", "foo", "bar"));
+			assertEquals(0, found.size());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne120", "foo", "bar"));
+			assertEquals(1, found.size());
+			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne123", "foo", "bar"));
+			assertEquals(0, found.size());
 		}
 	}
 
@@ -1715,7 +1826,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals(1, found.size());
 
 		found = toList(myObservationDao.search("value-quantity", new QuantityParam(112)));
-		assertEquals(1, found.size());
+		assertEquals(0, found.size());
 
 		found = toList(myObservationDao.search("value-quantity", new QuantityParam(212)));
 		assertEquals(0, found.size());

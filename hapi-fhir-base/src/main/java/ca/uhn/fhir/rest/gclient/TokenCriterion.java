@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 
@@ -67,7 +68,7 @@ class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal
 	}
 
 	@Override
-	public String getParameterValue() {
+	public String getParameterValue(FhirContext theContext) {
 		return myValue;
 	}
 

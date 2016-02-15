@@ -4,7 +4,10 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +25,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -1786,7 +1788,7 @@ public class GenericClientDstu2Test {
                 .execute();
         //@formatter:on
 
-		assertEquals("http://example.com/fhir/Patient?name=james&_lastUpdated=%3E%3D2011-01-01&_lastUpdated=%3C%3D2012-01-01", capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?name=james&_lastUpdated=ge2011-01-01&_lastUpdated=le2012-01-01", capt.getValue().getURI().toString());
 		assertEquals(Patient.class, response.getEntries().get(0).getResource().getClass());
 
 	}

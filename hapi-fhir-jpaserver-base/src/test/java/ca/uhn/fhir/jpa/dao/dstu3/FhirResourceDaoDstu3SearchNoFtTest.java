@@ -75,6 +75,7 @@ import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -84,6 +85,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -200,7 +202,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		ourLog.info(toStringMultiline(results));
 		assertEquals(2, results.size());
 		
-		List<IIdType> actual = toUnqualifiedVersionlessIds(mySubstanceDao.search(Substance.SP_QUANTITY, new QuantityParam(null, 123, "http://foo", "UNIT")));
+		List<IIdType> actual = toUnqualifiedVersionlessIds(mySubstanceDao.search(Substance.SP_QUANTITY, new QuantityParam((ParamPrefixEnum)null, 123, "http://foo", "UNIT")));
 		assertThat(actual, contains(id));
 	}
 	
@@ -908,7 +910,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			assertEquals(0, found.size());
 		}
 		{
-			IBundleProvider found = myEncounterDao.search(Encounter.SP_LENGTH, new NumberParam("2"));
+			IBundleProvider found = myEncounterDao.search(Encounter.SP_LENGTH, new NumberParam("4"));
 			assertEquals(1, found.size());
 			assertThat(toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1.toUnqualifiedVersionless()));
 		}
@@ -2057,16 +2059,84 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testSearchWithUriParamAbove() throws Exception {
+		ValueSet vs1 = new ValueSet();
+		vs1.setUrl("http://hl7.org/foo/baz");
+		myValueSetDao.create(vs1).getId().toUnqualifiedVersionless();
+	
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://hl7.org/foo/bar");
+		IIdType id2 = myValueSetDao.create(vs2).getId().toUnqualifiedVersionless();
+		
+		ValueSet vs3 = new ValueSet();
+		vs3.setUrl("http://hl7.org/foo/bar/baz");
+		IIdType id3 = myValueSetDao.create(vs3).getId().toUnqualifiedVersionless();
+
+		IBundleProvider result;
+		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/foo/bar/baz/boz").setQualifier(UriParamQualifierEnum.ABOVE));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(id2, id3));
+
+		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/foo/bar/baz").setQualifier(UriParamQualifierEnum.ABOVE));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(id2, id3));
+
+		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/foo/bar").setQualifier(UriParamQualifierEnum.ABOVE));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(id2));
+
+		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/fhir/ValueSet/basic-resource-type").setQualifier(UriParamQualifierEnum.ABOVE));
+		assertThat(toUnqualifiedVersionlessIds(result), empty());
+
+		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org").setQualifier(UriParamQualifierEnum.ABOVE));
+		assertThat(toUnqualifiedVersionlessIds(result), empty());
+	}
+	
+	@Test
 	public void testSearchWithUriParam() throws Exception {
 		Class<ValueSet> type = ValueSet.class;
 		String resourceName = "/valueset-dstu2.json";
 		ValueSet vs = loadResourceFromClasspath(type, resourceName);
-		myValueSetDao.update(vs);
+		IIdType id1 = myValueSetDao.update(vs).getId().toUnqualifiedVersionless();
 
-		IBundleProvider result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/fhir/ValueSet/basic-resource-type"));
-		assertThat(toUnqualifiedVersionlessIds(result), contains((IIdType)new IdType("ValueSet/testSearchWithUriParam")));
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://hl7.org/foo/bar");
+		IIdType id2 = myValueSetDao.create(vs2).getId().toUnqualifiedVersionless();
+		
+		IBundleProvider result;
+		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/fhir/ValueSet/basic-resource-type"));
+		assertThat(toUnqualifiedVersionlessIds(result), contains(id1));
+		
+		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/fhir/ValueSet/basic-resource-type").setQualifier(UriParamQualifierEnum.BELOW));
+		assertThat(toUnqualifiedVersionlessIds(result), contains(id1));
+
+		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/fhir/ValueSet/").setQualifier(UriParamQualifierEnum.BELOW));
+		assertThat(toUnqualifiedVersionlessIds(result), contains(id1));
 	}
 
+	@Test
+	public void testSearchWithUriParamBelow() throws Exception {
+		Class<ValueSet> type = ValueSet.class;
+		String resourceName = "/valueset-dstu2.json";
+		ValueSet vs = loadResourceFromClasspath(type, resourceName);
+		IIdType id1 = myValueSetDao.update(vs).getId().toUnqualifiedVersionless();
+
+		ValueSet vs2 = new ValueSet();
+		vs2.setUrl("http://hl7.org/foo/bar");
+		IIdType id2 = myValueSetDao.create(vs2).getId().toUnqualifiedVersionless();
+		
+		IBundleProvider result;
+
+		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://").setQualifier(UriParamQualifierEnum.BELOW));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(id1, id2));
+
+		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org").setQualifier(UriParamQualifierEnum.BELOW));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(id1, id2));
+
+		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/foo").setQualifier(UriParamQualifierEnum.BELOW));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(id2));
+	
+		result = myValueSetDao.search(ValueSet.SP_URL, new UriParam("http://hl7.org/foo/baz").setQualifier(UriParamQualifierEnum.BELOW));
+		assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder());
+	}
+	
 	private String toStringMultiline(List<?> theResults) {
 		StringBuilder b = new StringBuilder();
 		for (Object next : theResults) {

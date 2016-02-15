@@ -25,29 +25,24 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * Works like the normal {@link ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy} unless there's an x-forwarded-host present, in which case that's used in place of the server's address.
+ *	<p>
+ * If the Apache Http Server <code>mod_proxy</code> isn't configured to supply <code>x-forwarded-proto</code>, the factory method that you use to create the address strategy will determine the default. Note that
+ * <code>mod_proxy</code> doesn't set this by default, but it can be configured via <code>RequestHeader set X-Forwarded-Proto http</code> (or https)
+ *	</p>
+ *	<p>
+ * If you want to set the protocol based on something other than the constructor argument, you should be able to do so by overriding <code>protocol</code>.
+ *	</p>
+ *	<p>
+ * Note that while this strategy was designed to work with Apache Http Server, and has been tested against it, it should work with any proxy server that sets <code>x-forwarded-host</code>
+ * </p>
  *
- * If the Apache Http Server <i>mod_proxy</i> isn't configured to supply <i>x-forwarded-proto</i>, the factory method that you use to create the address strategy will determine the default. Note that
- * <i>mod_proxy</i> doesn't set this by default, but it can be configured via <i>RequestHeader set X-Forwarded-Proto http</i> (or https)
- *
- * If you want to set the protocol based on something other than the constructor argument, you should be able to do so by overriding <i>protocol</i>.
- *
- * Note that while this strategy was designed to work with Apache Http Server, and has been tested against it, it should work with any proxy server that sets <i>x-forwarded-host</i>
- *
- * Created by Bill de Beaubien on 3/30/2015.
+ * @author Created by Bill de Beaubien on 3/30/2015.
  */
 public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 	private boolean myUseHttps = false;
 
 	protected ApacheProxyAddressStrategy(boolean theUseHttps) {
 		myUseHttps = theUseHttps;
-	}
-
-	public static ApacheProxyAddressStrategy forHttp() {
-		return new ApacheProxyAddressStrategy(false);
-	}
-
-	public static ApacheProxyAddressStrategy forHttps() {
-		return new ApacheProxyAddressStrategy(true);
 	}
 
 	@Override
@@ -57,17 +52,6 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 			return forwardedServerBase(theServletContext, theRequest, forwardedHost);
 		}
 		return super.determineServerBase(theServletContext, theRequest);
-	}
-
-	private String getForwardedHost(HttpServletRequest theRequest) {
-		String forwardedHost = theRequest.getHeader("x-forwarded-host");
-		if (forwardedHost != null) {
-			int commaPos = forwardedHost.indexOf(',');
-			if (commaPos >= 0) {
-				forwardedHost = forwardedHost.substring(0, commaPos - 1);
-			}
-		}
-		return forwardedHost;
 	}
 
 	public String forwardedServerBase(ServletContext theServletContext, HttpServletRequest theRequest, String theForwardedHost) {
@@ -81,11 +65,36 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 		return serverBase;
 	}
 
+	private String getForwardedHost(HttpServletRequest theRequest) {
+		String forwardedHost = theRequest.getHeader("x-forwarded-host");
+		if (forwardedHost != null) {
+			int commaPos = forwardedHost.indexOf(',');
+			if (commaPos >= 0) {
+				forwardedHost = forwardedHost.substring(0, commaPos - 1);
+			}
+		}
+		return forwardedHost;
+	}
+
 	protected String protocol(HttpServletRequest theRequest) {
 		String protocol = theRequest.getHeader("x-forwarded-proto");
 		if (protocol != null) {
 			return protocol;
 		}
 		return myUseHttps ? "https" : "http";
+	}
+
+	/**
+	 * Static factory for instance using <code>http://</code>
+	 */
+	public static ApacheProxyAddressStrategy forHttp() {
+		return new ApacheProxyAddressStrategy(false);
+	}
+
+	/**
+	 * Static factory for instance using <code>https://</code>
+	 */
+	public static ApacheProxyAddressStrategy forHttps() {
+		return new ApacheProxyAddressStrategy(true);
 	}
 }

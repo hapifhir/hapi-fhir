@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.gclient;
 
 import java.util.Date;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 
@@ -75,7 +76,7 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 		}
 
 		@Override
-		public String getParameterValue() {
+		public String getParameterValue(FhirContext theContext) {
 			return myValue;
 		}
 

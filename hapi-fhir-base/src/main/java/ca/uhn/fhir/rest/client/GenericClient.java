@@ -449,7 +449,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			ArrayList<String> valueList = new ArrayList<String>();
 			String qualifier = null;
 			for (IQueryParameterType nextValue : nextEntry.getValue()) {
-				valueList.add(nextValue.getValueAsQueryToken());
+				valueList.add(nextValue.getValueAsQueryToken(myContext));
 				qualifier = nextValue.getQueryParameterQualifier();
 			}
 			qualifier = StringUtils.defaultString(qualifier);
@@ -802,14 +802,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private static class CriterionList extends ArrayList<ICriterionInternal> {
+	private class CriterionList extends ArrayList<ICriterionInternal> {
 
 		private static final long serialVersionUID = 1L;
 
 		public void populateParamList(Map<String, List<String>> theParams) {
 			for (ICriterionInternal next : this) {
 				String parameterName = next.getParameterName();
-				String parameterValue = next.getParameterValue();
+				String parameterValue = next.getParameterValue(myContext);
 				addParam(theParams, parameterName, parameterValue);
 			}
 		}
@@ -1760,11 +1760,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myCriterion.populateParamList(params);
 
 			for (TokenParam next : myTags) {
-				addParam(params, Constants.PARAM_TAG, next.getValueAsQueryToken());
+				addParam(params, Constants.PARAM_TAG, next.getValueAsQueryToken(myContext));
 			}
 
 			for (TokenParam next : mySecurity) {
-				addParam(params, Constants.PARAM_SECURITY, next.getValueAsQueryToken());
+				addParam(params, Constants.PARAM_SECURITY, next.getValueAsQueryToken(myContext));
 			}
 
 			for (String next : myProfile) {
@@ -1793,7 +1793,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			if (myLastUpdated != null) {
 				for (DateParam next : myLastUpdated.getValuesAsQueryTokens()) {
-					addParam(params, Constants.PARAM_LASTUPDATED, next.getValueAsQueryToken());
+					addParam(params, Constants.PARAM_LASTUPDATED, next.getValueAsQueryToken(myContext));
 				}
 			}
 

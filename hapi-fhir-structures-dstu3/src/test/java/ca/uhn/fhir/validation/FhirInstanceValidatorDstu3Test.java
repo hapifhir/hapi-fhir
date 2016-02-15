@@ -36,6 +36,7 @@ import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -52,7 +53,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu3Test.class);
-	private DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
+	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
 	private FhirInstanceValidator myInstanceVal;
 	private IValidationSupport myMockSupport;
 
@@ -66,9 +67,10 @@ public class FhirInstanceValidatorDstu3Test {
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
 
-	@After
-	public void after() {
+	@AfterClass
+	public static void afterClass() {
 		myDefaultValidationSupport.flush();
+		myDefaultValidationSupport = null;
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -20,17 +20,26 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 
-public class NumberParam extends BaseParam implements IQueryParameterType {
+public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQueryParameterType {
 
-	private InternalQuantityDt myQuantity = new InternalQuantityDt();
+	private BigDecimal myQuantity;
 
+	/**
+	 * Constructor
+	 */
 	public NumberParam() {
+		super();
 	}
 
 	/**
@@ -49,10 +58,12 @@ public class NumberParam extends BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	String doGetValueAsQueryToken() {
+	String doGetValueAsQueryToken(FhirContext theContext) {
 		StringBuilder b = new StringBuilder();
-		b.append(ParameterUtil.escapeWithDefault(myQuantity.getComparatorElement().getValue()));
-		b.append(ParameterUtil.escapeWithDefault(myQuantity.getValueElement().toString()));
+		if (getPrefix() != null) {
+			b.append(ParameterUtil.escapeWithDefault(getPrefix().getValueForContext(theContext)));
+		}
+		b.append(ParameterUtil.escapeWithDefault(myQuantity.toPlainString()));
 		return b.toString();
 	}
 	
@@ -61,46 +72,29 @@ public class NumberParam extends BaseParam implements IQueryParameterType {
 		if (getMissing() != null && isBlank(theValue)) {
 			return;
 		}
-		if (theValue.startsWith("<=")) {
-			myQuantity.setComparator(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS);
-			myQuantity.setValue(new BigDecimal(theValue.substring(2)));
-		} else if (theValue.startsWith("<")) {
-			myQuantity.setComparator(QuantityCompararatorEnum.LESSTHAN);
-			myQuantity.setValue(new BigDecimal(theValue.substring(1)));
-		} else if (theValue.startsWith(">=")) {
-			myQuantity.setComparator(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS);
-			myQuantity.setValue(new BigDecimal(theValue.substring(2)));
-		} else if (theValue.startsWith(">")) {
-			myQuantity.setComparator(QuantityCompararatorEnum.GREATERTHAN);
-			myQuantity.setValue(new BigDecimal(theValue.substring(1)));
-		} else {
-			myQuantity.setComparator((QuantityCompararatorEnum) null);
-			myQuantity.setValue(new BigDecimal(theValue));
+		String value = super.extractPrefixAndReturnRest(theValue);
+		myQuantity = null;
+		if (isNotBlank(value)) {
+			myQuantity = new BigDecimal(value);
 		}
 	}
 	
 	
-	public QuantityCompararatorEnum getComparator() {
-		return myQuantity.getComparatorElement().getValueAsEnum();
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE);
+		b.append("prefix", getPrefix());
+		b.append("value", myQuantity);
+		return b.build();
 	}
 
 	public BigDecimal getValue() {
-		return myQuantity.getValueElement().getValue();
+		return myQuantity;
 	}
-
-	@Override
-	public String toString() {
-		StringBuilder b = new StringBuilder();
-		b.append(getClass().getSimpleName());
-		b.append("[");
-		if (myQuantity.getComparatorElement().isEmpty() == false) {
-			b.append(myQuantity.getComparatorElement().getValue());
-		}
-		if (myQuantity.getValueElement().isEmpty() == false) {
-			b.append(myQuantity.getValueElement().toString());
-		}
-		b.append("]");
-		return b.toString();
+	
+	public NumberParam setValue(BigDecimal theValue) {
+		myQuantity = theValue;
+		return this;
 	}
 
 }

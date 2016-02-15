@@ -1,46 +1,32 @@
 package ca.uhn.fhir.rest.param;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 - 2016 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class DateParam extends DateTimeDt implements IQueryParameterType, IQueryParameterOr<DateParam> {
+@SuppressWarnings("deprecation")
+public class DateParam extends BaseParamWithPrefix<DateParam> implements IQueryParameterType , IQueryParameterOr<DateParam> {
 
-	private BaseParam myBase=new BaseParam.ComposableBaseParam();
-	private QuantityCompararatorEnum myComparator;
+	private final DateTimeDt myValue = new DateTimeDt();
 
 	/**
 	 * Constructor
@@ -51,41 +37,102 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 	/**
 	 * Constructor
 	 */
-	public DateParam(QuantityCompararatorEnum theComparator, Date theDate) {
-		myComparator = theComparator;
+	public DateParam(ParamPrefixEnum thePrefix, Date theDate) {
+		setPrefix(thePrefix);
 		setValue(theDate);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public DateParam(QuantityCompararatorEnum theComparator, DateTimeDt theDate) {
-		myComparator = theComparator;
-		setValueAsString(theDate != null ? theDate.getValueAsString() : null);
+	public DateParam(ParamPrefixEnum thePrefix, DateTimeDt theDate) {
+		setPrefix(thePrefix);
+		myValue.setValueAsString(theDate != null ? theDate.getValueAsString() : null);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public DateParam(QuantityCompararatorEnum theComparator, IPrimitiveType<Date> theDate) {
-		myComparator = theComparator;
-		setValueAsString(theDate != null ? theDate.getValueAsString() : null);
+	public DateParam(ParamPrefixEnum thePrefix, IPrimitiveType<Date> theDate) {
+		setPrefix(thePrefix);
+		myValue.setValueAsString(theDate != null ? theDate.getValueAsString() : null);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public DateParam(QuantityCompararatorEnum theComparator, long theDate) {
+	public DateParam(ParamPrefixEnum thePrefix, long theDate) {
 		Validate.inclusiveBetween(1, Long.MAX_VALUE, theDate, "theDate must not be 0 or negative");
-		myComparator = theComparator;
+		setPrefix(thePrefix);
 		setValue(new Date(theDate));
 	}
 
 	/**
 	 * Constructor
 	 */
+	public DateParam(ParamPrefixEnum thePrefix, String theDate) {
+		setPrefix(thePrefix);
+		setValueAsString(theDate);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @deprecated Use constructors with {@link ParamPrefixEnum} parameter instead, as {@link QuantityCompararatorEnum}
+	 *             is deprecated
+	 */
+	@Deprecated
+	public DateParam(QuantityCompararatorEnum theComparator, Date theDate) {
+		setPrefix(toPrefix(theComparator));
+		setValue(theDate);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @deprecated Use constructors with {@link ParamPrefixEnum} parameter instead, as {@link QuantityCompararatorEnum}
+	 *             is deprecated
+	 */
+	@Deprecated
+	public DateParam(QuantityCompararatorEnum theComparator, DateTimeDt theDate) {
+		setPrefix(toPrefix(theComparator));
+		setValue(theDate);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @deprecated Use constructors with {@link ParamPrefixEnum} parameter instead, as {@link QuantityCompararatorEnum}
+	 *             is deprecated
+	 */
+	@Deprecated
+	public DateParam(QuantityCompararatorEnum theComparator, IPrimitiveType<Date> theDate) {
+		setPrefix(toPrefix(theComparator));
+		setValue(theDate);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @deprecated Use constructors with {@link ParamPrefixEnum} parameter instead, as {@link QuantityCompararatorEnum}
+	 *             is deprecated
+	 */
+	@Deprecated
+	public DateParam(QuantityCompararatorEnum theComparator, long theDate) {
+		Validate.inclusiveBetween(1, Long.MAX_VALUE, theDate, "theDate must not be 0 or negative");
+		setPrefix(toPrefix(theComparator));
+		setValue(new Date(theDate));
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @deprecated Use constructors with {@link ParamPrefixEnum} parameter instead, as {@link QuantityCompararatorEnum}
+	 *             is deprecated
+	 */
+	@Deprecated
 	public DateParam(QuantityCompararatorEnum theComparator, String theDate) {
-		myComparator = theComparator;
+		setPrefix(toPrefix(theComparator));
 		setValueAsString(theDate);
 	}
 
@@ -93,123 +140,135 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 	 * Constructor which takes a complete [qualifier]{date} string.
 	 * 
 	 * @param theString
-	 *            The string
+	 *           The string
 	 */
 	public DateParam(String theString) {
 		setValueAsQueryToken(null, theString);
 	}
 
-	/**
-	 * Returns the comparator, or <code>null</code> if none has been set
-	 */
-	public QuantityCompararatorEnum getComparator() {
-		return myComparator;
+	@Override
+	String doGetQueryParameterQualifier() {
+		return null;
 	}
 
 	@Override
-	public Boolean getMissing() {
-		return myBase.getMissing();
+	String doGetValueAsQueryToken(FhirContext theContext) {
+		StringBuilder b = new StringBuilder();
+		if (getPrefix() != null) {
+			b.append(ParameterUtil.escapeWithDefault(getPrefix().getValueForContext(theContext)));
+		}
+		
+		if (myValue != null) {
+			b.append(ParameterUtil.escapeWithDefault(myValue.getValueAsString()));
+		}
+
+		return b.toString();
 	}
 
 	@Override
-	public String getQueryParameterQualifier() {
-		if (myBase.getMissing()!=null) {
-			return myBase.getQueryParameterQualifier();
+	void doSetValueAsQueryToken(String theQualifier, String theValue) {
+		setValueAsString(theValue);
+	}
+
+	public TemporalPrecisionEnum getPrecision() {
+		if (myValue != null) {
+			return myValue.getPrecision();
+		}
+		return null;
+	}
+
+	public Date getValue() {
+		if (myValue != null) {
+			return myValue.getValue();
 		}
 		return null;
 	}
 
 	public DateTimeDt getValueAsDateTimeDt() {
-		return new DateTimeDt(getValueAsString());
+		if (myValue == null) {
+			return null;
+		}
+		return new DateTimeDt(myValue.getValue());
 	}
 
 	public InstantDt getValueAsInstantDt() {
-		return new InstantDt(getValue());
+		if (myValue == null) {
+			return null;
+		}
+		return new InstantDt(myValue.getValue());
 	}
 
-	@Override
-	public String getValueAsQueryToken() {
-		if (myBase.getMissing()!=null) {
-			return myBase.getValueAsQueryToken();
+	public String getValueAsString() {
+		if (myValue != null) {
+			return myValue.getValueAsString();
+		} else {
+			return null;
 		}
-		if (myComparator != null && getValue() != null) {
-			return myComparator.getCode() + getValueAsString();
-		} else if (myComparator == null && getValue() != null) {
-			return getValueAsString();
-		}
-		return "";
-	}
-
-	@Override
-	public List<DateParam> getValuesAsQueryTokens() {
-		return Collections.singletonList(this);
 	}
 
 	/**
 	 * Returns <code>true</code> if no date/time is specified. Note that this method does not check the comparator, so a
 	 * QualifiedDateParam with only a comparator and no date/time is considered empty.
 	 */
-	@Override
 	public boolean isEmpty() {
-		// Just here to provide a javadoc
-		return super.isEmpty();
+		return myValue.isEmpty();
 	}
 
-	public void setComparator(QuantityCompararatorEnum theComparator) {
-		myComparator = theComparator;
-	}
-
-	@Override
-	public void setMissing(Boolean theMissing) {
-		myBase.setMissing(theMissing);
-	}
-
-	@Override
+	/**
+	 * Sets the value of the param to the given date (sets to the {@link TemporalPrecisionEnum#MILLI millisecond}
+	 * precision, and will be encoded using the system local time zone).
+	 */
 	public DateParam setValue(Date theValue) {
-		super.setValue(theValue, TemporalPrecisionEnum.MILLI);
+		myValue.setValue(theValue, TemporalPrecisionEnum.MILLI);
 		return this;
 	}
 
-	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
-		myBase.setValueAsQueryToken(theQualifier, theValue);
-		if (myBase.getMissing()!=null) {
-			setValue(null);
-			myComparator=null;
-			return;
-		}
-
-		if (theValue.length() < 2) {
-			throw new DataFormatException("Invalid qualified date parameter: " + theValue);
-		}
-
-		char char0 = theValue.charAt(0);
-		char char1 = theValue.charAt(1);
-		if (Character.isDigit(char0)) {
-			setValueAsString(theValue);
+	/**
+	 * Sets the value using a FHIR Date type, such as a {@link DateDt}, or a DateTimeType.
+	 */
+	public void setValue(IPrimitiveType<Date> theValue) {
+		if (theValue != null) {
+			myValue.setValueAsString(theValue.getValueAsString());
 		} else {
-			int dateStart = 2;
-			if (Character.isDigit(char1)) {
-				dateStart = 1;
-			}
-
-			String comparatorString = theValue.substring(0, dateStart);
-			QuantityCompararatorEnum comparator = QuantityCompararatorEnum.VALUESET_BINDER.fromCodeString(comparatorString);
-			if (comparator == null) {
-				throw new DataFormatException("Invalid date qualifier: " + comparatorString);
-			}
-
-			String dateString = theValue.substring(dateStart);
-			setValueAsString(dateString);
-			setComparator(comparator);
+			myValue.setValue(null);
 		}
+	}
 
+	/**
+	 * Accepts values with or without a prefix (e.g. <code>gt2011-01-01</code> and <code>2011-01-01</code>).
+	 * If no prefix is provided in the given value, the {@link #getPrefix() existing prefix} is preserved
+	 */
+	public void setValueAsString(String theDate) {
+		if (isNotBlank(theDate)) {
+			ParamPrefixEnum existingPrefix = getPrefix();
+			myValue.setValueAsString(super.extractPrefixAndReturnRest(theDate));
+			if (getPrefix() == null) {
+				setPrefix(existingPrefix);
+			}
+		} else {
+			myValue.setValue(null);
+		}
+	}
+
+	private ParamPrefixEnum toPrefix(QuantityCompararatorEnum theComparator) {
+		if (theComparator != null) {
+			return ParamPrefixEnum.forDstu1Value(theComparator.getCode());
+		}
+		return null;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("prefix", getPrefix());
+		b.append("value", getValueAsString());
+		return b.build();
 	}
 
 	@Override
 	public void  setValuesAsQueryTokens(QualifiedParamList theParameters) {
-		myBase.setMissing(null);
-		myComparator = null;
+		setMissing(null);
+		setPrefix(null);
 		setValueAsString(null);
 		
 		if (theParameters.size() == 1) {
@@ -221,19 +280,9 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 	}
 
 	@Override
-	public String toString() {
-		StringBuilder b = new StringBuilder();
-		b.append(getClass().getSimpleName());
-		b.append("[");
-		if (myComparator!=null) {
-			b.append(myComparator.getCode());
-		}
-		b.append(getValueAsString());
-		if (myBase.getMissing()!=null) {
-			b.append(" missing=").append(myBase.getMissing());
-		}
-		b.append("]");
-		return b.toString();
+	public List<DateParam> getValuesAsQueryTokens() {
+		return Collections.singletonList(this);
 	}
+
 
 }

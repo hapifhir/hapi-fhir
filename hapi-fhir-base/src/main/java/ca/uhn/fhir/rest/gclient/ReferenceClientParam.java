@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.gclient;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 
 /*
@@ -72,8 +73,8 @@ public class ReferenceClientParam extends BaseClientParam  implements IParam {
 		}
 
 		@Override
-		public String getParameterValue() {
-			return myWrappedCriterion.getParameterValue();
+		public String getParameterValue(FhirContext theContext) {
+			return myWrappedCriterion.getParameterValue(theContext);
 		}
 
 	}

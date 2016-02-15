@@ -77,8 +77,7 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	/**
 	 * Match only resources where the resource has the given profile declaration. This parameter corresponds to
 	 * the <code>_profile</code> URL parameter.
-	 * @param theSystem The tag code system, or <code>null</code> to match any code system (this may not be supported on all servers)
-	 * @param theCode The tag code. Must not be <code>null</code> or empty.
+	 * @param theProfileUri The URI of a given profile to search for resources which match  
 	 */
 	IQuery<T> withProfile(String theProfileUri);
 

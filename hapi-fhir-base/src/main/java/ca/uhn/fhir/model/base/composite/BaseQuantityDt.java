@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 
 import org.apache.commons.lang3.StringUtils;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -101,7 +102,7 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
 	public abstract BoundCodeDt<?> getComparatorElement();
 
 	@Override
-	public String getValueAsQueryToken() {
+	public String getValueAsQueryToken(FhirContext theContext) {
 		StringBuilder b= new StringBuilder();
 		if (getComparatorElement() != null) {
 			b.append(getComparatorElement().getValue());

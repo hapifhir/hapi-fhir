@@ -26,6 +26,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,6 +55,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -70,6 +72,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
@@ -94,7 +97,6 @@ import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.model.dstu.resource.BaseResource;
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -105,11 +107,13 @@ import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -128,14 +132,16 @@ public class SearchBuilder {
 	private Class<? extends IBaseResource> myResourceType;
 	private ISearchDao mySearchDao;
 	private ISearchResultDao mySearchResultDao;
+	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 
-	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, ISearchDao theSearchDao, ISearchResultDao theSearchResultDao, BaseHapiFhirDao theDao) {
+	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, PlatformTransactionManager thePlatformTransactionManager, ISearchDao theSearchDao, ISearchResultDao theSearchResultDao, BaseHapiFhirDao theDao, IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
 		myPlatformTransactionManager = thePlatformTransactionManager;
 		mySearchDao = theSearchDao;
 		mySearchResultDao = theSearchResultDao;
 		myCallingDao = theDao;
+		myResourceIndexedSearchParamUriDao = theResourceIndexedSearchParamUriDao;
 	}
 
 	private Set<Long> addPredicateComposite(RuntimeSearchParam theParamDef, Set<Long> thePids, List<? extends IQueryParameterType> theNextAnd) {
@@ -350,30 +356,14 @@ public class SearchBuilder {
 					return thePids;
 				}
 
-				Path<Object> fromObj = from.get("myValue");
-				if (param.getComparator() == null) {
-					double mul = value.doubleValue() * 1.01;
-					double low = value.doubleValue() - mul;
-					double high = value.doubleValue() + mul;
-					Predicate lowPred = builder.ge(fromObj.as(Long.class), low);
-					Predicate highPred = builder.le(fromObj.as(Long.class), high);
-					codePredicates.add(builder.and(lowPred, highPred));
-				} else {
-					switch (param.getComparator()) {
-					case GREATERTHAN:
-						codePredicates.add(builder.greaterThan(fromObj.as(BigDecimal.class), value));
-						break;
-					case GREATERTHAN_OR_EQUALS:
-						codePredicates.add(builder.ge(fromObj.as(BigDecimal.class), value));
-						break;
-					case LESSTHAN:
-						codePredicates.add(builder.lessThan(fromObj.as(BigDecimal.class), value));
-						break;
-					case LESSTHAN_OR_EQUALS:
-						codePredicates.add(builder.le(fromObj.as(BigDecimal.class), value));
-						break;
-					}
-				}
+				final Expression<BigDecimal> fromObj = from.get("myValue");
+				ParamPrefixEnum prefix = ObjectUtils.defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
+				String invalidMessageName = "invalidNumberPrefix";
+				String valueAsString = param.getValue().toPlainString();
+
+				Predicate num = createPredicateNumeric(builder, params, prefix, value, fromObj, invalidMessageName, valueAsString);
+				codePredicates.add(num);
+
 			} else {
 				throw new IllegalArgumentException("Invalid token type: " + params.getClass());
 			}
@@ -481,23 +471,24 @@ public class SearchBuilder {
 
 			String systemValue;
 			String unitsValue;
-			QuantityCompararatorEnum cmpValue;
+			ParamPrefixEnum cmpValue;
 			BigDecimal valueValue;
-			boolean approx = false;
+			String valueString;
 
 			if (params instanceof BaseQuantityDt) {
 				BaseQuantityDt param = (BaseQuantityDt) params;
 				systemValue = param.getSystemElement().getValueAsString();
 				unitsValue = param.getUnitsElement().getValueAsString();
-				cmpValue = QuantityCompararatorEnum.VALUESET_BINDER.fromCodeString(param.getComparatorElement().getValueAsString());
+				cmpValue = ParamPrefixEnum.forDstu1Value(param.getComparatorElement().getValueAsString());
 				valueValue = param.getValueElement().getValue();
+				valueString = param.getValueElement().getValueAsString();
 			} else if (params instanceof QuantityParam) {
 				QuantityParam param = (QuantityParam) params;
-				systemValue = param.getSystem().getValueAsString();
+				systemValue = param.getSystem();
 				unitsValue = param.getUnits();
-				cmpValue = param.getComparator();
-				valueValue = param.getValue().getValue();
-				approx = param.isApproximate();
+				cmpValue = param.getPrefix();
+				valueValue = param.getValue();
+				valueString = param.getValueAsString();
 			} else {
 				throw new IllegalArgumentException("Invalid quantity type: " + params.getClass());
 			}
@@ -512,36 +503,11 @@ public class SearchBuilder {
 				code = builder.equal(from.get("myUnits"), unitsValue);
 			}
 
-			Predicate num;
-			if (cmpValue == null) {
-				BigDecimal mul = approx ? new BigDecimal(0.1) : new BigDecimal(0.01);
-				BigDecimal low = valueValue.subtract(valueValue.multiply(mul));
-				BigDecimal high = valueValue.add(valueValue.multiply(mul));
-				Predicate lowPred = builder.gt(from.get("myValue").as(BigDecimal.class), low);
-				Predicate highPred = builder.lt(from.get("myValue").as(BigDecimal.class), high);
-				num = builder.and(lowPred, highPred);
-			} else {
-				switch (cmpValue) {
-				case GREATERTHAN:
-					Expression<Number> path = from.get("myValue");
-					num = builder.gt(path, valueValue);
-					break;
-				case GREATERTHAN_OR_EQUALS:
-					path = from.get("myValue");
-					num = builder.ge(path, valueValue);
-					break;
-				case LESSTHAN:
-					path = from.get("myValue");
-					num = builder.lt(path, valueValue);
-					break;
-				case LESSTHAN_OR_EQUALS:
-					path = from.get("myValue");
-					num = builder.le(path, valueValue);
-					break;
-				default:
-					throw new IllegalStateException(cmpValue.getCode());
-				}
-			}
+			cmpValue = ObjectUtils.defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
+			final Expression<BigDecimal> path = from.get("myValue");
+			String invalidMessageName = "invalidQuantityPrefix";
+
+			Predicate num = createPredicateNumeric(builder, params, cmpValue, valueValue, path, invalidMessageName, valueString);
 
 			if (system == null && code == null) {
 				codePredicates.add(num);
@@ -602,7 +568,7 @@ public class SearchBuilder {
 				ReferenceParam ref = (ReferenceParam) params;
 
 				if (isBlank(ref.getChain())) {
-					String resourceId = ref.getValueAsQueryToken();
+					String resourceId = ref.getValueAsQueryToken(myContext);
 					if (resourceId.contains("/")) {
 						IIdType dt = new IdDt(resourceId);
 						resourceId = dt.getIdPart();
@@ -790,7 +756,7 @@ public class SearchBuilder {
 					if (isNotBlank(nextParam.getValue())) {
 						haveTags = true;
 					} else if (isNotBlank(nextParam.getSystem())) {
-						throw new InvalidRequestException("Invalid " + theParamName + " parameter (must supply a value/code and not just a system): " + nextParam.getValueAsQueryToken());
+						throw new InvalidRequestException("Invalid " + theParamName + " parameter (must supply a value/code and not just a system): " + nextParam.getValueAsQueryToken(myContext));
 					}
 				} else {
 					UriParam nextParam = (UriParam) nextParamUncasted;
@@ -942,11 +908,53 @@ public class SearchBuilder {
 				}
 
 				Path<Object> fromObj = from.get("myUri");
-				codePredicates.add(builder.equal(fromObj.as(String.class), value));
+				Predicate predicate;
+				if (param.getQualifier() == UriParamQualifierEnum.ABOVE) {
+
+					/*
+					 * :above is an inefficient query- It means that the user is supplying a more specific URL
+					 * (say http://example.com/foo/bar/baz) and that we should match on any URLs that are
+					 * less specific but otherwise the same. For example http://example.com and http://example.com/foo
+					 * would both match.
+					 * 
+					 * We do this by querying the DB for all candidate URIs and then manually checking
+					 * each one. This isn't very efficient, but this is also probably not a very common
+					 * type of query to do.
+					 * 
+					 * If we ever need to make this more efficient, lucene could certainly be used
+					 * as an optimization.
+					 */
+					ourLog.info("Searching for candidate URI:above parameters for Resource[{}] param[{}]", myResourceName, theParamName);
+					Collection<String> candidates = myResourceIndexedSearchParamUriDao.findAllByResourceTypeAndParamName(myResourceName, theParamName);
+					List<String> toFind = new ArrayList<String>();
+					for (String next : candidates) {
+						if (value.length() >= next.length()) {
+							if (value.substring(0, next.length()).equals(next)) {
+								toFind.add(next);
+							}
+						}
+					}
+
+					if (toFind.isEmpty()) {
+						continue;
+					}
+
+					predicate = fromObj.as(String.class).in(toFind);
+
+				} else if (param.getQualifier() == UriParamQualifierEnum.BELOW) {
+					predicate = builder.like(fromObj.as(String.class), createLeftMatchLikeExpression(value));
+				} else {
+					predicate = builder.equal(fromObj.as(String.class), value);
+				}
+				codePredicates.add(predicate);
 			} else {
 				throw new IllegalArgumentException("Invalid URI type: " + params.getClass());
 			}
 
+		}
+
+		if (codePredicates.isEmpty()) {
+			return new HashSet<Long>();
 		}
 
 		Predicate masterCodePredicate = builder.or(toArray(codePredicates));
@@ -1026,10 +1034,6 @@ public class SearchBuilder {
 		return p;
 	}
 
-	// private Set<Long> addPredicateComposite(String theParamName, Set<Long> thePids, List<? extends
-	// IQueryParameterType> theList) {
-	// }
-
 	private Predicate createPredicateDateFromRange(CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> theFrom, DateRangeParam theRange) {
 		Date lowerBound = theRange.getLowerBoundAsInstant();
 		Date upperBound = theRange.getUpperBoundAsInstant();
@@ -1038,27 +1042,22 @@ public class SearchBuilder {
 		if (lowerBound != null) {
 			Predicate gt = theBuilder.greaterThanOrEqualTo(theFrom.<Date> get("myValueLow"), lowerBound);
 			Predicate lt = theBuilder.greaterThanOrEqualTo(theFrom.<Date> get("myValueHigh"), lowerBound);
-			lb = theBuilder.or(gt, lt);
-
-			// Predicate gin = builder.isNull(from.get("myValueLow"));
-			// Predicate lbo = builder.or(gt, gin);
-			// Predicate lin = builder.isNull(from.get("myValueHigh"));
-			// Predicate hbo = builder.or(lt, lin);
-			// lb = builder.and(lbo, hbo);
+			if (theRange.getLowerBound().getPrefix() == ParamPrefixEnum.STARTS_AFTER) {
+				lb = gt;
+			} else {
+				lb = theBuilder.or(gt, lt);
+			}
 		}
 
 		Predicate ub = null;
 		if (upperBound != null) {
 			Predicate gt = theBuilder.lessThanOrEqualTo(theFrom.<Date> get("myValueLow"), upperBound);
 			Predicate lt = theBuilder.lessThanOrEqualTo(theFrom.<Date> get("myValueHigh"), upperBound);
-			ub = theBuilder.or(gt, lt);
-
-			// Predicate gin = builder.isNull(from.get("myValueLow"));
-			// Predicate lbo = builder.or(gt, gin);
-			// Predicate lin = builder.isNull(from.get("myValueHigh"));
-			// Predicate ubo = builder.or(lt, lin);
-			// ub = builder.and(ubo, lbo);
-
+			if (theRange.getUpperBound().getPrefix() == ParamPrefixEnum.ENDS_BEFORE) {
+				ub = lt;
+			} else {
+				ub = theBuilder.or(gt, lt);
+			}
 		}
 
 		if (lb != null && ub != null) {
@@ -1069,6 +1068,52 @@ public class SearchBuilder {
 			return (ub);
 		}
 	}
+
+	private Predicate createPredicateNumeric(CriteriaBuilder builder, IQueryParameterType params, ParamPrefixEnum cmpValue, BigDecimal valueValue, final Expression<BigDecimal> path, String invalidMessageName, String theValueString) {
+		Predicate num;
+		switch (cmpValue) {
+		case GREATERTHAN:
+			num = builder.gt(path, valueValue);
+			break;
+		case GREATERTHAN_OR_EQUALS:
+			num = builder.ge(path, valueValue);
+			break;
+		case LESSTHAN:
+			num = builder.lt(path, valueValue);
+			break;
+		case LESSTHAN_OR_EQUALS:
+			num = builder.le(path, valueValue);
+			break;
+		case APPROXIMATE:
+		case EQUAL:
+		case NOT_EQUAL:
+			BigDecimal mul = calculateFuzzAmount(cmpValue, valueValue);
+			BigDecimal low = valueValue.subtract(mul, MathContext.DECIMAL64);
+			BigDecimal high = valueValue.add(mul, MathContext.DECIMAL64);
+			Predicate lowPred;
+			Predicate highPred;
+			if (cmpValue != ParamPrefixEnum.NOT_EQUAL) {
+				lowPred = builder.ge(path.as(BigDecimal.class), low);
+				highPred = builder.le(path.as(BigDecimal.class), high);
+				ourLog.info("Searching for {} <= val <= {}", low, high);
+				num = builder.and(lowPred, highPred);
+			} else {
+				// Prefix was "ne", so reverse it!
+				lowPred = builder.lt(path.as(BigDecimal.class), low);
+				highPred = builder.gt(path.as(BigDecimal.class), high);
+				num = builder.or(lowPred, highPred);
+			}
+			break;
+		default:
+			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, invalidMessageName, cmpValue.getValue(), params.getValueAsQueryToken(myContext));
+			throw new InvalidRequestException(msg);
+		}
+		return num;
+	}
+
+	// private Set<Long> addPredicateComposite(String theParamName, Set<Long> thePids, List<? extends
+	// IQueryParameterType> theList) {
+	// }
 
 	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theFrom) {
 		String rawSearchTerm;
@@ -1093,7 +1138,7 @@ public class SearchBuilder {
 		}
 
 		String likeExpression = BaseHapiFhirDao.normalizeString(rawSearchTerm);
-		likeExpression = likeExpression.replace("%", "[%]") + "%";
+		likeExpression = createLeftMatchLikeExpression(likeExpression);
 
 		Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
 		if (theParameter instanceof StringParam && ((StringParam) theParameter).isExact()) {
@@ -1101,6 +1146,10 @@ public class SearchBuilder {
 			singleCode = theBuilder.and(singleCode, exactCode);
 		}
 		return singleCode;
+	}
+
+	private static String createLeftMatchLikeExpression(String likeExpression) {
+		return likeExpression.replace("%", "[%]") + "%";
 	}
 
 	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
@@ -1311,15 +1360,15 @@ public class SearchBuilder {
 
 			if (resource instanceof IResource) {
 				if (theRevIncludedPids.contains(next.getId())) {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource)resource, BundleEntrySearchModeEnum.INCLUDE);
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.INCLUDE);
 				} else {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource)resource, BundleEntrySearchModeEnum.MATCH);
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.MATCH);
 				}
 			} else {
 				if (theRevIncludedPids.contains(next.getId())) {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource)resource, BundleEntrySearchModeEnum.INCLUDE.getCode());
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.INCLUDE.getCode());
 				} else {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource)resource, BundleEntrySearchModeEnum.MATCH.getCode());
+					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.MATCH.getCode());
 				}
 			}
 
@@ -1519,9 +1568,9 @@ public class SearchBuilder {
 			loadPids = new HashSet<Long>();
 			if (theParams.containsKey(Constants.PARAM_CONTENT) || theParams.containsKey(Constants.PARAM_TEXT)) {
 				List<Long> pids = mySearchDao.everything(myResourceName, theParams);
-//				if (pid != null) {
-//					loadPids.add(pid);
-//				}
+				// if (pid != null) {
+				// loadPids.add(pid);
+				// }
 				loadPids.addAll(pids);
 			} else {
 				CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
@@ -1694,7 +1743,7 @@ public class SearchBuilder {
 							continue;
 						} else {
 							for (IQueryParameterType next : nextValue) {
-								String value = next.getValueAsQueryToken();
+								String value = next.getValueAsQueryToken(myContext);
 								IIdType valueId = new IdDt(value);
 
 								try {
@@ -1866,6 +1915,28 @@ public class SearchBuilder {
 
 		qp.setValueAsQueryToken(theQualifier, theValueAsQueryToken); // aaaa
 		return qp;
+	}
+
+	/**
+	 * Figures out the tolerance for a search. For example, if the user is searching for
+	 * <code>4.00</code>, this method returns <code>0.005</code> because we shold actually
+	 * match values which are <code>4 (+/-) 0.005</code> according to the FHIR specs.
+	 */
+	static BigDecimal calculateFuzzAmount(ParamPrefixEnum cmpValue, BigDecimal theValue) {
+		if (cmpValue == ParamPrefixEnum.APPROXIMATE) {
+			return theValue.multiply(new BigDecimal(0.1));
+		} else {
+			String plainString = theValue.toPlainString();
+			int dotIdx = plainString.indexOf('.');
+			if (dotIdx == -1) {
+				return new BigDecimal(0.5);
+			}
+
+			int precision = plainString.length() - (dotIdx);
+			double mul = Math.pow(10, -precision);
+			double val = mul * 5.0d;
+			return new BigDecimal(val);
+		}
 	}
 
 	static Predicate[] toArray(List<Predicate> thePredicates) {

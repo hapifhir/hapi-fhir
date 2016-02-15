@@ -22,6 +22,8 @@ package ca.uhn.fhir.rest.param;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.math.BigDecimal;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -29,24 +31,38 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.util.CoverageIgnore;
 
-public class ReferenceParam extends IdDt implements IQueryParameterType {
+public class ReferenceParam extends BaseParam implements IQueryParameterType {
 
-	private BaseParam myBase=new BaseParam.ComposableBaseParam();
+	private final IdDt myId = new IdDt();
 	private String myChain;
 
+	/**
+	 * Constructor
+	 */
 	public ReferenceParam() {
+		super();
 	}
 
+	/**
+	 * Constructor
+	 */
 	public ReferenceParam(String theValue) {
 		setValueAsQueryToken(null, theValue);
 	}
 
+	/**
+	 * Constructor
+	 */
 	public ReferenceParam(String theChain, String theValue) {
 		setValueAsQueryToken(null, theValue);
 		setChain(theChain);
 	}
 
+	/**
+	 * Constructor
+	 */
 	public ReferenceParam(String theResourceType, String theChain, String theValue) {
 		if (isNotBlank(theResourceType)) {
 			setValue(theResourceType + "/" + theValue);
@@ -56,21 +72,120 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 		setChain(theChain);
 	}
 
+	public void setValue(String theValue) {
+		myId.setValue(theValue);
+	}
+
 	public String getChain() {
 		return myChain;
 	}
 
-	@Override
-	public Boolean getMissing() {
-		return myBase.getMissing();
+
+
+	public Class<? extends IBaseResource> getResourceType(FhirContext theCtx) {
+		if (isBlank(getResourceType())) {
+			return null;
+		}
+		return theCtx.getResourceDefinition(getResourceType()).getImplementingClass();
+	}
+
+
+	public void setChain(String theChain) {
+		myChain = theChain;
+	}
+
+
+	/**
+	 * Returns a new param containing the same value as this param, but with the type copnverted
+	 * to {@link DateParam}. This is useful if you are using reference parameters and want to handle
+	 * chained parameters of different types in a single method.
+	 * <p>
+	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * in the HAPI FHIR documentation for an example of how to use this method.
+	 * </p>
+	 */
+	public DateParam toDateParam(FhirContext theContext) {
+		DateParam retVal = new DateParam();
+		retVal.setValueAsQueryToken(null, getValueAsQueryToken(theContext));
+		return retVal;
+	}
+
+	/**
+	 * Returns a new param containing the same value as this param, but with the type copnverted
+	 * to {@link NumberParam}. This is useful if you are using reference parameters and want to handle
+	 * chained parameters of different types in a single method.
+	 * <p>
+	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * in the HAPI FHIR documentation for an example of how to use this method.
+	 * </p>
+	 */
+	public NumberParam toNumberParam(FhirContext theContext) {
+		NumberParam retVal = new NumberParam();
+		retVal.setValueAsQueryToken(null, getValueAsQueryToken(theContext));
+		return retVal;
+	}
+	
+	/**
+	 * Returns a new param containing the same value as this param, but with the type copnverted
+	 * to {@link QuantityParam}. This is useful if you are using reference parameters and want to handle
+	 * chained parameters of different types in a single method.
+	 * <p>
+	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * in the HAPI FHIR documentation for an example of how to use this method.
+	 * </p>
+	 */
+	public QuantityParam toQuantityParam(FhirContext theContext) {
+		QuantityParam retVal = new QuantityParam();
+		retVal.setValueAsQueryToken(null, getValueAsQueryToken(theContext));
+		return retVal;
 	}
 
 	@Override
-	public String getQueryParameterQualifier() {
-		if (myBase.getMissing()!=null) {
-			return myBase.getQueryParameterQualifier();
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		if (isNotBlank(myChain)) {
+			b.append("chain", myChain);
 		}
-		
+		b.append("value", getValue());
+		return b.build();
+	}
+
+	public String getValue() {
+		return myId.getValue();
+	}
+
+	/**
+	 * Returns a new param containing the same value as this param, but with the type copnverted
+	 * to {@link StringParam}. This is useful if you are using reference parameters and want to handle
+	 * chained parameters of different types in a single method.
+	 * <p>
+	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * in the HAPI FHIR documentation for an example of how to use this method.
+	 * </p>
+	 */
+	public StringParam toStringParam(FhirContext theContext) {
+		StringParam retVal = new StringParam();
+		retVal.setValueAsQueryToken(null, getValueAsQueryToken(theContext));
+		return retVal;
+	}
+
+	/**
+	 * Returns a new param containing the same value as this param, but with the type copnverted
+	 * to {@link TokenParam}. This is useful if you are using reference parameters and want to handle
+	 * chained parameters of different types in a single method.
+	 * <p>
+	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
+	 * in the HAPI FHIR documentation for an example of how to use this method.
+	 * </p>
+	 */
+	public TokenParam toTokenParam(FhirContext theContext) {
+		TokenParam retVal = new TokenParam();
+		retVal.setValueAsQueryToken(null, getValueAsQueryToken(theContext));
+		return retVal;
+	}
+
+	@Override
+	String doGetQueryParameterQualifier() {
 		StringBuilder b = new StringBuilder();
 		if (isNotBlank(getResourceType())) {
 			b.append(':');
@@ -86,43 +201,21 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 		return null;
 	}
 
-	public Class<? extends IBaseResource> getResourceType(FhirContext theCtx) {
-		if (isBlank(getResourceType())) {
-			return null;
-		}
-		return theCtx.getResourceDefinition(getResourceType()).getImplementingClass();
+	public String getResourceType() {
+		return myId.getResourceType();
 	}
 
 	@Override
-	public String getValueAsQueryToken() {
-		if (myBase.getMissing()!=null) {
-			return myBase.getValueAsQueryToken();
-		}
-		if (isBlank(getResourceType())) {
-			return getValue(); // e.g. urn:asdjd or 123 or cid:wieiuru or #1
+	String doGetValueAsQueryToken(FhirContext theContext) {
+		if (isBlank(myId.getResourceType())) {
+			return myId.getValue(); // e.g. urn:asdjd or 123 or cid:wieiuru or #1
 		} else {
-			return getIdPart();
+			return myId.getIdPart();
 		}
 	}
 
-	public void setChain(String theChain) {
-		myChain = theChain;
-	}
-
 	@Override
-	public void setMissing(Boolean theMissing) {
-		myBase.setMissing(theMissing);
-	}
-
-	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
-		myBase.setValueAsQueryToken(theQualifier, theValue);
-		if (myBase.getMissing()!=null) {
-			myChain=null;
-			setValue(null);
-			return;
-		}
-		
+	void doSetValueAsQueryToken(String theQualifier, String theValue) {
 		String q = theQualifier;
 		String resourceType = null;
 		if (isNotBlank(q)) {
@@ -146,89 +239,27 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 		}
 	}
 
-	/**
-	 * Returns a new param containing the same value as this param, but with the type copnverted
-	 * to {@link DateParam}. This is useful if you are using reference parameters and want to handle
-	 * chained parameters of different types in a single method.
-	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
-	 * in the HAPI FHIR documentation for an example of how to use this method.
-	 * </p>
-	 */
-	public DateParam toDateParam() {
-		DateParam retVal = new DateParam();
-		retVal.setValueAsQueryToken(null, getValueAsQueryToken());
-		return retVal;
+	@CoverageIgnore
+	public String getIdPart() {
+		return myId.getIdPart();
 	}
 
-	/**
-	 * Returns a new param containing the same value as this param, but with the type copnverted
-	 * to {@link NumberParam}. This is useful if you are using reference parameters and want to handle
-	 * chained parameters of different types in a single method.
-	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
-	 * in the HAPI FHIR documentation for an example of how to use this method.
-	 * </p>
-	 */
-	public NumberParam toNumberParam() {
-		NumberParam retVal = new NumberParam();
-		retVal.setValueAsQueryToken(null, getValueAsQueryToken());
-		return retVal;
-	}
-	
-	/**
-	 * Returns a new param containing the same value as this param, but with the type copnverted
-	 * to {@link QuantityParam}. This is useful if you are using reference parameters and want to handle
-	 * chained parameters of different types in a single method.
-	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
-	 * in the HAPI FHIR documentation for an example of how to use this method.
-	 * </p>
-	 */
-	public QuantityParam toQuantityParam() {
-		QuantityParam retVal = new QuantityParam();
-		retVal.setValueAsQueryToken(null, getValueAsQueryToken());
-		return retVal;
+	@CoverageIgnore
+	public Long getIdPartAsLong() {
+		return myId.getIdPartAsLong();
 	}
 
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		if (isNotBlank(myChain)) {
-			b.append("chain", myChain);
-		}
-		b.append("value", getValue());
-		return b.build();
+	@CoverageIgnore
+	public BigDecimal getIdPartAsBigDecimal() {
+		return myId.getIdPartAsBigDecimal();
 	}
 
-	/**
-	 * Returns a new param containing the same value as this param, but with the type copnverted
-	 * to {@link StringParam}. This is useful if you are using reference parameters and want to handle
-	 * chained parameters of different types in a single method.
-	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
-	 * in the HAPI FHIR documentation for an example of how to use this method.
-	 * </p>
-	 */
-	public StringParam toStringParam() {
-		StringParam retVal = new StringParam();
-		retVal.setValueAsQueryToken(null, getValueAsQueryToken());
-		return retVal;
+	@CoverageIgnore
+	public String getBaseUrl() {
+		return myId.getBaseUrl();
 	}
 
-	/**
-	 * Returns a new param containing the same value as this param, but with the type copnverted
-	 * to {@link TokenParam}. This is useful if you are using reference parameters and want to handle
-	 * chained parameters of different types in a single method.
-	 * <p>
-	 * See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_operations.html#dynamic_chains">Dynamic Chains</a>
-	 * in the HAPI FHIR documentation for an example of how to use this method.
-	 * </p>
-	 */
-	public TokenParam toTokenParam() {
-		TokenParam retVal = new TokenParam();
-		retVal.setValueAsQueryToken(null, getValueAsQueryToken());
-		return retVal;
+	public boolean hasResourceType() {
+		return myId.hasResourceType();
 	}
-
 }

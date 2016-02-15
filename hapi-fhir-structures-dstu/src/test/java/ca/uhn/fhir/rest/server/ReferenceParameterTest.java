@@ -228,8 +228,8 @@ public class ReferenceParameterTest {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("foo|bar", ourLastRefParam.getValue());
-		assertEquals("foo", ourLastRefParam.toTokenParam().getSystem());
-		assertEquals("bar", ourLastRefParam.toTokenParam().getValue());
+		assertEquals("foo", ourLastRefParam.toTokenParam(ourCtx).getSystem());
+		assertEquals("bar", ourLastRefParam.toTokenParam(ourCtx).getValue());
 	}
 
 	
@@ -427,7 +427,7 @@ public class ReferenceParameterTest {
 
 			Patient p = new Patient();
 			p.setId("1");
-			p.addName().addFamily("0" + theParam.getValueAsQueryToken());
+			p.addName().addFamily("0" + theParam.getValueAsQueryToken(ourCtx));
 			p.addName().addFamily("1" + defaultString(theParam.getResourceType()));
 			p.addName().addFamily("2" + defaultString(theParam.getChain()));
 			retVal.add(p);

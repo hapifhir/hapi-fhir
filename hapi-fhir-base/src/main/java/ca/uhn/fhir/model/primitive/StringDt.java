@@ -22,6 +22,7 @@ package ca.uhn.fhir.model.primitive;
 
 import org.apache.commons.lang3.StringUtils;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -95,7 +96,7 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getValueAsQueryToken() {
+	public String getValueAsQueryToken(FhirContext theContext) {
 		return getValue();
 	}
 

@@ -25,8 +25,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.util.CoverageIgnore;
 
+/**
+ * @deprecated This class has been replaced by {@link ParamPrefixEnum} in HAPI FHIR 1.5
+ */
+@Deprecated
 @CoverageIgnore
 public enum QuantityCompararatorEnum {
 
@@ -106,7 +111,7 @@ public enum QuantityCompararatorEnum {
 	/**
 	 * Returns the enumerated value associated with this code
 	 */
-	public QuantityCompararatorEnum forCode(String theCode) {
+	public static QuantityCompararatorEnum forCode(String theCode) {
 		QuantityCompararatorEnum retVal = CODE_TO_ENUM.get(theCode);
 		return retVal;
 	}

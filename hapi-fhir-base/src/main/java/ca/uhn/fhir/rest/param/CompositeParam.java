@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -64,14 +65,14 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 	}
 
 	@Override
-	String doGetValueAsQueryToken() {
+	String doGetValueAsQueryToken(FhirContext theContext) {
 		StringBuilder b = new StringBuilder();
 		if (myLeftType != null) {
-			b.append(myLeftType.getValueAsQueryToken());
+			b.append(myLeftType.getValueAsQueryToken(theContext));
 		}
 		b.append('$');
 		if (myRightType != null) {
-			b.append(myRightType.getValueAsQueryToken());
+			b.append(myRightType.getValueAsQueryToken(theContext));
 		}
 		return b.toString();
 	}

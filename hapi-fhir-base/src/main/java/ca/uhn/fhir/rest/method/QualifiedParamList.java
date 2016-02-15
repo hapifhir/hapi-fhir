@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 
@@ -42,12 +43,12 @@ public class QualifiedParamList extends ArrayList<String> {
 		super(theCapacity);
 	}
 
-	public QualifiedParamList(IQueryParameterOr<?> theNextOr) {
+	public QualifiedParamList(IQueryParameterOr<?> theNextOr, FhirContext theContext) {
 		for (IQueryParameterType next : theNextOr.getValuesAsQueryTokens()) {
 			if (myQualifier == null) {
 				myQualifier = next.getQueryParameterQualifier();
 			}
-			add(next.getValueAsQueryToken());
+			add(next.getValueAsQueryToken(theContext));
 		}
 	}
 

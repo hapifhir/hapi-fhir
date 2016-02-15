@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.context.FhirContext;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -48,14 +50,14 @@ abstract class BaseParam implements IQueryParameterType {
 
 	abstract String doGetQueryParameterQualifier();
 
-	abstract String doGetValueAsQueryToken();
+	abstract String doGetValueAsQueryToken(FhirContext theContext);
 	
 	@Override
-	public final String getValueAsQueryToken() {
+	public final String getValueAsQueryToken(FhirContext theContext) {
 		if (myMissing != null) {
 			return myMissing ? Constants.PARAMQUALIFIER_MISSING_TRUE : Constants.PARAMQUALIFIER_MISSING_FALSE;
 		}
-		return doGetValueAsQueryToken();
+		return doGetValueAsQueryToken(theContext);
 	}
 
 	/**
@@ -79,23 +81,5 @@ abstract class BaseParam implements IQueryParameterType {
 
 	abstract void doSetValueAsQueryToken(String theQualifier, String theValue);
 
-	static class ComposableBaseParam extends BaseParam{
-
-		@Override
-		String doGetQueryParameterQualifier() {
-			return null;
-		}
-
-		@Override
-		String doGetValueAsQueryToken() {
-			return null;
-		}
-
-		@Override
-		void doSetValueAsQueryToken(String theQualifier, String theValue) {
-			// nothing
-		}
-		
-	}
 	
 }

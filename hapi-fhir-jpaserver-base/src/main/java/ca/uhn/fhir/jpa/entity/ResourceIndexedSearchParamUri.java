@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.entity;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
@@ -34,9 +35,9 @@ import org.hibernate.search.annotations.Field;
 //@formatter:off
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_URI" /* , indexes = { @Index(name = "IDX_SP_TOKEN", columnList = "SP_SYSTEM,SP_VALUE") } */)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_SPIDX_URI", indexes = { 
-	@org.hibernate.annotations.Index(name = "IDX_SP_URI", columnNames = { "RES_TYPE", "SP_NAME", "SP_URI" }) 
+@Table(name = "HFJ_SPIDX_URI", indexes = { 
+	@Index(name = "IDX_SP_URI", columnList = "RES_TYPE,SP_NAME,SP_URI"), 
+	@Index(name = "IDX_SP_RESTYPE_NAME", columnList = "RES_TYPE,SP_NAME") 
 })
 //@formatter:on
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {

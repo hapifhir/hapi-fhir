@@ -3,7 +3,7 @@ package example;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
-@SuppressWarnings({ "unused", "serial" })
+@SuppressWarnings({ "serial" })
 //START SNIPPET: provider
 public class PagingServer extends RestfulServer {
 

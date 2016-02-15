@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
@@ -94,7 +95,7 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	 * {@inheritDoc}
 	 */
 	@Override
-	String doGetValueAsQueryToken() {
+	String doGetValueAsQueryToken(FhirContext theContext) {
 		if (getSystem() != null) {
 			return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|' + ParameterUtil.escape(getValue());
 		} else {

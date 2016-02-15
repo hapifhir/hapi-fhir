@@ -25,15 +25,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
 public class UriParam extends BaseParam implements IQueryParameterType {
 
+	private UriParamQualifierEnum myQualifier;
 	private String myValue;
 
+	/**
+	 * Constructor
+	 */
 	public UriParam() {
+		super();
 	}
 
 	public UriParam(String theValue) {
@@ -42,17 +48,25 @@ public class UriParam extends BaseParam implements IQueryParameterType {
 
 	@Override
 	String doGetQueryParameterQualifier() {
-		return null;
+		return myQualifier != null ? myQualifier.getValue() : null;
 	}
 
 	@Override
-	String doGetValueAsQueryToken() {
+	String doGetValueAsQueryToken(FhirContext theContext) {
 		return ParameterUtil.escape(myValue);
 	}
 
 	@Override
 	void doSetValueAsQueryToken(String theQualifier, String theValue) {
+		myQualifier = UriParamQualifierEnum.forValue(theQualifier);
 		myValue = ParameterUtil.unescape(theValue);
+	}
+
+	/**
+	 * Gets the qualifier for this param (may be <code>null</code> and generally will be)
+	 */
+	public UriParamQualifierEnum getQualifier() {
+		return myQualifier;
 	}
 
 	public String getValue() {
@@ -75,8 +89,24 @@ public class UriParam extends BaseParam implements IQueryParameterType {
 		return StringUtils.isEmpty(myValue);
 	}
 
-	public void setValue(String theValue) {
+	/**
+	 * Sets the qualifier for this param (may be <code>null</code> and generally will be)
+	 * 
+	 * @return Returns a reference to <code>this</code> for easy method chanining
+	 */
+	public UriParam setQualifier(UriParamQualifierEnum theQualifier) {
+		myQualifier = theQualifier;
+		return this;
+	}
+
+	/**
+	 * Sets the value for this param
+	 * 
+	 * @return Returns a reference to <code>this</code> for easy method chanining
+	 */
+	public UriParam setValue(String theValue) {
 		myValue = theValue;
+		return this;
 	}
 
 	@Override

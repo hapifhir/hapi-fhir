@@ -85,11 +85,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class RestfulServerMethodTest {
-
 	private static CloseableHttpClient ourClient;
 	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerMethodTest.class);
@@ -722,8 +718,8 @@ public class RestfulServerMethodTest {
 		assertEquals(1, bundle.getEntries().size());
 
 		Patient patient = (Patient) bundle.getEntries().get(0).getResource();
-		assertEquals("urn:aaa|aaa", patient.getIdentifier().get(1).getValueAsQueryToken());
-		assertEquals("urn:bbb|bbb", patient.getIdentifier().get(2).getValueAsQueryToken());
+		assertEquals("urn:aaa|aaa", patient.getIdentifier().get(1).getValueAsQueryToken(ourCtx));
+		assertEquals("urn:bbb|bbb", patient.getIdentifier().get(2).getValueAsQueryToken(ourCtx));
 	}
 
 	@Test
@@ -1256,8 +1252,8 @@ public class RestfulServerMethodTest {
 		@Search()
 		public Patient getPatientByDateRange(@RequiredParam(name = "dateRange") DateRangeParam theIdentifiers) {
 			Patient retVal = getIdToPatient().get("1");
-			retVal.getName().get(0).addSuffix().setValue(theIdentifiers.getLowerBound().getValueAsQueryToken());
-			retVal.getName().get(0).addSuffix().setValue(theIdentifiers.getUpperBound().getValueAsQueryToken());
+			retVal.getName().get(0).addSuffix().setValue(theIdentifiers.getLowerBound().getValueAsQueryToken(ourCtx));
+			retVal.getName().get(0).addSuffix().setValue(theIdentifiers.getUpperBound().getValueAsQueryToken(ourCtx));
 			return retVal;
 		}
 

@@ -7,11 +7,15 @@
 	</properties>
 	<body>
 		<release version="1.5" date="TBD">
-			<action type="fix" issue="291">
-				Fix a failure starting the REST server if a method returns an untyped List, which
-				among other things prevented resource provider added to the server
-				as CDI beans in a JBoss enviroment. Thanks to GitHub user fw060 (Fei) for
-				reporting and figuring out exactly why this wasn't working!
+			<action type="add">
+            Bump the version of a few dependencies to the
+            latest versions (dependent HAPI modules listed in brackets):
+            <![CDATA[
+               <ul>
+                  <li>Hibernate (JPA, Web Tester): 5.0.7 -&gt; 5.1.0</li>
+						<li>SLF4j (All): 1.7.14 -&gt; 1.7.16</li>
+               </ul>
+            ]]>
 			</action>
 			<action type="add">
 				Support comments when parsing and encoding both JSON and XML. Comments are retrieved
@@ -23,6 +27,37 @@
 				Added options to the CLI upload-examples command which allow it to cache
 				the downloaded content file, or use an arbitrary one. Thanks to Adam Carbone
 				for the pull request!
+			</action>
+			<action type="fix">
+				REST search parameters with a prefix/comparator had not been updated to use
+				the DSTU2 style prefixes (gt2011-01-10) instead of the DSTU1 style prefixes
+				(&gt;2011-01-01). The client has been updated so that it uses the new prefixes
+				if the client has a DSTU2+ context. The server has been updated so that it now
+				supports both styles.
+				<![CDATA[<br/><br/>]]>
+				As a part of this change, a new enum called
+				<![CDATA[<a href="./apidocs/ca/uhn/fhir/rest/param/ParamPrefixEnum.html">ParamPrefixEnum</a>]]
+				has been introduced. This enum replaces the old 
+				<![CDATA[<a href="./apidocs/ca/uhn/fhir/model/dstu/valueset/QuantityCompararatorEnum.html">QuantityCompararatorEnum</a>]]>
+				which has a typo in its name and can not represent several new prefixes added since 
+				DSTU1.
+			</action>
+			<action type="add">
+				JPA server number and quantity search params now follow the rules for the
+				use of precision in search terms outlined in the
+				<![CDATA[<a href="https://www.hl7.org/fhir/search.html">search page</a>]]> of the
+				FHIR specification. For example, previously a 1% tolerance was applied for
+				all searches (10% for approximate search). Now, a tolerance which respects the
+				precision of the search term is used (but still 10% for approximate search).
+			</action>
+			<action type="fix" issue="291">
+				Fix a failure starting the REST server if a method returns an untyped List, which
+				among other things prevented resource provider added to the server
+				as CDI beans in a JBoss enviroment. Thanks to GitHub user fw060 (Fei) for
+				reporting and figuring out exactly why this wasn't working!
+			</action>
+			<action type="add">
+				JPA server now supports :above and :below qualifiers on URI search params
 			</action>
 		</release>
 		<release version="1.4" date="2016-02-04">
