@@ -27,31 +27,31 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
-//@formatter:off
-@Table(name="TRM_CODESYSTEM", uniqueConstraints= {
-	@UniqueConstraint(name="IDX_CS_RESOURCEPID", columnNames= {"RES_ID"})
-})
-@Entity()
-//@formatter:on
-public class TermCodeSystem implements Serializable {
+@Entity
+@Table(name="TRM_CONCEPT")
+public class TermConceptParentChildLink implements Serializable {
 	private static final long serialVersionUID = 1L;
-
+	
 	@Id()
-	@SequenceGenerator(name="SEQ_CODESYSTEM_PID", sequenceName="SEQ_CODESYSTEM_PID")
+	@SequenceGenerator(name="SEQ_CONCEPT_PC_PID", sequenceName="SEQ_CONCEPT_PC_PID")
 	@GeneratedValue()
 	@Column(name="PID")
 	private Long myPid;
-	
-	@OneToOne()
-	@JoinColumn(name="RES_ID", referencedColumnName="RES_ID", nullable=false, updatable=false)
-	private ResourceTable myResource;
-	
-	@Column(name="RES_VERSION_ID", nullable=false, updatable=false)
-	private Long myResourceVersionId;
 
+	@ManyToOne
+	@JoinColumn(name="PARENT_PID", nullable=false)
+	private TermConcept myParent;
+	
+	@ManyToOne
+	@JoinColumn(name="CHILD_PID", nullable=false)
+	private TermConcept myChild;
+
+	@ManyToOne
+	@JoinColumn(name="CODESYSTEM_PID", nullable=false)
+	private TermCodeSystem myCodeSystem;
+	
 }

@@ -404,7 +404,7 @@
 			<dependency>
 				<groupId>org.apache.maven.doxia</groupId>
 				<artifactId>doxia-module-markdown</artifactId>
-				<version>1.7</version>
+				<version>1.6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
@@ -1263,7 +1263,7 @@
 					<dependency>
 						<groupId>org.apache.maven.doxia</groupId>
 						<artifactId>doxia-module-markdown</artifactId>
-						<version>1.7</version>
+						<version>1.6</version>
 					</dependency>
 					<dependency>
 						<groupId>lt.velykis.maven.skins</groupId>
@@ -1369,6 +1369,9 @@
 	<profiles>
 		<profile>
 			<id>DIST</id>
+			<modules>
+				<module>hapi-fhir-osgi-core</module>
+			</modules>
 		</profile>
 		<profile>
 			<id>ROOT</id>
@@ -1474,7 +1477,6 @@
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>
-				<module>hapi-fhir-osgi-core</module>
 				<module>hapi-fhir-base-example-embedded-ws</module>
 			</modules>
 		</profile>

@@ -1095,8 +1095,8 @@ public class SearchBuilder {
 			if (cmpValue != ParamPrefixEnum.NOT_EQUAL) {
 				lowPred = builder.ge(path.as(BigDecimal.class), low);
 				highPred = builder.le(path.as(BigDecimal.class), high);
-				ourLog.info("Searching for {} <= val <= {}", low, high);
 				num = builder.and(lowPred, highPred);
+				ourLog.trace("Searching for {} <= val <= {}", low, high);
 			} else {
 				// Prefix was "ne", so reverse it!
 				lowPred = builder.lt(path.as(BigDecimal.class), low);
