@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.config;
 
 import javax.annotation.Resource;
 
+import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +38,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.term.ITerminologySvc;
+import ca.uhn.fhir.jpa.term.TerminologySvcImpl;
 
 @Configuration
 @EnableScheduling
@@ -95,6 +98,11 @@ public class BaseConfig implements SchedulingConfigurer {
 		return ourFhirContextDstu3;
 	}
 
+	@Bean(autowire=Autowire.BY_TYPE)
+	public ITerminologySvc terminologyService() {
+		return new TerminologySvcImpl();
+	}
+	
 	@Bean
 	public TaskScheduler taskScheduler() {
 		ThreadPoolTaskScheduler retVal = new ThreadPoolTaskScheduler();

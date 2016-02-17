@@ -571,9 +571,14 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			}
 
 		}
+
+		ourLog.info("Flushing context after {}", theActionName);
+		myEntityManager.flush();
 		
 		long delay = System.currentTimeMillis() - start;
-		ourLog.info(theActionName + " completed in {}ms", new Object[] { delay });
+		int numEntries = theRequest.getEntry().size();
+		long delayPer = delay / numEntries;
+		ourLog.info("{} completed in {}ms ({} entries at {}ms per entry)", new Object[] { theActionName , delay, numEntries, delayPer });
 
 		response.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
 		return response;

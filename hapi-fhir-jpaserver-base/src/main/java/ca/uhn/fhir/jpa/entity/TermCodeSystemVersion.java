@@ -21,33 +21,37 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 //@formatter:off
-@Table(name="TRM_CODESYSTEM", uniqueConstraints= {
-	@UniqueConstraint(name="IDX_CS_CODESYSTEM", columnNames= {"CODE_SYSTEM_URI"})
+@Table(name="TRM_CODESYSTEM_VER", uniqueConstraints= {
+	@UniqueConstraint(name="IDX_CSV_RESOURCEPID_AND_VER", columnNames= {"RES_ID", "RES_VERSION_ID"})
 })
 @Entity()
 //@formatter:on
-public class TermCodeSystem implements Serializable {
+public class TermCodeSystemVersion implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	@Column(name="CODE_SYSTEM_URI", nullable=false)
-	private String myCodeSystemUri;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCodeSystem")
+	private Collection<TermConcept> myConcepts;
 
 	@Id()
-	@SequenceGenerator(name = "SEQ_CODESYSTEM_PID", sequenceName = "SEQ_CODESYSTEM_PID")
-	@GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_CODESYSTEM_PID")
+	@SequenceGenerator(name = "SEQ_CODESYSTEMVER_PID", sequenceName = "SEQ_CODESYSTEMVER_PID")
+	@GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_CODESYSTEMVER_PID")
 	@Column(name = "PID")
 	private Long myPid;
 
@@ -55,19 +59,30 @@ public class TermCodeSystem implements Serializable {
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false)
 	private ResourceTable myResource;
 
-	public String getCodeSystemUri() {
-		return myCodeSystemUri;
+	@Column(name = "RES_VERSION_ID", nullable = false, updatable = false)
+	private Long myResourceVersionId;
+
+	public Collection<TermConcept> getConcepts() {
+		if (myConcepts == null) {
+			myConcepts = new ArrayList<TermConcept>();
+		}
+		return myConcepts;
 	}
 
 	public ResourceTable getResource() {
 		return myResource;
 	}
 
-	public void setCodeSystemUri(String theCodeSystemUri) {
-		myCodeSystemUri = theCodeSystemUri;
+	public Long getResourceVersionId() {
+		return myResourceVersionId;
 	}
 
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
 	}
+
+	public void setResourceVersionId(Long theResourceVersionId) {
+		myResourceVersionId = theResourceVersionId;
+	}
+
 }
